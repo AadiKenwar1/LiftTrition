@@ -1,0 +1,231 @@
+import { useColorScheme } from '@/components/ExpoComponents/useColorScheme'
+import { PowerSyncGuard } from '@/components/GuardComponents/PowerSyncGuard'
+import { AuthProvider, useAuth } from '@/context/AuthContext'
+import { BillingProvider } from '@/context/BillingContext'
+import { NutritionProvider, useNutrition } from '@/context/NutritionContext'
+import { SettingsProvider, useSettings } from '@/context/SettingsContext'
+import { useWorkout, WorkoutProvider } from '@/context/WorkoutContext'
+import {
+    Poppins_100Thin,
+    Poppins_100Thin_Italic,
+    Poppins_200ExtraLight,
+    Poppins_200ExtraLight_Italic,
+    Poppins_300Light,
+    Poppins_300Light_Italic,
+    Poppins_400Regular,
+    Poppins_400Regular_Italic,
+    Poppins_500Medium,
+    Poppins_500Medium_Italic,
+    Poppins_600SemiBold,
+    Poppins_600SemiBold_Italic,
+    Poppins_700Bold,
+    Poppins_700Bold_Italic,
+    Poppins_800ExtraBold,
+    Poppins_800ExtraBold_Italic,
+    Poppins_900Black,
+    Poppins_900Black_Italic,
+} from '@expo-google-fonts/poppins'
+import { Ionicons } from '@expo/vector-icons'
+import FontAwesome from '@expo/vector-icons/FontAwesome'
+import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native'
+import * as Sentry from '@sentry/react-native'
+import { Asset } from 'expo-asset'
+import { useFonts } from 'expo-font'
+import { Stack, useRouter } from 'expo-router'
+import * as SplashScreen from 'expo-splash-screen'
+import React, { useEffect, useState } from 'react'
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native'
+import 'react-native-gesture-handler'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import 'react-native-reanimated'
+
+// Catch any errors thrown by the Layout component.
+
+export { ErrorBoundary } from 'expo-router'
+
+// Ensure that reloading on `/modal` keeps a back button present.
+export const unstable_settings = { initialRouteName: '(tabs)' }
+
+// Prevent the splash screen from auto-hiding before asset loading is complete.
+SplashScreen.preventAutoHideAsync()
+
+Sentry.init({
+    dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
+    enableInExpoDevelopment: false,
+})
+
+export default Sentry.wrap(function RootLayout() {
+    const [logoLoaded, setLogoLoaded] = useState(false)
+    const [loaded, error] = useFonts({
+        SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+        Poppins_100Thin,
+        Poppins_100Thin_Italic,
+        Poppins_200ExtraLight,
+        Poppins_200ExtraLight_Italic,
+        Poppins_300Light,
+        Poppins_300Light_Italic,
+        Poppins_400Regular,
+        Poppins_400Regular_Italic,
+        Poppins_500Medium,
+        Poppins_500Medium_Italic,
+        Poppins_600SemiBold,
+        Poppins_600SemiBold_Italic,
+        Poppins_700Bold,
+        Poppins_700Bold_Italic,
+        Poppins_800ExtraBold,
+        Poppins_800ExtraBold_Italic,
+        Poppins_900Black,
+        Poppins_900Black_Italic,
+        ...FontAwesome.font,
+    })
+
+    // Expo Router uses Error Boundaries to catch errors in the navigation tree.
+    useEffect(() => {
+        if (error) throw error
+    }, [error])
+
+    useEffect(() => {
+        Promise.all([
+            Asset.loadAsync(require('@/assets/images/LiftTritionAppIconV2.png')),
+            Asset.loadAsync(require('@/assets/images/LTpng.png')),
+        ]).then(() => setLogoLoaded(true))
+    }, [])
+
+    useEffect(() => {
+        if (loaded && logoLoaded) {
+            SplashScreen.hideAsync()
+        }
+    }, [loaded, logoLoaded])
+
+    if (!loaded) return null
+    return <RootLayoutNav />
+})
+
+function HeaderBackButton() {
+    const router = useRouter()
+    return (
+        <Pressable onPress={() => router.back()} style={{ paddingHorizontal: 0 }}>
+            <Ionicons name="arrow-back" size={24} color="#FFF" />
+        </Pressable>
+    )
+}
+
+function StackLayout() {
+    const { session } = useAuth()
+    const { settings, loaded: settingsLoaded } = useSettings()
+    const { loaded: nutritionLoaded } = useNutrition()
+    const { loaded: workoutLoaded } = useWorkout()
+    const allContextsLoaded = settingsLoaded && nutritionLoaded && workoutLoaded
+
+    if (!allContextsLoaded) {
+        return (
+            <View style={styles.syncContainer}>
+                <ActivityIndicator size="large" color="#2f80ed" />
+                <Text style={styles.syncText}>Loading LiftTrition...</Text>
+            </View>
+        )
+    }
+    return (
+        <Stack
+            screenOptions={{
+                headerLeft: ({ canGoBack }) => (canGoBack ? <HeaderBackButton /> : null),
+                headerShadowVisible: false,
+                headerTitleStyle: {
+                    fontFamily: 'Poppins_600SemiBold',
+                    fontSize: 22,
+                    color: '#FFF',
+                },
+            }}
+        >
+            <Stack.Protected guard={!session}>
+                <Stack.Screen name="authScreens/login" options={{ headerShown: false }} />
+            </Stack.Protected>
+            <Stack.Protected guard={!settings.onboardingComplete}>
+                <Stack.Screen name="onboardingScreens/onboarding1" options={{ headerShown: false }} />
+                <Stack.Screen name="onboardingScreens/onboarding2" options={{ headerShown: false }} />
+                <Stack.Screen name="onboardingScreens/onboarding3" options={{ headerShown: false }} />
+                <Stack.Screen name="onboardingScreens/onboarding4" options={{ headerShown: false }} />
+                <Stack.Screen name="onboardingScreens/onboarding5" options={{ headerShown: false }} />
+                <Stack.Screen name="onboardingScreens/onboarding6" options={{ headerShown: false }} />
+                <Stack.Screen name="onboardingScreens/onboarding7" options={{ headerShown: false }} />
+                <Stack.Screen name="onboardingScreens/onboarding8" options={{ headerShown: false }} />
+                <Stack.Screen name="onboardingScreens/onboarding9" options={{ headerShown: false }} />
+                <Stack.Screen name="onboardingScreens/onboarding10" options={{ headerShown: false }} />
+            </Stack.Protected>
+
+            <Stack.Protected guard={!!session && allContextsLoaded && settings.onboardingComplete}>
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+                <Stack.Screen name="workoutScreens/addWorkoutModal" options={{ presentation: 'modal', title: 'Add Workout', headerShown: false }} />
+                <Stack.Screen name="workoutScreens/archiveModal" options={{ presentation: 'modal', headerShown: false }} />
+                <Stack.Screen name="workoutScreens/exerciseScreen" options={{ title: 'Exercises', headerShown: true, headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
+                <Stack.Screen name="workoutScreens/addExerciseModal" options={{ presentation: 'modal', headerShown: false }} />
+                <Stack.Screen name="workoutScreens/logsModal" options={{ presentation: 'modal', headerShown: false }} />
+                <Stack.Screen name="workoutScreens/notesModal" options={{ presentation: 'modal', headerShown: false }} />
+                <Stack.Screen name="workoutScreens/renameModal" options={{ presentation: 'modal', headerShown: false }} />
+                <Stack.Screen name="nutritionScreens/addNutritionModal" options={{ presentation: 'modal', headerShown: false }} />
+                <Stack.Screen name="nutritionScreens/savedNutritionModal" options={{ presentation: 'modal', headerShown: false }} />
+                <Stack.Screen name="nutritionScreens/foodDBModal" options={{ presentation: 'modal', headerShown: false }} />
+                <Stack.Screen name="nutritionScreens/cameraScreen" options={{ presentation: 'modal', headerShown: false }} />
+                <Stack.Screen name="nutritionScreens/barcodeScreen" options={{ presentation: 'modal', headerShown: false }} />
+                <Stack.Screen name="nutritionScreens/analyzingModal" options={{ presentation: 'modal', headerShown: false }} />
+                <Stack.Screen name="nutritionScreens/updateBWModal" options={{ presentation: 'modal', headerShown: false }} />
+                <Stack.Screen name="nutritionScreens/dateModal" options={{ presentation: 'modal', headerShown: false }} />
+                <Stack.Screen name="nutritionScreens/editManualEntry" options={{ presentation: 'modal', headerShown: false }} />
+                <Stack.Screen name="nutritionScreens/editPhotoEntry" options={{ presentation: 'modal', headerShown: false }} />
+                <Stack.Screen name="settingsScreens/profile" options={{ headerShown: true, title: 'Profile', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
+                <Stack.Screen name="settingsScreens/subscription" options={{ headerShown: true, title: 'Subscription', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
+                <Stack.Screen name="settingsScreens/adjustTraining" options={{ headerShown: true, title: 'Adjust Training', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
+                <Stack.Screen name="settingsScreens/adjustNutrition/adjustNutrition1" options={{ headerShown: true, title: 'Step 1 of 3', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
+                <Stack.Screen name="settingsScreens/adjustNutrition/adjustNutrition2" options={{ headerShown: true, title: 'Step 2 of 3', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
+                <Stack.Screen name="settingsScreens/adjustNutrition/adjustNutrition3" options={{ headerShown: true, title: 'Step 3 of 3', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
+                <Stack.Screen name="settingsScreens/createExercise/createExercise1" options={{ headerShown: true, title: 'My Exercises', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
+                <Stack.Screen name="settingsScreens/createExercise/createExercise2" options={{ headerShown: true, title: 'Step 1 of 5', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
+                <Stack.Screen name="settingsScreens/createExercise/createExercise3" options={{ headerShown: true, title: 'Step 2 of 5', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
+                <Stack.Screen name="settingsScreens/createExercise/createExercise4" options={{ headerShown: true, title: 'Step 3 of 5', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
+                <Stack.Screen name="settingsScreens/createExercise/createExercise5" options={{ headerShown: true, title: 'Step 4 of 5', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
+                <Stack.Screen name="settingsScreens/createExercise/createExercise6" options={{ headerShown: true, title: 'Step 5 of 5', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
+                <Stack.Screen name="settingsScreens/adjustMeasurements" options={{ headerShown: true, title: 'Adjust Measurements', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
+                <Stack.Screen name="settingsScreens/termsAndPrivacy" options={{ headerShown: true, title: 'Terms & Privacy', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
+                <Stack.Screen name="settingsScreens/support" options={{ headerShown: true, title: 'Support', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
+            </Stack.Protected>
+        </Stack>
+    )
+}
+
+function RootLayoutNav() {
+    const colorScheme = useColorScheme()
+    return (
+        <GestureHandlerRootView style={{ flex: 1 }}>
+            <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+                <AuthProvider>
+                    <PowerSyncGuard>
+                        <SettingsProvider>
+                            <BillingProvider>
+                                <WorkoutProvider>
+                                    <NutritionProvider>
+                                        <StackLayout />
+                                    </NutritionProvider>
+                                </WorkoutProvider>
+                            </BillingProvider>
+                        </SettingsProvider>
+                    </PowerSyncGuard>
+                </AuthProvider>
+            </ThemeProvider>
+        </GestureHandlerRootView>
+    )
+}
+
+const styles = StyleSheet.create({
+    syncContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#121212',
+    },
+    syncText: {
+        color: '#888',
+        marginTop: 16,
+        fontSize: 16,
+    },
+})

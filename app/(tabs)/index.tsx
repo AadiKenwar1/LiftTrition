@@ -1,0 +1,164 @@
+import NutritionScreen from '@/app/nutritionScreens/nutritionScreen'
+import WorkoutScreen from '@/app/workoutScreens/workoutScreen'
+import Fab from '@/components/NeutralComponents/Fab'
+import ModeSwitcher from '@/components/NeutralComponents/ModeSwitcher'
+import { useBilling } from '@/context/BillingContext'
+import { useSettings } from '@/context/SettingsContext'
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
+import { useRouter } from 'expo-router'
+import { Fragment } from 'react'
+import { StyleSheet, TouchableOpacity } from 'react-native'
+
+export default function LogScreen() {
+    const { mode } = useSettings()
+    const router = useRouter()
+    const { hasPremium } = useBilling()
+
+    return (
+        <>
+            <ModeSwitcher />
+            {mode ?
+                <WorkoutScreen />
+            :   <NutritionScreen />}
+            <Fab>
+                {mode === true ?
+                    [
+                        // Add Workout Button
+                        <TouchableOpacity activeOpacity={0.75} key="add-workout" style={[styles.workoutFabButtons]} onPress={() => router.push('/workoutScreens/addWorkoutModal')}>
+                            <Ionicons name="add" size={35} color="white" shadowColor="black" shadowRadius={1} shadowOpacity={0.2} />
+                        </TouchableOpacity>,
+
+                        // View Archived Workouts Button
+                        <TouchableOpacity
+                            activeOpacity={0.75}
+                            key="archive"
+                            style={[styles.workoutFabButtons]}
+                            onPress={() =>
+                                router.push({
+                                    pathname: '/workoutScreens/archiveModal',
+                                    params: { logType: 'workouts' },
+                                })
+                            }
+                        >
+                            <Ionicons name="archive-outline" size={35} color="white" shadowColor="black" shadowRadius={1} shadowOpacity={0.2} />
+                        </TouchableOpacity>,
+
+                        //Coming Soon - AI Workout Generator (react fragment to even out the buttons)
+                        <TouchableOpacity activeOpacity={0.75} key="ai-workout" style={[styles.workoutUnavailableFabButtons]} onPress={() => alert('Coming Soon')}>
+                            <Ionicons name="sparkles-sharp" size={30} color="white" shadowColor="black" shadowRadius={1} shadowOpacity={0.2} />
+                        </TouchableOpacity>,
+                        //Coming Soon - Workout Scheduler (react fragment to even out the buttons)
+                        <TouchableOpacity activeOpacity={0.75} key="workout-scheduler" style={[styles.workoutUnavailableFabButtons]} onPress={() => alert('Coming Soon')}>
+                            <Ionicons name="calendar-outline" size={30} color="white" shadowColor="black" shadowRadius={1} shadowOpacity={0.2} />
+                        </TouchableOpacity>,
+
+                        //Placeholder for even out the buttons
+                        <Fragment key="placeholder"></Fragment>,
+                    ]
+                :   [
+                        //Add Nutrition Button
+                        <TouchableOpacity activeOpacity={0.75} key="add-nutrition" style={[styles.nutritionFabButtons]} onPress={() => router.push('/nutritionScreens/addNutritionModal')}>
+                            <Ionicons name="add" size={35} color="#FFFFFF" shadowColor="white" shadowRadius={1} shadowOpacity={0.2} />
+                        </TouchableOpacity>,
+
+                        //Camera Button
+                        <TouchableOpacity
+                            activeOpacity={0.75}
+                            key="camera"
+                            style={[hasPremium ? styles.nutritionFabButtons : styles.nutritionUnavailableFabButtons]}
+                            onPress={() => (hasPremium ? router.push('/nutritionScreens/cameraScreen') : router.push('/settingsScreens/subscription'))}
+                        >
+                            <Ionicons name="camera" size={35} color="#FFFFFF" shadowColor="white" shadowRadius={1} shadowOpacity={0.2} />
+                        </TouchableOpacity>,
+
+                        //Food Database Button
+                        <TouchableOpacity
+                            activeOpacity={0.75}
+                            key="food-database"
+                            style={[hasPremium ? styles.nutritionFabButtons : styles.nutritionUnavailableFabButtons]}
+                            onPress={() => (hasPremium ? router.push('/nutritionScreens/foodDBModal') : router.push('/settingsScreens/subscription'))}
+                        >
+                            <MaterialCommunityIcons name="database-search" size={35} color="#FFFFFF" shadowColor="white" shadowRadius={1} shadowOpacity={0.2} />
+                        </TouchableOpacity>,
+
+                        //Saved Foods Button
+                        <TouchableOpacity activeOpacity={0.75} key="saved-foods" style={[styles.nutritionFabButtons]} onPress={() => router.push('/nutritionScreens/savedNutritionModal')}>
+                            <Ionicons name="bookmark" size={35} color="#FFFFFF" shadowColor="white" shadowRadius={1} shadowOpacity={0.2} />
+                        </TouchableOpacity>,
+                    ]
+                }
+            </Fab>
+        </>
+    )
+}
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#181818',
+    },
+    workoutFabButtons: {
+        height: 60,
+        width: 60,
+        backgroundColor: '#2f80ed',
+        borderRadius: 40,
+        borderColor: 'black',
+        alignItems: 'center',
+        justifyContent: 'center',
+        elevation: 5,
+        shadowColor: 'black',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.6,
+        shadowRadius: 3,
+        borderWidth: 0.3,
+        zIndex: 10,
+    },
+    workoutUnavailableFabButtons: {
+        height: 60,
+        width: 60,
+        backgroundColor: '#888',
+        borderRadius: 40,
+        borderColor: 'black',
+        alignItems: 'center',
+        justifyContent: 'center',
+        elevation: 5,
+        shadowColor: 'black',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.6,
+        shadowRadius: 3,
+        borderWidth: 0.3,
+        zIndex: 10,
+    },
+    nutritionFabButtons: {
+        height: 60,
+        width: 60,
+        backgroundColor: '#22C922',
+        borderRadius: 40,
+        borderColor: 'black',
+        alignItems: 'center',
+        justifyContent: 'center',
+        elevation: 5,
+        shadowColor: 'black',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.6,
+        shadowRadius: 3,
+        borderWidth: 0.3,
+        zIndex: 10,
+    },
+    nutritionUnavailableFabButtons: {
+        height: 60,
+        width: 60,
+        backgroundColor: '#888',
+        borderRadius: 40,
+        borderColor: 'black',
+        alignItems: 'center',
+        justifyContent: 'center',
+        elevation: 5,
+        shadowColor: 'black',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.6,
+        shadowRadius: 3,
+        borderWidth: 0.3,
+        zIndex: 10,
+    },
+})
