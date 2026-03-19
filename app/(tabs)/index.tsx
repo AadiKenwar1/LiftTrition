@@ -44,16 +44,10 @@ export default function LogScreen() {
                         </TouchableOpacity>,
 
                         //Coming Soon - AI Workout Generator (react fragment to even out the buttons)
-                        <TouchableOpacity activeOpacity={0.75} key="ai-workout" style={[styles.workoutUnavailableFabButtons]} onPress={() => alert('Coming Soon')}>
-                            <Ionicons name="sparkles-sharp" size={30} color="white" shadowColor="black" shadowRadius={1} shadowOpacity={0.2} />
-                        </TouchableOpacity>,
-                        //Coming Soon - Workout Scheduler (react fragment to even out the buttons)
-                        <TouchableOpacity activeOpacity={0.75} key="workout-scheduler" style={[styles.workoutUnavailableFabButtons]} onPress={() => alert('Coming Soon')}>
-                            <Ionicons name="calendar-outline" size={30} color="white" shadowColor="black" shadowRadius={1} shadowOpacity={0.2} />
-                        </TouchableOpacity>,
 
                         //Placeholder for even out the buttons
                         <Fragment key="placeholder"></Fragment>,
+                        <Fragment key="placeholder2"></Fragment>,
                     ]
                 :   [
                         //Add Nutrition Button

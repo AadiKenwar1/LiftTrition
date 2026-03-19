@@ -63,7 +63,15 @@ export default function ExerciseScreen() {
             muscleGroups = muscles.join(' • ')
         }
 
-        return <Log text={item.name} subtitle={muscleGroups} onPress={() => router.push({ pathname: '/workoutScreens/logsModal', params: { workoutId: workoutId, exerciseId: item.id, exerciseName: item.name } })} onMenuPress={drag} onEditPress={() => handleEdit(item)} />
+        return (
+            <Log
+                text={item.name}
+                subtitle={muscleGroups}
+                onPress={() => router.push({ pathname: '/workoutScreens/logsModal', params: { workoutId: workoutId, exerciseId: item.id, exerciseName: item.name } })}
+                onMenuPress={drag}
+                onEditPress={() => handleEdit(item)}
+            />
+        )
     }
 
     return (

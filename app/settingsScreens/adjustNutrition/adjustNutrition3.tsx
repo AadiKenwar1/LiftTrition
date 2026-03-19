@@ -108,7 +108,7 @@ export default function AdjustNutrition4Screen() {
             </View>
 
             {/* Note */}
-            <Text style={styles.noteText}>You can adjust these goals anytime in settings</Text>
+            <Text style={styles.noteText}>You can adjust these goals anytime in settings {'\n'} *Note that updating body weight will automatically update nutrition goals</Text>
 
             {/* Button Container */}
             <View style={styles.buttonContainer}>
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#121212',
         paddingHorizontal: 25,
-        paddingTop: 40,
+        paddingTop: 24,
         paddingBottom: 40,
         alignItems: 'center',
     },
@@ -156,14 +156,14 @@ const styles = StyleSheet.create({
         color: '#aaa',
         textAlign: 'center',
         letterSpacing: 0.2,
-        marginBottom: 24,
+        marginBottom: 12,
         paddingHorizontal: 8,
         fontFamily: 'Poppins_400Regular',
     },
     macrosContainer: {
         width: '100%',
         gap: 10,
-        marginBottom: 16,
+        marginBottom: 8,
     },
     macrosRow: {
         flexDirection: 'row',

@@ -20,6 +20,7 @@ export default function LogsModal() {
     // Normalize params to strings
     const workoutId = typeof params.workoutId === 'string' ? params.workoutId : params.workoutId?.[0] || ''
     const exerciseId = typeof params.exerciseId === 'string' ? params.exerciseId : params.exerciseId?.[0] || ''
+    const exerciseName = typeof params.exerciseName === 'string' ? params.exerciseName : params.exerciseName?.[0] || 'Log'
 
     const [weight, setWeight] = useState('')
     const [reps, setReps] = useState('')
@@ -78,6 +79,7 @@ export default function LogsModal() {
                     </View>
 
                     <View style={styles.content}>
+                        <Text style={styles.exerciseTitle}>{exerciseName}</Text>
                         {/* Compact Input Section */}
                         <View style={styles.inputSection}>
                             {/* Input Fields Row */}
@@ -85,13 +87,32 @@ export default function LogsModal() {
                                 {/* Weight Input */}
                                 <View style={styles.inputGroup}>
                                     <Text style={styles.inputLabel}>Weight ({weightUnit})</Text>
-                                    <TextInput style={[styles.input, focusedField === 'weight' && styles.inputFocused]} placeholder="0" placeholderTextColor="#666" value={weight} onChangeText={setWeight} onFocus={() => setFocusedField('weight')} onBlur={() => setFocusedField(null)} keyboardType="numeric" autoFocus />
+                                    <TextInput
+                                        style={[styles.input, focusedField === 'weight' && styles.inputFocused]}
+                                        placeholder="0"
+                                        placeholderTextColor="#666"
+                                        value={weight}
+                                        onChangeText={setWeight}
+                                        onFocus={() => setFocusedField('weight')}
+                                        onBlur={() => setFocusedField(null)}
+                                        keyboardType="numeric"
+                                        autoFocus
+                                    />
                                 </View>
 
                                 {/* Reps Input */}
                                 <View style={styles.inputGroup}>
                                     <Text style={styles.inputLabel}>Reps</Text>
-                                    <TextInput style={[styles.input, focusedField === 'reps' && styles.inputFocused]} placeholder="0" placeholderTextColor="#666" value={reps} onChangeText={setReps} onFocus={() => setFocusedField('reps')} onBlur={() => setFocusedField(null)} keyboardType="numeric" />
+                                    <TextInput
+                                        style={[styles.input, focusedField === 'reps' && styles.inputFocused]}
+                                        placeholder="0"
+                                        placeholderTextColor="#666"
+                                        value={reps}
+                                        onChangeText={setReps}
+                                        onFocus={() => setFocusedField('reps')}
+                                        onBlur={() => setFocusedField(null)}
+                                        keyboardType="numeric"
+                                    />
                                 </View>
 
                                 {/* RPE Input - Optional */}
@@ -99,7 +120,16 @@ export default function LogsModal() {
                                     <Text style={styles.inputLabelOptional}>
                                         RPE <Text style={styles.optionalBadge}>(opt)</Text>
                                     </Text>
-                                    <TextInput style={[styles.inputOptional, focusedField === 'rpe' && styles.inputFocused]} placeholder="-" placeholderTextColor="#555" value={rpe} onChangeText={setRpe} onFocus={() => setFocusedField('rpe')} onBlur={() => setFocusedField(null)} keyboardType="numeric" />
+                                    <TextInput
+                                        style={[styles.inputOptional, focusedField === 'rpe' && styles.inputFocused]}
+                                        placeholder="-"
+                                        placeholderTextColor="#555"
+                                        value={rpe}
+                                        onChangeText={setRpe}
+                                        onFocus={() => setFocusedField('rpe')}
+                                        onBlur={() => setFocusedField(null)}
+                                        keyboardType="numeric"
+                                    />
                                 </View>
 
                                 {/* Add Button */}
@@ -150,6 +180,13 @@ const styles = StyleSheet.create({
         paddingHorizontal: 24,
         paddingTop: 12,
         paddingBottom: 32,
+    },
+    exerciseTitle: {
+        fontSize: 20,
+        color: '#FFF',
+        letterSpacing: -0.5,
+        fontFamily: 'Poppins_600SemiBold',
+        marginBottom: 16,
     },
     inputSection: {
         marginBottom: 20,

@@ -7,11 +7,15 @@ import { BarChart3, Database, Sparkles, Zap } from 'lucide-react-native'
 import { useState } from 'react'
 import { ActivityIndicator, Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
+type PlanType = 'monthly' | 'annual'
+
 export default function Onboarding10Screen() {
     const [termsModalVisible, setTermsModalVisible] = useState(false)
-    const { settings, setSettings } = useSettings()
-    const { loading, hasPremium, monthlyPackage, priceInfo, purchasePackage, restorePurchases, error } = useBilling()
+    const [selectedPlan, setSelectedPlan] = useState<PlanType>('annual')
     const [purchasing, setPurchasing] = useState(false)
+    const { settings, setSettings, mode } = useSettings()
+    const accent = mode ? '#2f80ed' : '#22C922'
+    const { loading, hasPremium, monthlyPackage, annualPackage, priceInfo, annualPriceInfo, purchasePackage, restorePurchases, error } = useBilling()
 
     const completeOnboarding = () => {
         setSettings({
@@ -22,15 +26,18 @@ export default function Onboarding10Screen() {
         router.replace('/(tabs)')
     }
 
+    const selectedPackage = selectedPlan === 'monthly' ? monthlyPackage : annualPackage
+
     const handleSubscribe = async () => {
-        if (!monthlyPackage) {
+        const pkg = selectedPlan === 'monthly' ? monthlyPackage : annualPackage
+        if (!pkg) {
             Alert.alert('Error', 'Subscription package not available. Please try again later.')
             return
         }
 
         setPurchasing(true)
         try {
-            await purchasePackage(monthlyPackage)
+            await purchasePackage(pkg)
             Alert.alert('Success', 'Your subscription is now active!')
             completeOnboarding()
         } catch (err: any) {
@@ -68,7 +75,7 @@ export default function Onboarding10Screen() {
             <View style={styles.content}>
                 {/* Icon */}
                 <View style={styles.iconCircle}>
-                    <Ionicons name="sparkles-outline" size={72} color="#2f80ed" />
+                    <Ionicons name="sparkles-outline" size={48} color="#2f80ed" />
                 </View>
 
                 {/* Title */}
@@ -99,13 +106,25 @@ export default function Onboarding10Screen() {
                     </View>
                 </View>
 
-                {/* Pricing */}
-                <View style={styles.pricingCard}>
-                    <View style={styles.priceRow}>
-                        <Text style={styles.priceAmount}>{priceInfo?.price || '$4.99'}</Text>
-                        <Text style={styles.priceInterval}>/{priceInfo?.period || 'month'}</Text>
-                    </View>
-                    <Text style={styles.pricingNote}>3 day Free Trial Included {'\n'}Cancel anytime</Text>
+                {/* Pricing - Monthly & Annual */}
+                <View style={styles.pricingRow}>
+                    <TouchableOpacity style={[styles.pricingCard, selectedPlan === 'monthly' && styles.pricingCardSelected]} onPress={() => setSelectedPlan('monthly')} activeOpacity={0.8} disabled={!monthlyPackage}>
+                        <Text style={styles.planLabel}>Monthly</Text>
+                        <View style={styles.priceRow}>
+                            <Text style={styles.priceAmount}>{priceInfo?.price || '$4.99'}</Text>
+                            <Text style={styles.priceInterval}>/month</Text>
+                        </View>
+                        <Text style={styles.pricingNote}>3 day free trial</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[styles.pricingCard, selectedPlan === 'annual' && styles.pricingCardSelected]} onPress={() => setSelectedPlan('annual')} activeOpacity={0.8} disabled={!annualPackage}>
+                        <Text style={styles.planLabel}>Annual</Text>
+                        <View style={styles.priceRow}>
+                            <Text style={styles.priceAmount}>{annualPriceInfo?.price || '$39.99'}</Text>
+                            <Text style={styles.priceInterval}>/year</Text>
+                        </View>
+                        <Text style={styles.pricingNote}>3 day free trial</Text>
+                        <Text style={[styles.saveBadge, { color: accent }]}>Best value</Text>
+                    </TouchableOpacity>
                 </View>
 
                 {error && (
@@ -115,7 +134,7 @@ export default function Onboarding10Screen() {
                 )}
 
                 {/* Subscribe Button */}
-                <TouchableOpacity style={[styles.subscribeButton, (hasPremium || purchasing) && styles.subscribeButtonDisabled]} onPress={handleSubscribe} activeOpacity={0.8} disabled={!monthlyPackage || hasPremium || purchasing}>
+                <TouchableOpacity style={[styles.subscribeButton, (hasPremium || purchasing) && styles.subscribeButtonDisabled]} onPress={handleSubscribe} activeOpacity={0.8} disabled={!selectedPackage || hasPremium || purchasing}>
                     {purchasing ?
                         <ActivityIndicator size="small" color="#fff" />
                     :   <Text style={styles.subscribeButtonText}>{hasPremium ? 'Subscription Active' : 'Subscribe Now'}</Text>}
@@ -138,9 +157,13 @@ export default function Onboarding10Screen() {
 
                 <Text style={styles.legalText}>
                     By subscribing, you agree to our{' '}
-                    <Text style={styles.termsLink} onPress={() => setTermsModalVisible(true)}>Terms of Service</Text>
-                    {' '}and{' '}
-                    <Text style={styles.termsLink} onPress={() => setTermsModalVisible(true)}>Privacy Policy</Text>
+                    <Text style={styles.termsLink} onPress={() => setTermsModalVisible(true)}>
+                        Terms of Service
+                    </Text>{' '}
+                    and{' '}
+                    <Text style={styles.termsLink} onPress={() => setTermsModalVisible(true)}>
+                        Privacy Policy
+                    </Text>
                     .
                 </Text>
                 <TermsAndPrivacyModal visible={termsModalVisible} onClose={() => setTermsModalVisible(false)} />
@@ -154,7 +177,7 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#121212',
         paddingHorizontal: 25,
-        paddingTop: 60,
+        paddingTop: 75,
         paddingBottom: 30,
     },
     centerContent: {
@@ -172,9 +195,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     iconCircle: {
-        width: 144,
-        height: 144,
-        borderRadius: 72,
+        width: 96,
+        height: 96,
+        borderRadius: 48,
         backgroundColor: '#242424',
         justifyContent: 'center',
         alignItems: 'center',
@@ -226,15 +249,35 @@ const styles = StyleSheet.create({
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },
-    pricingCard: {
+    pricingRow: {
+        flexDirection: 'row',
+        gap: 12,
         width: '100%',
+        marginBottom: 16,
+    },
+    pricingCard: {
+        flex: 1,
         backgroundColor: 'rgba(45, 156, 255, 0.1)',
         borderRadius: 12,
-        padding: 20,
+        padding: 16,
         alignItems: 'center',
         borderWidth: 2,
         borderColor: 'rgba(45, 156, 255, 0.3)',
-        marginBottom: 16,
+    },
+    pricingCardSelected: {
+        borderColor: '#2f80ed',
+        borderWidth: 3,
+    },
+    planLabel: {
+        fontSize: 12,
+        color: '#aaa',
+        marginBottom: 4,
+        fontFamily: 'Poppins_600SemiBold',
+    },
+    saveBadge: {
+        fontSize: 10,
+        marginTop: 6,
+        fontFamily: 'Poppins_600SemiBold',
     },
     priceRow: {
         flexDirection: 'row',
@@ -242,7 +285,7 @@ const styles = StyleSheet.create({
         marginBottom: 2,
     },
     priceAmount: {
-        fontSize: 28,
+        fontSize: 24,
         color: '#2f80ed',
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',

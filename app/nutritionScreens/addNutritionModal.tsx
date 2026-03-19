@@ -89,7 +89,7 @@ export default function AddNutritionModal() {
                 {/* Icon Section */}
                 <View style={styles.iconContainer}>
                     <View style={styles.iconCircle}>
-                        <Utensils size={40} color="#22C922" strokeWidth={2.5} />
+                        <Utensils size={50} color="#22C922" strokeWidth={2.5} />
                     </View>
                 </View>
 
@@ -274,9 +274,9 @@ const styles = StyleSheet.create({
         marginTop: 12,
     },
     iconCircle: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
+        width: 100,
+        height: 100,
+        borderRadius: 50,
         backgroundColor: '#1e1e1e',
         justifyContent: 'center',
         alignItems: 'center',
@@ -287,13 +287,13 @@ const styles = StyleSheet.create({
         fontSize: 24,
         color: '#FFF',
         textAlign: 'center',
-        marginBottom: 6,
+        marginBottom: 4,
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },
     subtitle: {
-        fontSize: 14,
-        color: '#888',
+        fontSize: 16,
+        color: '#aaa',
         textAlign: 'center',
         marginBottom: 20,
         fontFamily: 'Poppins_400Regular',

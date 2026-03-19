@@ -12,12 +12,22 @@ interface DraggableListProps<T> {
 }
 
 export default function DraggableList<T>({ data, onDragEnd, renderItem, keyExtractor, contentContainerStyle, ListHeaderComponent }: DraggableListProps<T>) {
-    return <DraggableFlatList data={data} onDragEnd={({ data }) => onDragEnd(data)} keyExtractor={keyExtractor} renderItem={(params) => <ScaleDecorator>{renderItem(params)}</ScaleDecorator>} contentContainerStyle={[styles.content, contentContainerStyle]} ListHeaderComponent={ListHeaderComponent} />
+    return (
+        <DraggableFlatList
+            data={data}
+            onDragEnd={({ data }) => onDragEnd(data)}
+            keyExtractor={keyExtractor}
+            renderItem={(params) => <ScaleDecorator>{renderItem(params)}</ScaleDecorator>}
+            contentContainerStyle={[styles.content, contentContainerStyle]}
+            ListHeaderComponent={ListHeaderComponent}
+        />
+    )
 }
 
 const styles = StyleSheet.create({
     content: {
         paddingHorizontal: 20,
         paddingTop: 0,
+        paddingBottom: 150,
     },
 })

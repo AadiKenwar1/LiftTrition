@@ -1,62 +1,62 @@
 {
-  "expo": {
-    "name": "LiftTrition",
-    "slug": "App",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/images/LTIcon.png",
-    "scheme": "app",
-    "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/images/LTsplashIcon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#121212"
-    },
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.LiftTrition.App",
-      "usesAppleSignIn": true,
-      "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
-      }
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
-    },
-    "web": {
-      "bundler": "metro",
-      "output": "static",
-      "favicon": "./assets/images/favicon.png"
-    },
-    "plugins": [
-      "expo-router",
-      "@react-native-community/datetimepicker",
-      "expo-apple-authentication",
-      "@journeyapps/react-native-quick-sqlite",
-      "expo-font",
-      [
-        "@sentry/react-native/expo",
-        {
-          "url": "https://sentry.io/",
-          "project": "lifttritionapp",
-          "organization": "na-mvc"
+    "expo": {
+        "name": "LiftTrition",
+        "slug": "App",
+        "version": "1.0.0",
+        "orientation": "portrait",
+        "icon": "./assets/images/LTIcon.png",
+        "scheme": "app",
+        "userInterfaceStyle": "automatic",
+        "newArchEnabled": true,
+        "splash": {
+            "image": "./assets/images/LTsplashIcon.png",
+            "resizeMode": "contain",
+            "backgroundColor": "#121212"
+        },
+        "ios": {
+            "supportsTablet": true,
+            "bundleIdentifier": "com.LiftTrition.App",
+            "usesAppleSignIn": true,
+            "infoPlist": {
+                "ITSAppUsesNonExemptEncryption": false
+            }
+        },
+        "android": {
+            "adaptiveIcon": {
+                "foregroundImage": "./assets/images/adaptive-icon.png",
+                "backgroundColor": "#ffffff"
+            },
+            "edgeToEdgeEnabled": true,
+            "predictiveBackGestureEnabled": false
+        },
+        "web": {
+            "bundler": "metro",
+            "output": "static",
+            "favicon": "./assets/images/favicon.png"
+        },
+        "plugins": [
+            "expo-router",
+            "@react-native-community/datetimepicker",
+            "expo-apple-authentication",
+            "@journeyapps/react-native-quick-sqlite",
+            "expo-font",
+            [
+                "@sentry/react-native/expo",
+                {
+                    "url": "https://sentry.io/",
+                    "project": "lifttritionapp",
+                    "organization": "na-mvc"
+                }
+            ]
+        ],
+        "experiments": {
+            "typedRoutes": true
+        },
+        "extra": {
+            "router": {},
+            "eas": {
+                "projectId": "22572fc8-eb07-4d16-90bc-8ebd90b2a812"
+            }
         }
-      ]
-    ],
-    "experiments": {
-      "typedRoutes": true
-    },
-    "extra": {
-      "router": {},
-      "eas": {
-        "projectId": "22572fc8-eb07-4d16-90bc-8ebd90b2a812"
-      }
     }
-  }
 }

@@ -3,7 +3,7 @@ import { Dispatch, SetStateAction } from "react";
 import { Settings } from "../types";
 import { calculateMacros } from "./macroCalculation";
 
-export function updateBw(updatedWeight: number, setBwProgress: Dispatch<SetStateAction<Record<string, number>>>, setSettings: Dispatch<SetStateAction<Settings>>){
+export function updateBw(updatedWeight: number, setBwProgress: Dispatch<SetStateAction<Record<string, number>>>, setSettings: Dispatch<SetStateAction<Settings>>) {
     if(updatedWeight <= 0) return;
     
     //Creates keys in the format YYYY-MM-DD

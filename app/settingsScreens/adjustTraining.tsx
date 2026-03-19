@@ -39,7 +39,7 @@ export default function AdjustTrainingScreen() {
         <View style={styles.container}>
             <View style={styles.topSection}>
                 <View style={[styles.iconCircle, { borderColor: accent }]}>
-                    <Dumbbell size={60} color={accent} strokeWidth={2} />
+                    <Dumbbell size={48} color={accent} strokeWidth={2} />
                 </View>
                 <Text style={styles.titleText}>Update Your Activity Level</Text>
                 <Text style={styles.subtitleText}>Nutrition and Fatigue calculations will be updated</Text>
@@ -75,18 +75,18 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#121212',
         paddingHorizontal: 24,
-        paddingTop: 20,
+        paddingTop: 12,
         paddingBottom: 20,
         alignItems: 'center',
     },
     topSection: {
         alignItems: 'center',
-        marginBottom: 16,
+        marginBottom: 12,
     },
     iconCircle: {
-        width: 108,
-        height: 108,
-        borderRadius: 54,
+        width: 84,
+        height: 84,
+        borderRadius: 42,
         backgroundColor: '#1e1e1e',
         justifyContent: 'center',
         alignItems: 'center',
@@ -103,17 +103,16 @@ const styles = StyleSheet.create({
     },
     subtitleText: {
         fontSize: 14,
-        color: '#888',
+        color: '#aaa',
         textAlign: 'center',
         letterSpacing: 0.2,
-        paddingHorizontal: 8,
         fontFamily: 'Poppins_400Regular',
     },
     optionsContainer: {
         width: '100%',
         gap: 6,
         justifyContent: 'center',
-        marginBottom: 16,
+        marginBottom: 12,
     },
     optionButton: {
         width: '100%',
@@ -138,8 +137,8 @@ const styles = StyleSheet.create({
         color: '#fff',
     },
     optionSubtitle: {
-        fontSize: 11,
-        color: '#888',
+        fontSize: 13,
+        color: '#aaa',
         letterSpacing: 0.2,
         textAlign: 'center',
         fontFamily: 'Poppins_500Medium',

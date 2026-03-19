@@ -10,5 +10,7 @@ export interface BillingContextInterface {
     restorePurchases: () => Promise<CustomerInfo>
     hasPremium: boolean
     monthlyPackage: PurchasesPackage | null
+    annualPackage: PurchasesPackage | null
     priceInfo: { price: string; period: string } | null
+    annualPriceInfo: { price: string; period: string } | null
 }

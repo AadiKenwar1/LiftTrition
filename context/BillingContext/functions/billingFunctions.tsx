@@ -5,9 +5,21 @@ import Purchases, { CustomerInfo, PurchasesPackage } from 'react-native-purchase
 export function getMonthlyPackage(offerings: any): PurchasesPackage | null {
     if (!offerings?.current?.availablePackages) return null;
     return offerings.current.availablePackages.find(
-        (pkg: PurchasesPackage) => 
-            pkg.identifier === 'monthly' || 
-            pkg.packageType === 'MONTHLY'
+        (pkg: PurchasesPackage) =>
+            pkg.identifier === 'monthly' ||
+            pkg.identifier === '$rc_monthly' ||
+            pkg.packageType === 'MONTHLY',
+    ) || null;
+}
+
+// Get annual package from offerings
+export function getAnnualPackage(offerings: any): PurchasesPackage | null {
+    if (!offerings?.current?.availablePackages) return null;
+    return offerings.current.availablePackages.find(
+        (pkg: PurchasesPackage) =>
+            pkg.identifier === 'annual' ||
+            pkg.identifier === '$rc_annual' ||
+            pkg.packageType === 'ANNUAL',
     ) || null;
 }
 

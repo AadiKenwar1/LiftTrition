@@ -2,27 +2,35 @@ import { useBilling } from '@/context/BillingContext'
 import { useSettings } from '@/context/SettingsContext'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { BarChart3, Database, Sparkles, Zap } from 'lucide-react-native'
+import { useState } from 'react'
 import { ActivityIndicator, Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 const ACCENT = { workout: '#2f80ed', nutrition: '#22C922' }
 const ACCENT_RGBA = { workout: 'rgba(45, 156, 255, 0.1)', nutrition: 'rgba(34, 201, 34, 0.1)' }
 const ACCENT_RGBA_30 = { workout: 'rgba(45, 156, 255, 0.3)', nutrition: 'rgba(34, 201, 34, 0.3)' }
 
+type PlanType = 'monthly' | 'annual'
+
 export default function SubscriptionScreen() {
-    const { loading, hasPremium, monthlyPackage, priceInfo, purchasePackage, restorePurchases, error } = useBilling()
+    const { loading, hasPremium, monthlyPackage, annualPackage, priceInfo, annualPriceInfo, purchasePackage, restorePurchases, error } = useBilling()
     const { mode } = useSettings()
+    const [selectedPlan, setSelectedPlan] = useState<PlanType>('annual')
     const accent = mode ? ACCENT.workout : ACCENT.nutrition
     const accentRgba = mode ? ACCENT_RGBA.workout : ACCENT_RGBA.nutrition
     const accentRgba30 = mode ? ACCENT_RGBA_30.workout : ACCENT_RGBA_30.nutrition
 
+    const selectedPackage = selectedPlan === 'monthly' ? monthlyPackage : annualPackage
+    const selectedPriceInfo = selectedPlan === 'monthly' ? priceInfo : annualPriceInfo
+
     const handleSubscribe = async () => {
-        if (!monthlyPackage) {
+        const pkg = selectedPlan === 'monthly' ? monthlyPackage : annualPackage
+        if (!pkg) {
             Alert.alert('Error', 'Subscription package not available. Please try again later.')
             return
         }
 
         try {
-            await purchasePackage(monthlyPackage)
+            await purchasePackage(pkg)
             Alert.alert('Success', 'Your subscription is now active!')
         } catch (err: any) {
             if (err.userCancelled) return
@@ -85,14 +93,50 @@ export default function SubscriptionScreen() {
                     </View>
                 </View>
 
-                {/* Pricing Section */}
+                {/* Pricing Section - Monthly & Annual */}
                 <View style={styles.pricingSection}>
-                    <View style={[styles.pricingCard, { backgroundColor: accentRgba, borderColor: accentRgba30 }]}>
-                        <View style={styles.priceRow}>
-                            <Text style={[styles.priceAmount, { color: accent }]}>{priceInfo?.price || '$4.99'}</Text>
-                            <Text style={styles.priceInterval}>/{priceInfo?.period || 'month'}</Text>
-                        </View>
-                        <Text style={styles.pricingNote}>3 day Free Trial Included {'\n'}Cancel anytime</Text>
+                    <View style={styles.pricingRow}>
+                        <TouchableOpacity
+                            style={[
+                                styles.pricingCard,
+                                {
+                                    backgroundColor: accentRgba,
+                                    borderColor: selectedPlan === 'monthly' ? accent : accentRgba30,
+                                    borderWidth: selectedPlan === 'monthly' ? 3 : 2,
+                                },
+                            ]}
+                            onPress={() => setSelectedPlan('monthly')}
+                            activeOpacity={0.8}
+                            disabled={!monthlyPackage}
+                        >
+                            <Text style={styles.planLabel}>Monthly</Text>
+                            <View style={styles.priceRow}>
+                                <Text style={[styles.priceAmount, { color: accent }]}>{priceInfo?.price || '$4.99'}</Text>
+                                <Text style={styles.priceInterval}>/ month</Text>
+                            </View>
+                            <Text style={styles.pricingNote}>3 day free trial</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[
+                                styles.pricingCard,
+                                {
+                                    backgroundColor: accentRgba,
+                                    borderColor: selectedPlan === 'annual' ? accent : accentRgba30,
+                                    borderWidth: selectedPlan === 'annual' ? 3 : 2,
+                                },
+                            ]}
+                            onPress={() => setSelectedPlan('annual')}
+                            activeOpacity={0.8}
+                            disabled={!annualPackage}
+                        >
+                            <Text style={styles.planLabel}>Annual</Text>
+                            <View style={styles.priceRow}>
+                                <Text style={[styles.priceAmount, { color: accent }]}>{annualPriceInfo?.price || '$39.99'}</Text>
+                                <Text style={styles.priceInterval}>/ year</Text>
+                            </View>
+                            <Text style={styles.pricingNote}>3 day free trial</Text>
+                            <Text style={[styles.saveBadge, { color: accent }]}>Best value!</Text>
+                        </TouchableOpacity>
                     </View>
                 </View>
 
@@ -105,16 +149,23 @@ export default function SubscriptionScreen() {
 
                 {/* Subscribe Button */}
                 <TouchableOpacity
-                    style={[styles.subscribeButton, { backgroundColor: hasPremium ? '#4CAF50' : accent, shadowColor: hasPremium ? '#4CAF50' : accent }, hasPremium && styles.subscribeButtonActive]}
+                    style={[
+                        styles.subscribeButton,
+                        {
+                            backgroundColor: accent,
+                            shadowColor: accent,
+                            opacity: hasPremium ? 0.6 : 1,
+                        },
+                    ]}
                     onPress={handleSubscribe}
                     activeOpacity={0.8}
-                    disabled={!monthlyPackage || hasPremium}
+                    disabled={!selectedPackage || hasPremium}
                 >
                     <Text style={styles.subscribeButtonText}>
                         {hasPremium ?
                             'Subscription Active'
-                        : monthlyPackage ?
-                            'Subscribe Now'
+                        : selectedPackage ?
+                            `Subscribe ${selectedPlan === 'monthly' ? 'Monthly' : 'Annually'}`
                         :   'Loading...'}
                     </Text>
                 </TouchableOpacity>
@@ -139,7 +190,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#121212',
-        paddingTop: 20,
     },
     centerContent: {
         justifyContent: 'center',
@@ -161,7 +211,7 @@ const styles = StyleSheet.create({
     },
     heroSection: {
         alignItems: 'center',
-        marginBottom: 28,
+        marginBottom: 12,
     },
     heroIcon: {
         width: 96,
@@ -177,7 +227,7 @@ const styles = StyleSheet.create({
         fontSize: 32,
         color: '#fff',
         letterSpacing: -0.5,
-        marginBottom: 12,
+        marginBottom: 4,
         fontFamily: 'Poppins_600SemiBold',
     },
     heroSubtitle: {
@@ -186,11 +236,10 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         lineHeight: 22,
         letterSpacing: 0.2,
-        paddingHorizontal: 8,
         fontFamily: 'Poppins_400Regular',
     },
     featuresSection: {
-        marginBottom: 28,
+        marginBottom: 12,
     },
     featuresRow: {
         flexDirection: 'row',
@@ -217,11 +266,26 @@ const styles = StyleSheet.create({
     pricingSection: {
         marginBottom: 20,
     },
+    pricingRow: {
+        flexDirection: 'row',
+        gap: 12,
+    },
     pricingCard: {
+        flex: 1,
         borderRadius: 16,
-        padding: 20,
+        padding: 16,
         alignItems: 'center',
-        borderWidth: 2,
+    },
+    planLabel: {
+        fontSize: 14,
+        color: '#aaa',
+        marginBottom: 4,
+        fontFamily: 'Poppins_600SemiBold',
+    },
+    saveBadge: {
+        fontSize: 14,
+        marginTop: 6,
+        fontFamily: 'Poppins_600SemiBold',
     },
     priceRow: {
         flexDirection: 'row',
@@ -229,7 +293,7 @@ const styles = StyleSheet.create({
         marginBottom: 6,
     },
     priceAmount: {
-        fontSize: 40,
+        fontSize: 24,
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },
@@ -273,9 +337,6 @@ const styles = StyleSheet.create({
         shadowRadius: 12,
         elevation: 8,
     },
-    subscribeButtonActive: {
-        opacity: 0.8,
-    },
     subscribeButtonText: {
         fontSize: 17,
         color: '#fff',
@@ -289,7 +350,7 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 10,
+        marginBottom: 0,
     },
     restoreButtonText: {
         fontSize: 14,

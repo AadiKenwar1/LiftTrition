@@ -124,7 +124,7 @@ export default function SettingsScreen() {
 
             {/* Goals Section */}
             <View style={styles.section}>
-                <Text style={styles.sectionTitle}>GOALS</Text>
+                <Text style={styles.sectionTitle}>GOAL ADJUSTMENTS</Text>
                 {renderSettingItem(settingsOptions[2], 2)}
                 {renderSettingItem(settingsOptions[3], 3)}
                 {renderSettingItem(settingsOptions[4], 4)}
