@@ -4,6 +4,7 @@ import { useSettings } from '@/context/SettingsContext'
 import { Settings } from '@/context/SettingsContext/types'
 import { AntDesign } from '@expo/vector-icons'
 import { Image } from 'expo-image'
+import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
@@ -30,6 +31,11 @@ export default function LoginScreen() {
 
     return (
         <View style={styles.container}>
+            <LinearGradient
+                colors={['rgba(255, 255, 255, 0.07)', 'transparent']}
+                style={styles.topGradient}
+                pointerEvents="none"
+            />
             {/* Logo/Branding Section */}
             <View style={styles.brandingContainer}>
                 <View style={styles.logoContainer}>
@@ -73,6 +79,13 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         paddingBottom: 50,
         paddingTop: 60,
+    },
+    topGradient: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 220,
     },
     brandingContainer: {
         alignItems: 'center',

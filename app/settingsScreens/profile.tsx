@@ -14,7 +14,7 @@ export default function ProfileScreen() {
 
     const { user, signOut, deleteAccount } = useAuth()
     const { settings, mode } = useSettings()
-    const accent = mode ? '#2f80ed' : '#22C922'
+    const accent = 'white'
 
     const router = useRouter()
 
@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
     scrollView: { flex: 1 },
     scrollContent: { paddingHorizontal: 20, paddingBottom: 40 },
     profileIconContainer: { alignItems: 'center', marginVertical: 24 },
-    profileIcon: { width: 100, height: 100, borderRadius: 50, backgroundColor: '#242424', justifyContent: 'center', alignItems: 'center', borderWidth: 2 },
+    profileIcon: { width: 100, height: 100, borderRadius: 50, backgroundColor: '#282A2C', justifyContent: 'center', alignItems: 'center', borderWidth: 2 },
     section: { marginBottom: 24 },
     sectionTitle: { fontSize: 18, color: '#fff', marginBottom: 12, paddingLeft: 4, letterSpacing: -0.5, fontFamily: 'Poppins_600SemiBold' },
     card: { backgroundColor: '#1e1e1e', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#2a2a2a' },

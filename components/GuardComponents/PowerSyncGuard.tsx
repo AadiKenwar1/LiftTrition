@@ -37,7 +37,7 @@ export function PowerSyncGuard({ children }: Props) {
     if (!powerSyncReady) {
         return (
             <View style={styles.syncContainer}>
-                <ActivityIndicator size="large" color="#2f80ed" />
+                <ActivityIndicator size="large" color="white" />
                 <Text style={styles.syncText}>Syncing data...</Text>
             </View>
         )

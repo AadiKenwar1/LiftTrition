@@ -3,15 +3,12 @@ import { validateHeightWeight, validateTargetWeight } from '@/context/SettingsCo
 import { router } from 'expo-router'
 import { Target } from 'lucide-react-native'
 import { useState } from 'react'
-import { Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
-
-const ACCENT = { workout: '#2f80ed', nutrition: '#22C922' }
-const ACCENT_RGBA = { workout: 'rgba(45, 156, 255, 0.15)', nutrition: 'rgba(34, 201, 34, 0.15)' }
+import { Keyboard, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
 
 export default function AdjustNutrition2Screen() {
     const { settings, mode } = useSettings()
-    const accent = mode ? ACCENT.workout : ACCENT.nutrition
-    const accentRgba = mode ? ACCENT_RGBA.workout : ACCENT_RGBA.nutrition
+    const accent = '#22C922'
+
     const [goal, setGoal] = useState<'lose' | 'gain' | 'maintain' | null>(settings.goalType)
     const [targetWeight, setTargetWeight] = useState(settings.goalWeight.toString())
 
@@ -37,10 +34,10 @@ export default function AdjustNutrition2Screen() {
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View style={styles.container}>
+            <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="never">
                 {/* Icon */}
                 <View style={[styles.iconCircle, { borderColor: accent }]}>
-                    <Target size={72} color={accent} strokeWidth={2} />
+                    <Target size={96} color={accent} strokeWidth={2} />
                 </View>
 
                 {/* Title */}
@@ -51,15 +48,15 @@ export default function AdjustNutrition2Screen() {
 
                 {/* Goal Options */}
                 <View style={styles.goalContainer}>
-                    <TouchableOpacity style={[styles.goalButton, goal === 'lose' && { backgroundColor: accentRgba, borderColor: accent }]} onPress={() => setGoal('lose')} activeOpacity={0.7}>
+                    <TouchableOpacity style={[styles.goalButton, goal === 'lose' && { borderColor: accent }]} onPress={() => setGoal('lose')} activeOpacity={0.7}>
                         <Text style={[styles.goalText, goal === 'lose' && styles.goalTextSelected]}>Lose</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={[styles.goalButton, goal === 'maintain' && { backgroundColor: accentRgba, borderColor: accent }]} onPress={() => setGoal('maintain')} activeOpacity={0.7}>
+                    <TouchableOpacity style={[styles.goalButton, goal === 'maintain' && { borderColor: accent }]} onPress={() => setGoal('maintain')} activeOpacity={0.7}>
                         <Text style={[styles.goalText, goal === 'maintain' && styles.goalTextSelected]}>Maintain</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={[styles.goalButton, goal === 'gain' && { backgroundColor: accentRgba, borderColor: accent }]} onPress={() => setGoal('gain')} activeOpacity={0.7}>
+                    <TouchableOpacity style={[styles.goalButton, goal === 'gain' && { borderColor: accent }]} onPress={() => setGoal('gain')} activeOpacity={0.7}>
                         <Text style={[styles.goalText, goal === 'gain' && styles.goalTextSelected]}>Gain</Text>
                     </TouchableOpacity>
                 </View>
@@ -76,16 +73,16 @@ export default function AdjustNutrition2Screen() {
                 )}
 
                 {goal === 'maintain' && (
-                    <View style={[styles.maintainMessageContainer, { backgroundColor: accentRgba.replace('0.15', '0.1'), borderColor: accentRgba.replace('0.15', '0.3') }]}>
+                    <View style={[styles.maintainMessageContainer]}>
                         <Text style={styles.maintainMessageText}>Maintaining body weight, so no target weight needed</Text>
                     </View>
                 )}
 
                 {/* Next Button */}
-                <TouchableOpacity style={[styles.nextButton, { backgroundColor: accent, shadowColor: accent }]} onPress={handleNext} activeOpacity={0.8}>
+                <TouchableOpacity style={[styles.nextButton]} onPress={handleNext} activeOpacity={0.8}>
                     <Text style={styles.nextButtonText}>Next</Text>
                 </TouchableOpacity>
-            </View>
+            </ScrollView>
         </TouchableWithoutFeedback>
     )
 }
@@ -94,16 +91,20 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#121212',
+        paddingTop: 54,
+    },
+    scrollContent: {
         paddingHorizontal: 25,
-        paddingTop: 36,
-        paddingBottom: 40,
         alignItems: 'center',
+        paddingBottom: 200,
+        flexGrow: 1,
+        justifyContent: 'center',
     },
     iconCircle: {
         width: 144,
         height: 144,
         borderRadius: 72,
-        backgroundColor: '#242424',
+        backgroundColor: '#282A2C',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
@@ -193,6 +194,8 @@ const styles = StyleSheet.create({
         borderRadius: 14,
         borderWidth: 1,
         marginBottom: 24,
+        backgroundColor: 'rgb(63, 63, 63)',
+        borderColor: 'rgba(78, 78, 78, 0.9)',
     },
     maintainMessageText: {
         fontSize: 14,
@@ -206,6 +209,8 @@ const styles = StyleSheet.create({
         height: 60,
         borderRadius: 16,
         justifyContent: 'center',
+        backgroundColor: 'white',
+        shadowColor: '#22C922',
         alignItems: 'center',
         shadowOffset: { width: 0, height: 6 },
         shadowOpacity: 0.4,
@@ -214,7 +219,7 @@ const styles = StyleSheet.create({
     },
     nextButtonText: {
         fontSize: 16,
-        color: '#fff',
+        color: '#000',
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },

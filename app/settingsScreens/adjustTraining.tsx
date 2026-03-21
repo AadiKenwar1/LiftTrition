@@ -4,14 +4,11 @@ import { Dumbbell } from 'lucide-react-native'
 import { useState } from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
-const ACCENT = { workout: '#2f80ed', nutrition: '#22C922' }
-const ACCENT_RGBA = { workout: 'rgba(45, 156, 255, 0.15)', nutrition: 'rgba(34, 201, 34, 0.15)' }
-
 export default function AdjustTrainingScreen() {
     const { settings, setSettings, calculateMacros, mode } = useSettings()
     const [selectedFrequency, setSelectedFrequency] = useState<'sedentary' | 'light' | 'moderate' | 'active' | 'gymrat'>(settings.activityLevel)
-    const accent = mode ? ACCENT.workout : ACCENT.nutrition
-    const accentRgba = mode ? ACCENT_RGBA.workout : ACCENT_RGBA.nutrition
+    const accent = '#2f80ed'
+    const accentRgba = 'rgba(45, 156, 255, 0.15)'
 
     const frequencies = [
         { id: 'sedentary', label: 'Sedentary', subtitle: 'Little to no exercise' },
@@ -39,7 +36,7 @@ export default function AdjustTrainingScreen() {
         <View style={styles.container}>
             <View style={styles.topSection}>
                 <View style={[styles.iconCircle, { borderColor: accent }]}>
-                    <Dumbbell size={48} color={accent} strokeWidth={2} />
+                    <Dumbbell size={54} color={'#2f80ed'} strokeWidth={2} />
                 </View>
                 <Text style={styles.titleText}>Update Your Activity Level</Text>
                 <Text style={styles.subtitleText}>Nutrition and Fatigue calculations will be updated</Text>
@@ -49,7 +46,7 @@ export default function AdjustTrainingScreen() {
                 {frequencies.map((freq) => (
                     <TouchableOpacity
                         key={freq.id}
-                        style={[styles.optionButton, selectedFrequency === freq.id && { backgroundColor: accentRgba, borderColor: accent }]}
+                        style={[styles.optionButton, selectedFrequency === freq.id && { borderColor: accent }]}
                         onPress={() => setSelectedFrequency(freq.id as 'sedentary' | 'light' | 'moderate' | 'active' | 'gymrat')}
                         activeOpacity={0.7}
                     >
@@ -63,7 +60,7 @@ export default function AdjustTrainingScreen() {
                 ))}
             </View>
 
-            <TouchableOpacity style={[styles.saveButton, { backgroundColor: accent, shadowColor: accent }]} onPress={handleSave} activeOpacity={0.8}>
+            <TouchableOpacity style={[styles.saveButton]} onPress={handleSave} activeOpacity={0.8}>
                 <Text style={styles.saveButtonText}>Save</Text>
             </TouchableOpacity>
         </View>
@@ -81,16 +78,16 @@ const styles = StyleSheet.create({
     },
     topSection: {
         alignItems: 'center',
-        marginBottom: 12,
+        marginBottom: 16,
     },
     iconCircle: {
-        width: 84,
-        height: 84,
-        borderRadius: 42,
-        backgroundColor: '#1e1e1e',
+        width: 96,
+        height: 96,
+        borderRadius: 48,
+        backgroundColor: '#282A2C',
         justifyContent: 'center',
         alignItems: 'center',
-        borderWidth: 2,
+        borderWidth: 1.5,
         marginBottom: 12,
     },
     titleText: {
@@ -102,7 +99,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_600SemiBold',
     },
     subtitleText: {
-        fontSize: 14,
+        fontSize: 16,
         color: '#aaa',
         textAlign: 'center',
         letterSpacing: 0.2,
@@ -172,14 +169,16 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginTop: 8,
-        shadowOffset: { width: 0, height: 4 },
+        shadowOffset: { width: 0, height: 6 },
         shadowOpacity: 0.4,
-        shadowRadius: 8,
+        shadowRadius: 12,
         elevation: 8,
+        backgroundColor: 'white',
+        shadowColor: '#2f80ed',
     },
     saveButtonText: {
         fontSize: 16,
-        color: '#FFF',
+        color: 'black',
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },

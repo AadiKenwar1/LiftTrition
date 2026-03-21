@@ -85,10 +85,7 @@ export default Sentry.wrap(function RootLayout() {
     }, [error])
 
     useEffect(() => {
-        Promise.all([
-            Asset.loadAsync(require('@/assets/images/LiftTritionAppIconV2.png')),
-            Asset.loadAsync(require('@/assets/images/LTpng.png')),
-        ]).then(() => setLogoLoaded(true))
+        Promise.all([Asset.loadAsync(require('@/assets/images/LiftTritionAppIconV2.png')), Asset.loadAsync(require('@/assets/images/LTpng.png'))]).then(() => setLogoLoaded(true))
     }, [])
 
     useEffect(() => {
@@ -120,7 +117,7 @@ function StackLayout() {
     if (!allContextsLoaded) {
         return (
             <View style={styles.syncContainer}>
-                <ActivityIndicator size="large" color="#2f80ed" />
+                <ActivityIndicator size="large" color="white" />
                 <Text style={styles.syncText}>Loading LiftTrition...</Text>
             </View>
         )

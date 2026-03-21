@@ -1,10 +1,19 @@
 import { useAuth } from '@/context/AuthContext'
 import { useSettings } from '@/context/SettingsContext'
+import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
-import { Check, ChevronRight } from 'lucide-react-native'
-import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { BarChart2, Dumbbell, Scale, Sparkle } from 'lucide-react-native'
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
-const { width: screenWidth } = Dimensions.get('window')
+const BLUE = '#2f80ed'
+const GREEN = '#22C922'
+
+const features = [
+    { icon: Dumbbell, text: 'Simple, customizable, and effective workout and nutrition tracking', accent: BLUE },
+    { icon: Sparkle, text: 'AI features and an extensive Food Database to make tracking easy', accent: GREEN },
+    { icon: BarChart2, text: 'Insights on your progress through understandable visualizations', accent: BLUE },
+    { icon: Scale, text: 'The platform to achieve and CRUSH your fitness goals', accent: GREEN },
+]
 
 export default function Onboarding1Screen() {
     const { settings, setSettings } = useSettings()
@@ -13,63 +22,36 @@ export default function Onboarding1Screen() {
 
     return (
         <View style={styles.container}>
+            <LinearGradient colors={['rgba(255, 255, 255, 0.2)', 'transparent']} style={styles.topGradient} pointerEvents="none" />
             <View style={styles.content}>
-                {/* Header */}
-                <View style={styles.header}>
-                    <Text style={styles.welcomeText}>Welcome to</Text>
-                    <Text style={styles.titleText}>LiftTrition</Text>
-                    <View style={styles.accentLine} />
+                {/* Badge */}
+                <View style={styles.badge}>
+                    <Text style={styles.badgeText}>FREE TO USE</Text>
                 </View>
 
-                {/* Subtitle */}
-                <Text style={styles.subtitleText}>LiftTrition is a free to use fitness app that helps you...</Text>
+                {/* Header */}
+                <Text style={styles.titleText}>LiftTrition</Text>
+                <Text style={styles.subtitleText}>What we have to offer: </Text>
 
                 {/* Features */}
                 <View style={styles.featuresContainer}>
-                    <View style={styles.featureItem}>
-                        <View style={styles.checkCircle}>
-                            <Check size={18} color="#2f80ed" strokeWidth={3} />
+                    {features.map(({ icon: Icon, text, accent }, i) => (
+                        <View key={i} style={styles.featureCard}>
+                            <View style={[styles.featureIconBox, { backgroundColor: accent + '20' }]}>
+                                <Icon size={20} color={accent} strokeWidth={2.5} />
+                            </View>
+                            <Text style={styles.featureText}>{text}</Text>
                         </View>
-                        <Text style={styles.featureText}>Simplify workout and nutrition tracking</Text>
-                    </View>
-
-                    <View style={styles.featureItem}>
-                        <View style={styles.checkCircle}>
-                            <Check size={18} color="#2f80ed" strokeWidth={3} />
-                        </View>
-                        <Text style={styles.featureText}>Gain insights through understandable visualizations</Text>
-                    </View>
-
-                    <View style={styles.featureItem}>
-                        <View style={styles.checkCircle}>
-                            <Check size={18} color="#2f80ed" strokeWidth={3} />
-                        </View>
-                        <Text style={styles.featureText}>Build muscle and strength</Text>
-                    </View>
-
-                    <View style={styles.featureItem}>
-                        <View style={styles.checkCircle}>
-                            <Check size={18} color="#2f80ed" strokeWidth={3} />
-                        </View>
-                        <Text style={styles.featureText}>Achieve your ideal body weight and stay healthy</Text>
-                    </View>
+                    ))}
                 </View>
-
-                {/* Bottom Text */}
-                <Text style={styles.bottomText}>Before we begin, we're going to need some information about you to calibrate your fitness goals.</Text>
+                {/* Footer */}
+                <View style={styles.footer}>
+                    <Text style={styles.footerHint}>If this sounds like something you're interested in, let's get started! We just need to ask a few quick questions to personalize your goals.</Text>
+                    <TouchableOpacity style={styles.ctaButton} activeOpacity={0.85} onPress={() => router.push('/onboardingScreens/onboarding2')}>
+                        <Text style={styles.ctaText}>Get Started</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
-
-            {/* CTA Button */}
-            <TouchableOpacity
-                style={styles.ctaButton}
-                onPress={() => {
-                    router.push('/onboardingScreens/onboarding2')
-                }}
-                activeOpacity={0.8}
-            >
-                <Text style={styles.ctaText}>Get Started</Text>
-                <ChevronRight size={24} color="white" strokeWidth={2.5} />
-            </TouchableOpacity>
         </View>
     )
 }
@@ -78,127 +60,115 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#121212',
-        justifyContent: 'space-between',
-        padding: 20,
-        paddingTop: 60,
-        paddingBottom: 50,
+        paddingHorizontal: 24,
+        paddingTop: 58,
+        paddingBottom: 44,
+    },
+    topGradient: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 220,
     },
     content: {
+        flex: 1,
         alignItems: 'center',
-        paddingTop: 40,
+        paddingTop: 16,
     },
-    header: {
-        alignItems: 'center',
-        marginBottom: 24,
+    badge: {
+        alignSelf: 'center',
+        paddingHorizontal: 14,
+        paddingVertical: 6,
+        borderRadius: 20,
+        backgroundColor: 'rgba(255, 255, 255, 0.08)',
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.15)',
+        marginBottom: 8,
     },
-    welcomeText: {
-        fontSize: 18,
-        color: '#888',
-        letterSpacing: 0.2,
-        marginBottom: 4,
-        fontFamily: 'Poppins_500Medium',
-    },
-    titleText: {
-        fontSize: 42,
-        color: '#fff',
-        letterSpacing: -0.5,
-        marginBottom: 12,
+    badgeText: {
+        fontSize: 11,
+        color: '#999',
+        letterSpacing: 1.8,
         fontFamily: 'Poppins_600SemiBold',
     },
-    accentLine: {
-        width: 60,
-        height: 4,
-        backgroundColor: '#2f80ed',
-        borderRadius: 2,
+    titleText: {
+        fontSize: 52,
+        color: '#fff',
+        letterSpacing: -1.5,
+        marginBottom: 0,
+        fontFamily: 'Poppins_700Bold',
+        textAlign: 'center',
     },
     subtitleText: {
-        fontSize: 16,
+        fontSize: 15,
         color: '#aaa',
         textAlign: 'center',
-        lineHeight: 24,
-        letterSpacing: 0.2,
-        marginBottom: 30,
+        lineHeight: 23,
+        letterSpacing: 0.1,
+        marginBottom: 16,
         paddingHorizontal: 8,
         fontFamily: 'Poppins_400Regular',
     },
     featuresContainer: {
-        gap: 24,
         width: '100%',
+        gap: 10,
+        marginBottom: 12,
     },
-    featureItem: {
+    featureCard: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 18,
-        paddingHorizontal: 8,
+        gap: 14,
+        backgroundColor: '#282A2C',
+        borderRadius: 14,
+        paddingHorizontal: 16,
+        paddingVertical: 14,
+        borderWidth: 0,
+        borderColor: '#222',
     },
-    checkCircle: {
-        width: 44,
-        height: 44,
-        borderRadius: 22,
-        backgroundColor: 'rgba(45, 156, 255, 0.15)',
+    featureIconBox: {
+        width: 38,
+        height: 38,
+        borderRadius: 10,
+        backgroundColor: '#fff',
         justifyContent: 'center',
         alignItems: 'center',
-        borderWidth: 1.5,
-        borderColor: 'rgba(45, 156, 255, 0.3)',
+        flexShrink: 0,
     },
     featureText: {
         flex: 1,
-        fontSize: 16,
+        fontSize: 14,
         color: '#fff',
-        letterSpacing: -0.5,
-        lineHeight: 24,
+        letterSpacing: -0.2,
+        lineHeight: 21,
         fontFamily: 'Poppins_500Medium',
+        marginBottom: 6,
+        marginTop: 6,
     },
-    bottomText: {
-        fontSize: 16,
-        color: '#888',
+    footer: {
+        width: '100%',
+        gap: 12,
+    },
+    footerHint: {
+        fontSize: 13,
+        color: '#aaa',
         textAlign: 'center',
-        lineHeight: 22,
-        letterSpacing: 0.2,
-        marginTop: 36,
-        paddingHorizontal: 8,
+        letterSpacing: 0.1,
         fontFamily: 'Poppins_400Regular',
+        marginBottom: 4,
     },
     ctaButton: {
         width: '100%',
-        height: 56,
-        backgroundColor: '#2f80ed',
+        height: 58,
         borderRadius: 16,
-        flexDirection: 'row',
+        backgroundColor: '#fff',
         justifyContent: 'center',
         alignItems: 'center',
-        gap: 8,
-        shadowColor: '#2f80ed',
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.4,
-        shadowRadius: 12,
-        elevation: 8,
     },
     ctaText: {
-        fontSize: 18,
-        color: '#fff',
-        letterSpacing: -0.5,
+        fontSize: 17,
+        color: '#000',
+        letterSpacing: -0.3,
         fontFamily: 'Poppins_600SemiBold',
-    },
-    testResetButton: {
-        position: 'absolute',
-        top: 60,
-        right: 20,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-        paddingHorizontal: 12,
-        paddingVertical: 8,
-        backgroundColor: 'rgba(255, 255, 255, 0.05)',
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.1)',
-        zIndex: 10,
-    },
-    testResetText: {
-        fontSize: 12,
-        color: '#888',
-        letterSpacing: 0.2,
-        fontFamily: 'Poppins_500Medium',
     },
 })

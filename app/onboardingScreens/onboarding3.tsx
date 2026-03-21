@@ -1,5 +1,6 @@
 import { useSettings } from '@/context/SettingsContext'
 import Octicons from '@expo/vector-icons/Octicons'
+import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
 import { useState } from 'react'
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
@@ -19,15 +20,16 @@ export default function Onboarding3Screen() {
 
     return (
         <View style={styles.container}>
+            <LinearGradient colors={['rgba(34, 201, 34, 0.14)', 'transparent']} style={styles.topGradient} pointerEvents="none" />
             <View style={styles.content}>
                 {/* Icon */}
                 <View style={styles.iconCircle}>
-                    <Octicons name="person-fill" size={65} color="#2f80ed" />
+                    <Octicons name="person-fill" size={65} color="#22C922" />
                 </View>
 
                 {/* Title */}
                 <Text style={styles.titleText}>What is your {'\n'}Biological Sex?</Text>
-                <Text style={styles.subtitleText}>We need this to calculate your BMR to adjust your nutrition goals.</Text>
+                <Text style={styles.subtitleText}>We use your biological sex for BMR and nutrition goal calculations.</Text>
 
                 {/* Gender Selection Buttons */}
                 <View style={styles.genderContainer}>
@@ -74,6 +76,13 @@ const styles = StyleSheet.create({
         paddingTop: 50,
         paddingBottom: 50,
     },
+    topGradient: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 220,
+    },
     content: {
         alignItems: 'center',
         paddingTop: 40,
@@ -82,11 +91,11 @@ const styles = StyleSheet.create({
         width: 144,
         height: 144,
         borderRadius: 72,
-        backgroundColor: '#242424',
+        backgroundColor: '#282A2C',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
-        borderColor: '#2f80ed',
+        borderColor: '#22C922',
         marginBottom: 16,
     },
     titleText: {
@@ -98,7 +107,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_600SemiBold',
     },
     subtitleText: {
-        fontSize: 15,
+        fontSize: 16,
         color: '#aaa',
         textAlign: 'center',
         lineHeight: 22,
@@ -126,8 +135,7 @@ const styles = StyleSheet.create({
         gap: 12,
     },
     genderButtonSelected: {
-        backgroundColor: 'rgba(45, 156, 255, 0.15)',
-        borderColor: '#2f80ed',
+        borderColor: '#22C922',
     },
     genderIconCircle: {
         width: 70,
@@ -138,7 +146,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     genderIconCircleSelected: {
-        backgroundColor: 'rgba(45, 156, 255, 0.25)',
+        backgroundColor: 'rgba(34, 201, 34, 0.25)',
     },
     genderIcon: {
         fontSize: 35,
@@ -152,7 +160,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_600SemiBold',
     },
     genderTextSelected: {
-        color: '#2f80ed',
+        color: '#22C922',
     },
     buttonContainer: {
         flexDirection: 'row',
@@ -180,19 +188,19 @@ const styles = StyleSheet.create({
     nextButton: {
         flex: 1,
         height: 60,
-        backgroundColor: '#2f80ed',
+        backgroundColor: '#D4F5D4',
         borderRadius: 16,
         justifyContent: 'center',
         alignItems: 'center',
-        shadowColor: '#2f80ed',
+        shadowColor: '#22C922',
         shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.4,
+        shadowOpacity: 0.2,
         shadowRadius: 12,
         elevation: 8,
     },
     nextButtonText: {
         fontSize: 17,
-        color: '#fff',
+        color: 'black',
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },

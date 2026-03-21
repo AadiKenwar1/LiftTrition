@@ -1,9 +1,12 @@
 import { useSettings } from '@/context/SettingsContext'
 import { validateTargetWeight } from '@/context/SettingsContext/functions/validator'
-import Octicons from '@expo/vector-icons/Octicons'
+import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
+import { Target } from 'lucide-react-native'
 import { useState } from 'react'
-import { Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
+import { Keyboard, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
+
+const ACCENT = '#22C922'
 
 export default function Onboarding6Screen() {
     const { settings, setSettings } = useSettings()
@@ -31,28 +34,29 @@ export default function Onboarding6Screen() {
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View style={styles.container}>
-                <View style={styles.content}>
+            <View style={styles.outerContainer}>
+                <LinearGradient colors={['rgba(34, 201, 34, 0.14)', 'transparent']} style={styles.topGradient} pointerEvents="none" />
+                <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="never">
                     {/* Icon */}
-                    <View style={styles.iconCircle}>
-                        <Octicons name="goal" size={72} color="#2f80ed" />
+                    <View style={[styles.iconCircle, { borderColor: ACCENT }]}>
+                        <Target size={86} color={ACCENT} strokeWidth={2} />
                     </View>
 
                     {/* Title */}
                     <Text style={styles.titleText}>What's Your {'\n'}Body Weight Goal?</Text>
-                    <Text style={styles.subtitleText}>We use this adjust your nutrition goals.</Text>
+                    <Text style={styles.subtitleText}>We use your body weight goal to adjust your nutrition goals</Text>
 
                     {/* Goal Options */}
                     <View style={styles.goalContainer}>
-                        <TouchableOpacity style={[styles.goalButton, goal === 'lose' && styles.goalButtonSelected]} onPress={() => setGoal('lose')} activeOpacity={0.7}>
+                        <TouchableOpacity style={[styles.goalButton, goal === 'lose' && { borderColor: ACCENT }]} onPress={() => setGoal('lose')} activeOpacity={0.7}>
                             <Text style={[styles.goalText, goal === 'lose' && styles.goalTextSelected]}>Lose</Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity style={[styles.goalButton, goal === 'maintain' && styles.goalButtonSelected]} onPress={() => setGoal('maintain')} activeOpacity={0.7}>
+                        <TouchableOpacity style={[styles.goalButton, goal === 'maintain' && { borderColor: ACCENT }]} onPress={() => setGoal('maintain')} activeOpacity={0.7}>
                             <Text style={[styles.goalText, goal === 'maintain' && styles.goalTextSelected]}>Maintain</Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity style={[styles.goalButton, goal === 'gain' && styles.goalButtonSelected]} onPress={() => setGoal('gain')} activeOpacity={0.7}>
+                        <TouchableOpacity style={[styles.goalButton, goal === 'gain' && { borderColor: ACCENT }]} onPress={() => setGoal('gain')} activeOpacity={0.7}>
                             <Text style={[styles.goalText, goal === 'gain' && styles.goalTextSelected]}>Gain</Text>
                         </TouchableOpacity>
                     </View>
@@ -73,54 +77,60 @@ export default function Onboarding6Screen() {
                             <Text style={styles.maintainMessageText}>Maintaining body weight, so no target weight needed</Text>
                         </View>
                     )}
-                </View>
-
-                {/* Navigation Buttons */}
-                <View style={styles.buttonContainer}>
-                    <TouchableOpacity
-                        style={styles.backButton}
-                        onPress={() => {
-                            router.back()
-                        }}
-                        activeOpacity={0.8}
-                    >
-                        <Text style={styles.backButtonText}>Back</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.nextButton} onPress={handleNext} activeOpacity={0.8}>
-                        <Text style={styles.nextButtonText}>Next</Text>
-                    </TouchableOpacity>
-                </View>
+                    {/* Navigation Buttons */}
+                    <View style={styles.buttonContainer}>
+                        <TouchableOpacity
+                            style={styles.backButton}
+                            onPress={() => {
+                                router.back()
+                            }}
+                            activeOpacity={0.8}
+                        >
+                            <Text style={styles.backButtonText}>Back</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.nextButton} onPress={handleNext} activeOpacity={0.8}>
+                            <Text style={styles.nextButtonText}>Next</Text>
+                        </TouchableOpacity>
+                    </View>
+                </ScrollView>
             </View>
         </TouchableWithoutFeedback>
     )
 }
 
 const styles = StyleSheet.create({
-    container: {
+    outerContainer: {
         flex: 1,
         backgroundColor: '#121212',
-        padding: 25,
-        paddingTop: 60,
-        paddingBottom: 50,
+    },
+    topGradient: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 220,
     },
     content: {
+        flex: 1,
+        paddingTop: 90,
+    },
+    scrollContent: {
+        paddingHorizontal: 25,
         alignItems: 'center',
-        paddingTop: 40,
-        marginBottom: 32,
+        paddingBottom: 200,
     },
     iconCircle: {
         width: 144,
         height: 144,
         borderRadius: 72,
-        backgroundColor: '#242424',
+        backgroundColor: '#282A2C',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
-        borderColor: '#2f80ed',
         marginBottom: 12,
     },
     titleText: {
-        fontSize: 32,
+        fontSize: 28,
         color: '#fff',
         letterSpacing: -0.5,
         marginBottom: 4,
@@ -128,14 +138,14 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_600SemiBold',
     },
     subtitleText: {
-        fontSize: 14,
+        fontSize: 16,
         color: '#aaa',
         textAlign: 'center',
-        lineHeight: 22,
         letterSpacing: 0.2,
-        marginBottom: 32,
-        paddingHorizontal: 16,
+        marginBottom: 24,
+        paddingHorizontal: 8,
         fontFamily: 'Poppins_400Regular',
+        lineHeight: 22,
     },
     goalContainer: {
         flexDirection: 'row',
@@ -148,31 +158,28 @@ const styles = StyleSheet.create({
         height: 60,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#282A2C',
+        backgroundColor: '#242424',
         borderRadius: 14,
         borderWidth: 2,
         borderColor: '#242424',
     },
-    goalButtonSelected: {
-        backgroundColor: 'rgba(45, 156, 255, 0.15)',
-        borderColor: '#2f80ed',
-    },
     goalText: {
         fontSize: 16,
-        fontWeight: '600',
-        color: '#888',
-        letterSpacing: -0.3,
+        color: '#aaa',
+        letterSpacing: -0.5,
+        fontFamily: 'Poppins_500Medium',
     },
     goalTextSelected: {
         color: '#fff',
     },
     inputGroup: {
         width: '100%',
+        marginBottom: 24,
     },
     inputLabel: {
         fontSize: 16,
         color: '#aaa',
-        marginBottom: 10,
+        marginBottom: 8,
         paddingLeft: 4,
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
@@ -180,23 +187,24 @@ const styles = StyleSheet.create({
     inputWrapper: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#282A2C',
+        backgroundColor: '#242424',
         borderRadius: 14,
         borderWidth: 1,
         borderColor: '#242424',
         paddingHorizontal: 16,
-        height: 56,
+        height: 60,
+        marginBottom: 8,
     },
     input: {
         flex: 1,
-        fontSize: 18,
+        fontSize: 16,
         color: '#fff',
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },
     unitText: {
         fontSize: 16,
-        color: '#666',
+        color: '#aaa',
         marginLeft: 12,
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
@@ -204,19 +212,19 @@ const styles = StyleSheet.create({
     maintainMessageContainer: {
         width: '100%',
         paddingVertical: 20,
-        paddingHorizontal: 24,
-        backgroundColor: 'rgba(45, 156, 255, 0.1)',
+        paddingHorizontal: 20,
         borderRadius: 14,
         borderWidth: 1,
-        borderColor: 'rgba(45, 156, 255, 0.3)',
+        marginBottom: 24,
+        backgroundColor: '#282A2C',
+        borderColor: '#282A2C',
     },
     maintainMessageText: {
-        fontSize: 15,
+        fontSize: 16,
         color: '#aaa',
         textAlign: 'center',
-        lineHeight: 22,
         letterSpacing: 0.2,
-        fontFamily: 'Poppins_500Medium',
+        fontFamily: 'Poppins_400Regular',
     },
     buttonContainer: {
         flexDirection: 'row',
@@ -244,19 +252,19 @@ const styles = StyleSheet.create({
     nextButton: {
         flex: 1,
         height: 60,
-        backgroundColor: '#2f80ed',
+        backgroundColor: '#D4F5D4',
         borderRadius: 16,
         justifyContent: 'center',
         alignItems: 'center',
-        shadowColor: '#2f80ed',
+        shadowColor: ACCENT,
         shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.4,
+        shadowOpacity: 0.2,
         shadowRadius: 12,
         elevation: 8,
     },
     nextButtonText: {
-        fontSize: 17,
-        color: '#fff',
+        fontSize: 16,
+        color: '#000',
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },

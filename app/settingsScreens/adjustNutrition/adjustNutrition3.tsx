@@ -1,14 +1,13 @@
 import { useSettings } from '@/context/SettingsContext'
+import FontAwesome from '@expo/vector-icons/FontAwesome'
 import { router, useLocalSearchParams } from 'expo-router'
-import { Beef, Droplet, Flame, Sparkles, Wheat } from 'lucide-react-native'
+import { Beef, Droplet, Flame, Wheat } from 'lucide-react-native'
 import { useMemo } from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
-const ACCENT = { workout: '#2f80ed', nutrition: '#22C922' }
-
 export default function AdjustNutrition4Screen() {
-    const { settings, setSettings, calculateMacros, mode } = useSettings()
-    const accent = mode ? ACCENT.workout : ACCENT.nutrition
+    const { settings, setSettings, calculateMacros } = useSettings()
+    const accent = '#22C922'
     const params = useLocalSearchParams<{
         height: string
         weight: string
@@ -61,7 +60,7 @@ export default function AdjustNutrition4Screen() {
         <View style={styles.container}>
             {/* Icon */}
             <View style={[styles.iconCircle, { borderColor: accent }]}>
-                <Sparkles size={72} color={accent} strokeWidth={2} />
+                <FontAwesome name="list-alt" size={72} color={accent} strokeWidth={2} />
             </View>
 
             {/* Title */}
@@ -116,7 +115,7 @@ export default function AdjustNutrition4Screen() {
                     <Text style={styles.cancelButtonText}>Cancel</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={[styles.saveButton, { backgroundColor: accent, shadowColor: accent }]} onPress={handleSave} activeOpacity={0.8}>
+                <TouchableOpacity style={[styles.saveButton]} onPress={handleSave} activeOpacity={0.8}>
                     <Text style={styles.saveButtonText}>Save Changes</Text>
                 </TouchableOpacity>
             </View>
@@ -130,14 +129,13 @@ const styles = StyleSheet.create({
         backgroundColor: '#121212',
         paddingHorizontal: 25,
         paddingTop: 24,
-        paddingBottom: 40,
         alignItems: 'center',
     },
     iconCircle: {
         width: 144,
         height: 144,
         borderRadius: 72,
-        backgroundColor: '#242424',
+        backgroundColor: '#282A2C',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
@@ -231,10 +229,12 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.4,
         shadowRadius: 12,
         elevation: 8,
+        backgroundColor: 'white',
+        shadowColor: '#22C922',
     },
     saveButtonText: {
         fontSize: 16,
-        color: '#fff',
+        color: 'black',
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },

@@ -1,6 +1,7 @@
 import { useSettings } from '@/context/SettingsContext'
 import { powerSync } from '@/lib/powersync/system'
 import { formatDateTime } from '@/lib/utils/dateHelper'
+import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { ChevronRight, CreditCard, Dumbbell, FileText, HelpCircle, Plus, Scale, User, Utensils } from 'lucide-react-native'
 import { useEffect, useState } from 'react'
@@ -103,7 +104,13 @@ export default function SettingsScreen() {
     }
 
     return (
-        <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+        <View style={styles.outerContainer}>
+            <LinearGradient
+                colors={['rgba(255, 255, 255, 0.07)', 'transparent']}
+                style={styles.topGradient}
+                pointerEvents="none"
+            />
+            <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
             <View style={styles.header}>
                 <Text style={styles.title}>Settings</Text>
                 <Text style={styles.headerSubtitle}>Manage your preferences</Text>
@@ -142,14 +149,26 @@ export default function SettingsScreen() {
                 {renderSettingItem(settingsOptions[6], 6)}
                 {renderSettingItem(settingsOptions[7], 7)}
             </View>
-        </ScrollView>
+            </ScrollView>
+        </View>
     )
 }
 
 const styles = StyleSheet.create({
-    container: {
+    outerContainer: {
         flex: 1,
         backgroundColor: '#121212',
+    },
+    topGradient: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 220,
+        zIndex: 1,
+    },
+    container: {
+        flex: 1,
     },
     contentContainer: {
         paddingBottom: 40,

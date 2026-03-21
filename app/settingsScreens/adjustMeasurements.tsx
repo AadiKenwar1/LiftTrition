@@ -13,7 +13,8 @@ export default function AdjustNutrition1Screen() {
     const [unitSystem, setUnitSystem] = useState<'imperial' | 'metric'>(settings.unitSystem)
     const [height, setHeight] = useState(settings.height.toString())
     const [weight, setWeight] = useState(settings.bodyWeight.toString())
-    const accent = mode ? ACCENT.workout : ACCENT.nutrition
+    //const accent = mode ? ACCENT.workout : ACCENT.nutrition
+    const accent = 'white'
     const accentRgba = mode ? ACCENT_RGBA.workout : ACCENT_RGBA.nutrition
 
     function handleSave() {
@@ -42,8 +43,8 @@ export default function AdjustNutrition1Screen() {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={styles.container}>
                 {/* Icon */}
-                <View style={[styles.iconCircle, { borderColor: accent }]}>
-                    <FontAwesome5 name="pencil-ruler" size={65} color={accent} />
+                <View style={[styles.iconCircle, { borderColor: '#FBBF24' }]}>
+                    <FontAwesome5 name="pencil-ruler" size={65} color={'#FBBF24'} />
                 </View>
 
                 {/* Title */}
@@ -54,10 +55,10 @@ export default function AdjustNutrition1Screen() {
 
                 {/* Unit System Toggle */}
                 <View style={styles.toggleContainer}>
-                    <TouchableOpacity style={[styles.toggleButton, unitSystem === 'imperial' && { backgroundColor: accentRgba, borderColor: accent }]} onPress={() => setUnitSystem('imperial')} activeOpacity={0.7}>
+                    <TouchableOpacity style={[styles.toggleButton, unitSystem === 'imperial' && { borderColor: '#FBBF24' }]} onPress={() => setUnitSystem('imperial')} activeOpacity={0.7}>
                         <Text style={[styles.toggleText, unitSystem === 'imperial' && styles.toggleTextActive]}>Imperial</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={[styles.toggleButton, unitSystem === 'metric' && { backgroundColor: accentRgba, borderColor: accent }]} onPress={() => setUnitSystem('metric')} activeOpacity={0.7}>
+                    <TouchableOpacity style={[styles.toggleButton, unitSystem === 'metric' && { borderColor: '#FBBF24' }]} onPress={() => setUnitSystem('metric')} activeOpacity={0.7}>
                         <Text style={[styles.toggleText, unitSystem === 'metric' && styles.toggleTextActive]}>Metric</Text>
                     </TouchableOpacity>
                 </View>
@@ -105,10 +106,10 @@ const styles = StyleSheet.create({
         width: 144,
         height: 144,
         borderRadius: 72,
-        backgroundColor: '#242424',
+        backgroundColor: '#282A2C',
         justifyContent: 'center',
         alignItems: 'center',
-        borderWidth: 2,
+        borderWidth: 1.5,
         marginBottom: 12,
     },
     titleText: {
@@ -196,13 +197,13 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.4,
+        shadowOpacity: 0.3,
         shadowRadius: 12,
         elevation: 8,
     },
     nextButtonText: {
         fontSize: 16,
-        color: '#fff',
+        color: '#000',
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },

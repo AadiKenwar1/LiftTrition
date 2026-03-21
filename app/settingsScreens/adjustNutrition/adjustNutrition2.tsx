@@ -5,12 +5,10 @@ import { Gauge, Rabbit, Turtle } from 'lucide-react-native'
 import { useState } from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
-const ACCENT = { workout: '#2f80ed', nutrition: '#22C922' }
-
 export default function AdjustNutrition3Screen() {
     const { mode } = useSettings()
     const params = useLocalSearchParams<{ height: string; weight: string; unitSystem: string; goal: string; targetWeight: string }>()
-    const accent = mode ? ACCENT.workout : ACCENT.nutrition
+    const accent = '#22C922'
     const [goalPace, setGoalPace] = useState(0.5)
 
     const handleNext = () => {
@@ -53,7 +51,7 @@ export default function AdjustNutrition3Screen() {
             <View style={styles.sliderContainer}>
                 {/* Current Value Display */}
                 <View style={styles.valueDisplay}>
-                    <Text style={[styles.valueText, { color: accent }]}>{goalPace.toFixed(1)}</Text>
+                    <Text style={[styles.valueText]}>{goalPace.toFixed(1)}</Text>
                     <Text style={styles.valueLabelText}>{getPaceLabel(goalPace)}</Text>
                 </View>
 
@@ -72,7 +70,7 @@ export default function AdjustNutrition3Screen() {
             </View>
 
             {/* Next Button */}
-            <TouchableOpacity style={[styles.nextButton, { backgroundColor: accent, shadowColor: accent }]} onPress={handleNext} activeOpacity={0.8}>
+            <TouchableOpacity style={[styles.nextButton]} onPress={handleNext} activeOpacity={0.8}>
                 <Text style={styles.nextButtonText}>Next</Text>
             </TouchableOpacity>
         </View>
@@ -84,15 +82,14 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#121212',
         paddingHorizontal: 25,
-        paddingTop: 36,
-        paddingBottom: 40,
         alignItems: 'center',
+        paddingTop: 36,
     },
     iconCircle: {
         width: 144,
         height: 144,
         borderRadius: 72,
-        backgroundColor: '#242424',
+        backgroundColor: '#282A2C',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
@@ -125,6 +122,7 @@ const styles = StyleSheet.create({
         marginBottom: 24,
     },
     valueText: {
+        color: '#fff',
         fontSize: 48,
         marginBottom: 6,
         letterSpacing: -0.5,
@@ -132,7 +130,7 @@ const styles = StyleSheet.create({
     },
     valueLabelText: {
         fontSize: 24,
-        color: '#888',
+        color: '#aaa',
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },
@@ -165,10 +163,12 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.4,
         shadowRadius: 12,
         elevation: 8,
+        backgroundColor: 'white',
+        shadowColor: '#22C922',
     },
     nextButtonText: {
         fontSize: 16,
-        color: '#fff',
+        color: '#000',
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },

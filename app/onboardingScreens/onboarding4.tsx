@@ -1,9 +1,12 @@
 import { useSettings } from '@/context/SettingsContext'
 import { validateHeightWeight } from '@/context/SettingsContext/functions/validator'
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5'
+import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
 import { useState } from 'react'
 import { Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
+
+const AMBER = '#FBBF24'
 
 export default function Onboarding4Screen() {
     const { settings, setSettings, handleUpdateBw } = useSettings()
@@ -29,22 +32,23 @@ export default function Onboarding4Screen() {
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={styles.container}>
+                <LinearGradient colors={['rgba(251, 191, 36, 0.14)', 'transparent']} style={styles.topGradient} pointerEvents="none" />
                 <View style={styles.content}>
                     {/* Icon */}
-                    <View style={styles.iconCircle}>
-                        <FontAwesome5 name="pencil-ruler" size={65} color="#2f80ed" />
+                    <View style={[styles.iconCircle, { borderColor: AMBER }]}>
+                        <FontAwesome5 name="pencil-ruler" size={65} color={AMBER} />
                     </View>
 
                     {/* Title */}
                     <Text style={styles.titleText}>What's your Measurements?</Text>
-                    <Text style={styles.subtitleText}>We need this to calculate your BMR to adjust your nutrition goals.</Text>
+                    <Text style={styles.subtitleText}>We use your height and weight for BMR and nutrition goal calculations.</Text>
 
                     {/* Unit System Toggle */}
                     <View style={styles.toggleContainer}>
-                        <TouchableOpacity style={[styles.toggleButton, unitSystem === 'imperial' && styles.toggleButtonActive]} onPress={() => setUnitSystem('imperial')} activeOpacity={0.7}>
+                        <TouchableOpacity style={[styles.toggleButton, unitSystem === 'imperial' && { borderColor: AMBER }]} onPress={() => setUnitSystem('imperial')} activeOpacity={0.7}>
                             <Text style={[styles.toggleText, unitSystem === 'imperial' && styles.toggleTextActive]}>Imperial</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={[styles.toggleButton, unitSystem === 'metric' && styles.toggleButtonActive]} onPress={() => setUnitSystem('metric')} activeOpacity={0.7}>
+                        <TouchableOpacity style={[styles.toggleButton, unitSystem === 'metric' && { borderColor: AMBER }]} onPress={() => setUnitSystem('metric')} activeOpacity={0.7}>
                             <Text style={[styles.toggleText, unitSystem === 'metric' && styles.toggleTextActive]}>Metric</Text>
                         </TouchableOpacity>
                     </View>
@@ -99,6 +103,13 @@ const styles = StyleSheet.create({
         paddingTop: 50,
         paddingBottom: 50,
     },
+    topGradient: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 220,
+    },
     content: {
         alignItems: 'center',
         paddingTop: 40,
@@ -107,11 +118,10 @@ const styles = StyleSheet.create({
         width: 144,
         height: 144,
         borderRadius: 72,
-        backgroundColor: '#242424',
+        backgroundColor: '#282A2C',
         justifyContent: 'center',
         alignItems: 'center',
-        borderWidth: 2,
-        borderColor: '#2f80ed',
+        borderWidth: 1.5,
         marginBottom: 12,
     },
     titleText: {
@@ -123,13 +133,13 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_600SemiBold',
     },
     subtitleText: {
-        fontSize: 15,
+        fontSize: 16,
         color: '#aaa',
         textAlign: 'center',
         lineHeight: 22,
         letterSpacing: 0.2,
-        marginBottom: 16,
-        paddingHorizontal: 16,
+        marginBottom: 24,
+        paddingHorizontal: 8,
         fontFamily: 'Poppins_400Regular',
     },
     toggleContainer: {
@@ -148,12 +158,8 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderColor: '#242424',
     },
-    toggleButtonActive: {
-        backgroundColor: 'rgba(45, 156, 255, 0.15)',
-        borderColor: '#2f80ed',
-    },
     toggleText: {
-        fontSize: 18,
+        fontSize: 16,
         color: '#888',
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
@@ -163,7 +169,7 @@ const styles = StyleSheet.create({
     },
     inputContainer: {
         width: '100%',
-        gap: 20,
+        gap: 16,
         marginBottom: 32,
     },
     inputGroup: {
@@ -189,13 +195,13 @@ const styles = StyleSheet.create({
     },
     input: {
         flex: 1,
-        fontSize: 18,
+        fontSize: 16,
         color: '#fff',
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },
     unitText: {
-        fontSize: 16,
+        fontSize: 14,
         color: '#666',
         marginLeft: 12,
         letterSpacing: -0.5,
@@ -227,19 +233,19 @@ const styles = StyleSheet.create({
     nextButton: {
         flex: 1,
         height: 60,
-        backgroundColor: '#2f80ed',
+        backgroundColor: '#FFF1CC',
         borderRadius: 16,
         justifyContent: 'center',
         alignItems: 'center',
-        shadowColor: '#2f80ed',
+        shadowColor: AMBER,
         shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.4,
+        shadowOpacity: 0.2,
         shadowRadius: 12,
         elevation: 8,
     },
     nextButtonText: {
-        fontSize: 17,
-        color: '#fff',
+        fontSize: 16,
+        color: '#000',
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },

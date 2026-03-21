@@ -1,6 +1,7 @@
 import DatePicker from '@/components/NutritionComponents/DatePicker'
 import { useSettings } from '@/context/SettingsContext'
 import FontAwesome from '@expo/vector-icons/FontAwesome'
+import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
 import { useState } from 'react'
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
@@ -33,6 +34,7 @@ export default function Onboarding2Screen() {
 
     return (
         <View style={styles.container}>
+            <LinearGradient colors={['rgba(47, 128, 237, 0.3)', 'transparent']} style={styles.topGradient} pointerEvents="none" />
             <View style={styles.content}>
                 {/* Icon */}
                 <View style={styles.iconCircle}>
@@ -41,7 +43,7 @@ export default function Onboarding2Screen() {
 
                 {/* Title */}
                 <Text style={styles.titleText}>When's Your Birthday?</Text>
-                <Text style={styles.subtitleText}>We need this to calculate your age to adjust your nutrition goals.</Text>
+                <Text style={styles.subtitleText}>We use your age for BMR and nutrition goal calculations.</Text>
 
                 {/* Date Picker */}
                 <View style={styles.datePickerContainer}>
@@ -76,6 +78,13 @@ const styles = StyleSheet.create({
         paddingTop: 35,
         paddingBottom: 50,
     },
+    topGradient: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 220,
+    },
     content: {
         alignItems: 'center',
         paddingTop: 40,
@@ -84,7 +93,7 @@ const styles = StyleSheet.create({
         width: 144,
         height: 144,
         borderRadius: 72,
-        backgroundColor: '#242424',
+        backgroundColor: '#282A2C',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
@@ -100,7 +109,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_600SemiBold',
     },
     subtitleText: {
-        fontSize: 15,
+        fontSize: 16,
         color: '#aaa',
         textAlign: 'center',
         lineHeight: 22,
@@ -140,19 +149,19 @@ const styles = StyleSheet.create({
     nextButton: {
         flex: 1,
         height: 60,
-        backgroundColor: '#2f80ed',
+        backgroundColor: '#D4E4FF',
         borderRadius: 16,
         justifyContent: 'center',
         alignItems: 'center',
         shadowColor: '#2f80ed',
         shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.4,
+        shadowOpacity: 0.2,
         shadowRadius: 12,
         elevation: 8,
     },
     nextButtonText: {
         fontSize: 17,
-        color: '#fff',
+        color: 'black',
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },

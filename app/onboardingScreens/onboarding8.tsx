@@ -1,7 +1,10 @@
 import { useSettings } from '@/context/SettingsContext'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
+import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+
+const ACCENT = '#FBBF24'
 
 export default function Onboarding8Screen() {
     const { settings, setSettings, calculateMacros } = useSettings()
@@ -42,14 +45,15 @@ export default function Onboarding8Screen() {
 
     return (
         <View style={styles.container}>
+            <LinearGradient colors={['rgba(251, 191, 36, 0.14)', 'transparent']} style={styles.topGradient} pointerEvents="none" />
             <View style={styles.content}>
                 {/* Icon */}
-                <View style={styles.iconCircle}>
-                    <MaterialCommunityIcons name="folder-information" size={72} color="#2f80ed" />
+                <View style={[styles.iconCircle, { borderColor: ACCENT }]}>
+                    <MaterialCommunityIcons name="folder-information" size={72} color={ACCENT} />
                 </View>
 
                 {/* Title */}
-                <Text style={styles.titleText}>Review Your Information</Text>
+                <Text style={styles.titleText}>Summary</Text>
                 <Text style={styles.subtitleText}>Review your details before we calculate your personalized plan</Text>
 
                 {/* Settings Summary */}
@@ -69,13 +73,17 @@ export default function Onboarding8Screen() {
                     {/* Height */}
                     <View style={styles.summaryRow}>
                         <Text style={styles.summaryLabel}>Height</Text>
-                        <Text style={styles.summaryValue}>{settings.height} {settings.unitSystem === 'imperial' ? 'in' : 'cm'}</Text>
+                        <Text style={styles.summaryValue}>
+                            {settings.height} {settings.unitSystem === 'imperial' ? 'in' : 'cm'}
+                        </Text>
                     </View>
 
                     {/* Weight */}
                     <View style={styles.summaryRow}>
                         <Text style={styles.summaryLabel}>Weight</Text>
-                        <Text style={styles.summaryValue}>{settings.bodyWeight} {settings.unitSystem === 'imperial' ? 'lbs' : 'kg'}</Text>
+                        <Text style={styles.summaryValue}>
+                            {settings.bodyWeight} {settings.unitSystem === 'imperial' ? 'lbs' : 'kg'}
+                        </Text>
                     </View>
 
                     {/* Activity Level */}
@@ -95,12 +103,16 @@ export default function Onboarding8Screen() {
                         <>
                             <View style={styles.summaryRow}>
                                 <Text style={styles.summaryLabel}>Target Weight</Text>
-                                <Text style={styles.summaryValue}>{settings.goalWeight} {settings.unitSystem === 'imperial' ? 'lbs' : 'kg'}</Text>
+                                <Text style={styles.summaryValue}>
+                                    {settings.goalWeight} {settings.unitSystem === 'imperial' ? 'lbs' : 'kg'}
+                                </Text>
                             </View>
 
                             <View style={styles.summaryRow}>
                                 <Text style={styles.summaryLabel}>Goal Pace</Text>
-                                <Text style={styles.summaryValue}>{settings.goalPace.toFixed(1)} {settings.unitSystem === 'imperial' ? 'lbs' : 'kg'}/week</Text>
+                                <Text style={styles.summaryValue}>
+                                    {settings.goalPace.toFixed(1)} {settings.unitSystem === 'imperial' ? 'lbs' : 'kg'}/week
+                                </Text>
                             </View>
                         </>
                     )}
@@ -128,50 +140,53 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#121212',
         padding: 25,
-        paddingTop: 50,
-        paddingBottom: 50,
+        paddingTop: 90,
+    },
+    topGradient: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 220,
     },
     content: {
         alignItems: 'center',
-        paddingTop: 40,
     },
     iconCircle: {
         width: 144,
         height: 144,
         borderRadius: 72,
-        backgroundColor: '#242424',
+        backgroundColor: '#282A2C',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
-        borderColor: '#2f80ed',
         marginBottom: 12,
     },
     titleText: {
-        fontSize: 32,
+        fontSize: 28,
         color: '#fff',
         letterSpacing: -0.5,
-        lineHeight: 38,
         marginBottom: 4,
         textAlign: 'center',
         fontFamily: 'Poppins_600SemiBold',
     },
     subtitleText: {
-        fontSize: 15,
+        fontSize: 16,
         color: '#aaa',
         textAlign: 'center',
-        lineHeight: 22,
         letterSpacing: 0.2,
-        marginBottom: 16,
-        paddingHorizontal: 16,
+        marginBottom: 12,
+        paddingHorizontal: 8,
         fontFamily: 'Poppins_400Regular',
+        lineHeight: 22,
     },
     summaryContainer: {
         width: '100%',
         backgroundColor: '#242424',
-        borderRadius: 16,
+        borderRadius: 14,
         padding: 16,
         gap: 12,
-        borderWidth: 1,
+        borderWidth: 2,
         borderColor: '#242424',
         marginBottom: 8,
     },
@@ -193,11 +208,11 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_600SemiBold',
     },
     noteText: {
-        fontSize: 13,
-        color: '#666',
+        fontSize: 12,
+        color: '#aaa',
         textAlign: 'center',
         letterSpacing: 0.2,
-        marginBottom: 20,
+        marginBottom: 24,
         fontFamily: 'Poppins_500Medium',
     },
     buttonContainer: {
@@ -209,36 +224,36 @@ const styles = StyleSheet.create({
     },
     backButton: {
         flex: 1,
-        height: 56,
-        backgroundColor: '#282A2C',
+        height: 60,
+        backgroundColor: '#242424',
         borderRadius: 16,
         justifyContent: 'center',
         alignItems: 'center',
-        borderWidth: 1,
+        borderWidth: 2,
         borderColor: '#242424',
     },
     backButtonText: {
-        fontSize: 17,
-        fontWeight: '600',
-        color: '#aaa',
-        letterSpacing: -0.3,
+        fontSize: 16,
+        color: '#888',
+        letterSpacing: -0.5,
+        fontFamily: 'Poppins_600SemiBold',
     },
     nextButton: {
         flex: 1,
-        height: 56,
-        backgroundColor: '#2f80ed',
+        height: 60,
+        backgroundColor: '#FFF1CC',
         borderRadius: 16,
         justifyContent: 'center',
         alignItems: 'center',
-        shadowColor: '#2f80ed',
+        shadowColor: ACCENT,
         shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.4,
+        shadowOpacity: 0.2,
         shadowRadius: 12,
         elevation: 8,
     },
     nextButtonText: {
-        fontSize: 17,
-        color: '#fff',
+        fontSize: 16,
+        color: '#000',
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },
