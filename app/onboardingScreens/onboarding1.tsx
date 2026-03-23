@@ -9,8 +9,8 @@ const BLUE = '#2f80ed'
 const GREEN = '#22C922'
 
 const features = [
-    { icon: Dumbbell, text: 'Simple, customizable, and effective workout and nutrition tracking', accent: BLUE },
-    { icon: Sparkle, text: 'AI features and an extensive Food Database to make tracking easy', accent: GREEN },
+    { icon: Dumbbell, text: 'Simple, customizable, and effective workout and nutrition tracking in one place', accent: BLUE },
+    { icon: Sparkle, text: 'AI features and an extensive food database to make tracking easy', accent: GREEN },
     { icon: BarChart2, text: 'Insights on your progress through understandable visualizations', accent: BLUE },
     { icon: Scale, text: 'The platform to achieve and CRUSH your fitness goals', accent: GREEN },
 ]
@@ -24,14 +24,9 @@ export default function Onboarding1Screen() {
         <View style={styles.container}>
             <LinearGradient colors={['rgba(255, 255, 255, 0.2)', 'transparent']} style={styles.topGradient} pointerEvents="none" />
             <View style={styles.content}>
-                {/* Badge */}
-                <View style={styles.badge}>
-                    <Text style={styles.badgeText}>FREE TO USE</Text>
-                </View>
-
                 {/* Header */}
                 <Text style={styles.titleText}>LiftTrition</Text>
-                <Text style={styles.subtitleText}>What we have to offer: </Text>
+                <Text style={styles.subtitleText}>LiftTrition is a free to use fitness platform that offers the following:</Text>
 
                 {/* Features */}
                 <View style={styles.featuresContainer}>
@@ -60,8 +55,8 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#121212',
-        paddingHorizontal: 24,
-        paddingTop: 58,
+        paddingHorizontal: 25,
+        paddingTop: 70,
         paddingBottom: 44,
     },
     topGradient: {
@@ -75,22 +70,6 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         paddingTop: 16,
-    },
-    badge: {
-        alignSelf: 'center',
-        paddingHorizontal: 14,
-        paddingVertical: 6,
-        borderRadius: 20,
-        backgroundColor: 'rgba(255, 255, 255, 0.08)',
-        borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.15)',
-        marginBottom: 8,
-    },
-    badgeText: {
-        fontSize: 11,
-        color: '#999',
-        letterSpacing: 1.8,
-        fontFamily: 'Poppins_600SemiBold',
     },
     titleText: {
         fontSize: 52,
@@ -119,10 +98,10 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 14,
+        height: 85,
         backgroundColor: '#282A2C',
         borderRadius: 14,
         paddingHorizontal: 16,
-        paddingVertical: 14,
         borderWidth: 0,
         borderColor: '#222',
     },
@@ -159,7 +138,7 @@ const styles = StyleSheet.create({
     },
     ctaButton: {
         width: '100%',
-        height: 58,
+        height: 60,
         borderRadius: 16,
         backgroundColor: '#fff',
         justifyContent: 'center',

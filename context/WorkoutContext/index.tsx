@@ -1,6 +1,7 @@
 import { useAuth } from '@/context/AuthContext'
 import { convertExerciseLibraryToList, exerciseLib } from '@/context/WorkoutContext/exerciseLibrary'
 import { powerSync } from '@/lib/powersync/system'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useState } from 'react'
 import { loadWorkoutData, saveWorkoutData } from './database/powersyncStore'
 import { createUserExercise, deleteUserExercise } from './functions/createExerciseFunctions'
@@ -11,7 +12,6 @@ import { addLog, deleteLog } from './functions/logFunctions'
 import { getVolumeData } from './functions/volumeFunctions'
 import { addWorkout, archiveWorkout, deleteWorkout, renameWorkout, updateWorkoutNote, updateWorkoutOrder } from './functions/workoutFunctions'
 import { CreateExerciseData, Exercise, ExerciseLib, Log, Workout, WorkoutContextInterface } from './types'
-import AsyncStorage from '@react-native-async-storage/async-storage'
 
 const WorkoutContext = createContext<WorkoutContextInterface | undefined>(undefined)
 

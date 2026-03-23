@@ -1,6 +1,21 @@
 // lib/utils/dateHelper.ts
 
 /**
+ * Returns true if the given date is after today (in the future).
+ * Compares calendar dates only (ignores time).
+ *
+ * @param date - Date to check
+ * @returns true if the date is after today
+ */
+export function isDateAfterToday(date: Date): boolean {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const d = new Date(date)
+    d.setHours(0, 0, 0, 0)
+    return d.getTime() > today.getTime()
+}
+
+/**
  * Get a date key in YYYY-MM-DD format using local timezone
  * Uses en-CA locale which returns dates in ISO 8601 format
  * 
@@ -24,6 +39,22 @@ export function formatDateTime(date: Date): string {
         hour: 'numeric',
         minute: '2-digit',
     })
+}
+
+/**
+ * Returns "Today" if the date is today, otherwise formats the date (e.g., "Feb 3, 2024").
+ *
+ * @param date - Date object to format
+ * @param showYear - Whether to include year for non-today dates
+ * @returns Formatted date string or "Today"
+ */
+export function formatDateOrToday(date: Date, showYear: boolean = true): string {
+    const d = new Date(date)
+    d.setHours(0, 0, 0, 0)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    if (d.getTime() === today.getTime()) return 'Today'
+    return formatDate(date, showYear)
 }
 
 /**

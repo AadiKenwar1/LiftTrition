@@ -8,7 +8,6 @@ export default function AdjustTrainingScreen() {
     const { settings, setSettings, calculateMacros, mode } = useSettings()
     const [selectedFrequency, setSelectedFrequency] = useState<'sedentary' | 'light' | 'moderate' | 'active' | 'gymrat'>(settings.activityLevel)
     const accent = '#2f80ed'
-    const accentRgba = 'rgba(45, 156, 255, 0.15)'
 
     const frequencies = [
         { id: 'sedentary', label: 'Sedentary', subtitle: 'Little to no exercise' },
@@ -36,10 +35,10 @@ export default function AdjustTrainingScreen() {
         <View style={styles.container}>
             <View style={styles.topSection}>
                 <View style={[styles.iconCircle, { borderColor: accent }]}>
-                    <Dumbbell size={54} color={'#2f80ed'} strokeWidth={2} />
+                    <Dumbbell size={72} color={'#2f80ed'} strokeWidth={2} />
                 </View>
                 <Text style={styles.titleText}>Update Your Activity Level</Text>
-                <Text style={styles.subtitleText}>Nutrition and Fatigue calculations will be updated</Text>
+                <Text style={styles.subtitleText}>Updates Nutrition Goals and Fatigue</Text>
             </View>
 
             <View style={styles.optionsContainer}>
@@ -50,12 +49,8 @@ export default function AdjustTrainingScreen() {
                         onPress={() => setSelectedFrequency(freq.id as 'sedentary' | 'light' | 'moderate' | 'active' | 'gymrat')}
                         activeOpacity={0.7}
                     >
-                        <Text style={[styles.optionLabel, selectedFrequency === freq.id && styles.optionLabelSelected]} numberOfLines={1}>
-                            {freq.label}
-                        </Text>
-                        <Text style={[styles.optionSubtitle, selectedFrequency === freq.id && styles.optionSubtitleSelected]} numberOfLines={1}>
-                            {freq.subtitle}
-                        </Text>
+                        <Text style={[styles.optionLabel, selectedFrequency === freq.id && styles.optionLabelSelected]}>{freq.label}</Text>
+                        <Text style={[styles.optionSubtitle, selectedFrequency === freq.id && styles.optionSubtitleSelected]}>{freq.subtitle}</Text>
                     </TouchableOpacity>
                 ))}
             </View>
@@ -81,9 +76,9 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     iconCircle: {
-        width: 96,
-        height: 96,
-        borderRadius: 48,
+        width: 144,
+        height: 144,
+        borderRadius: 72,
         backgroundColor: '#282A2C',
         justifyContent: 'center',
         alignItems: 'center',
@@ -107,41 +102,42 @@ const styles = StyleSheet.create({
     },
     optionsContainer: {
         width: '100%',
-        gap: 6,
+        gap: 8,
         justifyContent: 'center',
         marginBottom: 12,
     },
     optionButton: {
         width: '100%',
+        height: 65,
         backgroundColor: '#282A2C',
         borderRadius: 12,
-        paddingVertical: 12,
-        paddingHorizontal: 14,
+        paddingHorizontal: 16,
+        flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center',
         borderWidth: 2,
-        borderColor: '#2a2a2a',
-        gap: 2,
+        borderColor: '#282A2C',
+        gap: 12,
     },
     optionLabel: {
         fontSize: 15,
         color: '#FFF',
         letterSpacing: -0.5,
-        textAlign: 'center',
         fontFamily: 'Poppins_600SemiBold',
+        width: 80,
     },
     optionLabelSelected: {
         color: '#fff',
     },
     optionSubtitle: {
-        fontSize: 13,
+        flex: 1,
+        fontSize: 14,
         color: '#aaa',
-        letterSpacing: 0.2,
-        textAlign: 'center',
-        fontFamily: 'Poppins_500Medium',
+        letterSpacing: 0.1,
+        lineHeight: 18,
+        fontFamily: 'Poppins_400Regular',
     },
     optionSubtitleSelected: {
-        color: '#fff',
+        color: '#ccc',
     },
     noteContainer: {
         width: '100%',
@@ -163,18 +159,18 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_500Medium',
     },
     saveButton: {
+        backgroundColor: '#D4E4FF',
         width: '100%',
         height: 60,
         borderRadius: 12,
         justifyContent: 'center',
         alignItems: 'center',
-        marginTop: 8,
+        marginTop: 4,
+        shadowColor: '#2f80ed',
         shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.4,
+        shadowOpacity: 0.2,
         shadowRadius: 12,
         elevation: 8,
-        backgroundColor: 'white',
-        shadowColor: '#2f80ed',
     },
     saveButtonText: {
         fontSize: 16,

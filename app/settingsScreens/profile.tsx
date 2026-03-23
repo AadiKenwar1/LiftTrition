@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
     profileIcon: { width: 100, height: 100, borderRadius: 50, backgroundColor: '#282A2C', justifyContent: 'center', alignItems: 'center', borderWidth: 2 },
     section: { marginBottom: 24 },
     sectionTitle: { fontSize: 18, color: '#fff', marginBottom: 12, paddingLeft: 4, letterSpacing: -0.5, fontFamily: 'Poppins_600SemiBold' },
-    card: { backgroundColor: '#1e1e1e', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#2a2a2a' },
+    card: { backgroundColor: '#282A2C', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#2a2a2a' },
     infoRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12 },
     infoLabel: { fontSize: 15, color: '#aaa', letterSpacing: -0.5, fontFamily: 'Poppins_600SemiBold' },
     infoValue: { fontSize: 15, color: '#fff', letterSpacing: -0.5, fontFamily: 'Poppins_600SemiBold' },

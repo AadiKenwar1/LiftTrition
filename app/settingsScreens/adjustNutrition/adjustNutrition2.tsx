@@ -45,7 +45,7 @@ export default function AdjustNutrition3Screen() {
             <Text style={styles.titleText}>Goal Pace?</Text>
 
             {/* Subtitle */}
-            <Text style={styles.subtitleText}>How fast do you want to reach your goal weight? {'\n'}(Pounds per week)</Text>
+            <Text style={styles.subtitleText}>How fast do you want to reach your bodyweight goal? {'\n'}(Pounds per week)</Text>
 
             {/* Slider Container */}
             <View style={styles.sliderContainer}>
@@ -154,17 +154,17 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_500Medium',
     },
     nextButton: {
+        backgroundColor: '#D4F5D4',
         width: '100%',
         height: 60,
         borderRadius: 16,
         justifyContent: 'center',
         alignItems: 'center',
+        shadowColor: '#22C922',
         shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.4,
+        shadowOpacity: 0.2,
         shadowRadius: 12,
         elevation: 8,
-        backgroundColor: 'white',
-        shadowColor: '#22C922',
     },
     nextButtonText: {
         fontSize: 16,

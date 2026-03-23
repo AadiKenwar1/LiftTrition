@@ -41,7 +41,7 @@ export default function AdjustNutrition2Screen() {
                 </View>
 
                 {/* Title */}
-                <Text style={styles.titleText}>What's Your Goal?</Text>
+                <Text style={styles.titleText}>What's Your {'\n'}Bodyweight Goal?</Text>
 
                 {/* Subtitle */}
                 <Text style={styles.subtitleText}>Needed for nutrition calculation adjustments</Text>
@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#121212',
-        paddingTop: 54,
+        paddingTop: 36,
     },
     scrollContent: {
         paddingHorizontal: 25,
@@ -138,14 +138,14 @@ const styles = StyleSheet.create({
         height: 60,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#242424',
+        backgroundColor: '#282A2C',
         borderRadius: 14,
         borderWidth: 2,
-        borderColor: '#242424',
+        borderColor: '#282A2C',
     },
     goalText: {
         fontSize: 16,
-        color: '#888',
+        color: '#aaa',
         letterSpacing: -0.5,
         fontFamily: 'Poppins_500Medium',
     },
@@ -165,10 +165,10 @@ const styles = StyleSheet.create({
     inputWrapper: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#242424',
+        backgroundColor: '#282A2C',
         borderRadius: 14,
         borderWidth: 1,
-        borderColor: '#242424',
+        borderColor: '#282A2C',
         paddingHorizontal: 16,
         height: 60,
         marginBottom: 8,
@@ -182,20 +182,20 @@ const styles = StyleSheet.create({
     },
     unitText: {
         fontSize: 16,
-        color: '#666',
+        color: '#aaa',
         marginLeft: 12,
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },
     maintainMessageContainer: {
         width: '100%',
-        paddingVertical: 16,
+        paddingVertical: 20,
         paddingHorizontal: 20,
         borderRadius: 14,
         borderWidth: 1,
         marginBottom: 24,
-        backgroundColor: 'rgb(63, 63, 63)',
-        borderColor: 'rgba(78, 78, 78, 0.9)',
+        backgroundColor: '#282A2C',
+        borderColor: '#282A2C',
     },
     maintainMessageText: {
         fontSize: 14,
@@ -209,11 +209,11 @@ const styles = StyleSheet.create({
         height: 60,
         borderRadius: 16,
         justifyContent: 'center',
-        backgroundColor: 'white',
+        backgroundColor: '#D4F5D4',
         shadowColor: '#22C922',
         alignItems: 'center',
         shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.4,
+        shadowOpacity: 0.2,
         shadowRadius: 12,
         elevation: 8,
     },

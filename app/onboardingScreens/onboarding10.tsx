@@ -2,6 +2,7 @@ import TermsAndPrivacyModal from '@/components/NeutralComponents/TermsAndPrivacy
 import { useBilling } from '@/context/BillingContext'
 import { useSettings } from '@/context/SettingsContext'
 import Ionicons from '@expo/vector-icons/Ionicons'
+import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
 import { BarChart3, Database, Sparkles, Zap } from 'lucide-react-native'
 import { useState } from 'react'
@@ -62,20 +63,25 @@ export default function Onboarding10Screen() {
     }
 
     if (loading) {
+        const gradientColors = accent === '#2f80ed' ? ['rgba(47, 128, 237, 0.14)', 'transparent'] : ['rgba(34, 201, 34, 0.14)', 'transparent']
         return (
             <View style={[styles.container, styles.centerContent]}>
-                <ActivityIndicator size="large" color="#2f80ed" />
+                <LinearGradient colors={gradientColors} style={styles.topGradient} pointerEvents="none" />
+                <ActivityIndicator size="large" color={accent} />
                 <Text style={styles.loadingText}>Loading subscription options...</Text>
             </View>
         )
     }
 
+    const gradientColors = accent === '#2f80ed' ? ['rgba(47, 128, 237, 0.14)', 'transparent'] : ['rgba(34, 201, 34, 0.14)', 'transparent']
+
     return (
         <View style={styles.container}>
+            <LinearGradient colors={gradientColors} style={styles.topGradient} pointerEvents="none" />
             <View style={styles.content}>
                 {/* Icon */}
-                <View style={styles.iconCircle}>
-                    <Ionicons name="sparkles-outline" size={48} color="#2f80ed" />
+                <View style={[styles.iconCircle, { borderColor: accent }]}>
+                    <Ionicons name="sparkles" size={72} color="#2f80ed" />
                 </View>
 
                 {/* Title */}
@@ -86,21 +92,21 @@ export default function Onboarding10Screen() {
                 <View style={styles.featuresSection}>
                     <View style={styles.featuresRow}>
                         <View style={styles.featureItem}>
-                            <Database size={16} color="#2f80ed" strokeWidth={2} />
+                            <Database size={16} color={accent} strokeWidth={2} />
                             <Text style={styles.featureText}>Food Database</Text>
                         </View>
                         <View style={styles.featureItem}>
-                            <Sparkles size={16} color="#2f80ed" strokeWidth={2} />
+                            <Sparkles size={16} color={accent} strokeWidth={2} />
                             <Text style={styles.featureText}>AI Features</Text>
                         </View>
                     </View>
                     <View style={styles.featuresRow}>
                         <View style={styles.featureItem}>
-                            <BarChart3 size={16} color="#2f80ed" strokeWidth={2} />
+                            <BarChart3 size={16} color={accent} strokeWidth={2} />
                             <Text style={styles.featureText}>Extra Charts</Text>
                         </View>
                         <View style={styles.featureItem}>
-                            <Zap size={16} color="#2f80ed" strokeWidth={2} />
+                            <Zap size={16} color={accent} strokeWidth={2} />
                             <Text style={styles.featureText}>And More</Text>
                         </View>
                     </View>
@@ -108,18 +114,18 @@ export default function Onboarding10Screen() {
 
                 {/* Pricing - Monthly & Annual */}
                 <View style={styles.pricingRow}>
-                    <TouchableOpacity style={[styles.pricingCard, selectedPlan === 'monthly' && styles.pricingCardSelected]} onPress={() => setSelectedPlan('monthly')} activeOpacity={0.8} disabled={!monthlyPackage}>
-                        <Text style={styles.planLabel}>Monthly</Text>
+                    <TouchableOpacity style={[styles.pricingCard, selectedPlan === 'monthly' && { ...styles.pricingCardSelected, borderColor: accent }]} onPress={() => setSelectedPlan('monthly')} activeOpacity={0.8} disabled={!monthlyPackage}>
+                        <Text style={[styles.planLabel]}>Monthly</Text>
                         <View style={styles.priceRow}>
-                            <Text style={styles.priceAmount}>{priceInfo?.price || '$4.99'}</Text>
+                            <Text style={[styles.priceAmount, { color: accent }]}>{priceInfo?.price || '$4.99'}</Text>
                             <Text style={styles.priceInterval}>/month</Text>
                         </View>
                         <Text style={styles.pricingNote}>3 day free trial</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={[styles.pricingCard, selectedPlan === 'annual' && styles.pricingCardSelected]} onPress={() => setSelectedPlan('annual')} activeOpacity={0.8} disabled={!annualPackage}>
+                    <TouchableOpacity style={[styles.pricingCard, selectedPlan === 'annual' && { ...styles.pricingCardSelected, borderColor: accent }]} onPress={() => setSelectedPlan('annual')} activeOpacity={0.8} disabled={!annualPackage}>
                         <Text style={styles.planLabel}>Annual</Text>
                         <View style={styles.priceRow}>
-                            <Text style={styles.priceAmount}>{annualPriceInfo?.price || '$39.99'}</Text>
+                            <Text style={[styles.priceAmount, { color: accent }]}>{annualPriceInfo?.price || '$39.99'}</Text>
                             <Text style={styles.priceInterval}>/year</Text>
                         </View>
                         <Text style={styles.pricingNote}>3 day free trial</Text>
@@ -133,35 +139,46 @@ export default function Onboarding10Screen() {
                     </View>
                 )}
 
-                {/* Subscribe Button */}
-                <TouchableOpacity style={[styles.subscribeButton, (hasPremium || purchasing) && styles.subscribeButtonDisabled]} onPress={handleSubscribe} activeOpacity={0.8} disabled={!selectedPackage || hasPremium || purchasing}>
-                    {purchasing ?
-                        <ActivityIndicator size="small" color="#fff" />
-                    :   <Text style={styles.subscribeButtonText}>{hasPremium ? 'Subscription Active' : 'Subscribe Now'}</Text>}
-                </TouchableOpacity>
+                {/* Button Stack */}
+                <View style={styles.buttonStack}>
+                    <TouchableOpacity
+                        style={[
+                            styles.subscribeButton,
+                            {
+                                shadowColor: accent,
+                                backgroundColor: accent === '#2f80ed' ? '#D4E4FF' : '#D4F5D4',
+                            },
+                            (hasPremium || purchasing) && styles.subscribeButtonDisabled,
+                        ]}
+                        onPress={handleSubscribe}
+                        activeOpacity={0.8}
+                        disabled={!selectedPackage || hasPremium || purchasing}
+                    >
+                        {purchasing ?
+                            <ActivityIndicator size="small" color="#000" />
+                        :   <Text style={styles.subscribeButtonText}>{hasPremium ? 'Subscription Active' : 'Subscribe Now'}</Text>}
+                    </TouchableOpacity>
 
-                {/* Back Button */}
-                <TouchableOpacity style={styles.backButton} onPress={() => router.back()} activeOpacity={0.8}>
-                    <Text style={styles.backButtonText}>Back</Text>
-                </TouchableOpacity>
+                    <TouchableOpacity style={styles.backButton} onPress={() => router.back()} activeOpacity={0.8}>
+                        <Text style={styles.backButtonText}>Back</Text>
+                    </TouchableOpacity>
 
-                {/* Continue to app - basic text */}
-                <TouchableOpacity onPress={completeOnboarding} activeOpacity={0.7} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }} style={styles.continueTouchable}>
-                    <Text style={styles.continueText}>Continue to app</Text>
-                </TouchableOpacity>
+                    <TouchableOpacity onPress={completeOnboarding} activeOpacity={0.7} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
+                        <Text style={[styles.continueText, { color: accent }]}>Continue to app</Text>
+                    </TouchableOpacity>
 
-                {/* Restore Button */}
-                <TouchableOpacity style={styles.restoreButton} onPress={handleRestore} activeOpacity={0.7}>
-                    <Text style={styles.restoreButtonText}>Restore Purchases</Text>
-                </TouchableOpacity>
+                    <TouchableOpacity style={styles.restoreButton} onPress={handleRestore} activeOpacity={0.7}>
+                        <Text style={[styles.restoreButtonText, { color: accent }]}>Restore Purchases</Text>
+                    </TouchableOpacity>
+                </View>
 
                 <Text style={styles.legalText}>
                     By subscribing, you agree to our{' '}
-                    <Text style={styles.termsLink} onPress={() => setTermsModalVisible(true)}>
+                    <Text style={[styles.termsLink, { color: accent }]} onPress={() => setTermsModalVisible(true)}>
                         Terms of Service
                     </Text>{' '}
                     and{' '}
-                    <Text style={styles.termsLink} onPress={() => setTermsModalVisible(true)}>
+                    <Text style={[styles.termsLink, { color: accent }]} onPress={() => setTermsModalVisible(true)}>
                         Privacy Policy
                     </Text>
                     .
@@ -176,9 +193,16 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#121212',
-        paddingHorizontal: 25,
-        paddingTop: 75,
-        paddingBottom: 30,
+        padding: 25,
+        paddingTop: 48,
+        paddingBottom: 24,
+    },
+    topGradient: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 220,
     },
     centerContent: {
         justifyContent: 'center',
@@ -193,55 +217,55 @@ const styles = StyleSheet.create({
     content: {
         flex: 1,
         alignItems: 'center',
+        paddingTop: 24,
     },
     iconCircle: {
-        width: 96,
-        height: 96,
-        borderRadius: 48,
-        backgroundColor: '#242424',
+        width: 144,
+        height: 144,
+        borderRadius: 72,
+        backgroundColor: '#282A2C',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
-        borderColor: '#2f80ed',
         marginBottom: 8,
     },
     titleText: {
-        fontSize: 32,
+        fontSize: 24,
         color: '#fff',
         letterSpacing: -0.5,
-        marginBottom: 4,
+        marginBottom: 2,
         textAlign: 'center',
         fontFamily: 'Poppins_600SemiBold',
     },
     subtitleText: {
-        fontSize: 16,
+        fontSize: 14,
         color: '#aaa',
         textAlign: 'center',
-        lineHeight: 18,
+        lineHeight: 20,
         letterSpacing: 0.2,
-        marginBottom: 12,
+        marginBottom: 8,
         paddingHorizontal: 8,
         fontFamily: 'Poppins_400Regular',
     },
     featuresSection: {
         width: '100%',
-        marginBottom: 10,
+        marginBottom: 6,
     },
     featuresRow: {
         flexDirection: 'row',
-        gap: 8,
-        marginBottom: 8,
+        gap: 6,
+        marginBottom: 6,
     },
     featureItem: {
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#1e1e1e',
+        backgroundColor: '#282A2C',
         borderRadius: 10,
-        padding: 15,
+        padding: 14,
         gap: 6,
         borderWidth: 1,
-        borderColor: '#2a2a2a',
+        borderColor: '#333',
     },
     featureText: {
         fontSize: 14,
@@ -253,19 +277,18 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         gap: 12,
         width: '100%',
-        marginBottom: 16,
+        marginBottom: 10,
     },
     pricingCard: {
         flex: 1,
-        backgroundColor: 'rgba(45, 156, 255, 0.1)',
+        backgroundColor: '#282A2C',
         borderRadius: 12,
-        padding: 16,
+        padding: 12,
         alignItems: 'center',
         borderWidth: 2,
-        borderColor: 'rgba(45, 156, 255, 0.3)',
+        borderColor: '#333',
     },
     pricingCardSelected: {
-        borderColor: '#2f80ed',
         borderWidth: 3,
     },
     planLabel: {
@@ -285,8 +308,7 @@ const styles = StyleSheet.create({
         marginBottom: 2,
     },
     priceAmount: {
-        fontSize: 24,
-        color: '#2f80ed',
+        fontSize: 20,
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },
@@ -309,7 +331,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(255, 59, 48, 0.1)',
         borderRadius: 10,
         padding: 8,
-        marginBottom: 10,
+        marginBottom: 6,
         borderWidth: 1,
         borderColor: 'rgba(255, 59, 48, 0.3)',
     },
@@ -319,37 +341,28 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         fontFamily: 'Poppins_400Regular',
     },
+    buttonStack: {
+        width: '100%',
+        gap: 8,
+    },
     subscribeButton: {
         width: '100%',
-        height: 48,
-        backgroundColor: '#2f80ed',
-        borderRadius: 12,
+        height: 52,
+        borderRadius: 16,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 16,
-        shadowColor: '#2f80ed',
         shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.4,
+        shadowOpacity: 0.3,
         shadowRadius: 12,
         elevation: 8,
     },
-    subscribeButtonDisabled: {
-        opacity: 0.8,
-    },
-    subscribeButtonText: {
-        fontSize: 17,
-        color: '#fff',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
     backButton: {
         width: '100%',
-        height: 48,
+        height: 52,
         backgroundColor: '#282A2C',
-        borderRadius: 12,
+        borderRadius: 16,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 16,
         borderWidth: 1,
         borderColor: '#242424',
     },
@@ -359,14 +372,19 @@ const styles = StyleSheet.create({
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },
+    subscribeButtonDisabled: {
+        opacity: 0.7,
+    },
+    subscribeButtonText: {
+        fontSize: 17,
+        color: '#000',
+        letterSpacing: -0.5,
+        fontFamily: 'Poppins_600SemiBold',
+    },
     restoreButton: {
-        width: '100%',
-        height: 36,
         backgroundColor: 'transparent',
-        borderRadius: 12,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 0,
+        alignSelf: 'center',
+        paddingVertical: 4,
     },
     restoreButtonText: {
         fontSize: 14,
@@ -381,7 +399,8 @@ const styles = StyleSheet.create({
         lineHeight: 14,
         letterSpacing: 0.2,
         paddingHorizontal: 8,
-        marginBottom: 8,
+        marginTop: 4,
+        marginBottom: 4,
         fontFamily: 'Poppins_400Regular',
     },
     termsLink: {
@@ -389,13 +408,11 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_600SemiBold',
         textDecorationLine: 'underline',
     },
-    continueTouchable: {
-        marginBottom: 4,
-    },
     continueText: {
         fontSize: 16,
         color: '#2f80ed',
         letterSpacing: 0.2,
         fontFamily: 'Poppins_500Medium',
+        textAlign: 'center',
     },
 })

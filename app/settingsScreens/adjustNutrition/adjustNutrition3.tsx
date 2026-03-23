@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#121212',
         paddingHorizontal: 25,
-        paddingTop: 24,
+        paddingTop: 36,
         alignItems: 'center',
     },
     iconCircle: {
@@ -222,15 +222,15 @@ const styles = StyleSheet.create({
     saveButton: {
         flex: 1,
         height: 60,
+        backgroundColor: '#D4F5D4',
         borderRadius: 16,
         justifyContent: 'center',
         alignItems: 'center',
+        shadowColor: '#22C922',
         shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.4,
+        shadowOpacity: 0.2,
         shadowRadius: 12,
         elevation: 8,
-        backgroundColor: 'white',
-        shadowColor: '#22C922',
     },
     saveButtonText: {
         fontSize: 16,

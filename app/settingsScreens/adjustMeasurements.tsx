@@ -5,17 +5,11 @@ import { router } from 'expo-router'
 import { useState } from 'react'
 import { Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
 
-const ACCENT = { workout: '#2f80ed', nutrition: '#22C922' }
-const ACCENT_RGBA = { workout: 'rgba(45, 156, 255, 0.15)', nutrition: 'rgba(34, 201, 34, 0.15)' }
-
 export default function AdjustNutrition1Screen() {
     const { settings, setSettings, handleUpdateBw, calculateMacros, mode } = useSettings()
     const [unitSystem, setUnitSystem] = useState<'imperial' | 'metric'>(settings.unitSystem)
     const [height, setHeight] = useState(settings.height.toString())
     const [weight, setWeight] = useState(settings.bodyWeight.toString())
-    //const accent = mode ? ACCENT.workout : ACCENT.nutrition
-    const accent = 'white'
-    const accentRgba = mode ? ACCENT_RGBA.workout : ACCENT_RGBA.nutrition
 
     function handleSave() {
         if (!validateHeightWeight(Number(height), Number(weight), unitSystem)) return
@@ -51,7 +45,7 @@ export default function AdjustNutrition1Screen() {
                 <Text style={styles.titleText}>Update Your Measurements</Text>
 
                 {/* Subtitle */}
-                <Text style={styles.subtitleText}>Nutrition calculations will be updated</Text>
+                <Text style={styles.subtitleText}>Updates Nutrition Goals</Text>
 
                 {/* Unit System Toggle */}
                 <View style={styles.toggleContainer}>
@@ -85,7 +79,7 @@ export default function AdjustNutrition1Screen() {
                 </View>
 
                 {/* Next Button */}
-                <TouchableOpacity style={[styles.nextButton, { backgroundColor: accent, shadowColor: accent }]} onPress={handleSave} activeOpacity={0.8}>
+                <TouchableOpacity style={styles.nextButton} onPress={handleSave} activeOpacity={0.8}>
                     <Text style={styles.nextButtonText}>Save</Text>
                 </TouchableOpacity>
             </View>
@@ -191,14 +185,15 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_600SemiBold',
     },
     nextButton: {
+        backgroundColor: '#FFF1CC',
         width: '100%',
         height: 60,
         borderRadius: 16,
         justifyContent: 'center',
         alignItems: 'center',
-        shadowColor: '#22C922',
+        shadowColor: '#FBBF24',
         shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.3,
+        shadowOpacity: 0.2,
         shadowRadius: 12,
         elevation: 8,
     },

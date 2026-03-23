@@ -1,26 +1,21 @@
+import TermsAndPrivacyModal from '@/components/NeutralComponents/TermsAndPrivacyModal'
 import { useBilling } from '@/context/BillingContext'
-import { useSettings } from '@/context/SettingsContext'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { BarChart3, Database, Sparkles, Zap } from 'lucide-react-native'
 import { useState } from 'react'
-import { ActivityIndicator, Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Alert, Linking, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
-const ACCENT = { workout: '#2f80ed', nutrition: '#22C922' }
-const ACCENT_RGBA = { workout: 'rgba(45, 156, 255, 0.1)', nutrition: 'rgba(34, 201, 34, 0.1)' }
-const ACCENT_RGBA_30 = { workout: 'rgba(45, 156, 255, 0.3)', nutrition: 'rgba(34, 201, 34, 0.3)' }
+const ACCENT = '#2f80ed'
 
 type PlanType = 'monthly' | 'annual'
 
 export default function SubscriptionScreen() {
-    const { loading, hasPremium, monthlyPackage, annualPackage, priceInfo, annualPriceInfo, purchasePackage, restorePurchases, error } = useBilling()
-    const { mode } = useSettings()
+    const [termsModalVisible, setTermsModalVisible] = useState(false)
     const [selectedPlan, setSelectedPlan] = useState<PlanType>('annual')
-    const accent = mode ? ACCENT.workout : ACCENT.nutrition
-    const accentRgba = mode ? ACCENT_RGBA.workout : ACCENT_RGBA.nutrition
-    const accentRgba30 = mode ? ACCENT_RGBA_30.workout : ACCENT_RGBA_30.nutrition
+    const [purchasing, setPurchasing] = useState(false)
+    const { loading, hasPremium, monthlyPackage, annualPackage, priceInfo, annualPriceInfo, purchasePackage, restorePurchases, error } = useBilling()
 
     const selectedPackage = selectedPlan === 'monthly' ? monthlyPackage : annualPackage
-    const selectedPriceInfo = selectedPlan === 'monthly' ? priceInfo : annualPriceInfo
 
     const handleSubscribe = async () => {
         const pkg = selectedPlan === 'monthly' ? monthlyPackage : annualPackage
@@ -29,12 +24,18 @@ export default function SubscriptionScreen() {
             return
         }
 
+        setPurchasing(true)
         try {
             await purchasePackage(pkg)
             Alert.alert('Success', 'Your subscription is now active!')
         } catch (err: any) {
-            if (err.userCancelled) return
+            if (err.userCancelled) {
+                setPurchasing(false)
+                return
+            }
             Alert.alert('Error', err.message || 'Failed to complete purchase. Please try again.')
+        } finally {
+            setPurchasing(false)
         }
     }
 
@@ -47,11 +48,19 @@ export default function SubscriptionScreen() {
         }
     }
 
-    // Show loading state
+    const handleManageSubscription = () => {
+        const url = Platform.select({
+            ios: 'https://apps.apple.com/account/subscriptions',
+            android: 'https://play.google.com/store/account/subscriptions',
+            default: 'https://apps.apple.com/account/subscriptions',
+        })
+        Linking.openURL(url)
+    }
+
     if (loading) {
         return (
             <View style={[styles.container, styles.centerContent]}>
-                <ActivityIndicator size="large" color={accent} />
+                <ActivityIndicator size="large" color={ACCENT} />
                 <Text style={styles.loadingText}>Loading subscription options...</Text>
             </View>
         )
@@ -60,127 +69,98 @@ export default function SubscriptionScreen() {
     return (
         <View style={styles.container}>
             <View style={styles.content}>
-                {/* Hero Section */}
-                <View style={styles.heroSection}>
-                    <View style={[styles.heroIcon, { borderColor: accent }]}>
-                        <Ionicons name="sparkles-outline" size={48} color={accent} />
-                    </View>
-                    <Text style={styles.heroTitle}>Unlock Premium</Text>
-                    <Text style={styles.heroSubtitle}>Get unlimited access to AI-powered features, food database access, and advanced analytics</Text>
+                {/* Icon */}
+                <View style={[styles.iconCircle, { borderColor: ACCENT }]}>
+                    <Ionicons name="sparkles" size={72} color={ACCENT} />
                 </View>
+
+                {/* Title */}
+                <Text style={styles.titleText}>Unlock Premium?</Text>
+                <Text style={styles.subtitleText}>Get AI food analysis, food database access, and more</Text>
 
                 {/* Features Grid */}
                 <View style={styles.featuresSection}>
                     <View style={styles.featuresRow}>
                         <View style={styles.featureItem}>
-                            <Database size={20} color={accent} strokeWidth={2} />
+                            <Database size={16} color={ACCENT} strokeWidth={2} />
                             <Text style={styles.featureText}>Food Database</Text>
                         </View>
                         <View style={styles.featureItem}>
-                            <Sparkles size={20} color={accent} strokeWidth={2} />
+                            <Sparkles size={16} color={ACCENT} strokeWidth={2} />
                             <Text style={styles.featureText}>AI Features</Text>
                         </View>
                     </View>
                     <View style={styles.featuresRow}>
                         <View style={styles.featureItem}>
-                            <BarChart3 size={20} color={accent} strokeWidth={2} />
+                            <BarChart3 size={16} color={ACCENT} strokeWidth={2} />
                             <Text style={styles.featureText}>Extra Charts</Text>
                         </View>
                         <View style={styles.featureItem}>
-                            <Zap size={20} color={accent} strokeWidth={2} />
+                            <Zap size={16} color={ACCENT} strokeWidth={2} />
                             <Text style={styles.featureText}>And More</Text>
                         </View>
                     </View>
                 </View>
 
-                {/* Pricing Section - Monthly & Annual */}
-                <View style={styles.pricingSection}>
-                    <View style={styles.pricingRow}>
-                        <TouchableOpacity
-                            style={[
-                                styles.pricingCard,
-                                {
-                                    backgroundColor: accentRgba,
-                                    borderColor: selectedPlan === 'monthly' ? accent : accentRgba30,
-                                    borderWidth: selectedPlan === 'monthly' ? 3 : 2,
-                                },
-                            ]}
-                            onPress={() => setSelectedPlan('monthly')}
-                            activeOpacity={0.8}
-                            disabled={!monthlyPackage}
-                        >
-                            <Text style={styles.planLabel}>Monthly</Text>
-                            <View style={styles.priceRow}>
-                                <Text style={[styles.priceAmount, { color: accent }]}>{priceInfo?.price || '$4.99'}</Text>
-                                <Text style={styles.priceInterval}>/ month</Text>
-                            </View>
-                            <Text style={styles.pricingNote}>3 day free trial</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[
-                                styles.pricingCard,
-                                {
-                                    backgroundColor: accentRgba,
-                                    borderColor: selectedPlan === 'annual' ? accent : accentRgba30,
-                                    borderWidth: selectedPlan === 'annual' ? 3 : 2,
-                                },
-                            ]}
-                            onPress={() => setSelectedPlan('annual')}
-                            activeOpacity={0.8}
-                            disabled={!annualPackage}
-                        >
-                            <Text style={styles.planLabel}>Annual</Text>
-                            <View style={styles.priceRow}>
-                                <Text style={[styles.priceAmount, { color: accent }]}>{annualPriceInfo?.price || '$39.99'}</Text>
-                                <Text style={styles.priceInterval}>/ year</Text>
-                            </View>
-                            <Text style={styles.pricingNote}>3 day free trial</Text>
-                            <Text style={[styles.saveBadge, { color: accent }]}>Best value!</Text>
-                        </TouchableOpacity>
-                    </View>
+                {/* Pricing - Monthly & Annual */}
+                <View style={styles.pricingRow}>
+                    <TouchableOpacity style={[styles.pricingCard, selectedPlan === 'monthly' && { ...styles.pricingCardSelected, borderColor: ACCENT }]} onPress={() => setSelectedPlan('monthly')} activeOpacity={0.8} disabled={!monthlyPackage}>
+                        <Text style={styles.planLabel}>Monthly</Text>
+                        <View style={styles.priceRow}>
+                            <Text style={[styles.priceAmount, { color: ACCENT }]}>{priceInfo?.price || '$4.99'}</Text>
+                            <Text style={styles.priceInterval}>/month</Text>
+                        </View>
+                        <Text style={styles.pricingNote}>3 day free trial</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[styles.pricingCard, selectedPlan === 'annual' && { ...styles.pricingCardSelected, borderColor: ACCENT }]} onPress={() => setSelectedPlan('annual')} activeOpacity={0.8} disabled={!annualPackage}>
+                        <Text style={styles.planLabel}>Annual</Text>
+                        <View style={styles.priceRow}>
+                            <Text style={[styles.priceAmount, { color: ACCENT }]}>{annualPriceInfo?.price || '$39.99'}</Text>
+                            <Text style={styles.priceInterval}>/year</Text>
+                        </View>
+                        <Text style={styles.pricingNote}>3 day free trial</Text>
+                        <Text style={[styles.saveBadge, { color: ACCENT }]}>Best value</Text>
+                    </TouchableOpacity>
                 </View>
 
-                {/* Error Message */}
                 {error && (
                     <View style={styles.errorContainer}>
                         <Text style={styles.errorText}>{error.message}</Text>
                     </View>
                 )}
 
-                {/* Subscribe Button */}
-                <TouchableOpacity
-                    style={[
-                        styles.subscribeButton,
-                        {
-                            backgroundColor: accent,
-                            shadowColor: accent,
-                            opacity: hasPremium ? 0.6 : 1,
-                        },
-                    ]}
-                    onPress={handleSubscribe}
-                    activeOpacity={0.8}
-                    disabled={!selectedPackage || hasPremium}
-                >
-                    <Text style={styles.subscribeButtonText}>
-                        {hasPremium ?
-                            'Subscription Active'
-                        : selectedPackage ?
-                            `Subscribe ${selectedPlan === 'monthly' ? 'Monthly' : 'Annually'}`
-                        :   'Loading...'}
-                    </Text>
-                </TouchableOpacity>
+                {/* Button Stack */}
+                <View style={styles.buttonStack}>
+                    <TouchableOpacity style={[styles.subscribeButton, (hasPremium || purchasing) && styles.subscribeButtonDisabled]} onPress={handleSubscribe} activeOpacity={0.8} disabled={!selectedPackage || hasPremium || purchasing}>
+                        {purchasing ?
+                            <ActivityIndicator size="small" color="#000" />
+                        :   <Text style={styles.subscribeButtonText}>{hasPremium ? 'Subscription Active' : 'Subscribe Now'}</Text>}
+                    </TouchableOpacity>
 
-                {/* Restore Button */}
-                <TouchableOpacity style={styles.restoreButton} onPress={handleRestore} activeOpacity={0.7}>
-                    <Text style={[styles.restoreButtonText, { color: accent }]}>Restore Purchases</Text>
-                </TouchableOpacity>
-
-                {/* Terms & Privacy */}
-                <View style={styles.legalSection}>
-                    <Text style={styles.legalText}>
-                        By subscribing, you agree to our <Text style={[styles.legalLink, { color: accent }]}>Terms</Text> and <Text style={[styles.legalLink, { color: accent }]}>Privacy Policy</Text>
-                    </Text>
+                    <View style={styles.linksRow}>
+                        <TouchableOpacity style={styles.restoreButton} onPress={handleRestore} activeOpacity={0.7}>
+                            <Text style={[styles.restoreButtonText, { color: ACCENT }]}>Restore Purchases</Text>
+                        </TouchableOpacity>
+                        {hasPremium && (
+                            <TouchableOpacity style={styles.restoreButton} onPress={handleManageSubscription} activeOpacity={0.7}>
+                                <Text style={[styles.restoreButtonText, { color: '#888' }]}>Manage subscription</Text>
+                            </TouchableOpacity>
+                        )}
+                    </View>
                 </View>
+
+                <Text style={styles.legalText}>
+                    By subscribing, you agree to our{' '}
+                    <Text style={[styles.termsLink, { color: ACCENT }]} onPress={() => setTermsModalVisible(true)}>
+                        Terms of Service
+                    </Text>{' '}
+                    and{' '}
+                    <Text style={[styles.termsLink, { color: ACCENT }]} onPress={() => setTermsModalVisible(true)}>
+                        Privacy Policy
+                    </Text>
+                    .
+                </Text>
+                <TermsAndPrivacyModal visible={termsModalVisible} onClose={() => setTermsModalVisible(false)} />
             </View>
         </View>
     )
@@ -190,11 +170,13 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#121212',
+        padding: 25,
+        paddingTop: 24,
+        paddingBottom: 24,
     },
     centerContent: {
         justifyContent: 'center',
         alignItems: 'center',
-        paddingHorizontal: 24,
     },
     loadingText: {
         color: '#888',
@@ -204,80 +186,82 @@ const styles = StyleSheet.create({
     },
     content: {
         flex: 1,
-        paddingHorizontal: 24,
-        paddingTop: 20,
-        paddingBottom: 40,
-        justifyContent: 'center',
-    },
-    heroSection: {
         alignItems: 'center',
-        marginBottom: 12,
     },
-    heroIcon: {
-        width: 96,
-        height: 96,
-        borderRadius: 48,
-        backgroundColor: '#242424',
+    iconCircle: {
+        width: 144,
+        height: 144,
+        borderRadius: 72,
+        backgroundColor: '#282A2C',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
-        marginBottom: 10,
+        marginBottom: 8,
     },
-    heroTitle: {
-        fontSize: 32,
+    titleText: {
+        fontSize: 28,
         color: '#fff',
         letterSpacing: -0.5,
-        marginBottom: 4,
+        marginBottom: 2,
+        textAlign: 'center',
         fontFamily: 'Poppins_600SemiBold',
     },
-    heroSubtitle: {
-        fontSize: 15,
+    subtitleText: {
+        fontSize: 16,
         color: '#aaa',
         textAlign: 'center',
-        lineHeight: 22,
+        lineHeight: 20,
         letterSpacing: 0.2,
+        marginBottom: 8,
+        paddingHorizontal: 8,
         fontFamily: 'Poppins_400Regular',
     },
     featuresSection: {
-        marginBottom: 12,
+        width: '100%',
+        marginBottom: 6,
     },
     featuresRow: {
         flexDirection: 'row',
-        gap: 10,
-        marginBottom: 10,
+        gap: 6,
+        marginBottom: 6,
     },
     featureItem: {
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#1e1e1e',
-        borderRadius: 12,
-        padding: 12,
-        gap: 8,
+        backgroundColor: '#282A2C',
+        borderRadius: 10,
+        padding: 14,
+        gap: 6,
         borderWidth: 1,
-        borderColor: '#2a2a2a',
+        borderColor: '#333',
     },
     featureText: {
-        fontSize: 13,
+        fontSize: 14,
         color: '#fff',
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },
-    pricingSection: {
-        marginBottom: 20,
-    },
     pricingRow: {
         flexDirection: 'row',
         gap: 12,
+        width: '100%',
+        marginBottom: 10,
     },
     pricingCard: {
         flex: 1,
-        borderRadius: 16,
-        padding: 16,
+        backgroundColor: '#282A2C',
+        borderRadius: 12,
+        padding: 14,
         alignItems: 'center',
+        borderWidth: 2,
+        borderColor: '#333',
+    },
+    pricingCardSelected: {
+        borderWidth: 3,
     },
     planLabel: {
-        fontSize: 14,
+        fontSize: 12,
         color: '#aaa',
         marginBottom: 4,
         fontFamily: 'Poppins_600SemiBold',
@@ -290,10 +274,10 @@ const styles = StyleSheet.create({
     priceRow: {
         flexDirection: 'row',
         alignItems: 'baseline',
-        marginBottom: 6,
+        marginBottom: 2,
     },
     priceAmount: {
-        fontSize: 24,
+        fontSize: 20,
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },
@@ -312,10 +296,11 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     errorContainer: {
+        width: '100%',
         backgroundColor: 'rgba(255, 59, 48, 0.1)',
-        borderRadius: 12,
-        padding: 12,
-        marginBottom: 16,
+        borderRadius: 10,
+        padding: 8,
+        marginBottom: 6,
         borderWidth: 1,
         borderColor: 'rgba(255, 59, 48, 0.3)',
     },
@@ -325,50 +310,60 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         fontFamily: 'Poppins_400Regular',
     },
+    buttonStack: {
+        width: '100%',
+        gap: 8,
+    },
+    linksRow: {
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 0,
+    },
     subscribeButton: {
         width: '100%',
         height: 52,
         borderRadius: 16,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 10,
+        backgroundColor: '#D4E4FF',
+        shadowColor: ACCENT,
         shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.4,
+        shadowOpacity: 0.3,
         shadowRadius: 12,
         elevation: 8,
     },
+    subscribeButtonDisabled: {
+        opacity: 0.7,
+    },
     subscribeButtonText: {
         fontSize: 17,
-        color: '#fff',
+        color: '#000',
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },
     restoreButton: {
-        width: '100%',
-        height: 40,
         backgroundColor: 'transparent',
-        borderRadius: 12,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 0,
+        alignSelf: 'center',
+        paddingVertical: 4,
     },
     restoreButtonText: {
-        fontSize: 14,
+        fontSize: 15,
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },
-    legalSection: {
-        paddingHorizontal: 8,
-    },
     legalText: {
-        fontSize: 11,
+        fontSize: 10,
         color: '#666',
         textAlign: 'center',
-        lineHeight: 16,
+        lineHeight: 14,
         letterSpacing: 0.2,
+        paddingHorizontal: 8,
+        marginTop: 4,
+        marginBottom: 4,
         fontFamily: 'Poppins_400Regular',
     },
-    legalLink: {
-        fontFamily: 'Poppins_500Medium',
+    termsLink: {
+        fontFamily: 'Poppins_600SemiBold',
+        textDecorationLine: 'underline',
     },
 })
