@@ -367,7 +367,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         fontWeight: '500',
         flexShrink: 1,
-        color: '#888',
+        color: '#aaa',
         letterSpacing: 0.2,
         fontFamily: 'Poppins_400Regular',
     },

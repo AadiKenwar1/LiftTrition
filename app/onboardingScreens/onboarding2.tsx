@@ -1,4 +1,4 @@
-import DatePicker from '@/components/NutritionComponents/DatePicker'
+import DatePicker from '@/components/NeutralComponents/DatePicker'
 import { useSettings } from '@/context/SettingsContext'
 import FontAwesome from '@expo/vector-icons/FontAwesome'
 import { LinearGradient } from 'expo-linear-gradient'

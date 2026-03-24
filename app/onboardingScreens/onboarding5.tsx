@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_400Regular',
     },
     optionSubtitleSelected: {
-        color: '#ccc',
+        color: '#aaa',
     },
     buttonContainer: {
         flexDirection: 'row',

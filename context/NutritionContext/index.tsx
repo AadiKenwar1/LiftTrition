@@ -31,7 +31,7 @@ export const NutritionProvider = ({ children }: PropsWithChildren) => {
     const handleUnsaveNutrition = async (id: string) => {
         await unsaveNutrition(id, setSavedNutritionEntries, userID);
     };
-    const handleAnalyzeAndAddPhoto = (photoUri: string, userID: string) => analyzeAndAddPhoto(photoUri, userID, setNutritionData);
+    const handleAnalyzeAndAddPhoto = (photoUri: string, userID: string) => analyzeAndAddPhoto(photoUri, userID, setNutritionData, selectedDate);
     const handleGetMacrosForDate = (date: Date) => getMacrosForDate(nutritionData, date);
     const handleGetMacroDataForGraph = (macroType: 'calories' | 'protein' | 'carbs' | 'fats', onboardingCompletedAt?: Date) => 
         getMacroDataForGraph(macroType, nutritionData, onboardingCompletedAt);

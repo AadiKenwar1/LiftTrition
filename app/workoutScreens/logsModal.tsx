@@ -1,30 +1,14 @@
-import DatePicker from '@/components/NutritionComponents/DatePicker'
+import DatePicker from '@/components/NeutralComponents/DatePicker'
 import { useAuth } from '@/context/AuthContext'
 import { useSettings } from '@/context/SettingsContext'
 import { useWorkout } from '@/context/WorkoutContext'
 import { Log } from '@/context/WorkoutContext/types'
-import { formatDate, formatDateOrToday, getDateKey, isDateAfterToday, sortByDateDesc } from '@/lib/utils/dateHelper'
+import { formatDateOrToday, getDateKey, isDateAfterToday, sortByCreatedAtDesc, sortByDateDesc } from '@/lib/utils/dateHelper'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useLocalSearchParams } from 'expo-router'
 import { Calendar, Check, Trash } from 'lucide-react-native'
 import { useEffect, useRef, useState } from 'react'
-import {
-    Alert,
-    Animated,
-    FlatList,
-    Keyboard,
-    KeyboardAvoidingView,
-    LayoutAnimation,
-    Modal,
-    Platform,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    UIManager,
-    View,
-} from 'react-native'
+import { Alert, Animated, FlatList, Keyboard, KeyboardAvoidingView, LayoutAnimation, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, UIManager, View } from 'react-native'
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true)
@@ -42,20 +26,25 @@ export default function LogsModal() {
     const exerciseId = typeof params.exerciseId === 'string' ? params.exerciseId : params.exerciseId?.[0] || ''
     const exerciseName = typeof params.exerciseName === 'string' ? params.exerciseName : params.exerciseName?.[0] || 'Log'
 
+    // State for the input (set information) fields
     const [weight, setWeight] = useState('')
     const [reps, setReps] = useState('')
     const [rpe, setRpe] = useState('')
     const [focusedField, setFocusedField] = useState<string | null>(null)
+
+    //State for date choice
     const [selectedLogDate, setSelectedLogDate] = useState(() => new Date())
     const [showDateModal, setShowDateModal] = useState(false)
     const [tempDate, setTempDate] = useState(() => new Date())
+
+    //Animation states
     const [lastAddedLogId, setLastAddedLogId] = useState<string | null>(null)
     const [showAddSuccess, setShowAddSuccess] = useState(false)
     const [deletingLogId, setDeletingLogId] = useState<string | null>(null)
-    const pendingAddRef = useRef<{ weight: number; reps: number; dateKey: string } | null>(null)
     const deleteOpacity = useRef(new Animated.Value(1)).current
     const deleteTranslateX = useRef(new Animated.Value(0)).current
     const addButtonScale = useRef(new Animated.Value(1)).current
+    const pendingAddRef = useRef<{ weight: number; reps: number; dateKey: string } | null>(null)
     const flatListRef = useRef<FlatList>(null)
     const clearHighlightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -68,15 +57,7 @@ export default function LogsModal() {
     useEffect(() => {
         if (!pendingAddRef.current || logs.length === 0) return
         const { weight, reps, dateKey } = pendingAddRef.current
-        const matching = logs
-            .filter(
-                (log) =>
-                    log.exerciseID === exerciseId &&
-                    log.weight === weight &&
-                    log.reps === reps &&
-                    getDateKey(log.date) === dateKey
-            )
-            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        const matching = logs.filter((log) => log.exerciseID === exerciseId && log.weight === weight && log.reps === reps && getDateKey(log.date) === dateKey).sort(sortByCreatedAtDesc)
         if (matching.length > 0) {
             const newLogId = matching[0].id
             setLastAddedLogId(newLogId)
@@ -102,10 +83,7 @@ export default function LogsModal() {
         if (!deletingLogId) return
         deleteOpacity.setValue(1)
         deleteTranslateX.setValue(0)
-        Animated.parallel([
-            Animated.timing(deleteOpacity, { toValue: 0, duration: 250, useNativeDriver: true }),
-            Animated.timing(deleteTranslateX, { toValue: 100, duration: 250, useNativeDriver: true }),
-        ]).start(({ finished }) => {
+        Animated.parallel([Animated.timing(deleteOpacity, { toValue: 0, duration: 250, useNativeDriver: true }), Animated.timing(deleteTranslateX, { toValue: 100, duration: 250, useNativeDriver: true })]).start(({ finished }) => {
             if (finished) {
                 LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
                 handleDeleteLog(deletingLogId)
@@ -119,12 +97,16 @@ export default function LogsModal() {
         setDeletingLogId(id)
     }
 
+    const showInvalidDateAlert = () => {
+        Keyboard.dismiss()
+        Alert.alert('Invalid Date', "You can't log workouts for future dates. Please select today or an earlier date.")
+    }
+
     // Validates the date, adds the log, and shows success feedback (scale animation + checkmark).
     const handleAdd = () => {
         if (weight.trim() && reps.trim()) {
             if (isDateAfterToday(selectedLogDate)) {
-                Keyboard.dismiss()
-                Alert.alert('Invalid Date', "You can't log workouts for future dates. Please select today or an earlier date.")
+                showInvalidDateAlert()
                 return
             }
             const weightVal = parseFloat(weight)
@@ -134,10 +116,7 @@ export default function LogsModal() {
             handleAddLog(workoutId, exerciseId, userID, weightVal, repsVal, rpeValue, selectedLogDate)
             setLastExercise(params.exerciseName)
             setShowAddSuccess(true)
-            Animated.sequence([
-                Animated.timing(addButtonScale, { toValue: 1.2, duration: 100, useNativeDriver: true }),
-                Animated.timing(addButtonScale, { toValue: 1, duration: 200, useNativeDriver: true }),
-            ]).start()
+            Animated.sequence([Animated.timing(addButtonScale, { toValue: 1.2, duration: 100, useNativeDriver: true }), Animated.timing(addButtonScale, { toValue: 1, duration: 200, useNativeDriver: true })]).start()
             setTimeout(() => setShowAddSuccess(false), 500)
         }
     }
@@ -145,8 +124,7 @@ export default function LogsModal() {
     // Validates the selected date and confirms it for new log entries (or shows error if future date).
     const handleDateModalDone = () => {
         if (isDateAfterToday(tempDate)) {
-            Keyboard.dismiss()
-            Alert.alert('Invalid Date', "You can't log workouts for future dates. Please select today or an earlier date.")
+            showInvalidDateAlert()
             return
         }
         setSelectedLogDate(tempDate)
@@ -155,13 +133,14 @@ export default function LogsModal() {
 
     const isValid = weight.trim() && reps.trim()
 
-    // Filter and sort logs (most recent date first, then most recently created first within same date)
+    // Filter and sort logs (most recent date first, then most recently created first within same calendar day)
     const exerciseLogs = logs
         .filter((log) => log.exerciseID === exerciseId)
         .sort((a, b) => {
-            const byDate = sortByDateDesc(a.date, b.date)
-            if (byDate !== 0) return byDate
-            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            const dateKeyA = getDateKey(a.date)
+            const dateKeyB = getDateKey(b.date)
+            if (dateKeyA !== dateKeyB) return sortByDateDesc(a.date, b.date)
+            return sortByCreatedAtDesc(a, b)
         })
 
     // Renders each log item with optional highlight (newly added) or delete animation.
@@ -188,23 +167,14 @@ export default function LogsModal() {
                         </View>
                         <Text style={styles.logDate}>{formatDateOrToday(item.date, true)}</Text>
                     </View>
-                    <TouchableOpacity
-                        onPress={() => handleDelete(item.id)}
-                        style={styles.deleteButton}
-                        activeOpacity={0.6}
-                        disabled={isDeleting}
-                    >
+                    <TouchableOpacity onPress={() => handleDelete(item.id)} style={styles.deleteButton} activeOpacity={0.6} disabled={isDeleting}>
                         <Trash size={20} color="#FF453A" strokeWidth={2.5} />
                     </TouchableOpacity>
                 </View>
             </View>
         )
         if (isDeleting) {
-            return (
-                <Animated.View style={{ opacity: deleteOpacity, transform: [{ translateX: deleteTranslateX }] }}>
-                    {content}
-                </Animated.View>
-            )
+            return <Animated.View style={{ opacity: deleteOpacity, transform: [{ translateX: deleteTranslateX }] }}>{content}</Animated.View>
         }
         return content
     }
@@ -259,11 +229,11 @@ export default function LogsModal() {
 
                                         {/* RPE Input - Optional */}
                                         <View style={styles.inputGroup}>
-                                            <Text style={styles.inputLabelOptional}>
+                                            <Text style={styles.inputLabel}>
                                                 RPE <Text style={styles.optionalBadge}>(opt)</Text>
                                             </Text>
                                             <TextInput
-                                                style={[styles.inputOptional, focusedField === 'rpe' && styles.inputFocused]}
+                                                style={[styles.input, styles.inputOptional, focusedField === 'rpe' && styles.inputFocused]}
                                                 placeholder="-"
                                                 placeholderTextColor="#555"
                                                 value={rpe}
@@ -276,24 +246,21 @@ export default function LogsModal() {
 
                                         {/* Add Button */}
                                         <TouchableOpacity onPress={handleAdd} disabled={!isValid} activeOpacity={0.8} style={styles.addButtonTouchable}>
-                                            <Animated.View style={[styles.addButtonInner, { transform: [{ scale: addButtonScale }] }]}>
+                                            <Animated.View style={[styles.addButton, { transform: [{ scale: addButtonScale }] }]}>
                                                 <LinearGradient
                                                     colors={
-                                                        showAddSuccess
-                                                            ? ['#22C55E', '#16A34A']
-                                                            : !isValid
-                                                              ? ['#333', '#333']
-                                                              : ['#1A7AD4', '#2f80ed', '#5BA3F5']
+                                                        showAddSuccess ? ['#22C55E', '#16A34A']
+                                                        : !isValid ?
+                                                            ['#333', '#333']
+                                                        :   ['#1A7AD4', '#2f80ed', '#5BA3F5']
                                                     }
                                                     start={{ x: 0, y: 0 }}
                                                     end={{ x: 1, y: 1 }}
-                                                    style={styles.addButton}
+                                                    style={styles.addButtonGradient}
                                                 >
-                                                    {showAddSuccess ? (
+                                                    {showAddSuccess ?
                                                         <Check size={24} color="#FFF" strokeWidth={3} />
-                                                    ) : (
-                                                        <Text style={styles.addButtonText}>+</Text>
-                                                    )}
+                                                    :   <Text style={styles.addButtonText}>+</Text>}
                                                 </LinearGradient>
                                             </Animated.View>
                                         </TouchableOpacity>
@@ -334,8 +301,8 @@ export default function LogsModal() {
                         <View style={styles.dateModalBackdrop} />
                     </TouchableWithoutFeedback>
                     <View style={styles.dateModalContent}>
-                        <View style={styles.handleContainer}></View>
-
+                        <Text style={styles.dateModalTitle}>Change Date</Text>
+                        <Text style={styles.dateModalSubtitle}>Logs will be added to the selected date</Text>
                         <DatePicker selectedDate={tempDate} onDateChange={setTempDate} color="#2f80ed" />
                         <TouchableOpacity onPress={handleDateModalDone} activeOpacity={0.8} style={styles.dateConfirmTouchable}>
                             <LinearGradient colors={['#1A7AD4', '#2f80ed']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.dateConfirmButton}>
@@ -402,13 +369,6 @@ const styles = StyleSheet.create({
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },
-    inputLabelOptional: {
-        fontSize: 12,
-        color: '#aaa',
-        marginBottom: 6,
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
     optionalBadge: {
         fontSize: 10,
         color: '#aaa',
@@ -428,18 +388,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_600SemiBold',
     },
     inputOptional: {
-        backgroundColor: '#282A2C',
-        borderRadius: 12,
-        paddingHorizontal: 12,
-        paddingVertical: 12,
-        fontSize: 16,
-        color: '#FFF',
-        borderWidth: 2,
-        borderColor: '#282A2C',
-        textAlign: 'center',
         opacity: 0.7,
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
     },
     inputFocused: {
         borderColor: '#2f80ed',
@@ -459,13 +408,15 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 4,
     },
-    addButtonInner: {
-        width: '100%',
-        height: '100%',
-    },
     addButton: {
         width: '100%',
         height: '100%',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    addButtonGradient: {
+        flex: 1,
+        width: '100%',
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -496,7 +447,7 @@ const styles = StyleSheet.create({
     },
     dateModalOverlay: {
         flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.85)',
+        backgroundColor: 'rgba(63, 63, 63, 0.85)',
         justifyContent: 'flex-end',
     },
     dateModalBackdrop: {
@@ -508,10 +459,11 @@ const styles = StyleSheet.create({
         borderTopRightRadius: 20,
         paddingHorizontal: 24,
         paddingBottom: 48,
+        paddingTop: 16,
         maxHeight: '70%',
     },
     dateModalTitle: {
-        fontSize: 20,
+        fontSize: 24,
         color: '#FFF',
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
@@ -519,8 +471,8 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     dateModalSubtitle: {
-        fontSize: 14,
-        color: '#888',
+        fontSize: 16,
+        color: '#aaa',
         fontFamily: 'Poppins_400Regular',
         marginBottom: 16,
         textAlign: 'center',

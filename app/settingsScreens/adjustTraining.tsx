@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_400Regular',
     },
     optionSubtitleSelected: {
-        color: '#ccc',
+        color: '#aaa',
     },
     noteContainer: {
         width: '100%',
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#D4E4FF',
         width: '100%',
         height: 60,
-        borderRadius: 12,
+        borderRadius: 16,
         justifyContent: 'center',
         alignItems: 'center',
         marginTop: 4,

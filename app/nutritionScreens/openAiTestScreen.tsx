@@ -304,7 +304,7 @@ const styles = StyleSheet.create({
     },
     subtitle: {
         fontSize: 14,
-        color: '#888',
+        color: '#aaa',
         textAlign: 'center',
         marginBottom: 24,
         fontFamily: 'Poppins_400Regular',

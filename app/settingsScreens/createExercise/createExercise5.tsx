@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
     },
     subtitleText: {
         fontSize: 14,
-        color: '#888',
+        color: '#aaa',
         textAlign: 'center',
         lineHeight: 20,
         letterSpacing: 0.2,

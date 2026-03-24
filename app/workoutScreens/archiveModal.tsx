@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     },
     subtitle: {
         fontSize: 14,
-        color: '#888',
+        color: '#aaa',
         textAlign: 'center',
         fontFamily: 'Poppins_400Regular',
         letterSpacing: 0.2,
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
     },
     emptySubtext: {
         fontSize: 14,
-        color: '#666',
+        color: '#aaa',
         textAlign: 'center',
         fontFamily: 'Poppins_400Regular',
     },

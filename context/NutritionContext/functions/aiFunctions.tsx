@@ -15,7 +15,7 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
 
 
 // Analyze Photo Function
-export async function analyzeAndAddPhoto(photoUri: string, userID: string, setNutritionData: Dispatch<SetStateAction<NutritionEntry[]>>): Promise<void> {
+export async function analyzeAndAddPhoto(photoUri: string, userID: string, setNutritionData: Dispatch<SetStateAction<NutritionEntry[]>>, date: Date = new Date()): Promise<void> {
     try {
     
     //Convert photo to base64
@@ -48,7 +48,7 @@ export async function analyzeAndAddPhoto(photoUri: string, userID: string, setNu
       id: uuid.v4() as string,
       userId: userID,
       name: data.name || 'Photo Entry',
-      date: new Date(),
+      date: new Date(date),
       time: Date.now(),
       protein: Math.round(totalProtein * 10) / 10,
       carbs: Math.round(totalCarbs * 10) / 10,

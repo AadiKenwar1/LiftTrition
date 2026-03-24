@@ -14,7 +14,7 @@ interface FoodItemWithQuantity extends FoodItem {
 }
 
 export default function FoodDBModal() {
-    const { handleAddNutrition } = useNutrition()
+    const { handleAddNutrition, selectedDate } = useNutrition()
     const { userID } = useAuth()
     const router = useRouter()
 
@@ -91,7 +91,7 @@ export default function FoodDBModal() {
 
     //Adds all items from the list of added items to the nutrition context
     function handleAddAll() {
-        const now = new Date()
+        const now = new Date(selectedDate)
         for (const item of addedItems) {
             const quantity = item.quantity || 1
             const nutritionEntry = {
@@ -313,7 +313,7 @@ const styles = StyleSheet.create({
     },
     subtitle: {
         fontSize: 14,
-        color: '#888',
+        color: '#aaa',
         textAlign: 'center',
         marginBottom: 20,
         fontFamily: 'Poppins_400Regular',
@@ -412,11 +412,11 @@ const styles = StyleSheet.create({
     },
     emptyText: {
         fontSize: 14,
-        color: '#666',
+        color: '#aaa',
     },
     emptySubtext: {
         fontSize: 12,
-        color: '#555',
+        color: '#aaa',
     },
     brandName: {
         fontSize: 12,
@@ -471,7 +471,7 @@ const styles = StyleSheet.create({
     },
     quantitySubtitle: {
         fontSize: 14,
-        color: '#888',
+        color: '#aaa',
         textAlign: 'center',
         marginBottom: 20,
         letterSpacing: 0.2,

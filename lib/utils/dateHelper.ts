@@ -94,6 +94,13 @@ export function sortByDateDesc(a: Date, b: Date): number {
 }
 
 /**
+ * Sort comparator for createdAt (most recently created first)
+ */
+export function sortByCreatedAtDesc<T extends { createdAt: Date }>(a: T, b: T): number {
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+}
+
+/**
  * Sort comparator for dates (oldest first)
  * 
  * @param a - First date

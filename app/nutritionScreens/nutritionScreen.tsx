@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
     },
     emptySubtext: {
         fontSize: 16,
-        color: '#888',
+        color: '#aaa',
         textAlign: 'center',
         lineHeight: 24,
         letterSpacing: 0.2,

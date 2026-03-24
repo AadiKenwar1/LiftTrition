@@ -11,7 +11,7 @@ import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView, S
 import uuid from 'react-native-uuid'
 
 export default function AddNutritionModal() {
-    const { handleAddNutrition } = useNutrition()
+    const { handleAddNutrition, selectedDate } = useNutrition()
     const router = useRouter()
     const { userID } = useAuth()
     const { hasPremium } = useBilling()
@@ -34,7 +34,7 @@ export default function AddNutritionModal() {
             id: uuid.v4() as string,
             userId: userID,
             name: mealName.trim() || 'Unnamed Entry',
-            date: new Date(),
+            date: new Date(selectedDate),
             time: Date.now(),
             protein: protein.trim() ? parseFloat(protein) : 0,
             carbs: carbs.trim() ? parseFloat(carbs) : 0,

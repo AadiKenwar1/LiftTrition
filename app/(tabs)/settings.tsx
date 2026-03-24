@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
     },
     headerSubtitle: {
         fontSize: 16,
-        color: '#888',
+        color: '#aaa',
         letterSpacing: 0.2,
         fontFamily: 'Poppins_400Regular',
     },
@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
     },
     settingSubtitle: {
         fontSize: 13,
-        color: '#888',
+        color: '#aaa',
         letterSpacing: 0.2,
         lineHeight: 16,
         fontFamily: 'Poppins_400Regular',

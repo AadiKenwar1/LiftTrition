@@ -1,4 +1,4 @@
-import DatePicker from '@/components/NutritionComponents/DatePicker'
+import DatePicker from '@/components/NeutralComponents/DatePicker'
 import { useNutrition } from '@/context/NutritionContext'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
@@ -32,8 +32,8 @@ export default function DateModal() {
                 </View>
 
                 {/* Title */}
-                <Text style={styles.title}>Select Date</Text>
-                <Text style={styles.subtitle}>Choose a date to view nutrition entries</Text>
+                <Text style={styles.title}>Change Date</Text>
+                <Text style={styles.subtitle}>Choose a date to view nutrition logs {'\n'}Logs will be added for the set date. </Text>
 
                 {/* Date Picker */}
                 <DatePicker selectedDate={tempDate} onDateChange={setTempDate} color="#22C922" />
@@ -98,8 +98,8 @@ const styles = StyleSheet.create({
         letterSpacing: -0.5,
     },
     subtitle: {
-        fontSize: 14,
-        color: '#888',
+        fontSize: 16,
+        color: '#aaa',
         textAlign: 'center',
         marginBottom: 20,
         fontFamily: 'Poppins_400Regular',

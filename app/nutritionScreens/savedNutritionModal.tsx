@@ -8,11 +8,11 @@ import { FlatList, KeyboardAvoidingView, Platform, StyleSheet, Text, View } from
 import uuid from 'react-native-uuid'
 
 export default function SavedNutritionModal() {
-    const { savedNutritionEntries, handleUnsaveNutrition, handleAddNutrition } = useNutrition()
+    const { savedNutritionEntries, handleUnsaveNutrition, handleAddNutrition, selectedDate } = useNutrition()
     const { userID } = useAuth()
     const router = useRouter()
     function handleAddSavedItem(savedItem: NutritionEntry) {
-        const now = new Date()
+        const now = new Date(selectedDate)
         const newNutritionItem: NutritionEntry = {
             id: uuid.v4() as string,
             userId: userID,
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
     },
     subtitle: {
         fontSize: 14,
-        color: '#888',
+        color: '#aaa',
         textAlign: 'center',
         marginBottom: 20,
         fontFamily: 'Poppins_400Regular',
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
     },
     emptySubtext: {
         fontSize: 14,
-        color: '#888',
+        color: '#aaa',
         textAlign: 'center',
         fontFamily: 'Poppins_400Regular',
     },
