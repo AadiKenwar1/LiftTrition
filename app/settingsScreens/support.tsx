@@ -1,4 +1,3 @@
-import { useSettings } from '@/context/SettingsContext'
 import { supabase } from '@/lib/supabase/client'
 import { HelpCircle } from 'lucide-react-native'
 import { useState } from 'react'
@@ -6,11 +5,10 @@ import { Alert, Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, Touchab
 
 type SubjectType = 'support' | 'feature_request'
 
-export default function SupportScreen() {
-    const { mode } = useSettings()
-    const accent = mode ? '#2f80ed' : '#22C922'
-    const accentRgba = mode ? 'rgba(45, 156, 255, 0.15)' : 'rgba(34, 201, 34, 0.15)'
+const ACCENT = '#fff'
+const ACCENT_MUTED = 'rgba(255, 255, 255, 0.12)'
 
+export default function SupportScreen() {
     const [subjectType, setSubjectType] = useState<SubjectType>('support')
     const [subject, setSubject] = useState('')
     const [message, setMessage] = useState('')
@@ -63,28 +61,18 @@ export default function SupportScreen() {
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={styles.container}>
-                <View style={[styles.iconCircle, { borderColor: accent }]}>
-                    <HelpCircle size={40} color={accent} strokeWidth={2} />
+                <View style={styles.iconCircle}>
+                    <HelpCircle size={40} color={ACCENT} strokeWidth={2} />
                 </View>
 
                 <Text style={styles.titleText}>Support & Feature Requests</Text>
                 <Text style={styles.subtitleText}>Describe your issue, question, or feature idea. We will respond as soon as possible.</Text>
 
                 <View style={styles.typeToggleContainer}>
-                    <TouchableOpacity
-                        style={[styles.typeButton, subjectType === 'support' && { backgroundColor: accentRgba, borderColor: accent }]}
-                        onPress={() => setSubjectType('support')}
-                        activeOpacity={0.7}
-                        disabled={loading}
-                    >
+                    <TouchableOpacity style={[styles.typeButton, subjectType === 'support' && { backgroundColor: ACCENT_MUTED, borderColor: ACCENT }]} onPress={() => setSubjectType('support')} activeOpacity={0.7} disabled={loading}>
                         <Text style={[styles.typeButtonText, subjectType === 'support' && styles.typeButtonTextActive]}>LiftTrition Support</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity
-                        style={[styles.typeButton, subjectType === 'feature_request' && { backgroundColor: accentRgba, borderColor: accent }]}
-                        onPress={() => setSubjectType('feature_request')}
-                        activeOpacity={0.7}
-                        disabled={loading}
-                    >
+                    <TouchableOpacity style={[styles.typeButton, subjectType === 'feature_request' && { backgroundColor: ACCENT_MUTED, borderColor: ACCENT }]} onPress={() => setSubjectType('feature_request')} activeOpacity={0.7} disabled={loading}>
                         <Text style={[styles.typeButtonText, subjectType === 'feature_request' && styles.typeButtonTextActive]}>Request a Feature</Text>
                     </TouchableOpacity>
                 </View>
@@ -118,7 +106,7 @@ export default function SupportScreen() {
                     </View>
                 </View>
 
-                <TouchableOpacity style={[styles.sendButton, { backgroundColor: accent, shadowColor: accent }, loading && styles.sendButtonDisabled]} onPress={handleSend} disabled={loading} activeOpacity={0.8}>
+                <TouchableOpacity style={[styles.sendButton, loading && styles.sendButtonDisabled]} onPress={handleSend} disabled={loading} activeOpacity={0.8}>
                     <Text style={styles.sendButtonText}>{loading ? 'Sending...' : 'Send'}</Text>
                 </TouchableOpacity>
             </View>
@@ -138,10 +126,11 @@ const styles = StyleSheet.create({
         width: 80,
         height: 80,
         borderRadius: 40,
-        backgroundColor: '#242424',
+        backgroundColor: '#282A2C',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
+        borderColor: '#fff',
         alignSelf: 'center',
         marginBottom: 12,
     },
@@ -219,8 +208,10 @@ const styles = StyleSheet.create({
         width: '100%',
         height: 56,
         borderRadius: 16,
+        backgroundColor: '#fff',
         justifyContent: 'center',
         alignItems: 'center',
+        shadowColor: '#000',
         shadowOffset: { width: 0, height: 6 },
         shadowOpacity: 0.35,
         shadowRadius: 10,
@@ -231,7 +222,7 @@ const styles = StyleSheet.create({
     },
     sendButtonText: {
         fontSize: 16,
-        color: '#fff',
+        color: '#121212',
         fontFamily: 'Poppins_600SemiBold',
     },
 })

@@ -3,7 +3,7 @@ import { View } from 'react-native'
 
 export default function TermsAndPrivacyScreen() {
     return (
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, backgroundColor: '#121212' }}>
             <TermsAndPrivacyContent />
         </View>
     )
