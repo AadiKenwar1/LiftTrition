@@ -133,7 +133,7 @@ export default function SubscriptionScreen() {
                 <View style={styles.buttonStack}>
                     <TouchableOpacity style={[styles.subscribeButton, (hasPremium || purchasing) && styles.subscribeButtonDisabled]} onPress={handleSubscribe} activeOpacity={0.8} disabled={!selectedPackage || hasPremium || purchasing}>
                         {purchasing ?
-                            <ActivityIndicator size="small" color="#000" />
+                            <ActivityIndicator size="small" color="#fff" />
                         :   <Text style={styles.subscribeButtonText}>{hasPremium ? 'Subscription Active' : 'Subscribe Now'}</Text>}
                     </TouchableOpacity>
 
@@ -141,11 +141,10 @@ export default function SubscriptionScreen() {
                         <TouchableOpacity style={styles.restoreButton} onPress={handleRestore} activeOpacity={0.7}>
                             <Text style={[styles.restoreButtonText, { color: ACCENT }]}>Restore Purchases</Text>
                         </TouchableOpacity>
-                        {hasPremium && (
-                            <TouchableOpacity style={styles.restoreButton} onPress={handleManageSubscription} activeOpacity={0.7}>
-                                <Text style={[styles.restoreButtonText, { color: '#888' }]}>Manage subscription</Text>
-                            </TouchableOpacity>
-                        )}
+
+                        <TouchableOpacity style={styles.restoreButton} onPress={handleManageSubscription} activeOpacity={0.7}>
+                            <Text style={[styles.restoreButtonText, { color: '#888' }]}>Manage subscription</Text>
+                        </TouchableOpacity>
                     </View>
                 </View>
 
@@ -246,7 +245,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         gap: 12,
         width: '100%',
-        marginBottom: 10,
+        marginBottom: 12,
     },
     pricingCard: {
         flex: 1,
@@ -325,7 +324,7 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#D4E4FF',
+        backgroundColor: ACCENT,
         shadowColor: ACCENT,
         shadowOffset: { width: 0, height: 6 },
         shadowOpacity: 0.3,
@@ -337,7 +336,7 @@ const styles = StyleSheet.create({
     },
     subscribeButtonText: {
         fontSize: 17,
-        color: '#000',
+        color: '#fff',
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },

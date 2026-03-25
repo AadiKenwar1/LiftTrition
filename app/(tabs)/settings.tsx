@@ -105,50 +105,46 @@ export default function SettingsScreen() {
 
     return (
         <View style={styles.outerContainer}>
-            <LinearGradient
-                colors={['rgba(255, 255, 255, 0.07)', 'transparent']}
-                style={styles.topGradient}
-                pointerEvents="none"
-            />
+            <LinearGradient colors={['rgba(255, 255, 255, 0.07)', 'transparent']} style={styles.topGradient} pointerEvents="none" />
             <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-            <View style={styles.header}>
-                <Text style={styles.title}>Settings</Text>
-                <Text style={styles.headerSubtitle}>Manage your preferences</Text>
-                {lastSyncedAt ?
-                    <Text style={styles.lastSynced}>Last synced: {formatDateTime(lastSyncedAt)}</Text>
-                : powerSync.currentStatus.connected ?
-                    <Text style={styles.lastSynced}>Syncing...</Text>
-                :   null}
-                <Text style={styles.lastSynced}>Current Mode: {mode ? 'LIFT' : 'NUTRITION'}</Text>
-            </View>
+                <View style={styles.header}>
+                    <Text style={styles.title}>Settings</Text>
+                    <Text style={styles.headerSubtitle}>Manage your preferences</Text>
+                    {lastSyncedAt ?
+                        <Text style={styles.lastSynced}>Last synced: {formatDateTime(lastSyncedAt)}</Text>
+                    : powerSync.currentStatus.connected ?
+                        <Text style={styles.lastSynced}>Syncing...</Text>
+                    :   null}
+                    <Text style={styles.lastSynced}>Current Mode: {mode ? 'LIFT' : 'NUTRITION'}</Text>
+                </View>
 
-            {/* Account Section */}
-            <View style={styles.section}>
-                <Text style={styles.sectionTitle}>ACCOUNT</Text>
-                {renderSettingItem(settingsOptions[0], 0)}
-                {renderSettingItem(settingsOptions[1], 1)}
-            </View>
+                {/* Account Section */}
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>ACCOUNT</Text>
+                    {renderSettingItem(settingsOptions[0], 0)}
+                    {renderSettingItem(settingsOptions[1], 1)}
+                </View>
 
-            {/* Goals Section */}
-            <View style={styles.section}>
-                <Text style={styles.sectionTitle}>GOAL ADJUSTMENTS</Text>
-                {renderSettingItem(settingsOptions[2], 2)}
-                {renderSettingItem(settingsOptions[3], 3)}
-                {renderSettingItem(settingsOptions[4], 4)}
-            </View>
+                {/* Goals Section */}
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>GOAL ADJUSTMENTS</Text>
+                    {renderSettingItem(settingsOptions[2], 2)}
+                    {renderSettingItem(settingsOptions[3], 3)}
+                    {renderSettingItem(settingsOptions[4], 4)}
+                </View>
 
-            {/* Customization Section */}
-            <View style={styles.section}>
-                <Text style={styles.sectionTitle}>CUSTOMIZATION</Text>
-                {renderSettingItem(settingsOptions[5], 5)}
-            </View>
+                {/* Customization Section */}
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>CUSTOMIZATION</Text>
+                    {renderSettingItem(settingsOptions[5], 5)}
+                </View>
 
-            {/* Support Section */}
-            <View style={styles.section}>
-                <Text style={styles.sectionTitle}>SUPPORT</Text>
-                {renderSettingItem(settingsOptions[6], 6)}
-                {renderSettingItem(settingsOptions[7], 7)}
-            </View>
+                {/* Support Section */}
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>SUPPORT</Text>
+                    {renderSettingItem(settingsOptions[6], 6)}
+                    {renderSettingItem(settingsOptions[7], 7)}
+                </View>
             </ScrollView>
         </View>
     )

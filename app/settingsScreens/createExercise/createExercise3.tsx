@@ -1,8 +1,8 @@
-import { useSettings } from '@/context/SettingsContext'
 import ScrollableList, { ScrollableListItem } from '@/components/NeutralComponents/ScrollableList'
-import { ADVANCED_MUSCLE_GROUPS, SIMPLE_MUSCLE_GROUPS } from '@/context/WorkoutContext/exerciseLibrary/constants'
+import { useSettings } from '@/context/SettingsContext'
+import { MUSCLE_GROUPS } from '@/context/WorkoutContext/exerciseLibrary/constants'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import { Dumbbell } from 'lucide-react-native'
+import { BicepsFlexed } from 'lucide-react-native'
 import { useMemo, useState } from 'react'
 import { Alert, Keyboard, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
 
@@ -15,17 +15,14 @@ export default function CreateExercise3Screen() {
     const accentRgba = mode ? ACCENT_RGBA.workout : ACCENT_RGBA.nutrition
     const router = useRouter()
     const params = useLocalSearchParams<{ exerciseName: string; isCompound: string }>()
-    const [muscleView, setMuscleView] = useState<'simple' | 'advanced'>('simple')
     const [selectedMainMuscle, setSelectedMainMuscle] = useState<string>('')
 
-    const currentMuscleList = muscleView === 'simple' ? SIMPLE_MUSCLE_GROUPS : ADVANCED_MUSCLE_GROUPS
-
     const muscleListItems: ScrollableListItem[] = useMemo(() => {
-        return currentMuscleList.map((muscle) => ({
+        return MUSCLE_GROUPS.map((muscle) => ({
             id: muscle,
             title: muscle,
         }))
-    }, [currentMuscleList])
+    }, [])
 
     function handleNext() {
         if (!selectedMainMuscle) {
@@ -39,7 +36,6 @@ export default function CreateExercise3Screen() {
                 exerciseName: params.exerciseName || '',
                 isCompound: params.isCompound || 'false',
                 mainMuscle: selectedMainMuscle,
-                muscleView: muscleView,
             },
         })
     }
@@ -49,39 +45,14 @@ export default function CreateExercise3Screen() {
             <View style={styles.container}>
                 <View style={styles.content}>
                     {/* Icon */}
-                    <View style={[styles.iconCircle, { borderColor: accent }]}>
-                        <Dumbbell size={60} color={accent} strokeWidth={2} />
+                    <View style={styles.iconCircle}>
+                        <BicepsFlexed size={60} color="#2f80ed" strokeWidth={2} />
                     </View>
-
                     {/* Title */}
                     <Text style={styles.titleText}>Select Main Muscle</Text>
 
                     {/* Subtitle */}
                     <Text style={styles.subtitleText}>Tap to select. Tap again to deselect.</Text>
-
-                    {/* View Toggle Buttons */}
-                    <View style={styles.toggleContainer}>
-                        <TouchableOpacity
-                            style={[styles.toggleButton, muscleView === 'simple' && { backgroundColor: accentRgba, borderColor: accent }]}
-                            onPress={() => {
-                                setMuscleView('simple')
-                                setSelectedMainMuscle('') // Reset selection when switching views
-                            }}
-                            activeOpacity={0.7}
-                        >
-                            <Text style={[styles.toggleText, muscleView === 'simple' && styles.toggleTextActive]}>Simple</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[styles.toggleButton, muscleView === 'advanced' && { backgroundColor: accentRgba, borderColor: accent }]}
-                            onPress={() => {
-                                setMuscleView('advanced')
-                                setSelectedMainMuscle('') // Reset selection when switching views
-                            }}
-                            activeOpacity={0.7}
-                        >
-                            <Text style={[styles.toggleText, muscleView === 'advanced' && styles.toggleTextActive]}>Advanced</Text>
-                        </TouchableOpacity>
-                    </View>
 
                     {/* Muscle List */}
                     <View style={styles.listContainer}>
@@ -101,9 +72,6 @@ export default function CreateExercise3Screen() {
 
                 {/* Navigation Buttons */}
                 <View style={styles.buttonContainer}>
-                    <TouchableOpacity style={styles.backButton} onPress={() => router.back()} activeOpacity={0.8}>
-                        <Text style={styles.backButtonText}>Back</Text>
-                    </TouchableOpacity>
                     <TouchableOpacity style={[styles.nextButton, { backgroundColor: accent, shadowColor: accent }]} onPress={handleNext} activeOpacity={0.8}>
                         <Text style={styles.nextButtonText}>Next</Text>
                     </TouchableOpacity>
@@ -118,7 +86,7 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#121212',
         paddingHorizontal: 25,
-        paddingTop: 20,
+        paddingTop: 4,
         paddingBottom: 40,
         justifyContent: 'space-between',
     },
@@ -136,10 +104,11 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         marginBottom: 12,
         marginTop: 5,
-        backgroundColor: '#1e1e1e',
+        backgroundColor: '#282A2C',
+        borderColor: '#2f80ed',
     },
     titleText: {
-        fontSize: 24,
+        fontSize: 28,
         color: '#FFF',
         letterSpacing: -0.5,
         marginBottom: 4,
@@ -147,38 +116,13 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_600SemiBold',
     },
     subtitleText: {
-        fontSize: 15,
+        fontSize: 16,
         color: '#aaa',
         textAlign: 'center',
         lineHeight: 20,
         letterSpacing: 0.2,
-        marginBottom: 16,
-        fontFamily: 'Poppins_400Regular',
-    },
-    toggleContainer: {
-        flexDirection: 'row',
-        width: '100%',
-        gap: 12,
         marginBottom: 4,
-    },
-    toggleButton: {
-        flex: 1,
-        height: 52,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#282A2C',
-        borderRadius: 12,
-        borderWidth: 2,
-        borderColor: '#2a2a2a',
-    },
-    toggleText: {
-        fontSize: 15,
-        color: '#888',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    toggleTextActive: {
-        color: '#fff',
+        fontFamily: 'Poppins_400Regular',
     },
     listContainer: {
         width: '100%',

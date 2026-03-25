@@ -71,7 +71,7 @@ export default function CreateExercise2Screen() {
                                     <Activity size={28} color={isCompound === true ? accent : '#666'} strokeWidth={2.5} />
                                 </View>
                                 <Text style={[styles.typeText, isCompound === true && styles.typeTextSelected]}>Compound</Text>
-                                <Text style={styles.typeDescription}>Multiple muscles</Text>
+                                <Text style={styles.typeDescription}>Multi joint exercise</Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity style={[styles.typeButton, isCompound === false && { backgroundColor: accentRgba, borderColor: accent }]} onPress={() => setIsCompound(false)} activeOpacity={0.7}>
@@ -79,7 +79,7 @@ export default function CreateExercise2Screen() {
                                     <Target size={28} color={isCompound === false ? accent : '#666'} strokeWidth={2.5} />
                                 </View>
                                 <Text style={[styles.typeText, isCompound === false && styles.typeTextSelected]}>Isolation</Text>
-                                <Text style={styles.typeDescription}>Single muscle</Text>
+                                <Text style={styles.typeDescription}>Single joint exercise</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -87,9 +87,6 @@ export default function CreateExercise2Screen() {
 
                 {/* Navigation Buttons */}
                 <View style={styles.buttonContainer}>
-                    <TouchableOpacity style={styles.backButton} onPress={() => router.back()} activeOpacity={0.8}>
-                        <Text style={styles.backButtonText}>Back</Text>
-                    </TouchableOpacity>
                     <TouchableOpacity style={[styles.nextButton, { backgroundColor: accent, shadowColor: accent }]} onPress={handleNext} activeOpacity={0.8}>
                         <Text style={styles.nextButtonText}>Next</Text>
                     </TouchableOpacity>
@@ -119,7 +116,7 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         marginBottom: 12,
         marginTop: 10,
-        backgroundColor: '#1e1e1e',
+        backgroundColor: '#282A2C',
     },
     titleText: {
         fontSize: 24,
@@ -130,7 +127,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_600SemiBold',
     },
     subtitleText: {
-        fontSize: 15,
+        fontSize: 16,
         color: '#aaa',
         textAlign: 'center',
         lineHeight: 20,
@@ -144,7 +141,7 @@ const styles = StyleSheet.create({
     },
     inputLabel: {
         fontSize: 15,
-        color: '#888',
+        color: '#aaa',
         marginBottom: 8,
         paddingLeft: 4,
         letterSpacing: -0.5,
@@ -198,7 +195,7 @@ const styles = StyleSheet.create({
     },
     typeText: {
         fontSize: 16,
-        color: '#888',
+        color: '#aaa',
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },
@@ -207,7 +204,7 @@ const styles = StyleSheet.create({
     },
     typeDescription: {
         fontSize: 12,
-        color: '#666',
+        color: '#aaa',
         letterSpacing: 0.2,
         fontFamily: 'Poppins_400Regular',
     },

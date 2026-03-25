@@ -106,24 +106,34 @@ export default function EditPhotoEntry() {
                 {/* Meal Name */}
                 <View style={styles.section}>
                     <Text style={styles.sectionLabel}>Meal Name</Text>
-                    <TextInput style={[styles.input, focusedField === 'name' && styles.inputFocused]} value={name} onChangeText={setName} placeholder="Meal name" placeholderTextColor="#555" onFocus={() => setFocusedField('name')} onBlur={() => setFocusedField(null)} />
+                    <TextInput
+                        style={[styles.input, focusedField === 'name' && styles.inputFocused]}
+                        value={name}
+                        onChangeText={setName}
+                        placeholder="Meal name"
+                        placeholderTextColor="#555"
+                        onFocus={() => setFocusedField('name')}
+                        onBlur={() => setFocusedField(null)}
+                    />
                 </View>
 
                 {/* Ingredients */}
                 <View style={styles.section}>
-                    <View style={styles.sectionRowHeader}>
-                        <Text style={styles.sectionLabel}>Ingredients</Text>
-                        <TouchableOpacity style={styles.addIngredientBtn} onPress={addIngredient} activeOpacity={0.7}>
-                            <Plus size={14} color="#22C922" strokeWidth={2.5} />
-                            <Text style={styles.addIngredientBtnText}>Add</Text>
-                        </TouchableOpacity>
-                    </View>
+                    <Text style={styles.sectionLabel}>Ingredients</Text>
 
                     {ingredients.map((ingredient, index) => (
                         <View key={index} style={styles.ingredientCard}>
                             {/* Name + delete */}
                             <View style={styles.ingredientHeaderRow}>
-                                <TextInput style={[styles.ingredientNameInput, focusedField === `iname-${index}` && styles.inputFocused]} value={ingredient.name} onChangeText={(val) => updateIngredient(index, 'name', val)} placeholder="Ingredient name" placeholderTextColor="#555" onFocus={() => setFocusedField(`iname-${index}`)} onBlur={() => setFocusedField(null)} />
+                                <TextInput
+                                    style={[styles.ingredientNameInput, focusedField === `iname-${index}` && styles.inputFocused]}
+                                    value={ingredient.name}
+                                    onChangeText={(val) => updateIngredient(index, 'name', val)}
+                                    placeholder="Ingredient name"
+                                    placeholderTextColor="#555"
+                                    onFocus={() => setFocusedField(`iname-${index}`)}
+                                    onBlur={() => setFocusedField(null)}
+                                />
                                 <TouchableOpacity style={styles.deleteBtn} onPress={() => removeIngredient(index)} activeOpacity={0.7}>
                                     <Trash2 size={16} color="#FF453A" strokeWidth={2} />
                                 </TouchableOpacity>
@@ -138,7 +148,15 @@ export default function EditPhotoEntry() {
                                             <Text style={styles.macroRowLabel}>{macro.charAt(0).toUpperCase() + macro.slice(1)}</Text>
                                             <Text style={styles.macroRowUnit}>({macro === 'calories' ? 'kcal' : 'g'})</Text>
                                         </View>
-                                        <TextInput style={[styles.macroRowInput, focusedField === `${macro}-${index}` && styles.inputFocused]} value={(ingredient[macro] as number).toString()} onChangeText={(val) => updateIngredient(index, macro, val)} keyboardType="numeric" onFocus={() => setFocusedField(`${macro}-${index}`)} onBlur={() => setFocusedField(null)} placeholderTextColor="#555" />
+                                        <TextInput
+                                            style={[styles.macroRowInput, focusedField === `${macro}-${index}` && styles.inputFocused]}
+                                            value={(ingredient[macro] as number).toString()}
+                                            onChangeText={(val) => updateIngredient(index, macro, val)}
+                                            keyboardType="numeric"
+                                            onFocus={() => setFocusedField(`${macro}-${index}`)}
+                                            onBlur={() => setFocusedField(null)}
+                                            placeholderTextColor="#555"
+                                        />
                                     </View>
                                 ))}
                             </View>
@@ -158,7 +176,15 @@ export default function EditPhotoEntry() {
                                         <Text style={styles.quantityButtonText}>−</Text>
                                     </TouchableOpacity>
 
-                                    <TextInput style={[styles.quantityInput, focusedField === `qty-${index}` && styles.quantityInputFocused]} value={ingredient.quantity.toString()} onChangeText={(val) => updateIngredient(index, 'quantity', val)} keyboardType="numeric" onFocus={() => setFocusedField(`qty-${index}`)} onBlur={() => setFocusedField(null)} placeholderTextColor="#555" />
+                                    <TextInput
+                                        style={[styles.quantityInput, focusedField === `qty-${index}` && styles.quantityInputFocused]}
+                                        value={ingredient.quantity.toString()}
+                                        onChangeText={(val) => updateIngredient(index, 'quantity', val)}
+                                        keyboardType="numeric"
+                                        onFocus={() => setFocusedField(`qty-${index}`)}
+                                        onBlur={() => setFocusedField(null)}
+                                        placeholderTextColor="#555"
+                                    />
 
                                     <TouchableOpacity
                                         style={styles.quantityButton}
@@ -197,6 +223,15 @@ export default function EditPhotoEntry() {
                             </View>
                         </View>
                     ))}
+
+                    <View style={styles.addIngredientBelowWrap}>
+                        <TouchableOpacity style={styles.addIngredientBtn} onPress={addIngredient} activeOpacity={0.75}>
+                            <View style={styles.addIngredientIconCircle}>
+                                <Plus size={20} color="#5CE073" strokeWidth={2.5} />
+                            </View>
+                            <Text style={styles.addIngredientBtnText}>Add ingredient</Text>
+                        </TouchableOpacity>
+                    </View>
 
                     {/* Calculated totals */}
                     <View style={styles.totalsCard}>
@@ -266,7 +301,7 @@ const styles = StyleSheet.create({
         width: 80,
         height: 80,
         borderRadius: 40,
-        backgroundColor: '#1e1e1e',
+        backgroundColor: '#282A2C',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
@@ -276,12 +311,12 @@ const styles = StyleSheet.create({
         fontSize: 24,
         color: '#FFF',
         textAlign: 'center',
-        marginBottom: 6,
+        marginBottom: 4,
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },
     subtitle: {
-        fontSize: 14,
+        fontSize: 16,
         color: '#aaa',
         textAlign: 'center',
         marginBottom: 20,
@@ -298,11 +333,9 @@ const styles = StyleSheet.create({
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },
-    sectionRowHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 12,
+    addIngredientBelowWrap: {
+        width: '100%',
+        marginBottom: 16,
     },
     input: {
         backgroundColor: '#282A2C',
@@ -319,20 +352,32 @@ const styles = StyleSheet.create({
         borderColor: '#22C922',
     },
     addIngredientBtn: {
+        width: '100%',
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 5,
-        paddingVertical: 7,
-        paddingHorizontal: 12,
-        backgroundColor: '#1e1e1e',
-        borderRadius: 8,
+        justifyContent: 'center',
+        gap: 12,
+        paddingVertical: 16,
+        paddingHorizontal: 18,
+        borderRadius: 12,
+        backgroundColor: 'rgba(34, 201, 34, 0.06)',
         borderWidth: 1,
-        borderColor: '#22C922',
+        borderColor: 'rgba(34, 201, 34, 0.28)',
+    },
+    addIngredientIconCircle: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: 'rgba(34, 201, 34, 0.14)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: 'rgba(34, 201, 34, 0.35)',
     },
     addIngredientBtnText: {
-        fontSize: 13,
-        color: '#22C922',
-        letterSpacing: -0.5,
+        fontSize: 15,
+        color: '#F0F0F0',
+        letterSpacing: -0.4,
         fontFamily: 'Poppins_600SemiBold',
     },
     ingredientCard: {
@@ -351,7 +396,7 @@ const styles = StyleSheet.create({
     },
     ingredientNameInput: {
         flex: 1,
-        backgroundColor: '#242424',
+        backgroundColor: '#282A2C',
         borderRadius: 8,
         paddingHorizontal: 12,
         paddingVertical: 10,

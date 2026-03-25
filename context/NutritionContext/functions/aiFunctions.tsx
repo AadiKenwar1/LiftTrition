@@ -31,6 +31,10 @@ export async function analyzeAndAddPhoto(photoUri: string, userID: string, setNu
       cleanedResponse = cleanedResponse.trim();
     }
     const data = JSON.parse(cleanedResponse);
+    const ingredients = Array.isArray(data.ingredients) ? data.ingredients : [];
+    if (ingredients.length === 0) {
+      throw new Error('No food detected in this photo. Try a clearer picture, or add your meal manually.');
+    }
     //Calculate total nutrition from ingredients
     let totalProtein = 0;
     let totalCarbs = 0;
@@ -56,7 +60,7 @@ export async function analyzeAndAddPhoto(photoUri: string, userID: string, setNu
       calories: Math.round(totalCalories),
       isPhoto: true,
       photoUri: photoUri,
-      ingredients: data.ingredients || [],
+      ingredients,
       createdAt: new Date(),
       updatedAt: new Date(),
     };

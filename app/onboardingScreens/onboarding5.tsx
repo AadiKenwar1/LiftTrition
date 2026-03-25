@@ -1,7 +1,7 @@
 import { useSettings } from '@/context/SettingsContext'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
-import { Dumbbell } from 'lucide-react-native'
+import { Activity } from 'lucide-react-native'
 import { useState } from 'react'
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
@@ -34,7 +34,7 @@ export default function Onboarding5Screen() {
             <View style={styles.content}>
                 {/* Icon */}
                 <View style={[styles.iconCircle, { borderColor: ACCENT }]}>
-                    <Dumbbell size={72} color={ACCENT} strokeWidth={2} />
+                    <Activity size={72} color={ACCENT} strokeWidth={2} />
                 </View>
 
                 {/* Title */}

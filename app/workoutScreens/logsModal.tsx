@@ -259,7 +259,7 @@ export default function LogsModal() {
                                                     style={styles.addButtonGradient}
                                                 >
                                                     {showAddSuccess ?
-                                                        <Check size={24} color="#FFF" strokeWidth={3} />
+                                                        <Check size={24} color="#FFF" strokeWidth={1.5} />
                                                     :   <Text style={styles.addButtonText}>+</Text>}
                                                 </LinearGradient>
                                             </Animated.View>
@@ -424,7 +424,7 @@ const styles = StyleSheet.create({
         fontSize: 24,
         color: '#FFF',
         letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
+        fontFamily: 'Poppins_400Regular',
     },
     changeDateButton: {
         flexDirection: 'row',

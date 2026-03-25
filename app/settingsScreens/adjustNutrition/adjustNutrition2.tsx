@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_500Medium',
     },
     nextButton: {
-        backgroundColor: '#D4F5D4',
+        backgroundColor: '#22C922',
         width: '100%',
         height: 60,
         borderRadius: 16,
@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
     },
     nextButtonText: {
         fontSize: 16,
-        color: '#000',
+        color: '#fff',
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },

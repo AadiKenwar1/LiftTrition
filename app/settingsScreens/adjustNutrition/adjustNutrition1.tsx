@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
         height: 60,
         borderRadius: 16,
         justifyContent: 'center',
-        backgroundColor: '#D4F5D4',
+        backgroundColor: '#22C922',
         shadowColor: '#22C922',
         alignItems: 'center',
         shadowOffset: { width: 0, height: 6 },
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
     },
     nextButtonText: {
         fontSize: 16,
-        color: '#000',
+        color: '#fff',
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },

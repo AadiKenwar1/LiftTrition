@@ -3,7 +3,7 @@ import { useWorkout } from '@/context/WorkoutContext'
 import { Ionicons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
-import { Dumbbell, Trash2 } from 'lucide-react-native'
+import { Dumbbell } from 'lucide-react-native'
 import { useEffect } from 'react'
 import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
@@ -12,7 +12,7 @@ export default function CreateExerciseScreen() {
     const { setMode, mode } = useSettings()
     const router = useRouter()
     const accent = mode ? '#2f80ed' : '#22C922'
-    const accentRgba = mode ? 'rgba(45, 156, 255, 0.15)' : 'rgba(34, 201, 34, 0.15)'
+    const accentRgba = mode ? 'rgba(47, 128, 237, 0.15)' : 'rgba(34, 201, 34, 0.15)'
     useEffect(() => {
         setMode(true)
     }, [])
@@ -23,7 +23,7 @@ export default function CreateExerciseScreen() {
     }))
 
     const handleDelete = (exerciseName: string) => {
-        Alert.alert('Delete Exercise', `Are you sure you want to delete "${exerciseName}"?`, [
+        Alert.alert('Delete Exercise', `Are you sure you want to delete "${exerciseName}"? \nNOTE: Deleting an custom exercise will delete the exercise from all workouts and logs associated with it.`, [
             {
                 text: 'Cancel',
                 style: 'cancel',
@@ -43,7 +43,7 @@ export default function CreateExerciseScreen() {
             <View style={styles.exerciseCard}>
                 <View style={[styles.accentBar, { backgroundColor: accent }]} />
                 <View style={styles.cardContent}>
-                    <View style={[styles.iconContainer, { backgroundColor: accentRgba, borderColor: accentRgba.replace('0.15', '0.3') }]}>
+                    <View style={[styles.iconContainer, { borderColor: accentRgba.replace('0.15', '0.8') }]}>
                         <Dumbbell size={24} color={accent} strokeWidth={2} />
                     </View>
 
@@ -68,9 +68,11 @@ export default function CreateExerciseScreen() {
                         </View>
                     </View>
 
+                    {/*
                     <TouchableOpacity style={styles.deleteButton} onPress={() => handleDelete(item.name)} activeOpacity={0.7}>
                         <Trash2 size={20} color="#FF3B30" strokeWidth={2} />
                     </TouchableOpacity>
+                    */}
                 </View>
             </View>
         )
@@ -97,7 +99,7 @@ export default function CreateExerciseScreen() {
             }
 
             <TouchableOpacity style={[styles.fab, { shadowColor: accent }]} onPress={() => router.push('/settingsScreens/createExercise/createExercise2')} activeOpacity={0.9}>
-                <LinearGradient colors={mode ? ['#1A7FE0', '#2f80ed', '#3DAFFF'] : ['#1a9a1a', '#22C922', '#3dd63d']} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={styles.gradientFab}>
+                <LinearGradient colors={['#1F6FD8', '#2F80ED', '#4A95F3']} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={styles.gradientFab}>
                     <Ionicons name="add" size={50} color="white" />
                 </LinearGradient>
             </TouchableOpacity>
@@ -111,7 +113,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#121212',
     },
     listContainer: {
-        padding: 20,
+        padding: 25,
         paddingBottom: 200,
     },
     emptyContainer: {
@@ -119,12 +121,13 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         paddingHorizontal: 40,
+        paddingBottom: 100,
     },
     emptyIconCircle: {
         width: 120,
         height: 120,
         borderRadius: 60,
-        backgroundColor: '#1e1e1e',
+        backgroundColor: '#282A2C',
         borderWidth: 3,
         justifyContent: 'center',
         alignItems: 'center',
@@ -167,7 +170,7 @@ const styles = StyleSheet.create({
         width: 48,
         height: 48,
         borderRadius: 24,
-        borderWidth: 1,
+        borderWidth: 1.5,
         justifyContent: 'center',
         alignItems: 'center',
     },

@@ -1,17 +1,27 @@
 import DatePicker from '@/components/NeutralComponents/DatePicker'
 import { useNutrition } from '@/context/NutritionContext'
+import { isDateAfterToday } from '@/lib/utils/dateHelper'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { Calendar } from 'lucide-react-native'
 import { useState } from 'react'
-import { KeyboardAvoidingView, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, Keyboard, KeyboardAvoidingView, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 export default function DateModal() {
     const { selectedDate, setSelectedDate } = useNutrition()
     const router = useRouter()
     const [tempDate, setTempDate] = useState(selectedDate)
 
+    const showInvalidDateAlert = () => {
+        Keyboard.dismiss()
+        Alert.alert('Invalid Date', "You can't view nutrition for future dates. Please select today or an earlier date.")
+    }
+
     const handleConfirm = () => {
+        if (isDateAfterToday(tempDate)) {
+            showInvalidDateAlert()
+            return
+        }
         setSelectedDate(tempDate)
         router.back()
     }
@@ -83,7 +93,7 @@ const styles = StyleSheet.create({
         width: 80,
         height: 80,
         borderRadius: 40,
-        backgroundColor: '#1e1e1e',
+        backgroundColor: '#282A2C',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
@@ -93,7 +103,7 @@ const styles = StyleSheet.create({
         fontSize: 24,
         color: '#FFF',
         textAlign: 'center',
-        marginBottom: 6,
+        marginBottom: 4,
         fontFamily: 'Poppins_600SemiBold',
         letterSpacing: -0.5,
     },

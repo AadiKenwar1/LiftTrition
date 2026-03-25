@@ -13,7 +13,8 @@ Respond ONLY with JSON in this exact format:
 {"calories":number,"protein":number,"carbs":number,"fats":number}
 Use realistic serving sizes. Protein, carbs, fats in grams.`
 
-const VISION_PROMPT = `Analyze this food photo. List each distinct food item. For each: COUNT/QUANTITY and nutrition PER UNIT (protein, carbs, fats, calories in grams/kcal).
+const VISION_PROMPT = `You help users log meals in a fitness app (not medical advice). Look at visible foods and drinks only. List each distinct item. For each: COUNT/QUANTITY and nutrition PER UNIT (protein, carbs, fats, calories in grams/kcal).
+If no food is clearly visible, respond with JSON using "ingredients": [] and a short "name" like "No food visible".
 Respond ONLY with JSON:
 {"name":string,"ingredients":[{"name":string,"quantity":number,"protein":number,"carbs":number,"fats":number,"calories":number}]}
 Values per ingredient are PER ONE UNIT. quantity = how many in the photo.`
@@ -44,6 +45,7 @@ serve(async (req: Request) => {
             {
                 model: 'gpt-4o',
                 temperature: 0.2,
+                response_format: { type: 'json_object' },
                 messages: [
                     {
                         role: 'user',
@@ -58,6 +60,7 @@ serve(async (req: Request) => {
             {
                 model: 'gpt-4-turbo',
                 temperature: 0.2,
+                response_format: { type: 'json_object' },
                 messages: [
                     { role: 'system', content: TEXT_SYSTEM },
                     { role: 'user', content: TEXT_USER(body.foodName) },
@@ -78,8 +81,17 @@ serve(async (req: Request) => {
     }
 
     const data = await res.json()
-    const content = data?.choices?.[0]?.message?.content
-    if (!content) return new Response(JSON.stringify({ error: 'Invalid response' }), { status: 502 })
+    const message = data?.choices?.[0]?.message
+    const refusal = message?.refusal as string | undefined
+    const content = message?.content as string | null | undefined
+
+    if (refusal) {
+        return new Response(JSON.stringify({ error: 'refused', message: refusal }), { status: 422 })
+    }
+    if (!content) {
+        console.error('[fetchOpenAI] Missing message.content', JSON.stringify(data))
+        return new Response(JSON.stringify({ error: 'Invalid response' }), { status: 502 })
+    }
 
     return new Response(content, { headers: { 'Content-Type': 'application/json' } })
 })

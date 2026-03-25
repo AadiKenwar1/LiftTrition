@@ -23,7 +23,7 @@ export default function AddExerciseModal() {
             {/* Header Section */}
             <View style={styles.header}>
                 <View style={styles.iconCircle}>
-                    <Dumbbell size={48} color="#2f80ed" strokeWidth={2} />
+                    <Dumbbell size={40} color="#2f80ed" strokeWidth={2} />
                 </View>
                 <Text style={styles.title}>Add Exercise</Text>
                 <Text style={styles.subtitle}>Choose from our exercise library</Text>
@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
         width: 80,
         height: 80,
         borderRadius: 40,
-        backgroundColor: '#1e1e1e',
+        backgroundColor: '#282A2C',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
         fontSize: 24,
         color: '#FFF',
         textAlign: 'center',
-        marginBottom: 6,
+        marginBottom: 4,
         fontFamily: 'Poppins_600SemiBold',
         letterSpacing: -0.5,
     },

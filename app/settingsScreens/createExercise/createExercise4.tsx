@@ -1,8 +1,8 @@
-import { useSettings } from '@/context/SettingsContext'
 import ScrollableList, { ScrollableListItem } from '@/components/NeutralComponents/ScrollableList'
-import { ADVANCED_MUSCLE_GROUPS, SIMPLE_MUSCLE_GROUPS } from '@/context/WorkoutContext/exerciseLibrary/constants'
+import { useSettings } from '@/context/SettingsContext'
+import { MUSCLE_GROUPS } from '@/context/WorkoutContext/exerciseLibrary/constants'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import { Dumbbell } from 'lucide-react-native'
+import { BicepsFlexed } from 'lucide-react-native'
 import { useMemo, useState } from 'react'
 import { Keyboard, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
 
@@ -18,17 +18,13 @@ export default function CreateExercise4Screen() {
         exerciseName: string
         isCompound: string
         mainMuscle: string
-        muscleView: string
     }>()
     const [selectedSecondaryMuscles, setSelectedSecondaryMuscles] = useState<string[]>([])
 
-    const muscleView = (params.muscleView || 'simple') as 'simple' | 'advanced'
-    const currentMuscleList = muscleView === 'simple' ? SIMPLE_MUSCLE_GROUPS : ADVANCED_MUSCLE_GROUPS
-
     // Filter out the main muscle from the list
     const filteredMuscleList = useMemo(() => {
-        return currentMuscleList.filter((muscle) => muscle !== params.mainMuscle)
-    }, [currentMuscleList, params.mainMuscle])
+        return MUSCLE_GROUPS.filter((muscle) => muscle !== params.mainMuscle)
+    }, [params.mainMuscle])
 
     const muscleListItems: ScrollableListItem[] = useMemo(() => {
         return filteredMuscleList.map((muscle) => ({
@@ -67,24 +63,18 @@ export default function CreateExercise4Screen() {
             <View style={styles.container}>
                 <View style={styles.content}>
                     {/* Icon */}
-                    <View style={[styles.iconCircle, { borderColor: accent }]}>
-                        <Dumbbell size={60} color={accent} strokeWidth={2} />
+                    <View style={styles.iconCircle}>
+                        <BicepsFlexed size={60} color="#2f80ed" strokeWidth={2} />
                     </View>
-
                     {/* Title */}
-                    <Text style={styles.titleText}>Select Secondary Muscles</Text>
+                    <Text style={styles.titleText}>Select Secondary Muscles (optional)</Text>
 
                     {/* Subtitle */}
                     <Text style={styles.subtitleText}>Tap to select. Tap again to deselect.</Text>
 
                     {/* Muscle List */}
                     <View style={styles.listContainer}>
-                        <ScrollableList
-                            data={muscleListItems}
-                            searchPlaceholder="Search muscles..."
-                            onPress={(item) => handleMusclePress(item.title)}
-                            selectedIds={selectedSecondaryMuscles}
-                        />
+                        <ScrollableList data={muscleListItems} searchPlaceholder="Search muscles..." onPress={(item) => handleMusclePress(item.title)} selectedIds={selectedSecondaryMuscles} />
                         {selectedSecondaryMuscles.length > 0 && (
                             <View style={[styles.selectedIndicator, { backgroundColor: accentRgba, borderColor: accent }]}>
                                 <Text style={[styles.selectedText, { color: accent }]}>
@@ -97,9 +87,6 @@ export default function CreateExercise4Screen() {
 
                 {/* Navigation Buttons */}
                 <View style={styles.buttonContainer}>
-                    <TouchableOpacity style={styles.backButton} onPress={() => router.back()} activeOpacity={0.8}>
-                        <Text style={styles.backButtonText}>Back</Text>
-                    </TouchableOpacity>
                     <TouchableOpacity style={[styles.nextButton, { backgroundColor: accent, shadowColor: accent }]} onPress={handleNext} activeOpacity={0.8}>
                         <Text style={styles.nextButtonText}>Next</Text>
                     </TouchableOpacity>
@@ -114,7 +101,7 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#121212',
         paddingHorizontal: 25,
-        paddingTop: 20,
+        paddingTop: 4,
         paddingBottom: 40,
         justifyContent: 'space-between',
     },
@@ -132,10 +119,11 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         marginBottom: 12,
         marginTop: 5,
-        backgroundColor: '#1e1e1e',
+        backgroundColor: '#282A2C',
+        borderColor: '#2f80ed',
     },
     titleText: {
-        fontSize: 24,
+        fontSize: 28,
         color: '#FFF',
         letterSpacing: -0.5,
         marginBottom: 4,
@@ -143,7 +131,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_600SemiBold',
     },
     subtitleText: {
-        fontSize: 14,
+        fontSize: 16,
         color: '#aaa',
         textAlign: 'center',
         lineHeight: 20,

@@ -73,7 +73,7 @@ export function getFatigueFeedback(percentage: number): string {
     if (percentage > 0) {
         return 'Light work today, but it all adds up. Staying consistent is what matters.'
     }
-    return 'Rest day. Sometimes the best thing you can do is take a break.'
+    return "No training today so far. If today is a rest day, that's great! If not, get moving and get your workout in."
 }
 
 //Calculate fatigue factor for user added exercise

@@ -43,18 +43,23 @@ export default function CreateExercise5Screen() {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={styles.container}>
                 <View style={styles.content}>
-                    {/* Icon */}
                     <View style={styles.iconCircle}>
                         <Dumbbell size={60} color="#2f80ed" strokeWidth={2} />
                     </View>
 
                     {/* Title */}
                     <Text style={styles.titleText}>Select Equipment Type</Text>
+                    <Text style={styles.subtitleText}>What equipment will be used for this exercise?</Text>
 
                     {/* Equipment Buttons */}
                     <View style={styles.equipmentContainer}>
                         {EQUIPMENT_TYPES.map((equipment) => (
-                            <TouchableOpacity key={equipment} style={[styles.equipmentButton, selectedEquipment === equipment && { backgroundColor: accentRgba, borderColor: accent }]} onPress={() => setSelectedEquipment(equipment)} activeOpacity={0.7}>
+                            <TouchableOpacity
+                                key={equipment}
+                                style={[styles.equipmentButton, selectedEquipment === equipment && { backgroundColor: accentRgba, borderColor: accent }]}
+                                onPress={() => setSelectedEquipment(equipment)}
+                                activeOpacity={0.7}
+                            >
                                 <Text style={[styles.equipmentText, selectedEquipment === equipment && styles.equipmentTextSelected]}>{equipment}</Text>
                             </TouchableOpacity>
                         ))}
@@ -63,9 +68,6 @@ export default function CreateExercise5Screen() {
 
                 {/* Navigation Buttons */}
                 <View style={styles.buttonContainer}>
-                    <TouchableOpacity style={styles.backButton} onPress={() => router.back()} activeOpacity={0.8}>
-                        <Text style={styles.backButtonText}>Back</Text>
-                    </TouchableOpacity>
                     <TouchableOpacity style={[styles.nextButton, { backgroundColor: accent, shadowColor: accent }]} onPress={handleNext} activeOpacity={0.8}>
                         <Text style={styles.nextButtonText}>Next</Text>
                     </TouchableOpacity>
@@ -80,7 +82,7 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#121212',
         paddingHorizontal: 25,
-        paddingTop: 20,
+        paddingTop: 12,
         paddingBottom: 40,
     },
     content: {
@@ -96,24 +98,24 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         marginBottom: 12,
         marginTop: 5,
-        backgroundColor: '#1e1e1e',
+        backgroundColor: '#282A2C',
         borderColor: '#2f80ed',
     },
     titleText: {
         fontSize: 24,
         color: '#FFF',
         letterSpacing: -0.5,
-        marginBottom: 24,
+        marginBottom: 4,
         textAlign: 'center',
         fontFamily: 'Poppins_600SemiBold',
     },
     subtitleText: {
-        fontSize: 14,
+        fontSize: 16,
         color: '#aaa',
         textAlign: 'center',
         lineHeight: 20,
         letterSpacing: 0.2,
-        marginBottom: 28,
+        marginBottom: 12,
         paddingHorizontal: 20,
         fontFamily: 'Poppins_400Regular',
     },

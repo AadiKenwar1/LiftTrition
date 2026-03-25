@@ -59,7 +59,16 @@ export default function SavedNutritionModal() {
                 <Text style={styles.subtitle}>Your frequently used meals</Text>
 
                 {/* Saved Entries List */}
-                <FlatList data={savedNutritionEntries} renderItem={({ item }) => <SavedEntry name={item.name} calories={item.calories} protein={item.protein} carbs={item.carbs} fats={item.fats} onAddPress={() => handleAddSavedItem(item)} onDeletePress={() => handleUnsaveNutrition(item.id)} />} keyExtractor={(item) => item.id} ListEmptyComponent={renderEmptyState} contentContainerStyle={styles.listContent} showsVerticalScrollIndicator={false} />
+                <FlatList
+                    data={savedNutritionEntries}
+                    renderItem={({ item }) => (
+                        <SavedEntry name={item.name} calories={item.calories} protein={item.protein} carbs={item.carbs} fats={item.fats} onAddPress={() => handleAddSavedItem(item)} onDeletePress={() => handleUnsaveNutrition(item.id)} />
+                    )}
+                    keyExtractor={(item) => item.id}
+                    ListEmptyComponent={renderEmptyState}
+                    contentContainerStyle={styles.listContent}
+                    showsVerticalScrollIndicator={false}
+                />
             </View>
         </KeyboardAvoidingView>
     )
@@ -99,7 +108,7 @@ const styles = StyleSheet.create({
         width: 80,
         height: 80,
         borderRadius: 40,
-        backgroundColor: '#1e1e1e',
+        backgroundColor: '#282A2C',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
@@ -109,12 +118,12 @@ const styles = StyleSheet.create({
         fontSize: 24,
         color: '#FFF',
         textAlign: 'center',
-        marginBottom: 6,
+        marginBottom: 4,
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },
     subtitle: {
-        fontSize: 14,
+        fontSize: 16,
         color: '#aaa',
         textAlign: 'center',
         marginBottom: 20,

@@ -1,84 +1,67 @@
-import { useNutrition } from '@/context/NutritionContext';
-import { NutritionEntry } from '@/context/NutritionContext/types';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Pencil } from 'lucide-react-native';
-import { useState } from 'react';
-import {
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
-} from 'react-native';
+import { useNutrition } from '@/context/NutritionContext'
+import { NutritionEntry } from '@/context/NutritionContext/types'
+import { LinearGradient } from 'expo-linear-gradient'
+import { useLocalSearchParams, useRouter } from 'expo-router'
+import { Pencil } from 'lucide-react-native'
+import { useState } from 'react'
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
 export default function EditManualEntry() {
-    const router = useRouter();
-    const { entry: entryParam } = useLocalSearchParams<{ entry: string }>();
-    const { handleEditNutrition } = useNutrition();
+    const router = useRouter()
+    const { entry: entryParam } = useLocalSearchParams<{ entry: string }>()
+    const { handleEditNutrition } = useNutrition()
 
     // Normalize param (Expo Router can return string | string[] | undefined)
-    const entryStr = typeof entryParam === 'string' ? entryParam : entryParam?.[0];
+    const entryStr = typeof entryParam === 'string' ? entryParam : entryParam?.[0]
     if (!entryStr) {
-        router.back();
-        return null;
+        router.back()
+        return null
     }
 
     // Parse entry from route params and rehydrate dates
-    const raw = JSON.parse(entryStr);
+    const raw = JSON.parse(entryStr)
     const parsedEntry: NutritionEntry = {
         ...raw,
         date: new Date(raw.date),
         createdAt: new Date(raw.createdAt),
         updatedAt: new Date(raw.updatedAt),
-    };
+    }
 
-    const [name, setName] = useState(parsedEntry.name);
-    const [focusedField, setFocusedField] = useState<string | null>(null);
-    const [calories, setCalories] = useState(parsedEntry.calories.toString());
-    const [protein, setProtein] = useState(parsedEntry.protein.toString());
-    const [carbs, setCarbs] = useState(parsedEntry.carbs.toString());
-    const [fats, setFats] = useState(parsedEntry.fats.toString());
+    const [name, setName] = useState(parsedEntry.name)
+    const [focusedField, setFocusedField] = useState<string | null>(null)
+    const [calories, setCalories] = useState(parsedEntry.calories.toString())
+    const [protein, setProtein] = useState(parsedEntry.protein.toString())
+    const [carbs, setCarbs] = useState(parsedEntry.carbs.toString())
+    const [fats, setFats] = useState(parsedEntry.fats.toString())
 
     const macroFields = [
         { label: 'Calories', value: calories, setter: setCalories, key: 'calories', unit: 'kcal' },
-        { label: 'Protein',  value: protein,  setter: setProtein,  key: 'protein',  unit: 'g' },
-        { label: 'Carbs',    value: carbs,    setter: setCarbs,    key: 'carbs',    unit: 'g' },
-        { label: 'Fats',     value: fats,     setter: setFats,     key: 'fats',     unit: 'g' },
-    ] as const;
+        { label: 'Protein', value: protein, setter: setProtein, key: 'protein', unit: 'g' },
+        { label: 'Carbs', value: carbs, setter: setCarbs, key: 'carbs', unit: 'g' },
+        { label: 'Fats', value: fats, setter: setFats, key: 'fats', unit: 'g' },
+    ] as const
 
     function handleSave() {
         const updatedEntry: NutritionEntry = {
             ...parsedEntry,
             name: name.trim() || parsedEntry.name,
-            protein:  parseFloat(protein)  || 0,
-            carbs:    parseFloat(carbs)    || 0,
-            fats:     parseFloat(fats)     || 0,
+            protein: parseFloat(protein) || 0,
+            carbs: parseFloat(carbs) || 0,
+            fats: parseFloat(fats) || 0,
             calories: parseFloat(calories) || 0,
-        };
-        handleEditNutrition(parsedEntry.id, updatedEntry);
-        router.back();
+        }
+        handleEditNutrition(parsedEntry.id, updatedEntry)
+        router.back()
     }
 
     return (
-        <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={styles.container}
-        >
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
             {/* Drag Handle */}
             <View style={styles.handleContainer}>
                 <View style={styles.handle} />
             </View>
 
-            <ScrollView
-                style={styles.scrollView}
-                contentContainerStyle={styles.content}
-                showsVerticalScrollIndicator={false}
-                keyboardShouldPersistTaps="handled"
-            >
+            <ScrollView style={styles.scrollView} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
                 {/* Icon */}
                 <View style={styles.iconContainer}>
                     <View style={styles.iconCircle}>
@@ -114,10 +97,7 @@ export default function EditManualEntry() {
                                 <Text style={styles.macroUnit}>({unit === 'kcal' ? 'kcal' : 'g'})</Text>
                             </View>
                             <TextInput
-                                style={[
-                                    styles.macroInput,
-                                    focusedField === key && styles.inputFocused,
-                                ]}
+                                style={[styles.macroInput, focusedField === key && styles.inputFocused]}
                                 value={value}
                                 onChangeText={setter}
                                 keyboardType="numeric"
@@ -131,23 +111,14 @@ export default function EditManualEntry() {
                 </View>
 
                 {/* Save Button */}
-                <TouchableOpacity
-                    onPress={handleSave}
-                    activeOpacity={0.8}
-                    style={styles.saveButtonTouchable}
-                >
-                    <LinearGradient
-                        colors={['#3CB855', '#22C922', '#5CE073']}
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 1 }}
-                        style={styles.saveButton}
-                    >
+                <TouchableOpacity onPress={handleSave} activeOpacity={0.8} style={styles.saveButtonTouchable}>
+                    <LinearGradient colors={['#3CB855', '#22C922', '#5CE073']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.saveButton}>
                         <Text style={styles.saveButtonText}>Save Changes</Text>
                     </LinearGradient>
                 </TouchableOpacity>
             </ScrollView>
         </KeyboardAvoidingView>
-    );
+    )
 }
 
 const styles = StyleSheet.create({
@@ -186,7 +157,7 @@ const styles = StyleSheet.create({
         width: 80,
         height: 80,
         borderRadius: 40,
-        backgroundColor: '#1e1e1e',
+        backgroundColor: '#282A2C',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
@@ -196,12 +167,12 @@ const styles = StyleSheet.create({
         fontSize: 24,
         color: '#FFF',
         textAlign: 'center',
-        marginBottom: 6,
+        marginBottom: 4,
         fontFamily: 'Poppins_600SemiBold',
         letterSpacing: -0.5,
     },
     subtitle: {
-        fontSize: 14,
+        fontSize: 16,
         color: '#aaa',
         textAlign: 'center',
         marginBottom: 20,
@@ -288,4 +259,4 @@ const styles = StyleSheet.create({
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },
-});
+})

@@ -1,6 +1,6 @@
 import { useSettings } from '@/context/SettingsContext'
 import { router } from 'expo-router'
-import { Dumbbell } from 'lucide-react-native'
+import { Activity } from 'lucide-react-native'
 import { useState } from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
@@ -35,7 +35,7 @@ export default function AdjustTrainingScreen() {
         <View style={styles.container}>
             <View style={styles.topSection}>
                 <View style={[styles.iconCircle, { borderColor: accent }]}>
-                    <Dumbbell size={72} color={'#2f80ed'} strokeWidth={2} />
+                    <Activity size={72} color={'#2f80ed'} strokeWidth={2} />
                 </View>
                 <Text style={styles.titleText}>Update Your Activity Level</Text>
                 <Text style={styles.subtitleText}>Updates Nutrition Goals and Fatigue</Text>
@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_500Medium',
     },
     saveButton: {
-        backgroundColor: '#D4E4FF',
+        backgroundColor: '#2f80ed',
         width: '100%',
         height: 60,
         borderRadius: 16,
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
     },
     saveButtonText: {
         fontSize: 16,
-        color: 'black',
+        color: '#fff',
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },

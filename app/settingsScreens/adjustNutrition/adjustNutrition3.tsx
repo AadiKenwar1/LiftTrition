@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
     saveButton: {
         flex: 1,
         height: 60,
-        backgroundColor: '#D4F5D4',
+        backgroundColor: '#22C922',
         borderRadius: 16,
         justifyContent: 'center',
         alignItems: 'center',
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
     },
     saveButtonText: {
         fontSize: 16,
-        color: 'black',
+        color: '#fff',
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },

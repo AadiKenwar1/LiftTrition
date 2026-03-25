@@ -47,7 +47,19 @@ export default function NoteModal() {
 
                         {/* Text Input */}
                         <View style={styles.inputContainer}>
-                            <TextInput style={[styles.input, isFocused && styles.inputFocused]} placeholder="Add a note..." placeholderTextColor="#666" value={note} onChangeText={setNote} onFocus={() => setIsFocused(true)} onBlur={() => setIsFocused(false)} multiline numberOfLines={6} textAlignVertical="top" autoFocus />
+                            <TextInput
+                                style={[styles.input, isFocused && styles.inputFocused]}
+                                placeholder="Add a note..."
+                                placeholderTextColor="#666"
+                                value={note}
+                                onChangeText={setNote}
+                                onFocus={() => setIsFocused(true)}
+                                onBlur={() => setIsFocused(false)}
+                                multiline
+                                numberOfLines={6}
+                                textAlignVertical="top"
+                                autoFocus
+                            />
                         </View>
 
                         {/* Auto-save indicator */}
@@ -95,7 +107,7 @@ const styles = StyleSheet.create({
         width: 80,
         height: 80,
         borderRadius: 40,
-        backgroundColor: '#1e1e1e',
+        backgroundColor: '#282A2C',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
@@ -105,12 +117,12 @@ const styles = StyleSheet.create({
         fontSize: 24,
         color: '#FFF',
         textAlign: 'center',
-        marginBottom: 6,
+        marginBottom: 4,
         fontFamily: 'Poppins_600SemiBold',
         letterSpacing: -0.5,
     },
     subtitle: {
-        fontSize: 14,
+        fontSize: 16,
         color: '#aaa',
         textAlign: 'center',
         marginBottom: 20,

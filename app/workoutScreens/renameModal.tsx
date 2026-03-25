@@ -56,7 +56,17 @@ export default function RenameModal() {
 
                 {/* Input Field */}
                 <View style={styles.inputContainer}>
-                    <TextInput style={[styles.input, isFocused && styles.inputFocused]} placeholder="Workout name" placeholderTextColor="#666" value={workoutName} onChangeText={setWorkoutName} onFocus={() => setIsFocused(true)} onBlur={() => setIsFocused(false)} autoFocus blurOnSubmit={false} />
+                    <TextInput
+                        style={[styles.input, isFocused && styles.inputFocused]}
+                        placeholder="Workout name"
+                        placeholderTextColor="#666"
+                        value={workoutName}
+                        onChangeText={setWorkoutName}
+                        onFocus={() => setIsFocused(true)}
+                        onBlur={() => setIsFocused(false)}
+                        autoFocus
+                        blurOnSubmit={false}
+                    />
                 </View>
 
                 {/* Rename Button */}

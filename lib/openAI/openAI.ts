@@ -22,6 +22,17 @@ async function callEdgeFunction(body: { type: 'text'; foodName: string } | { typ
 
     if (!res.ok) {
         const text = await res.text()
+        let parsed: { error?: string } | null = null
+        try {
+            parsed = JSON.parse(text) as { error?: string }
+        } catch {
+            // not JSON
+        }
+        if (parsed?.error === 'refused') {
+            throw new Error(
+                'Could not analyze this photo. Try a clearer picture of your food, or add a manual entry.',
+            )
+        }
         throw new Error(`Edge function error: ${res.status} - ${text}`)
     }
 

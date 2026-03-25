@@ -62,10 +62,13 @@ export default function AnalyzingModal() {
             // Success! Dismiss all modals and return to home
             router.dismissAll()
         } catch (error: any) {
-            // Failed - show alert then go home
+            const msg =
+                typeof error?.message === 'string' && error.message.length > 0
+                    ? error.message
+                    : "Sorry we weren't able to analyze your photo. Please try again."
             Alert.alert(
                 'Analysis Failed',
-                error.message || 'Unable to analyze photo. Please try again.',
+                msg,
                 [
                     {
                         text: 'Try Again',
