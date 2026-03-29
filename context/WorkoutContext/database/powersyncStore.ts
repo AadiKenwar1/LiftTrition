@@ -287,9 +287,20 @@ export async function saveWorkoutData(
                        id, user_id, workout_id, exercise_id, date, weight, reps, rpe, created_at, updated_at
                      )
                      VALUES (
-                       ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now')
+                       ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
                      )`,
-                    [log.id, row.user_id, row.workout_id, row.exercise_id, row.date, row.weight, row.reps, row.rpe]
+                    [
+                        log.id,
+                        row.user_id,
+                        row.workout_id,
+                        row.exercise_id,
+                        row.date,
+                        row.weight,
+                        row.reps,
+                        row.rpe,
+                        row.created_at,
+                        row.updated_at,
+                    ]
                 );
             }
         }

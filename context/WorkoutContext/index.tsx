@@ -10,7 +10,7 @@ import { calculateFatiguePercentage, getFatigueFeedback } from './functions/fati
 import { getOneRepMaxData } from './functions/graphFunctions'
 import { addLog, deleteLog } from './functions/logFunctions'
 import { getVolumeData } from './functions/volumeFunctions'
-import { addWorkout, archiveWorkout, deleteWorkout, renameWorkout, updateWorkoutNote, updateWorkoutOrder } from './functions/workoutFunctions'
+import { addWorkout, archiveWorkout, deleteWorkout, duplicateWorkout, renameWorkout, updateWorkoutNote, updateWorkoutOrder } from './functions/workoutFunctions'
 import { CreateExerciseData, Exercise, ExerciseLib, Log, Workout, WorkoutContextInterface } from './types'
 
 const WorkoutContext = createContext<WorkoutContextInterface | undefined>(undefined)
@@ -29,13 +29,19 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
 
     //Wrapper Functions
     const handleAddWorkout = (name: string, userId: string) => addWorkout(name, userId, setWorkouts)
+    const handleDuplicateWorkout = (id: string) => {
+        if (!userID) return
+        duplicateWorkout(id, userID, setWorkouts, setExercises)
+    }
     const handleDeleteWorkout = async (id: string) => {
         deleteWorkout(id, setWorkouts, setExercises, setLogs)
         // Delete from PowerSync (exercises and logs will cascade delete)
         if (userID) {
             try {
                 await powerSync.execute('DELETE FROM workouts WHERE id = ?', [id])
-            } catch {}
+            } catch (e) {
+                console.warn('[WorkoutContext] Failed to delete workout from PowerSync', e)
+            }
         }
     }
     const handleArchiveWorkout = (id: string, archived: boolean) => archiveWorkout(id, archived, setWorkouts)
@@ -49,7 +55,9 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
         if (userID) {
             try {
                 await powerSync.execute('DELETE FROM exercises WHERE id = ?', [id])
-            } catch {}
+            } catch (e) {
+                console.warn('[WorkoutContext] Failed to delete exercise from PowerSync', e)
+            }
         }
     }
     const handleArchiveExercise = (id: string, workoutID: string, archived: boolean) => archiveExercise(id, workoutID, archived, setExercises)
@@ -61,7 +69,9 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
         if (userID) {
             try {
                 await powerSync.execute('DELETE FROM logs WHERE id = ?', [id])
-            } catch {}
+            } catch (e) {
+                console.warn('[WorkoutContext] Failed to delete log from PowerSync', e)
+            }
         }
     }
     const handleCalculateFatiguePercentage = (numDays: number, activityLevel: string) => calculateFatiguePercentage(numDays, logs, exercises, fullExerciseLib, activityLevel)
@@ -74,7 +84,9 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
         if (userID) {
             try {
                 await powerSync.execute('DELETE FROM user_exercises WHERE user_id = ? AND name = ?', [userID, exerciseName])
-            } catch {}
+            } catch (e) {
+                console.warn('[WorkoutContext] Failed to delete user exercise from PowerSync', e)
+            }
         }
     }
 
@@ -99,7 +111,8 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
             try {
                 const stored = await AsyncStorage.getItem(`lastExercise:${userID}`)
                 setLastExercise(stored ?? '')
-            } catch {
+            } catch (e) {
+                console.warn('[WorkoutContext] Failed to load lastExercise from AsyncStorage', e)
                 setLastExercise('')
             }
         }
@@ -133,7 +146,8 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
                 setUserExercises(userExercises)
                 setHasLoadedUserData(hasData)
                 setLoaded(true)
-            } catch {
+            } catch (e) {
+                console.warn('[WorkoutContext] Failed to load workout data from PowerSync', e)
                 setWorkouts([])
                 setExercises([])
                 setLogs([])
@@ -172,7 +186,9 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
                 } else {
                     await AsyncStorage.removeItem(`lastExercise:${userID}`)
                 }
-            } catch {}
+            } catch (e) {
+                console.warn('[WorkoutContext] Failed to persist lastExercise to AsyncStorage', e)
+            }
         }
 
         saveLastExercise()
@@ -192,6 +208,7 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
                 setUserExercises,
                 setLastExercise,
                 handleAddWorkout,
+                handleDuplicateWorkout,
                 handleDeleteWorkout,
                 handleArchiveWorkout,
                 handleRenameWorkout,

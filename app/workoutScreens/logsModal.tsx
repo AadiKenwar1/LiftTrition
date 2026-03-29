@@ -1,4 +1,5 @@
-import DatePicker from '@/components/NeutralComponents/DatePicker'
+import LogDateModal from '@/components/WorkoutComponents/LogDateModal'
+import LogHistoryList from '@/components/WorkoutComponents/LogHistoryList'
 import { useAuth } from '@/context/AuthContext'
 import { useSettings } from '@/context/SettingsContext'
 import { useWorkout } from '@/context/WorkoutContext'
@@ -6,13 +7,9 @@ import { Log } from '@/context/WorkoutContext/types'
 import { formatDateOrToday, getDateKey, isDateAfterToday, sortByCreatedAtDesc, sortByDateDesc } from '@/lib/utils/dateHelper'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useLocalSearchParams } from 'expo-router'
-import { Calendar, Check, Trash } from 'lucide-react-native'
+import { Calendar, Check } from 'lucide-react-native'
 import { useEffect, useRef, useState } from 'react'
-import { Alert, Animated, FlatList, Keyboard, KeyboardAvoidingView, LayoutAnimation, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, UIManager, View } from 'react-native'
-
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-    UIManager.setLayoutAnimationEnabledExperimental(true)
-}
+import { Alert, Animated, FlatList, Keyboard, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
 
 export default function LogsModal() {
     const { handleAddLog, handleDeleteLog, logs, setLastExercise } = useWorkout()
@@ -35,23 +32,14 @@ export default function LogsModal() {
     //State for date choice
     const [selectedLogDate, setSelectedLogDate] = useState(() => new Date())
     const [showDateModal, setShowDateModal] = useState(false)
-    const [tempDate, setTempDate] = useState(() => new Date())
 
     //Animation states
     const [lastAddedLogId, setLastAddedLogId] = useState<string | null>(null)
     const [showAddSuccess, setShowAddSuccess] = useState(false)
-    const [deletingLogId, setDeletingLogId] = useState<string | null>(null)
-    const deleteOpacity = useRef(new Animated.Value(1)).current
-    const deleteTranslateX = useRef(new Animated.Value(0)).current
     const addButtonScale = useRef(new Animated.Value(1)).current
     const pendingAddRef = useRef<{ weight: number; reps: number; dateKey: string } | null>(null)
-    const flatListRef = useRef<FlatList>(null)
+    const flatListRef = useRef<FlatList<Log> | null>(null)
     const clearHighlightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-    // Sync tempDate with selectedLogDate when the date picker modal opens.
-    useEffect(() => {
-        if (showDateModal) setTempDate(selectedLogDate)
-    }, [showDateModal])
 
     // Find the newly added log, highlight it, scroll to it, and clear the highlight after 500ms (matches add button).
     useEffect(() => {
@@ -59,7 +47,8 @@ export default function LogsModal() {
         const { weight, reps, dateKey } = pendingAddRef.current
         const matching = logs.filter((log) => log.exerciseID === exerciseId && log.weight === weight && log.reps === reps && getDateKey(log.date) === dateKey).sort(sortByCreatedAtDesc)
         if (matching.length > 0) {
-            const newLogId = matching[0].id
+            const added = matching[0]
+            const newLogId = added.id
             setLastAddedLogId(newLogId)
             pendingAddRef.current = null
             const idx = exerciseLogs.findIndex((l) => l.id === newLogId)
@@ -77,25 +66,6 @@ export default function LogsModal() {
             if (clearHighlightTimeoutRef.current) clearTimeout(clearHighlightTimeoutRef.current)
         }
     }, [])
-
-    // Run the slide-out animation for the log being deleted, then remove it from the list.
-    useEffect(() => {
-        if (!deletingLogId) return
-        deleteOpacity.setValue(1)
-        deleteTranslateX.setValue(0)
-        Animated.parallel([Animated.timing(deleteOpacity, { toValue: 0, duration: 250, useNativeDriver: true }), Animated.timing(deleteTranslateX, { toValue: 100, duration: 250, useNativeDriver: true })]).start(({ finished }) => {
-            if (finished) {
-                LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
-                handleDeleteLog(deletingLogId)
-                setDeletingLogId(null)
-            }
-        })
-    }, [deletingLogId])
-
-    // Triggers the delete animation by setting the log id to delete.
-    const handleDelete = (id: string) => {
-        setDeletingLogId(id)
-    }
 
     const showInvalidDateAlert = () => {
         Keyboard.dismiss()
@@ -121,16 +91,6 @@ export default function LogsModal() {
         }
     }
 
-    // Validates the selected date and confirms it for new log entries (or shows error if future date).
-    const handleDateModalDone = () => {
-        if (isDateAfterToday(tempDate)) {
-            showInvalidDateAlert()
-            return
-        }
-        setSelectedLogDate(tempDate)
-        setShowDateModal(false)
-    }
-
     const isValid = weight.trim() && reps.trim()
 
     // Filter and sort logs (most recent date first, then most recently created first within same calendar day)
@@ -142,42 +102,6 @@ export default function LogsModal() {
             if (dateKeyA !== dateKeyB) return sortByDateDesc(a.date, b.date)
             return sortByCreatedAtDesc(a, b)
         })
-
-    // Renders each log item with optional highlight (newly added) or delete animation.
-    const renderLog = ({ item }: { item: Log }) => {
-        const isDeleting = item.id === deletingLogId
-        const wrapperStyle = [styles.logItemWrapper, item.id === lastAddedLogId && styles.logItemWrapperHighlight]
-        const content = (
-            <View style={wrapperStyle}>
-                <View style={styles.logAccentBar} />
-                <View style={styles.logItem}>
-                    <View style={styles.logContent}>
-                        <View style={styles.logInfo}>
-                            <Text style={styles.logWeight}>
-                                {item.weight} {weightUnit}
-                            </Text>
-                            <Text style={styles.logSeparator}>×</Text>
-                            <Text style={styles.logReps}>{item.reps} reps</Text>
-                            {item.rpe > 0 && (
-                                <>
-                                    <Text style={styles.logSeparator}>•</Text>
-                                    <Text style={styles.logRpe}>RPE {item.rpe}</Text>
-                                </>
-                            )}
-                        </View>
-                        <Text style={styles.logDate}>{formatDateOrToday(item.date, true)}</Text>
-                    </View>
-                    <TouchableOpacity onPress={() => handleDelete(item.id)} style={styles.deleteButton} activeOpacity={0.6} disabled={isDeleting}>
-                        <Trash size={20} color="#FF453A" strokeWidth={2.5} />
-                    </TouchableOpacity>
-                </View>
-            </View>
-        )
-        if (isDeleting) {
-            return <Animated.View style={{ opacity: deleteOpacity, transform: [{ translateX: deleteTranslateX }] }}>{content}</Animated.View>
-        }
-        return content
-    }
 
     return (
         <>
@@ -268,50 +192,39 @@ export default function LogsModal() {
 
                                     {/* Change Date Button */}
                                     <TouchableOpacity onPress={() => setShowDateModal(true)} style={styles.changeDateButton} activeOpacity={0.7}>
-                                        <Calendar size={18} color="#2f80ed" strokeWidth={2.5} />
-                                        <Text style={styles.changeDateButtonText}>{formatDateOrToday(selectedLogDate, true)} (Tap to change date)</Text>
+                                        <View flexDirection="column" alignItems="center">
+                                            <View flexDirection="row" gap={4}>
+                                                <Calendar size={18} color="#2f80ed" strokeWidth={2.5} />
+                                                <Text style={styles.changeDateButtonText}>{formatDateOrToday(selectedLogDate, true)} (Tap to change)</Text>
+                                            </View>
+                                            <Text style={styles.changeDateButtonText}>Logs will be added to the selected date</Text>
+                                        </View>
                                     </TouchableOpacity>
                                 </View>
                             </View>
                         </TouchableWithoutFeedback>
 
-                        {/* Logs List Section - outside TouchableWithoutFeedback so scroll works */}
-                        <View style={styles.logsSection}>
-                            <Text style={styles.logsSectionTitle}>History</Text>
-                            <FlatList
-                                ref={flatListRef}
-                                data={exerciseLogs}
-                                renderItem={renderLog}
-                                keyExtractor={(item) => item.id}
-                                showsVerticalScrollIndicator={false}
-                                contentContainerStyle={styles.logsList}
-                                style={styles.logsFlatList}
-                                keyboardShouldPersistTaps="handled"
-                                onScrollBeginDrag={Keyboard.dismiss}
-                                onScrollToIndexFailed={() => {}}
-                            />
-                        </View>
+                        <LogHistoryList
+                            logs={exerciseLogs}
+                            weightUnit={weightUnit}
+                            lastAddedLogId={lastAddedLogId}
+                            onDeleteConfirmed={handleDeleteLog}
+                            flatListRef={flatListRef}
+                        />
                     </View>
                 </View>
             </KeyboardAvoidingView>
 
-            <Modal visible={showDateModal} transparent animationType="slide" onRequestClose={() => setShowDateModal(false)}>
-                <View style={styles.dateModalOverlay}>
-                    <TouchableWithoutFeedback onPress={() => setShowDateModal(false)}>
-                        <View style={styles.dateModalBackdrop} />
-                    </TouchableWithoutFeedback>
-                    <View style={styles.dateModalContent}>
-                        <Text style={styles.dateModalTitle}>Change Date</Text>
-                        <Text style={styles.dateModalSubtitle}>Logs will be added to the selected date</Text>
-                        <DatePicker selectedDate={tempDate} onDateChange={setTempDate} color="#2f80ed" />
-                        <TouchableOpacity onPress={handleDateModalDone} activeOpacity={0.8} style={styles.dateConfirmTouchable}>
-                            <LinearGradient colors={['#1A7AD4', '#2f80ed']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.dateConfirmButton}>
-                                <Text style={styles.dateConfirmText}>Done</Text>
-                            </LinearGradient>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </Modal>
+            <LogDateModal
+                visible={showDateModal}
+                selectedDate={selectedLogDate}
+                onClose={() => setShowDateModal(false)}
+                onInvalidDate={showInvalidDateAlert}
+                onConfirm={(date) => {
+                    setSelectedLogDate(date)
+                    setShowDateModal(false)
+                }}
+            />
         </>
     )
 }
@@ -444,158 +357,5 @@ const styles = StyleSheet.create({
         color: '#2f80ed',
         fontFamily: 'Poppins_600SemiBold',
         letterSpacing: -0.5,
-    },
-    dateModalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(63, 63, 63, 0.85)',
-        justifyContent: 'flex-end',
-    },
-    dateModalBackdrop: {
-        flex: 1,
-    },
-    dateModalContent: {
-        backgroundColor: '#121212',
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        paddingHorizontal: 24,
-        paddingBottom: 48,
-        paddingTop: 16,
-        maxHeight: '70%',
-    },
-    dateModalTitle: {
-        fontSize: 24,
-        color: '#FFF',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-        marginBottom: 4,
-        textAlign: 'center',
-    },
-    dateModalSubtitle: {
-        fontSize: 16,
-        color: '#aaa',
-        fontFamily: 'Poppins_400Regular',
-        marginBottom: 16,
-        textAlign: 'center',
-    },
-    dateConfirmTouchable: {
-        borderRadius: 12,
-        overflow: 'hidden',
-        marginTop: 16,
-        shadowColor: '#2f80ed',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 8,
-    },
-    dateConfirmButton: {
-        borderRadius: 12,
-        paddingVertical: 16,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    dateConfirmText: {
-        fontSize: 17,
-        color: '#FFF',
-        fontFamily: 'Poppins_600SemiBold',
-        letterSpacing: -0.5,
-    },
-    logsSection: {
-        flex: 1,
-        paddingTop: 16,
-        borderTopWidth: 1,
-        borderTopColor: '#2a2a2a',
-    },
-    logsFlatList: {
-        flex: 1,
-    },
-    logsSectionTitle: {
-        fontSize: 18,
-        color: '#FFF',
-        marginBottom: 12,
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    logsList: {
-        paddingBottom: 20,
-    },
-    logItemWrapper: {
-        flexDirection: 'row',
-        marginBottom: 10,
-        borderRadius: 16,
-        overflow: 'hidden',
-        backgroundColor: '#282A2C',
-        borderWidth: 1,
-        borderColor: '#2a2a2a',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 6,
-        elevation: 6,
-    },
-    logItemWrapperHighlight: {
-        backgroundColor: '#1e3a2f',
-        borderColor: '#22C55E',
-        borderWidth: 2,
-    },
-    logAccentBar: {
-        width: 4,
-        backgroundColor: '#2f80ed',
-        shadowColor: '#2f80ed',
-        shadowOffset: { width: 2, height: 0 },
-        shadowOpacity: 0.5,
-        shadowRadius: 4,
-    },
-    logItem: {
-        flex: 1,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingVertical: 16,
-        paddingHorizontal: 16,
-    },
-    logContent: {
-        flex: 1,
-        marginRight: 12,
-    },
-    logInfo: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-        marginBottom: 4,
-    },
-    logWeight: {
-        fontSize: 17,
-        color: '#FFF',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    logSeparator: {
-        fontSize: 16,
-        color: '#aaa',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    logReps: {
-        fontSize: 17,
-        color: '#FFF',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    logRpe: {
-        fontSize: 14,
-        color: '#aaa',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    logDate: {
-        fontSize: 12,
-        color: '#666',
-        letterSpacing: 0.2,
-        fontFamily: 'Poppins_500Medium',
-    },
-    deleteButton: {
-        padding: 8,
-        justifyContent: 'center',
-        alignItems: 'center',
     },
 })

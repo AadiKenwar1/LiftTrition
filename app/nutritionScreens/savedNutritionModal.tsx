@@ -12,21 +12,21 @@ export default function SavedNutritionModal() {
     const { userID } = useAuth()
     const router = useRouter()
     function handleAddSavedItem(savedItem: NutritionEntry) {
-        const now = new Date(selectedDate)
+        const createdAt = new Date()
         const newNutritionItem: NutritionEntry = {
             id: uuid.v4() as string,
             userId: userID,
             name: savedItem.name,
-            date: now,
-            time: now.getTime(),
+            date: new Date(selectedDate),
+            time: createdAt.getTime(),
             protein: savedItem.protein,
             carbs: savedItem.carbs,
             fats: savedItem.fats,
             calories: savedItem.calories,
             isPhoto: savedItem.isPhoto,
             ingredients: savedItem.ingredients,
-            createdAt: now,
-            updatedAt: now,
+            createdAt,
+            updatedAt: createdAt,
         }
         handleAddNutrition(newNutritionItem)
         router.back()

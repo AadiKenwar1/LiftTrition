@@ -26,6 +26,7 @@ export function PowerSyncGuard({ children }: Props) {
                 await powerSync.waitForFirstSync()
                 setPowerSyncReady(true)
             } catch (error) {
+                console.warn('[PowerSyncGuard] waitForFirstSync failed, continuing anyway', error)
                 setPowerSyncReady(true)
             }
         }

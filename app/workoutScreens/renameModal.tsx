@@ -46,7 +46,7 @@ export default function RenameModal() {
                 {/* Icon Section */}
                 <View style={styles.iconContainer}>
                     <View style={styles.iconCircle}>
-                        <Pencil size={48} color="#2f80ed" strokeWidth={2.5} />
+                        <Pencil size={72} color="#2f80ed" strokeWidth={2.5} />
                     </View>
                 </View>
 
@@ -110,9 +110,9 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     iconCircle: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
+        width: 144,
+        height: 144,
+        borderRadius: 72,
         backgroundColor: '#1e1e1e',
         justifyContent: 'center',
         alignItems: 'center',

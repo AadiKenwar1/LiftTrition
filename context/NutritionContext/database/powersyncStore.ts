@@ -248,7 +248,7 @@ export async function saveNutritionData(
                        is_photo, photo_uri, created_at, updated_at
                      )
                      VALUES (
-                       ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now')
+                       ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
                      )`,
                     [
                         entry.id,
@@ -261,7 +261,9 @@ export async function saveNutritionData(
                         row.fats,
                         row.calories,
                         row.is_photo,
-                        row.photo_uri
+                        row.photo_uri,
+                        row.created_at,
+                        row.updated_at
                     ]
                 );
             }
@@ -335,7 +337,7 @@ export async function saveNutritionData(
                        is_photo, photo_uri, created_at, updated_at
                      )
                      VALUES (
-                       ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now')
+                       ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
                      )`,
                     [
                         entry.id,
@@ -346,7 +348,9 @@ export async function saveNutritionData(
                         row.fats,
                         row.calories,
                         row.is_photo,
-                        row.photo_uri
+                        row.photo_uri,
+                        row.created_at,
+                        row.updated_at
                     ]
                 );
             }

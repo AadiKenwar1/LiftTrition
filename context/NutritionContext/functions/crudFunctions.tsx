@@ -22,7 +22,9 @@ export async function deleteNutrition(
                 'DELETE FROM nutrition_entries WHERE id = ?',
                 [id]
             );
-        } catch {}
+        } catch (e) {
+            console.warn('[NutritionContext] Failed to delete nutrition entry from PowerSync', e)
+        }
     }
 }
 
@@ -51,6 +53,8 @@ export async function unsaveNutrition(
                 'DELETE FROM saved_nutrition_entries WHERE id = ?',
                 [id]
             );
-        } catch {}
+        } catch (e) {
+            console.warn('[NutritionContext] Failed to delete saved nutrition entry from PowerSync', e)
+        }
     }
 }

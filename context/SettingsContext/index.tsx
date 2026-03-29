@@ -62,7 +62,8 @@ export const SettingsProvider = ({ children }: PropsWithChildren) => {
                 setBwProgress(bwProgress)
                 setHasLoadedUserData(hasData)
                 setLoaded(true)
-            } catch {
+            } catch (e) {
+                console.warn('[SettingsContext] Failed to load settings from PowerSync', e)
                 setSettings(defaultSettings)
                 setBwProgress({})
                 setHasLoadedUserData(false)
@@ -83,7 +84,9 @@ export const SettingsProvider = ({ children }: PropsWithChildren) => {
     // Save to PowerSync - ONLY if we've loaded actual user data or user completed onboarding
     useEffect(() => {
         if (!loaded || !userID || !hasLoadedUserData) return
-        saveSettingsAndBw(userID, settings, bwProgress).catch(() => {})
+        saveSettingsAndBw(userID, settings, bwProgress).catch((e) => {
+            console.warn('[SettingsContext] Failed to save settings to PowerSync', e)
+        })
     }, [settings, bwProgress, loaded, userID, hasLoadedUserData])
 
     return (

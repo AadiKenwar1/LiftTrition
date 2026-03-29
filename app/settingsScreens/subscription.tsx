@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         gap: 12,
         width: '100%',
-        marginBottom: 12,
+        marginBottom: 16,
     },
     pricingCard: {
         flex: 1,

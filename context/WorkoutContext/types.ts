@@ -67,6 +67,7 @@ export interface WorkoutContextInterface {
     lastExercise: string
     setLastExercise: (exercise: string) => void
     handleAddWorkout: (name: string, userId: string) => void
+    handleDuplicateWorkout: (id: string) => void
     handleDeleteWorkout: (id: string) => void
     handleArchiveWorkout: (id: string, archived: boolean) => void
     handleRenameWorkout: (id: string, name: string) => void

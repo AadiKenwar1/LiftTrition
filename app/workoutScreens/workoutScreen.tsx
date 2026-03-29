@@ -10,7 +10,7 @@ import { RenderItemParams } from 'react-native-draggable-flatlist'
 
 export default function WorkoutScreen() {
     //Workout Context Functions
-    const { handleUpdateWorkoutOrder, handleArchiveWorkout, handleDeleteWorkout, workouts } = useWorkout()
+    const { handleUpdateWorkoutOrder, handleArchiveWorkout, handleDeleteWorkout, handleDuplicateWorkout, workouts } = useWorkout()
     //Router
     const router = useRouter()
     //Auth Context Functions
@@ -32,6 +32,13 @@ export default function WorkoutScreen() {
                 text: 'Rename',
                 style: 'default',
                 onPress: () => router.push({ pathname: '/workoutScreens/renameModal', params: { workoutId: workout.id } }),
+            },
+            {
+                text: 'Duplicate',
+                style: 'default',
+                onPress: () => {
+                    if (userID) handleDuplicateWorkout(workout.id)
+                },
             },
             {
                 text: 'Archive',

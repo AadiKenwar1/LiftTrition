@@ -15,7 +15,7 @@ export default function Onboarding5Screen() {
         { id: 'sedentary', label: 'Sedentary', subtitle: 'Little to no exercise' },
         { id: 'light', label: 'Light', subtitle: 'Light exercise 1-3 days a week' },
         { id: 'moderate', label: 'Moderate', subtitle: 'Moderate exercise 4-5 days a week' },
-        { id: 'active', label: 'Active', subtitle: 'Moderate exercise 6-7 days a week OR Intensive exercise 3-4 days a week' },
+        { id: 'active', label: 'Active', subtitle: 'Intensive exercise 3-4 days a week or Moderate exercise 6-7 days a week' },
         { id: 'gymrat', label: 'Gym Rat', subtitle: 'Intensive exercise 6-7 days a week' },
     ]
 

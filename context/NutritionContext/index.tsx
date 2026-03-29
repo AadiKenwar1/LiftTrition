@@ -60,6 +60,7 @@ export const NutritionProvider = ({ children }: PropsWithChildren) => {
                 setHasLoadedUserData(hasData);
                 setLoaded(true);
             } catch (error) {
+                console.warn('[NutritionContext] Failed to load nutrition data from PowerSync', error);
                 setNutritionData([]);
                 setSavedNutritionEntries([]);
                 setHasLoadedUserData(false);
@@ -80,7 +81,9 @@ export const NutritionProvider = ({ children }: PropsWithChildren) => {
     useEffect(() => {
         if (!loaded || !userID || !hasLoadedUserData) return;
         
-        saveNutritionData(userID, nutritionData, savedNutritionEntries).catch(() => {});
+        saveNutritionData(userID, nutritionData, savedNutritionEntries).catch((e) => {
+            console.warn('[NutritionContext] Failed to save nutrition data to PowerSync', e);
+        });
     }, [nutritionData, savedNutritionEntries, loaded, userID, hasLoadedUserData]);
 
     return (

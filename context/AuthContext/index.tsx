@@ -63,7 +63,9 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
                 if (session && user) {
                     // PowerSync should auto-reconnect, but we can verify by checking if we can query
                     // This is just a health check - PowerSync handles reconnection internally
-                    powerSync.getAll('SELECT 1 LIMIT 1').catch(() => {});
+                    powerSync.getAll('SELECT 1 LIMIT 1').catch((e) => {
+                        console.warn('[AuthContext] PowerSync health check query failed', e);
+                    });
                 }
             }, 30000); // Check every 30 seconds
             

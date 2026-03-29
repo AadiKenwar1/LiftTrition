@@ -43,7 +43,9 @@ export function BillingProvider({ children }: { children: React.ReactNode }) {
                     // Calling logOut when user is anonymous crashes the app (native exception).
                     const hadUser = previousUserIdRef.current != null
                     if (hadUser) {
-                        await Purchases.logOut().catch(() => {})
+                        await Purchases.logOut().catch((e) => {
+                            console.warn('[BillingContext] Purchases.logOut failed (expected if already logged out)', e)
+                        })
                     }
                     previousUserIdRef.current = null
                     setOfferings(null)

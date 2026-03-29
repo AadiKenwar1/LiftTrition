@@ -68,3 +68,52 @@ export function updateWorkoutOrder(reorderedWorkouts: Workout[], setWorkouts: Di
         return updated || workout;
     }))
 }
+
+/** Copies a workout and its non-archived exercises; logs are not copied (old exercise ids remain on historical logs). */
+export function duplicateWorkout(
+    sourceWorkoutId: string,
+    userId: string,
+    setWorkouts: Dispatch<SetStateAction<Workout[]>>,
+    setExercises: Dispatch<SetStateAction<Exercise[]>>,
+) {
+    const newWorkoutId = uuid.v4() as string
+    const now = new Date()
+
+    setWorkouts((prev) => {
+        const source = prev.find((w) => w.id === sourceWorkoutId)
+        if (!source) return prev
+
+        const incrementedWorkouts = incrementWorkoutOrders(prev)
+        const newWorkout: Workout = {
+            id: newWorkoutId,
+            userID: userId,
+            name: `${source.name} (Copy)`,
+            order: 0,
+            archived: false,
+            note: source.note,
+            createdAt: now,
+            updatedAt: now,
+        }
+        return [...incrementedWorkouts, newWorkout]
+    })
+
+    setExercises((prev) => {
+        const sourceExercises = prev
+            .filter((e) => e.workoutID === sourceWorkoutId && !e.archived)
+            .sort((a, b) => a.order - b.order)
+
+        const duplicated: Exercise[] = sourceExercises.map((ex, index) => ({
+            id: uuid.v4() as string,
+            userID: userId,
+            workoutID: newWorkoutId,
+            name: ex.name,
+            userMax: ex.userMax,
+            order: index,
+            archived: false,
+            createdAt: now,
+            updatedAt: now,
+        }))
+
+        return [...prev, ...duplicated]
+    })
+}

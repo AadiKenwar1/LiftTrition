@@ -91,23 +91,23 @@ export default function FoodDBModal() {
 
     //Adds all items from the list of added items to the nutrition context
     function handleAddAll() {
-        const now = new Date(selectedDate)
         for (const item of addedItems) {
+            const createdAt = new Date()
             const quantity = item.quantity || 1
             const nutritionEntry = {
                 id: uuid.v4() as string,
                 userId: userID,
                 name: item.name,
-                date: now,
-                time: now.getTime(),
+                date: new Date(selectedDate),
+                time: createdAt.getTime(),
                 protein: item.protein * quantity,
                 carbs: item.carbs * quantity,
                 fats: item.fats * quantity,
                 calories: item.calories * quantity,
                 isPhoto: false,
                 ingredients: [],
-                createdAt: now,
-                updatedAt: now,
+                createdAt,
+                updatedAt: createdAt,
             }
             handleAddNutrition(nutritionEntry)
         }
