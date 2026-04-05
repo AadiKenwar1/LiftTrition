@@ -1,9 +1,7 @@
-import { useAuth } from '@/context/AuthContext'
-import { useSettings } from '@/context/SettingsContext'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { BarChart2, Dumbbell, Scale, Sparkle } from 'lucide-react-native'
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 const BLUE = '#2f80ed'
 const GREEN = '#22C922'
@@ -16,14 +14,12 @@ const features = [
 ]
 
 export default function Onboarding1Screen() {
-    const { settings, setSettings } = useSettings()
-    const { signOut } = useAuth()
     const router = useRouter()
 
     return (
         <View style={styles.container}>
             <LinearGradient colors={['rgba(255, 255, 255, 0.2)', 'transparent']} style={styles.topGradient} pointerEvents="none" />
-            <View style={styles.content}>
+            <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
                 {/* Header */}
                 <Text style={styles.titleText}>LiftTrition</Text>
                 <Text style={styles.subtitleText}>LiftTrition is a free to use fitness platform that offers the following:</Text>
@@ -39,13 +35,14 @@ export default function Onboarding1Screen() {
                         </View>
                     ))}
                 </View>
-                {/* Footer */}
-                <View style={styles.footer}>
-                    <Text style={styles.footerHint}>If this sounds like something you're interested in, let's get started! We just need to ask a few quick questions to personalize your goals.</Text>
-                    <TouchableOpacity style={styles.ctaButton} activeOpacity={0.85} onPress={() => router.push('/onboardingScreens/onboarding2')}>
-                        <Text style={styles.ctaText}>Get Started</Text>
-                    </TouchableOpacity>
-                </View>
+
+                <Text style={styles.footerHint}>If this sounds like something you're interested in, let's get started! We just need to ask a few quick questions to personalize your goals.</Text>
+            </ScrollView>
+
+            <View style={styles.ctaBar}>
+                <TouchableOpacity style={styles.ctaButton} activeOpacity={0.85} onPress={() => router.push('/onboardingScreens/onboarding2')}>
+                    <Text style={styles.ctaText}>Get Started</Text>
+                </TouchableOpacity>
             </View>
         </View>
     )
@@ -57,7 +54,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#121212',
         paddingHorizontal: 25,
         paddingTop: 70,
-        paddingBottom: 44,
+        paddingBottom: 50,
     },
     topGradient: {
         position: 'absolute',
@@ -66,10 +63,13 @@ const styles = StyleSheet.create({
         right: 0,
         height: 220,
     },
-    content: {
+    scroll: {
         flex: 1,
+    },
+    scrollContent: {
         alignItems: 'center',
         paddingTop: 16,
+        paddingBottom: 16,
     },
     titleText: {
         fontSize: 52,
@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
     featuresContainer: {
         width: '100%',
         gap: 10,
-        marginBottom: 12,
+        marginBottom: 16,
     },
     featureCard: {
         flexDirection: 'row',
@@ -124,17 +124,18 @@ const styles = StyleSheet.create({
         marginBottom: 6,
         marginTop: 6,
     },
-    footer: {
-        width: '100%',
-        gap: 12,
-    },
     footerHint: {
         fontSize: 13,
         color: '#aaa',
         textAlign: 'center',
         letterSpacing: 0.1,
         fontFamily: 'Poppins_400Regular',
-        marginBottom: 4,
+        width: '100%',
+        paddingHorizontal: 4,
+        marginBottom: 8,
+    },
+    ctaBar: {
+        width: '100%',
     },
     ctaButton: {
         width: '100%',

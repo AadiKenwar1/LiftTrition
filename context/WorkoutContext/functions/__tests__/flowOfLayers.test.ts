@@ -43,6 +43,7 @@ function createMockLog(overrides: Partial<Log> = {}): Log {
         workoutID: 'workout-1',
         exerciseID: 'exercise-1',
         date: new Date('2024-01-01'),
+        time: 0,
         weight: 100,
         reps: 10,
         rpe: 8,
@@ -101,6 +102,8 @@ describe('Flow of Layers - Workout, Exercise, and Log Integration', () => {
             expect(logs).toHaveLength(1);
             expect(logs[0].workoutID).toBe(workoutId);
             expect(logs[0].exerciseID).toBe(exerciseId);
+            expect(typeof logs[0].time).toBe('number');
+            expect(Number.isFinite(logs[0].time)).toBe(true);
         });
         
         test('should handle multiple exercises in one workout', () => {
@@ -146,6 +149,7 @@ describe('Flow of Layers - Workout, Exercise, and Log Integration', () => {
             const logs = getLogs();
             expect(logs).toHaveLength(3);
             expect(logs.every(l => l.exerciseID === exerciseId)).toBe(true);
+            expect(logs.every((l) => typeof l.time === 'number' && Number.isFinite(l.time))).toBe(true);
         });
     });
     

@@ -12,6 +12,7 @@ function createMockLog(overrides: Partial<Log> = {}): Log {
     workoutID: 'workout-1',
     exerciseID: 'exercise-1',
     date: new Date('2024-01-15'),
+    time: 0,
     weight: 100,
     reps: 10,
     rpe: 7,
@@ -55,6 +56,35 @@ describe('Workout Graph Functions', () => {
       const jan16 = result.find(([date]) => date === getDateKey(new Date('2024-01-16')));
       expect(jan15?.[1].length).toBe(2);
       expect(jan16?.[1].length).toBe(1);
+    });
+
+    test('should group same-calendar-day logs regardless of time ordering field', () => {
+      const sameDay = new Date('2024-01-15');
+      const logs: Log[] = [
+        createMockLog({
+          date: sameDay,
+          exerciseID: 'ex1',
+          id: 'early',
+          time: 100,
+          weight: 90,
+          reps: 10,
+        }),
+        createMockLog({
+          date: sameDay,
+          exerciseID: 'ex1',
+          id: 'late',
+          time: 9_000,
+          weight: 100,
+          reps: 10,
+        }),
+      ];
+      const exercises: Exercise[] = [createMockExercise({ id: 'ex1', name: 'Bench Press' })];
+
+      const result = groupAllExerciseLogsByDate('Bench Press', exercises, logs);
+
+      const bucket = result.find(([d]) => d === getDateKey(sameDay));
+      expect(bucket?.[1]).toHaveLength(2);
+      expect(bucket?.[1].map((l) => l.id).sort()).toEqual(['early', 'late']);
     });
 
     test('should return empty array when no matching logs', () => {

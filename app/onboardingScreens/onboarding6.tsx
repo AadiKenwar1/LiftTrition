@@ -36,7 +36,7 @@ export default function Onboarding6Screen() {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={styles.outerContainer}>
                 <LinearGradient colors={['rgba(34, 201, 34, 0.14)', 'transparent']} style={styles.topGradient} pointerEvents="none" />
-                <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="never">
+                <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
                     {/* Icon */}
                     <View style={[styles.iconCircle, { borderColor: ACCENT }]}>
                         <Target size={86} color={ACCENT} strokeWidth={2} />
@@ -77,7 +77,9 @@ export default function Onboarding6Screen() {
                             <Text style={styles.maintainMessageText}>Maintaining body weight, so no target weight needed</Text>
                         </View>
                     )}
-                    {/* Navigation Buttons */}
+                </ScrollView>
+                {/* Navigation Buttons */}
+                <View style={styles.navFooter}>
                     <View style={styles.buttonContainer}>
                         <TouchableOpacity
                             style={styles.backButton}
@@ -92,7 +94,7 @@ export default function Onboarding6Screen() {
                             <Text style={styles.nextButtonText}>Next</Text>
                         </TouchableOpacity>
                     </View>
-                </ScrollView>
+                </View>
             </View>
         </TouchableWithoutFeedback>
     )
@@ -110,14 +112,18 @@ const styles = StyleSheet.create({
         right: 0,
         height: 220,
     },
-    content: {
+    scroll: {
         flex: 1,
-        paddingTop: 90,
     },
     scrollContent: {
         paddingHorizontal: 25,
         alignItems: 'center',
-        paddingBottom: 200,
+        paddingTop: 90,
+        paddingBottom: 24,
+    },
+    navFooter: {
+        paddingHorizontal: 25,
+        paddingBottom: 50,
     },
     iconCircle: {
         width: 144,

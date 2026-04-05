@@ -3,7 +3,7 @@ import Octicons from '@expo/vector-icons/Octicons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
 import { useState } from 'react'
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 export default function Onboarding3Screen() {
     const { settings, setSettings } = useSettings()
@@ -21,7 +21,7 @@ export default function Onboarding3Screen() {
     return (
         <View style={styles.container}>
             <LinearGradient colors={['rgba(34, 201, 34, 0.14)', 'transparent']} style={styles.topGradient} pointerEvents="none" />
-            <View style={styles.content}>
+            <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
                 {/* Icon */}
                 <View style={styles.iconCircle}>
                     <Octicons name="person-fill" size={65} color="#22C922" />
@@ -47,7 +47,7 @@ export default function Onboarding3Screen() {
                         <Text style={[styles.genderText, selectedSex === 'female' && styles.genderTextSelected]}>Female</Text>
                     </TouchableOpacity>
                 </View>
-            </View>
+            </ScrollView>
 
             {/* Navigation Buttons */}
             <View style={styles.buttonContainer}>
@@ -83,9 +83,13 @@ const styles = StyleSheet.create({
         right: 0,
         height: 220,
     },
-    content: {
+    scroll: {
+        flex: 1,
+    },
+    scrollContent: {
         alignItems: 'center',
         paddingTop: 40,
+        paddingBottom: 16,
     },
     iconCircle: {
         width: 144,
@@ -126,8 +130,7 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#282A2C',
         borderRadius: 20,
-        paddingVertical: 48,
-        paddingHorizontal: 16,
+        paddingVertical: '25%',
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 2,

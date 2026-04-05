@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
 import { Gauge, Rabbit, Turtle } from 'lucide-react-native'
 import { useState } from 'react'
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 const ACCENT = '#22C922'
 
@@ -33,37 +33,38 @@ export default function Onboarding7Screen() {
     return (
         <View style={styles.container}>
             <LinearGradient colors={['rgba(34, 201, 34, 0.14)', 'transparent']} style={styles.topGradient} pointerEvents="none" />
-            {/* Content */}
-            {/* Icon */}
-            <View style={[styles.iconCircle, { borderColor: ACCENT }]}>
-                <Gauge size={72} color={ACCENT} strokeWidth={2} />
-            </View>
-
-            {/* Title */}
-            <Text style={styles.titleText}>How Fast Do You Want to Reach Your Body Weight Goal?</Text>
-            <Text style={styles.subtitleText}>We use your goal pace to adjust your nutrition goals. {'\n'}(Pounds per week).</Text>
-
-            {/* Slider Container */}
-            <View style={styles.sliderContainer}>
-                {/* Current Value Display */}
-                <View style={styles.valueDisplay}>
-                    <Text style={styles.valueText}>{goalPace.toFixed(1)}</Text>
-                    <Text style={styles.valueLabelText}>{getPaceLabel(goalPace)}</Text>
+            <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+                {/* Icon */}
+                <View style={[styles.iconCircle, { borderColor: ACCENT }]}>
+                    <Gauge size={72} color={ACCENT} strokeWidth={2} />
                 </View>
 
-                {/* Slider with Icons */}
-                <View style={styles.sliderRow}>
-                    <Turtle size={24} color="#666" strokeWidth={2} />
-                    <Slider style={styles.slider} minimumValue={0.2} maximumValue={3.0} step={0.1} value={goalPace} onValueChange={setGoalPace} minimumTrackTintColor={ACCENT} maximumTrackTintColor="#333" thumbTintColor={ACCENT} />
-                    <Rabbit size={24} color="#666" strokeWidth={2} />
-                </View>
+                {/* Title */}
+                <Text style={styles.titleText}>How Fast Do You Want to Reach Your Body Weight Goal?</Text>
+                <Text style={styles.subtitleText}>We use your goal pace to adjust your nutrition goals. {'\n'}(Pounds per week).</Text>
 
-                {/* Min/Max Labels */}
-                <View style={styles.rangeLabels}>
-                    <Text style={styles.rangeLabelText}>0.2</Text>
-                    <Text style={styles.rangeLabelText}>3.0</Text>
+                {/* Slider Container */}
+                <View style={styles.sliderContainer}>
+                    {/* Current Value Display */}
+                    <View style={styles.valueDisplay}>
+                        <Text style={styles.valueText}>{goalPace.toFixed(1)}</Text>
+                        <Text style={styles.valueLabelText}>{getPaceLabel(goalPace)}</Text>
+                    </View>
+
+                    {/* Slider with Icons */}
+                    <View style={styles.sliderRow}>
+                        <Turtle size={24} color="#666" strokeWidth={2} />
+                        <Slider style={styles.slider} minimumValue={0.2} maximumValue={3.0} step={0.1} value={goalPace} onValueChange={setGoalPace} minimumTrackTintColor={ACCENT} maximumTrackTintColor="#333" thumbTintColor={ACCENT} />
+                        <Rabbit size={24} color="#666" strokeWidth={2} />
+                    </View>
+
+                    {/* Min/Max Labels */}
+                    <View style={styles.rangeLabels}>
+                        <Text style={styles.rangeLabelText}>0.2</Text>
+                        <Text style={styles.rangeLabelText}>3.0</Text>
+                    </View>
                 </View>
-            </View>
+            </ScrollView>
             {/* Navigation Buttons */}
             <View style={styles.buttonContainer}>
                 <TouchableOpacity style={styles.backButton} onPress={() => router.back()} activeOpacity={0.8}>
@@ -82,9 +83,6 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#121212',
         paddingHorizontal: 25,
-        alignItems: 'center',
-        padding: 25,
-        paddingTop: 90,
         paddingBottom: 50,
     },
     topGradient: {
@@ -94,10 +92,14 @@ const styles = StyleSheet.create({
         right: 0,
         height: 220,
     },
-    content: {
+    scroll: {
+        flex: 1,
+    },
+    scrollContent: {
         alignItems: 'center',
         width: '100%',
-        flex: 1,
+        paddingTop: 90,
+        paddingBottom: 16,
     },
     iconCircle: {
         width: 144,

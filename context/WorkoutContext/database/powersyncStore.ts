@@ -82,6 +82,8 @@ function rowToLog(row: LogRecord): Log {
         workoutID: row.workout_id!,
         exerciseID: row.exercise_id!,
         date: parsedDate,
+        time:
+            row.time != null ? Number(row.time) : row.created_at ? new Date(row.created_at).getTime() : 0,
         weight: row.weight ?? 0,
         reps: row.reps ?? 0,
         rpe: row.rpe ?? 0,
@@ -101,6 +103,7 @@ function logToRow(log: Log) {
         workout_id: log.workoutID,
         exercise_id: log.exerciseID,
         date: getDateKey(localDate),  // Use getDateKey to get local date string (YYYY-MM-DD)
+        time: log.time,
         weight: log.weight,
         reps: log.reps,
         rpe: log.rpe,
@@ -131,7 +134,7 @@ export async function loadWorkoutData(userId: string): Promise<{
 
     // Load logs
     const logRows = await powerSync.getAll(
-        'SELECT * FROM logs WHERE user_id = ? ORDER BY date DESC',
+        'SELECT * FROM logs WHERE user_id = ? ORDER BY date DESC, time DESC',
         [userId]
     ) as LogRecord[];
 
@@ -274,20 +277,21 @@ export async function saveWorkoutData(
                        workout_id = ?,
                        exercise_id = ?,
                        date = ?,
+                       time = ?,
                        weight = ?,
                        reps = ?,
                        rpe = ?,
                        updated_at = datetime('now')
                      WHERE id = ?`,
-                    [row.workout_id, row.exercise_id, row.date, row.weight, row.reps, row.rpe, log.id]
+                    [row.workout_id, row.exercise_id, row.date, row.time, row.weight, row.reps, row.rpe, log.id]
                 );
             } else {
                 await tx.execute(
                     `INSERT INTO logs (
-                       id, user_id, workout_id, exercise_id, date, weight, reps, rpe, created_at, updated_at
+                       id, user_id, workout_id, exercise_id, date, time, weight, reps, rpe, created_at, updated_at
                      )
                      VALUES (
-                       ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                       ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
                      )`,
                     [
                         log.id,
@@ -295,6 +299,7 @@ export async function saveWorkoutData(
                         row.workout_id,
                         row.exercise_id,
                         row.date,
+                        row.time,
                         row.weight,
                         row.reps,
                         row.rpe,

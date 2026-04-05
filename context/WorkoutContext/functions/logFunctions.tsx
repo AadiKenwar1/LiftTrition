@@ -13,6 +13,7 @@ export function addLog(workoutID: string, exerciseID: string, userID: string, we
         workoutID: workoutID,
         exerciseID: exerciseID,
         date: date,
+        time: Date.now(),
         weight: weight,
         reps: reps,
         rpe: rpe,

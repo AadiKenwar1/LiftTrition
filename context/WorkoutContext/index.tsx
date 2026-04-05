@@ -9,7 +9,7 @@ import { addExercise, archiveExercise, deleteExercise, updateExerciseOrder } fro
 import { calculateFatiguePercentage, getFatigueFeedback } from './functions/fatigueFunctions'
 import { getOneRepMaxData } from './functions/graphFunctions'
 import { addLog, deleteLog } from './functions/logFunctions'
-import { getVolumeData } from './functions/volumeFunctions'
+import { getSetsData } from './functions/volumeFunctions'
 import { addWorkout, archiveWorkout, deleteWorkout, duplicateWorkout, renameWorkout, updateWorkoutNote, updateWorkoutOrder } from './functions/workoutFunctions'
 import { CreateExerciseData, Exercise, ExerciseLib, Log, Workout, WorkoutContextInterface } from './types'
 
@@ -76,7 +76,7 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
     }
     const handleCalculateFatiguePercentage = (numDays: number, activityLevel: string) => calculateFatiguePercentage(numDays, logs, exercises, fullExerciseLib, activityLevel)
     const handleGetOneRepMaxData = (exerciseName: string) => getOneRepMaxData(exerciseName, exercises, logs)
-    const handleGetVolumeData = (onboardingCompletedAt?: Date) => getVolumeData(logs, onboardingCompletedAt)
+    const handleGetSetsData = (onboardingCompletedAt?: Date) => getSetsData(logs, onboardingCompletedAt)
     const handleCreateUserExercise = (exerciseData: CreateExerciseData, userID: string) => createUserExercise(exerciseData, userID, setUserExercises)
     const handleDeleteUserExercise = async (exerciseName: string) => {
         deleteUserExercise(exerciseName, setUserExercises)
@@ -223,7 +223,7 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
                 handleCalculateFatiguePercentage,
                 getFatigueFeedback,
                 handleGetOneRepMaxData,
-                handleGetVolumeData,
+                handleGetSetsData,
                 handleCreateUserExercise,
                 handleDeleteUserExercise,
             }}

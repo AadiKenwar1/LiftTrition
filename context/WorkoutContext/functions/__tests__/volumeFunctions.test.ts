@@ -10,6 +10,7 @@ function createMockLog(overrides: Partial<Log> = {}): Log {
         workoutID: 'workout-1',
         exerciseID: 'exercise-1',
         date: new Date('2024-01-15'),
+        time: 0,
         weight: 100,
         reps: 10,
         rpe: 8,
@@ -80,16 +81,19 @@ describe('Volume Functions', () => {
                 const logs: Log[] = [
                     createMockLog({
                         date: sameDate,
+                        time: 1,
                         weight: 100,
                         reps: 10 // Volume: 1000
                     }),
                     createMockLog({
                         date: sameDate,
+                        time: 2,
                         weight: 80,
                         reps: 12 // Volume: 960
                     }),
                     createMockLog({
                         date: sameDate,
+                        time: 3,
                         weight: 120,
                         reps: 8 // Volume: 960
                     })

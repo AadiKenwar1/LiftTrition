@@ -143,6 +143,7 @@ const logs = new Table({
   workout_id: column.text,
   exercise_id: column.text,
   date: column.text,
+  time: column.integer,
   weight: column.real,
   reps: column.integer,
   rpe: column.real,

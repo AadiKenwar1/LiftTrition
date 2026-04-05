@@ -3,7 +3,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
 import { Activity } from 'lucide-react-native'
 import { useState } from 'react'
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 const ACCENT = '#2f80ed'
 
@@ -31,7 +31,7 @@ export default function Onboarding5Screen() {
     return (
         <View style={styles.container}>
             <LinearGradient colors={['rgba(47, 128, 237, 0.3)', 'transparent']} style={styles.topGradient} pointerEvents="none" />
-            <View style={styles.content}>
+            <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
                 {/* Icon */}
                 <View style={[styles.iconCircle, { borderColor: ACCENT }]}>
                     <Activity size={72} color={ACCENT} strokeWidth={2} />
@@ -50,7 +50,7 @@ export default function Onboarding5Screen() {
                         </TouchableOpacity>
                     ))}
                 </View>
-            </View>
+            </ScrollView>
 
             {/* Navigation Buttons */}
             <View style={styles.buttonContainer}>
@@ -86,9 +86,13 @@ const styles = StyleSheet.create({
         right: 0,
         height: 220,
     },
-    content: {
+    scroll: {
+        flex: 1,
+    },
+    scrollContent: {
         alignItems: 'center',
         width: '100%',
+        paddingBottom: 16,
     },
     iconCircle: {
         width: 144,

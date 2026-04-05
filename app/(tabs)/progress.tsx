@@ -10,9 +10,7 @@ import { downsampleData } from '@/lib/utils/downsample'
 import { useFonts } from 'expo-font'
 import { ChevronDown, Dumbbell, Scale } from 'lucide-react-native'
 import { useEffect, useMemo, useState } from 'react'
-import { Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-
-const { width: screenWidth } = Dimensions.get('window')
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 export default function ProgressScreen() {
     const [fontsLoaded] = useFonts({
@@ -20,7 +18,7 @@ export default function ProgressScreen() {
     })
     const { mode, settings } = useSettings()
     const { handleGetMacrosForDate, handleGetMacroDataForGraph, nutritionData } = useNutrition()
-    const { handleCalculateFatiguePercentage, getFatigueFeedback, logs, handleGetOneRepMaxData, handleGetVolumeData, lastExercise, setLastExercise, fullExerciseLibAsList } = useWorkout()
+    const { handleCalculateFatiguePercentage, getFatigueFeedback, logs, handleGetOneRepMaxData, handleGetSetsData, lastExercise, setLastExercise, fullExerciseLibAsList } = useWorkout()
     const { handleGetBodyWeightProgressData, bwProgress } = useSettings()
 
     // Local state for graph selections
@@ -79,7 +77,7 @@ export default function ProgressScreen() {
     }, [mode, selectedExercise, selectedMacro, selectedRange1, logs, nutritionData, lastExercise, handleGetOneRepMaxData, handleGetMacroDataForGraph, settings.onboardingCompletedAt])
 
     const graph2Data = useMemo(() => {
-        const rawData = mode === true ? handleGetVolumeData(settings.onboardingCompletedAt) : handleGetBodyWeightProgressData(settings.onboardingCompletedAt)
+        const rawData = mode === true ? handleGetSetsData(settings.onboardingCompletedAt) : handleGetBodyWeightProgressData(settings.onboardingCompletedAt)
 
         const startIndex = Math.max(0, rawData.length - selectedRange2)
         const slicedData = rawData.slice(startIndex)
@@ -87,7 +85,7 @@ export default function ProgressScreen() {
         const downsampled = downsampleData(slicedData, bucketSize)
 
         return downsampled
-    }, [mode, logs, bwProgress, selectedRange2, settings.onboardingCompletedAt, handleGetVolumeData, handleGetBodyWeightProgressData])
+    }, [mode, logs, bwProgress, selectedRange2, settings.onboardingCompletedAt, handleGetSetsData, handleGetBodyWeightProgressData])
 
     const caloriePercent = (todayMacros.totalCalories / settings.calorieGoal) * 100
     const proteinPercent = (todayMacros.totalProtein / settings.proteinGoal) * 100
@@ -125,10 +123,12 @@ export default function ProgressScreen() {
                 </View>
 
                 {/**Row of 3 cards */}
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                <View style={styles.threeCardsRow}>
                     {/*1/3 Square Card*/}
-                    <View style={{ flexDirection: 'column' }}>
-                        <Text style={styles.oneThirdTopText}> {mode === true ? `Last 3 Days` : `Todays Protein`}</Text>
+                    <View style={styles.oneThirdColumn}>
+                        <Text style={styles.oneThirdTopText} numberOfLines={2}>
+                            {mode === true ? `Last 3 Days` : `Todays Protein`}
+                        </Text>
                         <View style={styles.oneThirdSquareCard}>
                             <ProgressWheel percent={mode === true ? fatigueData.last3Days : proteinPercent} size={95} strokeWidth={9.5} fontSize={20} />
                             {mode === false && (
@@ -140,8 +140,10 @@ export default function ProgressScreen() {
                     </View>
 
                     {/*1/3 Square Card*/}
-                    <View style={{ flexDirection: 'column' }}>
-                        <Text style={styles.oneThirdTopText}> {mode === true ? `Last 6 Days` : `Todays Carbs`}</Text>
+                    <View style={styles.oneThirdColumn}>
+                        <Text style={styles.oneThirdTopText} numberOfLines={2}>
+                            {mode === true ? `Last 6 Days` : `Todays Carbs`}
+                        </Text>
                         <View style={styles.oneThirdSquareCard}>
                             <ProgressWheel percent={mode === true ? fatigueData.last6Days : carbsPercent} size={95} strokeWidth={9.5} fontSize={20} />
                             {mode === false && (
@@ -153,8 +155,10 @@ export default function ProgressScreen() {
                     </View>
 
                     {/*1/3 Square Card*/}
-                    <View style={{ flexDirection: 'column' }}>
-                        <Text style={styles.oneThirdTopText}> {mode === true ? `Last 9 Days` : `Todays Fats`}</Text>
+                    <View style={styles.oneThirdColumn}>
+                        <Text style={styles.oneThirdTopText} numberOfLines={2}>
+                            {mode === true ? `Last 9 Days` : `Todays Fats`}
+                        </Text>
                         <View style={styles.oneThirdSquareCard}>
                             <ProgressWheel percent={mode === true ? fatigueData.last9Days : fatsPercent} size={95} strokeWidth={9.5} fontSize={20} />
                             {mode === false && (
@@ -217,13 +221,13 @@ export default function ProgressScreen() {
                 </View>
 
                 {/* Graph 2 Card */}
-                <Text style={styles.mainTitle}>{mode === true ? `Volume Graph` : `Body Weight Graph`}</Text>
+                <Text style={styles.mainTitle}>{mode === true ? `Sets Graph` : `Body Weight Graph`}</Text>
                 <View style={styles.graphCard}>
                     {graph2Data.length > 0 && (
                         <Text style={styles.graphSubtext}>
                             {mode ?
                                 <>
-                                    Graph displays <Text style={[styles.graphSubtext, { fontFamily: 'Poppins_600SemiBold' }]}>total volume</Text> by day
+                                    Graph displays <Text style={[styles.graphSubtext, { fontFamily: 'Poppins_600SemiBold' }]}>total sets</Text> by day
                                 </>
                             :   <>
                                     Graph displays <Text style={[styles.graphSubtext, { fontFamily: 'Poppins_600SemiBold' }]}>body weight</Text> by day
@@ -240,8 +244,8 @@ export default function ProgressScreen() {
                                         <Dumbbell size={48} color="#2f80ed" strokeWidth={2} />
                                     :   <Scale size={48} color="#22C933" strokeWidth={2} />}
                                 </View>
-                                <Text style={styles.emptyGraphText}>{mode === true ? 'No volume data yet' : 'No weight data yet'}</Text>
-                                <Text style={styles.emptyGraphSubtext}>{mode === true ? 'Start logging workouts to see your volume' : 'Update your body weight to see progress'}</Text>
+                                <Text style={styles.emptyGraphText}>{mode === true ? 'No set data yet' : 'No weight data yet'}</Text>
+                                <Text style={styles.emptyGraphSubtext}>{mode === true ? 'Start logging workouts to see your sets' : 'Update your body weight to see progress'}</Text>
                             </View>
                         }
                     </View>
@@ -287,15 +291,16 @@ const styles = StyleSheet.create({
         paddingBottom: 60,
         paddingHorizontal: 15,
         backgroundColor: '#121212',
+        width: '100%',
     },
     rectangularCard: {
-        width: screenWidth - 32,
-        height: (screenWidth - 32) / 2.5,
+        width: '100%',
+        aspectRatio: 2.5,
         backgroundColor: '#282A2C',
         borderRadius: 15,
         marginBottom: 10,
         padding: 20,
-        alignSelf: 'center',
+        alignSelf: 'stretch',
         alignItems: 'center',
         flexDirection: 'row',
         gap: 10,
@@ -314,9 +319,20 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingRight: 10,
     },
+    threeCardsRow: {
+        flexDirection: 'row',
+        gap: 8,
+        width: '100%',
+        alignSelf: 'stretch',
+    },
+    oneThirdColumn: {
+        flex: 1,
+        minWidth: 0,
+        flexDirection: 'column',
+    },
     oneThirdSquareCard: {
-        width: (screenWidth - 32 - 20) / 3,
-        height: (screenWidth - 32) / 2.25,
+        width: '100%',
+        aspectRatio: 0.71,
         backgroundColor: '#282A2C',
         borderRadius: 15,
         marginBottom: 10,
@@ -372,13 +388,13 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_400Regular',
     },
     graphCard: {
-        width: screenWidth - 32,
+        width: '100%',
         height: 450,
         backgroundColor: '#282A2C',
         borderRadius: 15,
         marginBottom: 15,
         padding: 15,
-        alignSelf: 'center',
+        alignSelf: 'stretch',
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.6,

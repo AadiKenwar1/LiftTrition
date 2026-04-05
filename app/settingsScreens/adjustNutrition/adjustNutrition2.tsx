@@ -3,7 +3,7 @@ import Slider from '@react-native-community/slider'
 import { router, useLocalSearchParams } from 'expo-router'
 import { Gauge, Rabbit, Turtle } from 'lucide-react-native'
 import { useState } from 'react'
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 export default function AdjustNutrition3Screen() {
     const { mode } = useSettings()
@@ -36,43 +36,50 @@ export default function AdjustNutrition3Screen() {
 
     return (
         <View style={styles.container}>
-            {/* Icon */}
-            <View style={[styles.iconCircle, { borderColor: accent }]}>
-                <Gauge size={72} color={accent} strokeWidth={2} />
-            </View>
-
-            {/* Title */}
-            <Text style={styles.titleText}>Goal Pace?</Text>
-
-            {/* Subtitle */}
-            <Text style={styles.subtitleText}>How fast do you want to reach your bodyweight goal? {'\n'}(Pounds per week)</Text>
-
-            {/* Slider Container */}
-            <View style={styles.sliderContainer}>
-                {/* Current Value Display */}
-                <View style={styles.valueDisplay}>
-                    <Text style={[styles.valueText]}>{goalPace.toFixed(1)}</Text>
-                    <Text style={styles.valueLabelText}>{getPaceLabel(goalPace)}</Text>
+            <ScrollView
+                style={styles.scroll}
+                contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+            >
+                {/* Icon */}
+                <View style={[styles.iconCircle, { borderColor: accent }]}>
+                    <Gauge size={72} color={accent} strokeWidth={2} />
                 </View>
 
-                {/* Slider with Icons */}
-                <View style={styles.sliderRow}>
-                    <Turtle size={24} color="#666" strokeWidth={2} />
-                    <Slider style={styles.slider} minimumValue={0.2} maximumValue={3.0} step={0.1} value={goalPace} onValueChange={setGoalPace} minimumTrackTintColor={accent} maximumTrackTintColor="#333" thumbTintColor={accent} />
-                    <Rabbit size={24} color="#666" strokeWidth={2} />
+                {/* Title */}
+                <Text style={styles.titleText}>Goal Pace?</Text>
+
+                {/* Subtitle */}
+                <Text style={styles.subtitleText}>How fast do you want to reach your bodyweight goal? {'\n'}(Pounds per week)</Text>
+
+                {/* Slider Container */}
+                <View style={styles.sliderContainer}>
+                    {/* Current Value Display */}
+                    <View style={styles.valueDisplay}>
+                        <Text style={[styles.valueText]}>{goalPace.toFixed(1)}</Text>
+                        <Text style={styles.valueLabelText}>{getPaceLabel(goalPace)}</Text>
+                    </View>
+
+                    {/* Slider with Icons */}
+                    <View style={styles.sliderRow}>
+                        <Turtle size={24} color="#666" strokeWidth={2} />
+                        <Slider style={styles.slider} minimumValue={0.2} maximumValue={3.0} step={0.1} value={goalPace} onValueChange={setGoalPace} minimumTrackTintColor={accent} maximumTrackTintColor="#333" thumbTintColor={accent} />
+                        <Rabbit size={24} color="#666" strokeWidth={2} />
+                    </View>
+
+                    {/* Min/Max Labels */}
+                    <View style={styles.rangeLabels}>
+                        <Text style={styles.rangeLabelText}>0.2</Text>
+                        <Text style={styles.rangeLabelText}>3.0</Text>
+                    </View>
                 </View>
 
-                {/* Min/Max Labels */}
-                <View style={styles.rangeLabels}>
-                    <Text style={styles.rangeLabelText}>0.2</Text>
-                    <Text style={styles.rangeLabelText}>3.0</Text>
-                </View>
-            </View>
-
-            {/* Next Button */}
-            <TouchableOpacity style={[styles.nextButton]} onPress={handleNext} activeOpacity={0.8}>
-                <Text style={styles.nextButtonText}>Next</Text>
-            </TouchableOpacity>
+                {/* Next Button */}
+                <TouchableOpacity style={[styles.nextButton]} onPress={handleNext} activeOpacity={0.8}>
+                    <Text style={styles.nextButtonText}>Next</Text>
+                </TouchableOpacity>
+            </ScrollView>
         </View>
     )
 }
@@ -81,9 +88,18 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#121212',
-        paddingHorizontal: 25,
+    },
+    scroll: {
+        flex: 1,
+        width: '100%',
+    },
+    scrollContent: {
+        flexGrow: 1,
         alignItems: 'center',
+        width: '100%',
+        paddingHorizontal: 25,
         paddingTop: 36,
+        paddingBottom: 40,
     },
     iconCircle: {
         width: 144,

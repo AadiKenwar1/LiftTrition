@@ -2,7 +2,7 @@ import { useSettings } from '@/context/SettingsContext'
 import { router } from 'expo-router'
 import { Activity } from 'lucide-react-native'
 import { useState } from 'react'
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 export default function AdjustTrainingScreen() {
     const { settings, setSettings, calculateMacros, mode } = useSettings()
@@ -33,31 +33,33 @@ export default function AdjustTrainingScreen() {
 
     return (
         <View style={styles.container}>
-            <View style={styles.topSection}>
-                <View style={[styles.iconCircle, { borderColor: accent }]}>
-                    <Activity size={72} color={'#2f80ed'} strokeWidth={2} />
+            <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+                <View style={styles.topSection}>
+                    <View style={[styles.iconCircle, { borderColor: accent }]}>
+                        <Activity size={72} color={'#2f80ed'} strokeWidth={2} />
+                    </View>
+                    <Text style={styles.titleText}>Update Your Activity Level</Text>
+                    <Text style={styles.subtitleText}>Updates Nutrition Goals and Fatigue</Text>
                 </View>
-                <Text style={styles.titleText}>Update Your Activity Level</Text>
-                <Text style={styles.subtitleText}>Updates Nutrition Goals and Fatigue</Text>
-            </View>
 
-            <View style={styles.optionsContainer}>
-                {frequencies.map((freq) => (
-                    <TouchableOpacity
-                        key={freq.id}
-                        style={[styles.optionButton, selectedFrequency === freq.id && { borderColor: accent }]}
-                        onPress={() => setSelectedFrequency(freq.id as 'sedentary' | 'light' | 'moderate' | 'active' | 'gymrat')}
-                        activeOpacity={0.7}
-                    >
-                        <Text style={[styles.optionLabel, selectedFrequency === freq.id && styles.optionLabelSelected]}>{freq.label}</Text>
-                        <Text style={[styles.optionSubtitle, selectedFrequency === freq.id && styles.optionSubtitleSelected]}>{freq.subtitle}</Text>
-                    </TouchableOpacity>
-                ))}
-            </View>
+                <View style={styles.optionsContainer}>
+                    {frequencies.map((freq) => (
+                        <TouchableOpacity
+                            key={freq.id}
+                            style={[styles.optionButton, selectedFrequency === freq.id && { borderColor: accent }]}
+                            onPress={() => setSelectedFrequency(freq.id as 'sedentary' | 'light' | 'moderate' | 'active' | 'gymrat')}
+                            activeOpacity={0.7}
+                        >
+                            <Text style={[styles.optionLabel, selectedFrequency === freq.id && styles.optionLabelSelected]}>{freq.label}</Text>
+                            <Text style={[styles.optionSubtitle, selectedFrequency === freq.id && styles.optionSubtitleSelected]}>{freq.subtitle}</Text>
+                        </TouchableOpacity>
+                    ))}
+                </View>
 
-            <TouchableOpacity style={[styles.saveButton]} onPress={handleSave} activeOpacity={0.8}>
-                <Text style={styles.saveButtonText}>Save</Text>
-            </TouchableOpacity>
+                <TouchableOpacity style={[styles.saveButton]} onPress={handleSave} activeOpacity={0.8}>
+                    <Text style={styles.saveButtonText}>Save</Text>
+                </TouchableOpacity>
+            </ScrollView>
         </View>
     )
 }
@@ -70,6 +72,15 @@ const styles = StyleSheet.create({
         paddingTop: 12,
         paddingBottom: 20,
         alignItems: 'center',
+    },
+    scroll: {
+        flex: 1,
+        width: '100%',
+    },
+    scrollContent: {
+        alignItems: 'center',
+        width: '100%',
+        paddingBottom: 8,
     },
     topSection: {
         alignItems: 'center',
@@ -152,7 +163,7 @@ const styles = StyleSheet.create({
     },
     noteText: {
         fontSize: 12,
-        color: '#888',
+        color: '#aaa',
         lineHeight: 15,
         textAlign: 'center',
         letterSpacing: 0.2,

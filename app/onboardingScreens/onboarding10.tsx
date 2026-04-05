@@ -1,4 +1,3 @@
-import TermsAndPrivacyModal from '@/components/NeutralComponents/TermsAndPrivacyModal'
 import { useBilling } from '@/context/BillingContext'
 import { useSettings } from '@/context/SettingsContext'
 import Ionicons from '@expo/vector-icons/Ionicons'
@@ -6,16 +5,18 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
 import { BarChart3, Database, Sparkles, Zap } from 'lucide-react-native'
 import { useState } from 'react'
-import { ActivityIndicator, Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 type PlanType = 'monthly' | 'annual'
 
+/** Premium paywall always uses blue accent (independent of app light/dark mode). */
+const ACCENT = '#2f80ed'
+const GRADIENT_COLORS = ['rgba(47, 128, 237, 0.14)', 'transparent'] as const
+
 export default function Onboarding10Screen() {
-    const [termsModalVisible, setTermsModalVisible] = useState(false)
     const [selectedPlan, setSelectedPlan] = useState<PlanType>('annual')
     const [purchasing, setPurchasing] = useState(false)
-    const { settings, setSettings, mode } = useSettings()
-    const accent = mode ? '#2f80ed' : '#22C922'
+    const { settings, setSettings } = useSettings()
     const { loading, hasPremium, monthlyPackage, annualPackage, priceInfo, annualPriceInfo, purchasePackage, restorePurchases, error } = useBilling()
 
     const completeOnboarding = () => {
@@ -63,25 +64,22 @@ export default function Onboarding10Screen() {
     }
 
     if (loading) {
-        const gradientColors = accent === '#2f80ed' ? ['rgba(47, 128, 237, 0.14)', 'transparent'] : ['rgba(34, 201, 34, 0.14)', 'transparent']
         return (
             <View style={[styles.container, styles.centerContent]}>
-                <LinearGradient colors={gradientColors} style={styles.topGradient} pointerEvents="none" />
-                <ActivityIndicator size="large" color={accent} />
+                <LinearGradient colors={GRADIENT_COLORS} style={styles.topGradient} pointerEvents="none" />
+                <ActivityIndicator size="large" color={ACCENT} />
                 <Text style={styles.loadingText}>Loading subscription options...</Text>
             </View>
         )
     }
 
-    const gradientColors = accent === '#2f80ed' ? ['rgba(47, 128, 237, 0.14)', 'transparent'] : ['rgba(34, 201, 34, 0.14)', 'transparent']
-
     return (
         <View style={styles.container}>
-            <LinearGradient colors={gradientColors} style={styles.topGradient} pointerEvents="none" />
-            <View style={styles.content}>
+            <LinearGradient colors={GRADIENT_COLORS} style={styles.topGradient} pointerEvents="none" />
+            <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
                 {/* Icon */}
-                <View style={[styles.iconCircle, { borderColor: accent }]}>
-                    <Ionicons name="sparkles" size={72} color="#2f80ed" />
+                <View style={[styles.iconCircle, { borderColor: ACCENT }]}>
+                    <Ionicons name="sparkles" size={72} color={ACCENT} />
                 </View>
 
                 {/* Title */}
@@ -92,21 +90,21 @@ export default function Onboarding10Screen() {
                 <View style={styles.featuresSection}>
                     <View style={styles.featuresRow}>
                         <View style={styles.featureItem}>
-                            <Database size={16} color={accent} strokeWidth={2} />
+                            <Database size={18} color={ACCENT} strokeWidth={2} />
                             <Text style={styles.featureText}>Food Database</Text>
                         </View>
                         <View style={styles.featureItem}>
-                            <Sparkles size={16} color={accent} strokeWidth={2} />
+                            <Sparkles size={18} color={ACCENT} strokeWidth={2} />
                             <Text style={styles.featureText}>AI Features</Text>
                         </View>
                     </View>
                     <View style={styles.featuresRow}>
                         <View style={styles.featureItem}>
-                            <BarChart3 size={16} color={accent} strokeWidth={2} />
+                            <BarChart3 size={18} color={ACCENT} strokeWidth={2} />
                             <Text style={styles.featureText}>Extra Charts</Text>
                         </View>
                         <View style={styles.featureItem}>
-                            <Zap size={16} color={accent} strokeWidth={2} />
+                            <Zap size={16} color={ACCENT} strokeWidth={2} />
                             <Text style={styles.featureText}>And More</Text>
                         </View>
                     </View>
@@ -114,22 +112,22 @@ export default function Onboarding10Screen() {
 
                 {/* Pricing - Monthly & Annual */}
                 <View style={styles.pricingRow}>
-                    <TouchableOpacity style={[styles.pricingCard, selectedPlan === 'monthly' && { ...styles.pricingCardSelected, borderColor: accent }]} onPress={() => setSelectedPlan('monthly')} activeOpacity={0.8} disabled={!monthlyPackage}>
+                    <TouchableOpacity style={[styles.pricingCard, selectedPlan === 'monthly' && { ...styles.pricingCardSelected, borderColor: ACCENT }]} onPress={() => setSelectedPlan('monthly')} activeOpacity={0.8} disabled={!monthlyPackage}>
                         <Text style={[styles.planLabel]}>Monthly</Text>
                         <View style={styles.priceRow}>
-                            <Text style={[styles.priceAmount, { color: accent }]}>{priceInfo?.price || '$4.99'}</Text>
+                            <Text style={[styles.priceAmount, { color: ACCENT }]}>{priceInfo?.price || '$4.99'}</Text>
                             <Text style={styles.priceInterval}>/month</Text>
                         </View>
                         <Text style={styles.pricingNote}>3 day free trial</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={[styles.pricingCard, selectedPlan === 'annual' && { ...styles.pricingCardSelected, borderColor: accent }]} onPress={() => setSelectedPlan('annual')} activeOpacity={0.8} disabled={!annualPackage}>
+                    <TouchableOpacity style={[styles.pricingCard, selectedPlan === 'annual' && { ...styles.pricingCardSelected, borderColor: ACCENT }]} onPress={() => setSelectedPlan('annual')} activeOpacity={0.8} disabled={!annualPackage}>
                         <Text style={styles.planLabel}>Annual</Text>
                         <View style={styles.priceRow}>
-                            <Text style={[styles.priceAmount, { color: accent }]}>{annualPriceInfo?.price || '$39.99'}</Text>
+                            <Text style={[styles.priceAmount, { color: ACCENT }]}>{annualPriceInfo?.price || '$39.99'}</Text>
                             <Text style={styles.priceInterval}>/year</Text>
                         </View>
                         <Text style={styles.pricingNote}>3 day free trial</Text>
-                        <Text style={[styles.saveBadge, { color: accent }]}>Best value</Text>
+                        <Text style={[styles.saveBadge, { color: ACCENT }]}>Best value</Text>
                     </TouchableOpacity>
                 </View>
 
@@ -139,14 +137,13 @@ export default function Onboarding10Screen() {
                     </View>
                 )}
 
-                {/* Button Stack */}
-                <View style={styles.buttonStack}>
+                <View style={styles.subscribeBlock}>
                     <TouchableOpacity
                         style={[
                             styles.subscribeButton,
                             {
-                                shadowColor: accent,
-                                backgroundColor: accent === '#2f80ed' ? '#D4E4FF' : '#D4F5D4',
+                                shadowColor: ACCENT,
+                                backgroundColor: '#D4E4FF',
                             },
                             (hasPremium || purchasing) && styles.subscribeButtonDisabled,
                         ]}
@@ -159,31 +156,21 @@ export default function Onboarding10Screen() {
                         :   <Text style={styles.subscribeButtonText}>{hasPremium ? 'Subscription Active' : 'Subscribe Now'}</Text>}
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.backButton} onPress={() => router.back()} activeOpacity={0.8}>
-                        <Text style={styles.backButtonText}>Back</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity onPress={completeOnboarding} activeOpacity={0.7} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
-                        <Text style={[styles.continueText, { color: accent }]}>Continue to app</Text>
-                    </TouchableOpacity>
-
                     <TouchableOpacity style={styles.restoreButton} onPress={handleRestore} activeOpacity={0.7}>
-                        <Text style={[styles.restoreButtonText, { color: accent }]}>Restore Purchases</Text>
+                        <Text style={styles.restoreButtonText}>Restore Purchases</Text>
                     </TouchableOpacity>
                 </View>
+            </ScrollView>
 
-                <Text style={styles.legalText}>
-                    By subscribing, you agree to our{' '}
-                    <Text style={[styles.termsLink, { color: accent }]} onPress={() => setTermsModalVisible(true)}>
-                        Terms of Service
-                    </Text>{' '}
-                    and{' '}
-                    <Text style={[styles.termsLink, { color: accent }]} onPress={() => setTermsModalVisible(true)}>
-                        Privacy Policy
-                    </Text>
-                    .
-                </Text>
-                <TermsAndPrivacyModal visible={termsModalVisible} onClose={() => setTermsModalVisible(false)} />
+            <View style={styles.footer}>
+                <View style={styles.navButtonRow}>
+                    <TouchableOpacity style={styles.navBackButton} onPress={() => router.back()} activeOpacity={0.8}>
+                        <Text style={styles.navBackButtonText}>Back</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.navContinueButton} onPress={completeOnboarding} activeOpacity={0.8}>
+                        <Text style={styles.navContinueButtonText}>Finish</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
         </View>
     )
@@ -193,9 +180,9 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#121212',
-        padding: 25,
+        paddingHorizontal: 25,
         paddingTop: 48,
-        paddingBottom: 24,
+        paddingBottom: 50,
     },
     topGradient: {
         position: 'absolute',
@@ -214,10 +201,13 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontFamily: 'Poppins_400Regular',
     },
-    content: {
+    scroll: {
         flex: 1,
+    },
+    scrollContent: {
         alignItems: 'center',
         paddingTop: 24,
+        paddingBottom: 16,
     },
     iconCircle: {
         width: 144,
@@ -249,26 +239,27 @@ const styles = StyleSheet.create({
     },
     featuresSection: {
         width: '100%',
-        marginBottom: 6,
+        marginBottom: 8,
     },
     featuresRow: {
         flexDirection: 'row',
-        gap: 6,
-        marginBottom: 6,
+        gap: 8,
+        marginBottom: 8,
     },
     featureItem: {
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: '#282A2C',
-        borderRadius: 10,
-        padding: 14,
-        gap: 6,
+        borderRadius: 12,
+        paddingVertical: 16,
+        paddingHorizontal: 16,
+        gap: 8,
         borderWidth: 1,
         borderColor: '#333',
     },
     featureText: {
-        fontSize: 14,
+        fontSize: 15,
         color: '#fff',
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
@@ -292,13 +283,13 @@ const styles = StyleSheet.create({
         borderWidth: 3,
     },
     planLabel: {
-        fontSize: 12,
+        fontSize: 13,
         color: '#aaa',
         marginBottom: 4,
         fontFamily: 'Poppins_600SemiBold',
     },
     saveBadge: {
-        fontSize: 10,
+        fontSize: 11,
         marginTop: 6,
         fontFamily: 'Poppins_600SemiBold',
     },
@@ -308,19 +299,19 @@ const styles = StyleSheet.create({
         marginBottom: 2,
     },
     priceAmount: {
-        fontSize: 20,
+        fontSize: 22,
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },
     priceInterval: {
-        fontSize: 16,
+        fontSize: 17,
         color: '#888',
         marginLeft: 4,
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },
     pricingNote: {
-        fontSize: 12,
+        fontSize: 13,
         color: '#aaa',
         letterSpacing: 0.2,
         fontFamily: 'Poppins_500Medium',
@@ -341,13 +332,21 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         fontFamily: 'Poppins_400Regular',
     },
-    buttonStack: {
+    subscribeBlock: {
+        alignSelf: 'stretch',
         width: '100%',
-        gap: 8,
+        gap: 10,
+        marginTop: 8,
+        marginBottom: 8,
+    },
+    footer: {
+        width: '100%',
+        gap: 12,
     },
     subscribeButton: {
+        alignSelf: 'stretch',
         width: '100%',
-        height: 52,
+        height: 60,
         borderRadius: 16,
         justifyContent: 'center',
         alignItems: 'center',
@@ -355,22 +354,6 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.3,
         shadowRadius: 12,
         elevation: 8,
-    },
-    backButton: {
-        width: '100%',
-        height: 52,
-        backgroundColor: '#282A2C',
-        borderRadius: 16,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: '#242424',
-    },
-    backButtonText: {
-        fontSize: 17,
-        color: '#aaa',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
     },
     subscribeButtonDisabled: {
         opacity: 0.7,
@@ -381,38 +364,57 @@ const styles = StyleSheet.create({
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },
-    restoreButton: {
-        backgroundColor: 'transparent',
-        alignSelf: 'center',
-        paddingVertical: 4,
+    navButtonRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        width: '100%',
+        gap: 12,
     },
-    restoreButtonText: {
-        fontSize: 14,
-        color: '#2f80ed',
+    navBackButton: {
+        flex: 1,
+        height: 60,
+        backgroundColor: '#282A2C',
+        borderRadius: 16,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#242424',
+    },
+    navBackButtonText: {
+        fontSize: 17,
+        color: '#aaa',
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },
-    legalText: {
-        fontSize: 10,
-        color: '#666',
-        textAlign: 'center',
-        lineHeight: 14,
-        letterSpacing: 0.2,
-        paddingHorizontal: 8,
-        marginTop: 4,
-        marginBottom: 4,
-        fontFamily: 'Poppins_400Regular',
+    navContinueButton: {
+        flex: 1,
+        height: 60,
+        backgroundColor: '#D4E4FF',
+        borderRadius: 16,
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: ACCENT,
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.2,
+        shadowRadius: 12,
+        elevation: 8,
     },
-    termsLink: {
-        color: '#2f80ed',
+    navContinueButtonText: {
+        fontSize: 16,
+        color: '#000',
+        letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
-        textDecorationLine: 'underline',
     },
-    continueText: {
+    restoreButton: {
+        backgroundColor: 'transparent',
+        alignSelf: 'center',
+        paddingVertical: 2,
+    },
+    restoreButtonText: {
         fontSize: 16,
         color: '#2f80ed',
-        letterSpacing: 0.2,
-        fontFamily: 'Poppins_500Medium',
-        textAlign: 'center',
+        letterSpacing: -0.5,
+        fontFamily: 'Poppins_600SemiBold',
     },
 })

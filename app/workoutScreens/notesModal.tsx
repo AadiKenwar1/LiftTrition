@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     },
     autoSaveText: {
         fontSize: 13,
-        color: '#666',
+        color: '#aaa',
         textAlign: 'center',
         fontStyle: 'italic',
         fontFamily: 'Poppins_400Regular',

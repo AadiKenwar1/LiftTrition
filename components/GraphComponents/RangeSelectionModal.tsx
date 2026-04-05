@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
         borderColor: '#2a2a2a',
     },
     optionButtonSelected: {
-        backgroundColor: 'rgba(45, 156, 255, 0.1)',
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
     },
     optionText: {
         fontSize: 17,

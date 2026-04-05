@@ -3,10 +3,10 @@ import { validateHeightWeight } from '@/context/SettingsContext/functions/valida
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5'
 import { router } from 'expo-router'
 import { useState } from 'react'
-import { Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
+import { Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
-export default function AdjustNutrition1Screen() {
-    const { settings, setSettings, handleUpdateBw, calculateMacros, mode } = useSettings()
+export default function AdjustMeasurementsScreen() {
+    const { settings, setSettings, handleUpdateBw, calculateMacros } = useSettings()
     const [unitSystem, setUnitSystem] = useState<'imperial' | 'metric'>(settings.unitSystem)
     const [height, setHeight] = useState(settings.height.toString())
     const [weight, setWeight] = useState(settings.bodyWeight.toString())
@@ -34,56 +34,74 @@ export default function AdjustNutrition1Screen() {
     }
 
     return (
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View style={styles.container}>
-                {/* Icon */}
-                <View style={[styles.iconCircle, { borderColor: '#FBBF24' }]}>
-                    <FontAwesome5 name="pencil-ruler" size={65} color={'#FBBF24'} />
-                </View>
+        <View style={styles.container}>
+            <KeyboardAvoidingView style={styles.keyboardAvoiding} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+                <ScrollView
+                    style={styles.scroll}
+                    contentContainerStyle={styles.scrollContent}
+                    keyboardShouldPersistTaps="handled"
+                    keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+                    showsVerticalScrollIndicator={false}
+                    onScrollBeginDrag={Keyboard.dismiss}
+                >
+                    {/* Icon */}
+                    <View style={[styles.iconCircle, { borderColor: '#FBBF24' }]}>
+                        <FontAwesome5 name="pencil-ruler" size={65} color={'#FBBF24'} />
+                    </View>
 
-                {/* Title */}
-                <Text style={styles.titleText}>Update Your Measurements</Text>
+                    {/* Title */}
+                    <Text style={styles.titleText}>Update Your Measurements</Text>
 
-                {/* Subtitle */}
-                <Text style={styles.subtitleText}>Updates Nutrition Goals</Text>
+                    {/* Subtitle */}
+                    <Text style={styles.subtitleText}>Updates Nutrition Goals</Text>
 
-                {/* Unit System Toggle */}
-                <View style={styles.toggleContainer}>
-                    <TouchableOpacity style={[styles.toggleButton, unitSystem === 'imperial' && { borderColor: '#FBBF24' }]} onPress={() => setUnitSystem('imperial')} activeOpacity={0.7}>
-                        <Text style={[styles.toggleText, unitSystem === 'imperial' && styles.toggleTextActive]}>Imperial</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={[styles.toggleButton, unitSystem === 'metric' && { borderColor: '#FBBF24' }]} onPress={() => setUnitSystem('metric')} activeOpacity={0.7}>
-                        <Text style={[styles.toggleText, unitSystem === 'metric' && styles.toggleTextActive]}>Metric</Text>
-                    </TouchableOpacity>
-                </View>
+                    {/* Unit System Toggle */}
+                    <View style={styles.toggleContainer}>
+                        <TouchableOpacity style={[styles.toggleButton, unitSystem === 'imperial' && { borderColor: '#FBBF24' }]} onPress={() => setUnitSystem('imperial')} activeOpacity={0.7}>
+                            <Text style={[styles.toggleText, unitSystem === 'imperial' && styles.toggleTextActive]}>Imperial</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={[styles.toggleButton, unitSystem === 'metric' && { borderColor: '#FBBF24' }]} onPress={() => setUnitSystem('metric')} activeOpacity={0.7}>
+                            <Text style={[styles.toggleText, unitSystem === 'metric' && styles.toggleTextActive]}>Metric</Text>
+                        </TouchableOpacity>
+                    </View>
 
-                {/* Input Fields */}
-                <View style={styles.inputContainer}>
-                    {/* Height Input */}
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.inputLabel}>Height</Text>
-                        <View style={styles.inputWrapper}>
-                            <TextInput style={styles.input} placeholder={unitSystem === 'imperial' ? '70' : '178'} placeholderTextColor="#555" keyboardType="numeric" value={height} onChangeText={setHeight} />
-                            <Text style={styles.unitText}>{unitSystem === 'imperial' ? 'in' : 'cm'}</Text>
+                    {/* Input Fields */}
+                    <View style={styles.inputContainer}>
+                        {/* Height Input */}
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.inputLabel}>Height</Text>
+                            <View style={styles.inputWrapper}>
+                                <TextInput style={styles.input} placeholder={unitSystem === 'imperial' ? '70' : '178'} placeholderTextColor="#555" keyboardType="numeric" value={height} onChangeText={setHeight} returnKeyType="next" />
+                                <Text style={styles.unitText}>{unitSystem === 'imperial' ? 'in' : 'cm'}</Text>
+                            </View>
+                        </View>
+
+                        {/* Weight Input */}
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.inputLabel}>Weight</Text>
+                            <View style={styles.inputWrapper}>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder={unitSystem === 'imperial' ? '160' : '73'}
+                                    placeholderTextColor="#555"
+                                    keyboardType="numeric"
+                                    value={weight}
+                                    onChangeText={setWeight}
+                                    returnKeyType="done"
+                                    onSubmitEditing={handleSave}
+                                />
+                                <Text style={styles.unitText}>{unitSystem === 'imperial' ? 'lbs' : 'kg'}</Text>
+                            </View>
                         </View>
                     </View>
 
-                    {/* Weight Input */}
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.inputLabel}>Weight</Text>
-                        <View style={styles.inputWrapper}>
-                            <TextInput style={styles.input} placeholder={unitSystem === 'imperial' ? '160' : '73'} placeholderTextColor="#555" keyboardType="numeric" value={weight} onChangeText={setWeight} />
-                            <Text style={styles.unitText}>{unitSystem === 'imperial' ? 'lbs' : 'kg'}</Text>
-                        </View>
-                    </View>
-                </View>
-
-                {/* Next Button */}
-                <TouchableOpacity style={styles.nextButton} onPress={handleSave} activeOpacity={0.8}>
-                    <Text style={styles.nextButtonText}>Save</Text>
-                </TouchableOpacity>
-            </View>
-        </TouchableWithoutFeedback>
+                    {/* Save Button */}
+                    <TouchableOpacity style={styles.nextButton} onPress={handleSave} activeOpacity={0.8}>
+                        <Text style={styles.nextButtonText}>Save</Text>
+                    </TouchableOpacity>
+                </ScrollView>
+            </KeyboardAvoidingView>
+        </View>
     )
 }
 
@@ -91,10 +109,21 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#121212',
+    },
+    keyboardAvoiding: {
+        flex: 1,
+    },
+    scroll: {
+        flex: 1,
+        width: '100%',
+    },
+    scrollContent: {
+        flexGrow: 1,
+        alignItems: 'center',
+        width: '100%',
         paddingHorizontal: 25,
         paddingTop: 20,
         paddingBottom: 40,
-        alignItems: 'center',
     },
     iconCircle: {
         width: 144,

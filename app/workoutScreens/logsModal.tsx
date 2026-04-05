@@ -4,7 +4,7 @@ import { useAuth } from '@/context/AuthContext'
 import { useSettings } from '@/context/SettingsContext'
 import { useWorkout } from '@/context/WorkoutContext'
 import { Log } from '@/context/WorkoutContext/types'
-import { formatDateOrToday, getDateKey, isDateAfterToday, sortByCreatedAtDesc, sortByDateDesc } from '@/lib/utils/dateHelper'
+import { formatDateOrToday, getDateKey, isDateAfterToday, sortByDateDesc } from '@/lib/utils/dateHelper'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useLocalSearchParams } from 'expo-router'
 import { Calendar, Check } from 'lucide-react-native'
@@ -45,7 +45,9 @@ export default function LogsModal() {
     useEffect(() => {
         if (!pendingAddRef.current || logs.length === 0) return
         const { weight, reps, dateKey } = pendingAddRef.current
-        const matching = logs.filter((log) => log.exerciseID === exerciseId && log.weight === weight && log.reps === reps && getDateKey(log.date) === dateKey).sort(sortByCreatedAtDesc)
+        const matching = logs
+            .filter((log) => log.exerciseID === exerciseId && log.weight === weight && log.reps === reps && getDateKey(log.date) === dateKey)
+            .sort((a, b) => (b.time !== a.time ? b.time - a.time : b.id.localeCompare(a.id)))
         if (matching.length > 0) {
             const added = matching[0]
             const newLogId = added.id
@@ -93,14 +95,15 @@ export default function LogsModal() {
 
     const isValid = weight.trim() && reps.trim()
 
-    // Filter and sort logs (most recent date first, then most recently created first within same calendar day)
+    // Filter and sort logs (most recent date first, then most recent time within same calendar day)
     const exerciseLogs = logs
         .filter((log) => log.exerciseID === exerciseId)
         .sort((a, b) => {
             const dateKeyA = getDateKey(a.date)
             const dateKeyB = getDateKey(b.date)
             if (dateKeyA !== dateKeyB) return sortByDateDesc(a.date, b.date)
-            return sortByCreatedAtDesc(a, b)
+            if (b.time !== a.time) return b.time - a.time
+            return b.id.localeCompare(a.id)
         })
 
     return (

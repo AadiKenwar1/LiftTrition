@@ -4,7 +4,7 @@ import FontAwesome from '@expo/vector-icons/FontAwesome'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
 import { useState } from 'react'
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 export default function Onboarding2Screen() {
     const { settings, setSettings } = useSettings()
@@ -35,21 +35,21 @@ export default function Onboarding2Screen() {
     return (
         <View style={styles.container}>
             <LinearGradient colors={['rgba(47, 128, 237, 0.3)', 'transparent']} style={styles.topGradient} pointerEvents="none" />
-            <View style={styles.content}>
+            <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
                 {/* Icon */}
                 <View style={styles.iconCircle}>
                     <FontAwesome name="birthday-cake" size={72} color="#2f80ed" />
                 </View>
 
                 {/* Title */}
-                <Text style={styles.titleText}>When's Your Birthday?</Text>
+                <Text style={styles.titleText}>When's Your {'\n'}Birthday?</Text>
                 <Text style={styles.subtitleText}>We use your age for BMR and nutrition goal calculations.</Text>
 
                 {/* Date Picker */}
                 <View style={styles.datePickerContainer}>
                     <DatePicker selectedDate={birthDate} onDateChange={setBirthDate} color="#2f80ed" />
                 </View>
-            </View>
+            </ScrollView>
 
             {/* Navigation Buttons */}
             <View style={styles.buttonContainer}>
@@ -85,9 +85,13 @@ const styles = StyleSheet.create({
         right: 0,
         height: 220,
     },
-    content: {
+    scroll: {
+        flex: 1,
+    },
+    scrollContent: {
         alignItems: 'center',
         paddingTop: 40,
+        paddingBottom: 16,
     },
     iconCircle: {
         width: 144,

@@ -40,3 +40,15 @@ export function validateTargetWeight(targetWeight: number, currentWeight: number
     }
     return true
 }
+
+export function validateMacro(value: number): boolean {
+    if (Number.isNaN(value) || !Number.isFinite(value)) {
+        Alert.alert('Invalid Input', 'Please enter a valid number.', [{ text: 'OK' }])
+        return false
+    }
+    if (value < 0) {
+        Alert.alert('Invalid Input', 'Value cannot be negative.', [{ text: 'OK' }])
+        return false
+    }
+    return true
+}

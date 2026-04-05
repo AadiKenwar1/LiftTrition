@@ -4,7 +4,7 @@ import FontAwesome5 from '@expo/vector-icons/FontAwesome5'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
 import { useState } from 'react'
-import { Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
+import { Keyboard, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
 
 const AMBER = '#FBBF24'
 
@@ -33,7 +33,7 @@ export default function Onboarding4Screen() {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={styles.container}>
                 <LinearGradient colors={['rgba(251, 191, 36, 0.14)', 'transparent']} style={styles.topGradient} pointerEvents="none" />
-                <View style={styles.content}>
+                <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
                     {/* Icon */}
                     <View style={[styles.iconCircle, { borderColor: AMBER }]}>
                         <FontAwesome5 name="pencil-ruler" size={65} color={AMBER} />
@@ -73,7 +73,7 @@ export default function Onboarding4Screen() {
                             </View>
                         </View>
                     </View>
-                </View>
+                </ScrollView>
 
                 {/* Navigation Buttons */}
                 <View style={styles.buttonContainer}>
@@ -110,9 +110,13 @@ const styles = StyleSheet.create({
         right: 0,
         height: 220,
     },
-    content: {
+    scroll: {
+        flex: 1,
+    },
+    scrollContent: {
         alignItems: 'center',
         paddingTop: 40,
+        paddingBottom: 16,
     },
     iconCircle: {
         width: 144,

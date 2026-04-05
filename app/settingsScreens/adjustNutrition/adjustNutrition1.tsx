@@ -3,10 +3,10 @@ import { validateHeightWeight, validateTargetWeight } from '@/context/SettingsCo
 import { router } from 'expo-router'
 import { Target } from 'lucide-react-native'
 import { useState } from 'react'
-import { Keyboard, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
+import { Keyboard, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
 export default function AdjustNutrition2Screen() {
-    const { settings, mode } = useSettings()
+    const { settings } = useSettings()
     const accent = '#22C922'
 
     const [goal, setGoal] = useState<'lose' | 'gain' | 'maintain' | null>(settings.goalType)
@@ -33,8 +33,15 @@ export default function AdjustNutrition2Screen() {
     }
 
     return (
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="never">
+        <View style={styles.container}>
+            <ScrollView
+                style={styles.scroll}
+                contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+                keyboardDismissMode="on-drag"
+                onScrollBeginDrag={Keyboard.dismiss}
+            >
                 {/* Icon */}
                 <View style={[styles.iconCircle, { borderColor: accent }]}>
                     <Target size={96} color={accent} strokeWidth={2} />
@@ -83,7 +90,7 @@ export default function AdjustNutrition2Screen() {
                     <Text style={styles.nextButtonText}>Next</Text>
                 </TouchableOpacity>
             </ScrollView>
-        </TouchableWithoutFeedback>
+        </View>
     )
 }
 
@@ -91,14 +98,18 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#121212',
-        paddingTop: 36,
+    },
+    scroll: {
+        flex: 1,
+        width: '100%',
     },
     scrollContent: {
-        paddingHorizontal: 25,
-        alignItems: 'center',
-        paddingBottom: 200,
         flexGrow: 1,
-        justifyContent: 'center',
+        alignItems: 'center',
+        width: '100%',
+        paddingHorizontal: 25,
+        paddingTop: 36,
+        paddingBottom: 40,
     },
     iconCircle: {
         width: 144,

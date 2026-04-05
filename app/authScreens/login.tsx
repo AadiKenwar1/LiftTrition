@@ -31,19 +31,15 @@ export default function LoginScreen() {
 
     return (
         <View style={styles.container}>
-            <LinearGradient
-                colors={['rgba(255, 255, 255, 0.07)', 'transparent']}
-                style={styles.topGradient}
-                pointerEvents="none"
-            />
+            <LinearGradient colors={['rgba(255, 255, 255, 0.07)', 'transparent']} style={styles.topGradient} pointerEvents="none" />
             {/* Logo/Branding Section */}
             <View style={styles.brandingContainer}>
                 <View style={styles.logoContainer}>
-                    <Image source={require('@/assets/images/LTpng.png')} style={{ width: 375, height: 375 }} contentFit="contain" priority="high" />
+                    <Image source={require('@/assets/images/LTpng.png')} style={{ width: '175%', height: '175%' }} contentFit="contain" priority="high" />
                 </View>
 
                 <Text style={styles.appName}>LiftTrition</Text>
-                <Text style={styles.tagline}> Weightlifting and Nutrition Tracking Made Simple</Text>
+                <Text style={styles.tagline}> Progress Starts With Tracking</Text>
             </View>
 
             {/* Sign In Buttons */}
@@ -102,15 +98,23 @@ const styles = StyleSheet.create({
         fontWeight: '800',
         color: '#fff',
         letterSpacing: -1.5,
-        marginBottom: 8,
+        marginBottom: 0,
         fontFamily: 'Poppins_800ExtraBold',
     },
     tagline: {
-        fontSize: 20,
+        fontSize: 22,
         fontWeight: '500',
         color: '#888',
-        letterSpacing: 0.5,
+        letterSpacing: -0.5,
         fontFamily: 'Poppins_500Medium',
+        marginBottom: 24,
+        textAlign: 'center',
+    },
+    subtagline: {
+        fontSize: 20,
+        color: '#888',
+        letterSpacing: -0.5,
+        fontFamily: 'Poppins_500Medium_Italic',
         marginBottom: 24,
         textAlign: 'center',
     },

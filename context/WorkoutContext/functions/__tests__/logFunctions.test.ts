@@ -10,6 +10,7 @@ function createMockLog(overrides: Partial<Log> = {}): Log {
         workoutID: 'workout-1',
         exerciseID: 'exercise-1',
         date: new Date('2024-01-01'),
+        time: 0,
         weight: 100,
         reps: 10,
         rpe: 8,
@@ -58,6 +59,20 @@ describe('Log Functions', () => {
                 expect(result[0].reps).toBe(10)
                 expect(result[0].rpe).toBe(8)
                 expect(result[0].date).toEqual(date)
+                expect(typeof result[0].time).toBe('number')
+                expect(Number.isFinite(result[0].time)).toBe(true)
+            })
+
+            test('should set time to Date.now() (epoch ms)', () => {
+                const fixedNow = 1_705_318_800_123
+                const nowSpy = jest.spyOn(Date, 'now').mockReturnValue(fixedNow)
+                const { setter, getState, setState } = createMockSetter<Log>()
+                setState([])
+
+                addLog('workout-1', 'exercise-1', 'user-1', 100, 10, 8, new Date('2024-01-15'), setter)
+
+                expect(getState()[0].time).toBe(fixedNow)
+                nowSpy.mockRestore()
             })
 
             test('should store date as Date object', () => {
@@ -138,34 +153,31 @@ describe('Log Functions', () => {
                 expect(result[0].weight).toBe(100.5)
             })
 
-            test('should handle negative weight', () => {
+            test('should not add log when weight is negative (validation)', () => {
                 const { setter, getState, setState } = createMockSetter<Log>()
                 setState([])
 
                 addLog('workout-1', 'exercise-1', 'user-1', -10, 10, 8, new Date(), setter)
 
-                const result = getState()
-                expect(result[0].weight).toBe(-10)
+                expect(getState()).toHaveLength(0)
             })
 
-            test('should handle negative reps', () => {
+            test('should not add log when reps is negative (validation)', () => {
                 const { setter, getState, setState } = createMockSetter<Log>()
                 setState([])
 
                 addLog('workout-1', 'exercise-1', 'user-1', 100, -5, 8, new Date(), setter)
 
-                const result = getState()
-                expect(result[0].reps).toBe(-5)
+                expect(getState()).toHaveLength(0)
             })
 
-            test('should handle negative RPE', () => {
+            test('should not add log when RPE is negative (validation)', () => {
                 const { setter, getState, setState } = createMockSetter<Log>()
                 setState([])
 
                 addLog('workout-1', 'exercise-1', 'user-1', 100, 10, -1, new Date(), setter)
 
-                const result = getState()
-                expect(result[0].rpe).toBe(-1)
+                expect(getState()).toHaveLength(0)
             })
         })
 
@@ -187,6 +199,8 @@ describe('Log Functions', () => {
                 expect(result[0].weight).toBe(100)
                 expect(result[0].reps).toBe(10)
                 expect(result[0].rpe).toBe(8)
+                expect(typeof result[0].time).toBe('number')
+                expect(Number.isFinite(result[0].time)).toBe(true)
                 expect(result[0].createdAt).toBeInstanceOf(Date)
                 expect(result[0].updatedAt).toBeInstanceOf(Date)
             })
@@ -320,9 +334,10 @@ describe('Log Functions', () => {
 
             const result = getState()
             expect(result).toHaveLength(3)
-            expect(result[0].date).toBe(date1.toISOString())
-            expect(result[1].date).toBe(date2.toISOString())
-            expect(result[2].date).toBe(date3.toISOString())
+            expect(result[0].date).toEqual(date1)
+            expect(result[1].date).toEqual(date2)
+            expect(result[2].date).toEqual(date3)
+            expect(result.every((l) => typeof l.time === 'number')).toBe(true)
         })
 
         test('should handle adding logs across multiple workouts and exercises', () => {

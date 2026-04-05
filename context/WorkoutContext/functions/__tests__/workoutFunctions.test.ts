@@ -248,9 +248,9 @@ describe('Workout Functions', () => {
                 const { setter: setLogs, getState: getLogs, setState: setLogsState } = createMockSetter<Log>();
                 
                 setLogsState([
-                    { id: 'log1', workoutID: '1', exerciseID: 'ex1', userID: 'user-1', date: new Date('2024-01-01'), weight: 100, reps: 10, rpe: 8, createdAt: new Date(), updatedAt: new Date() },
-                    { id: 'log2', workoutID: '2', exerciseID: 'ex2', userID: 'user-1', date: new Date('2024-01-01'), weight: 100, reps: 10, rpe: 8, createdAt: new Date(), updatedAt: new Date() },
-                    { id: 'log3', workoutID: '1', exerciseID: 'ex3', userID: 'user-1', date: new Date('2024-01-01'), weight: 100, reps: 10, rpe: 8, createdAt: new Date(), updatedAt: new Date() }
+                    { id: 'log1', workoutID: '1', exerciseID: 'ex1', userID: 'user-1', date: new Date('2024-01-01'), time: 0, weight: 100, reps: 10, rpe: 8, createdAt: new Date(), updatedAt: new Date() },
+                    { id: 'log2', workoutID: '2', exerciseID: 'ex2', userID: 'user-1', date: new Date('2024-01-01'), time: 0, weight: 100, reps: 10, rpe: 8, createdAt: new Date(), updatedAt: new Date() },
+                    { id: 'log3', workoutID: '1', exerciseID: 'ex3', userID: 'user-1', date: new Date('2024-01-01'), time: 0, weight: 100, reps: 10, rpe: 8, createdAt: new Date(), updatedAt: new Date() }
                 ]);
                 
                 deleteWorkout('1', setWorkouts, setExercises, setLogs);
@@ -616,9 +616,9 @@ describe('Workout Functions', () => {
             ]);
             
             setLogsState([
-                { id: 'log1', workoutID: '1', exerciseID: 'ex1', userID: 'user-1', date: new Date('2024-01-01'), weight: 100, reps: 10, rpe: 8, createdAt: new Date(), updatedAt: new Date() },
-                { id: 'log2', workoutID: '1', exerciseID: 'ex2', userID: 'user-1', date: new Date('2024-01-01'), weight: 100, reps: 10, rpe: 8, createdAt: new Date(), updatedAt: new Date() },
-                { id: 'log3', workoutID: '2', exerciseID: 'ex3', userID: 'user-1', date: new Date('2024-01-01'), weight: 100, reps: 10, rpe: 8, createdAt: new Date(), updatedAt: new Date() }
+                { id: 'log1', workoutID: '1', exerciseID: 'ex1', userID: 'user-1', date: new Date('2024-01-01'), time: 0, weight: 100, reps: 10, rpe: 8, createdAt: new Date(), updatedAt: new Date() },
+                { id: 'log2', workoutID: '1', exerciseID: 'ex2', userID: 'user-1', date: new Date('2024-01-01'), time: 0, weight: 100, reps: 10, rpe: 8, createdAt: new Date(), updatedAt: new Date() },
+                { id: 'log3', workoutID: '2', exerciseID: 'ex3', userID: 'user-1', date: new Date('2024-01-01'), time: 0, weight: 100, reps: 10, rpe: 8, createdAt: new Date(), updatedAt: new Date() }
             ]);
             
             deleteWorkout('1', setWorkouts, setExercises, setLogs);

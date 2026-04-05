@@ -3,7 +3,7 @@ import { useBilling } from '@/context/BillingContext'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { BarChart3, Database, Sparkles, Zap } from 'lucide-react-native'
 import { useState } from 'react'
-import { ActivityIndicator, Alert, Linking, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Alert, Linking, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 const ACCENT = '#2f80ed'
 
@@ -68,7 +68,12 @@ export default function SubscriptionScreen() {
 
     return (
         <View style={styles.container}>
-            <View style={styles.content}>
+            <ScrollView
+                style={styles.scroll}
+                contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+            >
                 {/* Icon */}
                 <View style={[styles.iconCircle, { borderColor: ACCENT }]}>
                     <Ionicons name="sparkles" size={72} color={ACCENT} />
@@ -160,7 +165,7 @@ export default function SubscriptionScreen() {
                     .
                 </Text>
                 <TermsAndPrivacyModal visible={termsModalVisible} onClose={() => setTermsModalVisible(false)} />
-            </View>
+            </ScrollView>
         </View>
     )
 }
@@ -169,23 +174,27 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#121212',
+    },
+    scroll: {
+        flex: 1,
+    },
+    scrollContent: {
+        flexGrow: 1,
         padding: 25,
         paddingTop: 24,
-        paddingBottom: 24,
+        paddingBottom: 32,
+        alignItems: 'center',
     },
     centerContent: {
         justifyContent: 'center',
         alignItems: 'center',
+        paddingHorizontal: 25,
     },
     loadingText: {
         color: '#888',
         marginTop: 16,
         fontSize: 16,
         fontFamily: 'Poppins_400Regular',
-    },
-    content: {
-        flex: 1,
-        alignItems: 'center',
     },
     iconCircle: {
         width: 144,

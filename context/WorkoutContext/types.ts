@@ -28,6 +28,7 @@ export interface Log {
     workoutID: string
     exerciseID: string
     date: Date
+    time: number
     weight: number
     reps: number
     rpe: number
@@ -82,7 +83,7 @@ export interface WorkoutContextInterface {
     handleCalculateFatiguePercentage: (numDays: number, activityLevel: string) => number
     getFatigueFeedback: (percentage: number) => string
     handleGetOneRepMaxData: (exerciseName: string) => Array<{ day: string; value: number }>
-    handleGetVolumeData: (onboardingCompletedAt?: Date) => Array<{ day: string; value: number }>
+    handleGetSetsData: (onboardingCompletedAt?: Date) => Array<{ day: string; value: number }>
     handleCreateUserExercise: (exerciseData: CreateExerciseData, userID: string) => void
     handleDeleteUserExercise: (exerciseName: string) => void
 }

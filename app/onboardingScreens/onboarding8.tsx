@@ -2,7 +2,7 @@ import { useSettings } from '@/context/SettingsContext'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 const ACCENT = '#FBBF24'
 
@@ -46,7 +46,7 @@ export default function Onboarding8Screen() {
     return (
         <View style={styles.container}>
             <LinearGradient colors={['rgba(251, 191, 36, 0.14)', 'transparent']} style={styles.topGradient} pointerEvents="none" />
-            <View style={styles.content}>
+            <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
                 {/* Icon */}
                 <View style={[styles.iconCircle, { borderColor: ACCENT }]}>
                     <MaterialCommunityIcons name="folder-information" size={72} color={ACCENT} />
@@ -120,7 +120,7 @@ export default function Onboarding8Screen() {
 
                 {/* Adjustable Settings Note */}
                 <Text style={styles.noteText}>These settings can be adjusted at any time</Text>
-            </View>
+            </ScrollView>
 
             {/* Navigation Buttons */}
             <View style={styles.buttonContainer}>
@@ -139,8 +139,8 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#121212',
-        padding: 25,
-        paddingTop: 90,
+        paddingHorizontal: 25,
+        paddingBottom: 50,
     },
     topGradient: {
         position: 'absolute',
@@ -149,8 +149,13 @@ const styles = StyleSheet.create({
         right: 0,
         height: 220,
     },
-    content: {
+    scroll: {
+        flex: 1,
+    },
+    scrollContent: {
         alignItems: 'center',
+        paddingTop: 90,
+        paddingBottom: 16,
     },
     iconCircle: {
         width: 144,
