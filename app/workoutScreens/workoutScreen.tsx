@@ -57,7 +57,14 @@ export default function WorkoutScreen() {
         ])
     }
 
-    const renderHeader = () => <Text style={styles.sectionTitle}>Workouts</Text>
+    const renderHeader = () => {
+        return (
+            <>
+                <Text style={styles.sectionTitle}>Workouts</Text>
+                <Text style={styles.sectionSubtitle}>Tap workout to open. Tap pencil to edit. Hold stacked lines to rearrange</Text>
+            </>
+        )
+    }
 
     return (
         <View style={styles.container}>
@@ -90,8 +97,14 @@ const styles = StyleSheet.create({
         flexShrink: 1,
         color: '#fff',
         letterSpacing: -0.5,
-        marginBottom: 10,
         fontFamily: 'Poppins_600SemiBold',
+    },
+    sectionSubtitle: {
+        fontSize: 14,
+        color: '#aaa',
+        letterSpacing: 0.2,
+        fontFamily: 'Poppins_400Regular',
+        marginBottom: 10,
     },
     emptyContainer: {
         flex: 1,

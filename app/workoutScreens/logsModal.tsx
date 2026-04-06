@@ -45,9 +45,7 @@ export default function LogsModal() {
     useEffect(() => {
         if (!pendingAddRef.current || logs.length === 0) return
         const { weight, reps, dateKey } = pendingAddRef.current
-        const matching = logs
-            .filter((log) => log.exerciseID === exerciseId && log.weight === weight && log.reps === reps && getDateKey(log.date) === dateKey)
-            .sort((a, b) => (b.time !== a.time ? b.time - a.time : b.id.localeCompare(a.id)))
+        const matching = logs.filter((log) => log.exerciseID === exerciseId && log.weight === weight && log.reps === reps && getDateKey(log.date) === dateKey).sort((a, b) => (b.time !== a.time ? b.time - a.time : b.id.localeCompare(a.id)))
         if (matching.length > 0) {
             const added = matching[0]
             const newLogId = added.id
@@ -194,7 +192,7 @@ export default function LogsModal() {
                                     </View>
 
                                     {/* Change Date Button */}
-                                    <TouchableOpacity onPress={() => setShowDateModal(true)} style={styles.changeDateButton} activeOpacity={0.7}>
+                                    <TouchableOpacity onPress={() => setShowDateModal(true)} style={styles.changeDateButton} activeOpacity={0.5}>
                                         <View flexDirection="column" alignItems="center">
                                             <View flexDirection="row" gap={4}>
                                                 <Calendar size={18} color="#2f80ed" strokeWidth={2.5} />
@@ -207,13 +205,7 @@ export default function LogsModal() {
                             </View>
                         </TouchableWithoutFeedback>
 
-                        <LogHistoryList
-                            logs={exerciseLogs}
-                            weightUnit={weightUnit}
-                            lastAddedLogId={lastAddedLogId}
-                            onDeleteConfirmed={handleDeleteLog}
-                            flatListRef={flatListRef}
-                        />
+                        <LogHistoryList logs={exerciseLogs} weightUnit={weightUnit} lastAddedLogId={lastAddedLogId} onDeleteConfirmed={handleDeleteLog} flatListRef={flatListRef} />
                     </View>
                 </View>
             </KeyboardAvoidingView>

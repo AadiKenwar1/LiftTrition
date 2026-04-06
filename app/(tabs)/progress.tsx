@@ -133,7 +133,7 @@ export default function ProgressScreen() {
                             <ProgressWheel percent={mode === true ? fatigueData.last3Days : proteinPercent} size={95} strokeWidth={9.5} fontSize={20} />
                             {mode === false && (
                                 <Text style={styles.oneThirdBottomText}>
-                                    {Math.round(todayMacros.totalProtein)}/{settings.proteinGoal}
+                                    {Math.round(todayMacros.totalProtein)}/{settings.proteinGoal}g
                                 </Text>
                             )}
                         </View>
@@ -148,7 +148,7 @@ export default function ProgressScreen() {
                             <ProgressWheel percent={mode === true ? fatigueData.last6Days : carbsPercent} size={95} strokeWidth={9.5} fontSize={20} />
                             {mode === false && (
                                 <Text style={styles.oneThirdBottomText}>
-                                    {Math.round(todayMacros.totalCarbs)}/{settings.carbsGoal}
+                                    {Math.round(todayMacros.totalCarbs)}/{settings.carbsGoal}g
                                 </Text>
                             )}
                         </View>
@@ -163,7 +163,7 @@ export default function ProgressScreen() {
                             <ProgressWheel percent={mode === true ? fatigueData.last9Days : fatsPercent} size={95} strokeWidth={9.5} fontSize={20} />
                             {mode === false && (
                                 <Text style={styles.oneThirdBottomText}>
-                                    {Math.round(todayMacros.totalFats)}/{settings.fatsGoal}
+                                    {Math.round(todayMacros.totalFats)}/{settings.fatsGoal}g
                                 </Text>
                             )}
                         </View>

@@ -235,12 +235,12 @@ export default function ProfileScreen() {
 
                 {/* Action Buttons */}
                 <View style={styles.actionSection}>
-                    <TouchableOpacity style={[styles.signOutButton, signOutLoading && styles.buttonDisabled]} onPress={handleSignOut} activeOpacity={0.7} disabled={signOutLoading || deleteLoading}>
+                    <TouchableOpacity style={[styles.signOutButton, signOutLoading && styles.buttonDisabled]} onPress={handleSignOut} activeOpacity={0.5} disabled={signOutLoading || deleteLoading}>
                         <LogOut size={20} color="#fff" strokeWidth={2} />
                         <Text style={styles.signOutText}>{signOutLoading ? 'Signing out...' : 'Sign Out'}</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={[styles.deleteButton, deleteLoading && styles.buttonDisabled]} onPress={handleDeleteAccount} activeOpacity={0.7} disabled={signOutLoading || deleteLoading}>
+                    <TouchableOpacity style={[styles.deleteButton, deleteLoading && styles.buttonDisabled]} onPress={handleDeleteAccount} activeOpacity={0.5} disabled={signOutLoading || deleteLoading}>
                         <Trash2 size={20} color="#FF6B6B" strokeWidth={2} />
                         <Text style={styles.deleteText}>{deleteLoading ? 'Deleting account...' : 'Delete Account'}</Text>
                     </TouchableOpacity>

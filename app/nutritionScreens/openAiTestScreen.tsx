@@ -160,12 +160,12 @@ export default function OpenAiTestScreen() {
                     </View>
 
                     <View style={styles.imagePickerRow}>
-                        <TouchableOpacity onPress={pickImage} style={styles.imagePickerButton} activeOpacity={0.7}>
+                        <TouchableOpacity onPress={pickImage} style={styles.imagePickerButton} activeOpacity={0.5}>
                             <ImageIcon size={20} color="#22C922" strokeWidth={2.5} />
                             <Text style={styles.imagePickerText}>Pick Image</Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity onPress={takePhoto} style={styles.imagePickerButton} activeOpacity={0.7}>
+                        <TouchableOpacity onPress={takePhoto} style={styles.imagePickerButton} activeOpacity={0.5}>
                             <Camera size={20} color="#22C922" strokeWidth={2.5} />
                             <Text style={styles.imagePickerText}>Take Photo</Text>
                         </TouchableOpacity>
@@ -201,7 +201,7 @@ export default function OpenAiTestScreen() {
                     <View style={styles.resultsSection}>
                         <View style={styles.resultHeader}>
                             <Text style={styles.resultTitle}>Result</Text>
-                            <TouchableOpacity onPress={clearResults} activeOpacity={0.7}>
+                            <TouchableOpacity onPress={clearResults} activeOpacity={0.5}>
                                 <Text style={styles.clearButton}>Clear</Text>
                             </TouchableOpacity>
                         </View>

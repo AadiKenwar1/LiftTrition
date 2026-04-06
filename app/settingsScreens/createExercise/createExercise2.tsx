@@ -66,7 +66,7 @@ export default function CreateExercise2Screen() {
                     <View style={styles.typeContainer}>
                         <Text style={styles.inputLabel}>Exercise Type</Text>
                         <View style={styles.typeButtons}>
-                            <TouchableOpacity style={[styles.typeButton, isCompound === true && { backgroundColor: accentRgba, borderColor: accent }]} onPress={() => setIsCompound(true)} activeOpacity={0.7}>
+                            <TouchableOpacity style={[styles.typeButton, isCompound === true && { backgroundColor: accentRgba, borderColor: accent }]} onPress={() => setIsCompound(true)} activeOpacity={0.5}>
                                 <View style={[styles.typeIconCircle, isCompound === true && { backgroundColor: accentRgba.replace('0.15', '0.2'), borderColor: accent }]}>
                                     <Activity size={28} color={isCompound === true ? accent : '#666'} strokeWidth={2.5} />
                                 </View>
@@ -74,7 +74,7 @@ export default function CreateExercise2Screen() {
                                 <Text style={styles.typeDescription}>Multi joint exercise</Text>
                             </TouchableOpacity>
 
-                            <TouchableOpacity style={[styles.typeButton, isCompound === false && { backgroundColor: accentRgba, borderColor: accent }]} onPress={() => setIsCompound(false)} activeOpacity={0.7}>
+                            <TouchableOpacity style={[styles.typeButton, isCompound === false && { backgroundColor: accentRgba, borderColor: accent }]} onPress={() => setIsCompound(false)} activeOpacity={0.5}>
                                 <View style={[styles.typeIconCircle, isCompound === false && { backgroundColor: accentRgba.replace('0.15', '0.2'), borderColor: accent }]}>
                                     <Target size={28} color={isCompound === false ? accent : '#666'} strokeWidth={2.5} />
                                 </View>

@@ -32,13 +32,15 @@ export default function BwCard({ height = 120 }: CardProps) {
                                 <Text style={styles.mainValue}>{formatWeight(settings.bodyWeight)}</Text>
                                 <Text style={styles.mainUnit}>{settings.unitSystem === 'imperial' ? 'lbs' : 'kg'}</Text>
                             </View>
-                            <Text style={styles.goalText}>Goal: {formatWeight(settings.goalWeight)} {settings.unitSystem === 'imperial' ? 'lbs' : 'kg'}</Text>
+                            <Text style={styles.goalText}>
+                                Goal: {formatWeight(settings.goalWeight)} {settings.unitSystem === 'imperial' ? 'lbs' : 'kg'}
+                            </Text>
                             <Text style={styles.hintText}>(Tap pencil to update)</Text>
                         </View>
                     </View>
 
                     {/* Edit Button - Positioned Absolute */}
-                    <TouchableOpacity style={styles.editButton} onPress={handleEditPress} activeOpacity={0.7}>
+                    <TouchableOpacity style={styles.editButton} onPress={handleEditPress} activeOpacity={0.5}>
                         <Pencil size={18} color="#22C922" strokeWidth={2.5} />
                     </TouchableOpacity>
                 </View>

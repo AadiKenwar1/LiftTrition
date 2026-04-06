@@ -7,7 +7,7 @@ import { Exercise } from '@/context/WorkoutContext/types'
 import { Ionicons } from '@expo/vector-icons'
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
 import { useLayoutEffect } from 'react'
-import { Alert, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { RenderItemParams } from 'react-native-draggable-flatlist'
 
 export default function ExerciseScreen() {
@@ -76,9 +76,11 @@ export default function ExerciseScreen() {
 
     return (
         <View style={styles.container}>
+            <View paddingHorizontal={25}>
+                <Text style={styles.sectionSubtitle}>Tap exercise to log. Tap pencil to edit. Hold stacked lines to rearrange</Text>
+            </View>
             {/* Draggable List */}
             <DraggableList key={listKey} data={activeExercises} renderItem={renderItem} keyExtractor={(item) => item.id} onDragEnd={(reorderedExercises) => handleUpdateExerciseOrder(workoutId, reorderedExercises)} />
-
             <Fab>
                 {[
                     <TouchableOpacity key="add-exercise" style={[styles.workoutFabButtons]} onPress={() => router.push({ pathname: '/workoutScreens/addExerciseModal', params: { workoutId: workoutId } })}>
@@ -101,6 +103,7 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#121212',
         paddingTop: 10,
+        paddingHorizontal: 10,
     },
     workoutFabButtons: {
         height: 60,
@@ -117,5 +120,20 @@ const styles = StyleSheet.create({
         shadowRadius: 3,
         borderWidth: 0.3,
         zIndex: 10,
+    },
+    sectionTitle: {
+        fontSize: 22,
+        flexShrink: 1,
+        color: '#fff',
+        letterSpacing: -0.5,
+        fontFamily: 'Poppins_600SemiBold',
+        
+    },
+    sectionSubtitle: {
+        fontSize: 14,
+        color: '#aaa',
+        letterSpacing: 0.2,
+        fontFamily: 'Poppins_400Regular',
+        marginBottom: 10,
     },
 })

@@ -135,7 +135,7 @@ export default function AddNutritionModal() {
                         />
                         <TouchableOpacity
                             style={hasPremium ? styles.aiButton : styles.aiButtonUnavailable}
-                            activeOpacity={0.7}
+                            activeOpacity={0.5}
                             onPress={() => (hasPremium ? handleGenerateMacros('calories') : router.replace('/settingsScreens/subscription'))}
                             disabled={generating}
                         >

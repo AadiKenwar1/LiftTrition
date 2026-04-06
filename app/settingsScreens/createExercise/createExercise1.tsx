@@ -69,7 +69,7 @@ export default function CreateExerciseScreen() {
                     </View>
 
                     {/*
-                    <TouchableOpacity style={styles.deleteButton} onPress={() => handleDelete(item.name)} activeOpacity={0.7}>
+                    <TouchableOpacity style={styles.deleteButton} onPress={() => handleDelete(item.name)} activeOpacity={0.5}>
                         <Trash2 size={20} color="#FF3B30" strokeWidth={2} />
                     </TouchableOpacity>
                     */}

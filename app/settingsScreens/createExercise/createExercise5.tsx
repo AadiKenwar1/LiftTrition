@@ -58,7 +58,7 @@ export default function CreateExercise5Screen() {
                                 key={equipment}
                                 style={[styles.equipmentButton, selectedEquipment === equipment && { backgroundColor: accentRgba, borderColor: accent }]}
                                 onPress={() => setSelectedEquipment(equipment)}
-                                activeOpacity={0.7}
+                                activeOpacity={0.5}
                             >
                                 <Text style={[styles.equipmentText, selectedEquipment === equipment && styles.equipmentTextSelected]}>{equipment}</Text>
                             </TouchableOpacity>

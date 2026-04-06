@@ -49,13 +49,13 @@ export default function SavedEntry({ name, calories, protein, carbs, fats, onAdd
 
                 {/* Stacked Action Buttons */}
                 <View style={styles.actionsContainer}>
-                    <TouchableOpacity style={styles.iconButton} onPress={onAddPress} activeOpacity={0.7}>
+                    <TouchableOpacity style={styles.iconButton} onPress={onAddPress} activeOpacity={0.5}>
                         <View style={styles.iconCircle}>
                             <Plus size={18 * 1.4} color="#22C922" strokeWidth={2.5} />
                         </View>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.iconButton} onPress={onDeletePress} activeOpacity={0.7}>
+                    <TouchableOpacity style={styles.iconButton} onPress={onDeletePress} activeOpacity={0.5}>
                         <View style={styles.icon2Circle}>
                             <Trash2 size={18} color="#FF453A" strokeWidth={2.5} />
                         </View>

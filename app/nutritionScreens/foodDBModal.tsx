@@ -139,11 +139,11 @@ export default function FoodDBModal() {
                         <Text style={styles.quantitySubtitle}>{quantityInputItem?.name}</Text>
                         <TextInput style={styles.quantityInput} placeholder="1" placeholderTextColor="#666" value={quantityValue} onChangeText={setQuantityValue} keyboardType="numeric" autoFocus />
                         <View style={styles.quantityButtons}>
-                            <TouchableOpacity style={[styles.quantityButton, styles.cancelButton]} onPress={cancelAddItem} activeOpacity={0.7}>
+                            <TouchableOpacity style={[styles.quantityButton, styles.cancelButton]} onPress={cancelAddItem} activeOpacity={0.5}>
                                 <X size={18} color="#FF453A" strokeWidth={2.5} />
                                 <Text style={[styles.quantityButtonText, styles.cancelButtonText]}>Cancel</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={[styles.quantityButton, styles.confirmButton]} onPress={confirmAddItem} activeOpacity={0.7}>
+                            <TouchableOpacity style={[styles.quantityButton, styles.confirmButton]} onPress={confirmAddItem} activeOpacity={0.5}>
                                 <Check size={18} color="#22C922" strokeWidth={2.5} />
                                 <Text style={[styles.quantityButtonText, styles.confirmButtonText]}>Add</Text>
                             </TouchableOpacity>
@@ -197,7 +197,7 @@ export default function FoodDBModal() {
                                             {item.calories * (item.quantity || 1)} cal • {item.protein * (item.quantity || 1)}g P • {item.carbs * (item.quantity || 1)}g C • {item.fats * (item.quantity || 1)}g F
                                         </Text>
                                     </View>
-                                    <TouchableOpacity style={styles.removeButton} onPress={() => handleRemoveItem(item.id)} activeOpacity={0.7}>
+                                    <TouchableOpacity style={styles.removeButton} onPress={() => handleRemoveItem(item.id)} activeOpacity={0.5}>
                                         <X size={18} color="#FF453A" strokeWidth={2.5} />
                                     </TouchableOpacity>
                                 </View>
@@ -224,7 +224,7 @@ export default function FoodDBModal() {
                                             {item.brandName && <Text style={styles.brandName}>{item.brandName}</Text>}
                                             {isLoading && <Text style={styles.loadingDetailsText}>Loading details...</Text>}
                                         </View>
-                                        <TouchableOpacity style={[styles.addButton, (isAdded || isLoading) && styles.addButtonDisabled]} onPress={() => handleAddItem(item)} activeOpacity={0.7} disabled={!!isAdded || isLoading}>
+                                        <TouchableOpacity style={[styles.addButton, (isAdded || isLoading) && styles.addButtonDisabled]} onPress={() => handleAddItem(item)} activeOpacity={0.5} disabled={!!isAdded || isLoading}>
                                             {isLoading ?
                                                 <ActivityIndicator size="small" color="#666" />
                                             :   <Plus size={18} color={isAdded ? '#666' : '#22C922'} strokeWidth={2.5} />}

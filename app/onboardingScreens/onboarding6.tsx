@@ -48,15 +48,15 @@ export default function Onboarding6Screen() {
 
                     {/* Goal Options */}
                     <View style={styles.goalContainer}>
-                        <TouchableOpacity style={[styles.goalButton, goal === 'lose' && { borderColor: ACCENT }]} onPress={() => setGoal('lose')} activeOpacity={0.7}>
+                        <TouchableOpacity style={[styles.goalButton, goal === 'lose' && { borderColor: ACCENT }]} onPress={() => setGoal('lose')} activeOpacity={0.5}>
                             <Text style={[styles.goalText, goal === 'lose' && styles.goalTextSelected]}>Lose</Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity style={[styles.goalButton, goal === 'maintain' && { borderColor: ACCENT }]} onPress={() => setGoal('maintain')} activeOpacity={0.7}>
+                        <TouchableOpacity style={[styles.goalButton, goal === 'maintain' && { borderColor: ACCENT }]} onPress={() => setGoal('maintain')} activeOpacity={0.5}>
                             <Text style={[styles.goalText, goal === 'maintain' && styles.goalTextSelected]}>Maintain</Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity style={[styles.goalButton, goal === 'gain' && { borderColor: ACCENT }]} onPress={() => setGoal('gain')} activeOpacity={0.7}>
+                        <TouchableOpacity style={[styles.goalButton, goal === 'gain' && { borderColor: ACCENT }]} onPress={() => setGoal('gain')} activeOpacity={0.5}>
                             <Text style={[styles.goalText, goal === 'gain' && styles.goalTextSelected]}>Gain</Text>
                         </TouchableOpacity>
                     </View>

@@ -44,7 +44,7 @@ export default function Onboarding5Screen() {
                 {/* Frequency Options */}
                 <View style={styles.optionsContainer}>
                     {frequencies.map((freq) => (
-                        <TouchableOpacity key={freq.id} style={[styles.optionButton, selectedFrequency === freq.id && { borderColor: ACCENT }]} onPress={() => setSelectedFrequency(freq.id)} activeOpacity={0.7}>
+                        <TouchableOpacity key={freq.id} style={[styles.optionButton, selectedFrequency === freq.id && { borderColor: ACCENT }]} onPress={() => setSelectedFrequency(freq.id)} activeOpacity={0.5}>
                             <Text style={[styles.optionLabel, selectedFrequency === freq.id && styles.optionLabelSelected]}>{freq.label}</Text>
                             <Text style={[styles.optionSubtitle, selectedFrequency === freq.id && styles.optionSubtitleSelected]}>{freq.subtitle}</Text>
                         </TouchableOpacity>

@@ -31,7 +31,7 @@ export default function ScrollableList({ data, searchPlaceholder = 'Search...', 
         const isSelected = selectedIds?.includes(item.id) ?? false
 
         return (
-            <ItemWrapper onPress={onPress ? () => onPress(item) : undefined} activeOpacity={0.7}>
+            <ItemWrapper onPress={onPress ? () => onPress(item) : undefined} activeOpacity={0.5}>
                 <View style={[styles.itemWrapper, isSelected && styles.itemWrapperSelected]}>
                     <View style={[styles.accentBar, { backgroundColor: mode ? '#2f80ed' : '#22C922' }]} />
                     <View style={styles.item}>
@@ -61,7 +61,7 @@ export default function ScrollableList({ data, searchPlaceholder = 'Search...', 
                 </View>
                 <TextInput style={styles.searchInput} placeholder={searchPlaceholder} placeholderTextColor="#666" value={searchQuery} onChangeText={setSearchQuery} autoCapitalize="none" autoCorrect={false} />
                 {searchQuery.length > 0 && (
-                    <TouchableOpacity style={styles.clearButton} onPress={() => setSearchQuery('')} activeOpacity={0.7}>
+                    <TouchableOpacity style={styles.clearButton} onPress={() => setSearchQuery('')} activeOpacity={0.5}>
                         <Text style={styles.clearText}>✕</Text>
                     </TouchableOpacity>
                 )}

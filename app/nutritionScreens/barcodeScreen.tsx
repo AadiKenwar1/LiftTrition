@@ -40,7 +40,7 @@ export default function BarcodeScreen() {
                                 <Text style={styles.permissionButtonText}>Grant Permission</Text>
                             </LinearGradient>
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={() => router.back()} style={styles.cancelButton} activeOpacity={0.7}>
+                        <TouchableOpacity onPress={() => router.back()} style={styles.cancelButton} activeOpacity={0.5}>
                             <Text style={styles.cancelButtonText}>Go Back</Text>
                         </TouchableOpacity>
                     </View>

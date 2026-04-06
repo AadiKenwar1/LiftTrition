@@ -33,14 +33,14 @@ export default function Onboarding3Screen() {
 
                 {/* Gender Selection Buttons */}
                 <View style={styles.genderContainer}>
-                    <TouchableOpacity style={[styles.genderButton, selectedSex === 'male' && styles.genderButtonSelected]} onPress={() => setSelectedSex('male')} activeOpacity={0.7}>
+                    <TouchableOpacity style={[styles.genderButton, selectedSex === 'male' && styles.genderButtonSelected]} onPress={() => setSelectedSex('male')} activeOpacity={0.5}>
                         <View style={[styles.genderIconCircle, selectedSex === 'male' && styles.genderIconCircleSelected]}>
                             <Text style={styles.genderIcon}>♂</Text>
                         </View>
                         <Text style={[styles.genderText, selectedSex === 'male' && styles.genderTextSelected]}>Male</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={[styles.genderButton, selectedSex === 'female' && styles.genderButtonSelected]} onPress={() => setSelectedSex('female')} activeOpacity={0.7}>
+                    <TouchableOpacity style={[styles.genderButton, selectedSex === 'female' && styles.genderButtonSelected]} onPress={() => setSelectedSex('female')} activeOpacity={0.5}>
                         <View style={[styles.genderIconCircle, selectedSex === 'female' && styles.genderIconCircleSelected]}>
                             <Text style={styles.genderIcon}>♀</Text>
                         </View>

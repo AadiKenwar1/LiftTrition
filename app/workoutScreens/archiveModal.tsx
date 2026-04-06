@@ -27,12 +27,12 @@ export default function ArchiveModal() {
                     {item.note && <Text style={styles.itemNote}>{item.note}</Text>}
                 </View>
                 <View style={styles.iconContainer}>
-                    <TouchableOpacity style={styles.iconButton} activeOpacity={0.7} onPress={() => (logType === 'workouts' ? handleArchiveWorkout(item.id, true) : handleArchiveExercise(item.id, item.workoutID, true))}>
+                    <TouchableOpacity style={styles.iconButton} activeOpacity={0.5} onPress={() => (logType === 'workouts' ? handleArchiveWorkout(item.id, true) : handleArchiveExercise(item.id, item.workoutID, true))}>
                         <View style={styles.iconCircle}>
                             <ArchiveRestore size={20 * 1.5} color="#2f80ed" strokeWidth={2} />
                         </View>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.iconButton} activeOpacity={0.7} onPress={() => (logType === 'workouts' ? handleDeleteWorkout(item.id) : handleDeleteExercise(item.id))}>
+                    <TouchableOpacity style={styles.iconButton} activeOpacity={0.5} onPress={() => (logType === 'workouts' ? handleDeleteWorkout(item.id) : handleDeleteExercise(item.id))}>
                         <View style={[styles.iconCircle, styles.deleteIconCircle]}>
                             <Trash size={20} color="#FF453A" strokeWidth={2.5} />
                         </View>

@@ -152,7 +152,7 @@ export default function AdjustNutrition4Screen() {
 
                 {/* Button Container */}
                 <View style={styles.buttonContainer}>
-                    <TouchableOpacity style={styles.cancelButton} onPress={handleCancel} activeOpacity={0.7}>
+                    <TouchableOpacity style={styles.cancelButton} onPress={handleCancel} activeOpacity={0.5}>
                         <Text style={styles.cancelButtonText}>Cancel</Text>
                     </TouchableOpacity>
 

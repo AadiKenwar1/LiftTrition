@@ -134,7 +134,7 @@ export default function EditPhotoEntry() {
                                     onFocus={() => setFocusedField(`iname-${index}`)}
                                     onBlur={() => setFocusedField(null)}
                                 />
-                                <TouchableOpacity style={styles.deleteBtn} onPress={() => removeIngredient(index)} activeOpacity={0.7}>
+                                <TouchableOpacity style={styles.deleteBtn} onPress={() => removeIngredient(index)} activeOpacity={0.5}>
                                     <Trash2 size={16} color="#FF453A" strokeWidth={2} />
                                 </TouchableOpacity>
                             </View>
@@ -171,7 +171,7 @@ export default function EditPhotoEntry() {
                                             const newQty = Math.max(0.1, ingredient.quantity - 1)
                                             updateIngredient(index, 'quantity', newQty.toString())
                                         }}
-                                        activeOpacity={0.7}
+                                        activeOpacity={0.5}
                                     >
                                         <Text style={styles.quantityButtonText}>−</Text>
                                     </TouchableOpacity>
@@ -192,7 +192,7 @@ export default function EditPhotoEntry() {
                                             const newQty = ingredient.quantity + 1
                                             updateIngredient(index, 'quantity', newQty.toString())
                                         }}
-                                        activeOpacity={0.7}
+                                        activeOpacity={0.5}
                                     >
                                         <Text style={styles.quantityButtonText}>+</Text>
                                     </TouchableOpacity>

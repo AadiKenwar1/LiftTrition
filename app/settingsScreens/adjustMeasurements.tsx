@@ -57,10 +57,10 @@ export default function AdjustMeasurementsScreen() {
 
                     {/* Unit System Toggle */}
                     <View style={styles.toggleContainer}>
-                        <TouchableOpacity style={[styles.toggleButton, unitSystem === 'imperial' && { borderColor: '#FBBF24' }]} onPress={() => setUnitSystem('imperial')} activeOpacity={0.7}>
+                        <TouchableOpacity style={[styles.toggleButton, unitSystem === 'imperial' && { borderColor: '#FBBF24' }]} onPress={() => setUnitSystem('imperial')} activeOpacity={0.5}>
                             <Text style={[styles.toggleText, unitSystem === 'imperial' && styles.toggleTextActive]}>Imperial</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={[styles.toggleButton, unitSystem === 'metric' && { borderColor: '#FBBF24' }]} onPress={() => setUnitSystem('metric')} activeOpacity={0.7}>
+                        <TouchableOpacity style={[styles.toggleButton, unitSystem === 'metric' && { borderColor: '#FBBF24' }]} onPress={() => setUnitSystem('metric')} activeOpacity={0.5}>
                             <Text style={[styles.toggleText, unitSystem === 'metric' && styles.toggleTextActive]}>Metric</Text>
                         </TouchableOpacity>
                     </View>

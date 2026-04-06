@@ -156,7 +156,7 @@ export default function Onboarding10Screen() {
                         :   <Text style={styles.subscribeButtonText}>{hasPremium ? 'Subscription Active' : 'Subscribe Now'}</Text>}
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.restoreButton} onPress={handleRestore} activeOpacity={0.7}>
+                    <TouchableOpacity style={styles.restoreButton} onPress={handleRestore} activeOpacity={0.5}>
                         <Text style={styles.restoreButtonText}>Restore Purchases</Text>
                     </TouchableOpacity>
                 </View>

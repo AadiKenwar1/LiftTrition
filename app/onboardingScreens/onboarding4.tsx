@@ -45,10 +45,10 @@ export default function Onboarding4Screen() {
 
                     {/* Unit System Toggle */}
                     <View style={styles.toggleContainer}>
-                        <TouchableOpacity style={[styles.toggleButton, unitSystem === 'imperial' && { borderColor: AMBER }]} onPress={() => setUnitSystem('imperial')} activeOpacity={0.7}>
+                        <TouchableOpacity style={[styles.toggleButton, unitSystem === 'imperial' && { borderColor: AMBER }]} onPress={() => setUnitSystem('imperial')} activeOpacity={0.5}>
                             <Text style={[styles.toggleText, unitSystem === 'imperial' && styles.toggleTextActive]}>Imperial</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={[styles.toggleButton, unitSystem === 'metric' && { borderColor: AMBER }]} onPress={() => setUnitSystem('metric')} activeOpacity={0.7}>
+                        <TouchableOpacity style={[styles.toggleButton, unitSystem === 'metric' && { borderColor: AMBER }]} onPress={() => setUnitSystem('metric')} activeOpacity={0.5}>
                             <Text style={[styles.toggleText, unitSystem === 'metric' && styles.toggleTextActive]}>Metric</Text>
                         </TouchableOpacity>
                     </View>

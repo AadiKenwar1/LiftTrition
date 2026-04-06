@@ -34,14 +34,7 @@ export default function AdjustNutrition2Screen() {
 
     return (
         <View style={styles.container}>
-            <ScrollView
-                style={styles.scroll}
-                contentContainerStyle={styles.scrollContent}
-                showsVerticalScrollIndicator={false}
-                keyboardShouldPersistTaps="handled"
-                keyboardDismissMode="on-drag"
-                onScrollBeginDrag={Keyboard.dismiss}
-            >
+            <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" onScrollBeginDrag={Keyboard.dismiss}>
                 {/* Icon */}
                 <View style={[styles.iconCircle, { borderColor: accent }]}>
                     <Target size={96} color={accent} strokeWidth={2} />
@@ -55,15 +48,15 @@ export default function AdjustNutrition2Screen() {
 
                 {/* Goal Options */}
                 <View style={styles.goalContainer}>
-                    <TouchableOpacity style={[styles.goalButton, goal === 'lose' && { borderColor: accent }]} onPress={() => setGoal('lose')} activeOpacity={0.7}>
+                    <TouchableOpacity style={[styles.goalButton, goal === 'lose' && { borderColor: accent }]} onPress={() => setGoal('lose')} activeOpacity={0.5}>
                         <Text style={[styles.goalText, goal === 'lose' && styles.goalTextSelected]}>Lose</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={[styles.goalButton, goal === 'maintain' && { borderColor: accent }]} onPress={() => setGoal('maintain')} activeOpacity={0.7}>
+                    <TouchableOpacity style={[styles.goalButton, goal === 'maintain' && { borderColor: accent }]} onPress={() => setGoal('maintain')} activeOpacity={0.5}>
                         <Text style={[styles.goalText, goal === 'maintain' && styles.goalTextSelected]}>Maintain</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={[styles.goalButton, goal === 'gain' && { borderColor: accent }]} onPress={() => setGoal('gain')} activeOpacity={0.7}>
+                    <TouchableOpacity style={[styles.goalButton, goal === 'gain' && { borderColor: accent }]} onPress={() => setGoal('gain')} activeOpacity={0.5}>
                         <Text style={[styles.goalText, goal === 'gain' && styles.goalTextSelected]}>Gain</Text>
                     </TouchableOpacity>
                 </View>

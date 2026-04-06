@@ -90,7 +90,7 @@ export default function SettingsScreen() {
     const renderSettingItem = (option: SettingsOption, index: number) => {
         const Icon = option.icon
         return (
-            <TouchableOpacity key={index} style={styles.settingItem} onPress={option.onPress} activeOpacity={0.7}>
+            <TouchableOpacity key={index} style={styles.settingItem} onPress={option.onPress} activeOpacity={0.5}>
                 <View style={styles.iconContainer}>
                     <Icon size={22} color={option.iconColor} strokeWidth={2.5} />
                 </View>

@@ -48,7 +48,7 @@ export default function AdjustTrainingScreen() {
                             key={freq.id}
                             style={[styles.optionButton, selectedFrequency === freq.id && { borderColor: accent }]}
                             onPress={() => setSelectedFrequency(freq.id as 'sedentary' | 'light' | 'moderate' | 'active' | 'gymrat')}
-                            activeOpacity={0.7}
+                            activeOpacity={0.5}
                         >
                             <Text style={[styles.optionLabel, selectedFrequency === freq.id && styles.optionLabelSelected]}>{freq.label}</Text>
                             <Text style={[styles.optionSubtitle, selectedFrequency === freq.id && styles.optionSubtitleSelected]}>{freq.subtitle}</Text>

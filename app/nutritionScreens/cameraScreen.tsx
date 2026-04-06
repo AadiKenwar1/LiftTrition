@@ -37,13 +37,13 @@ export default function CameraScreen() {
                             <Camera size={48} color="#22C922" strokeWidth={2.5} />
                         </View>
                         <Text style={styles.permissionTitle}>Camera Access Required</Text>
-                        <Text style={styles.permissionMessage}>We need access to your camera to take photos of your meals for nutrition tracking.</Text>
+                        <Text style={styles.permissionMessage}>We need access to your camera to take photos of your meals for nutrition tracking with AI analysis.</Text>
                         <TouchableOpacity onPress={requestPermission} activeOpacity={0.8} style={styles.permissionButtonTouchable}>
                             <LinearGradient colors={['#3CB855', '#22C922', '#5CE073']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.permissionButton}>
                                 <Text style={styles.permissionButtonText}>Grant Permission</Text>
                             </LinearGradient>
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={() => router.back()} style={styles.cancelButton} activeOpacity={0.7}>
+                        <TouchableOpacity onPress={() => router.back()} style={styles.cancelButton} activeOpacity={0.5}>
                             <Text style={styles.cancelButtonText}>Go Back</Text>
                         </TouchableOpacity>
                     </View>
@@ -139,7 +139,7 @@ export default function CameraScreen() {
 
                 {/* Bottom Actions */}
                 <View style={styles.previewActions}>
-                    <TouchableOpacity onPress={retakePhoto} style={styles.retakeButton} activeOpacity={0.7}>
+                    <TouchableOpacity onPress={retakePhoto} style={styles.retakeButton} activeOpacity={0.5}>
                         <Text style={styles.retakeButtonText}>Retake</Text>
                     </TouchableOpacity>
 
@@ -165,7 +165,7 @@ export default function CameraScreen() {
                 {/* Flash Button */}
                 <View style={styles.topBar}>
                     <View style={styles.spacer} />
-                    <TouchableOpacity onPress={toggleFlash} style={[styles.flashButton, flashEnabled && styles.flashButtonActive]} activeOpacity={0.7}>
+                    <TouchableOpacity onPress={toggleFlash} style={[styles.flashButton, flashEnabled && styles.flashButtonActive]} activeOpacity={0.5}>
                         <Zap size={24} color={flashEnabled ? '#FFF' : '#AAA'} strokeWidth={2.5} fill={flashEnabled ? '#FFF' : 'transparent'} />
                     </TouchableOpacity>
                 </View>
@@ -190,7 +190,7 @@ export default function CameraScreen() {
                             <View style={styles.captureButtonInner} />
                         </TouchableOpacity>
 
-                        <TouchableOpacity onPress={toggleCameraFacing} style={styles.flipButton} activeOpacity={0.7}>
+                        <TouchableOpacity onPress={toggleCameraFacing} style={styles.flipButton} activeOpacity={0.5}>
                             <FlipHorizontal size={28} color="#FFF" strokeWidth={2.5} />
                         </TouchableOpacity>
                     </View>

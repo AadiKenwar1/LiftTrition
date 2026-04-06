@@ -69,10 +69,10 @@ export default function SupportScreen() {
                 <Text style={styles.subtitleText}>Describe your issue, question, or feature idea. We will respond as soon as possible.</Text>
 
                 <View style={styles.typeToggleContainer}>
-                    <TouchableOpacity style={[styles.typeButton, subjectType === 'support' && { backgroundColor: ACCENT_MUTED, borderColor: ACCENT }]} onPress={() => setSubjectType('support')} activeOpacity={0.7} disabled={loading}>
+                    <TouchableOpacity style={[styles.typeButton, subjectType === 'support' && { backgroundColor: ACCENT_MUTED, borderColor: ACCENT }]} onPress={() => setSubjectType('support')} activeOpacity={0.5} disabled={loading}>
                         <Text style={[styles.typeButtonText, subjectType === 'support' && styles.typeButtonTextActive]}>LiftTrition Support</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={[styles.typeButton, subjectType === 'feature_request' && { backgroundColor: ACCENT_MUTED, borderColor: ACCENT }]} onPress={() => setSubjectType('feature_request')} activeOpacity={0.7} disabled={loading}>
+                    <TouchableOpacity style={[styles.typeButton, subjectType === 'feature_request' && { backgroundColor: ACCENT_MUTED, borderColor: ACCENT }]} onPress={() => setSubjectType('feature_request')} activeOpacity={0.5} disabled={loading}>
                         <Text style={[styles.typeButtonText, subjectType === 'feature_request' && styles.typeButtonTextActive]}>Request a Feature</Text>
                     </TouchableOpacity>
                 </View>

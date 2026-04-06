@@ -28,13 +28,13 @@ export default function Log({ text, subtitle, onPress, onEditPress, onMenuPress 
                         </View>
 
                         <View style={styles.icons}>
-                            <TouchableOpacity style={styles.iconButton} onPress={onEditPress} activeOpacity={0.7}>
+                            <TouchableOpacity style={styles.iconButton} onPress={onEditPress} activeOpacity={0.5}>
                                 <View style={styles.iconCircle}>
                                     <Pencil size={18} color="#2f80ed" strokeWidth={2.5} />
                                 </View>
                             </TouchableOpacity>
 
-                            <TouchableOpacity style={styles.iconButton} onLongPress={onMenuPress} activeOpacity={0.7}>
+                            <TouchableOpacity style={styles.iconButton} onLongPress={onMenuPress} delayLongPress={200} hitSlop={5} activeOpacity={0.5}>
                                 <View style={styles.iconCircle}>
                                     <Menu size={20} color="#2f80ed" strokeWidth={2.5} />
                                 </View>

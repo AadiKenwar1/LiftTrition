@@ -64,7 +64,7 @@ export default function NutritionScreen() {
             {/* Section Header */}
             <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>{isToday ? "Today's Logs" : `${formatDate(selectedDate, false)}'s Logs`}</Text>
-                <TouchableOpacity style={styles.dateButton} activeOpacity={0.7} onPress={() => router.push('/nutritionScreens/dateModal')}>
+                <TouchableOpacity style={styles.dateButton} activeOpacity={0.5} onPress={() => router.push('/nutritionScreens/dateModal')}>
                     <Calendar size={18} color="#22C922" strokeWidth={2.5} />
                     <Text style={styles.dateButtonText}>Change Date</Text>
                 </TouchableOpacity>

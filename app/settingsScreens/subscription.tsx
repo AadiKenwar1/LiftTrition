@@ -68,12 +68,7 @@ export default function SubscriptionScreen() {
 
     return (
         <View style={styles.container}>
-            <ScrollView
-                style={styles.scroll}
-                contentContainerStyle={styles.scrollContent}
-                showsVerticalScrollIndicator={false}
-                keyboardShouldPersistTaps="handled"
-            >
+            <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
                 {/* Icon */}
                 <View style={[styles.iconCircle, { borderColor: ACCENT }]}>
                     <Ionicons name="sparkles" size={72} color={ACCENT} />
@@ -143,11 +138,11 @@ export default function SubscriptionScreen() {
                     </TouchableOpacity>
 
                     <View style={styles.linksRow}>
-                        <TouchableOpacity style={styles.restoreButton} onPress={handleRestore} activeOpacity={0.7}>
+                        <TouchableOpacity style={styles.restoreButton} onPress={handleRestore} activeOpacity={0.5}>
                             <Text style={[styles.restoreButtonText, { color: ACCENT }]}>Restore Purchases</Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity style={styles.restoreButton} onPress={handleManageSubscription} activeOpacity={0.7}>
+                        <TouchableOpacity style={styles.restoreButton} onPress={handleManageSubscription} activeOpacity={0.5}>
                             <Text style={[styles.restoreButtonText, { color: '#888' }]}>Manage subscription</Text>
                         </TouchableOpacity>
                     </View>

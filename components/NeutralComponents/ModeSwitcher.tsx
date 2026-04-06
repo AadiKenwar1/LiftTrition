@@ -26,7 +26,7 @@ export default function CustomHeader() {
         }
 
         return (
-            <TouchableOpacity style={[styles.modeButton, styles.inactiveModeButton]} onPress={() => setMode(isLift)} activeOpacity={0.7}>
+            <TouchableOpacity style={[styles.modeButton, styles.inactiveModeButton]} onPress={() => setMode(isLift)} activeOpacity={0.5}>
                 <Text style={styles.modeButtonText}>{label}</Text>
             </TouchableOpacity>
         )

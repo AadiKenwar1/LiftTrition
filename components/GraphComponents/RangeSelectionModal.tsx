@@ -40,7 +40,7 @@ export default function RangeSelectionModal({ visible, onClose, selectedRange, o
                                 onSelectRange(range)
                                 onClose()
                             }}
-                            activeOpacity={0.7}
+                            activeOpacity={0.5}
                         >
                             <Text style={[styles.optionText, selectedRange === range && styles.optionTextSelected, selectedRange === range && { color: mode ? '#2f80ed' : '#34C759' }]}>
                                 Last {range} {unit}
