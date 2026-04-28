@@ -187,7 +187,12 @@ export default function ProgressScreen() {
                     )}
                     <View style={styles.chartContainer}>
                         {graph1Data.length > 0 ?
-                            <Graph1 mode={mode} data={graph1Data} selectedRange={selectedRange1} />
+                            <Graph1
+                                key={`graph1-${mode ? 'lift' : 'nutrition'}-${selectedRange1}-${mode ? selectedExercise : selectedMacro}`}
+                                mode={mode}
+                                data={graph1Data}
+                                selectedRange={selectedRange1}
+                            />
                         :   <View style={styles.emptyGraphState}>
                                 <View style={[styles.emptyIconCircle, { backgroundColor: mode === true ? 'rgba(45, 156, 255, 0.1)' : 'rgba(52, 199, 89, 0.1)' }]}>
                                     {mode === true ?
@@ -237,7 +242,12 @@ export default function ProgressScreen() {
                     )}
                     <View style={styles.chartContainer}>
                         {graph2Data.length > 0 ?
-                            <Graph1 mode={mode} data={graph2Data} selectedRange={selectedRange2} />
+                            <Graph1
+                                key={`graph2-${mode ? 'lift' : 'nutrition'}-${selectedRange2}`}
+                                mode={mode}
+                                data={graph2Data}
+                                selectedRange={selectedRange2}
+                            />
                         :   <View style={styles.emptyGraphState}>
                                 <View style={[styles.emptyIconCircle, { backgroundColor: mode === true ? 'rgba(45, 156, 255, 0.1)' : 'rgba(52, 199, 89, 0.1)' }]}>
                                     {mode === true ?
@@ -414,7 +424,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_400Regular',
         fontSize: 14,
         fontWeight: '400',
-        color: '#888',
+        color: '#aaa',
         letterSpacing: -0.2,
         textAlign: 'center',
         paddingHorizontal: 8,

@@ -2,7 +2,8 @@ import TermsAndPrivacyModal from '@/components/NeutralComponents/TermsAndPrivacy
 import { useBilling } from '@/context/BillingContext'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { BarChart3, Database, Sparkles, Zap } from 'lucide-react-native'
-import { useState } from 'react'
+import { useNavigation } from 'expo-router'
+import { useEffect, useState } from 'react'
 import { ActivityIndicator, Alert, Linking, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 const ACCENT = '#2f80ed'
@@ -10,10 +11,20 @@ const ACCENT = '#2f80ed'
 type PlanType = 'monthly' | 'annual'
 
 export default function SubscriptionScreen() {
+    const navigation = useNavigation()
     const [termsModalVisible, setTermsModalVisible] = useState(false)
     const [selectedPlan, setSelectedPlan] = useState<PlanType>('annual')
     const [purchasing, setPurchasing] = useState(false)
     const { loading, hasPremium, monthlyPackage, annualPackage, priceInfo, annualPriceInfo, purchasePackage, restorePurchases, error } = useBilling()
+
+    // Prevent leaving the screen while a purchase is in progress (back button, swipe back, hardware back, etc.)
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('beforeRemove', (e: any) => {
+            if (!purchasing) return
+            e.preventDefault()
+        })
+        return unsubscribe
+    }, [navigation, purchasing])
 
     const selectedPackage = selectedPlan === 'monthly' ? monthlyPackage : annualPackage
 
@@ -143,7 +154,7 @@ export default function SubscriptionScreen() {
                         </TouchableOpacity>
 
                         <TouchableOpacity style={styles.restoreButton} onPress={handleManageSubscription} activeOpacity={0.5}>
-                            <Text style={[styles.restoreButtonText, { color: '#888' }]}>Manage subscription</Text>
+                            <Text style={[styles.restoreButtonText, { color: '#aaa' }]}>Manage subscription</Text>
                         </TouchableOpacity>
                     </View>
                 </View>

@@ -13,11 +13,27 @@ Respond ONLY with JSON in this exact format:
 {"calories":number,"protein":number,"carbs":number,"fats":number}
 Use realistic serving sizes. Protein, carbs, fats in grams.`
 
-const VISION_PROMPT = `You help users log meals in a fitness app (not medical advice). Look at visible foods and drinks only. List each distinct item. For each: COUNT/QUANTITY and nutrition PER UNIT (protein, carbs, fats, calories in grams/kcal).
+const VISION_PROMPT = `You help users log meals in a fitness app (not medical advice).
+
+Look at visible foods and drinks only. List each distinct item. If the photo contains multiple distinct foods (for example sushi and a pasta bowl), output multiple ingredients and apply the countable vs whole-portion rules separately to each.
+
+For each item:
+- quantity = how many visible pieces/items are in the photo, or 1 if it is a single mixed/uncountable portion
+- protein, carbs, fats, calories = nutrition PER ONE VISIBLE PIECE/ITEM when quantity > 1
+- for foods that are not naturally countable (for example rice, pasta, salad, soup, mashed potatoes, oatmeal), set quantity = 1 and give nutrition for the whole visible portion
+- do NOT use nutrition for a generic serving, cup, or 100g unless the visible item itself is exactly that amount
+- do NOT multiply by quantity inside the nutrition fields
+- use conservative, realistic estimates based on the visible size
+- for low-calorie vegetables, avoid overestimating calories or protein
+
+Important:
+- If there are several small separate pieces visible (for example broccoli pieces, fries, nuggets, sushi pieces, grapes, strawberries), quantity should be the count of visible pieces, and nutrition should be for ONE of those visible pieces.
+- If the food is a pile, bowl, plate, or mixed dish that is not meaningfully countable, quantity should be 1 and nutrition should represent the entire visible portion.
+
 If no food is clearly visible, respond with JSON using "ingredients": [] and a short "name" like "No food visible".
+
 Respond ONLY with JSON:
-{"name":string,"ingredients":[{"name":string,"quantity":number,"protein":number,"carbs":number,"fats":number,"calories":number}]}
-Values per ingredient are PER ONE UNIT. quantity = how many in the photo.`
+{"name":string,"ingredients":[{"name":string,"quantity":number,"protein":number,"carbs":number,"fats":number,"calories":number}]}`
 
 serve(async (req: Request) => {
     const auth = req.headers.get('Authorization')

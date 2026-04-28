@@ -278,7 +278,7 @@ const styles = StyleSheet.create({
     },
     cancelButtonText: {
         fontSize: 16,
-        color: '#888',
+        color: '#aaa',
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },

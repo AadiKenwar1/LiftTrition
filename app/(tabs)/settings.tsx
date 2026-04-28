@@ -1,11 +1,7 @@
-import { useSettings } from '@/context/SettingsContext'
-import { powerSync } from '@/lib/powersync/system'
-import { formatDateTime } from '@/lib/utils/dateHelper'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { ChevronRight, CreditCard, Dumbbell, FileText, HelpCircle, Plus, Scale, User, Utensils } from 'lucide-react-native'
-import { useEffect, useState } from 'react'
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Pressable } from 'react-native'
 interface SettingsOption {
     icon: React.ComponentType<any>
     iconColor: string
@@ -16,17 +12,6 @@ interface SettingsOption {
 
 export default function SettingsScreen() {
     const router = useRouter()
-    const [lastSyncedAt, setLastSyncedAt] = useState<Date | undefined>(() => powerSync.currentStatus.lastSyncedAt)
-    const { mode } = useSettings()
-
-    useEffect(() => {
-        const unsubscribe = powerSync.registerListener({
-            statusChanged: (status) => {
-                setLastSyncedAt(status.lastSyncedAt)
-            },
-        })
-        return () => unsubscribe?.()
-    }, [])
 
     const settingsOptions: SettingsOption[] = [
         {
@@ -108,14 +93,15 @@ export default function SettingsScreen() {
             <LinearGradient colors={['rgba(255, 255, 255, 0.07)', 'transparent']} style={styles.topGradient} pointerEvents="none" />
             <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
                 <View style={styles.header}>
-                    <Text style={styles.title}>Settings</Text>
+                    <Pressable
+                        onPress={() => router.push('/settingsScreens/devStatsModal')}
+                        hitSlop={12}
+                        accessibilityRole="button"
+                        accessibilityLabel="Open developer stats"
+                    >
+                        <Text style={styles.title}>Settings</Text>
+                    </Pressable>
                     <Text style={styles.headerSubtitle}>Manage your preferences</Text>
-                    {lastSyncedAt ?
-                        <Text style={styles.lastSynced}>Last synced: {formatDateTime(lastSyncedAt)}</Text>
-                    : powerSync.currentStatus.connected ?
-                        <Text style={styles.lastSynced}>Syncing...</Text>
-                    :   null}
-                    <Text style={styles.lastSynced}>Current Mode: {mode ? 'LIFT' : 'NUTRITION'}</Text>
                 </View>
 
                 {/* Account Section */}
@@ -185,13 +171,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#aaa',
         letterSpacing: 0.2,
-        fontFamily: 'Poppins_400Regular',
-    },
-    lastSynced: {
-        fontSize: 13,
-        color: '#666',
-        letterSpacing: 0.2,
-        marginTop: 8,
         fontFamily: 'Poppins_400Regular',
     },
     section: {
