@@ -1,7 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { ChevronRight, CreditCard, Dumbbell, FileText, HelpCircle, Plus, Scale, User, Utensils } from 'lucide-react-native'
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Pressable } from 'react-native'
+import { Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 interface SettingsOption {
     icon: React.ComponentType<any>
     iconColor: string
@@ -93,12 +93,7 @@ export default function SettingsScreen() {
             <LinearGradient colors={['rgba(255, 255, 255, 0.07)', 'transparent']} style={styles.topGradient} pointerEvents="none" />
             <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
                 <View style={styles.header}>
-                    <Pressable
-                        onPress={() => router.push('/settingsScreens/devStatsModal')}
-                        hitSlop={12}
-                        accessibilityRole="button"
-                        accessibilityLabel="Open developer stats"
-                    >
+                    <Pressable onPress={() => router.push('/settingsScreens/devStatsModal')} hitSlop={12} accessibilityRole="button" accessibilityLabel="Open developer stats">
                         <Text style={styles.title}>Settings</Text>
                     </Pressable>
                     <Text style={styles.headerSubtitle}>Manage your preferences</Text>

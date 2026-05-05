@@ -6,8 +6,8 @@ import { useEffect, useRef } from 'react'
 import { AppState } from 'react-native'
 
 const CHECK_EVERY_MS = 30_000
-const STALE_MS = 2 * 60_000
-const MIN_KICK_GAP_MS = 2 * 60_000
+const STALE_MS = 10 * 60_000
+const MIN_KICK_GAP_MS = 10 * 60_000
 
 export function SyncWatchdog() {
     const { session, loading } = useAuth()
@@ -108,4 +108,3 @@ export function SyncWatchdog() {
 
     return null
 }
-

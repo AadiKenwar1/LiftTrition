@@ -1,5 +1,6 @@
 import { Poppins_400Regular } from '@expo-google-fonts/poppins'
 import { Circle, Group, Text, useFont } from '@shopify/react-native-skia'
+import { useEffect, useState } from 'react'
 import { ActivityIndicator, StyleSheet, View } from 'react-native'
 import { Area, CartesianChart, Line, useChartPressState } from 'victory-native'
 
@@ -14,12 +15,21 @@ export default function Graph1({ mode, data, selectedRange }: Graph1Props) {
     const { state, isActive } = useChartPressState({ x: '', y: { value: 0 } })
 
     const chartColor = mode === true ? '#2f80ed' : '#22C933'
+    const [minDelayDone, setMinDelayDone] = useState(false)
 
-    // Show loading indicator while font is loading
-    if (!font) {
+    // Keep chart in a placeholder state briefly on mount/remount.
+    // This smooths over a one-frame visual glitch during fast prop-driven remounts.
+    useEffect(() => {
+        setMinDelayDone(false)
+        const id = setTimeout(() => setMinDelayDone(true), 200)
+        return () => clearTimeout(id)
+    }, [])
+
+    // Show placeholder while font is loading, and for a minimum duration.
+    if (!font || !minDelayDone) {
         return (
             <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color={chartColor} />
+                <ActivityIndicator size="large" color="#888" />
             </View>
         )
     }
