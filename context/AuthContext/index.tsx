@@ -1,21 +1,24 @@
-import { Connector } from '@/lib/powersync/Connector';
-import { powerSync } from '@/lib/powersync/system';
-import { supabase } from '@/lib/supabase/client';
-import { Session, User } from "@supabase/supabase-js";
-import { createContext, PropsWithChildren, useContext, useEffect, useState } from "react";
-import { deleteAccount, signOut } from './functions/accountFunctions';
-import { signInWithApple } from './functions/authFunctions';
-import { AuthContextInterface } from "./types";
+import { disconnectPowerSync, ensurePowerSyncConnected } from '@/lib/powersync/orchestrator'
+import {
+    registerPowerSyncBackgroundTask,
+    unregisterPowerSyncBackgroundTask,
+} from '@/lib/powersync/registerBackgroundPowerSync'
+import { supabase } from '@/lib/supabase/client'
+import { Session, User } from '@supabase/supabase-js'
+import { createContext, PropsWithChildren, useContext, useEffect, useState } from 'react'
+import { deleteAccount, signOut } from './functions/accountFunctions'
+import { signInWithApple } from './functions/authFunctions'
+import { AuthContextInterface } from './types'
 
-const AuthContext = createContext<AuthContextInterface | undefined>(undefined);
+const AuthContext = createContext<AuthContextInterface | undefined>(undefined)
 
 export const AuthProvider = ({ children }: PropsWithChildren) => {
-    const [user, setUser] = useState<User | null>(null);
-    const [session, setSession] = useState<Session | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [user, setUser] = useState<User | null>(null)
+    const [session, setSession] = useState<Session | null>(null)
+    const [loading, setLoading] = useState(true)
 
     // Derive userID from user object
-    const userID = user?.id ?? '';
+    const userID = user?.id ?? ''
 
     // Check for existing session on app launch
     useEffect(() => {
@@ -28,55 +31,52 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
     // Listen for auth state changes (sign in, sign out, token refresh)
     useEffect(() => {
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        const {
+            data: { subscription },
+        } = supabase.auth.onAuthStateChange((_event, session) => {
             setSession(session)
             setUser(session?.user ?? null)
         })
         return () => subscription.unsubscribe()
     }, [])
 
-    // Connect PowerSync when user is authenticated
+    // Connect PowerSync when authenticated; disconnect on sign-out or cleanup.
+    // Use stable user id so token refresh does not disconnect/reconnect unnecessarily.
     useEffect(() => {
-        if (loading) return;
-        
-        if (session && user) {
-            const connector = new Connector();    
-            // Connect PowerSync
-            const connectPowerSync = async () => {
-                try {
-                    await powerSync.connect(connector);
-                } catch (error) {
-                    // Retry connection after a delay
-                    setTimeout(() => {
-                        if (session && user) {
-                            connectPowerSync();
-                        }
-                    }, 5000);
-                }
-            };
-            
-            connectPowerSync();
-            
-            // Monitor and ensure PowerSync stays connected
-            // PowerSync should handle reconnection automatically, but we'll verify periodically
-            const connectionMonitor = setInterval(() => {
-                if (session && user) {
-                    // PowerSync should auto-reconnect, but we can verify by checking if we can query
-                    // This is just a health check - PowerSync handles reconnection internally
-                    powerSync.getAll('SELECT 1 LIMIT 1').catch((e) => {
-                        console.warn('[AuthContext] PowerSync health check query failed', e);
-                    });
-                }
-            }, 30000); // Check every 30 seconds
-            
-            return () => {
-                clearInterval(connectionMonitor);
-            };
+        if (loading) return
+
+        const userId = session?.user?.id
+        if (!userId) {
+            void disconnectPowerSync('auth_no_session')
+            return
         }
-    }, [session, user, loading]);
+
+        void ensurePowerSyncConnected('auth_session').catch((e) => {
+            console.warn('[AuthContext] PowerSync ensureConnected failed', e)
+        })
+
+        return () => {
+            void disconnectPowerSync('auth_effect_cleanup')
+        }
+    }, [loading, session?.user?.id])
+
+    useEffect(() => {
+        if (loading) return
+        void (async () => {
+            try {
+                if (!session?.user?.id) {
+                    await unregisterPowerSyncBackgroundTask()
+                    return
+                }
+                await registerPowerSyncBackgroundTask()
+            } catch (e) {
+                console.warn('[AuthContext] Background PowerSync task register/unregister failed', e)
+            }
+        })()
+    }, [loading, session?.user?.id])
 
     return (
-        <AuthContext.Provider 
+        <AuthContext.Provider
             value={{
                 user,
                 session,
@@ -85,16 +85,17 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
                 signInWithApple,
                 signOut,
                 deleteAccount,
-            }}>
+            }}
+        >
             {children}
         </AuthContext.Provider>
-    );
+    )
 }
 
-export function useAuth(){
-    const context = useContext(AuthContext);
+export function useAuth() {
+    const context = useContext(AuthContext)
     if (!context) {
-        throw new Error('useAuth must be used within an AuthProvider');
+        throw new Error('useAuth must be used within an AuthProvider')
     }
-    return context;
+    return context
 }

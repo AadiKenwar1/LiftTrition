@@ -1,8 +1,16 @@
 import { useAuth } from '@/context/AuthContext'
+import { getBackgroundSyncMetrics, type BackgroundSyncMetrics } from '@/lib/powersync/backgroundSyncMetrics'
+import {
+    getKickThrottleRemainingMs,
+    getPowerSyncOrchestratorState,
+    type PowerSyncOrchestratorState,
+} from '@/lib/powersync/orchestrator'
+import { isPowerSyncBackgroundTaskRegistered } from '@/lib/powersync/registerBackgroundPowerSync'
 import { powerSync } from '@/lib/powersync/system'
+import * as BackgroundTask from 'expo-background-task'
 import { getWatchdogStatus, subscribeWatchdogStatus, type WatchdogStatus } from '@/lib/powersync/watchdogStatus'
 import { formatDateTime } from '@/lib/utils/dateHelper'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 
 export default function DevStatsScreen() {
@@ -10,20 +18,57 @@ export default function DevStatsScreen() {
     const [lastSyncedAt, setLastSyncedAt] = useState<Date | undefined>(() => powerSync.currentStatus.lastSyncedAt)
     const [powerSyncConnected, setPowerSyncConnected] = useState(() => powerSync.currentStatus.connected)
     const [watchdog, setWatchdog] = useState<WatchdogStatus>(() => getWatchdogStatus())
+    const [orchestrator, setOrchestrator] = useState<PowerSyncOrchestratorState>(() => getPowerSyncOrchestratorState())
+    const [kickCooldownMs, setKickCooldownMs] = useState(() => getKickThrottleRemainingMs())
+    const [bgMetrics, setBgMetrics] = useState<BackgroundSyncMetrics | null>(null)
+    const [bgRegistered, setBgRegistered] = useState(false)
+    const [bgApiStatus, setBgApiStatus] = useState<number | null>(null)
+
+    const refreshOrchestrator = useCallback(() => {
+        setOrchestrator(getPowerSyncOrchestratorState())
+        setKickCooldownMs(getKickThrottleRemainingMs())
+    }, [])
+
+    const refreshBackground = useCallback(async () => {
+        const [metrics, registered, status] = await Promise.all([
+            getBackgroundSyncMetrics(),
+            isPowerSyncBackgroundTaskRegistered(),
+            BackgroundTask.getStatusAsync().catch(() => null),
+        ])
+        setBgMetrics(metrics)
+        setBgRegistered(registered)
+        setBgApiStatus(status)
+    }, [])
 
     useEffect(() => {
         const unsubscribe = powerSync.registerListener({
             statusChanged: (status) => {
                 setLastSyncedAt(status.lastSyncedAt)
                 setPowerSyncConnected(status.connected)
+                refreshOrchestrator()
             },
         })
         return () => unsubscribe?.()
-    }, [])
+    }, [refreshOrchestrator])
 
     useEffect(() => {
-        return subscribeWatchdogStatus(setWatchdog)
-    }, [])
+        return subscribeWatchdogStatus((next) => {
+            setWatchdog(next)
+            refreshOrchestrator()
+        })
+    }, [refreshOrchestrator])
+
+    useEffect(() => {
+        void refreshBackground()
+    }, [refreshBackground])
+
+    useEffect(() => {
+        const id = setInterval(() => {
+            refreshOrchestrator()
+            void refreshBackground()
+        }, 1000)
+        return () => clearInterval(id)
+    }, [refreshOrchestrator, refreshBackground])
 
     return (
         <View style={styles.container}>
@@ -67,6 +112,51 @@ export default function DevStatsScreen() {
                 {watchdog.lastKickAt ?
                     <Text style={[styles.line, styles.subtle]}>Watchdog last kick: {formatDateTime(watchdog.lastKickAt)}</Text>
                 :   null}
+
+                <Text style={[styles.line, styles.sectionLabel]}>Orchestrator</Text>
+                <Text style={[styles.line, styles.subtle]}>
+                    Last attempt:{' '}
+                    {orchestrator.lastAttemptReason ?? '—'}
+                    {orchestrator.lastAttemptAt ? ` @ ${formatDateTime(orchestrator.lastAttemptAt)}` : ''}
+                </Text>
+                {orchestrator.lastError ?
+                    <Text style={[styles.line, styles.warn]}>Orchestrator error: {orchestrator.lastError}</Text>
+                :   <Text style={[styles.line, styles.subtle]}>Orchestrator error: none</Text>}
+                <Text style={[styles.line, styles.subtle]}>
+                    Kick cooldown:{' '}
+                    {kickCooldownMs > 0 ? `${Math.ceil(kickCooldownMs / 1000)}s until kick allowed` : 'Kick allowed now'}
+                </Text>
+
+                <Text style={[styles.line, styles.sectionLabel]}>Background sync task</Text>
+                <Text style={[styles.line, styles.subtle]}>
+                    API:{' '}
+                    {bgApiStatus === BackgroundTask.BackgroundTaskStatus.Available ?
+                        'Available'
+                    : bgApiStatus === BackgroundTask.BackgroundTaskStatus.Restricted ?
+                        'Restricted (Expo Go / web / policy)'
+                    : bgApiStatus !== null ?
+                        `Status ${bgApiStatus}`
+                    :   'Unknown'}
+                </Text>
+                <Text style={[styles.line, styles.subtle]}>
+                    Registered:{' '}
+                    {bgRegistered ? 'Yes' : 'No'}
+                </Text>
+                {bgMetrics ?
+                    <>
+                        <Text style={[styles.line, styles.subtle]}>
+                            BG runs: {bgMetrics.runCount} — last: {formatDateTime(new Date(bgMetrics.lastRunAt))}
+                        </Text>
+                        <Text style={[styles.line, styles.subtle]}>
+                            Last BG result: {bgMetrics.lastResult}
+                            {bgMetrics.lastSyncedAdvanced === true ? ' (lastSyncedAt advanced)' : ''}
+                            {bgMetrics.lastSyncedAdvanced === false ? ' (lastSyncedAt unchanged)' : ''}
+                        </Text>
+                        {bgMetrics.lastError ?
+                            <Text style={[styles.line, styles.warn]}>BG last error: {bgMetrics.lastError}</Text>
+                        :   null}
+                    </>
+                :   <Text style={[styles.line, styles.subtle]}>No background runs recorded yet</Text>}
             </ScrollView>
         </View>
     )
@@ -118,5 +208,13 @@ const styles = StyleSheet.create({
     },
     warn: {
         color: '#c9a227',
+    },
+    sectionLabel: {
+        marginTop: 16,
+        fontSize: 11,
+        color: '#555',
+        letterSpacing: 0.8,
+        fontFamily: 'Poppins_600SemiBold',
+        textTransform: 'uppercase',
     },
 })

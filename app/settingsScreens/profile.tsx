@@ -1,5 +1,6 @@
 import { useAuth } from '@/context/AuthContext'
 import { useSettings } from '@/context/SettingsContext'
+import { forceSignOut, isUploadFlushTimeoutError } from '@/context/AuthContext/functions/accountFunctions'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { useRouter } from 'expo-router'
 import { LogOut, Trash2 } from 'lucide-react-native'
@@ -50,7 +51,31 @@ export default function ProfileScreen() {
                     try {
                         await signOut()
                     } catch (error: unknown) {
-                        Alert.alert('Error', error instanceof Error ? error.message : 'Failed to sign out')
+                        if (isUploadFlushTimeoutError(error)) {
+                            Alert.alert(
+                                'Still syncing',
+                                "We're still uploading your data. You can wait and try again, or force sign out (unsynced data may be lost).",
+                                [
+                                    { text: 'Cancel', style: 'cancel' },
+                                    {
+                                        text: 'Force sign out',
+                                        style: 'destructive',
+                                        onPress: async () => {
+                                            setSignOutLoading(true)
+                                            try {
+                                                await forceSignOut()
+                                            } catch (e: unknown) {
+                                                Alert.alert('Error', e instanceof Error ? e.message : 'Failed to force sign out')
+                                            } finally {
+                                                setSignOutLoading(false)
+                                            }
+                                        },
+                                    },
+                                ]
+                            )
+                        } else {
+                            Alert.alert('Error', error instanceof Error ? error.message : 'Failed to sign out')
+                        }
                     } finally {
                         setSignOutLoading(false)
                     }

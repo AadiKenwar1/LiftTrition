@@ -450,7 +450,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         paddingHorizontal: 24,
-        marginBottom: 30,
+        marginBottom: 50,
     },
     quantityContent: {
         backgroundColor: '#1e1e1e',

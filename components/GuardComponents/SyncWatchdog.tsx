@@ -1,17 +1,15 @@
 import { useAuth } from '@/context/AuthContext'
-import { Connector } from '@/lib/powersync/Connector'
+import { getKickThrottleRemainingMs, getPowerSyncOrchestratorState, kickPowerSync } from '@/lib/powersync/orchestrator'
 import { powerSync } from '@/lib/powersync/system'
 import { setWatchdogStatus } from '@/lib/powersync/watchdogStatus'
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import { AppState } from 'react-native'
 
 const CHECK_EVERY_MS = 30_000
 const STALE_MS = 10 * 60_000
-const MIN_KICK_GAP_MS = 10 * 60_000
 
 export function SyncWatchdog() {
     const { session, loading } = useAuth()
-    const lastKickAtMsRef = useRef(0)
 
     useEffect(() => {
         if (loading) {
@@ -29,19 +27,45 @@ export function SyncWatchdog() {
         let disposed = false
 
         const kick = async (reason: 'disconnected' | 'stale_last_sync') => {
-            const now = Date.now()
-            const sinceLast = now - lastKickAtMsRef.current
-            if (sinceLast < MIN_KICK_GAP_MS) {
+            const orchestratorReason =
+                reason === 'disconnected' ? 'watchdog_disconnected' : 'watchdog_stale_last_sync'
+
+            const outcome = await kickPowerSync(orchestratorReason)
+            if (disposed) return
+
+            if (outcome === 'throttled') {
+                const remainingMs = getKickThrottleRemainingMs()
                 setWatchdogStatus({
                     enabled: true,
                     lastCheckAt: new Date(),
                     reason: 'throttled',
-                    message: `${reason}:${Math.round((MIN_KICK_GAP_MS - sinceLast) / 1000)}s_remaining`,
+                    message: `${reason}:${Math.ceil(remainingMs / 1000)}s_remaining`,
                 })
                 return
             }
 
-            lastKickAtMsRef.current = now
+            if (outcome === 'background') {
+                setWatchdogStatus({
+                    enabled: true,
+                    lastCheckAt: new Date(),
+                    reason: 'background',
+                    message: AppState.currentState,
+                })
+                return
+            }
+
+            if (outcome === 'error') {
+                const { lastError } = getPowerSyncOrchestratorState()
+                setWatchdogStatus({
+                    enabled: true,
+                    lastCheckAt: new Date(),
+                    lastKickAt: new Date(),
+                    reason: 'error',
+                    message: lastError ?? reason,
+                })
+                return
+            }
+
             setWatchdogStatus({
                 enabled: true,
                 lastCheckAt: new Date(),
@@ -49,21 +73,6 @@ export function SyncWatchdog() {
                 reason: 'kicked',
                 message: reason,
             })
-
-            try {
-                await powerSync.disconnect()
-                await powerSync.connect(new Connector())
-            } catch (e: unknown) {
-                if (disposed) return
-                const message = e instanceof Error ? e.message : 'unknown_error'
-                setWatchdogStatus({
-                    enabled: true,
-                    lastCheckAt: new Date(),
-                    lastKickAt: new Date(),
-                    reason: 'error',
-                    message,
-                })
-            }
         }
 
         const check = () => {
