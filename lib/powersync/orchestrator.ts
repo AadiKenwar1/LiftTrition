@@ -11,6 +11,7 @@ export type PowerSyncReconnectReason =
     | 'background_task'
     | 'watchdog_disconnected'
     | 'watchdog_stale_last_sync'
+    | 'watchdog_resume'
 
 export type PowerSyncKickOutcome = 'ok' | 'throttled' | 'background' | 'error'
 

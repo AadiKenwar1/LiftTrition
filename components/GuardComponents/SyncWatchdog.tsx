@@ -1,5 +1,10 @@
 import { useAuth } from '@/context/AuthContext'
-import { getKickThrottleRemainingMs, getPowerSyncOrchestratorState, kickPowerSync } from '@/lib/powersync/orchestrator'
+import {
+    ensurePowerSyncConnected,
+    getKickThrottleRemainingMs,
+    getPowerSyncOrchestratorState,
+    kickPowerSync,
+} from '@/lib/powersync/orchestrator'
 import { powerSync } from '@/lib/powersync/system'
 import { setWatchdogStatus } from '@/lib/powersync/watchdogStatus'
 import { useEffect } from 'react'
@@ -8,6 +13,13 @@ import { AppState } from 'react-native'
 const CHECK_EVERY_MS = 30_000
 const STALE_MS = 10 * 60_000
 
+/**
+ * PowerSync health monitor + recovery.
+ *
+ * - Runs only when a user session exists.
+ * - Avoids doing work in background (iOS often suspends networking/JS anyway).
+ * - Uses the orchestrator so connect/disconnect/kick actions never overlap.
+ */
 export function SyncWatchdog() {
     const { session, loading } = useAuth()
 
@@ -26,6 +38,10 @@ export function SyncWatchdog() {
         let appState = AppState.currentState
         let disposed = false
 
+        /**
+         * "Kick" is a hard reconnect (disconnect -> connect) routed through the orchestrator.
+         * This is heavier than a simple connect, so the orchestrator enforces throttling.
+         */
         const kick = async (reason: 'disconnected' | 'stale_last_sync') => {
             const orchestratorReason =
                 reason === 'disconnected' ? 'watchdog_disconnected' : 'watchdog_stale_last_sync'
@@ -75,6 +91,12 @@ export function SyncWatchdog() {
             })
         }
 
+        /**
+         * Periodic health check:
+         * - If not active, we only report background state.
+         * - If disconnected, kick immediately.
+         * - If lastSyncedAt is too old, kick to recover from "stuck but connected" cases.
+         */
         const check = () => {
             if (disposed) return
             setWatchdogStatus({ enabled: true, lastCheckAt: new Date() })
@@ -102,7 +124,17 @@ export function SyncWatchdog() {
 
         const sub = AppState.addEventListener('change', (next) => {
             appState = next
-            if (next === 'active') check()
+            if (next !== 'active') return
+            // Resume path: iOS may drop the socket while backgrounded, but AuthContext won't re-run
+            // unless the userId changes. We try a cheap "connect if disconnected" before the check.
+            void (async () => {
+                try {
+                    await ensurePowerSyncConnected('watchdog_resume')
+                } catch {
+                    // Error is stored on orchestrator state; check() may still kick if disconnected.
+                }
+                if (!disposed) check()
+            })()
         })
 
         const id = setInterval(check, CHECK_EVERY_MS)

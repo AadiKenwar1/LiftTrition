@@ -80,7 +80,8 @@ export interface WorkoutContextInterface {
     handleUpdateExerciseOrder: (workoutID: string, reorderedExercises: Exercise[]) => void
     handleAddLog: (workoutID: string, exerciseID: string, userID: string, weight: number, reps: number, rpe: number, date: Date) => void
     handleDeleteLog: (id: string) => void
-    handleCalculateFatiguePercentage: (numDays: number, activityLevel: string) => number
+    handleCalculateFatiguePercentage: (numDays: number, activityLevel: string, refByName?: Map<string, number>) => number
+    handleGetFatigueSummary: (activityLevel: string, refByName?: Map<string, number>) => { today: number; last3Days: number; last6Days: number; last9Days: number }
     getFatigueFeedback: (percentage: number) => string
     handleGetOneRepMaxData: (exerciseName: string) => Array<{ day: string; value: number }>
     handleGetSetsData: (onboardingCompletedAt?: Date) => Array<{ day: string; value: number }>

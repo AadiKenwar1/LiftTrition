@@ -6,7 +6,7 @@ import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useSt
 import { loadWorkoutData, saveWorkoutData } from './database/powersyncStore'
 import { createUserExercise, deleteUserExercise } from './functions/createExerciseFunctions'
 import { addExercise, archiveExercise, deleteExercise, updateExerciseOrder } from './functions/exerciseFunctions'
-import { calculateFatiguePercentage, getFatigueFeedback } from './functions/fatigueFunctions'
+import { calculateFatiguePercentage, calculateFatigueSummary, getFatigueFeedback } from './functions/fatigueFunctions'
 import { getOneRepMaxData } from './functions/graphFunctions'
 import { addLog, deleteLog } from './functions/logFunctions'
 import { getSetsData } from './functions/volumeFunctions'
@@ -74,7 +74,10 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
             }
         }
     }
-    const handleCalculateFatiguePercentage = (numDays: number, activityLevel: string) => calculateFatiguePercentage(numDays, logs, exercises, fullExerciseLib, activityLevel)
+    const handleCalculateFatiguePercentage = (numDays: number, activityLevel: string, refByName?: Map<string, number>) =>
+        calculateFatiguePercentage(numDays, logs, exercises, fullExerciseLib, activityLevel, refByName)
+    const handleGetFatigueSummary = (activityLevel: string, refByName?: Map<string, number>) =>
+        calculateFatigueSummary(logs, exercises, fullExerciseLib, activityLevel, refByName)
     const handleGetOneRepMaxData = (exerciseName: string) => getOneRepMaxData(exerciseName, exercises, logs)
     const handleGetSetsData = (onboardingCompletedAt?: Date) => getSetsData(logs, onboardingCompletedAt)
     const handleCreateUserExercise = (exerciseData: CreateExerciseData, userID: string) => createUserExercise(exerciseData, userID, setUserExercises)
@@ -221,6 +224,7 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
                 handleAddLog,
                 handleDeleteLog,
                 handleCalculateFatiguePercentage,
+                handleGetFatigueSummary,
                 getFatigueFeedback,
                 handleGetOneRepMaxData,
                 handleGetSetsData,

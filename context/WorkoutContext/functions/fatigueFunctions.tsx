@@ -1,10 +1,11 @@
 import { EQUIPMENT_FATIGUE_FACTORS, MUSCLE_FATIGUE_FACTORS } from '../exerciseLibrary/constants'
 import { Exercise, ExerciseLib, Log } from '../types'
-import { estimate1RM } from './oneRepMaxFunctions'
+import { estimate1RM, oneRMMap } from './oneRepMaxFunctions'
 
 // Configuration constants
-const DAILY_BUDGET = 600
+const DAILY_BUDGET = 10
 
+//Activity multipliers for fatigue calculation 
 const FREQUENCY_MULTIPLIERS: Record<string, number> = {
     sedentary: 0.966,
     light: 0.95,
@@ -13,47 +14,103 @@ const FREQUENCY_MULTIPLIERS: Record<string, number> = {
     gymrat: 0.85,
 }
 
-//Calculate fatigue percentage for the last X days
-export function calculateFatiguePercentage(numDays: number, logs: Log[], exercises: Exercise[], fullExerciseLib: ExerciseLib, activityLevel: string = 'moderate'): number {
-    if (logs.length === 0) return 0
+//Get the start of a day
+function getStartOfDay(d: Date) {
+    const copy = new Date(d)
+    copy.setHours(0, 0, 0, 0)
+    return copy
+}
 
+//Add days to a date
+function addDays(d: Date, deltaDays: number) {
+    const copy = new Date(d)
+    copy.setDate(copy.getDate() + deltaDays)
+    return copy
+}
+
+//Calculate fatigue for a single set
+function calculateSetFatigue(log: Log, exerciseName: string, fatigueFactor: number, frequencyMultiplier: number, refByName: Map<string, number>): number {
+    const refMax = refByName.get(exerciseName) ?? 0
+    const estimatedMax = estimate1RM(log.weight, log.reps)
+
+    // Best recent e1RM for this lift name (last 30 days); max with this set's e1RM handles
+    // missing/low rolling ref (sparse lifts, rename/keying), not “no fatigue sets.”
+    const currentMax = Math.max(refMax, estimatedMax)
+    if (currentMax === 0) return 0
+
+    // Adjusted Epley-style set score:
+    //   (w / 1RM) * (1 + reps/30)
+    // scaled by perceived effort (RPE), exercise fatigue factor, and activity multiplier.
+    const rpeScale = (log.rpe || 8) / 10
+    const base = (log.weight / currentMax) * (1 + log.reps / 30)
+    return base * rpeScale * fatigueFactor * frequencyMultiplier
+}
+
+
+export type FatigueSummary = {
+    today: number
+    last3Days: number
+    last6Days: number
+    last9Days: number
+}
+
+//Calculate fatigue summary (today/3/6/9-day)
+export function calculateFatigueSummary(logs: Log[], exercises: Exercise[], fullExerciseLib: ExerciseLib, activityLevel: string = 'moderate', refByName?: Map<string, number>): FatigueSummary {
+    
+    if (logs.length === 0) return { today: 0, last3Days: 0, last6Days: 0, last9Days: 0 }
+
+    const DAYS = 30
+
+    const localRefByName = refByName ?? oneRMMap(exercises, logs, DAYS)
     const frequencyMultiplier = FREQUENCY_MULTIPLIERS[activityLevel] || 0.933
     const exerciseMap = new Map(exercises.map((exercise) => [exercise.id, exercise]))
 
-    const cutoffDate = new Date()
-    cutoffDate.setDate(cutoffDate.getDate() - numDays)
+    const todayStart = getStartOfDay(new Date())
+    const cutoff1 = addDays(todayStart, -1)
+    const cutoff3 = addDays(todayStart, -3)
+    const cutoff6 = addDays(todayStart, -6)
+    const cutoff9 = addDays(todayStart, -9)
 
-    let totalFatigue = 0
+    let t1 = 0
+    let t3 = 0
+    let t6 = 0
+    let t9 = 0
 
     for (const log of logs) {
-        // Skip invalid logs
         if (log.reps <= 0 || log.weight <= 0) continue
+        if (log.date < cutoff9) continue
 
-        // Skip logs outside date range
-        if (log.date < cutoffDate) continue
-
-        //Get the exercise the log is for
         const exercise = exerciseMap.get(log.exerciseID)
         if (!exercise) continue
-
-        //Find the exercises definition and get the fatigue factor
         const exerciseDef = fullExerciseLib[exercise.name]
         if (!exerciseDef?.fatigueFactor) continue
 
-        // Calculate current max (use estimated 1RM if higher than recorded max)
-        const estimatedMax = estimate1RM(log.weight, log.reps)
-        const currentMax = Math.max(exercise.userMax || 0, estimatedMax)
-        if (currentMax === 0) continue //Avoids division by zero
+        const setFatigue = calculateSetFatigue(log, exercise.name, exerciseDef.fatigueFactor, frequencyMultiplier, localRefByName)
+        if (setFatigue === 0) continue
 
-        // Calculate fatigue for this set
-        const setFatigue = log.reps * (log.weight / currentMax) * (log.rpe || 7) * exerciseDef.fatigueFactor * frequencyMultiplier
-        totalFatigue += setFatigue
+        if (log.date >= cutoff1) {
+            t1 += setFatigue
+            t3 += setFatigue
+            t6 += setFatigue
+            t9 += setFatigue
+        } else if (log.date >= cutoff3) {
+            t3 += setFatigue
+            t6 += setFatigue
+            t9 += setFatigue
+        } else if (log.date >= cutoff6) {
+            t6 += setFatigue
+            t9 += setFatigue
+        } else {
+            t9 += setFatigue
+        }
     }
 
-    const dailyBudget = DAILY_BUDGET * numDays
-    const percentage = (totalFatigue / dailyBudget) * 100
-
-    return Math.max(0, percentage)
+    return {
+        today: Math.max(0, (t1 / (DAILY_BUDGET * 1)) * 100),
+        last3Days: Math.max(0, (t3 / (DAILY_BUDGET * 3)) * 100),
+        last6Days: Math.max(0, (t6 / (DAILY_BUDGET * 6)) * 100),
+        last9Days: Math.max(0, (t9 / (DAILY_BUDGET * 9)) * 100),
+    }
 }
 
 // Returns a casual feedback message based on fatigue percentage
@@ -93,4 +150,42 @@ export function calculateFatigueFactor(isCompound: boolean, mainMuscle: string, 
     const equipmentFatigue = EQUIPMENT_FATIGUE_FACTORS[equipment] || 0.0
     const fatigue = baseFatigue + mainMuscleFatigue + accessoryFatigue + equipmentFatigue
     return Math.min(1.1, Math.max(0.5, parseFloat(fatigue.toFixed(2))))
+}
+
+//Calculate fatigue percentage for the last X days (legacy function, used for specific day fatigue calculation)
+export function calculateFatiguePercentage(numDays: number, logs: Log[], exercises: Exercise[], fullExerciseLib: ExerciseLib, activityLevel: string = 'moderate', refByName?: Map<string, number>): number {
+    if (logs.length === 0) return 0
+
+    const localRefByName = refByName ?? oneRMMap(exercises, logs, 30)
+
+    const frequencyMultiplier = FREQUENCY_MULTIPLIERS[activityLevel] || 0.933
+    const exerciseMap = new Map(exercises.map((exercise) => [exercise.id, exercise]))
+
+    const cutoffDate = new Date()
+    cutoffDate.setDate(cutoffDate.getDate() - numDays)
+
+    let totalFatigue = 0
+
+    for (const log of logs) {
+        // Skip invalid logs
+        if (log.reps <= 0 || log.weight <= 0) continue
+
+        // Skip logs outside date range
+        if (log.date < cutoffDate) continue
+
+        //Get the exercise the log is for
+        const exercise = exerciseMap.get(log.exerciseID)
+        if (!exercise) continue
+
+        //Find the exercises definition and get the fatigue factor
+        const exerciseDef = fullExerciseLib[exercise.name]
+        if (!exerciseDef?.fatigueFactor) continue
+
+        totalFatigue += calculateSetFatigue(log, exercise.name, exerciseDef.fatigueFactor, frequencyMultiplier, localRefByName)
+    }
+
+    const dailyBudget = DAILY_BUDGET * numDays
+    const percentage = (totalFatigue / dailyBudget) * 100
+
+    return Math.max(0, percentage)
 }

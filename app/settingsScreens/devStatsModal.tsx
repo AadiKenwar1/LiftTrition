@@ -1,5 +1,6 @@
 import { useAuth } from '@/context/AuthContext'
 import { getBackgroundSyncMetrics, type BackgroundSyncMetrics } from '@/lib/powersync/backgroundSyncMetrics'
+import { supabase } from '@/lib/supabase/client'
 import {
     getKickThrottleRemainingMs,
     getPowerSyncOrchestratorState,
@@ -13,6 +14,35 @@ import { formatDateTime } from '@/lib/utils/dateHelper'
 import { useCallback, useEffect, useState } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 
+type TokenServerCheck = 'idle' | 'checking' | 'valid' | 'invalid' | 'error'
+
+function formatAgeShort(ms: number): string {
+    const s = Math.max(0, Math.floor(ms / 1000))
+    if (s < 60) return `${s}s ago`
+    const m = Math.floor(s / 60)
+    if (m < 60) return `${m}m ${s % 60}s ago`
+    const h = Math.floor(m / 60)
+    return `${h}h ${m % 60}m ago`
+}
+
+function formatTimeUntil(ms: number): string {
+    const s = Math.max(0, Math.ceil(ms / 1000))
+    if (s < 60) return `${s}s`
+    const m = Math.floor(s / 60)
+    if (m < 60) return `${m}m ${s % 60}s`
+    const h = Math.floor(m / 60)
+    return `${h}h ${m % 60}m`
+}
+
+function replicationFreshnessHint(connected: boolean, lastSyncedAt: Date | undefined): string {
+    if (!connected) return 'Transport is down — replication cannot run.'
+    if (!lastSyncedAt) return 'No lastSyncedAt yet — first sync may still be in progress, or no server data applied.'
+    const ageMs = Date.now() - lastSyncedAt.getTime()
+    if (ageMs < 2 * 60_000) return 'Marker is recent — replication likely healthy (or no new server data to apply).'
+    if (ageMs > 10 * 60_000) return 'Marker is old — may be stalled, or simply no server changes since then (watchdog uses 10m stale rule).'
+    return 'Marker age is moderate — if you expect new data, confirm server-side changes are reaching PowerSync.'
+}
+
 export default function DevStatsScreen() {
     const { session, loading: authLoading } = useAuth()
     const [lastSyncedAt, setLastSyncedAt] = useState<Date | undefined>(() => powerSync.currentStatus.lastSyncedAt)
@@ -23,6 +53,9 @@ export default function DevStatsScreen() {
     const [bgMetrics, setBgMetrics] = useState<BackgroundSyncMetrics | null>(null)
     const [bgRegistered, setBgRegistered] = useState(false)
     const [bgApiStatus, setBgApiStatus] = useState<number | null>(null)
+    const [tokenServerCheck, setTokenServerCheck] = useState<TokenServerCheck>('idle')
+    const [tokenServerDetail, setTokenServerDetail] = useState<string | undefined>()
+    const [lastGetUserAt, setLastGetUserAt] = useState<Date | undefined>()
 
     const refreshOrchestrator = useCallback(() => {
         setOrchestrator(getPowerSyncOrchestratorState())
@@ -39,6 +72,38 @@ export default function DevStatsScreen() {
         setBgRegistered(registered)
         setBgApiStatus(status)
     }, [])
+
+    /** Poll SDK truth so Dev Stats cannot drift if a status event is missed. */
+    const syncPowerSyncFromDevice = useCallback(() => {
+        const st = powerSync.currentStatus
+        setLastSyncedAt(st.lastSyncedAt)
+        setPowerSyncConnected(st.connected)
+        refreshOrchestrator()
+    }, [refreshOrchestrator])
+
+    const runGetUserValidation = useCallback(async () => {
+        if (!session?.user?.id) {
+            setTokenServerCheck('idle')
+            setTokenServerDetail(undefined)
+            setLastGetUserAt(undefined)
+            return
+        }
+        setTokenServerCheck('checking')
+        const { data, error } = await supabase.auth.getUser()
+        setLastGetUserAt(new Date())
+        if (error) {
+            setTokenServerCheck('error')
+            setTokenServerDetail(error.message)
+            return
+        }
+        if (!data.user) {
+            setTokenServerCheck('invalid')
+            setTokenServerDetail('No user returned from server')
+            return
+        }
+        setTokenServerCheck('valid')
+        setTokenServerDetail(undefined)
+    }, [session?.user?.id])
 
     useEffect(() => {
         const unsubscribe = powerSync.registerListener({
@@ -63,12 +128,23 @@ export default function DevStatsScreen() {
     }, [refreshBackground])
 
     useEffect(() => {
-        const id = setInterval(() => {
-            refreshOrchestrator()
-            void refreshBackground()
-        }, 1000)
+        void runGetUserValidation()
+    }, [runGetUserValidation])
+
+    useEffect(() => {
+        const id = setInterval(() => void runGetUserValidation(), 15_000)
         return () => clearInterval(id)
-    }, [refreshOrchestrator, refreshBackground])
+    }, [runGetUserValidation])
+
+    useEffect(() => {
+        const tick = () => {
+            syncPowerSyncFromDevice()
+            void refreshBackground()
+        }
+        const id = setInterval(tick, 1000)
+        tick()
+        return () => clearInterval(id)
+    }, [syncPowerSyncFromDevice, refreshBackground])
 
     return (
         <View style={styles.container}>
@@ -80,14 +156,21 @@ export default function DevStatsScreen() {
             <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
                 <Text style={styles.title}>Dev Stats</Text>
 
+                <Text style={[styles.line, styles.sectionLabel]}>Transport & replication</Text>
+                <Text style={[styles.line, powerSyncConnected ? styles.ok : styles.warn]}>
+                    PowerSync transport: {powerSyncConnected ? 'connected' : 'not connected'}
+                </Text>
                 {lastSyncedAt ?
-                    <Text style={[styles.line, styles.subtle]}>Last synced: {formatDateTime(lastSyncedAt)}</Text>
+                    <>
+                        <Text style={[styles.line, styles.subtle]}>lastSyncedAt: {formatDateTime(lastSyncedAt)}</Text>
+                        <Text style={[styles.line, styles.subtle]}>Marker age: {formatAgeShort(Date.now() - lastSyncedAt.getTime())}</Text>
+                    </>
                 : powerSyncConnected ?
-                    <Text style={[styles.line, styles.subtle]}>Syncing...</Text>
-                :   null}
+                    <Text style={[styles.line, styles.subtle]}>lastSyncedAt: none yet (still syncing or no server writes applied)</Text>
+                :   <Text style={[styles.line, styles.subtle]}>lastSyncedAt: —</Text>}
+                <Text style={[styles.line, styles.subtle]}>{replicationFreshnessHint(powerSyncConnected, lastSyncedAt)}</Text>
 
-                <Text style={[styles.line, powerSyncConnected ? styles.ok : styles.warn]}>PowerSync: {powerSyncConnected ? 'Connected' : 'Not connected'}</Text>
-
+                <Text style={[styles.line, styles.sectionLabel]}>Session & token</Text>
                 <Text
                     style={[
                         styles.line,
@@ -96,13 +179,41 @@ export default function DevStatsScreen() {
                         : styles.warn,
                     ]}
                 >
-                    Session:{' '}
+                    Session in memory:{' '}
                     {authLoading ?
                         'Checking…'
                     : session ?
-                        'Signed in'
-                    :   'Not signed in'}
+                        'present (signed in)'
+                    :   'absent'}
                 </Text>
+                {session?.expires_at ?
+                    <Text style={[styles.line, styles.subtle]}>
+                        Access token expiry (client):{' '}
+                        {formatDateTime(new Date(session.expires_at * 1000))}
+                        {Date.now() / 1000 > session.expires_at ?
+                            ' — expired (refresh should run)'
+                        :   ` — in ${formatTimeUntil(new Date(session.expires_at * 1000).getTime() - Date.now())}`}
+                    </Text>
+                :   null}
+                <Text
+                    style={[
+                        styles.line,
+                        tokenServerCheck === 'valid' ? styles.ok
+                        : tokenServerCheck === 'checking' ? styles.subtle
+                        : tokenServerCheck === 'idle' ? styles.subtle
+                        : styles.warn,
+                    ]}
+                >
+                    Server token check (getUser):{' '}
+                    {tokenServerCheck === 'idle' ? '—'
+                    : tokenServerCheck === 'checking' ? 'Checking…'
+                    : tokenServerCheck === 'valid' ? 'Valid'
+                    : tokenServerCheck === 'invalid' ? `Invalid${tokenServerDetail ? ` (${tokenServerDetail})` : ''}`
+                    :   `Error${tokenServerDetail ? `: ${tokenServerDetail}` : ''}`}
+                </Text>
+                {lastGetUserAt ?
+                    <Text style={[styles.line, styles.subtle]}>Last getUser: {formatDateTime(lastGetUserAt)} (every 15s)</Text>
+                :   null}
 
                 <Text style={[styles.line, styles.subtle]}>Watchdog: {watchdog.enabled ? 'Enabled' : 'Disabled'}</Text>
                 <Text style={[styles.line, styles.subtle]}>

@@ -6,6 +6,7 @@ import ModeSwitcher from '@/components/NeutralComponents/ModeSwitcher'
 import { useNutrition } from '@/context/NutritionContext'
 import { useSettings } from '@/context/SettingsContext'
 import { useWorkout } from '@/context/WorkoutContext'
+import { oneRMMap } from '@/context/WorkoutContext/functions/oneRepMaxFunctions'
 import { downsampleData } from '@/lib/utils/downsample'
 import { useFonts } from 'expo-font'
 import { ChevronDown, Dumbbell, Scale } from 'lucide-react-native'
@@ -18,7 +19,7 @@ export default function ProgressScreen() {
     })
     const { mode, settings } = useSettings()
     const { handleGetMacrosForDate, handleGetMacroDataForGraph, nutritionData } = useNutrition()
-    const { handleCalculateFatiguePercentage, getFatigueFeedback, logs, handleGetOneRepMaxData, handleGetSetsData, lastExercise, setLastExercise, fullExerciseLibAsList } = useWorkout()
+    const { handleGetFatigueSummary, getFatigueFeedback, logs, exercises, handleGetOneRepMaxData, handleGetSetsData, lastExercise, setLastExercise, fullExerciseLibAsList } = useWorkout()
     const { handleGetBodyWeightProgressData, bwProgress } = useSettings()
 
     // Local state for graph selections
@@ -52,41 +53,52 @@ export default function ProgressScreen() {
 
     const selectionData = mode ? fullExerciseLibAsList : macroList
 
+    // Get recent logs for the last 30 days used for fatigue calculations
+    const recentLogs30 = useMemo(() => {
+        const cutoff = new Date()
+        cutoff.setDate(cutoff.getDate() - 30)
+        return logs.filter((l) => l.date >= cutoff && l.reps > 0 && l.weight > 0)
+    }, [logs])
+
+    // Get one rep max map for fatigue calculations
+    const oneRmRefByName = useMemo(() => {
+        return oneRMMap(exercises, recentLogs30 ?? [], 30)
+    }, [recentLogs30])
+
     // Fatigue data for wheels
     const fatigueData = useMemo(() => {
-        return {
-            today: handleCalculateFatiguePercentage(1, settings.activityLevel),
-            last3Days: handleCalculateFatiguePercentage(3, settings.activityLevel),
-            last6Days: handleCalculateFatiguePercentage(6, settings.activityLevel),
-            last9Days: handleCalculateFatiguePercentage(9, settings.activityLevel),
-        }
-    }, [logs, settings.activityLevel, mode])
+        return handleGetFatigueSummary(settings.activityLevel, oneRmRefByName)
+    }, [logs, settings.activityLevel, mode, oneRmRefByName, handleGetFatigueSummary])
 
     //Macro data for wheels
     const todayMacros = useMemo(() => {
         return handleGetMacrosForDate(new Date())
-    }, [nutritionData, settings, mode])
+    }, [nutritionData, settings])
 
+    //Graph 1 data (one rep max or macro data)
     const graph1Data = useMemo(() => {
         const rawData = mode === true ? handleGetOneRepMaxData(selectedExercise) : handleGetMacroDataForGraph(selectedMacro, settings.onboardingCompletedAt)
-
         const startIndex = Math.max(0, rawData.length - selectedRange1)
         const slicedData = rawData.slice(startIndex)
         const bucketSize = selectedRange1 / 7
         return downsampleData(slicedData, bucketSize)
     }, [mode, selectedExercise, selectedMacro, selectedRange1, logs, nutritionData, lastExercise, handleGetOneRepMaxData, handleGetMacroDataForGraph, settings.onboardingCompletedAt])
 
+    //Graph 2 data (sets or body weight data)
     const graph2Data = useMemo(() => {
         const rawData = mode === true ? handleGetSetsData(settings.onboardingCompletedAt) : handleGetBodyWeightProgressData(settings.onboardingCompletedAt)
-
         const startIndex = Math.max(0, rawData.length - selectedRange2)
         const slicedData = rawData.slice(startIndex)
         const bucketSize = selectedRange2 / 7
         const downsampled = downsampleData(slicedData, bucketSize)
-
         return downsampled
     }, [mode, logs, bwProgress, selectedRange2, settings.onboardingCompletedAt, handleGetSetsData, handleGetBodyWeightProgressData])
 
+    //Graph 1 and 2 signatures for keying so that the graph re-renders when the data changes
+    const graph1Sig = `${graph1Data.length}:${graph1Data.at(-1)?.day ?? ''}:${graph1Data.at(-1)?.value ?? ''}`
+    const graph2Sig = `${graph2Data.length}:${graph2Data.at(-1)?.day ?? ''}:${graph2Data.at(-1)?.value ?? ''}`
+
+    //Calorie percentages for wheels
     const caloriePercent = (todayMacros.totalCalories / settings.calorieGoal) * 100
     const proteinPercent = (todayMacros.totalProtein / settings.proteinGoal) * 100
     const carbsPercent = (todayMacros.totalCarbs / settings.carbsGoal) * 100
@@ -187,12 +199,7 @@ export default function ProgressScreen() {
                     )}
                     <View style={styles.chartContainer}>
                         {graph1Data.length > 0 ?
-                            <Graph1
-                                key={`graph1-${mode ? 'lift' : 'nutrition'}-${selectedRange1}-${mode ? selectedExercise : selectedMacro}`}
-                                mode={mode}
-                                data={graph1Data}
-                                selectedRange={selectedRange1}
-                            />
+                            <Graph1 key={`graph1-${mode ? 'lift' : 'nutrition'}-${selectedRange1}-${mode ? selectedExercise : selectedMacro}-${graph1Sig}`} mode={mode} data={graph1Data} selectedRange={selectedRange1} />
                         :   <View style={styles.emptyGraphState}>
                                 <View style={[styles.emptyIconCircle, { backgroundColor: mode === true ? 'rgba(45, 156, 255, 0.1)' : 'rgba(52, 199, 89, 0.1)' }]}>
                                     {mode === true ?
@@ -242,12 +249,7 @@ export default function ProgressScreen() {
                     )}
                     <View style={styles.chartContainer}>
                         {graph2Data.length > 0 ?
-                            <Graph1
-                                key={`graph2-${mode ? 'lift' : 'nutrition'}-${selectedRange2}`}
-                                mode={mode}
-                                data={graph2Data}
-                                selectedRange={selectedRange2}
-                            />
+                            <Graph1 key={`graph2-${mode ? 'lift' : 'nutrition'}-${selectedRange2}-${graph2Sig}`} mode={mode} data={graph2Data} selectedRange={selectedRange2} />
                         :   <View style={styles.emptyGraphState}>
                                 <View style={[styles.emptyIconCircle, { backgroundColor: mode === true ? 'rgba(45, 156, 255, 0.1)' : 'rgba(52, 199, 89, 0.1)' }]}>
                                     {mode === true ?
