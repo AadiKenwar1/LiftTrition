@@ -1,16 +1,12 @@
 import { useAuth } from '@/context/AuthContext'
 import { getBackgroundSyncMetrics, type BackgroundSyncMetrics } from '@/lib/powersync/backgroundSyncMetrics'
-import { supabase } from '@/lib/supabase/client'
-import {
-    getKickThrottleRemainingMs,
-    getPowerSyncOrchestratorState,
-    type PowerSyncOrchestratorState,
-} from '@/lib/powersync/orchestrator'
+import { getKickThrottleRemainingMs, getPowerSyncOrchestratorState, type PowerSyncOrchestratorState } from '@/lib/powersync/orchestrator'
 import { isPowerSyncBackgroundTaskRegistered } from '@/lib/powersync/registerBackgroundPowerSync'
 import { powerSync } from '@/lib/powersync/system'
-import * as BackgroundTask from 'expo-background-task'
 import { getWatchdogStatus, subscribeWatchdogStatus, type WatchdogStatus } from '@/lib/powersync/watchdogStatus'
+import { supabase } from '@/lib/supabase/client'
 import { formatDateTime } from '@/lib/utils/dateHelper'
+import * as BackgroundTask from 'expo-background-task'
 import { useCallback, useEffect, useState } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 
@@ -63,11 +59,7 @@ export default function DevStatsScreen() {
     }, [])
 
     const refreshBackground = useCallback(async () => {
-        const [metrics, registered, status] = await Promise.all([
-            getBackgroundSyncMetrics(),
-            isPowerSyncBackgroundTaskRegistered(),
-            BackgroundTask.getStatusAsync().catch(() => null),
-        ])
+        const [metrics, registered, status] = await Promise.all([getBackgroundSyncMetrics(), isPowerSyncBackgroundTaskRegistered(), BackgroundTask.getStatusAsync().catch(() => null)])
         setBgMetrics(metrics)
         setBgRegistered(registered)
         setBgApiStatus(status)
@@ -157,9 +149,7 @@ export default function DevStatsScreen() {
                 <Text style={styles.title}>Dev Stats</Text>
 
                 <Text style={[styles.line, styles.sectionLabel]}>Transport & replication</Text>
-                <Text style={[styles.line, powerSyncConnected ? styles.ok : styles.warn]}>
-                    PowerSync transport: {powerSyncConnected ? 'connected' : 'not connected'}
-                </Text>
+                <Text style={[styles.line, powerSyncConnected ? styles.ok : styles.warn]}>PowerSync transport: {powerSyncConnected ? 'connected' : 'not connected'}</Text>
                 {lastSyncedAt ?
                     <>
                         <Text style={[styles.line, styles.subtle]}>lastSyncedAt: {formatDateTime(lastSyncedAt)}</Text>
@@ -188,11 +178,8 @@ export default function DevStatsScreen() {
                 </Text>
                 {session?.expires_at ?
                     <Text style={[styles.line, styles.subtle]}>
-                        Access token expiry (client):{' '}
-                        {formatDateTime(new Date(session.expires_at * 1000))}
-                        {Date.now() / 1000 > session.expires_at ?
-                            ' — expired (refresh should run)'
-                        :   ` — in ${formatTimeUntil(new Date(session.expires_at * 1000).getTime() - Date.now())}`}
+                        Access token expiry (client): {formatDateTime(new Date(session.expires_at * 1000))}
+                        {Date.now() / 1000 > session.expires_at ? ' — expired (refresh should run)' : ` — in ${formatTimeUntil(new Date(session.expires_at * 1000).getTime() - Date.now())}`}
                     </Text>
                 :   null}
                 <Text
@@ -205,10 +192,14 @@ export default function DevStatsScreen() {
                     ]}
                 >
                     Server token check (getUser):{' '}
-                    {tokenServerCheck === 'idle' ? '—'
-                    : tokenServerCheck === 'checking' ? 'Checking…'
-                    : tokenServerCheck === 'valid' ? 'Valid'
-                    : tokenServerCheck === 'invalid' ? `Invalid${tokenServerDetail ? ` (${tokenServerDetail})` : ''}`
+                    {tokenServerCheck === 'idle' ?
+                        '—'
+                    : tokenServerCheck === 'checking' ?
+                        'Checking…'
+                    : tokenServerCheck === 'valid' ?
+                        'Valid'
+                    : tokenServerCheck === 'invalid' ?
+                        `Invalid${tokenServerDetail ? ` (${tokenServerDetail})` : ''}`
                     :   `Error${tokenServerDetail ? `: ${tokenServerDetail}` : ''}`}
                 </Text>
                 {lastGetUserAt ?
@@ -226,17 +217,13 @@ export default function DevStatsScreen() {
 
                 <Text style={[styles.line, styles.sectionLabel]}>Orchestrator</Text>
                 <Text style={[styles.line, styles.subtle]}>
-                    Last attempt:{' '}
-                    {orchestrator.lastAttemptReason ?? '—'}
+                    Last attempt: {orchestrator.lastAttemptReason ?? '—'}
                     {orchestrator.lastAttemptAt ? ` @ ${formatDateTime(orchestrator.lastAttemptAt)}` : ''}
                 </Text>
                 {orchestrator.lastError ?
                     <Text style={[styles.line, styles.warn]}>Orchestrator error: {orchestrator.lastError}</Text>
                 :   <Text style={[styles.line, styles.subtle]}>Orchestrator error: none</Text>}
-                <Text style={[styles.line, styles.subtle]}>
-                    Kick cooldown:{' '}
-                    {kickCooldownMs > 0 ? `${Math.ceil(kickCooldownMs / 1000)}s until kick allowed` : 'Kick allowed now'}
-                </Text>
+                <Text style={[styles.line, styles.subtle]}>Kick cooldown: {kickCooldownMs > 0 ? `${Math.ceil(kickCooldownMs / 1000)}s until kick allowed` : 'Kick allowed now'}</Text>
 
                 <Text style={[styles.line, styles.sectionLabel]}>Background sync task</Text>
                 <Text style={[styles.line, styles.subtle]}>
@@ -249,10 +236,7 @@ export default function DevStatsScreen() {
                         `Status ${bgApiStatus}`
                     :   'Unknown'}
                 </Text>
-                <Text style={[styles.line, styles.subtle]}>
-                    Registered:{' '}
-                    {bgRegistered ? 'Yes' : 'No'}
-                </Text>
+                <Text style={[styles.line, styles.subtle]}>Registered: {bgRegistered ? 'Yes' : 'No'}</Text>
                 {bgMetrics ?
                     <>
                         <Text style={[styles.line, styles.subtle]}>

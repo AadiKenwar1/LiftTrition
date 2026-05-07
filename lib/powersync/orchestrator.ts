@@ -3,15 +3,7 @@ import { powerSync } from '@/lib/powersync/system'
 import { AppState } from 'react-native'
 
 /** Who requested a PowerSync connection change (for logging / dev tools). */
-export type PowerSyncReconnectReason =
-    | 'auth_session'
-    | 'auth_no_session'
-    | 'auth_effect_cleanup'
-    | 'sign_out_clear'
-    | 'background_task'
-    | 'watchdog_disconnected'
-    | 'watchdog_stale_last_sync'
-    | 'watchdog_resume'
+export type PowerSyncReconnectReason = 'auth_session' | 'auth_no_session' | 'auth_effect_cleanup' | 'sign_out_clear' | 'background_task' | 'watchdog_disconnected' | 'watchdog_stale_last_sync' | 'watchdog_resume'
 
 export type PowerSyncKickOutcome = 'ok' | 'throttled' | 'background' | 'error'
 
@@ -24,7 +16,7 @@ function enqueue<T>(task: () => Promise<T>): Promise<T> {
     const run = mutexChain.then(() => task())
     mutexChain = run.then(
         () => undefined,
-        () => undefined
+        () => undefined,
     )
     return run
 }
@@ -110,9 +102,7 @@ export async function disconnectAndClearPowerSync(): Promise<void> {
  * Hard reconnect: disconnect then connect. Throttled and skipped when not active.
  * Watchdog / recovery paths should use this instead of calling disconnect/connect directly.
  */
-export async function kickPowerSync(
-    reason: 'watchdog_disconnected' | 'watchdog_stale_last_sync'
-): Promise<PowerSyncKickOutcome> {
+export async function kickPowerSync(reason: 'watchdog_disconnected' | 'watchdog_stale_last_sync'): Promise<PowerSyncKickOutcome> {
     if (AppState.currentState !== 'active') {
         return 'background'
     }
