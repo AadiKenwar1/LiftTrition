@@ -3,7 +3,16 @@ import { powerSync } from '@/lib/powersync/system'
 import { AppState } from 'react-native'
 
 /** Who requested a PowerSync connection change (for logging / dev tools). */
-export type PowerSyncReconnectReason = 'auth_session' | 'auth_no_session' | 'auth_effect_cleanup' | 'sign_out_clear' | 'background_task' | 'watchdog_disconnected' | 'watchdog_stale_last_sync' | 'watchdog_resume'
+export type PowerSyncReconnectReason =
+    | 'auth_session'
+    | 'auth_no_session'
+    | 'auth_effect_cleanup'
+    | 'sign_out_clear'
+    | 'background_task'
+    | 'watchdog_disconnected'
+    | 'watchdog_stale_last_sync'
+    | 'watchdog_resume'
+    | 'settings_retry_update'
 
 export type PowerSyncKickOutcome = 'ok' | 'throttled' | 'background' | 'error'
 

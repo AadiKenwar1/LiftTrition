@@ -1,4 +1,4 @@
-import { calculateFatigueFactor, calculateFatiguePercentage } from '../fatigueFunctions'
+import { calculateFatigueFactor, calculateFatiguePercentage, calculateFatigueSummary } from '../fatigueFunctions'
 import type { Exercise, ExerciseLib, Log } from '../../types'
 
 function mockExercise(overrides: Partial<Exercise> = {}): Exercise {
@@ -113,6 +113,20 @@ describe('fatigueFunctions', () => {
             const exercises: Exercise[] = [mockExercise()]
             const lib = mockLib(1.0)
             expect(calculateFatiguePercentage(1, [], exercises, lib, 'moderate')).toBe(0)
+        })
+    })
+
+    describe('calculateFatigueSummary', () => {
+        test('today does not include yesterday', () => {
+            const exercises: Exercise[] = [mockExercise({ id: 'ex-1', name: 'Bench Press' })]
+            const lib = mockLib(1.0)
+
+            const yesterday = new Date('2026-01-30T00:00:00')
+            const yesterdayLog = mockLog({ id: 'y', exerciseID: 'ex-1', date: yesterday, weight: 100, reps: 5, rpe: 7 })
+
+            const summary = calculateFatigueSummary([yesterdayLog], exercises, lib, 'moderate')
+            expect(summary.today).toBe(0)
+            expect(summary.last3Days).toBeGreaterThan(0)
         })
     })
 

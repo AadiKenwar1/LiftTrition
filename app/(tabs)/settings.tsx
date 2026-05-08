@@ -1,10 +1,20 @@
+import { useAuth } from '@/context/AuthContext'
+import SyncPopup, { SyncPopupPhase, runSyncRetry } from '@/components/NeutralComponents/SyncPopup'
+import { powerSync } from '@/lib/powersync/system'
+import { formatDateTime } from '@/lib/utils/dateHelper'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { ChevronRight, CreditCard, Dumbbell, FileText, HelpCircle, Plus, Scale, User, Utensils } from 'lucide-react-native'
-import { powerSync } from '@/lib/powersync/system'
-import { formatDateTime } from '@/lib/utils/dateHelper'
-import { useEffect, useMemo, useState } from 'react'
-import { Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+    Alert,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native'
 interface SettingsOption {
     icon: React.ComponentType<any>
     iconColor: string
@@ -15,8 +25,75 @@ interface SettingsOption {
 
 export default function SettingsScreen() {
     const router = useRouter()
+    const { session } = useAuth()
     const [lastSyncedAt, setLastSyncedAt] = useState<Date | undefined>(() => powerSync.currentStatus.lastSyncedAt)
     const [powerSyncConnected, setPowerSyncConnected] = useState(() => powerSync.currentStatus.connected)
+
+    const [syncPopupVisible, setSyncPopupVisible] = useState(false)
+    const [syncPhase, setSyncPhase] = useState<SyncPopupPhase>('loading')
+    const [syncError, setSyncError] = useState<string | undefined>()
+    const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+    const retryTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+    const syncPhaseRef = useRef<SyncPopupPhase>(syncPhase)
+    const syncPopupVisibleRef = useRef<boolean>(syncPopupVisible)
+
+    useEffect(() => {
+        return () => {
+            if (successTimerRef.current) clearTimeout(successTimerRef.current)
+            if (retryTimeoutRef.current) clearTimeout(retryTimeoutRef.current)
+        }
+    }, [])
+
+    useEffect(() => {
+        syncPhaseRef.current = syncPhase
+    }, [syncPhase])
+
+    useEffect(() => {
+        syncPopupVisibleRef.current = syncPopupVisible
+    }, [syncPopupVisible])
+
+    const closePopup = useCallback(() => {
+        if (successTimerRef.current) {
+            clearTimeout(successTimerRef.current)
+            successTimerRef.current = null
+        }
+        if (retryTimeoutRef.current) {
+            clearTimeout(retryTimeoutRef.current)
+            retryTimeoutRef.current = null
+        }
+        setSyncPopupVisible(false)
+        setSyncPhase('loading')
+        setSyncError(undefined)
+    }, [])
+
+    const startRetry = useCallback(() => {
+        void runSyncRetry(session?.user?.id, setSyncPhase, setSyncError, () => {
+            successTimerRef.current = setTimeout(() => {
+                successTimerRef.current = null
+                setSyncPopupVisible(false)
+                setSyncPhase('loading')
+                setSyncError(undefined)
+            }, 650)
+        })
+    }, [session?.user?.id])
+
+    const openRetryPopup = useCallback(() => {
+        if (retryTimeoutRef.current) {
+            clearTimeout(retryTimeoutRef.current)
+            retryTimeoutRef.current = null
+        }
+        setSyncPopupVisible(true)
+        setSyncPhase('loading')
+        setSyncError(undefined)
+        retryTimeoutRef.current = setTimeout(() => {
+            retryTimeoutRef.current = null
+            if (!syncPopupVisibleRef.current) return
+            if (syncPhaseRef.current !== 'loading') return
+            Alert.alert('Update failed', 'Please try again later.')
+            closePopup()
+        }, 60_000)
+        startRetry()
+    }, [startRetry])
 
     useEffect(() => {
         const unsubscribe = powerSync.registerListener({
@@ -119,7 +196,24 @@ export default function SettingsScreen() {
                     </Pressable>
                     <Text style={styles.headerSubtitle}>Manage your preferences</Text>
                     <Text style={styles.lastUpdated}>{lastUpdatedLine}</Text>
+                    <TouchableOpacity
+                        onPress={openRetryPopup}
+                        style={styles.retryUpdateButton}
+                        activeOpacity={0.75}
+                        accessibilityRole="button"
+                        accessibilityLabel="Retry update"
+                    >
+                        <Text style={styles.retryUpdateText}>Retry update</Text>
+                    </TouchableOpacity>
                 </View>
+
+                <SyncPopup
+                    visible={syncPopupVisible}
+                    phase={syncPhase}
+                    errorMessage={syncError}
+                    onClose={closePopup}
+                    onRetry={startRetry}
+                />
 
                 {/* Account Section */}
                 <View style={styles.section}>
@@ -196,6 +290,22 @@ const styles = StyleSheet.create({
         letterSpacing: 0.2,
         marginTop: 6,
         fontFamily: 'Poppins_400Regular',
+    },
+    retryUpdateButton: {
+        alignSelf: 'flex-start',
+        marginTop: 10,
+        paddingVertical: 6,
+        paddingHorizontal: 14,
+        borderRadius: 10,
+        backgroundColor: '#242424',
+        borderWidth: 1,
+        borderColor: '#333',
+    },
+    retryUpdateText: {
+        fontSize: 13,
+        color: '#ccc',
+        fontFamily: 'Poppins_600SemiBold',
+        letterSpacing: 0.1,
     },
     section: {
         marginBottom: 24,

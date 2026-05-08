@@ -76,10 +76,15 @@ export function calculateFatigueSummary(logs: Log[], exercises: Exercise[], full
     const dailyBudget = getDailyBudget(activityLevel)
 
     const todayStart = getStartOfDay(new Date())
-    const cutoff1 = addDays(todayStart, -1)
-    const cutoff3 = addDays(todayStart, -3)
-    const cutoff6 = addDays(todayStart, -6)
-    const cutoff9 = addDays(todayStart, -9)
+    // Calendar-day windows (inclusive):
+    // - today: today only
+    // - last3Days: today + previous 2 days
+    // - last6Days: today + previous 5 days
+    // - last9Days: today + previous 8 days
+    const cutoff1 = todayStart
+    const cutoff3 = addDays(todayStart, -2)
+    const cutoff6 = addDays(todayStart, -5)
+    const cutoff9 = addDays(todayStart, -8)
 
     let t1 = 0
     let t3 = 0
@@ -88,7 +93,8 @@ export function calculateFatigueSummary(logs: Log[], exercises: Exercise[], full
 
     for (const log of logs) {
         if (log.reps <= 0 || log.weight <= 0) continue
-        if (log.date < cutoff9) continue
+        const logDay = getStartOfDay(log.date)
+        if (logDay < cutoff9) continue
 
         const exercise = exerciseMap.get(log.exerciseID)
         if (!exercise) continue
@@ -98,16 +104,16 @@ export function calculateFatigueSummary(logs: Log[], exercises: Exercise[], full
         const setFatigue = calculateSetFatigue(log, exercise.name, exerciseDef.fatigueFactor, frequencyMultiplier, localRefByName)
         if (setFatigue === 0) continue
 
-        if (log.date >= cutoff1) {
+        if (logDay >= cutoff1) {
             t1 += setFatigue
             t3 += setFatigue
             t6 += setFatigue
             t9 += setFatigue
-        } else if (log.date >= cutoff3) {
+        } else if (logDay >= cutoff3) {
             t3 += setFatigue
             t6 += setFatigue
             t9 += setFatigue
-        } else if (log.date >= cutoff6) {
+        } else if (logDay >= cutoff6) {
             t6 += setFatigue
             t9 += setFatigue
         } else {
