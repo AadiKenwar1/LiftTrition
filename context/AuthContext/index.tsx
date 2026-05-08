@@ -1,8 +1,4 @@
 import { disconnectPowerSync, ensurePowerSyncConnected } from '@/lib/powersync/orchestrator'
-import {
-    registerPowerSyncBackgroundTask,
-    unregisterPowerSyncBackgroundTask,
-} from '@/lib/powersync/registerBackgroundPowerSync'
 import { supabase } from '@/lib/supabase/client'
 import { Session, User } from '@supabase/supabase-js'
 import { createContext, PropsWithChildren, useContext, useEffect, useState } from 'react'
@@ -58,21 +54,6 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
         return () => {
             void disconnectPowerSync('auth_effect_cleanup')
         }
-    }, [loading, session?.user?.id])
-
-    useEffect(() => {
-        if (loading) return
-        void (async () => {
-            try {
-                if (!session?.user?.id) {
-                    await unregisterPowerSyncBackgroundTask()
-                    return
-                }
-                await registerPowerSyncBackgroundTask()
-            } catch (e) {
-                console.warn('[AuthContext] Background PowerSync task register/unregister failed', e)
-            }
-        })()
     }, [loading, session?.user?.id])
 
     return (

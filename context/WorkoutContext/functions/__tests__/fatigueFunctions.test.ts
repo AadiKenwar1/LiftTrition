@@ -78,7 +78,7 @@ describe('fatigueFunctions', () => {
             const repFactor = 1 + 5 / 30
             const heavyFatigue = (100 / e1) * repFactor * rpeScale * 1.0 * freq
             const lightFatigue = (50 / e1) * repFactor * rpeScale * 1.0 * freq
-            const expected = ((heavyFatigue + lightFatigue) / 10) * 100
+            const expected = ((heavyFatigue + lightFatigue) / 15) * 100
 
             expect(pct).toBeGreaterThan(0)
             expect(pct).toBeCloseTo(expected, 6)
@@ -104,7 +104,7 @@ describe('fatigueFunctions', () => {
             // With no rolling reference, currentMax falls back to this set's e1RM.
             const e1 = 100 * (1 + 0.0333 * 5)
             const expectedSetFatigue = (100 / e1) * (1 + 5 / 30) * (7 / 10) * 1.0 * 0.933
-            const expected = (expectedSetFatigue / (10 * 60)) * 100
+            const expected = (expectedSetFatigue / (15 * 60)) * 100
 
             expect(pct).toBeCloseTo(expected, 6)
         })

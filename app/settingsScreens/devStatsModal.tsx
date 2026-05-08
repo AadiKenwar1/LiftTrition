@@ -1,12 +1,9 @@
 import { useAuth } from '@/context/AuthContext'
-import { getBackgroundSyncMetrics, type BackgroundSyncMetrics } from '@/lib/powersync/backgroundSyncMetrics'
 import { getKickThrottleRemainingMs, getPowerSyncOrchestratorState, type PowerSyncOrchestratorState } from '@/lib/powersync/orchestrator'
-import { isPowerSyncBackgroundTaskRegistered } from '@/lib/powersync/registerBackgroundPowerSync'
 import { powerSync } from '@/lib/powersync/system'
 import { getWatchdogStatus, subscribeWatchdogStatus, type WatchdogStatus } from '@/lib/powersync/watchdogStatus'
 import { supabase } from '@/lib/supabase/client'
 import { formatDateTime } from '@/lib/utils/dateHelper'
-import * as BackgroundTask from 'expo-background-task'
 import { useCallback, useEffect, useState } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 
@@ -46,9 +43,6 @@ export default function DevStatsScreen() {
     const [watchdog, setWatchdog] = useState<WatchdogStatus>(() => getWatchdogStatus())
     const [orchestrator, setOrchestrator] = useState<PowerSyncOrchestratorState>(() => getPowerSyncOrchestratorState())
     const [kickCooldownMs, setKickCooldownMs] = useState(() => getKickThrottleRemainingMs())
-    const [bgMetrics, setBgMetrics] = useState<BackgroundSyncMetrics | null>(null)
-    const [bgRegistered, setBgRegistered] = useState(false)
-    const [bgApiStatus, setBgApiStatus] = useState<number | null>(null)
     const [tokenServerCheck, setTokenServerCheck] = useState<TokenServerCheck>('idle')
     const [tokenServerDetail, setTokenServerDetail] = useState<string | undefined>()
     const [lastGetUserAt, setLastGetUserAt] = useState<Date | undefined>()
@@ -56,13 +50,6 @@ export default function DevStatsScreen() {
     const refreshOrchestrator = useCallback(() => {
         setOrchestrator(getPowerSyncOrchestratorState())
         setKickCooldownMs(getKickThrottleRemainingMs())
-    }, [])
-
-    const refreshBackground = useCallback(async () => {
-        const [metrics, registered, status] = await Promise.all([getBackgroundSyncMetrics(), isPowerSyncBackgroundTaskRegistered(), BackgroundTask.getStatusAsync().catch(() => null)])
-        setBgMetrics(metrics)
-        setBgRegistered(registered)
-        setBgApiStatus(status)
     }, [])
 
     /** Poll SDK truth so Dev Stats cannot drift if a status event is missed. */
@@ -116,10 +103,6 @@ export default function DevStatsScreen() {
     }, [refreshOrchestrator])
 
     useEffect(() => {
-        void refreshBackground()
-    }, [refreshBackground])
-
-    useEffect(() => {
         void runGetUserValidation()
     }, [runGetUserValidation])
 
@@ -131,12 +114,11 @@ export default function DevStatsScreen() {
     useEffect(() => {
         const tick = () => {
             syncPowerSyncFromDevice()
-            void refreshBackground()
         }
         const id = setInterval(tick, 1000)
         tick()
         return () => clearInterval(id)
-    }, [syncPowerSyncFromDevice, refreshBackground])
+    }, [syncPowerSyncFromDevice])
 
     return (
         <View style={styles.container}>
@@ -224,34 +206,6 @@ export default function DevStatsScreen() {
                     <Text style={[styles.line, styles.warn]}>Orchestrator error: {orchestrator.lastError}</Text>
                 :   <Text style={[styles.line, styles.subtle]}>Orchestrator error: none</Text>}
                 <Text style={[styles.line, styles.subtle]}>Kick cooldown: {kickCooldownMs > 0 ? `${Math.ceil(kickCooldownMs / 1000)}s until kick allowed` : 'Kick allowed now'}</Text>
-
-                <Text style={[styles.line, styles.sectionLabel]}>Background sync task</Text>
-                <Text style={[styles.line, styles.subtle]}>
-                    API:{' '}
-                    {bgApiStatus === BackgroundTask.BackgroundTaskStatus.Available ?
-                        'Available'
-                    : bgApiStatus === BackgroundTask.BackgroundTaskStatus.Restricted ?
-                        'Restricted (Expo Go / web / policy)'
-                    : bgApiStatus !== null ?
-                        `Status ${bgApiStatus}`
-                    :   'Unknown'}
-                </Text>
-                <Text style={[styles.line, styles.subtle]}>Registered: {bgRegistered ? 'Yes' : 'No'}</Text>
-                {bgMetrics ?
-                    <>
-                        <Text style={[styles.line, styles.subtle]}>
-                            BG runs: {bgMetrics.runCount} — last: {formatDateTime(new Date(bgMetrics.lastRunAt))}
-                        </Text>
-                        <Text style={[styles.line, styles.subtle]}>
-                            Last BG result: {bgMetrics.lastResult}
-                            {bgMetrics.lastSyncedAdvanced === true ? ' (lastSyncedAt advanced)' : ''}
-                            {bgMetrics.lastSyncedAdvanced === false ? ' (lastSyncedAt unchanged)' : ''}
-                        </Text>
-                        {bgMetrics.lastError ?
-                            <Text style={[styles.line, styles.warn]}>BG last error: {bgMetrics.lastError}</Text>
-                        :   null}
-                    </>
-                :   <Text style={[styles.line, styles.subtle]}>No background runs recorded yet</Text>}
             </ScrollView>
         </View>
     )

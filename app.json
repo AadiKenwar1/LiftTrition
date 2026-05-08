@@ -47,8 +47,7 @@
                     "project": "lifttritionapp",
                     "organization": "na-mvc"
                 }
-            ],
-            "expo-background-task"
+            ]
         ],
         "experiments": {
             "typedRoutes": true

@@ -1,6 +1,9 @@
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { ChevronRight, CreditCard, Dumbbell, FileText, HelpCircle, Plus, Scale, User, Utensils } from 'lucide-react-native'
+import { powerSync } from '@/lib/powersync/system'
+import { formatDateTime } from '@/lib/utils/dateHelper'
+import { useEffect, useMemo, useState } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 interface SettingsOption {
     icon: React.ComponentType<any>
@@ -12,6 +15,24 @@ interface SettingsOption {
 
 export default function SettingsScreen() {
     const router = useRouter()
+    const [lastSyncedAt, setLastSyncedAt] = useState<Date | undefined>(() => powerSync.currentStatus.lastSyncedAt)
+    const [powerSyncConnected, setPowerSyncConnected] = useState(() => powerSync.currentStatus.connected)
+
+    useEffect(() => {
+        const unsubscribe = powerSync.registerListener({
+            statusChanged: (status) => {
+                setLastSyncedAt(status.lastSyncedAt)
+                setPowerSyncConnected(status.connected)
+            },
+        })
+        return () => unsubscribe?.()
+    }, [])
+
+    const lastUpdatedLine = useMemo(() => {
+        if (!powerSyncConnected) return 'Last updated: offline'
+        if (!lastSyncedAt) return 'Last updated: updating…'
+        return `Last updated: ${formatDateTime(lastSyncedAt)}`
+    }, [lastSyncedAt, powerSyncConnected])
 
     const settingsOptions: SettingsOption[] = [
         {
@@ -97,6 +118,7 @@ export default function SettingsScreen() {
                         <Text style={styles.title}>Settings</Text>
                     </Pressable>
                     <Text style={styles.headerSubtitle}>Manage your preferences</Text>
+                    <Text style={styles.lastUpdated}>{lastUpdatedLine}</Text>
                 </View>
 
                 {/* Account Section */}
@@ -166,6 +188,13 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#aaa',
         letterSpacing: 0.2,
+        fontFamily: 'Poppins_400Regular',
+    },
+    lastUpdated: {
+        fontSize: 13,
+        color: '#777',
+        letterSpacing: 0.2,
+        marginTop: 6,
         fontFamily: 'Poppins_400Regular',
     },
     section: {
