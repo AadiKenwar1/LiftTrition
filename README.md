@@ -18,9 +18,9 @@ Instant UX using PowerSync for eventual / background syncing.
 
 **Lift mode tracking flow:** Create workout → Add exercises → Enter exercise logs.
 
-Workouts and exercises can be archived and have notes added to them.
+- Workouts and exercises can be archived and have notes added to them.
 
-Basic and advanced CRUD features for workouts, exercises, and exercise logs.
+- Basic and advanced CRUD features for workouts, exercises, and exercise logs.
 
 **Nutrition mode tracking flow:** Nutrition logs can be added directly using a variety of tools.
 
@@ -28,7 +28,7 @@ Basic and advanced CRUD features for workouts, exercises, and exercise logs.
 - **Photo entry:** Snap a picture of your meal and have AI automatically estimate macros from the image. Advanced editing is available for photo entries.
 - **Food database:** Search an extensive food database for branded items with provided macronutrient information.
 
-Basic and advanced CRUD features for nutrition entries.
+- Basic and advanced CRUD features for nutrition entries.
 
 ### Goals and progress graphs
 
