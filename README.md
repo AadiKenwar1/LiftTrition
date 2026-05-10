@@ -4,6 +4,32 @@ Project description: AI powered tracking + progress visualizations for both weig
 
 In this README, weightlifting mode may be referred to as lift mode or lifting mode.
 
+## Preview
+
+<table>
+<tr>
+<td align="center" valign="top"><strong>Workouts</strong><br /><img src="assets/images/preview/WorkoutPreview.png" alt="Workouts" width="200" /></td>
+<td align="center" valign="top"><strong>Exercises</strong><br /><img src="assets/images/preview/ExercisesPreview.png" alt="Exercises" width="200" /></td>
+<td align="center" valign="top"><strong>Logs</strong><br /><img src="assets/images/preview/LogsPreview.png" alt="Logs" width="200" /></td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td align="center" valign="top"><strong>Nutrition</strong><br /><img src="assets/images/preview/NutrtionPreview.png" alt="Nutrition" width="200" /></td>
+<td align="center" valign="top"><strong>AI photo entry</strong><br /><img src="assets/images/preview/AiPicturePreview.png" alt="AI photo entry" width="200" /></td>
+<td align="center" valign="top"><strong>Manual nutrition entry</strong><br /><img src="assets/images/preview/ManualNutritionPreview.png" alt="Manual nutrition entry" width="200" /></td>
+</tr>
+</table>
+
+<table>
+<tr>
+<td align="center" valign="top"><strong>Food database</strong><br /><img src="assets/images/preview/FoodDBPreview.png" alt="Food database" width="200" /></td>
+<td align="center" valign="top"><strong>Workout graphs</strong><br /><img src="assets/images/preview/LiftProgressPreview.png" alt="Workout graphs" width="200" /></td>
+<td align="center" valign="top"><strong>Nutrition graphs</strong><br /><img src="assets/images/preview/NutrtitionGraphsPreview.png" alt="Nutrition graphs" width="200" /></td>
+</tr>
+</table>
+
 ## Tech stack
 
 - **Frontend:** React Native
