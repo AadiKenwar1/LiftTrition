@@ -147,7 +147,10 @@ export async function loadWorkoutData(userId: string): Promise<{
     // Convert to types
     const workouts = workoutRows.map(rowToWorkout);
     const exercises = exerciseRows.map(rowToExercise);
-    const logs = logRows.map(rowToLog);
+    const workoutIds = new Set(workouts.map((w) => w.id))
+    const exerciseIds = new Set(exercises.map((e) => e.id))
+    // Drop orphan logs (e.g. leftover rows after workout delete before child deletes existed)
+    const logs = logRows.map(rowToLog).filter((log) => workoutIds.has(log.workoutID) && exerciseIds.has(log.exerciseID))
 
     // Convert user_exercises rows to ExerciseLib object
     const userExercises: ExerciseLib = {};

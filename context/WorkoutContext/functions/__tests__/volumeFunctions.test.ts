@@ -1,6 +1,6 @@
 import { formatDateMinimal, getDateKey } from '@/lib/utils/dateHelper';
 import { Log } from '../../types';
-import { getVolumeData } from '../volumeFunctions';
+import { getSetsData, getVolumeData } from '../volumeFunctions';
 
 // Helper function to create mock log
 function createMockLog(overrides: Partial<Log> = {}): Log {
@@ -496,6 +496,66 @@ describe('Volume Functions', () => {
                     expect(typeof entry.value).toBe('number');
                 });
             });
+        });
+    });
+
+    describe('getSetsData', () => {
+        const mockToday = new Date('2024-02-15');
+        const originalDate = Date;
+
+        beforeEach(() => {
+            global.Date = jest.fn((...args: unknown[]) => {
+                if (args.length === 0) {
+                    return new originalDate(mockToday);
+                }
+                return new originalDate(...(args as ConstructorParameters<typeof Date>));
+            }) as any;
+            Object.setPrototypeOf(global.Date, originalDate);
+            global.Date.now = jest.fn(() => mockToday.getTime());
+        });
+
+        afterEach(() => {
+            global.Date = originalDate;
+        });
+
+        test('counts bodyweight sets (weight 0, reps > 0)', () => {
+            const logs: Log[] = [
+                createMockLog({
+                    date: daysAgo(1),
+                    weight: 0,
+                    reps: 12,
+                }),
+            ];
+            const result = getSetsData(logs);
+            const yesterdayDate = daysAgo(1);
+            const yesterdayDayString = formatDayString(yesterdayDate);
+            const yesterdayEntry = result.find((entry) => entry.day === yesterdayDayString);
+            expect(yesterdayEntry?.value).toBe(1);
+        });
+
+        test('still skips zero or negative reps', () => {
+            const sameDate = daysAgo(1);
+            const logs: Log[] = [
+                createMockLog({ date: sameDate, weight: 100, reps: 0 }),
+                createMockLog({ date: sameDate, weight: 100, reps: -1 }),
+                createMockLog({ date: sameDate, weight: 100, reps: 8 }),
+            ];
+            const result = getSetsData(logs);
+            const dayString = formatDayString(sameDate);
+            const entry = result.find((e) => e.day === dayString);
+            expect(entry?.value).toBe(1);
+        });
+
+        test('still skips negative weight', () => {
+            const sameDate = daysAgo(1);
+            const logs: Log[] = [
+                createMockLog({ date: sameDate, weight: -10, reps: 10 }),
+                createMockLog({ date: sameDate, weight: 50, reps: 5 }),
+            ];
+            const result = getSetsData(logs);
+            const dayString = formatDayString(sameDate);
+            const entry = result.find((e) => e.day === dayString);
+            expect(entry?.value).toBe(1);
         });
     });
 });

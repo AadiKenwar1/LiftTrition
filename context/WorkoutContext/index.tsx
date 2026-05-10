@@ -35,10 +35,15 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
     }
     const handleDeleteWorkout = async (id: string) => {
         deleteWorkout(id, setWorkouts, setExercises, setLogs)
-        // Delete from PowerSync (exercises and logs will cascade delete)
+        // Local PowerSync has no FK CASCADE — delete children first so orphans are not
+        // reloaded from SQLite (ghost logs / fatigue after app restart).
         if (userID) {
             try {
-                await powerSync.execute('DELETE FROM workouts WHERE id = ?', [id])
+                await powerSync.writeTransaction(async (tx) => {
+                    await tx.execute('DELETE FROM logs WHERE workout_id = ?', [id])
+                    await tx.execute('DELETE FROM exercises WHERE workout_id = ?', [id])
+                    await tx.execute('DELETE FROM workouts WHERE id = ?', [id])
+                })
             } catch (e) {
                 console.warn('[WorkoutContext] Failed to delete workout from PowerSync', e)
             }
@@ -51,10 +56,12 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
     const handleAddExercise = (workoutID: string, userID: string, name: string) => addExercise(workoutID, userID, name, setExercises)
     const handleDeleteExercise = async (id: string) => {
         deleteExercise(id, setExercises, setLogs)
-        // Delete from PowerSync (logs will cascade delete)
         if (userID) {
             try {
-                await powerSync.execute('DELETE FROM exercises WHERE id = ?', [id])
+                await powerSync.writeTransaction(async (tx) => {
+                    await tx.execute('DELETE FROM logs WHERE exercise_id = ?', [id])
+                    await tx.execute('DELETE FROM exercises WHERE id = ?', [id])
+                })
             } catch (e) {
                 console.warn('[WorkoutContext] Failed to delete exercise from PowerSync', e)
             }

@@ -15,13 +15,13 @@ export async function deleteNutrition(
 ){
     setNutritionData(prev => prev.filter(item => item.id !== id));
     
-    // Delete from PowerSync if userID provided (ingredients will cascade delete)
+    // Local PowerSync has no FK CASCADE — delete child ingredient rows first.
     if (userID) {
         try {
-            await powerSync.execute(
-                'DELETE FROM nutrition_entries WHERE id = ?',
-                [id]
-            );
+            await powerSync.writeTransaction(async (tx) => {
+                await tx.execute('DELETE FROM nutrition_entry_ingredients WHERE nutrition_entry_id = ?', [id])
+                await tx.execute('DELETE FROM nutrition_entries WHERE id = ?', [id])
+            })
         } catch (e) {
             console.warn('[NutritionContext] Failed to delete nutrition entry from PowerSync', e)
         }
@@ -46,13 +46,12 @@ export async function unsaveNutrition(
 ){
     setSavedNutritionEntries(prev => prev.filter(item => item.id !== id));
     
-    // Delete from PowerSync if userID provided (ingredients will cascade delete)
     if (userID) {
         try {
-            await powerSync.execute(
-                'DELETE FROM saved_nutrition_entries WHERE id = ?',
-                [id]
-            );
+            await powerSync.writeTransaction(async (tx) => {
+                await tx.execute('DELETE FROM saved_nutrition_entry_ingredients WHERE saved_nutrition_entry_id = ?', [id])
+                await tx.execute('DELETE FROM saved_nutrition_entries WHERE id = ?', [id])
+            })
         } catch (e) {
             console.warn('[NutritionContext] Failed to delete saved nutrition entry from PowerSync', e)
         }

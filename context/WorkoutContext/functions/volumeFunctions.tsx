@@ -58,7 +58,7 @@ export function getVolumeData(logs: Log[], onboardingCompletedAt?: Date): Array<
 
 /**
  * Get set-count data for graph (last 30 days or since onboarding completion)
- * One set = one log with weight > 0 and reps > 0, counted per calendar day
+ * One set = one log with reps > 0 and non-negative weight (weight 0 = bodyweight), per calendar day
  * Fills gaps with 0s for days without logs
  */
 export function getSetsData(logs: Log[], onboardingCompletedAt?: Date): Array<{ day: string; value: number }> {
@@ -71,7 +71,7 @@ export function getSetsData(logs: Log[], onboardingCompletedAt?: Date): Array<{ 
     let hasData = false;
 
     for (const log of logs) {
-        if (log.weight <= 0 || log.reps <= 0) continue;
+        if (log.reps <= 0 || log.weight < 0) continue
 
         hasData = true;
         const logDate = new Date(log.date);

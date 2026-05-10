@@ -382,5 +382,45 @@ export async function saveNutritionData(
                 );
             }
         }
+
+        // Remove DB rows for this user that are no longer in in-memory arrays (local DB has no cascade;
+        // save only upserts — without this, deleted entries can reappear after reload).
+        const keptMealIds = [...new Set(nutritionData.map((e) => e.id))]
+        if (keptMealIds.length === 0) {
+            await tx.execute(
+                'DELETE FROM nutrition_entry_ingredients WHERE nutrition_entry_id IN (SELECT id FROM nutrition_entries WHERE user_id = ?)',
+                [userId],
+            )
+            await tx.execute('DELETE FROM nutrition_entries WHERE user_id = ?', [userId])
+        } else {
+            const mealPh = keptMealIds.map(() => '?').join(', ')
+            await tx.execute(
+                `DELETE FROM nutrition_entry_ingredients WHERE nutrition_entry_id IN (SELECT id FROM nutrition_entries WHERE user_id = ? AND id NOT IN (${mealPh}))`,
+                [userId, ...keptMealIds],
+            )
+            await tx.execute(
+                `DELETE FROM nutrition_entries WHERE user_id = ? AND id NOT IN (${mealPh})`,
+                [userId, ...keptMealIds],
+            )
+        }
+
+        const keptSavedIds = [...new Set(savedNutritionEntries.map((e) => e.id))]
+        if (keptSavedIds.length === 0) {
+            await tx.execute(
+                'DELETE FROM saved_nutrition_entry_ingredients WHERE saved_nutrition_entry_id IN (SELECT id FROM saved_nutrition_entries WHERE user_id = ?)',
+                [userId],
+            )
+            await tx.execute('DELETE FROM saved_nutrition_entries WHERE user_id = ?', [userId])
+        } else {
+            const savedPh = keptSavedIds.map(() => '?').join(', ')
+            await tx.execute(
+                `DELETE FROM saved_nutrition_entry_ingredients WHERE saved_nutrition_entry_id IN (SELECT id FROM saved_nutrition_entries WHERE user_id = ? AND id NOT IN (${savedPh}))`,
+                [userId, ...keptSavedIds],
+            )
+            await tx.execute(
+                `DELETE FROM saved_nutrition_entries WHERE user_id = ? AND id NOT IN (${savedPh})`,
+                [userId, ...keptSavedIds],
+            )
+        }
     });
 }

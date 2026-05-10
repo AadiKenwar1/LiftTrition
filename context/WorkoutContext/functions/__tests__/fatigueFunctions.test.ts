@@ -70,15 +70,13 @@ describe('fatigueFunctions', () => {
             // Expected:
             // e1RM(100x5)=116.65; both sets use currentMax=116.65 due to rolling ref
             // adjusted Epley base: (w/currentMax) * (1 + reps/30)
-            // scaled by (rpe/10) * fatigueFactor * frequencyMultiplier
-            // percentage = total / (600*1) * 100
+            // scaled by (rpe/10) * fatigueFactor; activity only via daily budget (moderate = 10)
             const e1 = 100 * (1 + 0.0333 * 5) // 116.65
-            const freq = 0.933
             const rpeScale = 7 / 10
             const repFactor = 1 + 5 / 30
-            const heavyFatigue = (100 / e1) * repFactor * rpeScale * 1.0 * freq
-            const lightFatigue = (50 / e1) * repFactor * rpeScale * 1.0 * freq
-            const expected = ((heavyFatigue + lightFatigue) / 15) * 100
+            const heavyFatigue = (100 / e1) * repFactor * rpeScale * 1.0
+            const lightFatigue = (50 / e1) * repFactor * rpeScale * 1.0
+            const expected = ((heavyFatigue + lightFatigue) / 10) * 100
 
             expect(pct).toBeGreaterThan(0)
             expect(pct).toBeCloseTo(expected, 6)
@@ -103,8 +101,8 @@ describe('fatigueFunctions', () => {
 
             // With no rolling reference, currentMax falls back to this set's e1RM.
             const e1 = 100 * (1 + 0.0333 * 5)
-            const expectedSetFatigue = (100 / e1) * (1 + 5 / 30) * (7 / 10) * 1.0 * 0.933
-            const expected = (expectedSetFatigue / (15 * 60)) * 100
+            const expectedSetFatigue = (100 / e1) * (1 + 5 / 30) * (7 / 10) * 1.0
+            const expected = (expectedSetFatigue / (10 * 60)) * 100
 
             expect(pct).toBeCloseTo(expected, 6)
         })
