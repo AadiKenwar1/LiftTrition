@@ -4,11 +4,11 @@ import { estimate1RM, oneRMMap } from './oneRepMaxFunctions'
 
 // Daily fatigue "budget" by activity level (100% ≈ a hard day).
 const DAILY_BUDGETS: Record<string, number> = {
-    sedentary: 6,
-    light: 7,
-    moderate: 8,
-    active: 9,
-    gymrat: 10,
+    sedentary: 8,
+    light: 9,
+    moderate: 10,
+    active: 11,
+    gymrat: 12,
 }
 
 function getDailyBudget(activityLevel: string): number {
