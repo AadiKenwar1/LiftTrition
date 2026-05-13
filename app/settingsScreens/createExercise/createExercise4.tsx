@@ -67,10 +67,14 @@ export default function CreateExercise4Screen() {
                         <BicepsFlexed size={60} color="#2f80ed" strokeWidth={2} />
                     </View>
                     {/* Title */}
-                    <Text style={styles.titleText}>Select Secondary Muscles (optional)</Text>
+                    <Text style={styles.titleText} adjustsFontSizeToFit minimumFontScale={0.55} numberOfLines={1}>
+                        Select Secondary Muscles (optional)
+                    </Text>
 
                     {/* Subtitle */}
-                    <Text style={styles.subtitleText}>Tap to select. Tap again to deselect.</Text>
+                    <Text style={styles.subtitleText} adjustsFontSizeToFit minimumFontScale={0.55} numberOfLines={1}>
+                        Tap to select. Tap again to deselect.
+                    </Text>
 
                     {/* Muscle List */}
                     <View style={styles.listContainer}>

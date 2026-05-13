@@ -2,6 +2,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { BarChart2, Dumbbell, Scale, Sparkle } from 'lucide-react-native'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 const BLUE = '#2f80ed'
 const GREEN = '#22C922'
@@ -15,16 +16,28 @@ const features = [
 
 export default function Onboarding1Screen() {
     const router = useRouter()
+    const insets = useSafeAreaInsets()
 
     return (
         <View style={styles.container}>
             <LinearGradient colors={['rgba(255, 255, 255, 0.2)', 'transparent']} style={styles.topGradient} pointerEvents="none" />
-            <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-                {/* Header */}
-                <Text style={styles.titleText}>LiftTrition</Text>
+            <ScrollView
+                style={styles.scroll}
+                contentContainerStyle={[
+                    styles.scrollContent,
+                    {
+                        paddingTop: Math.max(insets.top, 12) + 36,
+                        paddingBottom: Math.max(insets.bottom, 16) + 24,
+                    },
+                ]}
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+            >
+                <Text style={styles.titleText} adjustsFontSizeToFit minimumFontScale={0.45} numberOfLines={1}>
+                    LiftTrition
+                </Text>
                 <Text style={styles.subtitleText}>LiftTrition is a free to use fitness platform that offers the following:</Text>
 
-                {/* Features */}
                 <View style={styles.featuresContainer}>
                     {features.map(({ icon: Icon, text, accent }, i) => (
                         <View key={i} style={styles.featureCard}>
@@ -37,13 +50,11 @@ export default function Onboarding1Screen() {
                 </View>
 
                 <Text style={styles.footerHint}>If this sounds like something you're interested in, let's get started! We just need to ask a few quick questions to personalize your goals.</Text>
-            </ScrollView>
 
-            <View style={styles.ctaBar}>
                 <TouchableOpacity style={styles.ctaButton} activeOpacity={0.85} onPress={() => router.push('/onboardingScreens/onboarding2')}>
                     <Text style={styles.ctaText}>Get Started</Text>
                 </TouchableOpacity>
-            </View>
+            </ScrollView>
         </View>
     )
 }
@@ -52,9 +63,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#121212',
-        paddingHorizontal: 25,
-        paddingTop: 70,
-        paddingBottom: 50,
     },
     topGradient: {
         position: 'absolute',
@@ -67,11 +75,14 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     scrollContent: {
+        flexGrow: 1,
+        width: '100%',
         alignItems: 'center',
-        paddingTop: 16,
-        paddingBottom: 16,
+        paddingHorizontal: 25,
+        justifyContent: 'center',
     },
     titleText: {
+        width: '100%',
         fontSize: 52,
         color: '#fff',
         letterSpacing: -1.5,
@@ -98,7 +109,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 14,
-        height: 85,
+        minHeight: 85,
+        paddingVertical: 12,
         backgroundColor: '#282A2C',
         borderRadius: 14,
         paddingHorizontal: 16,
@@ -132,18 +144,17 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_400Regular',
         width: '100%',
         paddingHorizontal: 4,
-        marginBottom: 8,
-    },
-    ctaBar: {
-        width: '100%',
+        marginBottom: 12,
     },
     ctaButton: {
         width: '100%',
-        height: 60,
+        minHeight: 60,
         borderRadius: 16,
         backgroundColor: '#fff',
         justifyContent: 'center',
         alignItems: 'center',
+        paddingVertical: 16,
+        marginTop: 8,
     },
     ctaText: {
         fontSize: 17,

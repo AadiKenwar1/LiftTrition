@@ -1,7 +1,8 @@
 import { supabase } from '@/lib/supabase/client'
 import { HelpCircle } from 'lucide-react-native'
 import { useState } from 'react'
-import { Alert, Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
+import { Alert, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 type SubjectType = 'support' | 'feature_request'
 
@@ -13,6 +14,8 @@ export default function SupportScreen() {
     const [subject, setSubject] = useState('')
     const [message, setMessage] = useState('')
     const [loading, setLoading] = useState(false)
+    const insets = useSafeAreaInsets()
+    const scrollBottomPad = Math.max(insets.bottom, 20) + 32
 
     async function handleSend() {
         const trimmedSubject = subject.trim()
@@ -59,68 +62,107 @@ export default function SupportScreen() {
     }
 
     return (
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View style={styles.container}>
-                <View style={styles.iconCircle}>
-                    <HelpCircle size={40} color={ACCENT} strokeWidth={2} />
+        <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={Platform.OS === 'ios' ? 8 : 0}>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                <View style={styles.flex}>
+                    <ScrollView
+                        style={styles.scroll}
+                        contentContainerStyle={[styles.scrollContent, { paddingBottom: scrollBottomPad }]}
+                        keyboardShouldPersistTaps="handled"
+                        showsVerticalScrollIndicator={false}
+                        bounces
+                    >
+                        <View style={styles.iconCircle}>
+                            <HelpCircle size={40} color={ACCENT} strokeWidth={2} />
+                        </View>
+
+                        <Text style={styles.titleText} adjustsFontSizeToFit minimumFontScale={0.55} numberOfLines={2}>
+                            Support & Feature Requests
+                        </Text>
+                        <Text style={styles.subtitleText} adjustsFontSizeToFit minimumFontScale={0.65} numberOfLines={4}>
+                            Describe your issue, question, or feature idea. We will respond as soon as possible.
+                        </Text>
+
+                        <View style={styles.typeToggleContainer}>
+                            <TouchableOpacity style={[styles.typeButton, subjectType === 'support' && { backgroundColor: ACCENT_MUTED, borderColor: ACCENT }]} onPress={() => setSubjectType('support')} activeOpacity={0.5} disabled={loading}>
+                                <Text
+                                    style={[styles.typeButtonText, subjectType === 'support' && styles.typeButtonTextActive]}
+                                    adjustsFontSizeToFit
+                                    minimumFontScale={0.65}
+                                    numberOfLines={2}
+                                >
+                                    LiftTrition Support
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={[styles.typeButton, subjectType === 'feature_request' && { backgroundColor: ACCENT_MUTED, borderColor: ACCENT }]} onPress={() => setSubjectType('feature_request')} activeOpacity={0.5} disabled={loading}>
+                                <Text
+                                    style={[styles.typeButtonText, subjectType === 'feature_request' && styles.typeButtonTextActive]}
+                                    adjustsFontSizeToFit
+                                    minimumFontScale={0.65}
+                                    numberOfLines={2}
+                                >
+                                    Request a Feature
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        <View style={styles.inputContainer}>
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.inputLabel} adjustsFontSizeToFit minimumFontScale={0.75} numberOfLines={1}>
+                                    Subject
+                                </Text>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder={subjectType === 'support' ? 'e.g. Billing question, Bug report' : 'e.g. Add dark mode, Export data'}
+                                    placeholderTextColor="#aaa"
+                                    value={subject}
+                                    onChangeText={setSubject}
+                                    editable={!loading}
+                                />
+                            </View>
+
+                            <View style={styles.inputGroup}>
+                                <Text style={styles.inputLabel} adjustsFontSizeToFit minimumFontScale={0.75} numberOfLines={1}>
+                                    Message
+                                </Text>
+                                <TextInput
+                                    style={[styles.input, styles.messageInput]}
+                                    placeholder={subjectType === 'support' ? 'Describe your issue or question...' : 'Describe the feature you would like to see...'}
+                                    placeholderTextColor="#aaa"
+                                    value={message}
+                                    onChangeText={setMessage}
+                                    multiline
+                                    numberOfLines={5}
+                                    textAlignVertical="top"
+                                    editable={!loading}
+                                />
+                            </View>
+                        </View>
+
+                        <TouchableOpacity style={[styles.sendButton, loading && styles.sendButtonDisabled]} onPress={handleSend} disabled={loading} activeOpacity={0.8}>
+                            <Text style={styles.sendButtonText} adjustsFontSizeToFit minimumFontScale={0.75} numberOfLines={1}>
+                                {loading ? 'Sending...' : 'Send'}
+                            </Text>
+                        </TouchableOpacity>
+                    </ScrollView>
                 </View>
-
-                <Text style={styles.titleText}>Support & Feature Requests</Text>
-                <Text style={styles.subtitleText}>Describe your issue, question, or feature idea. We will respond as soon as possible.</Text>
-
-                <View style={styles.typeToggleContainer}>
-                    <TouchableOpacity style={[styles.typeButton, subjectType === 'support' && { backgroundColor: ACCENT_MUTED, borderColor: ACCENT }]} onPress={() => setSubjectType('support')} activeOpacity={0.5} disabled={loading}>
-                        <Text style={[styles.typeButtonText, subjectType === 'support' && styles.typeButtonTextActive]}>LiftTrition Support</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={[styles.typeButton, subjectType === 'feature_request' && { backgroundColor: ACCENT_MUTED, borderColor: ACCENT }]} onPress={() => setSubjectType('feature_request')} activeOpacity={0.5} disabled={loading}>
-                        <Text style={[styles.typeButtonText, subjectType === 'feature_request' && styles.typeButtonTextActive]}>Request a Feature</Text>
-                    </TouchableOpacity>
-                </View>
-
-                <View style={styles.inputContainer}>
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.inputLabel}>Subject</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder={subjectType === 'support' ? 'e.g. Billing question, Bug report' : 'e.g. Add dark mode, Export data'}
-                            placeholderTextColor="#aaa"
-                            value={subject}
-                            onChangeText={setSubject}
-                            editable={!loading}
-                        />
-                    </View>
-
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.inputLabel}>Message</Text>
-                        <TextInput
-                            style={[styles.input, styles.messageInput]}
-                            placeholder={subjectType === 'support' ? 'Describe your issue or question...' : 'Describe the feature you would like to see...'}
-                            placeholderTextColor="#aaa"
-                            value={message}
-                            onChangeText={setMessage}
-                            multiline
-                            numberOfLines={5}
-                            textAlignVertical="top"
-                            editable={!loading}
-                        />
-                    </View>
-                </View>
-
-                <TouchableOpacity style={[styles.sendButton, loading && styles.sendButtonDisabled]} onPress={handleSend} disabled={loading} activeOpacity={0.8}>
-                    <Text style={styles.sendButtonText}>{loading ? 'Sending...' : 'Send'}</Text>
-                </TouchableOpacity>
-            </View>
-        </TouchableWithoutFeedback>
+            </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
     )
 }
 
 const styles = StyleSheet.create({
-    container: {
+    flex: {
         flex: 1,
         backgroundColor: '#121212',
+    },
+    scroll: {
+        flex: 1,
+    },
+    scrollContent: {
+        flexGrow: 1,
         paddingHorizontal: 25,
         paddingTop: 20,
-        paddingBottom: 40,
     },
     iconCircle: {
         width: 80,
@@ -135,6 +177,7 @@ const styles = StyleSheet.create({
         marginBottom: 12,
     },
     titleText: {
+        width: '100%',
         fontSize: 22,
         color: '#fff',
         letterSpacing: -0.5,
@@ -143,6 +186,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_600SemiBold',
     },
     subtitleText: {
+        width: '100%',
         fontSize: 15,
         color: '#aaa',
         textAlign: 'center',
@@ -150,6 +194,7 @@ const styles = StyleSheet.create({
         marginBottom: 24,
         paddingHorizontal: 8,
         fontFamily: 'Poppins_400Regular',
+        lineHeight: 22,
     },
     typeToggleContainer: {
         flexDirection: 'row',
@@ -159,7 +204,9 @@ const styles = StyleSheet.create({
     },
     typeButton: {
         flex: 1,
-        height: 48,
+        minHeight: 48,
+        paddingVertical: 10,
+        paddingHorizontal: 8,
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: '#282A2C',
@@ -168,9 +215,11 @@ const styles = StyleSheet.create({
         borderColor: '#242424',
     },
     typeButtonText: {
+        width: '100%',
         fontSize: 14,
         color: '#aaa',
         fontFamily: 'Poppins_600SemiBold',
+        textAlign: 'center',
     },
     typeButtonTextActive: {
         color: '#fff',
@@ -182,6 +231,7 @@ const styles = StyleSheet.create({
     },
     inputGroup: { width: '100%' },
     inputLabel: {
+        width: '100%',
         fontSize: 14,
         color: '#aaa',
         marginBottom: 8,
@@ -206,7 +256,9 @@ const styles = StyleSheet.create({
     },
     sendButton: {
         width: '100%',
-        height: 56,
+        minHeight: 56,
+        paddingVertical: 14,
+        paddingHorizontal: 20,
         borderRadius: 16,
         backgroundColor: '#fff',
         justifyContent: 'center',
@@ -221,8 +273,10 @@ const styles = StyleSheet.create({
         opacity: 0.6,
     },
     sendButtonText: {
+        maxWidth: '100%',
         fontSize: 16,
         color: '#121212',
         fontFamily: 'Poppins_600SemiBold',
+        textAlign: 'center',
     },
 })

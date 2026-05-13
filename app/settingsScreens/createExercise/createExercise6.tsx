@@ -4,7 +4,8 @@ import { useWorkout } from '@/context/WorkoutContext'
 import { CreateExerciseData } from '@/context/WorkoutContext/functions/createExerciseFunctions'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { CheckCircle2 } from 'lucide-react-native'
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 const ACCENT = { workout: '#2f80ed', nutrition: '#22C922' }
 
@@ -25,6 +26,8 @@ export default function CreateExercise6Screen() {
 
     const secondaryMuscles = params.secondaryMuscles ? JSON.parse(params.secondaryMuscles) : []
     const isCompound = params.isCompound === 'true'
+    const insets = useSafeAreaInsets()
+    const scrollBottomPad = Math.max(insets.bottom, 20) + 48
 
     function handleSave() {
         const exerciseData: CreateExerciseData = {
@@ -49,78 +52,89 @@ export default function CreateExercise6Screen() {
     }
 
     return (
-        <View style={styles.container}>
-            <View style={styles.content}>
-                {/* Success Icon */}
-                <View style={[styles.iconCircle, { borderColor: accent }]}>
-                    <CheckCircle2 size={48} color={accent} strokeWidth={2} />
-                </View>
-
-                {/* Title */}
-                <Text style={styles.titleText}>Review Your Exercise</Text>
-
-                {/* Subtitle */}
-                <Text style={styles.subtitleText}>Check your selections before saving</Text>
-
-                {/* Summary Cards */}
-                <View style={styles.summaryContainer}>
-                    {/* Exercise Name */}
-                    <View style={styles.summaryCard}>
-                        <Text style={styles.cardLabel}>Exercise Name</Text>
-                        <Text style={styles.cardValue}>{params.exerciseName}</Text>
+        <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={Platform.OS === 'ios' ? 8 : 0}>
+            <View style={styles.flex}>
+                <ScrollView
+                    style={styles.scroll}
+                    contentContainerStyle={[styles.scrollContent, { paddingBottom: scrollBottomPad }]}
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
+                    bounces
+                >
+                    {/* Success Icon */}
+                    <View style={[styles.iconCircle, { borderColor: accent }]}>
+                        <CheckCircle2 size={48} color={accent} strokeWidth={2} />
                     </View>
 
-                    {/* Exercise Type */}
-                    <View style={styles.summaryCard}>
-                        <Text style={styles.cardLabel}>Exercise Type</Text>
-                        <Text style={styles.cardValue}>{isCompound ? 'Compound' : 'Isolation'}</Text>
+                    {/* Title */}
+                    <Text style={styles.titleText}>Review Your Exercise</Text>
+
+                    {/* Subtitle */}
+                    <Text style={styles.subtitleText}>Check your selections before saving</Text>
+
+                    {/* Summary Cards */}
+                    <View style={styles.summaryContainer}>
+                        {/* Exercise Name */}
+                        <View style={styles.summaryCard}>
+                            <Text style={styles.cardLabel}>Exercise Name</Text>
+                            <Text style={styles.cardValue}>{params.exerciseName}</Text>
+                        </View>
+
+                        {/* Exercise Type */}
+                        <View style={styles.summaryCard}>
+                            <Text style={styles.cardLabel}>Exercise Type</Text>
+                            <Text style={styles.cardValue}>{isCompound ? 'Compound' : 'Isolation'}</Text>
+                        </View>
+
+                        {/* Main Muscle */}
+                        <View style={styles.summaryCard}>
+                            <Text style={styles.cardLabel}>Main Muscle</Text>
+                            <Text style={styles.cardValue}>{params.mainMuscle}</Text>
+                        </View>
+
+                        {/* Secondary Muscles */}
+                        <View style={styles.summaryCard}>
+                            <Text style={styles.cardLabel}>Secondary Muscles</Text>
+                            {secondaryMuscles.length > 0 ?
+                                <Text style={styles.cardValue}>{secondaryMuscles.join(', ')}</Text>
+                            :   <Text style={styles.cardValueEmpty}>None selected</Text>}
+                        </View>
+
+                        {/* Equipment */}
+                        <View style={styles.summaryCard}>
+                            <Text style={styles.cardLabel}>Equipment</Text>
+                            <Text style={styles.cardValue}>{params.equipment}</Text>
+                        </View>
                     </View>
 
-                    {/* Main Muscle */}
-                    <View style={styles.summaryCard}>
-                        <Text style={styles.cardLabel}>Main Muscle</Text>
-                        <Text style={styles.cardValue}>{params.mainMuscle}</Text>
+                    {/* Action Buttons */}
+                    <View style={styles.buttonContainer}>
+                        <TouchableOpacity style={styles.backButton} onPress={() => router.back()} activeOpacity={0.8}>
+                            <Text style={styles.backButtonText}>Back</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={[styles.saveButton, { backgroundColor: accent, shadowColor: accent }]} onPress={handleSave} activeOpacity={0.8}>
+                            <Text style={styles.saveButtonText}>Save Exercise</Text>
+                        </TouchableOpacity>
                     </View>
-
-                    {/* Secondary Muscles */}
-                    <View style={styles.summaryCard}>
-                        <Text style={styles.cardLabel}>Secondary Muscles</Text>
-                        {secondaryMuscles.length > 0 ?
-                            <Text style={styles.cardValue}>{secondaryMuscles.join(', ')}</Text>
-                        :   <Text style={styles.cardValueEmpty}>None selected</Text>}
-                    </View>
-
-                    {/* Equipment */}
-                    <View style={styles.summaryCard}>
-                        <Text style={styles.cardLabel}>Equipment</Text>
-                        <Text style={styles.cardValue}>{params.equipment}</Text>
-                    </View>
-                </View>
+                </ScrollView>
             </View>
-
-            {/* Action Buttons */}
-            <View style={styles.buttonContainer}>
-                <TouchableOpacity style={styles.backButton} onPress={() => router.back()} activeOpacity={0.8}>
-                    <Text style={styles.backButtonText}>Back</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={[styles.saveButton, { backgroundColor: accent, shadowColor: accent }]} onPress={handleSave} activeOpacity={0.8}>
-                    <Text style={styles.saveButtonText}>Save Exercise</Text>
-                </TouchableOpacity>
-            </View>
-        </View>
+        </KeyboardAvoidingView>
     )
 }
 
 const styles = StyleSheet.create({
-    container: {
+    flex: {
         flex: 1,
         backgroundColor: '#121212',
+    },
+    scroll: {
+        flex: 1,
+    },
+    scrollContent: {
+        flexGrow: 1,
+        alignItems: 'center',
         paddingHorizontal: 24,
         paddingTop: 20,
-        paddingBottom: 40,
-    },
-    content: {
-        alignItems: 'center',
     },
     iconCircle: {
         width: 80,

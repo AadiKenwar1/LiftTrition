@@ -2,7 +2,8 @@ import { useWorkout } from '@/context/WorkoutContext'
 import { useLocalSearchParams } from 'expo-router'
 import { FileText } from 'lucide-react-native'
 import { useEffect, useState } from 'react'
-import { Keyboard, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from 'react-native'
+import { Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 export default function NoteModal() {
     const { workouts, handleUpdateWorkoutNote } = useWorkout()
@@ -16,6 +17,8 @@ export default function NoteModal() {
 
     const [note, setNote] = useState(workout?.note || '')
     const [isFocused, setIsFocused] = useState(false)
+    const insets = useSafeAreaInsets()
+    const scrollBottomPad = Math.max(insets.bottom, 20) + 140
 
     // Auto-save when note changes (after initial load)
     useEffect(() => {
@@ -25,7 +28,7 @@ export default function NoteModal() {
     }, [note])
 
     return (
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container} keyboardVerticalOffset={Platform.OS === 'ios' ? 8 : 0}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <View style={styles.innerContainer}>
                     {/* Drag Handle */}
@@ -33,7 +36,15 @@ export default function NoteModal() {
                         <View style={styles.handle} />
                     </View>
 
-                    <View style={styles.content}>
+                    <ScrollView
+                        style={styles.scroll}
+                        contentContainerStyle={[styles.scrollContent, { paddingBottom: scrollBottomPad }]}
+                        keyboardShouldPersistTaps="handled"
+                        keyboardDismissMode="on-drag"
+                        showsVerticalScrollIndicator={false}
+                        bounces
+                        nestedScrollEnabled
+                    >
                         {/* Icon Section */}
                         <View style={styles.iconContainer}>
                             <View style={styles.iconCircle}>
@@ -64,7 +75,7 @@ export default function NoteModal() {
 
                         {/* Auto-save indicator */}
                         <Text style={styles.autoSaveText}>Saves automatically</Text>
-                    </View>
+                    </ScrollView>
                 </View>
             </TouchableWithoutFeedback>
         </KeyboardAvoidingView>
@@ -93,11 +104,13 @@ const styles = StyleSheet.create({
         backgroundColor: '#333',
         borderRadius: 3,
     },
-    content: {
+    scroll: {
         flex: 1,
+    },
+    scrollContent: {
+        flexGrow: 1,
         paddingHorizontal: 24,
         paddingTop: 12,
-        paddingBottom: 32,
     },
     iconContainer: {
         alignItems: 'center',

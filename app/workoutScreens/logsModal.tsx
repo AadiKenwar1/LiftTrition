@@ -193,12 +193,23 @@ export default function LogsModal() {
 
                                     {/* Change Date Button */}
                                     <TouchableOpacity onPress={() => setShowDateModal(true)} style={styles.changeDateButton} activeOpacity={0.5}>
-                                        <View flexDirection="column" alignItems="center">
-                                            <View flexDirection="row" gap={4}>
-                                                <Calendar size={18} color="#2f80ed" strokeWidth={2.5} />
-                                                <Text style={styles.changeDateButtonText}>{formatDateOrToday(selectedLogDate, true)} (Tap to change)</Text>
+                                        <View style={styles.changeDateButtonInner}>
+                                            <View style={styles.changeDateButtonTopRow}>
+                                                <View style={styles.changeDateInlineGroup}>
+                                                    <Calendar size={18} color="#2f80ed" strokeWidth={2.5} />
+                                                    <Text
+                                                        style={styles.changeDateButtonPrimaryText}
+                                                        adjustsFontSizeToFit
+                                                        minimumFontScale={0.65}
+                                                        numberOfLines={2}
+                                                    >
+                                                        {formatDateOrToday(selectedLogDate, true)} (Tap to change)
+                                                    </Text>
+                                                </View>
                                             </View>
-                                            <Text style={styles.changeDateButtonText}>Logs will be added to the selected date</Text>
+                                            <Text style={styles.changeDateButtonHint} adjustsFontSizeToFit minimumFontScale={0.65} numberOfLines={3}>
+                                                Logs will be added to the selected date
+                                            </Text>
                                         </View>
                                     </TouchableOpacity>
                                 </View>
@@ -338,19 +349,47 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 8,
         marginTop: 12,
         paddingVertical: 10,
-        paddingHorizontal: 16,
+        paddingHorizontal: 12,
         backgroundColor: '#282A2C',
         borderRadius: 12,
         borderWidth: 1,
         borderColor: '#2a2a2a',
     },
-    changeDateButtonText: {
+    changeDateButtonInner: {
+        width: '100%',
+        flexDirection: 'column',
+        alignItems: 'center',
+    },
+    changeDateButtonTopRow: {
+        width: '100%',
+        alignItems: 'center',
+    },
+    changeDateInlineGroup: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        alignSelf: 'center',
+        maxWidth: '100%',
+        gap: 6,
+    },
+    changeDateButtonPrimaryText: {
+        flexShrink: 1,
+        minWidth: 0,
         fontSize: 14,
         color: '#2f80ed',
         fontFamily: 'Poppins_600SemiBold',
         letterSpacing: -0.5,
+        textAlign: 'left',
+    },
+    changeDateButtonHint: {
+        width: '100%',
+        marginTop: 6,
+        fontSize: 13,
+        color: '#2f80ed',
+        fontFamily: 'Poppins_600SemiBold',
+        letterSpacing: -0.5,
+        textAlign: 'center',
+        lineHeight: 18,
     },
 })

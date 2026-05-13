@@ -3,7 +3,8 @@ import { EQUIPMENT_TYPES } from '@/context/WorkoutContext/exerciseLibrary/consta
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { Dumbbell } from 'lucide-react-native'
 import { useState } from 'react'
-import { Alert, Keyboard, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
+import { Alert, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 const ACCENT = { workout: '#2f80ed', nutrition: '#22C922' }
 const ACCENT_RGBA = { workout: 'rgba(45, 156, 255, 0.15)', nutrition: 'rgba(34, 201, 34, 0.15)' }
@@ -20,6 +21,8 @@ export default function CreateExercise5Screen() {
         secondaryMuscles: string
     }>()
     const [selectedEquipment, setSelectedEquipment] = useState<string>('')
+    const insets = useSafeAreaInsets()
+    const scrollBottomPad = Math.max(insets.bottom, 20) + 48
 
     function handleNext() {
         if (!selectedEquipment) {
@@ -40,54 +43,65 @@ export default function CreateExercise5Screen() {
     }
 
     return (
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View style={styles.container}>
-                <View style={styles.content}>
-                    <View style={styles.iconCircle}>
-                        <Dumbbell size={60} color="#2f80ed" strokeWidth={2} />
-                    </View>
+        <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={Platform.OS === 'ios' ? 8 : 0}>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                <View style={styles.flex}>
+                    <ScrollView
+                        style={styles.scroll}
+                        contentContainerStyle={[styles.scrollContent, { paddingBottom: scrollBottomPad }]}
+                        keyboardShouldPersistTaps="handled"
+                        showsVerticalScrollIndicator={false}
+                        bounces
+                    >
+                        <View style={[styles.iconCircle, { borderColor: accent }]}>
+                            <Dumbbell size={60} color={accent} strokeWidth={2} />
+                        </View>
 
-                    {/* Title */}
-                    <Text style={styles.titleText}>Select Equipment Type</Text>
-                    <Text style={styles.subtitleText}>What equipment will be used for this exercise?</Text>
+                        {/* Title */}
+                        <Text style={styles.titleText}>Select Equipment Type</Text>
+                        <Text style={styles.subtitleText}>What equipment will be used for this exercise?</Text>
 
-                    {/* Equipment Buttons */}
-                    <View style={styles.equipmentContainer}>
-                        {EQUIPMENT_TYPES.map((equipment) => (
-                            <TouchableOpacity
-                                key={equipment}
-                                style={[styles.equipmentButton, selectedEquipment === equipment && { backgroundColor: accentRgba, borderColor: accent }]}
-                                onPress={() => setSelectedEquipment(equipment)}
-                                activeOpacity={0.5}
-                            >
-                                <Text style={[styles.equipmentText, selectedEquipment === equipment && styles.equipmentTextSelected]}>{equipment}</Text>
+                        {/* Equipment Buttons */}
+                        <View style={styles.equipmentContainer}>
+                            {EQUIPMENT_TYPES.map((equipment) => (
+                                <TouchableOpacity
+                                    key={equipment}
+                                    style={[styles.equipmentButton, selectedEquipment === equipment && { backgroundColor: accentRgba, borderColor: accent }]}
+                                    onPress={() => setSelectedEquipment(equipment)}
+                                    activeOpacity={0.5}
+                                >
+                                    <Text style={[styles.equipmentText, selectedEquipment === equipment && styles.equipmentTextSelected]}>{equipment}</Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+
+                        {/* Navigation Buttons */}
+                        <View style={styles.buttonContainer}>
+                            <TouchableOpacity style={[styles.nextButton, { backgroundColor: accent, shadowColor: accent }]} onPress={handleNext} activeOpacity={0.8}>
+                                <Text style={styles.nextButtonText}>Next</Text>
                             </TouchableOpacity>
-                        ))}
-                    </View>
+                        </View>
+                    </ScrollView>
                 </View>
-
-                {/* Navigation Buttons */}
-                <View style={styles.buttonContainer}>
-                    <TouchableOpacity style={[styles.nextButton, { backgroundColor: accent, shadowColor: accent }]} onPress={handleNext} activeOpacity={0.8}>
-                        <Text style={styles.nextButtonText}>Next</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-        </TouchableWithoutFeedback>
+            </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
     )
 }
 
 const styles = StyleSheet.create({
-    container: {
+    flex: {
         flex: 1,
         backgroundColor: '#121212',
-        paddingHorizontal: 25,
-        paddingTop: 12,
-        paddingBottom: 40,
     },
-    content: {
+    scroll: {
+        flex: 1,
+    },
+    scrollContent: {
+        flexGrow: 1,
         width: '100%',
         alignItems: 'center',
+        paddingHorizontal: 25,
+        paddingTop: 12,
     },
     iconCircle: {
         width: 120,
@@ -99,7 +113,6 @@ const styles = StyleSheet.create({
         marginBottom: 12,
         marginTop: 5,
         backgroundColor: '#282A2C',
-        borderColor: '#2f80ed',
     },
     titleText: {
         fontSize: 24,

@@ -8,6 +8,7 @@ import { useRouter } from 'expo-router'
 import { Utensils } from 'lucide-react-native'
 import { useState } from 'react'
 import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import uuid from 'react-native-uuid'
 
 export default function AddNutritionModal() {
@@ -27,6 +28,8 @@ export default function AddNutritionModal() {
     const [generating, setGenerating] = useState(false)
     const [lastGeneratedFood, setLastGeneratedFood] = useState('')
     const [cachedMacros, setCachedMacros] = useState<{ calories: number; protein: number; carbs: number; fats: number } | null>(null)
+    const insets = useSafeAreaInsets()
+    const scrollBottomPad = Math.max(insets.bottom, 20) + 120
 
     //Adds a new entry to the nutrition context
     const handleAddEntry = () => {
@@ -79,13 +82,19 @@ export default function AddNutritionModal() {
     }
 
     return (
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container} keyboardVerticalOffset={Platform.OS === 'ios' ? 8 : 0}>
             {/* Drag Handle */}
             <View style={styles.handleContainer}>
                 <View style={styles.handle} />
             </View>
 
-            <ScrollView style={styles.scrollView} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+            <ScrollView
+                style={styles.scrollView}
+                contentContainerStyle={[styles.content, { paddingBottom: scrollBottomPad }]}
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+                bounces
+            >
                 {/* Icon Section */}
                 <View style={styles.iconContainer}>
                     <View style={styles.iconCircle}>
@@ -94,12 +103,18 @@ export default function AddNutritionModal() {
                 </View>
 
                 {/* Title */}
-                <Text style={styles.title}>Add Nutrition</Text>
-                <Text style={styles.subtitle}>Log your meal and macros</Text>
+                <Text style={styles.title} adjustsFontSizeToFit minimumFontScale={0.55} numberOfLines={2}>
+                    Add Nutrition
+                </Text>
+                <Text style={styles.subtitle} adjustsFontSizeToFit minimumFontScale={0.65} numberOfLines={3}>
+                    Log your meal and macros
+                </Text>
 
                 {/* Meal Name Input */}
                 <View style={styles.inputSection}>
-                    <Text style={styles.sectionTitle}>Meal Name</Text>
+                    <Text style={styles.sectionTitle} adjustsFontSizeToFit minimumFontScale={0.65} numberOfLines={2}>
+                        Meal Name
+                    </Text>
                     <View style={styles.inputContainer}>
                         <TextInput
                             style={[styles.input, focusedField === 'mealName' && styles.inputFocused]}
@@ -115,13 +130,19 @@ export default function AddNutritionModal() {
 
                 {/* Macros Section */}
                 <View style={styles.macrosSection}>
-                    <Text style={styles.sectionTitle}>Macronutrients</Text>
+                    <Text style={styles.sectionTitle} adjustsFontSizeToFit minimumFontScale={0.65} numberOfLines={2}>
+                        Macronutrients
+                    </Text>
 
                     {/* Calories */}
                     <View style={styles.macroInputRow}>
-                        <View style={{ flexDirection: 'column' }}>
-                            <Text style={styles.macroLabel}>Calories</Text>
-                            <Text style={styles.macroUnit}>(kcal)</Text>
+                        <View style={styles.macroLabelColumn}>
+                            <Text style={styles.macroLabel} adjustsFontSizeToFit minimumFontScale={0.6} numberOfLines={2}>
+                                Calories
+                            </Text>
+                            <Text style={styles.macroUnit} adjustsFontSizeToFit minimumFontScale={0.65} numberOfLines={1}>
+                                (kcal)
+                            </Text>
                         </View>
                         <TextInput
                             style={[styles.macroInput, focusedField === 'calories' && styles.inputFocused]}
@@ -147,9 +168,13 @@ export default function AddNutritionModal() {
 
                     {/* Protein */}
                     <View style={styles.macroInputRow}>
-                        <View style={{ flexDirection: 'column' }}>
-                            <Text style={styles.macroLabel}>Protein</Text>
-                            <Text style={styles.macroUnit}>(g)</Text>
+                        <View style={styles.macroLabelColumn}>
+                            <Text style={styles.macroLabel} adjustsFontSizeToFit minimumFontScale={0.6} numberOfLines={2}>
+                                Protein
+                            </Text>
+                            <Text style={styles.macroUnit} adjustsFontSizeToFit minimumFontScale={0.65} numberOfLines={1}>
+                                (g)
+                            </Text>
                         </View>
                         <TextInput
                             style={[styles.macroInput, focusedField === 'protein' && styles.inputFocused]}
@@ -175,9 +200,13 @@ export default function AddNutritionModal() {
 
                     {/* Carbs */}
                     <View style={styles.macroInputRow}>
-                        <View style={{ flexDirection: 'column' }}>
-                            <Text style={styles.macroLabel}>Carbs</Text>
-                            <Text style={styles.macroUnit}>(g)</Text>
+                        <View style={styles.macroLabelColumn}>
+                            <Text style={styles.macroLabel} adjustsFontSizeToFit minimumFontScale={0.6} numberOfLines={2}>
+                                Carbs
+                            </Text>
+                            <Text style={styles.macroUnit} adjustsFontSizeToFit minimumFontScale={0.65} numberOfLines={1}>
+                                (g)
+                            </Text>
                         </View>
                         <TextInput
                             style={[styles.macroInput, focusedField === 'carbs' && styles.inputFocused]}
@@ -203,9 +232,13 @@ export default function AddNutritionModal() {
 
                     {/* Fats */}
                     <View style={styles.macroInputRow}>
-                        <View style={{ flexDirection: 'column' }}>
-                            <Text style={styles.macroLabel}>Fats</Text>
-                            <Text style={styles.macroUnit}>(g)</Text>
+                        <View style={styles.macroLabelColumn}>
+                            <Text style={styles.macroLabel} adjustsFontSizeToFit minimumFontScale={0.6} numberOfLines={2}>
+                                Fats
+                            </Text>
+                            <Text style={styles.macroUnit} adjustsFontSizeToFit minimumFontScale={0.65} numberOfLines={1}>
+                                (g)
+                            </Text>
                         </View>
                         <TextInput
                             style={[styles.macroInput, focusedField === 'fats' && styles.inputFocused]}
@@ -233,7 +266,9 @@ export default function AddNutritionModal() {
                 {/* Add Button */}
                 <TouchableOpacity onPress={handleAddEntry} activeOpacity={0.8} style={styles.addButtonTouchable}>
                     <LinearGradient colors={['#179F17', '#22C922', '#3BE63B']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.addButton}>
-                        <Text style={styles.addButtonText}>Add Meal</Text>
+                        <Text style={styles.addButtonText} adjustsFontSizeToFit minimumFontScale={0.7} numberOfLines={1}>
+                            Add Meal
+                        </Text>
                     </LinearGradient>
                 </TouchableOpacity>
             </ScrollView>
@@ -264,9 +299,9 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     content: {
+        flexGrow: 1,
         paddingHorizontal: 24,
         paddingTop: 12,
-        paddingBottom: 32,
     },
     iconContainer: {
         alignItems: 'center',
@@ -284,6 +319,7 @@ const styles = StyleSheet.create({
         borderColor: '#22C922',
     },
     title: {
+        width: '100%',
         fontSize: 24,
         color: '#FFF',
         textAlign: 'center',
@@ -292,6 +328,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_600SemiBold',
     },
     subtitle: {
+        width: '100%',
         fontSize: 16,
         color: '#aaa',
         textAlign: 'center',
@@ -323,6 +360,7 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     sectionTitle: {
+        width: '100%',
         fontSize: 16,
         color: '#FFF',
         marginBottom: 12,
@@ -335,15 +373,23 @@ const styles = StyleSheet.create({
         gap: 10,
         marginBottom: 10,
     },
+    macroLabelColumn: {
+        flexDirection: 'column',
+        justifyContent: 'center',
+        minWidth: 72,
+        maxWidth: 112,
+        flexShrink: 1,
+    },
     macroLabel: {
+        width: '100%',
         fontSize: 16,
         color: '#AAA',
-        width: 70,
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },
     macroInput: {
         flex: 1,
+        minWidth: 0,
         backgroundColor: '#282A2C',
         borderRadius: 10,
         paddingHorizontal: 14,
@@ -355,9 +401,9 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_400Regular',
     },
     macroUnit: {
+        width: '100%',
         fontSize: 12,
         color: '#888',
-        width: 40,
         fontFamily: 'Poppins_500Medium',
     },
     aiButton: {
@@ -393,13 +439,16 @@ const styles = StyleSheet.create({
     addButton: {
         borderRadius: 12,
         paddingVertical: 16,
+        paddingHorizontal: 20,
         alignItems: 'center',
         justifyContent: 'center',
     },
     addButtonText: {
+        maxWidth: '100%',
         fontSize: 17,
         color: '#FFF',
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
+        textAlign: 'center',
     },
 })

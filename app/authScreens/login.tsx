@@ -7,13 +7,15 @@ import { Image } from 'expo-image'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 export default function LoginScreen() {
     const [termsModalVisible, setTermsModalVisible] = useState(false)
     const { signInWithApple, loading } = useAuth()
     const { settings, setSettings } = useSettings()
     const router = useRouter()
+    const insets = useSafeAreaInsets()
 
     function handleResetOnboarding() {
         const updatedSettings: Settings = {
@@ -32,35 +34,46 @@ export default function LoginScreen() {
     return (
         <View style={styles.container}>
             <LinearGradient colors={['rgba(255, 255, 255, 0.07)', 'transparent']} style={styles.topGradient} pointerEvents="none" />
-            {/* Logo/Branding Section */}
-            <View style={styles.brandingContainer}>
-                <View style={styles.logoContainer}>
-                    <Image source={require('@/assets/images/LTpng.png')} style={{ width: '175%', height: '175%' }} contentFit="contain" priority="high" />
+            <ScrollView
+                style={styles.scroll}
+                contentContainerStyle={[styles.scrollContent, { paddingBottom: Math.max(insets.bottom, 16) + 24 }]}
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
+            >
+                <View style={styles.brandingContainer}>
+                    <View style={styles.logoContainer}>
+                        <Image source={require('@/assets/images/LTpng.png')} style={{ width: '175%', height: '175%' }} contentFit="contain" priority="high" />
+                    </View>
+
+                    <Text
+                        style={styles.appName}
+                        adjustsFontSizeToFit
+                        minimumFontScale={0.45}
+                        numberOfLines={1}
+                    >
+                        LiftTrition
+                    </Text>
+                    <Text style={styles.tagline}> Progress Starts With Tracking</Text>
                 </View>
 
-                <Text style={styles.appName}>LiftTrition</Text>
-                <Text style={styles.tagline}> Progress Starts With Tracking</Text>
-            </View>
+                <View style={styles.buttonContainer}>
+                    <TouchableOpacity style={[styles.appleButton, loading && styles.appleButtonDisabled]} onPress={handleAppleSignIn} activeOpacity={0.8} disabled={loading}>
+                        <AntDesign name="apple" size={28} color="#000" />
+                        <Text style={styles.appleButtonText}>{loading ? 'Signing in...' : 'Continue with Apple'}</Text>
+                    </TouchableOpacity>
+                </View>
 
-            {/* Sign In Buttons */}
-            <View style={styles.buttonContainer}>
-                <TouchableOpacity style={[styles.appleButton, loading && styles.appleButtonDisabled]} onPress={handleAppleSignIn} activeOpacity={0.8} disabled={loading}>
-                    <AntDesign name="apple" size={28} color="#000" />
-                    <Text style={styles.appleButtonText}>{loading ? 'Signing in...' : 'Continue with Apple'}</Text>
-                </TouchableOpacity>
-            </View>
-
-            {/* Terms */}
-            <Text style={styles.termsText}>
-                By continuing, you agree to our{' '}
-                <Text style={styles.termsLink} onPress={() => setTermsModalVisible(true)}>
-                    Terms of Service
-                </Text>{' '}
-                and{' '}
-                <Text style={styles.termsLink} onPress={() => setTermsModalVisible(true)}>
-                    Privacy Policy
+                <Text style={styles.termsText}>
+                    By continuing, you agree to our{' '}
+                    <Text style={styles.termsLink} onPress={() => setTermsModalVisible(true)}>
+                        Terms of Service
+                    </Text>{' '}
+                    and{' '}
+                    <Text style={styles.termsLink} onPress={() => setTermsModalVisible(true)}>
+                        Privacy Policy
+                    </Text>
                 </Text>
-            </Text>
+            </ScrollView>
             <TermsAndPrivacyModal visible={termsModalVisible} onClose={() => setTermsModalVisible(false)} />
         </View>
     )
@@ -69,12 +82,18 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        alignItems: 'center',
         backgroundColor: '#121212',
+    },
+    scroll: {
+        flex: 1,
+    },
+    scrollContent: {
+        flexGrow: 1,
+        width: '100%',
         paddingHorizontal: 25,
-        justifyContent: 'center',
-        paddingBottom: 50,
         paddingTop: 60,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     topGradient: {
         position: 'absolute',
@@ -84,6 +103,7 @@ const styles = StyleSheet.create({
         height: 220,
     },
     brandingContainer: {
+        width: '100%',
         alignItems: 'center',
     },
     logoContainer: {
@@ -94,11 +114,13 @@ const styles = StyleSheet.create({
         marginBottom: 0,
     },
     appName: {
+        width: '100%',
         fontSize: 60,
         fontWeight: '800',
         color: '#fff',
         letterSpacing: -1.5,
         marginBottom: 0,
+        textAlign: 'center',
         fontFamily: 'Poppins_800ExtraBold',
     },
     tagline: {
@@ -204,14 +226,14 @@ const styles = StyleSheet.create({
         letterSpacing: -0.3,
     },
     termsText: {
-        position: 'absolute',
-        bottom: 30,
+        width: '100%',
+        marginTop: 28,
         fontSize: 12,
         fontWeight: '400',
         color: '#666',
         textAlign: 'center',
         lineHeight: 18,
-        paddingHorizontal: 32,
+        paddingHorizontal: 8,
     },
     termsLink: {
         color: '#2f80ed',

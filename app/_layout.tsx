@@ -42,7 +42,7 @@ import 'react-native-reanimated'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 /** Largest common iPhone portrait width (~Pro Max); on iPad this centers a phone-width column with side gutters. */
-const PHONE_MAX_WIDTH = 430
+const PHONE_MAX_WIDTH = 400
 
 function AppColumn({ children }: PropsWithChildren) {
     return (

@@ -49,10 +49,14 @@ export default function CreateExercise3Screen() {
                         <BicepsFlexed size={60} color="#2f80ed" strokeWidth={2} />
                     </View>
                     {/* Title */}
-                    <Text style={styles.titleText}>Select Main Muscle</Text>
+                    <Text style={styles.titleText} adjustsFontSizeToFit minimumFontScale={0.55} numberOfLines={1}>
+                        Select Main Muscle
+                    </Text>
 
                     {/* Subtitle */}
-                    <Text style={styles.subtitleText}>Tap to select. Tap again to deselect.</Text>
+                    <Text style={styles.subtitleText} adjustsFontSizeToFit minimumFontScale={0.55} numberOfLines={1}>
+                        Tap to select. Tap again to deselect.
+                    </Text>
 
                     {/* Muscle List */}
                     <View style={styles.listContainer}>
@@ -108,6 +112,7 @@ const styles = StyleSheet.create({
         borderColor: '#2f80ed',
     },
     titleText: {
+        width: '100%',
         fontSize: 28,
         color: '#FFF',
         letterSpacing: -0.5,

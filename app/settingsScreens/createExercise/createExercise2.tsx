@@ -3,7 +3,8 @@ import { useWorkout } from '@/context/WorkoutContext'
 import { useRouter } from 'expo-router'
 import { Activity, Dumbbell, Target } from 'lucide-react-native'
 import { useState } from 'react'
-import { Alert, Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
+import { Alert, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 const ACCENT = { workout: '#2f80ed', nutrition: '#22C922' }
 const ACCENT_RGBA = { workout: 'rgba(45, 156, 255, 0.15)', nutrition: 'rgba(34, 201, 34, 0.15)' }
@@ -16,6 +17,8 @@ export default function CreateExercise2Screen() {
     const accentRgba = mode ? ACCENT_RGBA.workout : ACCENT_RGBA.nutrition
     const [exerciseName, setExerciseName] = useState('')
     const [isCompound, setIsCompound] = useState<boolean>(false)
+    const insets = useSafeAreaInsets()
+    const scrollBottomPad = Math.max(insets.bottom, 20) + 48
 
     function handleNext() {
         const trimmedName = exerciseName.trim()
@@ -40,72 +43,83 @@ export default function CreateExercise2Screen() {
     }
 
     return (
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View style={styles.container}>
-                <View style={styles.content}>
-                    {/* Icon */}
-                    <View style={[styles.iconCircle, { borderColor: accent }]}>
-                        <Dumbbell size={72} color={accent} strokeWidth={2} />
-                    </View>
-
-                    {/* Title */}
-                    <Text style={styles.titleText}>Create Custom Exercise</Text>
-
-                    {/* Subtitle */}
-                    <Text style={styles.subtitleText}>Let's start with the basics</Text>
-
-                    {/* Exercise Name Input */}
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.inputLabel}>Exercise Name</Text>
-                        <View style={styles.inputWrapper}>
-                            <TextInput style={styles.input} placeholder="e.g., Cable Chest Fly" placeholderTextColor="#555" value={exerciseName} onChangeText={setExerciseName} autoCapitalize="words" />
+        <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={Platform.OS === 'ios' ? 8 : 0}>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                <View style={styles.flex}>
+                    <ScrollView
+                        style={styles.scroll}
+                        contentContainerStyle={[styles.scrollContent, { paddingBottom: scrollBottomPad }]}
+                        keyboardShouldPersistTaps="handled"
+                        showsVerticalScrollIndicator={false}
+                        bounces
+                    >
+                        {/* Icon */}
+                        <View style={[styles.iconCircle, { borderColor: accent }]}>
+                            <Dumbbell size={72} color={accent} strokeWidth={2} />
                         </View>
-                    </View>
 
-                    {/* Exercise Type Selection */}
-                    <View style={styles.typeContainer}>
-                        <Text style={styles.inputLabel}>Exercise Type</Text>
-                        <View style={styles.typeButtons}>
-                            <TouchableOpacity style={[styles.typeButton, isCompound === true && { backgroundColor: accentRgba, borderColor: accent }]} onPress={() => setIsCompound(true)} activeOpacity={0.5}>
-                                <View style={[styles.typeIconCircle, isCompound === true && { backgroundColor: accentRgba.replace('0.15', '0.2'), borderColor: accent }]}>
-                                    <Activity size={28} color={isCompound === true ? accent : '#666'} strokeWidth={2.5} />
-                                </View>
-                                <Text style={[styles.typeText, isCompound === true && styles.typeTextSelected]}>Compound</Text>
-                                <Text style={styles.typeDescription}>Multi joint exercise</Text>
-                            </TouchableOpacity>
+                        {/* Title */}
+                        <Text style={styles.titleText}>Create Custom Exercise</Text>
 
-                            <TouchableOpacity style={[styles.typeButton, isCompound === false && { backgroundColor: accentRgba, borderColor: accent }]} onPress={() => setIsCompound(false)} activeOpacity={0.5}>
-                                <View style={[styles.typeIconCircle, isCompound === false && { backgroundColor: accentRgba.replace('0.15', '0.2'), borderColor: accent }]}>
-                                    <Target size={28} color={isCompound === false ? accent : '#666'} strokeWidth={2.5} />
-                                </View>
-                                <Text style={[styles.typeText, isCompound === false && styles.typeTextSelected]}>Isolation</Text>
-                                <Text style={styles.typeDescription}>Single joint exercise</Text>
+                        {/* Subtitle */}
+                        <Text style={styles.subtitleText}>Let's start with the basics</Text>
+
+                        {/* Exercise Name Input */}
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.inputLabel}>Exercise Name</Text>
+                            <View style={styles.inputWrapper}>
+                                <TextInput style={styles.input} placeholder="e.g., Cable Chest Fly" placeholderTextColor="#555" value={exerciseName} onChangeText={setExerciseName} autoCapitalize="words" />
+                            </View>
+                        </View>
+
+                        {/* Exercise Type Selection */}
+                        <View style={styles.typeContainer}>
+                            <Text style={styles.inputLabel}>Exercise Type</Text>
+                            <View style={styles.typeButtons}>
+                                <TouchableOpacity style={[styles.typeButton, isCompound === true && { backgroundColor: accentRgba, borderColor: accent }]} onPress={() => setIsCompound(true)} activeOpacity={0.5}>
+                                    <View style={[styles.typeIconCircle, isCompound === true && { backgroundColor: accentRgba.replace('0.15', '0.2'), borderColor: accent }]}>
+                                        <Activity size={28} color={isCompound === true ? accent : '#666'} strokeWidth={2.5} />
+                                    </View>
+                                    <Text style={[styles.typeText, isCompound === true && styles.typeTextSelected]}>Compound</Text>
+                                    <Text style={styles.typeDescription}>Multi joint exercise</Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity style={[styles.typeButton, isCompound === false && { backgroundColor: accentRgba, borderColor: accent }]} onPress={() => setIsCompound(false)} activeOpacity={0.5}>
+                                    <View style={[styles.typeIconCircle, isCompound === false && { backgroundColor: accentRgba.replace('0.15', '0.2'), borderColor: accent }]}>
+                                        <Target size={28} color={isCompound === false ? accent : '#666'} strokeWidth={2.5} />
+                                    </View>
+                                    <Text style={[styles.typeText, isCompound === false && styles.typeTextSelected]}>Isolation</Text>
+                                    <Text style={styles.typeDescription}>Single joint exercise</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+
+                        {/* Navigation Buttons */}
+                        <View style={styles.buttonContainer}>
+                            <TouchableOpacity style={[styles.nextButton, { backgroundColor: accent, shadowColor: accent }]} onPress={handleNext} activeOpacity={0.8}>
+                                <Text style={styles.nextButtonText}>Next</Text>
                             </TouchableOpacity>
                         </View>
-                    </View>
+                    </ScrollView>
                 </View>
-
-                {/* Navigation Buttons */}
-                <View style={styles.buttonContainer}>
-                    <TouchableOpacity style={[styles.nextButton, { backgroundColor: accent, shadowColor: accent }]} onPress={handleNext} activeOpacity={0.8}>
-                        <Text style={styles.nextButtonText}>Next</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-        </TouchableWithoutFeedback>
+            </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
     )
 }
 
 const styles = StyleSheet.create({
-    container: {
+    flex: {
         flex: 1,
         backgroundColor: '#121212',
+    },
+    scroll: {
+        flex: 1,
+    },
+    scrollContent: {
+        flexGrow: 1,
+        alignItems: 'center',
         paddingHorizontal: 25,
         paddingTop: 20,
-        paddingBottom: 40,
-    },
-    content: {
-        alignItems: 'center',
     },
     iconCircle: {
         width: 144,

@@ -17,9 +17,11 @@ interface ScrollableListProps {
     searchPlaceholder?: string
     onPress?: (item: ScrollableListItem) => void
     selectedIds?: string[]
+    /** Enable when this list sits inside another vertical scroll (e.g. screen ScrollView). Android only; improves nested scroll handoff. */
+    nestedScrollEnabled?: boolean
 }
 
-export default function ScrollableList({ data, searchPlaceholder = 'Search...', onPress, selectedIds }: ScrollableListProps) {
+export default function ScrollableList({ data, searchPlaceholder = 'Search...', onPress, selectedIds, nestedScrollEnabled }: ScrollableListProps) {
     const { mode } = useSettings()
     const [searchQuery, setSearchQuery] = useState('')
 
@@ -68,7 +70,14 @@ export default function ScrollableList({ data, searchPlaceholder = 'Search...', 
             </View>
 
             {/* List */}
-            <FlatList data={filteredData} renderItem={renderItem} keyExtractor={(item) => item.id} contentContainerStyle={styles.listContent} showsVerticalScrollIndicator={false} />
+            <FlatList
+                data={filteredData}
+                renderItem={renderItem}
+                keyExtractor={(item) => item.id}
+                contentContainerStyle={styles.listContent}
+                showsVerticalScrollIndicator={false}
+                nestedScrollEnabled={nestedScrollEnabled}
+            />
         </View>
     )
 }

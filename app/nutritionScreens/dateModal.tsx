@@ -5,12 +5,15 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { Calendar } from 'lucide-react-native'
 import { useState } from 'react'
-import { Alert, Keyboard, KeyboardAvoidingView, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 export default function DateModal() {
     const { selectedDate, setSelectedDate } = useNutrition()
     const router = useRouter()
     const [tempDate, setTempDate] = useState(selectedDate)
+    const insets = useSafeAreaInsets()
+    const scrollBottomPad = Math.max(insets.bottom, 20) + 140
 
     const showInvalidDateAlert = () => {
         Keyboard.dismiss()
@@ -27,13 +30,19 @@ export default function DateModal() {
     }
 
     return (
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container} keyboardVerticalOffset={Platform.OS === 'ios' ? 8 : 0}>
             {/* Drag Handle */}
             <View style={styles.handleContainer}>
                 <View style={styles.handle} />
             </View>
 
-            <View style={styles.content}>
+            <ScrollView
+                style={styles.scroll}
+                contentContainerStyle={[styles.scrollContent, { paddingBottom: scrollBottomPad }]}
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
+                bounces
+            >
                 {/* Icon Section */}
                 <View style={styles.iconContainer}>
                     <View style={styles.iconCircle}>
@@ -54,7 +63,7 @@ export default function DateModal() {
                         <Text style={styles.confirmButtonText}>Confirm</Text>
                     </LinearGradient>
                 </TouchableOpacity>
-            </View>
+            </ScrollView>
         </KeyboardAvoidingView>
     )
 }
@@ -78,11 +87,13 @@ const styles = StyleSheet.create({
         backgroundColor: '#333',
         borderRadius: 3,
     },
-    content: {
+    scroll: {
         flex: 1,
+    },
+    scrollContent: {
+        flexGrow: 1,
         paddingHorizontal: 24,
         paddingTop: 12,
-        paddingBottom: 32,
     },
     iconContainer: {
         alignItems: 'center',
@@ -119,7 +130,6 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         overflow: 'hidden',
         marginTop: 16,
-        marginBottom: 24,
         shadowColor: '#22C922',
         shadowOffset: {
             width: 0,
@@ -132,6 +142,7 @@ const styles = StyleSheet.create({
     confirmButton: {
         borderRadius: 12,
         paddingVertical: 16,
+        paddingHorizontal: 20,
         alignItems: 'center',
         justifyContent: 'center',
     },

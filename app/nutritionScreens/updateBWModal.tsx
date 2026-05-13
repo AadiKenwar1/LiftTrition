@@ -3,23 +3,32 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
 import { Scale } from 'lucide-react-native'
 import { useState } from 'react'
-import { KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 export default function UpdateBWModal() {
     const { settings, handleUpdateBw } = useSettings()
     const [weight, setWeight] = useState('')
     const [isFocused, setIsFocused] = useState(false)
+    const insets = useSafeAreaInsets()
+    const scrollBottomPad = Math.max(insets.bottom, 20) + 140
 
     const currentWeight = settings.bodyWeight > 0 ? settings.bodyWeight.toFixed(1) : '--'
 
     return (
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container} keyboardVerticalOffset={Platform.OS === 'ios' ? 8 : 0}>
             {/* Drag Handle */}
             <View style={styles.handleContainer}>
                 <View style={styles.handle} />
             </View>
 
-            <View style={styles.content}>
+            <ScrollView
+                style={styles.scroll}
+                contentContainerStyle={[styles.scrollContent, { paddingBottom: scrollBottomPad }]}
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
+                bounces
+            >
                 {/* Icon Section */}
                 <View style={styles.iconContainer}>
                     <View style={styles.iconCircle}>
@@ -62,7 +71,7 @@ export default function UpdateBWModal() {
                         <Text style={styles.updateButtonText}>Update Weight</Text>
                     </LinearGradient>
                 </TouchableOpacity>
-            </View>
+            </ScrollView>
         </KeyboardAvoidingView>
     )
 }
@@ -86,11 +95,13 @@ const styles = StyleSheet.create({
         backgroundColor: '#333',
         borderRadius: 3,
     },
-    content: {
+    scroll: {
         flex: 1,
+    },
+    scrollContent: {
+        flexGrow: 1,
         paddingHorizontal: 24,
         paddingTop: 12,
-        paddingBottom: 32,
     },
     iconContainer: {
         alignItems: 'center',
@@ -155,6 +166,7 @@ const styles = StyleSheet.create({
     updateButton: {
         borderRadius: 12,
         paddingVertical: 16,
+        paddingHorizontal: 20,
         alignItems: 'center',
         justifyContent: 'center',
     },

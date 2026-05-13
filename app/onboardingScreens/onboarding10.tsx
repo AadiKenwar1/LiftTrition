@@ -91,21 +91,29 @@ export default function Onboarding10Screen() {
                     <View style={styles.featuresRow}>
                         <View style={styles.featureItem}>
                             <Database size={18} color={ACCENT} strokeWidth={2} />
-                            <Text style={styles.featureText}>Food Database</Text>
+                            <Text style={styles.featureText} adjustsFontSizeToFit minimumFontScale={0.55} numberOfLines={2}>
+                                Food Database
+                            </Text>
                         </View>
                         <View style={styles.featureItem}>
                             <Sparkles size={18} color={ACCENT} strokeWidth={2} />
-                            <Text style={styles.featureText}>AI Features</Text>
+                            <Text style={styles.featureText} adjustsFontSizeToFit minimumFontScale={0.55} numberOfLines={2}>
+                                AI Features
+                            </Text>
                         </View>
                     </View>
                     <View style={styles.featuresRow}>
                         <View style={styles.featureItem}>
                             <BarChart3 size={18} color={ACCENT} strokeWidth={2} />
-                            <Text style={styles.featureText}>Extra Charts</Text>
+                            <Text style={styles.featureText} adjustsFontSizeToFit minimumFontScale={0.55} numberOfLines={2}>
+                                Extra Charts
+                            </Text>
                         </View>
                         <View style={styles.featureItem}>
                             <Zap size={16} color={ACCENT} strokeWidth={2} />
-                            <Text style={styles.featureText}>And More</Text>
+                            <Text style={styles.featureText} adjustsFontSizeToFit minimumFontScale={0.55} numberOfLines={2}>
+                                And More
+                            </Text>
                         </View>
                     </View>
                 </View>
@@ -113,21 +121,39 @@ export default function Onboarding10Screen() {
                 {/* Pricing - Monthly & Annual */}
                 <View style={styles.pricingRow}>
                     <TouchableOpacity style={[styles.pricingCard, selectedPlan === 'monthly' && { ...styles.pricingCardSelected, borderColor: ACCENT }]} onPress={() => setSelectedPlan('monthly')} activeOpacity={0.8} disabled={!monthlyPackage}>
-                        <Text style={[styles.planLabel]}>Monthly</Text>
+                        <Text style={[styles.planLabel]} adjustsFontSizeToFit minimumFontScale={0.65} numberOfLines={1}>
+                            Monthly
+                        </Text>
                         <View style={styles.priceRow}>
-                            <Text style={[styles.priceAmount, { color: ACCENT }]}>{priceInfo?.price || '$4.99'}</Text>
-                            <Text style={styles.priceInterval}>/month</Text>
+                            <Text style={[styles.priceAmount, { color: ACCENT }]} adjustsFontSizeToFit minimumFontScale={0.55} numberOfLines={1}>
+                                {priceInfo?.price || '$4.99'}
+                            </Text>
+                            <Text style={styles.priceInterval} adjustsFontSizeToFit minimumFontScale={0.65} numberOfLines={1}>
+                                /month
+                            </Text>
                         </View>
-                        <Text style={styles.pricingNote}>3 day free trial</Text>
+                        <Text style={styles.pricingNote} adjustsFontSizeToFit minimumFontScale={0.65} numberOfLines={2}>
+                            3 day free trial
+                        </Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={[styles.pricingCard, selectedPlan === 'annual' && { ...styles.pricingCardSelected, borderColor: ACCENT }]} onPress={() => setSelectedPlan('annual')} activeOpacity={0.8} disabled={!annualPackage}>
-                        <Text style={styles.planLabel}>Annual</Text>
+                        <Text style={styles.planLabel} adjustsFontSizeToFit minimumFontScale={0.65} numberOfLines={1}>
+                            Annual
+                        </Text>
                         <View style={styles.priceRow}>
-                            <Text style={[styles.priceAmount, { color: ACCENT }]}>{annualPriceInfo?.price || '$39.99'}</Text>
-                            <Text style={styles.priceInterval}>/year</Text>
+                            <Text style={[styles.priceAmount, { color: ACCENT }]} adjustsFontSizeToFit minimumFontScale={0.55} numberOfLines={1}>
+                                {annualPriceInfo?.price || '$39.99'}
+                            </Text>
+                            <Text style={styles.priceInterval} adjustsFontSizeToFit minimumFontScale={0.65} numberOfLines={1}>
+                                /year
+                            </Text>
                         </View>
-                        <Text style={styles.pricingNote}>3 day free trial</Text>
-                        <Text style={[styles.saveBadge, { color: ACCENT }]}>Best value</Text>
+                        <Text style={styles.pricingNote} adjustsFontSizeToFit minimumFontScale={0.65} numberOfLines={2}>
+                            3 day free trial
+                        </Text>
+                        <Text style={[styles.saveBadge, { color: ACCENT }]} adjustsFontSizeToFit minimumFontScale={0.65} numberOfLines={1}>
+                            Best value
+                        </Text>
                     </TouchableOpacity>
                 </View>
 
@@ -259,6 +285,8 @@ const styles = StyleSheet.create({
         borderColor: '#333',
     },
     featureText: {
+        flex: 1,
+        minWidth: 0,
         fontSize: 15,
         color: '#fff',
         letterSpacing: -0.5,
@@ -283,34 +311,47 @@ const styles = StyleSheet.create({
         borderWidth: 3,
     },
     planLabel: {
+        width: '100%',
         fontSize: 13,
         color: '#aaa',
         marginBottom: 4,
         fontFamily: 'Poppins_600SemiBold',
+        textAlign: 'center',
     },
     saveBadge: {
+        width: '100%',
         fontSize: 11,
         marginTop: 6,
         fontFamily: 'Poppins_600SemiBold',
+        textAlign: 'center',
     },
     priceRow: {
         flexDirection: 'row',
         alignItems: 'baseline',
+        justifyContent: 'center',
+        flexWrap: 'wrap',
+        width: '100%',
         marginBottom: 2,
+        gap: 2,
     },
     priceAmount: {
+        flexShrink: 1,
+        minWidth: 0,
         fontSize: 22,
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
+        textAlign: 'center',
     },
     priceInterval: {
+        flexShrink: 0,
         fontSize: 17,
         color: '#888',
-        marginLeft: 4,
+        marginLeft: 2,
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },
     pricingNote: {
+        width: '100%',
         fontSize: 13,
         color: '#aaa',
         letterSpacing: 0.2,
