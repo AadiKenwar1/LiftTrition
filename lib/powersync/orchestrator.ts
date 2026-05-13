@@ -12,7 +12,6 @@ export type PowerSyncReconnectReason =
     | 'watchdog_disconnected'
     | 'watchdog_stale_last_sync'
     | 'watchdog_resume'
-    | 'settings_retry_update'
 
 export type PowerSyncKickOutcome = 'ok' | 'throttled' | 'background' | 'error'
 
