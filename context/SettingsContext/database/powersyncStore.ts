@@ -58,18 +58,15 @@ export async function loadSettingsAndBw(userId: string): Promise<{ settings: Set
     return { settings, bwProgress, hasData }
 }
 
-// Save settings and body weight progress to PowerSync
-// Uses writeTransaction to group all operations (best practice from PowerSync docs)
-export async function saveSettingsAndBw(userId: string, settings: Settings, bwProgress: Record<string, number>): Promise<void> {
-    // Use writeTransaction to group all operations (best practice from PowerSync docs)
+/**
+ * Upsert the single settings row for a user.
+ * Always exactly 1 DB op (UPDATE or INSERT).
+ */
+export async function upsertSettings(userId: string, settings: Settings): Promise<void> {
+    const row = settingsToRow(settings, userId)
     await powerSync.writeTransaction(async (tx) => {
-        // Check if settings record exists
-        const existingSettings = (await tx.getAll('SELECT id FROM settings WHERE user_id = ?', [userId])) as SettingsRecord[]
-
-        const row = settingsToRow(settings, userId)
-
-        if (existingSettings.length > 0) {
-            // Update existing record (PowerSync pattern: no ON CONFLICT on views)
+        const existing = (await tx.getAll('SELECT id FROM settings WHERE user_id = ?', [userId])) as SettingsRecord[]
+        if (existing.length > 0) {
             await tx.execute(
                 `UPDATE settings SET
                    birth_date = ?,
@@ -92,7 +89,6 @@ export async function saveSettingsAndBw(userId: string, settings: Settings, bwPr
                 [row.birth_date, row.gender, row.height, row.body_weight, row.unit_system, row.activity_level, row.goal_type, row.goal_weight, row.goal_pace, row.calorie_goal, row.protein_goal, row.carbs_goal, row.fats_goal, row.onboarding_complete, row.onboarding_completed_at, userId],
             )
         } else {
-            // Insert new record (PowerSync pattern: use uuid() for client-side IDs)
             await tx.execute(
                 `INSERT INTO settings (
                    id, user_id, birth_date, gender, height, body_weight,
@@ -111,32 +107,27 @@ export async function saveSettingsAndBw(userId: string, settings: Settings, bwPr
                 [row.user_id, row.birth_date, row.gender, row.height, row.body_weight, row.unit_system, row.activity_level, row.goal_type, row.goal_weight, row.goal_pace, row.calorie_goal, row.protein_goal, row.carbs_goal, row.fats_goal, row.onboarding_complete, row.onboarding_completed_at],
             )
         }
+    })
+}
 
-        // Upsert weight progress entries (same pattern: check then insert/update)
-        for (const [dateKey, weight] of Object.entries(bwProgress)) {
-            const existingWeight = (await tx.getAll('SELECT id FROM weight_progress WHERE user_id = ? AND date = ?', [userId, dateKey])) as WeightProgressRecord[]
-
-            if (existingWeight.length > 0) {
-                // Update existing
-                await tx.execute(
-                    `UPDATE weight_progress SET
-                       weight = ?,
-                       updated_at = datetime('now')
-                     WHERE user_id = ? AND date = ?`,
-                    [weight, userId, dateKey],
-                )
-            } else {
-                // Insert new
-                await tx.execute(
-                    `INSERT INTO weight_progress (
-                       id, user_id, date, weight, created_at, updated_at
-                     )
-                     VALUES (
-                       uuid(), ?, ?, ?, datetime('now'), datetime('now')
-                     )`,
-                    [userId, dateKey, weight],
-                )
-            }
+/**
+ * Upsert a single weight_progress row for a specific date.
+ * Always exactly 1 DB op (UPDATE or INSERT).
+ */
+export async function upsertWeightForDate(userId: string, dateKey: string, weight: number): Promise<void> {
+    await powerSync.writeTransaction(async (tx) => {
+        const existing = (await tx.getAll('SELECT id FROM weight_progress WHERE user_id = ? AND date = ?', [userId, dateKey])) as WeightProgressRecord[]
+        if (existing.length > 0) {
+            await tx.execute(
+                `UPDATE weight_progress SET weight = ?, updated_at = datetime('now') WHERE user_id = ? AND date = ?`,
+                [weight, userId, dateKey],
+            )
+        } else {
+            await tx.execute(
+                `INSERT INTO weight_progress (id, user_id, date, weight, created_at, updated_at)
+                 VALUES (uuid(), ?, ?, ?, datetime('now'), datetime('now'))`,
+                [userId, dateKey, weight],
+            )
         }
     })
 }

@@ -1,51 +1,51 @@
 import { calculateStartDate, formatDateMinimal, getDateKey } from "@/lib/utils/dateHelper";
-import { Dispatch, SetStateAction } from "react";
 import { Settings } from "../types";
 import { calculateMacros } from "./macroCalculation";
 
-export function updateBw(updatedWeight: number, setBwProgress: Dispatch<SetStateAction<Record<string, number>>>, setSettings: Dispatch<SetStateAction<Settings>>) {
-    if(updatedWeight <= 0) return;
-    
-    //Creates keys in the format YYYY-MM-DD
-    const today = getDateKey(new Date());
-    //Either adds a new entry or updates the existing one if the date already asks
-    setBwProgress(prev => ({...prev, [today]: updatedWeight }));
+/**
+ * Pure function: computes the new settings and date key after a body weight update.
+ * Returns null if the weight is invalid.
+ * The caller is responsible for updating state and persisting to DB.
+ */
+export function computeBwUpdate(
+    updatedWeight: number,
+    currentSettings: Settings,
+): { dateKey: string; newSettings: Settings } | null {
+    if (updatedWeight <= 0) return null;
 
-    // Update current body weight, auto-adjust goal type, and recalculate macros
-    setSettings(prev => {
-        let goalType: 'lose' | 'gain' | 'maintain';
-        if (updatedWeight > prev.goalWeight) {
-            goalType = 'lose';
-        } else if (updatedWeight === prev.goalWeight) {
-            goalType = 'maintain';
-        } else {
-            goalType = 'gain';
-        }
+    const dateKey = getDateKey(new Date());
 
-        // If goal type changed, set goalPace to 0.5
-        const newGoalPace = prev.goalType !== goalType ? 0.5 : prev.goalPace;
+    let goalType: 'lose' | 'gain' | 'maintain';
+    if (updatedWeight > currentSettings.goalWeight) {
+        goalType = 'lose';
+    } else if (updatedWeight === currentSettings.goalWeight) {
+        goalType = 'maintain';
+    } else {
+        goalType = 'gain';
+    }
 
-        // Create updated settings with new bodyweight, goalType, and goalPace
-        const updatedSettings: Settings = {
-            ...prev, 
-            bodyWeight: updatedWeight,
-            goalType: goalType,
-            goalPace: newGoalPace
-        };
+    const newGoalPace = currentSettings.goalType !== goalType ? 0.5 : currentSettings.goalPace;
 
-        // Recalculate macros based on the updated settings
-        const isImperial = prev.unitSystem === 'imperial';
-        const newMacros = calculateMacros(updatedSettings, isImperial);
+    const updatedSettings: Settings = {
+        ...currentSettings,
+        bodyWeight: updatedWeight,
+        goalType,
+        goalPace: newGoalPace,
+    };
 
-        // Return settings with updated macros
-        return {
+    const isImperial = currentSettings.unitSystem === 'imperial';
+    const newMacros = calculateMacros(updatedSettings, isImperial);
+
+    return {
+        dateKey,
+        newSettings: {
             ...updatedSettings,
             calorieGoal: newMacros.calResult,
             proteinGoal: newMacros.proteinGrams,
             carbsGoal: newMacros.carbGrams,
             fatsGoal: newMacros.fatGrams,
-        };
-    });
+        },
+    };
 }
 
 /**

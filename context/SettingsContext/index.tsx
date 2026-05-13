@@ -1,8 +1,8 @@
 import { useAuth } from '@/context/AuthContext'
 import { powerSync } from '@/lib/powersync/system'
 import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useRef, useState, type SetStateAction } from 'react'
-import { loadSettingsAndBw, saveSettingsAndBw } from './database/powersyncStore'
-import { getBodyWeightProgressData, updateBw } from './functions/bodyWeightFunctions'
+import { loadSettingsAndBw, upsertSettings, upsertWeightForDate } from './database/powersyncStore'
+import { computeBwUpdate, getBodyWeightProgressData } from './functions/bodyWeightFunctions'
 import { calculateMacros } from './functions/macroCalculation'
 import { Settings, SettingsContextInterface } from './types'
 
@@ -53,18 +53,22 @@ export const SettingsProvider = ({ children }: PropsWithChildren) => {
         [markSettingsPersistDirty],
     )
 
-    const setBwProgress = useCallback(
-        (action: SetStateAction<Record<string, number>>) => {
-            markSettingsPersistDirty()
-            setBwProgressState(action)
-        },
-        [markSettingsPersistDirty],
-    )
-
     const { userID } = useAuth()
 
-    // Wrapper Functions
-    const handleUpdateBw = (updatedWeight: number) => updateBw(updatedWeight, setBwProgress, setSettings)
+    // Handles a body weight update: updates state and directly persists only the two changed rows.
+    const handleUpdateBw = useCallback(async (updatedWeight: number) => {
+        const result = computeBwUpdate(updatedWeight, settings)
+        if (!result) return
+        setBwProgressState(prev => ({ ...prev, [result.dateKey]: updatedWeight }))
+        setSettings(result.newSettings)  // marks dirty → settings row persisted via persistDirty effect
+        if (!userID) return
+        try {
+            await upsertWeightForDate(userID, result.dateKey, updatedWeight)
+        } catch (e) {
+            console.warn('[SettingsContext] Failed to persist body weight', e)
+        }
+    }, [userID, settings, setSettings])
+
     const handleGetBodyWeightProgressData = (onboardingCompletedAt?: Date) => getBodyWeightProgressData(bwProgress, onboardingCompletedAt)
 
     // Load from PowerSync
@@ -111,7 +115,8 @@ export const SettingsProvider = ({ children }: PropsWithChildren) => {
         }
     }, [settings.onboardingComplete, hasLoadedUserData])
 
-    // Save to PowerSync only after real mutations (persistDirty), not after cold-load hydration.
+    // Save settings row to PowerSync only after real mutations (persistDirty), not after cold-load hydration.
+    // bwProgress is excluded — individual weight entries are persisted directly in handleUpdateBw.
     useEffect(() => {
         if (!loaded || !userID || !hasLoadedUserData || !persistDirty) return
         if (persistSavingRef.current) return
@@ -120,7 +125,7 @@ export const SettingsProvider = ({ children }: PropsWithChildren) => {
         persistSavingRef.current = true
         void (async () => {
             try {
-                await saveSettingsAndBw(userID, settings, bwProgress)
+                await upsertSettings(userID, settings)
                 if (cancelled) return
                 if (persistDirtyDuringSaveRef.current) {
                     persistDirtyDuringSaveRef.current = false
@@ -139,7 +144,7 @@ export const SettingsProvider = ({ children }: PropsWithChildren) => {
         return () => {
             cancelled = true
         }
-    }, [settings, bwProgress, loaded, userID, hasLoadedUserData, persistDirty, persistRetryNonce])
+    }, [settings, loaded, userID, hasLoadedUserData, persistDirty, persistRetryNonce])
 
     return (
         <SettingsContext.Provider
