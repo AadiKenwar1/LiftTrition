@@ -15,6 +15,13 @@ const legExercises: ExerciseLib = {
         equipment: 'Dumbbell',
         isCompound: true,
     },
+    'Machine Squat': {
+        mainMuscle: 'Quads',
+        accessoryMuscles: ['Glutes', 'Hamstrings', 'Lower Back', 'Calves'],
+        fatigueFactor: 0.9,
+        equipment: 'Machine',
+        isCompound: true,
+    },
     'Front Squat': {
         mainMuscle: 'Quads',
         accessoryMuscles: ['Glutes', 'Upper/Mid Back', 'Abs'],
@@ -95,14 +102,14 @@ const legExercises: ExerciseLib = {
     'Standing Calf Raises': {
         mainMuscle: 'Calves',
         accessoryMuscles: [],
-        fatigueFactor: 0.5,
-        equipment: 'Bodyweight',
+        fatigueFactor: 0.55,
+        equipment: 'Machine',
         isCompound: false,
     },
     'Seated Calf Raises': {
         mainMuscle: 'Calves',
         accessoryMuscles: [],
-        fatigueFactor: 0.5,
+        fatigueFactor: 0.55,
         equipment: 'Machine',
         isCompound: false,
     },
