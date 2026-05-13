@@ -1,4 +1,6 @@
 
+import type { Dispatch, SetStateAction } from 'react'
+
 export interface Settings {
     onboardingComplete: boolean;
     onboardingCompletedAt: Date | undefined;
@@ -30,7 +32,7 @@ export interface BodyWeightProgress {
 
 export interface SettingsContextInterface {
     settings: Settings;
-    setSettings: (settings: Settings) => void;
+    setSettings: Dispatch<SetStateAction<Settings>>;
     mode: boolean;
     setMode: (mode: boolean) => void;
     bwProgress: Record<string, number>;

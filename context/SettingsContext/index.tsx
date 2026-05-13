@@ -1,6 +1,6 @@
 import { useAuth } from '@/context/AuthContext'
 import { powerSync } from '@/lib/powersync/system'
-import { createContext, PropsWithChildren, useContext, useEffect, useState } from 'react'
+import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useRef, useState, type SetStateAction } from 'react'
 import { loadSettingsAndBw, saveSettingsAndBw } from './database/powersyncStore'
 import { getBodyWeightProgressData, updateBw } from './functions/bodyWeightFunctions'
 import { calculateMacros } from './functions/macroCalculation'
@@ -27,11 +27,39 @@ const defaultSettings: Settings = {
 const SettingsContext = createContext<SettingsContextInterface | undefined>(undefined)
 
 export const SettingsProvider = ({ children }: PropsWithChildren) => {
-    const [settings, setSettings] = useState<Settings>(defaultSettings)
-    const [bwProgress, setBwProgress] = useState<Record<string, number>>({})
+    const [settings, setSettingsState] = useState<Settings>(defaultSettings)
+    const [bwProgress, setBwProgressState] = useState<Record<string, number>>({})
     const [loaded, setLoaded] = useState(false)
     const [hasLoadedUserData, setHasLoadedUserData] = useState(false)
     const [mode, setMode] = useState<boolean>(true)
+    const [persistDirty, setPersistDirty] = useState(false)
+    const [persistRetryNonce, setPersistRetryNonce] = useState(0)
+    const persistSavingRef = useRef(false)
+    const persistDirtyDuringSaveRef = useRef(false)
+
+    const markSettingsPersistDirty = useCallback(() => {
+        if (persistSavingRef.current) {
+            persistDirtyDuringSaveRef.current = true
+        } else {
+            setPersistDirty(true)
+        }
+    }, [])
+
+    const setSettings = useCallback(
+        (action: SetStateAction<Settings>) => {
+            markSettingsPersistDirty()
+            setSettingsState(action)
+        },
+        [markSettingsPersistDirty],
+    )
+
+    const setBwProgress = useCallback(
+        (action: SetStateAction<Record<string, number>>) => {
+            markSettingsPersistDirty()
+            setBwProgressState(action)
+        },
+        [markSettingsPersistDirty],
+    )
 
     const { userID } = useAuth()
 
@@ -43,29 +71,31 @@ export const SettingsProvider = ({ children }: PropsWithChildren) => {
     useEffect(() => {
         // No user: reset to defaults and mark as loaded
         if (!userID) {
-            setSettings(defaultSettings)
-            setBwProgress({})
+            setSettingsState(defaultSettings)
+            setBwProgressState({})
             setLoaded(true)
             setHasLoadedUserData(false)
+            setPersistDirty(false)
             return
         }
 
         // User present: start in loading state and load from PowerSync
         setLoaded(false)
         setHasLoadedUserData(false)
+        setPersistDirty(false)
 
         const loadData = async () => {
             try {
                 await powerSync.waitForFirstSync()
                 const { settings, bwProgress, hasData } = await loadSettingsAndBw(userID)
-                setSettings(settings)
-                setBwProgress(bwProgress)
+                setSettingsState(settings)
+                setBwProgressState(bwProgress)
                 setHasLoadedUserData(hasData)
                 setLoaded(true)
             } catch (e) {
                 console.warn('[SettingsContext] Failed to load settings from PowerSync', e)
-                setSettings(defaultSettings)
-                setBwProgress({})
+                setSettingsState(defaultSettings)
+                setBwProgressState({})
                 setHasLoadedUserData(false)
                 setLoaded(true)
             }
@@ -81,13 +111,35 @@ export const SettingsProvider = ({ children }: PropsWithChildren) => {
         }
     }, [settings.onboardingComplete, hasLoadedUserData])
 
-    // Save to PowerSync - ONLY if we've loaded actual user data or user completed onboarding
+    // Save to PowerSync only after real mutations (persistDirty), not after cold-load hydration.
     useEffect(() => {
-        if (!loaded || !userID || !hasLoadedUserData) return
-        saveSettingsAndBw(userID, settings, bwProgress).catch((e) => {
-            console.warn('[SettingsContext] Failed to save settings to PowerSync', e)
-        })
-    }, [settings, bwProgress, loaded, userID, hasLoadedUserData])
+        if (!loaded || !userID || !hasLoadedUserData || !persistDirty) return
+        if (persistSavingRef.current) return
+
+        let cancelled = false
+        persistSavingRef.current = true
+        void (async () => {
+            try {
+                await saveSettingsAndBw(userID, settings, bwProgress)
+                if (cancelled) return
+                if (persistDirtyDuringSaveRef.current) {
+                    persistDirtyDuringSaveRef.current = false
+                    persistSavingRef.current = false
+                    setPersistDirty(true)
+                    return
+                }
+                setPersistDirty(false)
+            } catch (e) {
+                console.warn('[SettingsContext] Failed to save settings to PowerSync', e)
+                if (!cancelled) setPersistRetryNonce((n) => n + 1)
+            } finally {
+                if (!cancelled) persistSavingRef.current = false
+            }
+        })()
+        return () => {
+            cancelled = true
+        }
+    }, [settings, bwProgress, loaded, userID, hasLoadedUserData, persistDirty, persistRetryNonce])
 
     return (
         <SettingsContext.Provider

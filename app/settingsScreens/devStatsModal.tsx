@@ -1,6 +1,7 @@
 import { useAuth } from '@/context/AuthContext'
 import { getKickThrottleRemainingMs, getPowerSyncOrchestratorState, type PowerSyncOrchestratorState } from '@/lib/powersync/orchestrator'
 import { powerSync } from '@/lib/powersync/system'
+import { formatUploadQueueStatsRaw, getPendingUploadEstimate } from '@/lib/powersync/uploadQueueStats'
 import { getWatchdogStatus, subscribeWatchdogStatus, type WatchdogStatus } from '@/lib/powersync/watchdogStatus'
 import { supabase } from '@/lib/supabase/client'
 import { formatDateTime } from '@/lib/utils/dateHelper'
@@ -46,6 +47,10 @@ export default function DevStatsScreen() {
     const [tokenServerCheck, setTokenServerCheck] = useState<TokenServerCheck>('idle')
     const [tokenServerDetail, setTokenServerDetail] = useState<string | undefined>()
     const [lastGetUserAt, setLastGetUserAt] = useState<Date | undefined>()
+    const [uploadPendingEstimate, setUploadPendingEstimate] = useState<number | null>(null)
+    const [uploadQueueRaw, setUploadQueueRaw] = useState<string>('')
+    const [uploadPollError, setUploadPollError] = useState<string | undefined>()
+    const [uploadLastPolledAt, setUploadLastPolledAt] = useState<Date | undefined>()
 
     const refreshOrchestrator = useCallback(() => {
         setOrchestrator(getPowerSyncOrchestratorState())
@@ -120,6 +125,29 @@ export default function DevStatsScreen() {
         return () => clearInterval(id)
     }, [syncPowerSyncFromDevice])
 
+    useEffect(() => {
+        let cancelled = false
+        const pollUploadQueue = async () => {
+            try {
+                const stats = await powerSync.getUploadQueueStats()
+                if (cancelled) return
+                setUploadPendingEstimate(getPendingUploadEstimate(stats))
+                setUploadQueueRaw(formatUploadQueueStatsRaw(stats))
+                setUploadPollError(undefined)
+                setUploadLastPolledAt(new Date())
+            } catch (e: unknown) {
+                if (cancelled) return
+                setUploadPollError(e instanceof Error ? e.message : String(e))
+            }
+        }
+        void pollUploadQueue()
+        const id = setInterval(() => void pollUploadQueue(), 1000)
+        return () => {
+            cancelled = true
+            clearInterval(id)
+        }
+    }, [])
+
     return (
         <View style={styles.container}>
             {/* Drag Handle */}
@@ -141,6 +169,33 @@ export default function DevStatsScreen() {
                     <Text style={[styles.line, styles.subtle]}>lastSyncedAt: none yet (still syncing or no server writes applied)</Text>
                 :   <Text style={[styles.line, styles.subtle]}>lastSyncedAt: —</Text>}
                 <Text style={[styles.line, styles.subtle]}>{replicationFreshnessHint(powerSyncConnected, lastSyncedAt)}</Text>
+
+                <Text style={[styles.line, styles.sectionLabel]}>Upload queue</Text>
+                <Text
+                    style={[
+                        styles.line,
+                        uploadPendingEstimate === null ? styles.subtle
+                        : uploadPendingEstimate > 0 ? styles.warn
+                        : styles.ok,
+                    ]}
+                >
+                    Pending uploads (estimate):{' '}
+                    {uploadPendingEstimate === null ? 'unknown shape — see raw JSON' : uploadPendingEstimate}
+                </Text>
+                {uploadLastPolledAt ?
+                    <Text style={[styles.line, styles.subtle]}>Last polled: {formatDateTime(uploadLastPolledAt)} (every 1s)</Text>
+                :   null}
+                {uploadPollError ?
+                    <Text style={[styles.line, styles.warn]}>getUploadQueueStats error: {uploadPollError}</Text>
+                :   null}
+                <Text style={[styles.line, styles.subtle]}>
+                    Uses the same numeric fields as sign-out flush (count / entryCount / entries). SDK may return an estimate only.
+                </Text>
+                {uploadQueueRaw ?
+                    <Text style={styles.rawJson} selectable>
+                        {uploadQueueRaw}
+                    </Text>
+                :   null}
 
                 <Text style={[styles.line, styles.sectionLabel]}>Session & token</Text>
                 <Text
@@ -265,5 +320,12 @@ const styles = StyleSheet.create({
         letterSpacing: 0.8,
         fontFamily: 'Poppins_600SemiBold',
         textTransform: 'uppercase',
+    },
+    rawJson: {
+        marginTop: 8,
+        fontSize: 11,
+        lineHeight: 16,
+        color: '#777',
+        fontFamily: 'monospace',
     },
 })

@@ -1,3 +1,4 @@
+import { getPendingUploadEstimate } from '@/lib/powersync/uploadQueueStats'
 import { powerSync } from '@/lib/powersync/system'
 
 export class UploadFlushTimeoutError extends Error {
@@ -50,10 +51,9 @@ export async function flushUploadsOrThrow(options: FlushUploadsOptions): Promise
         }
 
         const stats = await powerSync.getUploadQueueStats()
-        // SDK docs: UploadQueueStats provides a count estimate.
-        const count = (stats as any)?.count ?? (stats as any)?.entryCount ?? (stats as any)?.entries ?? 0
+        const pending = getPendingUploadEstimate(stats)
 
-        if (typeof count === 'number' && count <= 0) {
+        if (pending !== null && pending <= 0) {
             consecutiveEmpty += 1
             if (consecutiveEmpty >= consecutiveEmptyCount) return
         } else {

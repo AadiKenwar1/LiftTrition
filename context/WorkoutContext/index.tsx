@@ -2,7 +2,7 @@ import { useAuth } from '@/context/AuthContext'
 import { convertExerciseLibraryToList, exerciseLib } from '@/context/WorkoutContext/exerciseLibrary'
 import { powerSync } from '@/lib/powersync/system'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { loadWorkoutData, saveWorkoutData } from './database/powersyncStore'
 import { createUserExercise, deleteUserExercise } from './functions/createExerciseFunctions'
 import { addExercise, archiveExercise, deleteExercise, updateExerciseOrder } from './functions/exerciseFunctions'
@@ -16,25 +16,49 @@ import { CreateExerciseData, Exercise, ExerciseLib, Log, Workout, WorkoutContext
 const WorkoutContext = createContext<WorkoutContextInterface | undefined>(undefined)
 
 export const WorkoutProvider = ({ children }: PropsWithChildren) => {
-    const [workouts, setWorkouts] = useState<Workout[]>([])
-    const [exercises, setExercises] = useState<Exercise[]>([])
-    const [logs, setLogs] = useState<Log[]>([])
-    const [userExercises, setUserExercises] = useState<ExerciseLib>({})
+    const [workouts, setWorkoutsState] = useState<Workout[]>([])
+    const [exercises, setExercisesState] = useState<Exercise[]>([])
+    const [logs, setLogsState] = useState<Log[]>([])
+    const [userExercises, setUserExercisesState] = useState<ExerciseLib>({})
     const [fullExerciseLib, setFullExerciseLib] = useState<ExerciseLib>(exerciseLib)
     const [lastExercise, setLastExercise] = useState<string>('')
     const [loaded, setLoaded] = useState(false)
     const [hasLoadedUserData, setHasLoadedUserData] = useState(false)
+    const [persistDirty, setPersistDirty] = useState(false)
+    const [persistRetryNonce, setPersistRetryNonce] = useState(0)
+    const persistSavingRef = useRef(false)
+    const persistDirtyDuringSaveRef = useRef(false)
+
+    const markWorkoutPersistDirty = useCallback(() => {
+        if (persistSavingRef.current) {
+            persistDirtyDuringSaveRef.current = true
+        } else {
+            setPersistDirty(true)
+        }
+    }, [])
+
+    const setUserExercises = useCallback(
+        (next: ExerciseLib) => {
+            markWorkoutPersistDirty()
+            setUserExercisesState(next)
+        },
+        [markWorkoutPersistDirty],
+    )
 
     const { userID } = useAuth()
 
     //Wrapper Functions
-    const handleAddWorkout = (name: string, userId: string) => addWorkout(name, userId, setWorkouts)
+    const handleAddWorkout = (name: string, userId: string) => {
+        markWorkoutPersistDirty()
+        addWorkout(name, userId, setWorkoutsState)
+    }
     const handleDuplicateWorkout = (id: string) => {
         if (!userID) return
-        duplicateWorkout(id, userID, setWorkouts, setExercises)
+        markWorkoutPersistDirty()
+        duplicateWorkout(id, userID, setWorkoutsState, setExercisesState)
     }
     const handleDeleteWorkout = async (id: string) => {
-        deleteWorkout(id, setWorkouts, setExercises, setLogs)
+        deleteWorkout(id, setWorkoutsState, setExercisesState, setLogsState)
         // Local PowerSync has no FK CASCADE — delete children first so orphans are not
         // reloaded from SQLite (ghost logs / fatigue after app restart).
         if (userID) {
@@ -49,13 +73,28 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
             }
         }
     }
-    const handleArchiveWorkout = (id: string, archived: boolean) => archiveWorkout(id, archived, setWorkouts)
-    const handleRenameWorkout = (id: string, name: string) => renameWorkout(id, name, setWorkouts)
-    const handleUpdateWorkoutNote = (id: string, note: string) => updateWorkoutNote(id, note, setWorkouts)
-    const handleUpdateWorkoutOrder = (reorderedWorkouts: Workout[]) => updateWorkoutOrder(reorderedWorkouts, setWorkouts)
-    const handleAddExercise = (workoutID: string, userID: string, name: string) => addExercise(workoutID, userID, name, setExercises)
+    const handleArchiveWorkout = (id: string, archived: boolean) => {
+        markWorkoutPersistDirty()
+        archiveWorkout(id, archived, setWorkoutsState)
+    }
+    const handleRenameWorkout = (id: string, name: string) => {
+        markWorkoutPersistDirty()
+        renameWorkout(id, name, setWorkoutsState)
+    }
+    const handleUpdateWorkoutNote = (id: string, note: string) => {
+        markWorkoutPersistDirty()
+        updateWorkoutNote(id, note, setWorkoutsState)
+    }
+    const handleUpdateWorkoutOrder = (reorderedWorkouts: Workout[]) => {
+        markWorkoutPersistDirty()
+        updateWorkoutOrder(reorderedWorkouts, setWorkoutsState)
+    }
+    const handleAddExercise = (workoutID: string, userIDParam: string, name: string) => {
+        markWorkoutPersistDirty()
+        addExercise(workoutID, userIDParam, name, setExercisesState)
+    }
     const handleDeleteExercise = async (id: string) => {
-        deleteExercise(id, setExercises, setLogs)
+        deleteExercise(id, setExercisesState, setLogsState)
         if (userID) {
             try {
                 await powerSync.writeTransaction(async (tx) => {
@@ -67,11 +106,20 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
             }
         }
     }
-    const handleArchiveExercise = (id: string, workoutID: string, archived: boolean) => archiveExercise(id, workoutID, archived, setExercises)
-    const handleUpdateExerciseOrder = (workoutID: string, reorderedExercises: Exercise[]) => updateExerciseOrder(workoutID, reorderedExercises, setExercises)
-    const handleAddLog = (workoutID: string, exerciseID: string, userID: string, weight: number, reps: number, rpe: number, date: Date) => addLog(workoutID, exerciseID, userID, weight, reps, rpe, date, setLogs)
+    const handleArchiveExercise = (id: string, workoutID: string, archived: boolean) => {
+        markWorkoutPersistDirty()
+        archiveExercise(id, workoutID, archived, setExercisesState)
+    }
+    const handleUpdateExerciseOrder = (workoutID: string, reorderedExercises: Exercise[]) => {
+        markWorkoutPersistDirty()
+        updateExerciseOrder(workoutID, reorderedExercises, setExercisesState)
+    }
+    const handleAddLog = (workoutID: string, exerciseID: string, userIDParam: string, weight: number, reps: number, rpe: number, date: Date) => {
+        markWorkoutPersistDirty()
+        addLog(workoutID, exerciseID, userIDParam, weight, reps, rpe, date, setLogsState)
+    }
     const handleDeleteLog = async (id: string) => {
-        deleteLog(id, setLogs)
+        deleteLog(id, setLogsState)
         // Delete from PowerSync
         if (userID) {
             try {
@@ -87,9 +135,12 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
         calculateFatigueSummary(logs, exercises, fullExerciseLib, activityLevel, refByName)
     const handleGetOneRepMaxData = (exerciseName: string) => getOneRepMaxData(exerciseName, exercises, logs)
     const handleGetSetsData = (onboardingCompletedAt?: Date) => getSetsData(logs, onboardingCompletedAt)
-    const handleCreateUserExercise = (exerciseData: CreateExerciseData, userID: string) => createUserExercise(exerciseData, userID, setUserExercises)
+    const handleCreateUserExercise = (exerciseData: CreateExerciseData, userIDParam: string) => {
+        markWorkoutPersistDirty()
+        createUserExercise(exerciseData, userIDParam, setUserExercisesState)
+    }
     const handleDeleteUserExercise = async (exerciseName: string) => {
-        deleteUserExercise(exerciseName, setUserExercises)
+        deleteUserExercise(exerciseName, setUserExercisesState)
         // Delete from PowerSync
         if (userID) {
             try {
@@ -133,35 +184,37 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
     // Load from PowerSync
     useEffect(() => {
         if (!userID) {
-            setWorkouts([])
-            setExercises([])
-            setLogs([])
-            setUserExercises({})
+            setWorkoutsState([])
+            setExercisesState([])
+            setLogsState([])
+            setUserExercisesState({})
             setLoaded(true)
             setHasLoadedUserData(false)
+            setPersistDirty(false)
             return
         }
 
         setLoaded(false)
         setHasLoadedUserData(false)
+        setPersistDirty(false)
 
         const loadData = async () => {
             try {
                 // Wait for PowerSync to sync before loading data
                 await powerSync.waitForFirstSync()
                 const { workouts, exercises, logs, userExercises, hasData } = await loadWorkoutData(userID)
-                setWorkouts(workouts)
-                setExercises(exercises)
-                setLogs(logs)
-                setUserExercises(userExercises)
+                setWorkoutsState(workouts)
+                setExercisesState(exercises)
+                setLogsState(logs)
+                setUserExercisesState(userExercises)
                 setHasLoadedUserData(hasData)
                 setLoaded(true)
             } catch (e) {
                 console.warn('[WorkoutContext] Failed to load workout data from PowerSync', e)
-                setWorkouts([])
-                setExercises([])
-                setLogs([])
-                setUserExercises({})
+                setWorkoutsState([])
+                setExercisesState([])
+                setLogsState([])
+                setUserExercisesState({})
                 setHasLoadedUserData(false)
                 setLoaded(true)
             }
@@ -178,12 +231,34 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
         }
     }, [workouts, exercises, logs, userExercises, hasLoadedUserData])
 
-    // Save to PowerSync - ONLY if we've loaded actual user data or user has created data
+    // Save to PowerSync only after real mutations (persistDirty), not after cold-load hydration.
     useEffect(() => {
-        if (!loaded || !userID || !hasLoadedUserData) return
+        if (!loaded || !userID || !hasLoadedUserData || !persistDirty) return
+        if (persistSavingRef.current) return
 
-        saveWorkoutData(userID, workouts, exercises, logs, userExercises).catch(() => {})
-    }, [workouts, exercises, logs, userExercises, loaded, userID, hasLoadedUserData])
+        let cancelled = false
+        persistSavingRef.current = true
+        void (async () => {
+            try {
+                await saveWorkoutData(userID, workouts, exercises, logs, userExercises)
+                if (cancelled) return
+                if (persistDirtyDuringSaveRef.current) {
+                    persistDirtyDuringSaveRef.current = false
+                    persistSavingRef.current = false
+                    setPersistDirty(true)
+                    return
+                }
+                setPersistDirty(false)
+            } catch {
+                if (!cancelled) setPersistRetryNonce((n) => n + 1)
+            } finally {
+                if (!cancelled) persistSavingRef.current = false
+            }
+        })()
+        return () => {
+            cancelled = true
+        }
+    }, [workouts, exercises, logs, userExercises, loaded, userID, hasLoadedUserData, persistDirty, persistRetryNonce])
 
     // Persist lastExercise per-user in AsyncStorage
     useEffect(() => {
