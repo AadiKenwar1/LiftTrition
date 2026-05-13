@@ -13,18 +13,15 @@ function rowToNutritionEntry(
     row: NutritionEntryRecord,
     ingredients: NutritionEntryIngredientRecord[]
 ): NutritionEntry {
-    // Parse date string in local timezone to avoid timezone issues
-    // When saving, we use getDateKey() which gives "YYYY-MM-DD" in local timezone
-    // When loading, we parse "YYYY-MM-DD" as local date to avoid UTC conversion issues
+    // Parse "YYYY-MM-DD" as local date to avoid UTC conversion issues
     let parsedDate: Date;
     if (row.date) {
-        // Parse "YYYY-MM-DD" as local date, not UTC
         const [year, month, day] = row.date.split('-').map(Number);
         parsedDate = new Date(year, month - 1, day);
     } else {
         parsedDate = new Date();
     }
-    
+
     return {
         id: row.id!,
         userId: row.user_id!,
@@ -52,15 +49,13 @@ function rowToNutritionEntry(
 
 // Map NutritionEntry -> DB row
 function nutritionEntryToRow(entry: NutritionEntry) {
-    // Normalize the date to start of day in local timezone before getting the date key
-    // This ensures we save the correct local date regardless of time of day
     const localDate = new Date(entry.date);
     localDate.setHours(0, 0, 0, 0);
-    
+
     return {
         user_id: entry.userId,
         name: entry.name,
-        date: getDateKey(localDate),  // Use getDateKey to get local date string (YYYY-MM-DD)
+        date: getDateKey(localDate),
         time: entry.time,
         protein: entry.protein,
         carbs: entry.carbs,
@@ -82,7 +77,7 @@ function rowToSavedNutritionEntry(
         id: row.id!,
         userId: row.user_id!,
         name: row.name!,
-        date: new Date(), // Saved entries don't have dates
+        date: new Date(),
         time: 0,
         protein: row.protein ?? 0,
         carbs: row.carbs ?? 0,
@@ -125,13 +120,11 @@ export async function loadNutritionData(userId: string): Promise<{
     savedNutritionEntries: NutritionEntry[];
     hasData: boolean;
 }> {
-    // Load nutrition entries
     const entryRows = await powerSync.getAll(
         'SELECT * FROM nutrition_entries WHERE user_id = ? ORDER BY date DESC, time DESC',
         [userId]
     ) as NutritionEntryRecord[];
 
-    // Load ingredients for all entries
     const entryIds = entryRows.map(row => row.id).filter((id): id is string => !!id);
 
     const allIngredients = entryIds.length > 0
@@ -142,7 +135,6 @@ export async function loadNutritionData(userId: string): Promise<{
         ) as NutritionEntryIngredientRecord[]
         : [];
 
-    // Group ingredients by entry ID
     const ingredientsByEntryId = new Map<string, NutritionEntryIngredientRecord[]>();
     for (const ing of allIngredients) {
         if (ing.nutrition_entry_id) {
@@ -152,19 +144,16 @@ export async function loadNutritionData(userId: string): Promise<{
         }
     }
 
-    // Map entries with their ingredients
     const nutritionData: NutritionEntry[] = entryRows.map(row => {
         const ingredients = ingredientsByEntryId.get(row.id!) || [];
         return rowToNutritionEntry(row, ingredients);
     });
 
-    // Load saved nutrition entries
     const savedEntryRows = await powerSync.getAll(
         'SELECT * FROM saved_nutrition_entries WHERE user_id = ? ORDER BY created_at DESC',
         [userId]
     ) as SavedNutritionEntryRecord[];
 
-    // Load ingredients for saved entries
     const savedEntryIds = savedEntryRows.map(row => row.id).filter((id): id is string => !!id);
 
     const allSavedIngredients = savedEntryIds.length > 0
@@ -175,7 +164,6 @@ export async function loadNutritionData(userId: string): Promise<{
         ) as SavedNutritionEntryIngredientRecord[]
         : [];
 
-    // Group saved ingredients by entry ID
     const savedIngredientsByEntryId = new Map<string, SavedNutritionEntryIngredientRecord[]>();
     for (const ing of allSavedIngredients) {
         if (ing.saved_nutrition_entry_id) {
@@ -185,7 +173,6 @@ export async function loadNutritionData(userId: string): Promise<{
         }
     }
 
-    // Map saved entries with their ingredients
     const savedNutritionEntries: NutritionEntry[] = savedEntryRows.map(row =>
         rowToSavedNutritionEntry(row, savedIngredientsByEntryId.get(row.id!) || [])
     );
@@ -194,233 +181,101 @@ export async function loadNutritionData(userId: string): Promise<{
     return { nutritionData, savedNutritionEntries, hasData };
 }
 
-// Save nutrition data to PowerSync
-// Uses writeTransaction to group all operations (best practice from PowerSync docs)
-export async function saveNutritionData(
-    userId: string,
-    nutritionData: NutritionEntry[],
-    savedNutritionEntries: NutritionEntry[]
-): Promise<void> {
+/**
+ * Upsert a single nutrition_entries row + its ingredients.
+ * Scoped to one entry — no other rows are touched.
+ */
+export async function upsertNutritionEntry(entry: NutritionEntry): Promise<void> {
+    const row = nutritionEntryToRow(entry);
+
     await powerSync.writeTransaction(async (tx) => {
-        // Save nutrition entries
-        for (const entry of nutritionData) {
-            const row = nutritionEntryToRow(entry);
+        const existing = await tx.getAll(
+            'SELECT id FROM nutrition_entries WHERE id = ?',
+            [entry.id]
+        ) as NutritionEntryRecord[];
 
-            // Check if entry exists (PowerSync pattern: no ON CONFLICT on views)
-            const existing = await tx.getAll(
-                'SELECT id FROM nutrition_entries WHERE id = ?',
-                [entry.id]
-            ) as NutritionEntryRecord[];
-
-            if (existing.length > 0) {
-                // Update existing entry
-                await tx.execute(
-                    `UPDATE nutrition_entries SET
-                       name = ?,
-                       date = ?,
-                       time = ?,
-                       protein = ?,
-                       carbs = ?,
-                       fats = ?,
-                       calories = ?,
-                       is_photo = ?,
-                       photo_uri = ?,
-                       updated_at = datetime('now')
-                     WHERE id = ?`,
-                    [
-                        row.name,
-                        row.date,
-                        row.time,
-                        row.protein,
-                        row.carbs,
-                        row.fats,
-                        row.calories,
-                        row.is_photo,
-                        row.photo_uri,
-                        entry.id
-                    ]
-                );
-            } else {
-                // Insert new entry (PowerSync pattern: use uuid() for client-side IDs)
-                await tx.execute(
-                    `INSERT INTO nutrition_entries (
-                       id, user_id, name, date, time, protein, carbs, fats, calories,
-                       is_photo, photo_uri, created_at, updated_at
-                     )
-                     VALUES (
-                       ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
-                     )`,
-                    [
-                        entry.id,
-                        row.user_id,
-                        row.name,
-                        row.date,
-                        row.time,
-                        row.protein,
-                        row.carbs,
-                        row.fats,
-                        row.calories,
-                        row.is_photo,
-                        row.photo_uri,
-                        row.created_at,
-                        row.updated_at
-                    ]
-                );
-            }
-
-            // Delete old ingredients (simpler than tracking individual changes)
+        if (existing.length > 0) {
             await tx.execute(
-                'DELETE FROM nutrition_entry_ingredients WHERE nutrition_entry_id = ?',
-                [entry.id]
+                `UPDATE nutrition_entries SET
+                   name = ?, date = ?, time = ?, protein = ?, carbs = ?,
+                   fats = ?, calories = ?, is_photo = ?, photo_uri = ?,
+                   updated_at = datetime('now')
+                 WHERE id = ?`,
+                [row.name, row.date, row.time, row.protein, row.carbs,
+                 row.fats, row.calories, row.is_photo, row.photo_uri, entry.id]
             );
-
-            // Insert new ingredients
-            for (const ing of entry.ingredients) {
-                await tx.execute(
-                    `INSERT INTO nutrition_entry_ingredients (
-                       id, nutrition_entry_id, name, quantity, protein, carbs, fats, calories, created_at
-                     )
-                     VALUES (
-                       uuid(), ?, ?, ?, ?, ?, ?, ?, datetime('now')
-                     )`,
-                    [
-                        entry.id,
-                        ing.name,
-                        ing.quantity,
-                        ing.protein,
-                        ing.carbs,
-                        ing.fats,
-                        ing.calories
-                    ]
-                );
-            }
-        }
-
-        // Save saved nutrition entries (same pattern)
-        for (const entry of savedNutritionEntries) {
-            const row = savedNutritionEntryToRow(entry);
-
-            const existing = await tx.getAll(
-                'SELECT id FROM saved_nutrition_entries WHERE id = ?',
-                [entry.id]
-            ) as SavedNutritionEntryRecord[];
-
-            if (existing.length > 0) {
-                // Update existing
-                await tx.execute(
-                    `UPDATE saved_nutrition_entries SET
-                       name = ?,
-                       protein = ?,
-                       carbs = ?,
-                       fats = ?,
-                       calories = ?,
-                       is_photo = ?,
-                       photo_uri = ?,
-                       updated_at = datetime('now')
-                     WHERE id = ?`,
-                    [
-                        row.name,
-                        row.protein,
-                        row.carbs,
-                        row.fats,
-                        row.calories,
-                        row.is_photo,
-                        row.photo_uri,
-                        entry.id
-                    ]
-                );
-            } else {
-                // Insert new
-                await tx.execute(
-                    `INSERT INTO saved_nutrition_entries (
-                       id, user_id, name, protein, carbs, fats, calories,
-                       is_photo, photo_uri, created_at, updated_at
-                     )
-                     VALUES (
-                       ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
-                     )`,
-                    [
-                        entry.id,
-                        row.user_id,
-                        row.name,
-                        row.protein,
-                        row.carbs,
-                        row.fats,
-                        row.calories,
-                        row.is_photo,
-                        row.photo_uri,
-                        row.created_at,
-                        row.updated_at
-                    ]
-                );
-            }
-
-            // Delete old ingredients
+        } else {
             await tx.execute(
-                'DELETE FROM saved_nutrition_entry_ingredients WHERE saved_nutrition_entry_id = ?',
-                [entry.id]
+                `INSERT INTO nutrition_entries (
+                   id, user_id, name, date, time, protein, carbs, fats, calories,
+                   is_photo, photo_uri, created_at, updated_at
+                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                [entry.id, row.user_id, row.name, row.date, row.time,
+                 row.protein, row.carbs, row.fats, row.calories,
+                 row.is_photo, row.photo_uri, row.created_at, row.updated_at]
             );
-
-            // Insert new ingredients
-            for (const ing of entry.ingredients) {
-                await tx.execute(
-                    `INSERT INTO saved_nutrition_entry_ingredients (
-                       id, saved_nutrition_entry_id, name, quantity, protein, carbs, fats, calories, created_at
-                     )
-                     VALUES (
-                       uuid(), ?, ?, ?, ?, ?, ?, ?, datetime('now')
-                     )`,
-                    [
-                        entry.id,
-                        ing.name,
-                        ing.quantity,
-                        ing.protein,
-                        ing.carbs,
-                        ing.fats,
-                        ing.calories
-                    ]
-                );
-            }
         }
 
-        // Remove DB rows for this user that are no longer in in-memory arrays (local DB has no cascade;
-        // save only upserts — without this, deleted entries can reappear after reload).
-        const keptMealIds = [...new Set(nutritionData.map((e) => e.id))]
-        if (keptMealIds.length === 0) {
+        await tx.execute(
+            'DELETE FROM nutrition_entry_ingredients WHERE nutrition_entry_id = ?',
+            [entry.id]
+        );
+        for (const ing of entry.ingredients) {
             await tx.execute(
-                'DELETE FROM nutrition_entry_ingredients WHERE nutrition_entry_id IN (SELECT id FROM nutrition_entries WHERE user_id = ?)',
-                [userId],
-            )
-            await tx.execute('DELETE FROM nutrition_entries WHERE user_id = ?', [userId])
+                `INSERT INTO nutrition_entry_ingredients (
+                   id, nutrition_entry_id, name, quantity, protein, carbs, fats, calories, created_at
+                 ) VALUES (uuid(), ?, ?, ?, ?, ?, ?, ?, datetime('now'))`,
+                [entry.id, ing.name, ing.quantity, ing.protein, ing.carbs, ing.fats, ing.calories]
+            );
+        }
+    });
+}
+
+/**
+ * Upsert a single saved_nutrition_entries row + its ingredients.
+ * Scoped to one saved entry — no other rows are touched.
+ */
+export async function upsertSavedNutritionEntry(entry: NutritionEntry): Promise<void> {
+    const row = savedNutritionEntryToRow(entry);
+
+    await powerSync.writeTransaction(async (tx) => {
+        const existing = await tx.getAll(
+            'SELECT id FROM saved_nutrition_entries WHERE id = ?',
+            [entry.id]
+        ) as SavedNutritionEntryRecord[];
+
+        if (existing.length > 0) {
+            await tx.execute(
+                `UPDATE saved_nutrition_entries SET
+                   name = ?, protein = ?, carbs = ?, fats = ?, calories = ?,
+                   is_photo = ?, photo_uri = ?, updated_at = datetime('now')
+                 WHERE id = ?`,
+                [row.name, row.protein, row.carbs, row.fats, row.calories,
+                 row.is_photo, row.photo_uri, entry.id]
+            );
         } else {
-            const mealPh = keptMealIds.map(() => '?').join(', ')
             await tx.execute(
-                `DELETE FROM nutrition_entry_ingredients WHERE nutrition_entry_id IN (SELECT id FROM nutrition_entries WHERE user_id = ? AND id NOT IN (${mealPh}))`,
-                [userId, ...keptMealIds],
-            )
-            await tx.execute(
-                `DELETE FROM nutrition_entries WHERE user_id = ? AND id NOT IN (${mealPh})`,
-                [userId, ...keptMealIds],
-            )
+                `INSERT INTO saved_nutrition_entries (
+                   id, user_id, name, protein, carbs, fats, calories,
+                   is_photo, photo_uri, created_at, updated_at
+                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                [entry.id, row.user_id, row.name, row.protein, row.carbs,
+                 row.fats, row.calories, row.is_photo, row.photo_uri,
+                 row.created_at, row.updated_at]
+            );
         }
 
-        const keptSavedIds = [...new Set(savedNutritionEntries.map((e) => e.id))]
-        if (keptSavedIds.length === 0) {
+        await tx.execute(
+            'DELETE FROM saved_nutrition_entry_ingredients WHERE saved_nutrition_entry_id = ?',
+            [entry.id]
+        );
+        for (const ing of entry.ingredients) {
             await tx.execute(
-                'DELETE FROM saved_nutrition_entry_ingredients WHERE saved_nutrition_entry_id IN (SELECT id FROM saved_nutrition_entries WHERE user_id = ?)',
-                [userId],
-            )
-            await tx.execute('DELETE FROM saved_nutrition_entries WHERE user_id = ?', [userId])
-        } else {
-            const savedPh = keptSavedIds.map(() => '?').join(', ')
-            await tx.execute(
-                `DELETE FROM saved_nutrition_entry_ingredients WHERE saved_nutrition_entry_id IN (SELECT id FROM saved_nutrition_entries WHERE user_id = ? AND id NOT IN (${savedPh}))`,
-                [userId, ...keptSavedIds],
-            )
-            await tx.execute(
-                `DELETE FROM saved_nutrition_entries WHERE user_id = ? AND id NOT IN (${savedPh})`,
-                [userId, ...keptSavedIds],
-            )
+                `INSERT INTO saved_nutrition_entry_ingredients (
+                   id, saved_nutrition_entry_id, name, quantity, protein, carbs, fats, calories, created_at
+                 ) VALUES (uuid(), ?, ?, ?, ?, ?, ?, ?, datetime('now'))`,
+                [entry.id, ing.name, ing.quantity, ing.protein, ing.carbs, ing.fats, ing.calories]
+            );
         }
     });
 }

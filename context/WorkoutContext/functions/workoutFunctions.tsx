@@ -2,107 +2,148 @@ import { Dispatch, SetStateAction } from 'react';
 import uuid from 'react-native-uuid';
 import { Exercise, Log, Workout } from '../types';
 
-
-//Increments the orders of all workouts by 1
+// Increments the order of all workouts by 1 (used in tests and internally).
 export function incrementWorkoutOrders(workouts: Workout[]): Workout[] {
-    return workouts.map(workout => ({ 
-        ...workout, 
-        order: workout.order + 1, 
-        updatedAt: new Date() 
-    }));
+    return workouts.map(w => ({ ...w, order: w.order + 1, updatedAt: new Date() }));
 }
 
-//Adds a new workout to the list
-export function addWorkout(name: string, userId: string, setWorkouts: Dispatch<SetStateAction<Workout[]>>){
+// Adds a new workout; returns the new workout so the caller can persist it.
+export function addWorkout(
+    name: string,
+    userId: string,
+    setWorkouts: Dispatch<SetStateAction<Workout[]>>
+): Workout {
+    const newWorkout: Workout = {
+        id: uuid.v4(),
+        userID: userId,
+        name,
+        order: 0,
+        archived: false,
+        note: '',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+    };
+
     setWorkouts(prev => {
-        const incrementedWorkouts = incrementWorkoutOrders(prev);
-        const newWorkout: Workout = {
-            id: uuid.v4(),
-            userID: userId,
-            name: name,
-            order: 0,
-            archived: false,
-            note: '',
-            createdAt: new Date(),
-            updatedAt: new Date(),
+        const incremented = prev.map(w => ({ ...w, order: w.order + 1, updatedAt: new Date() }));
+        return [...incremented, newWorkout];
+    });
+
+    return newWorkout;
+}
+
+// Deletes a workout and its exercises/logs from state only.
+export function deleteWorkout(
+    id: string,
+    setWorkouts: Dispatch<SetStateAction<Workout[]>>,
+    setExercises: Dispatch<SetStateAction<Exercise[]>>,
+    setLogs: Dispatch<SetStateAction<Log[]>>
+): void {
+    setWorkouts(prev => prev.filter(w => w.id !== id));
+    setExercises(prev => prev.filter(e => e.workoutID !== id));
+    setLogs(prev => prev.filter(l => l.workoutID !== id));
+}
+
+// Archives OR unarchives a workout.
+// Returns the updated workout (and all workouts that had their order bumped on unarchive).
+export function archiveWorkout(
+    id: string,
+    archived: boolean,
+    setWorkouts: Dispatch<SetStateAction<Workout[]>>
+): Workout[] {
+    let affected: Workout[] = [];
+    setWorkouts(prev => {
+        let next: Workout[];
+        if (archived) {
+            // Unarchive: put back at top, bump all active ones
+            next = prev.map(w => {
+                if (w.id === id) return { ...w, archived: false, order: 0, updatedAt: new Date() };
+                return { ...w, order: w.order + 1, updatedAt: new Date() };
+            });
+        } else {
+            // Archive: just mark archived
+            next = prev.map(w => w.id === id ? { ...w, archived: true, updatedAt: new Date() } : w);
         }
-        return [...incrementedWorkouts, newWorkout];
-    })
+        affected = next.filter(w => w.id === id || (archived && !w.archived));
+        return next;
+    });
+    return affected;
 }
 
-//Deletes a workout and all its corresponding exercises and logs
-export function deleteWorkout(id: string, setWorkouts: Dispatch<SetStateAction<Workout[]>>, setExercises: Dispatch<SetStateAction<Exercise[]>>, setLogs: Dispatch<SetStateAction<Log[]>>){
-    setWorkouts(prev => prev.filter(workout => workout.id !== id));
-    setExercises(prev => prev.filter(exercise => exercise.workoutID !== id));
-    setLogs(prev => prev.filter(log => log.workoutID !== id));
+// Renames a workout; returns the updated workout.
+export function renameWorkout(
+    id: string,
+    name: string,
+    setWorkouts: Dispatch<SetStateAction<Workout[]>>
+): Workout | undefined {
+    let updated: Workout | undefined;
+    setWorkouts(prev => prev.map(w => {
+        if (w.id !== id) return w;
+        updated = { ...w, name, updatedAt: new Date() };
+        return updated;
+    }));
+    return updated;
 }
 
-
-//Arhives OR Unarchives a workout based on the boolean parameter
-export function archiveWorkout(id: string, archived: boolean, setWorkouts: Dispatch<SetStateAction<Workout[]>>){
-    if(archived){
-        setWorkouts(prev => prev.map(workout => workout.id === id ? { ...workout, archived: false, order: 0, updatedAt: new Date()} : {...workout, order: workout.order + 1, updatedAt: new Date()}));
-    } else {
-        setWorkouts(prev => prev.map(workout => workout.id === id ? { ...workout, archived: true, updatedAt: new Date()} : workout));
-    }
+// Updates a workout's note; returns the updated workout.
+export function updateWorkoutNote(
+    id: string,
+    note: string,
+    setWorkouts: Dispatch<SetStateAction<Workout[]>>
+): Workout | undefined {
+    let updated: Workout | undefined;
+    setWorkouts(prev => prev.map(w => {
+        if (w.id !== id) return w;
+        updated = { ...w, note, updatedAt: new Date() };
+        return updated;
+    }));
+    return updated;
 }
 
-
-//Renames a workout
-export function renameWorkout(id: string, name: string, setWorkouts: Dispatch<SetStateAction<Workout[]>>){
-    setWorkouts(prev => prev.map(workout => workout.id === id ? { ...workout, name: name, updatedAt: new Date()} : workout));
+// Updates workout order after drag-and-drop; returns all reordered workouts.
+export function updateWorkoutOrder(
+    reorderedWorkouts: Workout[],
+    setWorkouts: Dispatch<SetStateAction<Workout[]>>
+): Workout[] {
+    const withOrder = reorderedWorkouts.map((w, i) => ({ ...w, order: i, updatedAt: new Date() }));
+    setWorkouts(prev => prev.map(w => {
+        const updated = withOrder.find(u => u.id === w.id);
+        return updated ?? w;
+    }));
+    return withOrder;
 }
 
-
-//Updates the note of a workout
-export function updateWorkoutNote(id: string, note: string, setWorkouts: Dispatch<SetStateAction<Workout[]>>){
-    setWorkouts(prev => prev.map(workout => workout.id === id ? { ...workout, note: note, updatedAt: new Date()} : workout));
-}
-
-
-//Updates the orders of a workout when dragged
-export function updateWorkoutOrder(reorderedWorkouts: Workout[], setWorkouts: Dispatch<SetStateAction<Workout[]>>){
-    const updatedWorkouts = reorderedWorkouts.map((workout, index) => ({ ...workout, order: index, updatedAt: new Date()}));
-    setWorkouts(prev => prev.map(workout=> {
-        const updated = updatedWorkouts.find(w => w.id === workout.id);
-        return updated || workout;
-    }))
-}
-
-/** Copies a workout and its non-archived exercises; logs are not copied (old exercise ids remain on historical logs). */
+// Duplicates a workout and its non-archived exercises.
+// Returns { newWorkout, newExercises } so the caller can persist them.
 export function duplicateWorkout(
     sourceWorkoutId: string,
     userId: string,
+    workouts: Workout[],
+    exercises: Exercise[],
     setWorkouts: Dispatch<SetStateAction<Workout[]>>,
     setExercises: Dispatch<SetStateAction<Exercise[]>>,
-) {
-    const newWorkoutId = uuid.v4() as string
-    const now = new Date()
+): { newWorkout: Workout; newExercises: Exercise[] } | null {
+    const source = workouts.find(w => w.id === sourceWorkoutId);
+    if (!source) return null;
 
-    setWorkouts((prev) => {
-        const source = prev.find((w) => w.id === sourceWorkoutId)
-        if (!source) return prev
+    const now = new Date();
+    const newWorkoutId = uuid.v4() as string;
 
-        const incrementedWorkouts = incrementWorkoutOrders(prev)
-        const newWorkout: Workout = {
-            id: newWorkoutId,
-            userID: userId,
-            name: `${source.name} (Copy)`,
-            order: 0,
-            archived: false,
-            note: source.note,
-            createdAt: now,
-            updatedAt: now,
-        }
-        return [...incrementedWorkouts, newWorkout]
-    })
+    const newWorkout: Workout = {
+        id: newWorkoutId,
+        userID: userId,
+        name: `${source.name} (Copy)`,
+        order: 0,
+        archived: false,
+        note: source.note,
+        createdAt: now,
+        updatedAt: now,
+    };
 
-    setExercises((prev) => {
-        const sourceExercises = prev
-            .filter((e) => e.workoutID === sourceWorkoutId && !e.archived)
-            .sort((a, b) => a.order - b.order)
-
-        const duplicated: Exercise[] = sourceExercises.map((ex, index) => ({
+    const newExercises: Exercise[] = exercises
+        .filter(e => e.workoutID === sourceWorkoutId && !e.archived)
+        .sort((a, b) => a.order - b.order)
+        .map((ex, index) => ({
             id: uuid.v4() as string,
             userID: userId,
             workoutID: newWorkoutId,
@@ -112,8 +153,13 @@ export function duplicateWorkout(
             archived: false,
             createdAt: now,
             updatedAt: now,
-        }))
+        }));
 
-        return [...prev, ...duplicated]
-    })
+    setWorkouts(prev => {
+        const incremented = prev.map(w => ({ ...w, order: w.order + 1, updatedAt: now }));
+        return [...incremented, newWorkout];
+    });
+    setExercises(prev => [...prev, ...newExercises]);
+
+    return { newWorkout, newExercises };
 }

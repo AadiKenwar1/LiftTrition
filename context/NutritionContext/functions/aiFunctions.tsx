@@ -14,10 +14,10 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
 }
 
 
-// Analyze Photo Function
-export async function analyzeAndAddPhoto(photoUri: string, userID: string, setNutritionData: Dispatch<SetStateAction<NutritionEntry[]>>, date: Date = new Date()): Promise<void> {
+// Analyze Photo Function — returns the created NutritionEntry so callers can persist it.
+export async function analyzeAndAddPhoto(photoUri: string, userID: string, setNutritionData: Dispatch<SetStateAction<NutritionEntry[]>>, date: Date = new Date()): Promise<NutritionEntry> {
     try {
-    
+
     //Convert photo to base64
     const file = new File(photoUri);
     const base64 = await file.base64();
@@ -65,6 +65,7 @@ export async function analyzeAndAddPhoto(photoUri: string, userID: string, setNu
       updatedAt: new Date(),
     };
     addNutrition(nutritionItem, setNutritionData);
+    return nutritionItem;
 
   } catch (error: any) {
     throw new Error(error.message || 'Failed to analyze photo');

@@ -30,10 +30,10 @@ export interface NutritionContextInterface {
     selectedDate: Date;
     loaded: boolean;
     setSelectedDate: (date: Date) => void;
-    handleAddNutrition: (nutritionEntry: NutritionEntry) => void;
+    handleAddNutrition: (nutritionEntry: NutritionEntry) => Promise<void>;
     handleDeleteNutrition: (id: string) => Promise<void>;
-    handleEditNutrition: (id: string, nutritionEntry: NutritionEntry) => void;
-    handleSaveNutrition: (nutritionEntry: NutritionEntry) => void;
+    handleEditNutrition: (id: string, nutritionEntry: NutritionEntry) => Promise<void>;
+    handleSaveNutrition: (nutritionEntry: NutritionEntry) => Promise<void>;
     handleUnsaveNutrition: (id: string) => Promise<void>;
     handleAnalyzeAndAddPhoto: (photoUri: string, userID: string) => Promise<void>;
     handleGetMacrosForDate: (date: Date) => { totalProtein: number; totalCarbs: number; totalFats: number; totalCalories: number };

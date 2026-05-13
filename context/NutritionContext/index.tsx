@@ -1,7 +1,7 @@
 import { useAuth } from '@/context/AuthContext';
 import { powerSync } from '@/lib/powersync/system';
-import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useRef, useState } from "react";
-import { loadNutritionData, saveNutritionData } from './database/powersyncStore';
+import { createContext, PropsWithChildren, useContext, useEffect, useState } from "react";
+import { loadNutritionData, upsertNutritionEntry, upsertSavedNutritionEntry } from './database/powersyncStore';
 import { analyzeAndAddPhoto } from "./functions/aiFunctions";
 import { addNutrition, deleteNutrition, editNutrition, saveNutrition, unsaveNutrition } from "./functions/crudFunctions";
 import { getMacroDataForGraph, getMacrosForDate } from "./functions/graphFunctions";
@@ -10,134 +10,98 @@ import { NutritionContextInterface, NutritionEntry } from "./types";
 const NutritionContext = createContext<NutritionContextInterface | undefined>(undefined);
 
 export const NutritionProvider = ({ children }: PropsWithChildren) => {
-    //User
     const { userID } = useAuth();
-    // Database Data
     const [nutritionData, setNutritionData] = useState<NutritionEntry[]>([]);
     const [savedNutritionEntries, setSavedNutritionEntries] = useState<NutritionEntry[]>([]);
-    // Local Only Data
     const [loaded, setLoaded] = useState(false);
-    const [hasLoadedUserData, setHasLoadedUserData] = useState(false);
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-    /** Only full `saveNutritionData` runs when true — avoids re-writing SQLite after every cold load. */
-    const [persistDirty, setPersistDirty] = useState(false)
-    const [persistRetryNonce, setPersistRetryNonce] = useState(0)
-    const persistSavingRef = useRef(false)
-    const persistDirtyDuringSaveRef = useRef(false)
 
-    const markNutritionPersistDirty = useCallback(() => {
-        if (persistSavingRef.current) {
-            persistDirtyDuringSaveRef.current = true
-        } else {
-            setPersistDirty(true)
-        }
-    }, [])
-
-    // Wrapper Functions
-    const handleAddNutrition = (nutritionEntry: NutritionEntry) => {
-        addNutrition(nutritionEntry, setNutritionData)
-        markNutritionPersistDirty()
-    }
-    const handleDeleteNutrition = async (id: string) => {
-        await deleteNutrition(id, setNutritionData, userID)
-        // deleteNutrition already applies deletes to PowerSync — no full persist pass
-    }
-    const handleEditNutrition = (id: string, nutritionEntry: NutritionEntry) => {
-        editNutrition(id, nutritionEntry, setNutritionData)
-        markNutritionPersistDirty()
-    }
-    const handleSaveNutrition = (nutritionEntry: NutritionEntry) => {
-        saveNutrition(nutritionEntry, setSavedNutritionEntries)
-        markNutritionPersistDirty()
-    }
-    const handleUnsaveNutrition = async (id: string) => {
-        await unsaveNutrition(id, setSavedNutritionEntries, userID)
-        // unsaveNutrition already applies deletes to PowerSync
-    }
-    const handleAnalyzeAndAddPhoto = async (photoUri: string, userIDParam: string) => {
-        await analyzeAndAddPhoto(photoUri, userIDParam, setNutritionData, selectedDate)
-        markNutritionPersistDirty()
-    }
-    const handleGetMacrosForDate = (date: Date) => getMacrosForDate(nutritionData, date);
-    const handleGetMacroDataForGraph = (macroType: 'calories' | 'protein' | 'carbs' | 'fats', onboardingCompletedAt?: Date) => 
-        getMacroDataForGraph(macroType, nutritionData, onboardingCompletedAt);
-
-    // Load from PowerSync, changes when user ID does
+    // Load from PowerSync whenever the user changes
     useEffect(() => {
         if (!userID) {
             setNutritionData([]);
             setSavedNutritionEntries([]);
             setLoaded(true);
-            setHasLoadedUserData(false);
-            setPersistDirty(false);
             return;
         }
 
         setLoaded(false);
-        setHasLoadedUserData(false);
-        setPersistDirty(false);
 
         const loadData = async () => {
             try {
-                // Wait for PowerSync to sync before loading data
                 await powerSync.waitForFirstSync();
-
-                const { nutritionData, savedNutritionEntries, hasData } = await loadNutritionData(userID);
+                const { nutritionData, savedNutritionEntries } = await loadNutritionData(userID);
                 setNutritionData(nutritionData);
                 setSavedNutritionEntries(savedNutritionEntries);
-                setHasLoadedUserData(hasData);
                 setLoaded(true);
             } catch (error) {
                 console.warn('[NutritionContext] Failed to load nutrition data from PowerSync', error);
                 setNutritionData([]);
                 setSavedNutritionEntries([]);
-                setHasLoadedUserData(false);
                 setLoaded(true);
             }
         }
         loadData();
     }, [userID]);
 
-    // Set hasLoadedUserData to true when user adds data (so new users can save)
-    useEffect(() => {
-        if ((nutritionData.length > 0 || savedNutritionEntries.length > 0) && !hasLoadedUserData) {
-            setHasLoadedUserData(true);
-        }
-    }, [nutritionData.length, savedNutritionEntries.length, hasLoadedUserData]);
+    // Each handler updates React state immediately, then writes only the affected
+    // row(s) to PowerSync — same pattern as deleteNutrition / unsaveNutrition.
 
-    // Save to PowerSync only after real mutations (persistDirty), not after cold-load hydration.
-    useEffect(() => {
-        if (!loaded || !userID || !hasLoadedUserData || !persistDirty) return
-        if (persistSavingRef.current) return
-
-        let cancelled = false
-        persistSavingRef.current = true
-        void (async () => {
-            try {
-                await saveNutritionData(userID, nutritionData, savedNutritionEntries)
-                if (cancelled) return
-                if (persistDirtyDuringSaveRef.current) {
-                    persistDirtyDuringSaveRef.current = false
-                    persistSavingRef.current = false
-                    setPersistDirty(true)
-                    return
-                }
-                setPersistDirty(false)
-            } catch (e) {
-                console.warn('[NutritionContext] Failed to save nutrition data to PowerSync', e)
-                if (!cancelled) setPersistRetryNonce((n) => n + 1)
-            } finally {
-                if (!cancelled) persistSavingRef.current = false
-            }
-        })()
-        return () => {
-            cancelled = true
+    const handleAddNutrition = async (nutritionEntry: NutritionEntry) => {
+        const added = addNutrition(nutritionEntry, setNutritionData);
+        if (!added || !userID) return;
+        try {
+            await upsertNutritionEntry(nutritionEntry);
+        } catch (e) {
+            console.warn('[NutritionContext] Failed to persist nutrition entry to PowerSync', e);
         }
-    }, [nutritionData, savedNutritionEntries, loaded, userID, hasLoadedUserData, persistDirty, persistRetryNonce])
+    }
+
+    const handleDeleteNutrition = async (id: string) => {
+        await deleteNutrition(id, setNutritionData, userID);
+    }
+
+    const handleEditNutrition = async (id: string, nutritionEntry: NutritionEntry) => {
+        const edited = editNutrition(id, nutritionEntry, setNutritionData);
+        if (!edited || !userID) return;
+        try {
+            await upsertNutritionEntry({ ...nutritionEntry, updatedAt: new Date() });
+        } catch (e) {
+            console.warn('[NutritionContext] Failed to persist nutrition edit to PowerSync', e);
+        }
+    }
+
+    const handleSaveNutrition = async (nutritionEntry: NutritionEntry) => {
+        const saved = saveNutrition(nutritionEntry, setSavedNutritionEntries);
+        if (!saved || !userID) return;
+        try {
+            await upsertSavedNutritionEntry(nutritionEntry);
+        } catch (e) {
+            console.warn('[NutritionContext] Failed to persist saved nutrition entry to PowerSync', e);
+        }
+    }
+
+    const handleUnsaveNutrition = async (id: string) => {
+        await unsaveNutrition(id, setSavedNutritionEntries, userID);
+    }
+
+    const handleAnalyzeAndAddPhoto = async (photoUri: string, userIDParam: string) => {
+        const entry = await analyzeAndAddPhoto(photoUri, userIDParam, setNutritionData, selectedDate);
+        if (!userIDParam) return;
+        try {
+            await upsertNutritionEntry(entry);
+        } catch (e) {
+            console.warn('[NutritionContext] Failed to persist photo entry to PowerSync', e);
+        }
+    }
+
+    const handleGetMacrosForDate = (date: Date) => getMacrosForDate(nutritionData, date);
+    const handleGetMacroDataForGraph = (macroType: 'calories' | 'protein' | 'carbs' | 'fats', onboardingCompletedAt?: Date) =>
+        getMacroDataForGraph(macroType, nutritionData, onboardingCompletedAt);
 
     return (
-        <NutritionContext.Provider 
-            value={{ 
+        <NutritionContext.Provider
+            value={{
                 nutritionData,
                 savedNutritionEntries,
                 selectedDate,

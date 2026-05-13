@@ -2,16 +2,29 @@ import { useAuth } from '@/context/AuthContext'
 import { convertExerciseLibraryToList, exerciseLib } from '@/context/WorkoutContext/exerciseLibrary'
 import { powerSync } from '@/lib/powersync/system'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
-import { loadWorkoutData, saveWorkoutData } from './database/powersyncStore'
-import { createUserExercise, deleteUserExercise } from './functions/createExerciseFunctions'
-import { addExercise, archiveExercise, deleteExercise, updateExerciseOrder } from './functions/exerciseFunctions'
-import { calculateFatiguePercentage, calculateFatigueSummary, getFatigueFeedback } from './functions/fatigueFunctions'
+import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import uuid from 'react-native-uuid'
+import {
+    insertDuplicateWorkout,
+    insertExerciseWithOrderBump,
+    insertLog,
+    insertWorkoutWithOrderBump,
+    loadWorkoutData,
+    updateExerciseOrders,
+    updateWorkoutOrders,
+    upsertExercise,
+    upsertUserExercise,
+    upsertWorkout,
+} from './database/powersyncStore'
+import { deleteUserExercise } from './functions/createExerciseFunctions'
+import { deleteExercise } from './functions/exerciseFunctions'
+import { calculateFatigueFactor, calculateFatiguePercentage, calculateFatigueSummary, getFatigueFeedback } from './functions/fatigueFunctions'
 import { getOneRepMaxData } from './functions/graphFunctions'
-import { addLog, deleteLog } from './functions/logFunctions'
+import { deleteLog as deleteLogFromState } from './functions/logFunctions'
+import { validateLog } from './functions/validator'
 import { getSetsData } from './functions/volumeFunctions'
-import { addWorkout, archiveWorkout, deleteWorkout, duplicateWorkout, renameWorkout, updateWorkoutNote, updateWorkoutOrder } from './functions/workoutFunctions'
-import { CreateExerciseData, Exercise, ExerciseLib, Log, Workout, WorkoutContextInterface } from './types'
+import { deleteWorkout } from './functions/workoutFunctions'
+import { CreateExerciseData, Exercise, ExerciseLib, ExerciseLibraryEntry, Log, Workout, WorkoutContextInterface } from './types'
 
 const WorkoutContext = createContext<WorkoutContextInterface | undefined>(undefined)
 
@@ -23,44 +36,85 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
     const [fullExerciseLib, setFullExerciseLib] = useState<ExerciseLib>(exerciseLib)
     const [lastExercise, setLastExercise] = useState<string>('')
     const [loaded, setLoaded] = useState(false)
-    const [hasLoadedUserData, setHasLoadedUserData] = useState(false)
-    const [persistDirty, setPersistDirty] = useState(false)
-    const [persistRetryNonce, setPersistRetryNonce] = useState(0)
-    const persistSavingRef = useRef(false)
-    const persistDirtyDuringSaveRef = useRef(false)
-
-    const markWorkoutPersistDirty = useCallback(() => {
-        if (persistSavingRef.current) {
-            persistDirtyDuringSaveRef.current = true
-        } else {
-            setPersistDirty(true)
-        }
-    }, [])
-
-    const setUserExercises = useCallback(
-        (next: ExerciseLib) => {
-            markWorkoutPersistDirty()
-            setUserExercisesState(next)
-        },
-        [markWorkoutPersistDirty],
-    )
 
     const { userID } = useAuth()
 
-    //Wrapper Functions
-    const handleAddWorkout = (name: string, userId: string) => {
-        markWorkoutPersistDirty()
-        addWorkout(name, userId, setWorkoutsState)
-    }
-    const handleDuplicateWorkout = (id: string) => {
+    // ------------------------------------------------------------------
+    // Workout handlers
+    // ------------------------------------------------------------------
+
+    const handleAddWorkout = useCallback(async (name: string, userId: string) => {
+        const now = new Date()
+        const newWorkout: Workout = {
+            id: uuid.v4() as string,
+            userID: userId,
+            name,
+            order: 0,
+            archived: false,
+            note: '',
+            createdAt: now,
+            updatedAt: now,
+        }
+        setWorkoutsState(prev => [
+            ...prev.map(w => ({ ...w, order: w.order + 1, updatedAt: now })),
+            newWorkout,
+        ])
+        try {
+            await insertWorkoutWithOrderBump(newWorkout)
+        } catch (e) {
+            console.warn('[WorkoutContext] Failed to insert workout', e)
+        }
+    }, [])
+
+    const handleDuplicateWorkout = useCallback(async (id: string) => {
         if (!userID) return
-        markWorkoutPersistDirty()
-        duplicateWorkout(id, userID, setWorkoutsState, setExercisesState)
-    }
-    const handleDeleteWorkout = async (id: string) => {
+        const source = workouts.find(w => w.id === id)
+        if (!source) return
+
+        const now = new Date()
+        const newWorkoutId = uuid.v4() as string
+
+        const newWorkout: Workout = {
+            id: newWorkoutId,
+            userID,
+            name: `${source.name} (Copy)`,
+            order: 0,
+            archived: false,
+            note: source.note,
+            createdAt: now,
+            updatedAt: now,
+        }
+
+        const newExercises: Exercise[] = exercises
+            .filter(e => e.workoutID === id && !e.archived)
+            .sort((a, b) => a.order - b.order)
+            .map((ex, index) => ({
+                id: uuid.v4() as string,
+                userID,
+                workoutID: newWorkoutId,
+                name: ex.name,
+                userMax: ex.userMax,
+                order: index,
+                archived: false,
+                createdAt: now,
+                updatedAt: now,
+            }))
+
+        setWorkoutsState(prev => [
+            ...prev.map(w => ({ ...w, order: w.order + 1, updatedAt: now })),
+            newWorkout,
+        ])
+        setExercisesState(prev => [...prev, ...newExercises])
+
+        try {
+            await insertDuplicateWorkout(newWorkout, newExercises)
+        } catch (e) {
+            console.warn('[WorkoutContext] Failed to duplicate workout', e)
+        }
+    }, [userID, workouts, exercises])
+
+    const handleDeleteWorkout = useCallback(async (id: string) => {
         deleteWorkout(id, setWorkoutsState, setExercisesState, setLogsState)
-        // Local PowerSync has no FK CASCADE — delete children first so orphans are not
-        // reloaded from SQLite (ghost logs / fatigue after app restart).
         if (userID) {
             try {
                 await powerSync.writeTransaction(async (tx) => {
@@ -72,28 +126,126 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
                 console.warn('[WorkoutContext] Failed to delete workout from PowerSync', e)
             }
         }
-    }
-    const handleArchiveWorkout = (id: string, archived: boolean) => {
-        markWorkoutPersistDirty()
-        archiveWorkout(id, archived, setWorkoutsState)
-    }
-    const handleRenameWorkout = (id: string, name: string) => {
-        markWorkoutPersistDirty()
-        renameWorkout(id, name, setWorkoutsState)
-    }
-    const handleUpdateWorkoutNote = (id: string, note: string) => {
-        markWorkoutPersistDirty()
-        updateWorkoutNote(id, note, setWorkoutsState)
-    }
-    const handleUpdateWorkoutOrder = (reorderedWorkouts: Workout[]) => {
-        markWorkoutPersistDirty()
-        updateWorkoutOrder(reorderedWorkouts, setWorkoutsState)
-    }
-    const handleAddExercise = (workoutID: string, userIDParam: string, name: string) => {
-        markWorkoutPersistDirty()
-        addExercise(workoutID, userIDParam, name, setExercisesState)
-    }
-    const handleDeleteExercise = async (id: string) => {
+    }, [userID])
+
+    const handleArchiveWorkout = useCallback(async (id: string, archived: boolean) => {
+        const now = new Date()
+        if (archived) {
+            // Currently archived → unarchiving: place at order 0, bump all active siblings
+            setWorkoutsState(prev => prev.map(w => {
+                if (w.id === id) return { ...w, archived: false, order: 0, updatedAt: now }
+                if (!w.archived) return { ...w, order: w.order + 1, updatedAt: now }
+                return w
+            }))
+            if (userID) {
+                try {
+                    await powerSync.writeTransaction(async (tx) => {
+                        await tx.execute(
+                            `UPDATE workouts SET "order" = "order" + 1, updated_at = datetime('now') WHERE user_id = ? AND archived = 0`,
+                            [userID]
+                        )
+                        await tx.execute(
+                            `UPDATE workouts SET archived = 0, "order" = 0, updated_at = datetime('now') WHERE id = ?`,
+                            [id]
+                        )
+                    })
+                } catch (e) {
+                    console.warn('[WorkoutContext] Failed to unarchive workout', e)
+                }
+            }
+        } else {
+            // Currently active → archiving
+            setWorkoutsState(prev => prev.map(w => w.id === id ? { ...w, archived: true, updatedAt: now } : w))
+            if (userID) {
+                try {
+                    await powerSync.execute(
+                        `UPDATE workouts SET archived = 1, updated_at = datetime('now') WHERE id = ?`,
+                        [id]
+                    )
+                } catch (e) {
+                    console.warn('[WorkoutContext] Failed to archive workout', e)
+                }
+            }
+        }
+    }, [userID])
+
+    const handleRenameWorkout = useCallback(async (id: string, name: string) => {
+        const now = new Date()
+        let updated: Workout | undefined
+        setWorkoutsState(prev => prev.map(w => {
+            if (w.id !== id) return w
+            updated = { ...w, name, updatedAt: now }
+            return updated
+        }))
+        if (updated) {
+            try {
+                await upsertWorkout(updated)
+            } catch (e) {
+                console.warn('[WorkoutContext] Failed to rename workout', e)
+            }
+        }
+    }, [])
+
+    const handleUpdateWorkoutNote = useCallback(async (id: string, note: string) => {
+        const now = new Date()
+        let updated: Workout | undefined
+        setWorkoutsState(prev => prev.map(w => {
+            if (w.id !== id) return w
+            updated = { ...w, note, updatedAt: now }
+            return updated
+        }))
+        if (updated) {
+            try {
+                await upsertWorkout(updated)
+            } catch (e) {
+                console.warn('[WorkoutContext] Failed to update workout note', e)
+            }
+        }
+    }, [])
+
+    const handleUpdateWorkoutOrder = useCallback(async (reorderedWorkouts: Workout[]) => {
+        const now = new Date()
+        const withOrder = reorderedWorkouts.map((w, i) => ({ ...w, order: i, updatedAt: now }))
+        setWorkoutsState(prev => prev.map(w => {
+            const updated = withOrder.find(u => u.id === w.id)
+            return updated ?? w
+        }))
+        try {
+            await updateWorkoutOrders(withOrder)
+        } catch (e) {
+            console.warn('[WorkoutContext] Failed to update workout order', e)
+        }
+    }, [])
+
+    // ------------------------------------------------------------------
+    // Exercise handlers
+    // ------------------------------------------------------------------
+
+    const handleAddExercise = useCallback(async (workoutID: string, userIDParam: string, name: string) => {
+        const now = new Date()
+        const newExercise: Exercise = {
+            id: uuid.v4() as string,
+            userID: userIDParam,
+            workoutID,
+            name,
+            userMax: 0,
+            order: 0,
+            archived: false,
+            createdAt: now,
+            updatedAt: now,
+        }
+        setExercisesState(prev => [
+            ...prev.map(e => e.workoutID === workoutID ? { ...e, order: e.order + 1, updatedAt: now } : e),
+            newExercise,
+        ])
+        try {
+            await insertExerciseWithOrderBump(newExercise)
+        } catch (e) {
+            console.warn('[WorkoutContext] Failed to insert exercise', e)
+        }
+    }, [])
+
+    const handleDeleteExercise = useCallback(async (id: string) => {
         deleteExercise(id, setExercisesState, setLogsState)
         if (userID) {
             try {
@@ -105,22 +257,102 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
                 console.warn('[WorkoutContext] Failed to delete exercise from PowerSync', e)
             }
         }
-    }
-    const handleArchiveExercise = (id: string, workoutID: string, archived: boolean) => {
-        markWorkoutPersistDirty()
-        archiveExercise(id, workoutID, archived, setExercisesState)
-    }
-    const handleUpdateExerciseOrder = (workoutID: string, reorderedExercises: Exercise[]) => {
-        markWorkoutPersistDirty()
-        updateExerciseOrder(workoutID, reorderedExercises, setExercisesState)
-    }
-    const handleAddLog = (workoutID: string, exerciseID: string, userIDParam: string, weight: number, reps: number, rpe: number, date: Date) => {
-        markWorkoutPersistDirty()
-        addLog(workoutID, exerciseID, userIDParam, weight, reps, rpe, date, setLogsState)
-    }
-    const handleDeleteLog = async (id: string) => {
-        deleteLog(id, setLogsState)
-        // Delete from PowerSync
+    }, [userID])
+
+    const handleArchiveExercise = useCallback(async (id: string, workoutID: string, archived: boolean) => {
+        const now = new Date()
+        if (archived) {
+            // Currently archived → unarchiving: place at order 0, bump active siblings
+            setExercisesState(prev => prev.map(e => {
+                if (e.id === id) return { ...e, archived: false, order: 0, updatedAt: now }
+                if (e.workoutID === workoutID && !e.archived) return { ...e, order: e.order + 1, updatedAt: now }
+                return e
+            }))
+            if (userID) {
+                try {
+                    await powerSync.writeTransaction(async (tx) => {
+                        await tx.execute(
+                            `UPDATE exercises SET "order" = "order" + 1, updated_at = datetime('now') WHERE workout_id = ? AND archived = 0`,
+                            [workoutID]
+                        )
+                        await tx.execute(
+                            `UPDATE exercises SET archived = 0, "order" = 0, updated_at = datetime('now') WHERE id = ?`,
+                            [id]
+                        )
+                    })
+                } catch (e) {
+                    console.warn('[WorkoutContext] Failed to unarchive exercise', e)
+                }
+            }
+        } else {
+            // Currently active → archiving
+            setExercisesState(prev => prev.map(e => e.id === id ? { ...e, archived: true, updatedAt: now } : e))
+            if (userID) {
+                try {
+                    await powerSync.execute(
+                        `UPDATE exercises SET archived = 1, updated_at = datetime('now') WHERE id = ?`,
+                        [id]
+                    )
+                } catch (e) {
+                    console.warn('[WorkoutContext] Failed to archive exercise', e)
+                }
+            }
+        }
+    }, [userID])
+
+    const handleUpdateExerciseOrder = useCallback(async (workoutID: string, reorderedExercises: Exercise[]) => {
+        const now = new Date()
+        const withOrder = reorderedExercises.map((e, i) => ({ ...e, order: i, updatedAt: now }))
+        setExercisesState(prev => prev.map(e => {
+            if (e.workoutID !== workoutID) return e
+            const updated = withOrder.find(u => u.id === e.id)
+            return updated ?? e
+        }))
+        try {
+            await updateExerciseOrders(withOrder)
+        } catch (e) {
+            console.warn('[WorkoutContext] Failed to update exercise order', e)
+        }
+    }, [])
+
+    // ------------------------------------------------------------------
+    // Log handlers
+    // ------------------------------------------------------------------
+
+    const handleAddLog = useCallback(async (
+        workoutID: string,
+        exerciseID: string,
+        userIDParam: string,
+        weight: number,
+        reps: number,
+        rpe: number,
+        date: Date,
+    ) => {
+        if (!validateLog(weight, reps, rpe)) return
+        const now = new Date()
+        const newLog: Log = {
+            id: uuid.v4() as string,
+            userID: userIDParam,
+            workoutID,
+            exerciseID,
+            date,
+            time: Date.now(),
+            weight,
+            reps,
+            rpe,
+            createdAt: now,
+            updatedAt: now,
+        }
+        setLogsState(prev => [...prev, newLog])
+        try {
+            await insertLog(newLog)
+        } catch (e) {
+            console.warn('[WorkoutContext] Failed to insert log', e)
+        }
+    }, [])
+
+    const handleDeleteLog = useCallback(async (id: string) => {
+        deleteLogFromState(id, setLogsState)
         if (userID) {
             try {
                 await powerSync.execute('DELETE FROM logs WHERE id = ?', [id])
@@ -128,20 +360,26 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
                 console.warn('[WorkoutContext] Failed to delete log from PowerSync', e)
             }
         }
-    }
-    const handleCalculateFatiguePercentage = (numDays: number, activityLevel: string, refByName?: Map<string, number>) =>
-        calculateFatiguePercentage(numDays, logs, exercises, fullExerciseLib, activityLevel, refByName)
-    const handleGetFatigueSummary = (activityLevel: string, refByName?: Map<string, number>) =>
-        calculateFatigueSummary(logs, exercises, fullExerciseLib, activityLevel, refByName)
-    const handleGetOneRepMaxData = (exerciseName: string) => getOneRepMaxData(exerciseName, exercises, logs)
-    const handleGetSetsData = (onboardingCompletedAt?: Date) => getSetsData(logs, onboardingCompletedAt)
-    const handleCreateUserExercise = (exerciseData: CreateExerciseData, userIDParam: string) => {
-        markWorkoutPersistDirty()
-        createUserExercise(exerciseData, userIDParam, setUserExercisesState)
-    }
-    const handleDeleteUserExercise = async (exerciseName: string) => {
+    }, [userID])
+
+    // ------------------------------------------------------------------
+    // User exercise handlers
+    // ------------------------------------------------------------------
+
+    const handleCreateUserExercise = useCallback(async (exerciseData: CreateExerciseData, userIDParam: string) => {
+        const { name, mainMuscle, accessoryMuscles, isCompound, equipment } = exerciseData
+        const fatigueFactor = calculateFatigueFactor(isCompound, mainMuscle, accessoryMuscles, equipment)
+        const newEntry: ExerciseLibraryEntry = { mainMuscle, accessoryMuscles, fatigueFactor, equipment, isCompound }
+        setUserExercisesState(prev => ({ ...prev, [name]: newEntry }))
+        try {
+            await upsertUserExercise(userIDParam, name, newEntry)
+        } catch (e) {
+            console.warn('[WorkoutContext] Failed to upsert user exercise', e)
+        }
+    }, [])
+
+    const handleDeleteUserExercise = useCallback(async (exerciseName: string) => {
         deleteUserExercise(exerciseName, setUserExercisesState)
-        // Delete from PowerSync
         if (userID) {
             try {
                 await powerSync.execute('DELETE FROM user_exercises WHERE user_id = ? AND name = ?', [userID, exerciseName])
@@ -149,9 +387,44 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
                 console.warn('[WorkoutContext] Failed to delete user exercise from PowerSync', e)
             }
         }
-    }
+    }, [userID])
 
-    // Use useEffect to merge base library with user exercises whenever userExercises changes
+    // Simple pass-through exposed for any external bulk-set needs (e.g. initial hydration overrides)
+    const setUserExercises = useCallback((next: ExerciseLib) => {
+        setUserExercisesState(next)
+    }, [])
+
+    // ------------------------------------------------------------------
+    // Read-only computation handlers
+    // ------------------------------------------------------------------
+
+    const handleCalculateFatiguePercentage = useCallback(
+        (numDays: number, activityLevel: string, refByName?: Map<string, number>) =>
+            calculateFatiguePercentage(numDays, logs, exercises, fullExerciseLib, activityLevel, refByName),
+        [logs, exercises, fullExerciseLib]
+    )
+
+    const handleGetFatigueSummary = useCallback(
+        (activityLevel: string, refByName?: Map<string, number>) =>
+            calculateFatigueSummary(logs, exercises, fullExerciseLib, activityLevel, refByName),
+        [logs, exercises, fullExerciseLib]
+    )
+
+    const handleGetOneRepMaxData = useCallback(
+        (exerciseName: string) => getOneRepMaxData(exerciseName, exercises, logs),
+        [exercises, logs]
+    )
+
+    const handleGetSetsData = useCallback(
+        (onboardingCompletedAt?: Date) => getSetsData(logs, onboardingCompletedAt),
+        [logs]
+    )
+
+    // ------------------------------------------------------------------
+    // Effects
+    // ------------------------------------------------------------------
+
+    // Merge base library with user exercises whenever userExercises changes
     useEffect(() => {
         setFullExerciseLib({ ...exerciseLib, ...userExercises })
     }, [userExercises])
@@ -168,7 +441,6 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
                 setLastExercise('')
                 return
             }
-
             try {
                 const stored = await AsyncStorage.getItem(`lastExercise:${userID}`)
                 setLastExercise(stored ?? '')
@@ -177,11 +449,10 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
                 setLastExercise('')
             }
         }
-
         loadLastExercise()
     }, [userID])
 
-    // Load from PowerSync
+    // Load from PowerSync when user changes
     useEffect(() => {
         if (!userID) {
             setWorkoutsState([])
@@ -189,25 +460,19 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
             setLogsState([])
             setUserExercisesState({})
             setLoaded(true)
-            setHasLoadedUserData(false)
-            setPersistDirty(false)
             return
         }
 
         setLoaded(false)
-        setHasLoadedUserData(false)
-        setPersistDirty(false)
 
         const loadData = async () => {
             try {
-                // Wait for PowerSync to sync before loading data
                 await powerSync.waitForFirstSync()
-                const { workouts, exercises, logs, userExercises, hasData } = await loadWorkoutData(userID)
-                setWorkoutsState(workouts)
-                setExercisesState(exercises)
-                setLogsState(logs)
-                setUserExercisesState(userExercises)
-                setHasLoadedUserData(hasData)
+                const { workouts: w, exercises: e, logs: l, userExercises: u } = await loadWorkoutData(userID)
+                setWorkoutsState(w)
+                setExercisesState(e)
+                setLogsState(l)
+                setUserExercisesState(u)
                 setLoaded(true)
             } catch (e) {
                 console.warn('[WorkoutContext] Failed to load workout data from PowerSync', e)
@@ -215,7 +480,6 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
                 setExercisesState([])
                 setLogsState([])
                 setUserExercisesState({})
-                setHasLoadedUserData(false)
                 setLoaded(true)
             }
         }
@@ -223,48 +487,10 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
         loadData()
     }, [userID])
 
-    // Set hasLoadedUserData to true when user creates data (so new users can save)
-    useEffect(() => {
-        const hasData = workouts.length > 0 || exercises.length > 0 || logs.length > 0 || Object.keys(userExercises).length > 0
-        if (hasData && !hasLoadedUserData) {
-            setHasLoadedUserData(true)
-        }
-    }, [workouts, exercises, logs, userExercises, hasLoadedUserData])
-
-    // Save to PowerSync only after real mutations (persistDirty), not after cold-load hydration.
-    useEffect(() => {
-        if (!loaded || !userID || !hasLoadedUserData || !persistDirty) return
-        if (persistSavingRef.current) return
-
-        let cancelled = false
-        persistSavingRef.current = true
-        void (async () => {
-            try {
-                await saveWorkoutData(userID, workouts, exercises, logs, userExercises)
-                if (cancelled) return
-                if (persistDirtyDuringSaveRef.current) {
-                    persistDirtyDuringSaveRef.current = false
-                    persistSavingRef.current = false
-                    setPersistDirty(true)
-                    return
-                }
-                setPersistDirty(false)
-            } catch {
-                if (!cancelled) setPersistRetryNonce((n) => n + 1)
-            } finally {
-                if (!cancelled) persistSavingRef.current = false
-            }
-        })()
-        return () => {
-            cancelled = true
-        }
-    }, [workouts, exercises, logs, userExercises, loaded, userID, hasLoadedUserData, persistDirty, persistRetryNonce])
-
     // Persist lastExercise per-user in AsyncStorage
     useEffect(() => {
         const saveLastExercise = async () => {
             if (!userID) return
-
             try {
                 if (lastExercise) {
                     await AsyncStorage.setItem(`lastExercise:${userID}`, lastExercise)
@@ -275,7 +501,6 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
                 console.warn('[WorkoutContext] Failed to persist lastExercise to AsyncStorage', e)
             }
         }
-
         saveLastExercise()
     }, [lastExercise, userID])
 
