@@ -1,4 +1,5 @@
 import { useColorScheme } from '@/components/ExpoComponents/useColorScheme'
+import { AppLoadingScreen } from '@/components/GuardComponents/AppLoadingScreen'
 import { PowerSyncGuard } from '@/components/GuardComponents/PowerSyncGuard'
 import { SyncWatchdog } from '@/components/GuardComponents/SyncWatchdog'
 import { AuthProvider, useAuth } from '@/context/AuthContext'
@@ -35,7 +36,7 @@ import { useFonts } from 'expo-font'
 import { Stack, useRouter } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
 import React, { type PropsWithChildren, useEffect, useState } from 'react'
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native'
+import { Pressable, StyleSheet, View } from 'react-native'
 import 'react-native-gesture-handler'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import 'react-native-reanimated'
@@ -130,10 +131,7 @@ function StackLayout() {
     if (!allContextsLoaded) {
         return (
             <AppColumn>
-                <View style={styles.syncContainer}>
-                    <ActivityIndicator size="large" color="white" />
-                    <Text style={styles.syncText}>Loading LiftTrition...</Text>
-                </View>
+                <AppLoadingScreen />
             </AppColumn>
         )
     }
@@ -246,16 +244,5 @@ const styles = StyleSheet.create({
         maxWidth: PHONE_MAX_WIDTH,
         alignSelf: 'center',
         backgroundColor: '#121212',
-    },
-    syncContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#121212',
-    },
-    syncText: {
-        color: '#888',
-        marginTop: 16,
-        fontSize: 16,
     },
 })

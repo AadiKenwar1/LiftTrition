@@ -9,8 +9,8 @@ const BLUE = '#2f80ed'
 const GREEN = '#22C922'
 
 const CARDS = [
-    { icon: Dumbbell, title: 'Train Hard', body: 'Log workouts &\nbuild routines', accent: BLUE },
-    { icon: Sparkle, title: 'Eat Smart', body: 'AI-assisted nutrition\ntracking', accent: GREEN },
+    { icon: Dumbbell, title: 'Train Harder', body: 'Log workouts &\nbuild routines', accent: BLUE },
+    { icon: Sparkle, title: 'Eat Smarter', body: 'AI-assisted nutrition\ntracking', accent: GREEN },
     { icon: BarChart2, title: 'See Progress', body: 'Strength, macros\nbodyweight trends, and more', accent: BLUE },
     { icon: Zap, title: 'Real Results', body: 'Built for real,\nconsistent results', accent: GREEN },
 ]

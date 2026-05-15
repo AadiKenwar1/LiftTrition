@@ -1,7 +1,7 @@
 import { useAuth } from '@/context/AuthContext'
 import { powerSync } from '@/lib/powersync/system'
 import React, { useEffect, useState } from 'react'
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native'
+import { AppLoadingScreen } from './AppLoadingScreen'
 
 type Props = {
     children: React.ReactNode
@@ -34,29 +34,9 @@ export function PowerSyncGuard({ children }: Props) {
         waitForSync()
     }, [session, authLoading])
 
-    // Show loading indicator while waiting for sync
     if (!powerSyncReady) {
-        return (
-            <View style={styles.syncContainer}>
-                <ActivityIndicator size="large" color="white" />
-                <Text style={styles.syncText}>Syncing data...</Text>
-            </View>
-        )
+        return <AppLoadingScreen message="Syncing data..." />
     }
 
     return <>{children}</>
 }
-
-const styles = StyleSheet.create({
-    syncContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#121212',
-    },
-    syncText: {
-        color: '#888',
-        marginTop: 16,
-        fontSize: 16,
-    },
-})
