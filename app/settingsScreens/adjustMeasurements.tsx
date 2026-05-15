@@ -1,5 +1,6 @@
 import { useSettings } from '@/context/SettingsContext'
 import { validateHeightWeight } from '@/context/SettingsContext/functions/validator'
+import { feetInchesToInches, inchesToFeetInches } from '@/lib/utils/unitConversions'
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5'
 import { router } from 'expo-router'
 import { useState } from 'react'
@@ -8,15 +9,22 @@ import { Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text,
 export default function AdjustMeasurementsScreen() {
     const { settings, setSettings, handleUpdateBw, calculateMacros } = useSettings()
     const [unitSystem, setUnitSystem] = useState<'imperial' | 'metric'>(settings.unitSystem)
-    const [height, setHeight] = useState(settings.height.toString())
+
+    // Imperial: initialise from stored total inches
+    const initialFtIn = inchesToFeetInches(settings.height)
+    const [heightFt, setHeightFt] = useState(settings.unitSystem === 'imperial' ? initialFtIn.feet.toString() : '')
+    const [heightIn, setHeightIn] = useState(settings.unitSystem === 'imperial' ? initialFtIn.inches.toString() : '')
+    const [height, setHeight] = useState(settings.unitSystem === 'metric' ? settings.height.toString() : '')
     const [weight, setWeight] = useState(settings.bodyWeight.toString())
 
     function handleSave() {
-        if (!validateHeightWeight(Number(height), Number(weight), unitSystem)) return
+        const totalHeight = unitSystem === 'imperial' ? feetInchesToInches(Number(heightFt), Number(heightIn)) : Number(height)
+
+        if (!validateHeightWeight(totalHeight, Number(weight), unitSystem)) return
 
         const updatedSettings = {
             ...settings,
-            height: Number(height),
+            height: totalHeight,
             bodyWeight: Number(weight),
             unitSystem,
         }
@@ -53,7 +61,7 @@ export default function AdjustMeasurementsScreen() {
                     <Text style={styles.titleText}>Update Your Measurements</Text>
 
                     {/* Subtitle */}
-                    <Text style={styles.subtitleText}>Updates Nutrition Goals</Text>
+                    <Text style={styles.subtitleText}>Updates Nutrition Goals and Unit System</Text>
 
                     {/* Unit System Toggle */}
                     <View style={styles.toggleContainer}>
@@ -70,10 +78,22 @@ export default function AdjustMeasurementsScreen() {
                         {/* Height Input */}
                         <View style={styles.inputGroup}>
                             <Text style={styles.inputLabel}>Height</Text>
-                            <View style={styles.inputWrapper}>
-                                <TextInput style={styles.input} placeholder={unitSystem === 'imperial' ? '70' : '178'} placeholderTextColor="#555" keyboardType="numeric" value={height} onChangeText={setHeight} returnKeyType="next" />
-                                <Text style={styles.unitText}>{unitSystem === 'imperial' ? 'in' : 'cm'}</Text>
-                            </View>
+                            {unitSystem === 'imperial' ?
+                                <View style={styles.ftInRow}>
+                                    <View style={[styles.inputWrapper, styles.ftInBox]}>
+                                        <TextInput style={styles.input} placeholder="5" placeholderTextColor="#555" keyboardType="numeric" value={heightFt} onChangeText={setHeightFt} returnKeyType="next" />
+                                        <Text style={styles.unitText}>ft</Text>
+                                    </View>
+                                    <View style={[styles.inputWrapper, styles.ftInBox]}>
+                                        <TextInput style={styles.input} placeholder="11" placeholderTextColor="#555" keyboardType="numeric" value={heightIn} onChangeText={setHeightIn} returnKeyType="next" />
+                                        <Text style={styles.unitText}>in</Text>
+                                    </View>
+                                </View>
+                            :   <View style={styles.inputWrapper}>
+                                    <TextInput style={styles.input} placeholder="178" placeholderTextColor="#555" keyboardType="numeric" value={height} onChangeText={setHeight} returnKeyType="next" />
+                                    <Text style={styles.unitText}>cm</Text>
+                                </View>
+                            }
                         </View>
 
                         {/* Weight Input */}
@@ -212,6 +232,13 @@ const styles = StyleSheet.create({
         marginLeft: 12,
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
+    },
+    ftInRow: {
+        flexDirection: 'row',
+        gap: 12,
+    },
+    ftInBox: {
+        flex: 1,
     },
     nextButton: {
         backgroundColor: '#FBBF24',

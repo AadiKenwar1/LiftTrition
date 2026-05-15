@@ -1,4 +1,5 @@
 import { useSettings } from '@/context/SettingsContext'
+import { inchesToFeetInches } from '@/lib/utils/unitConversions'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
@@ -47,6 +48,13 @@ export default function Onboarding8Screen() {
         <View style={styles.container}>
             <LinearGradient colors={['rgba(251, 191, 36, 0.14)', 'transparent']} style={styles.topGradient} pointerEvents="none" />
             <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+                {/* Step Indicator */}
+                <View style={styles.stepIndicator}>
+                    {Array.from({ length: 8 }).map((_, i) => (
+                        <View key={i} style={[styles.stepDot, i === 6 && styles.stepDotActive]} />
+                    ))}
+                </View>
+
                 {/* Icon */}
                 <View style={[styles.iconCircle, { borderColor: ACCENT }]}>
                     <MaterialCommunityIcons name="folder-information" size={72} color={ACCENT} />
@@ -74,7 +82,9 @@ export default function Onboarding8Screen() {
                     <View style={styles.summaryRow}>
                         <Text style={styles.summaryLabel}>Height</Text>
                         <Text style={styles.summaryValue}>
-                            {settings.height} {settings.unitSystem === 'imperial' ? 'in' : 'cm'}
+                            {settings.unitSystem === 'imperial'
+                                ? (() => { const { feet, inches } = inchesToFeetInches(settings.height); return `${feet}'${inches}"` })()
+                                : `${settings.height} cm`}
                         </Text>
                     </View>
 
@@ -154,8 +164,24 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         alignItems: 'center',
-        paddingTop: 90,
+        paddingTop: 50,
         paddingBottom: 16,
+    },
+    stepIndicator: {
+        flexDirection: 'row',
+        gap: 6,
+        marginBottom: 28,
+    },
+    stepDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: '#333',
+    },
+    stepDotActive: {
+        width: 24,
+        backgroundColor: '#FBBF24',
+        borderRadius: 4,
     },
     iconCircle: {
         width: 144,

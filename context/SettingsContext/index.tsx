@@ -3,6 +3,7 @@ import { powerSync } from '@/lib/powersync/system'
 import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useRef, useState, type SetStateAction } from 'react'
 import { loadSettingsAndBw, upsertSettings, upsertWeightForDate } from './database/powersyncStore'
 import { computeBwUpdate, getBodyWeightProgressData } from './functions/bodyWeightFunctions'
+import { getDateKey } from '@/lib/utils/dateHelper'
 import { calculateMacros } from './functions/macroCalculation'
 import { Settings, SettingsContextInterface } from './types'
 
@@ -56,18 +57,27 @@ export const SettingsProvider = ({ children }: PropsWithChildren) => {
     const { userID } = useAuth()
 
     // Handles a body weight update: updates state and directly persists only the two changed rows.
+    // Uses functional updaters so it always builds from the latest state, even when called
+    // immediately after another setSettings (e.g. onboarding4 sets height then calls this).
     const handleUpdateBw = useCallback(async (updatedWeight: number) => {
-        const result = computeBwUpdate(updatedWeight, settings)
-        if (!result) return
-        setBwProgressState(prev => ({ ...prev, [result.dateKey]: updatedWeight }))
-        setSettings(result.newSettings)  // marks dirty → settings row persisted via persistDirty effect
+        if (updatedWeight <= 0) return
+
+        const dateKey = getDateKey(new Date())
+
+        setBwProgressState(prev => ({ ...prev, [dateKey]: updatedWeight }))
+        setSettingsState(prev => {
+            const result = computeBwUpdate(updatedWeight, prev)
+            return result ? result.newSettings : prev
+        })
+        markSettingsPersistDirty()  // settings row persisted via persistDirty effect
+
         if (!userID) return
         try {
-            await upsertWeightForDate(userID, result.dateKey, updatedWeight)
+            await upsertWeightForDate(userID, dateKey, updatedWeight)
         } catch (e) {
             console.warn('[SettingsContext] Failed to persist body weight', e)
         }
-    }, [userID, settings, setSettings])
+    }, [userID, markSettingsPersistDirty])
 
     const handleGetBodyWeightProgressData = (onboardingCompletedAt?: Date) => getBodyWeightProgressData(bwProgress, onboardingCompletedAt)
 

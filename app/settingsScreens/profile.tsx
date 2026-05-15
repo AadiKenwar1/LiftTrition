@@ -1,6 +1,7 @@
 import { useAuth } from '@/context/AuthContext'
-import { useSettings } from '@/context/SettingsContext'
 import { forceSignOut, isUploadFlushTimeoutError } from '@/context/AuthContext/functions/accountFunctions'
+import { useSettings } from '@/context/SettingsContext'
+import { inchesToFeetInches } from '@/lib/utils/unitConversions'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { useRouter } from 'expo-router'
 import { LogOut, Trash2 } from 'lucide-react-native'
@@ -171,7 +172,9 @@ export default function ProfileScreen() {
                         <View style={styles.infoRow}>
                             <Text style={styles.infoLabel}>Height</Text>
                             <Text style={styles.infoValue}>
-                                {settings.height} {settings.unitSystem === 'imperial' ? 'in' : 'cm'}
+                                {settings.unitSystem === 'imperial'
+                                    ? (() => { const { feet, inches } = inchesToFeetInches(settings.height); return `${feet}'${inches}"` })()
+                                    : `${settings.height} cm`}
                             </Text>
                         </View>
 

@@ -22,6 +22,13 @@ export default function Onboarding3Screen() {
         <View style={styles.container}>
             <LinearGradient colors={['rgba(34, 201, 34, 0.14)', 'transparent']} style={styles.topGradient} pointerEvents="none" />
             <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+                {/* Step Indicator */}
+                <View style={styles.stepIndicator}>
+                    {Array.from({ length: 8 }).map((_, i) => (
+                        <View key={i} style={[styles.stepDot, i === 1 && styles.stepDotActive]} />
+                    ))}
+                </View>
+
                 {/* Icon */}
                 <View style={styles.iconCircle}>
                     <Octicons name="person-fill" size={65} color="#22C922" />
@@ -88,8 +95,24 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         alignItems: 'center',
-        paddingTop: 40,
+        paddingTop: 24,
         paddingBottom: 16,
+    },
+    stepIndicator: {
+        flexDirection: 'row',
+        gap: 6,
+        marginBottom: 28,
+    },
+    stepDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: '#333',
+    },
+    stepDotActive: {
+        width: 24,
+        backgroundColor: '#22C922',
+        borderRadius: 4,
     },
     iconCircle: {
         width: 144,

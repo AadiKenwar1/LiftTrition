@@ -24,7 +24,7 @@ export default function LoginScreen() {
             onboardingCompletedAt: undefined,
         }
         setSettings(updatedSettings)
-        router.push('/onboardingScreens/onboarding1')
+        router.push('/onboardingScreens/introduction')
     }
 
     async function handleAppleSignIn() {
@@ -34,26 +34,16 @@ export default function LoginScreen() {
     return (
         <View style={styles.container}>
             <LinearGradient colors={['rgba(255, 255, 255, 0.07)', 'transparent']} style={styles.topGradient} pointerEvents="none" />
-            <ScrollView
-                style={styles.scroll}
-                contentContainerStyle={[styles.scrollContent, { paddingBottom: Math.max(insets.bottom, 16) + 24 }]}
-                keyboardShouldPersistTaps="handled"
-                showsVerticalScrollIndicator={false}
-            >
+            <ScrollView style={styles.scroll} contentContainerStyle={[styles.scrollContent, { paddingBottom: Math.max(insets.bottom, 16) + 24 }]} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
                 <View style={styles.brandingContainer}>
                     <View style={styles.logoContainer}>
                         <Image source={require('@/assets/images/LTpng.png')} style={{ width: '175%', height: '175%' }} contentFit="contain" priority="high" />
                     </View>
 
-                    <Text
-                        style={styles.appName}
-                        adjustsFontSizeToFit
-                        minimumFontScale={0.45}
-                        numberOfLines={1}
-                    >
+                    <Text style={styles.appName} adjustsFontSizeToFit minimumFontScale={0.45} numberOfLines={1}>
                         LiftTrition
                     </Text>
-                    <Text style={styles.tagline}> Progress Starts With Tracking</Text>
+                    <Text style={styles.tagline}>Built for Strength, Physique, and Performance.</Text>
                 </View>
 
                 <View style={styles.buttonContainer}>
@@ -68,10 +58,6 @@ export default function LoginScreen() {
                     <Text style={styles.termsLink} onPress={() => setTermsModalVisible(true)}>
                         Terms of Service
                     </Text>{' '}
-                    and{' '}
-                    <Text style={styles.termsLink} onPress={() => setTermsModalVisible(true)}>
-                        Privacy Policy
-                    </Text>
                 </Text>
             </ScrollView>
             <TermsAndPrivacyModal visible={termsModalVisible} onClose={() => setTermsModalVisible(false)} />
@@ -124,7 +110,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_800ExtraBold',
     },
     tagline: {
-        fontSize: 22,
+        fontSize: 20,
         fontWeight: '500',
         color: '#888',
         letterSpacing: -0.5,
@@ -133,11 +119,11 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     subtagline: {
-        fontSize: 20,
+        fontSize: 16,
         color: '#888',
         letterSpacing: -0.5,
-        fontFamily: 'Poppins_500Medium_Italic',
-        marginBottom: 24,
+        fontFamily: 'Poppins_400Regular',
+        marginBottom: 12,
         textAlign: 'center',
     },
     buttonContainer: {

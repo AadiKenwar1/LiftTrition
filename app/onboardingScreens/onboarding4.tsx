@@ -1,5 +1,6 @@
 import { useSettings } from '@/context/SettingsContext'
 import { validateHeightWeight } from '@/context/SettingsContext/functions/validator'
+import { feetInchesToInches } from '@/lib/utils/unitConversions'
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
@@ -11,16 +12,22 @@ const AMBER = '#FBBF24'
 export default function Onboarding4Screen() {
     const { settings, setSettings, handleUpdateBw } = useSettings()
     const [unitSystem, setUnitSystem] = useState<'imperial' | 'metric'>('imperial')
+    const [heightFt, setHeightFt] = useState('')
+    const [heightIn, setHeightIn] = useState('')
     const [height, setHeight] = useState('')
     const [weight, setWeight] = useState('')
 
     function handleNext() {
-        if (!validateHeightWeight(Number(height), Number(weight), unitSystem)) {
+        const totalHeight = unitSystem === 'imperial'
+            ? feetInchesToInches(Number(heightFt), Number(heightIn))
+            : Number(height)
+
+        if (!validateHeightWeight(totalHeight, Number(weight), unitSystem)) {
             return
         } else {
             setSettings({
                 ...settings,
-                height: Number(height),
+                height: totalHeight,
                 bodyWeight: Number(weight),
                 unitSystem: unitSystem,
             })
@@ -34,6 +41,13 @@ export default function Onboarding4Screen() {
             <View style={styles.container}>
                 <LinearGradient colors={['rgba(251, 191, 36, 0.14)', 'transparent']} style={styles.topGradient} pointerEvents="none" />
                 <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+                    {/* Step Indicator */}
+                    <View style={styles.stepIndicator}>
+                        {Array.from({ length: 8 }).map((_, i) => (
+                            <View key={i} style={[styles.stepDot, i === 2 && styles.stepDotActive]} />
+                        ))}
+                    </View>
+
                     {/* Icon */}
                     <View style={[styles.iconCircle, { borderColor: AMBER }]}>
                         <FontAwesome5 name="pencil-ruler" size={65} color={AMBER} />
@@ -58,10 +72,23 @@ export default function Onboarding4Screen() {
                         {/* Height Input */}
                         <View style={styles.inputGroup}>
                             <Text style={styles.inputLabel}>Height</Text>
-                            <View style={styles.inputWrapper}>
-                                <TextInput style={styles.input} placeholder={unitSystem === 'imperial' ? '70' : '178'} placeholderTextColor="#555" keyboardType="numeric" value={height} onChangeText={setHeight} />
-                                <Text style={styles.unitText}>{unitSystem === 'imperial' ? 'in' : 'cm'}</Text>
-                            </View>
+                            {unitSystem === 'imperial' ? (
+                                <View style={styles.ftInRow}>
+                                    <View style={[styles.inputWrapper, styles.ftInBox]}>
+                                        <TextInput style={styles.input} placeholder="5" placeholderTextColor="#555" keyboardType="numeric" value={heightFt} onChangeText={setHeightFt} />
+                                        <Text style={styles.unitText}>ft</Text>
+                                    </View>
+                                    <View style={[styles.inputWrapper, styles.ftInBox]}>
+                                        <TextInput style={styles.input} placeholder="11" placeholderTextColor="#555" keyboardType="numeric" value={heightIn} onChangeText={setHeightIn} />
+                                        <Text style={styles.unitText}>in</Text>
+                                    </View>
+                                </View>
+                            ) : (
+                                <View style={styles.inputWrapper}>
+                                    <TextInput style={styles.input} placeholder="178" placeholderTextColor="#555" keyboardType="numeric" value={height} onChangeText={setHeight} />
+                                    <Text style={styles.unitText}>cm</Text>
+                                </View>
+                            )}
                         </View>
 
                         {/* Weight Input */}
@@ -115,8 +142,24 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         alignItems: 'center',
-        paddingTop: 40,
+        paddingTop: 24,
         paddingBottom: 16,
+    },
+    stepIndicator: {
+        flexDirection: 'row',
+        gap: 6,
+        marginBottom: 28,
+    },
+    stepDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: '#333',
+    },
+    stepDotActive: {
+        width: 24,
+        backgroundColor: '#FBBF24',
+        borderRadius: 4,
     },
     iconCircle: {
         width: 144,
@@ -210,6 +253,13 @@ const styles = StyleSheet.create({
         marginLeft: 12,
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
+    },
+    ftInRow: {
+        flexDirection: 'row',
+        gap: 12,
+    },
+    ftInBox: {
+        flex: 1,
     },
     buttonContainer: {
         flexDirection: 'row',

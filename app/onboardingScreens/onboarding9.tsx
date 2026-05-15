@@ -42,6 +42,13 @@ export default function Onboarding9Screen() {
         <View style={styles.container}>
             <LinearGradient colors={['rgba(34, 201, 34, 0.14)', 'transparent']} style={styles.topGradient} pointerEvents="none" />
             <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+                {/* Step Indicator */}
+                <View style={styles.stepIndicator}>
+                    {Array.from({ length: 8 }).map((_, i) => (
+                        <View key={i} style={[styles.stepDot, i <= 7 && styles.stepDotActive]} />
+                    ))}
+                </View>
+
                 {/* Icon */}
                 <View style={[styles.iconCircle, { borderColor: ACCENT }]}>
                     <FontAwesome name="list-alt" size={72} color={ACCENT} strokeWidth={2} />
@@ -128,8 +135,24 @@ const styles = StyleSheet.create({
     scrollContent: {
         alignItems: 'center',
         width: '100%',
-        paddingTop: 90,
+        paddingTop: 50,
         paddingBottom: 16,
+    },
+    stepIndicator: {
+        flexDirection: 'row',
+        gap: 6,
+        marginBottom: 28,
+    },
+    stepDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: '#333',
+    },
+    stepDotActive: {
+        width: 24,
+        backgroundColor: '#22C922',
+        borderRadius: 4,
     },
     iconCircle: {
         width: 144,

@@ -32,6 +32,13 @@ export default function Onboarding5Screen() {
         <View style={styles.container}>
             <LinearGradient colors={['rgba(47, 128, 237, 0.3)', 'transparent']} style={styles.topGradient} pointerEvents="none" />
             <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+                {/* Step Indicator */}
+                <View style={styles.stepIndicator}>
+                    {Array.from({ length: 8 }).map((_, i) => (
+                        <View key={i} style={[styles.stepDot, i === 3 && styles.stepDotActive]} />
+                    ))}
+                </View>
+
                 {/* Icon */}
                 <View style={[styles.iconCircle, { borderColor: ACCENT }]}>
                     <Activity size={72} color={ACCENT} strokeWidth={2} />
@@ -92,7 +99,24 @@ const styles = StyleSheet.create({
     scrollContent: {
         alignItems: 'center',
         width: '100%',
+        paddingTop: 24,
         paddingBottom: 16,
+    },
+    stepIndicator: {
+        flexDirection: 'row',
+        gap: 6,
+        marginBottom: 28,
+    },
+    stepDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: '#333',
+    },
+    stepDotActive: {
+        width: 24,
+        backgroundColor: '#2f80ed',
+        borderRadius: 4,
     },
     iconCircle: {
         width: 144,

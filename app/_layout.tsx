@@ -154,7 +154,8 @@ function StackLayout() {
                     <Stack.Screen name="authScreens/login" options={{ headerShown: false }} />
                 </Stack.Protected>
                 <Stack.Protected guard={!settings.onboardingComplete}>
-                    <Stack.Screen name="onboardingScreens/onboarding1" options={{ headerShown: false }} />
+                    <Stack.Screen name="onboardingScreens/introduction" options={{ headerShown: false }} />
+                    <Stack.Screen name="onboardingScreens/preboard" options={{ headerShown: false }} />
                     <Stack.Screen name="onboardingScreens/onboarding2" options={{ headerShown: false }} />
                     <Stack.Screen name="onboardingScreens/onboarding3" options={{ headerShown: false }} />
                     <Stack.Screen name="onboardingScreens/onboarding4" options={{ headerShown: false }} />

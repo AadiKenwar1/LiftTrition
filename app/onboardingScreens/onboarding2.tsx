@@ -36,6 +36,13 @@ export default function Onboarding2Screen() {
         <View style={styles.container}>
             <LinearGradient colors={['rgba(47, 128, 237, 0.3)', 'transparent']} style={styles.topGradient} pointerEvents="none" />
             <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+                {/* Step Indicator */}
+                <View style={styles.stepIndicator}>
+                    {Array.from({ length: 8 }).map((_, i) => (
+                        <View key={i} style={[styles.stepDot, i === 0 && styles.stepDotActive]} />
+                    ))}
+                </View>
+
                 {/* Icon */}
                 <View style={styles.iconCircle}>
                     <FontAwesome name="birthday-cake" size={72} color="#2f80ed" />
@@ -90,8 +97,24 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         alignItems: 'center',
-        paddingTop: 40,
+        paddingTop: 24,
         paddingBottom: 16,
+    },
+    stepIndicator: {
+        flexDirection: 'row',
+        gap: 6,
+        marginBottom: 28,
+    },
+    stepDot: {
+        width: 8,
+        height: 8,
+        borderRadius: 4,
+        backgroundColor: '#333',
+    },
+    stepDotActive: {
+        width: 24,
+        backgroundColor: '#2f80ed',
+        borderRadius: 4,
     },
     iconCircle: {
         width: 144,
