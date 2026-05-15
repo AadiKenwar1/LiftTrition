@@ -37,7 +37,7 @@ export default function LoginScreen() {
             <ScrollView style={styles.scroll} contentContainerStyle={[styles.scrollContent, { paddingBottom: Math.max(insets.bottom, 16) + 24 }]} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
                 <View style={styles.brandingContainer}>
                     <View style={styles.logoContainer}>
-                        <Image source={require('@/assets/images/LTpng.png')} style={{ width: '175%', height: '175%' }} contentFit="contain" priority="high" />
+                        <Image source={require('@/assets/images/AppIconPng.png')} style={{ width: '175%', height: '175%' }} contentFit="contain" priority="high" />
                     </View>
 
                     <Text style={styles.appName} adjustsFontSizeToFit minimumFontScale={0.45} numberOfLines={1}>
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
         height: 200,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 0,
+        marginBottom: 10,
     },
     appName: {
         width: '100%',

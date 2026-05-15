@@ -37,7 +37,7 @@ export default function IntroductionScreen() {
             >
                 {/* Hero circle — matches onboarding 2-9 */}
                 <View style={styles.iconCircle}>
-                    <Image source={require('@/assets/images/LTpng.png')} style={styles.logoImage} contentFit="contain" priority="high" />
+                    <Image source={require('@/assets/images/AppIconPng.png')} style={styles.logoImage} contentFit="contain" priority="high" />
                 </View>
 
                 {/* App name + tagline */}
@@ -102,8 +102,8 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
     },
     logoImage: {
-        width: '75%',
-        height: '75%',
+        width: '85%',
+        height: '85%',
     },
     appName: {
         fontSize: 40,
