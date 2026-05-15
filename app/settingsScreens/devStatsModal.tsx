@@ -179,8 +179,7 @@ export default function DevStatsScreen() {
                         : styles.ok,
                     ]}
                 >
-                    Pending uploads (estimate):{' '}
-                    {uploadPendingEstimate === null ? 'unknown shape — see raw JSON' : uploadPendingEstimate}
+                    Pending uploads (estimate): {uploadPendingEstimate === null ? 'unknown shape — see raw JSON' : uploadPendingEstimate}
                 </Text>
                 {uploadLastPolledAt ?
                     <Text style={[styles.line, styles.subtle]}>Last polled: {formatDateTime(uploadLastPolledAt)} (every 1s)</Text>
@@ -188,9 +187,7 @@ export default function DevStatsScreen() {
                 {uploadPollError ?
                     <Text style={[styles.line, styles.warn]}>getUploadQueueStats error: {uploadPollError}</Text>
                 :   null}
-                <Text style={[styles.line, styles.subtle]}>
-                    Uses the same numeric fields as sign-out flush (count / entryCount / entries). SDK may return an estimate only.
-                </Text>
+                <Text style={[styles.line, styles.subtle]}>Uses the same numeric fields as sign-out flush (count / entryCount / entries). SDK may return an estimate only.</Text>
                 {uploadQueueRaw ?
                     <Text style={styles.rawJson} selectable>
                         {uploadQueueRaw}

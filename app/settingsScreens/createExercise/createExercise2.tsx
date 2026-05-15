@@ -46,13 +46,7 @@ export default function CreateExercise2Screen() {
         <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={Platform.OS === 'ios' ? 8 : 0}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <View style={styles.flex}>
-                    <ScrollView
-                        style={styles.scroll}
-                        contentContainerStyle={[styles.scrollContent, { paddingBottom: scrollBottomPad }]}
-                        keyboardShouldPersistTaps="handled"
-                        showsVerticalScrollIndicator={false}
-                        bounces
-                    >
+                    <ScrollView style={styles.scroll} contentContainerStyle={[styles.scrollContent, { paddingBottom: scrollBottomPad }]} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} bounces>
                         {/* Icon */}
                         <View style={[styles.iconCircle, { borderColor: accent }]}>
                             <Dumbbell size={72} color={accent} strokeWidth={2} />
@@ -130,7 +124,7 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         marginBottom: 12,
         marginTop: 10,
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
     },
     titleText: {
         fontSize: 24,
@@ -164,10 +158,10 @@ const styles = StyleSheet.create({
     inputWrapper: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         borderRadius: 12,
         borderWidth: 2,
-        borderColor: '#282A2C',
+        borderColor: '#1e1e1e',
         paddingHorizontal: 16,
         height: 52,
     },
@@ -188,7 +182,7 @@ const styles = StyleSheet.create({
     },
     typeButton: {
         flex: 1,
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         borderRadius: 16,
         borderWidth: 2,
         borderColor: '#2a2a2a',
@@ -230,7 +224,7 @@ const styles = StyleSheet.create({
     backButton: {
         flex: 1,
         height: 52,
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         borderRadius: 16,
         justifyContent: 'center',
         alignItems: 'center',

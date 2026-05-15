@@ -308,7 +308,7 @@ const styles = StyleSheet.create({
     rectangularCard: {
         width: '100%',
         aspectRatio: 2.5,
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         borderRadius: 15,
         marginBottom: 10,
         padding: 20,
@@ -345,7 +345,7 @@ const styles = StyleSheet.create({
     oneThirdSquareCard: {
         width: '100%',
         aspectRatio: 0.71,
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         borderRadius: 15,
         marginBottom: 10,
         alignItems: 'center',
@@ -402,7 +402,7 @@ const styles = StyleSheet.create({
     graphCard: {
         width: '100%',
         height: 450,
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         borderRadius: 15,
         marginBottom: 15,
         padding: 15,

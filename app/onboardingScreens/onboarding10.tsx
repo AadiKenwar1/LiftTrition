@@ -415,7 +415,7 @@ const styles = StyleSheet.create({
     navBackButton: {
         flex: 1,
         height: 60,
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         borderRadius: 16,
         justifyContent: 'center',
         alignItems: 'center',

@@ -36,13 +36,7 @@ export default function DateModal() {
                 <View style={styles.handle} />
             </View>
 
-            <ScrollView
-                style={styles.scroll}
-                contentContainerStyle={[styles.scrollContent, { paddingBottom: scrollBottomPad }]}
-                keyboardShouldPersistTaps="handled"
-                showsVerticalScrollIndicator={false}
-                bounces
-            >
+            <ScrollView style={styles.scroll} contentContainerStyle={[styles.scrollContent, { paddingBottom: scrollBottomPad }]} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} bounces>
                 {/* Icon Section */}
                 <View style={styles.iconContainer}>
                     <View style={styles.iconCircle}>
@@ -104,7 +98,7 @@ const styles = StyleSheet.create({
         width: 80,
         height: 80,
         borderRadius: 40,
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,

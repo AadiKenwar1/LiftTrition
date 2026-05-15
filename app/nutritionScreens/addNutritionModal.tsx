@@ -88,13 +88,7 @@ export default function AddNutritionModal() {
                 <View style={styles.handle} />
             </View>
 
-            <ScrollView
-                style={styles.scrollView}
-                contentContainerStyle={[styles.content, { paddingBottom: scrollBottomPad }]}
-                showsVerticalScrollIndicator={false}
-                keyboardShouldPersistTaps="handled"
-                bounces
-            >
+            <ScrollView style={styles.scrollView} contentContainerStyle={[styles.content, { paddingBottom: scrollBottomPad }]} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" bounces>
                 {/* Icon Section */}
                 <View style={styles.iconContainer}>
                     <View style={styles.iconCircle}>
@@ -312,7 +306,7 @@ const styles = StyleSheet.create({
         width: 100,
         height: 100,
         borderRadius: 50,
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
@@ -343,14 +337,14 @@ const styles = StyleSheet.create({
         marginBottom: 0,
     },
     input: {
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         borderRadius: 12,
         paddingHorizontal: 16,
         paddingVertical: 14,
         fontSize: 15,
         color: '#FFF',
         borderWidth: 2,
-        borderColor: '#282A2C',
+        borderColor: '#1e1e1e',
         fontFamily: 'Poppins_400Regular',
     },
     inputFocused: {
@@ -390,14 +384,14 @@ const styles = StyleSheet.create({
     macroInput: {
         flex: 1,
         minWidth: 0,
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         borderRadius: 10,
         paddingHorizontal: 14,
         paddingVertical: 12,
         fontSize: 15,
         color: '#FFF',
         borderWidth: 2,
-        borderColor: '#282A2C',
+        borderColor: '#1e1e1e',
         fontFamily: 'Poppins_400Regular',
     },
     macroUnit: {

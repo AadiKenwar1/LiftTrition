@@ -139,14 +139,14 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     input: {
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         borderRadius: 12,
         paddingHorizontal: 16,
         paddingVertical: 14,
         fontSize: 15,
         color: '#FFF',
         borderWidth: 2,
-        borderColor: '#282A2C',
+        borderColor: '#1e1e1e',
         fontFamily: 'Poppins_400Regular',
     },
     inputFocused: {

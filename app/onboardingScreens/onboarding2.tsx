@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
         width: 144,
         height: 144,
         borderRadius: 72,
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     backButton: {
         flex: 1,
         height: 60,
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         borderRadius: 16,
         justifyContent: 'center',
         alignItems: 'center',

@@ -4,17 +4,15 @@ import { Activity, Ruler, SlidersHorizontal, Target } from 'lucide-react-native'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-// ─── Copy ─────────────────────────────────────────────────────────────────────
 const HEADLINE = 'Before we get started...'
 const PURPOSE = 'We just need a few details to personalize macronutrient goals and recovery targets to you'
 const STEPS = [
-    { icon: Ruler, label: 'Body stats', sub: 'Age, sex,\nheight & weight' },
-    { icon: Activity, label: 'Activity', sub: 'Your day-to-\nday lifestyle' },
-    { icon: Target, label: 'Goals', sub: 'What you\nwant to achieve' },
+    { icon: Ruler, label: 'Body stats', sub: 'Age, sex,\nheight & weight', color: '#FBBF24' },
+    { icon: Activity, label: 'Activity', sub: 'Your day-to-\nday lifestyle', color: '#2f80ed' },
+    { icon: Target, label: 'Goals', sub: 'What you\nwant to achieve', color: '#22C922' },
 ]
 const FOOTNOTE = '2 minutes  ·  Your data is never sold or shared'
 const CTA_LABEL = "Let's Go"
-// ─────────────────────────────────────────────────────────────────────────────
 
 export default function PreboardScreen() {
     const insets = useSafeAreaInsets()
@@ -48,10 +46,10 @@ export default function PreboardScreen() {
 
                 {/* 3-column step cards */}
                 <View style={styles.stepsRow}>
-                    {STEPS.map(({ icon: Icon, label, sub }) => (
+                    {STEPS.map(({ icon: Icon, label, sub, color }) => (
                         <View key={label} style={styles.stepCard}>
-                            <View style={styles.stepIconBox}>
-                                <Icon size={20} color="#fff" strokeWidth={2} />
+                            <View style={[styles.stepIconBox, { backgroundColor: color + '22' }]}>
+                                <Icon size={20} color={color} strokeWidth={2} />
                             </View>
                             <Text style={styles.stepLabel}>{label}</Text>
                             <Text style={styles.stepSub}>{sub}</Text>
@@ -101,7 +99,7 @@ const styles = StyleSheet.create({
         width: 144,
         height: 144,
         borderRadius: 72,
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
@@ -135,7 +133,7 @@ const styles = StyleSheet.create({
     },
     stepCard: {
         flex: 1,
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         borderRadius: 16,
         paddingVertical: 16,
         paddingHorizontal: 10,
@@ -146,7 +144,6 @@ const styles = StyleSheet.create({
         width: 40,
         height: 40,
         borderRadius: 12,
-        backgroundColor: '#3a3a3c',
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -159,7 +156,7 @@ const styles = StyleSheet.create({
     },
     stepSub: {
         fontSize: 11,
-        color: '#888',
+        color: '#aaa',
         letterSpacing: 0.1,
         lineHeight: 16,
         fontFamily: 'Poppins_400Regular',
@@ -181,7 +178,7 @@ const styles = StyleSheet.create({
     backButton: {
         flex: 1,
         height: 60,
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         borderRadius: 16,
         justifyContent: 'center',
         alignItems: 'center',

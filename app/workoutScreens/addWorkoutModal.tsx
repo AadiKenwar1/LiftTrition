@@ -24,13 +24,7 @@ export default function AddWorkoutModal() {
                 <View style={styles.handle} />
             </View>
 
-            <ScrollView
-                style={styles.scroll}
-                contentContainerStyle={[styles.scrollContent, { paddingBottom: scrollBottomPad }]}
-                keyboardShouldPersistTaps="handled"
-                showsVerticalScrollIndicator={false}
-                bounces
-            >
+            <ScrollView style={styles.scroll} contentContainerStyle={[styles.scrollContent, { paddingBottom: scrollBottomPad }]} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} bounces>
                 {/* Icon Section */}
                 <View style={styles.iconContainer}>
                     <View style={styles.iconCircle}>
@@ -111,7 +105,7 @@ const styles = StyleSheet.create({
         width: 144,
         height: 144,
         borderRadius: 72,
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
@@ -137,14 +131,14 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     input: {
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         borderRadius: 12,
         paddingHorizontal: 16,
         paddingVertical: 14,
         fontSize: 15,
         color: '#FFF',
         borderWidth: 2,
-        borderColor: '#282A2C',
+        borderColor: '#1e1e1e',
         fontFamily: 'Poppins_400Regular',
     },
     inputFocused: {

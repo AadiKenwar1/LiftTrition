@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
         marginVertical: 8,
         borderRadius: 20,
         overflow: 'hidden',
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
     },
     accentBar: {
         height: 3,

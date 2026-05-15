@@ -65,13 +65,7 @@ export default function SupportScreen() {
         <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={Platform.OS === 'ios' ? 8 : 0}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <View style={styles.flex}>
-                    <ScrollView
-                        style={styles.scroll}
-                        contentContainerStyle={[styles.scrollContent, { paddingBottom: scrollBottomPad }]}
-                        keyboardShouldPersistTaps="handled"
-                        showsVerticalScrollIndicator={false}
-                        bounces
-                    >
+                    <ScrollView style={styles.scroll} contentContainerStyle={[styles.scrollContent, { paddingBottom: scrollBottomPad }]} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} bounces>
                         <View style={styles.iconCircle}>
                             <HelpCircle size={40} color={ACCENT} strokeWidth={2} />
                         </View>
@@ -85,22 +79,17 @@ export default function SupportScreen() {
 
                         <View style={styles.typeToggleContainer}>
                             <TouchableOpacity style={[styles.typeButton, subjectType === 'support' && { backgroundColor: ACCENT_MUTED, borderColor: ACCENT }]} onPress={() => setSubjectType('support')} activeOpacity={0.5} disabled={loading}>
-                                <Text
-                                    style={[styles.typeButtonText, subjectType === 'support' && styles.typeButtonTextActive]}
-                                    adjustsFontSizeToFit
-                                    minimumFontScale={0.65}
-                                    numberOfLines={2}
-                                >
+                                <Text style={[styles.typeButtonText, subjectType === 'support' && styles.typeButtonTextActive]} adjustsFontSizeToFit minimumFontScale={0.65} numberOfLines={2}>
                                     LiftTrition Support
                                 </Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={[styles.typeButton, subjectType === 'feature_request' && { backgroundColor: ACCENT_MUTED, borderColor: ACCENT }]} onPress={() => setSubjectType('feature_request')} activeOpacity={0.5} disabled={loading}>
-                                <Text
-                                    style={[styles.typeButtonText, subjectType === 'feature_request' && styles.typeButtonTextActive]}
-                                    adjustsFontSizeToFit
-                                    minimumFontScale={0.65}
-                                    numberOfLines={2}
-                                >
+                            <TouchableOpacity
+                                style={[styles.typeButton, subjectType === 'feature_request' && { backgroundColor: ACCENT_MUTED, borderColor: ACCENT }]}
+                                onPress={() => setSubjectType('feature_request')}
+                                activeOpacity={0.5}
+                                disabled={loading}
+                            >
+                                <Text style={[styles.typeButtonText, subjectType === 'feature_request' && styles.typeButtonTextActive]} adjustsFontSizeToFit minimumFontScale={0.65} numberOfLines={2}>
                                     Request a Feature
                                 </Text>
                             </TouchableOpacity>
@@ -168,7 +157,7 @@ const styles = StyleSheet.create({
         width: 80,
         height: 80,
         borderRadius: 40,
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
@@ -209,7 +198,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 8,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         borderRadius: 14,
         borderWidth: 2,
         borderColor: '#242424',
@@ -239,7 +228,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_600SemiBold',
     },
     input: {
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         borderRadius: 14,
         borderWidth: 1,
         borderColor: '#242424',

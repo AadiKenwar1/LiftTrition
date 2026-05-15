@@ -1,19 +1,6 @@
 import { validateMacro } from '@/context/SettingsContext/functions/validator'
 import { useLayoutEffect, useRef, useState } from 'react'
-import {
-    Animated,
-    Easing,
-    Keyboard,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    Pressable,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
-} from 'react-native'
+import { Animated, Easing, Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
 export type MacroGoalKind = 'calories' | 'protein' | 'carbs' | 'fats'
 
@@ -40,7 +27,7 @@ const ACCENT = '#22C922'
 const openEasing = Easing.out(Easing.cubic)
 const closeEasing = Easing.in(Easing.cubic)
 
-export default function EditMacroGoalModal({ visible, kind, initialValue, onDismiss, onSave }: Props) {
+export default function EditMacroGoalModal({ visible, kind, initialValue, onDismiss, onSave, backgroundColor }: Props) {
     const [draft, setDraft] = useState('')
     const backdropOpacity = useRef(new Animated.Value(0)).current
     const cardAnim = useRef(new Animated.Value(0)).current
@@ -133,26 +120,16 @@ export default function EditMacroGoalModal({ visible, kind, initialValue, onDism
                                     transform: [{ translateY }, { scale }],
                                 }}
                             >
-                                <Pressable style={styles.card} onPress={e => e.stopPropagation()}>
+                                <Pressable style={styles.card} onPress={(e) => e.stopPropagation()}>
                                     <Text style={styles.cardTitle}>Edit {meta.title}</Text>
                                     <Text style={styles.hint}>Daily goal ({meta.unitSuffix.trim()})</Text>
-                                    <TextInput
-                                        style={styles.input}
-                                        value={draft}
-                                        onChangeText={setDraft}
-                                        keyboardType="decimal-pad"
-                                        placeholder="0"
-                                        placeholderTextColor="#555"
-                                        selectTextOnFocus
-                                    />
-                                    <Text style={styles.consistencyNote}>
-                                        Only this goal changes. Your other daily targets stay the same until you edit them.
-                                    </Text>
+                                    <TextInput style={styles.input} value={draft} onChangeText={setDraft} keyboardType="decimal-pad" placeholder="0" placeholderTextColor="#555" selectTextOnFocus />
+                                    <Text style={styles.consistencyNote}>Only this goal changes. Your other daily targets stay the same until you edit them.</Text>
                                     <View style={styles.actions}>
                                         <TouchableOpacity style={styles.cancelBtn} onPress={handleCancel} activeOpacity={0.8}>
                                             <Text style={styles.cancelText}>Cancel</Text>
                                         </TouchableOpacity>
-                                        <TouchableOpacity style={styles.saveBtn} onPress={handleSave} activeOpacity={0.8}>
+                                        <TouchableOpacity style={[styles.saveBtn, { backgroundColor: backgroundColor ? backgroundColor : '#D4F5D4' }]} onPress={handleSave} activeOpacity={0.8}>
                                             <Text style={styles.saveText}>Save</Text>
                                         </TouchableOpacity>
                                     </View>
@@ -244,7 +221,6 @@ const styles = StyleSheet.create({
         flex: 1,
         height: 60,
         borderRadius: 16,
-        backgroundColor: '#D4F5D4',
         justifyContent: 'center',
         alignItems: 'center',
         shadowColor: ACCENT,

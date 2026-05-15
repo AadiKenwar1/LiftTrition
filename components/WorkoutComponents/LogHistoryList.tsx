@@ -1,9 +1,9 @@
-import { formatDateOrToday } from '@/lib/utils/dateHelper'
-import { useEffect, useRef, useState } from 'react'
-import type { RefObject } from 'react'
-import { Animated, FlatList, Keyboard, LayoutAnimation, Platform, StyleSheet, Text, TouchableOpacity, UIManager, View } from 'react-native'
-import { Trash } from 'lucide-react-native'
 import type { Log } from '@/context/WorkoutContext/types'
+import { formatDateOrToday } from '@/lib/utils/dateHelper'
+import { Trash } from 'lucide-react-native'
+import type { RefObject } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { Animated, FlatList, Keyboard, LayoutAnimation, Platform, StyleSheet, Text, TouchableOpacity, UIManager, View } from 'react-native'
 
 type LogHistoryListProps = {
     logs: Log[]
@@ -33,10 +33,7 @@ export default function LogHistoryList({ logs, weightUnit, lastAddedLogId, onDel
 
         const deletingIdSnapshot = deletingLogId
 
-        Animated.parallel([
-            Animated.timing(deleteOpacity, { toValue: 0, duration: 250, useNativeDriver: true }),
-            Animated.timing(deleteTranslateX, { toValue: 100, duration: 250, useNativeDriver: true }),
-        ]).start(({ finished }) => {
+        Animated.parallel([Animated.timing(deleteOpacity, { toValue: 0, duration: 250, useNativeDriver: true }), Animated.timing(deleteTranslateX, { toValue: 100, duration: 250, useNativeDriver: true })]).start(({ finished }) => {
             if (!finished) return
             LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
             onDeleteConfirmed(deletingIdSnapshot)
@@ -73,12 +70,7 @@ export default function LogHistoryList({ logs, weightUnit, lastAddedLogId, onDel
                         <Text style={styles.logDate}>{formatDateOrToday(item.date, true)}</Text>
                     </View>
 
-                    <TouchableOpacity
-                        onPress={() => handleDelete(item.id)}
-                        style={styles.deleteButton}
-                        activeOpacity={0.6}
-                        disabled={isDeleting}
-                    >
+                    <TouchableOpacity onPress={() => handleDelete(item.id)} style={styles.deleteButton} activeOpacity={0.6} disabled={isDeleting}>
                         <Trash size={20} color="#FF453A" strokeWidth={2.5} />
                     </TouchableOpacity>
                 </View>
@@ -86,11 +78,7 @@ export default function LogHistoryList({ logs, weightUnit, lastAddedLogId, onDel
         )
 
         if (isDeleting) {
-            return (
-                <Animated.View style={{ opacity: deleteOpacity, transform: [{ translateX: deleteTranslateX }] }}>
-                    {content}
-                </Animated.View>
-            )
+            return <Animated.View style={{ opacity: deleteOpacity, transform: [{ translateX: deleteTranslateX }] }}>{content}</Animated.View>
         }
 
         return content
@@ -140,7 +128,7 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         borderRadius: 16,
         overflow: 'hidden',
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         borderWidth: 1,
         borderColor: '#2a2a2a',
         shadowColor: '#000',
@@ -216,4 +204,3 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
 })
-

@@ -44,12 +44,7 @@ export default function LogDateModal({ visible, selectedDate, onConfirm, onClose
                     <Text style={styles.subtitle}>Logs will be added to the selected date</Text>
                     <DatePicker selectedDate={tempDate} onDateChange={setTempDate} color="#2f80ed" />
                     <TouchableOpacity onPress={handleDone} activeOpacity={0.8} style={styles.confirmTouchable}>
-                        <LinearGradient
-                            colors={['#1A7AD4', '#2f80ed']}
-                            start={{ x: 0, y: 0 }}
-                            end={{ x: 1, y: 1 }}
-                            style={styles.confirmButton}
-                        >
+                        <LinearGradient colors={['#1A7AD4', '#2f80ed']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.confirmButton}>
                             <Text style={styles.confirmText}>Done</Text>
                         </LinearGradient>
                     </TouchableOpacity>
@@ -115,4 +110,3 @@ const styles = StyleSheet.create({
         letterSpacing: -0.5,
     },
 })
-

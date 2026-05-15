@@ -197,12 +197,7 @@ export default function LogsModal() {
                                             <View style={styles.changeDateButtonTopRow}>
                                                 <View style={styles.changeDateInlineGroup}>
                                                     <Calendar size={18} color="#2f80ed" strokeWidth={2.5} />
-                                                    <Text
-                                                        style={styles.changeDateButtonPrimaryText}
-                                                        adjustsFontSizeToFit
-                                                        minimumFontScale={0.65}
-                                                        numberOfLines={2}
-                                                    >
+                                                    <Text style={styles.changeDateButtonPrimaryText} adjustsFontSizeToFit minimumFontScale={0.65} numberOfLines={2}>
                                                         {formatDateOrToday(selectedLogDate, true)} (Tap to change)
                                                     </Text>
                                                 </View>
@@ -294,14 +289,14 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_500Medium',
     },
     input: {
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         borderRadius: 12,
         paddingHorizontal: 12,
         paddingVertical: 12,
         fontSize: 16,
         color: '#FFF',
         borderWidth: 2,
-        borderColor: '#282A2C',
+        borderColor: '#1e1e1e',
         textAlign: 'center',
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
@@ -352,7 +347,7 @@ const styles = StyleSheet.create({
         marginTop: 12,
         paddingVertical: 10,
         paddingHorizontal: 12,
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         borderRadius: 12,
         borderWidth: 1,
         borderColor: '#2a2a2a',

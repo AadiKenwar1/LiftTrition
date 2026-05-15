@@ -62,10 +62,7 @@ export default function AnalyzingModal() {
             // Success! Dismiss all modals and return to home
             router.dismissAll()
         } catch (error: any) {
-            const msg =
-                typeof error?.message === 'string' && error.message.length > 0
-                    ? error.message
-                    : "Sorry we weren't able to analyze your photo. Please try again."
+            const msg = typeof error?.message === 'string' && error.message.length > 0 ? error.message : "Sorry we weren't able to analyze your photo. Please try again."
             Alert.alert(
                 'Analysis Failed',
                 msg,
@@ -176,7 +173,7 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
         marginBottom: 32,
         borderWidth: 2,
-        borderColor: '#282A2C',
+        borderColor: '#1e1e1e',
     },
     photo: {
         width: '100%',

@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
         width: 120,
         height: 120,
         borderRadius: 60,
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         borderWidth: 3,
         justifyContent: 'center',
         alignItems: 'center',
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_400Regular',
     },
     exerciseCard: {
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         borderRadius: 16,
         borderWidth: 1,
         borderColor: '#2a2a2a',

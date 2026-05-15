@@ -1,8 +1,8 @@
 import TermsAndPrivacyModal from '@/components/NeutralComponents/TermsAndPrivacyModal'
 import { useBilling } from '@/context/BillingContext'
 import Ionicons from '@expo/vector-icons/Ionicons'
-import { BarChart3, Database, Sparkles, Zap } from 'lucide-react-native'
 import { useNavigation } from 'expo-router'
+import { BarChart3, Database, Sparkles, Zap } from 'lucide-react-native'
 import { useEffect, useState } from 'react'
 import { ActivityIndicator, Alert, Linking, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
@@ -177,7 +177,8 @@ export default function SubscriptionScreen() {
                             <ActivityIndicator size="small" color="#fff" />
                         :   <Text style={styles.subscribeButtonText} adjustsFontSizeToFit minimumFontScale={0.7} numberOfLines={2}>
                                 {hasPremium ? 'Subscription Active' : 'Subscribe Now'}
-                            </Text>}
+                            </Text>
+                        }
                     </TouchableOpacity>
 
                     <View style={styles.linksRow}>
@@ -242,7 +243,7 @@ const styles = StyleSheet.create({
         width: 144,
         height: 144,
         borderRadius: 72,
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
@@ -281,7 +282,7 @@ const styles = StyleSheet.create({
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         borderRadius: 12,
         paddingVertical: 16,
         paddingHorizontal: 16,
@@ -305,7 +306,7 @@ const styles = StyleSheet.create({
     },
     pricingCard: {
         flex: 1,
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         borderRadius: 12,
         padding: 12,
         alignItems: 'center',

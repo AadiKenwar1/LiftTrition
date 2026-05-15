@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_600SemiBold',
     },
     pickerWrapper: {
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         borderRadius: 14,
         borderWidth: 0.5,
         overflow: 'hidden',

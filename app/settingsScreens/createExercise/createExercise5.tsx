@@ -46,13 +46,7 @@ export default function CreateExercise5Screen() {
         <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={Platform.OS === 'ios' ? 8 : 0}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <View style={styles.flex}>
-                    <ScrollView
-                        style={styles.scroll}
-                        contentContainerStyle={[styles.scrollContent, { paddingBottom: scrollBottomPad }]}
-                        keyboardShouldPersistTaps="handled"
-                        showsVerticalScrollIndicator={false}
-                        bounces
-                    >
+                    <ScrollView style={styles.scroll} contentContainerStyle={[styles.scrollContent, { paddingBottom: scrollBottomPad }]} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} bounces>
                         <View style={[styles.iconCircle, { borderColor: accent }]}>
                             <Dumbbell size={60} color={accent} strokeWidth={2} />
                         </View>
@@ -112,7 +106,7 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         marginBottom: 12,
         marginTop: 5,
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
     },
     titleText: {
         fontSize: 24,
@@ -141,7 +135,7 @@ const styles = StyleSheet.create({
         width: '100%',
         paddingVertical: 18,
         paddingHorizontal: 20,
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         borderRadius: 14,
         borderWidth: 2,
         borderColor: '#2a2a2a',
@@ -164,7 +158,7 @@ const styles = StyleSheet.create({
     backButton: {
         flex: 1,
         height: 52,
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         borderRadius: 16,
         justifyContent: 'center',
         alignItems: 'center',

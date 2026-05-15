@@ -127,7 +127,6 @@ const styles = StyleSheet.create({
         color: '#fff',
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
-        
     },
     sectionSubtitle: {
         fontSize: 14,

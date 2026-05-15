@@ -82,9 +82,12 @@ export default function Onboarding8Screen() {
                     <View style={styles.summaryRow}>
                         <Text style={styles.summaryLabel}>Height</Text>
                         <Text style={styles.summaryValue}>
-                            {settings.unitSystem === 'imperial'
-                                ? (() => { const { feet, inches } = inchesToFeetInches(settings.height); return `${feet}'${inches}"` })()
-                                : `${settings.height} cm`}
+                            {settings.unitSystem === 'imperial' ?
+                                (() => {
+                                    const { feet, inches } = inchesToFeetInches(settings.height)
+                                    return `${feet}'${inches}"`
+                                })()
+                            :   `${settings.height} cm`}
                         </Text>
                     </View>
 
@@ -187,7 +190,7 @@ const styles = StyleSheet.create({
         width: 144,
         height: 144,
         borderRadius: 72,
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,

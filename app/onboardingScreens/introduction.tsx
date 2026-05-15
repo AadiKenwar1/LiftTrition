@@ -9,10 +9,10 @@ const BLUE = '#2f80ed'
 const GREEN = '#22C922'
 
 const CARDS = [
-    { icon: Dumbbell, title: 'Train', body: 'Log workouts &\nbuild routines', accent: BLUE },
-    { icon: Sparkle, title: 'Eat Smart', body: 'AI nutrition\ntracking + photo log', accent: GREEN },
-    { icon: BarChart2, title: 'Progress', body: 'Strength, macros\nbody weight trends, and more', accent: BLUE },
-    { icon: Zap, title: 'Perform', body: 'Built for real,\nconsistent results', accent: GREEN },
+    { icon: Dumbbell, title: 'Train Hard', body: 'Log workouts &\nbuild routines', accent: BLUE },
+    { icon: Sparkle, title: 'Eat Smart', body: 'AI-assisted nutrition\ntracking', accent: GREEN },
+    { icon: BarChart2, title: 'See Progress', body: 'Strength, macros\nbodyweight trends, and more', accent: BLUE },
+    { icon: Zap, title: 'Real Results', body: 'Built for real,\nconsistent results', accent: GREEN },
 ]
 
 export default function IntroductionScreen() {
@@ -42,7 +42,7 @@ export default function IntroductionScreen() {
 
                 {/* App name + tagline */}
                 <Text style={styles.appName}>LiftTrition</Text>
-                <Text style={styles.tagline}>Strength, physique, and performance{'\n'}— all in one place.</Text>
+                <Text style={styles.tagline}>Training, Nutrition, and Progress. Built together.</Text>
 
                 {/* 2×2 feature cards */}
                 <View style={styles.grid}>
@@ -70,7 +70,7 @@ export default function IntroductionScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#121212',
+        backgroundColor: '#101010',
     },
     topGradient: {
         position: 'absolute',
@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
         width: 144,
         height: 144,
         borderRadius: 72,
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
     },
     tagline: {
         fontSize: 15,
-        color: '#888',
+        color: '#aaa',
         textAlign: 'center',
         lineHeight: 22,
         letterSpacing: 0.1,
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
     },
     card: {
         width: '47.5%',
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         borderRadius: 14,
         padding: 16,
         gap: 8,
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
     },
     cardBody: {
         fontSize: 12,
-        color: '#666',
+        color: '#aaa',
         letterSpacing: 0.1,
         lineHeight: 17,
         fontFamily: 'Poppins_400Regular',

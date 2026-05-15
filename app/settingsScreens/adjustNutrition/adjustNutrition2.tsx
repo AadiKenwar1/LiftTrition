@@ -36,12 +36,7 @@ export default function AdjustNutrition3Screen() {
 
     return (
         <View style={styles.container}>
-            <ScrollView
-                style={styles.scroll}
-                contentContainerStyle={styles.scrollContent}
-                showsVerticalScrollIndicator={false}
-                keyboardShouldPersistTaps="handled"
-            >
+            <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
                 {/* Icon */}
                 <View style={[styles.iconCircle, { borderColor: accent }]}>
                     <Gauge size={72} color={accent} strokeWidth={2} />
@@ -105,7 +100,7 @@ const styles = StyleSheet.create({
         width: 144,
         height: 144,
         borderRadius: 72,
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,

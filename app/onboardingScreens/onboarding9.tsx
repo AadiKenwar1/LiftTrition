@@ -3,7 +3,7 @@ import { useSettings } from '@/context/SettingsContext'
 import FontAwesome from '@expo/vector-icons/FontAwesome'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
-import { Beef, Droplet, Flame, Wheat } from 'lucide-react-native'
+import { Beef, Droplet, Flame, Pencil, Wheat } from 'lucide-react-native'
 import { useState } from 'react'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
@@ -64,6 +64,7 @@ export default function Onboarding9Screen() {
                     <View style={styles.macrosRow}>
                         {/* Calories */}
                         <TouchableOpacity style={styles.macroCard} onPress={() => setEditingKind('calories')} activeOpacity={0.75}>
+                            <Pencil size={16} color="#888" strokeWidth={2} style={styles.pencilCorner} />
                             <Flame size={18} color="#FF6B6B" strokeWidth={2} />
                             <Text style={styles.macroLabel}>Calories</Text>
                             <Text style={styles.macroValue}>{settings.calorieGoal}</Text>
@@ -71,6 +72,7 @@ export default function Onboarding9Screen() {
 
                         {/* Protein */}
                         <TouchableOpacity style={styles.macroCard} onPress={() => setEditingKind('protein')} activeOpacity={0.75}>
+                            <Pencil size={16} color="#888" strokeWidth={2} style={styles.pencilCorner} />
                             <Beef size={18} color="red" strokeWidth={2} />
                             <Text style={styles.macroLabel}>Protein</Text>
                             <Text style={styles.macroValue}>{settings.proteinGoal}g</Text>
@@ -81,6 +83,7 @@ export default function Onboarding9Screen() {
                     <View style={styles.macrosRow}>
                         {/* Carbs */}
                         <TouchableOpacity style={styles.macroCard} onPress={() => setEditingKind('carbs')} activeOpacity={0.75}>
+                            <Pencil size={16} color="#888" strokeWidth={2} style={styles.pencilCorner} />
                             <Wheat size={18} color="#FFD93D" strokeWidth={2} />
                             <Text style={styles.macroLabel}>Carbs</Text>
                             <Text style={styles.macroValue}>{settings.carbsGoal}g</Text>
@@ -88,6 +91,7 @@ export default function Onboarding9Screen() {
 
                         {/* Fats */}
                         <TouchableOpacity style={styles.macroCard} onPress={() => setEditingKind('fats')} activeOpacity={0.75}>
+                            <Pencil size={16} color="#888" strokeWidth={2} style={styles.pencilCorner} />
                             <Droplet size={18} color="#22C922" strokeWidth={2} />
                             <Text style={styles.macroLabel}>Fats</Text>
                             <Text style={styles.macroValue}>{settings.fatsGoal}g</Text>
@@ -96,8 +100,7 @@ export default function Onboarding9Screen() {
                 </View>
 
                 {/* Note */}
-                <Text style={styles.tapNote}>Tap a card to edit a goal.</Text>
-                <Text style={styles.noteText}>You can also adjust these anytime in settings.{'\n'}*Updating body weight will automatically update nutrition goals.</Text>
+                <Text style={styles.noteText}>You can adjust these anytime in settings.{'\n'}*Updating body weight will automatically recalculate these goals.</Text>
             </ScrollView>
 
             <EditMacroGoalModal visible={editingKind != null} kind={editingKind} initialValue={editingKind != null ? macroInitialValue(editingKind, settings) : 0} onDismiss={() => setEditingKind(null)} onSave={handleSaveMacro} />
@@ -158,7 +161,7 @@ const styles = StyleSheet.create({
         width: 144,
         height: 144,
         borderRadius: 72,
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
@@ -202,6 +205,11 @@ const styles = StyleSheet.create({
         borderColor: '#242424',
         gap: 6,
     },
+    pencilCorner: {
+        position: 'absolute',
+        top: 10,
+        right: 10,
+    },
     macroLabel: {
         fontSize: 13,
         color: '#aaa',
@@ -213,14 +221,6 @@ const styles = StyleSheet.create({
         color: '#fff',
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
-    },
-    tapNote: {
-        fontSize: 12,
-        color: '#fff',
-        textAlign: 'center',
-        letterSpacing: 0.2,
-        marginBottom: 0,
-        fontFamily: 'Poppins_500Medium',
     },
     noteText: {
         fontSize: 12,

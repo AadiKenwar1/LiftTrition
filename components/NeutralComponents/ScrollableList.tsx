@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
     searchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         borderRadius: 12,
         marginTop: 12,
         marginBottom: 8,
@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
         marginVertical: 6,
         borderRadius: 16,
         overflow: 'hidden',
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         borderWidth: 1,
         borderColor: '#242424',
         shadowColor: '#000',

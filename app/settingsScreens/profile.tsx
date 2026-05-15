@@ -1,10 +1,11 @@
+import EditMacroGoalModal, { type MacroGoalKind } from '@/components/NutritionComponents/EditMacroGoalModal'
 import { useAuth } from '@/context/AuthContext'
 import { forceSignOut, isUploadFlushTimeoutError } from '@/context/AuthContext/functions/accountFunctions'
 import { useSettings } from '@/context/SettingsContext'
 import { inchesToFeetInches } from '@/lib/utils/unitConversions'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { useRouter } from 'expo-router'
-import { LogOut, Trash2 } from 'lucide-react-native'
+import { LogOut, Pencil, Trash2 } from 'lucide-react-native'
 import { useState } from 'react'
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
@@ -15,8 +16,30 @@ export default function ProfileScreen() {
     const SHOW_APPLE_ACCOUNT = false
 
     const { user, signOut, deleteAccount } = useAuth()
-    const { settings, mode } = useSettings()
+    const { settings, setSettings } = useSettings()
+    const [editingKind, setEditingKind] = useState<MacroGoalKind | null>(null)
     const accent = 'white'
+
+    function macroValue(kind: MacroGoalKind): number {
+        switch (kind) {
+            case 'calories':
+                return settings.calorieGoal
+            case 'protein':
+                return settings.proteinGoal
+            case 'carbs':
+                return settings.carbsGoal
+            case 'fats':
+                return settings.fatsGoal
+        }
+    }
+
+    function handleSaveMacro(value: number) {
+        if (!editingKind) return
+        if (editingKind === 'calories') setSettings({ ...settings, calorieGoal: value })
+        else if (editingKind === 'protein') setSettings({ ...settings, proteinGoal: value })
+        else if (editingKind === 'carbs') setSettings({ ...settings, carbsGoal: value })
+        else setSettings({ ...settings, fatsGoal: value })
+    }
 
     const router = useRouter()
 
@@ -53,27 +76,23 @@ export default function ProfileScreen() {
                         await signOut()
                     } catch (error: unknown) {
                         if (isUploadFlushTimeoutError(error)) {
-                            Alert.alert(
-                                'Still syncing',
-                                "We're still uploading your data. You can wait and try again, or force sign out (unsynced data may be lost).",
-                                [
-                                    { text: 'Cancel', style: 'cancel' },
-                                    {
-                                        text: 'Force sign out',
-                                        style: 'destructive',
-                                        onPress: async () => {
-                                            setSignOutLoading(true)
-                                            try {
-                                                await forceSignOut()
-                                            } catch (e: unknown) {
-                                                Alert.alert('Error', e instanceof Error ? e.message : 'Failed to force sign out')
-                                            } finally {
-                                                setSignOutLoading(false)
-                                            }
-                                        },
+                            Alert.alert('Still syncing', "We're still uploading your data. You can wait and try again, or force sign out (unsynced data may be lost).", [
+                                { text: 'Cancel', style: 'cancel' },
+                                {
+                                    text: 'Force sign out',
+                                    style: 'destructive',
+                                    onPress: async () => {
+                                        setSignOutLoading(true)
+                                        try {
+                                            await forceSignOut()
+                                        } catch (e: unknown) {
+                                            Alert.alert('Error', e instanceof Error ? e.message : 'Failed to force sign out')
+                                        } finally {
+                                            setSignOutLoading(false)
+                                        }
                                     },
-                                ]
-                            )
+                                },
+                            ])
                         } else {
                             Alert.alert('Error', error instanceof Error ? error.message : 'Failed to sign out')
                         }
@@ -169,23 +188,32 @@ export default function ProfileScreen() {
 
                         <View style={styles.divider} />
 
-                        <View style={styles.infoRow}>
+                        <TouchableOpacity style={styles.infoRow} onPress={() => router.push('/settingsScreens/adjustMeasurements')} activeOpacity={0.7}>
                             <Text style={styles.infoLabel}>Height</Text>
-                            <Text style={styles.infoValue}>
-                                {settings.unitSystem === 'imperial'
-                                    ? (() => { const { feet, inches } = inchesToFeetInches(settings.height); return `${feet}'${inches}"` })()
-                                    : `${settings.height} cm`}
-                            </Text>
-                        </View>
+                            <View style={styles.editRow}>
+                                <Text style={styles.infoValue}>
+                                    {settings.unitSystem === 'imperial' ?
+                                        (() => {
+                                            const { feet, inches } = inchesToFeetInches(settings.height)
+                                            return `${feet}'${inches}"`
+                                        })()
+                                    :   `${settings.height} cm`}
+                                </Text>
+                                <Pencil size={14} color="#888" strokeWidth={2} />
+                            </View>
+                        </TouchableOpacity>
 
                         <View style={styles.divider} />
 
-                        <View style={styles.infoRow}>
+                        <TouchableOpacity style={styles.infoRow} onPress={() => router.push('/settingsScreens/adjustMeasurements')} activeOpacity={0.7}>
                             <Text style={styles.infoLabel}>Weight</Text>
-                            <Text style={styles.infoValue}>
-                                {settings.bodyWeight} {settings.unitSystem === 'imperial' ? 'lbs' : 'kg'}
-                            </Text>
-                        </View>
+                            <View style={styles.editRow}>
+                                <Text style={styles.infoValue}>
+                                    {settings.bodyWeight} {settings.unitSystem === 'imperial' ? 'lbs' : 'kg'}
+                                </Text>
+                                <Pencil size={14} color="#888" strokeWidth={2} />
+                            </View>
+                        </TouchableOpacity>
                     </View>
                 </View>
 
@@ -193,17 +221,23 @@ export default function ProfileScreen() {
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Fitness Information</Text>
                     <View style={styles.card}>
-                        <View style={styles.infoRow}>
+                        <TouchableOpacity style={styles.infoRow} onPress={() => router.push('/settingsScreens/adjustTraining')} activeOpacity={0.7}>
                             <Text style={styles.infoLabel}>Activity Level</Text>
-                            <Text style={styles.infoValue}>{formatActivityLevel(settings.activityLevel)}</Text>
-                        </View>
+                            <View style={styles.editRow}>
+                                <Text style={styles.infoValue}>{formatActivityLevel(settings.activityLevel)}</Text>
+                                <Pencil size={14} color="#888" strokeWidth={2} />
+                            </View>
+                        </TouchableOpacity>
 
                         <View style={styles.divider} />
 
-                        <View style={styles.infoRow}>
+                        <TouchableOpacity style={styles.infoRow} onPress={() => router.push('/settingsScreens/adjustNutrition/adjustNutrition1')} activeOpacity={0.7}>
                             <Text style={styles.infoLabel}>Goal</Text>
-                            <Text style={styles.infoValue}>{formatGoalType(settings.goalType)} Weight</Text>
-                        </View>
+                            <View style={styles.editRow}>
+                                <Text style={styles.infoValue}>{formatGoalType(settings.goalType)} Weight</Text>
+                                <Pencil size={14} color="#888" strokeWidth={2} />
+                            </View>
+                        </TouchableOpacity>
 
                         {settings.goalType !== 'maintain' && (
                             <>
@@ -233,31 +267,23 @@ export default function ProfileScreen() {
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Nutrition Goals</Text>
                     <View style={styles.card}>
-                        <View style={styles.infoRow}>
-                            <Text style={styles.infoLabel}>Calories</Text>
-                            <Text style={styles.infoValue}>{settings.calorieGoal} cal</Text>
-                        </View>
-
-                        <View style={styles.divider} />
-
-                        <View style={styles.infoRow}>
-                            <Text style={styles.infoLabel}>Protein</Text>
-                            <Text style={styles.infoValue}>{settings.proteinGoal}g</Text>
-                        </View>
-
-                        <View style={styles.divider} />
-
-                        <View style={styles.infoRow}>
-                            <Text style={styles.infoLabel}>Carbs</Text>
-                            <Text style={styles.infoValue}>{settings.carbsGoal}g</Text>
-                        </View>
-
-                        <View style={styles.divider} />
-
-                        <View style={styles.infoRow}>
-                            <Text style={styles.infoLabel}>Fats</Text>
-                            <Text style={styles.infoValue}>{settings.fatsGoal}g</Text>
-                        </View>
+                        {[
+                            { kind: 'calories' as MacroGoalKind, label: 'Calories', value: `${settings.calorieGoal} cal` },
+                            { kind: 'protein' as MacroGoalKind, label: 'Protein', value: `${settings.proteinGoal}g` },
+                            { kind: 'carbs' as MacroGoalKind, label: 'Carbs', value: `${settings.carbsGoal}g` },
+                            { kind: 'fats' as MacroGoalKind, label: 'Fats', value: `${settings.fatsGoal}g` },
+                        ].map(({ kind, label, value }, i, arr) => (
+                            <View key={kind}>
+                                <TouchableOpacity style={styles.infoRow} onPress={() => setEditingKind(kind)} activeOpacity={0.7}>
+                                    <Text style={styles.infoLabel}>{label}</Text>
+                                    <View style={styles.editRow}>
+                                        <Text style={styles.infoValue}>{value}</Text>
+                                        <Pencil size={14} color="#888" strokeWidth={2} />
+                                    </View>
+                                </TouchableOpacity>
+                                {i < arr.length - 1 && <View style={styles.divider} />}
+                            </View>
+                        ))}
                     </View>
                 </View>
 
@@ -274,6 +300,7 @@ export default function ProfileScreen() {
                     </TouchableOpacity>
                 </View>
             </ScrollView>
+            <EditMacroGoalModal visible={editingKind != null} kind={editingKind} initialValue={editingKind != null ? macroValue(editingKind) : 0} onDismiss={() => setEditingKind(null)} onSave={handleSaveMacro} backgroundColor="#fff" />
         </View>
     )
 }
@@ -287,11 +314,12 @@ const styles = StyleSheet.create({
     scrollView: { flex: 1 },
     scrollContent: { paddingHorizontal: 20, paddingBottom: 40 },
     profileIconContainer: { alignItems: 'center', marginVertical: 24 },
-    profileIcon: { width: 100, height: 100, borderRadius: 50, backgroundColor: '#282A2C', justifyContent: 'center', alignItems: 'center', borderWidth: 2 },
+    profileIcon: { width: 100, height: 100, borderRadius: 50, backgroundColor: '#1e1e1e', justifyContent: 'center', alignItems: 'center', borderWidth: 2 },
     section: { marginBottom: 24 },
     sectionTitle: { fontSize: 18, color: '#fff', marginBottom: 12, paddingLeft: 4, letterSpacing: -0.5, fontFamily: 'Poppins_600SemiBold' },
-    card: { backgroundColor: '#282A2C', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#2a2a2a' },
+    card: { backgroundColor: '#1e1e1e', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#2a2a2a' },
     infoRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12 },
+    editRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
     infoLabel: { fontSize: 15, color: '#aaa', letterSpacing: -0.5, fontFamily: 'Poppins_600SemiBold' },
     infoValue: { fontSize: 15, color: '#fff', letterSpacing: -0.5, fontFamily: 'Poppins_600SemiBold' },
     userIdText: { maxWidth: '60%', fontFamily: 'monospace' },

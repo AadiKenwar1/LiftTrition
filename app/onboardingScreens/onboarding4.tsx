@@ -1,6 +1,6 @@
 import { useSettings } from '@/context/SettingsContext'
 import { validateHeightWeight } from '@/context/SettingsContext/functions/validator'
-import { feetInchesToInches } from '@/lib/utils/unitConversions'
+import { cmToInches, feetInchesToInches, inchesToCm, inchesToFeetInches, kgToLbs, lbsToKg } from '@/lib/utils/unitConversions'
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
@@ -17,10 +17,30 @@ export default function Onboarding4Screen() {
     const [height, setHeight] = useState('')
     const [weight, setWeight] = useState('')
 
+    function handleUnitToggle(next: 'imperial' | 'metric') {
+        if (next === unitSystem) return
+        if (next === 'metric') {
+            // imperial → metric
+            const totalIn = feetInchesToInches(Number(heightFt) || 0, Number(heightIn) || 0)
+            if (totalIn > 0) setHeight(inchesToCm(totalIn).toString())
+            const lbs = Number(weight) || 0
+            if (lbs > 0) setWeight(lbsToKg(lbs).toString())
+        } else {
+            // metric → imperial
+            const cm = Number(height) || 0
+            if (cm > 0) {
+                const { feet, inches } = inchesToFeetInches(cmToInches(cm))
+                setHeightFt(feet.toString())
+                setHeightIn(inches.toString())
+            }
+            const kg = Number(weight) || 0
+            if (kg > 0) setWeight(kgToLbs(kg).toString())
+        }
+        setUnitSystem(next)
+    }
+
     function handleNext() {
-        const totalHeight = unitSystem === 'imperial'
-            ? feetInchesToInches(Number(heightFt), Number(heightIn))
-            : Number(height)
+        const totalHeight = unitSystem === 'imperial' ? feetInchesToInches(Number(heightFt), Number(heightIn)) : Number(height)
 
         if (!validateHeightWeight(totalHeight, Number(weight), unitSystem)) {
             return
@@ -59,10 +79,10 @@ export default function Onboarding4Screen() {
 
                     {/* Unit System Toggle */}
                     <View style={styles.toggleContainer}>
-                        <TouchableOpacity style={[styles.toggleButton, unitSystem === 'imperial' && { borderColor: AMBER }]} onPress={() => setUnitSystem('imperial')} activeOpacity={0.5}>
+                        <TouchableOpacity style={[styles.toggleButton, unitSystem === 'imperial' && { borderColor: AMBER }]} onPress={() => handleUnitToggle('imperial')} activeOpacity={0.5}>
                             <Text style={[styles.toggleText, unitSystem === 'imperial' && styles.toggleTextActive]}>Imperial</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={[styles.toggleButton, unitSystem === 'metric' && { borderColor: AMBER }]} onPress={() => setUnitSystem('metric')} activeOpacity={0.5}>
+                        <TouchableOpacity style={[styles.toggleButton, unitSystem === 'metric' && { borderColor: AMBER }]} onPress={() => handleUnitToggle('metric')} activeOpacity={0.5}>
                             <Text style={[styles.toggleText, unitSystem === 'metric' && styles.toggleTextActive]}>Metric</Text>
                         </TouchableOpacity>
                     </View>
@@ -72,7 +92,7 @@ export default function Onboarding4Screen() {
                         {/* Height Input */}
                         <View style={styles.inputGroup}>
                             <Text style={styles.inputLabel}>Height</Text>
-                            {unitSystem === 'imperial' ? (
+                            {unitSystem === 'imperial' ?
                                 <View style={styles.ftInRow}>
                                     <View style={[styles.inputWrapper, styles.ftInBox]}>
                                         <TextInput style={styles.input} placeholder="5" placeholderTextColor="#555" keyboardType="numeric" value={heightFt} onChangeText={setHeightFt} />
@@ -83,12 +103,11 @@ export default function Onboarding4Screen() {
                                         <Text style={styles.unitText}>in</Text>
                                     </View>
                                 </View>
-                            ) : (
-                                <View style={styles.inputWrapper}>
+                            :   <View style={styles.inputWrapper}>
                                     <TextInput style={styles.input} placeholder="178" placeholderTextColor="#555" keyboardType="numeric" value={height} onChangeText={setHeight} />
                                     <Text style={styles.unitText}>cm</Text>
                                 </View>
-                            )}
+                            }
                         </View>
 
                         {/* Weight Input */}
@@ -165,7 +184,7 @@ const styles = StyleSheet.create({
         width: 144,
         height: 144,
         borderRadius: 72,
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 1.5,
@@ -200,7 +219,7 @@ const styles = StyleSheet.create({
         height: 60,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         borderRadius: 14,
         borderWidth: 2,
         borderColor: '#242424',
@@ -233,7 +252,7 @@ const styles = StyleSheet.create({
     inputWrapper: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         borderRadius: 14,
         borderWidth: 1,
         borderColor: '#242424',
@@ -271,7 +290,7 @@ const styles = StyleSheet.create({
     backButton: {
         flex: 1,
         height: 60,
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         borderRadius: 16,
         justifyContent: 'center',
         alignItems: 'center',

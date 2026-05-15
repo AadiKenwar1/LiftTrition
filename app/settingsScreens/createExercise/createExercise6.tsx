@@ -54,13 +54,7 @@ export default function CreateExercise6Screen() {
     return (
         <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={Platform.OS === 'ios' ? 8 : 0}>
             <View style={styles.flex}>
-                <ScrollView
-                    style={styles.scroll}
-                    contentContainerStyle={[styles.scrollContent, { paddingBottom: scrollBottomPad }]}
-                    keyboardShouldPersistTaps="handled"
-                    showsVerticalScrollIndicator={false}
-                    bounces
-                >
+                <ScrollView style={styles.scroll} contentContainerStyle={[styles.scrollContent, { paddingBottom: scrollBottomPad }]} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} bounces>
                     {/* Success Icon */}
                     <View style={[styles.iconCircle, { borderColor: accent }]}>
                         <CheckCircle2 size={48} color={accent} strokeWidth={2} />
@@ -170,7 +164,7 @@ const styles = StyleSheet.create({
         gap: 10,
     },
     summaryCard: {
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         borderRadius: 15,
         borderWidth: 1,
         borderColor: '#2a2a2a',
@@ -212,7 +206,7 @@ const styles = StyleSheet.create({
     backButton: {
         flex: 1,
         height: 52,
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         borderRadius: 16,
         justifyContent: 'center',
         alignItems: 'center',

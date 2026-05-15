@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         marginBottom: 12,
         marginTop: 5,
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         borderColor: '#2f80ed',
     },
     titleText: {
@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
     backButton: {
         flex: 1,
         height: 52,
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         borderRadius: 16,
         justifyContent: 'center',
         alignItems: 'center',

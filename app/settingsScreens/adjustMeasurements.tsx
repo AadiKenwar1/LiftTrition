@@ -1,6 +1,6 @@
 import { useSettings } from '@/context/SettingsContext'
 import { validateHeightWeight } from '@/context/SettingsContext/functions/validator'
-import { feetInchesToInches, inchesToFeetInches } from '@/lib/utils/unitConversions'
+import { cmToInches, feetInchesToInches, inchesToCm, inchesToFeetInches, kgToLbs, lbsToKg } from '@/lib/utils/unitConversions'
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5'
 import { router } from 'expo-router'
 import { useState } from 'react'
@@ -16,6 +16,28 @@ export default function AdjustMeasurementsScreen() {
     const [heightIn, setHeightIn] = useState(settings.unitSystem === 'imperial' ? initialFtIn.inches.toString() : '')
     const [height, setHeight] = useState(settings.unitSystem === 'metric' ? settings.height.toString() : '')
     const [weight, setWeight] = useState(settings.bodyWeight.toString())
+
+    function handleUnitToggle(next: 'imperial' | 'metric') {
+        if (next === unitSystem) return
+        if (next === 'metric') {
+            // imperial → metric
+            const totalIn = feetInchesToInches(Number(heightFt) || 0, Number(heightIn) || 0)
+            if (totalIn > 0) setHeight(inchesToCm(totalIn).toString())
+            const lbs = Number(weight) || 0
+            if (lbs > 0) setWeight(lbsToKg(lbs).toString())
+        } else {
+            // metric → imperial
+            const cm = Number(height) || 0
+            if (cm > 0) {
+                const { feet, inches } = inchesToFeetInches(cmToInches(cm))
+                setHeightFt(feet.toString())
+                setHeightIn(inches.toString())
+            }
+            const kg = Number(weight) || 0
+            if (kg > 0) setWeight(kgToLbs(kg).toString())
+        }
+        setUnitSystem(next)
+    }
 
     function handleSave() {
         const totalHeight = unitSystem === 'imperial' ? feetInchesToInches(Number(heightFt), Number(heightIn)) : Number(height)
@@ -65,10 +87,10 @@ export default function AdjustMeasurementsScreen() {
 
                     {/* Unit System Toggle */}
                     <View style={styles.toggleContainer}>
-                        <TouchableOpacity style={[styles.toggleButton, unitSystem === 'imperial' && { borderColor: '#FBBF24' }]} onPress={() => setUnitSystem('imperial')} activeOpacity={0.5}>
+                        <TouchableOpacity style={[styles.toggleButton, unitSystem === 'imperial' && { borderColor: '#FBBF24' }]} onPress={() => handleUnitToggle('imperial')} activeOpacity={0.5}>
                             <Text style={[styles.toggleText, unitSystem === 'imperial' && styles.toggleTextActive]}>Imperial</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={[styles.toggleButton, unitSystem === 'metric' && { borderColor: '#FBBF24' }]} onPress={() => setUnitSystem('metric')} activeOpacity={0.5}>
+                        <TouchableOpacity style={[styles.toggleButton, unitSystem === 'metric' && { borderColor: '#FBBF24' }]} onPress={() => handleUnitToggle('metric')} activeOpacity={0.5}>
                             <Text style={[styles.toggleText, unitSystem === 'metric' && styles.toggleTextActive]}>Metric</Text>
                         </TouchableOpacity>
                     </View>
@@ -149,7 +171,7 @@ const styles = StyleSheet.create({
         width: 144,
         height: 144,
         borderRadius: 72,
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 1.5,
@@ -183,7 +205,7 @@ const styles = StyleSheet.create({
         height: 60,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         borderRadius: 14,
         borderWidth: 2,
         borderColor: '#242424',
@@ -212,7 +234,7 @@ const styles = StyleSheet.create({
     inputWrapper: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         borderRadius: 14,
         borderWidth: 1,
         borderColor: '#242424',

@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
         width: 80,
         height: 80,
         borderRadius: 40,
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
@@ -271,12 +271,12 @@ const styles = StyleSheet.create({
     stagedRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#282A2C',
+        backgroundColor: '#1e1e1e',
         borderRadius: 12,
         padding: 14,
         marginBottom: 8,
         borderWidth: 2,
-        borderColor: '#282A2C',
+        borderColor: '#1e1e1e',
     },
     stagedInfo: {
         flex: 1,
