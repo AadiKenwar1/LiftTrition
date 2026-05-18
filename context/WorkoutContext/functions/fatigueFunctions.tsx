@@ -128,7 +128,7 @@ export function getFatigueFeedback(percentage: number): string {
         return 'Nice work today. You pushed pretty hard! Make sure you recover well.'
     }
     if (percentage >= 50) {
-        return "Good session today. You're putting in solid work."
+        return 'Solid session today. Keep it up!'
     }
     if (percentage >= 25) {
         return 'Nice light session today. Good chance to work on form and keep things moving.'

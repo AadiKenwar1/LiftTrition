@@ -1,9 +1,13 @@
 import type { Exercise, Log } from '../types'
 
-// Estimate 1RM from weight and reps using the Epley formula
+// Estimate 1RM from weight and reps using the Epley formula.
+// When reps === 1, the load itself is the 1RM — no rep multiplier applied.
 export function estimate1RM(weight: number, reps: number): number {
     if (!weight || !reps || weight <= 0 || reps <= 0) {
         return 0
+    }
+    if (reps === 1) {
+        return weight
     }
     return weight * (1 + 0.0333 * reps)
 }

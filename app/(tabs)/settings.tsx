@@ -2,7 +2,7 @@ import { powerSync } from '@/lib/powersync/system'
 import { getPendingUploadEstimate } from '@/lib/powersync/uploadQueueStats'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
-import { ChevronRight, CreditCard, Dumbbell, FileText, HelpCircle, Plus, Scale, User, Utensils } from 'lucide-react-native'
+import { ChevronRight, CreditCard, Dumbbell, FileText, FlaskConical, HelpCircle, Plus, Scale, User, Utensils } from 'lucide-react-native'
 import { useEffect, useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 interface SettingsOption {
@@ -94,6 +94,13 @@ export default function SettingsScreen() {
             onPress: () => router.push('/settingsScreens/termsAndPrivacy'),
         },
         {
+            icon: FlaskConical,
+            iconColor: '#FFF',
+            title: 'How It Works',
+            subtitle: 'The science behind your goals and fatigue score',
+            onPress: () => router.push('/settingsScreens/howItWorks'),
+        },
+        {
             icon: HelpCircle,
             iconColor: '#FFF',
             title: 'Support and Feature Requests',
@@ -156,6 +163,7 @@ export default function SettingsScreen() {
                     <Text style={styles.sectionTitle}>SUPPORT</Text>
                     {renderSettingItem(settingsOptions[6], 6)}
                     {renderSettingItem(settingsOptions[7], 7)}
+                    {renderSettingItem(settingsOptions[8], 8)}
                 </View>
             </ScrollView>
         </View>

@@ -189,10 +189,10 @@ export default function ProgressScreen() {
                         <Text style={styles.graphSubtext}>
                             {mode ?
                                 <>
-                                    Graph displays estimated one rep max for <Text style={[styles.graphSubtext, { fontFamily: 'Poppins_600SemiBold' }]}>{selectedExercise}</Text> each training day
+                                    Graph displays estimated one rep max for <Text style={[styles.graphSubtext, { fontFamily: 'Poppins_600SemiBold', color: '#2f80ed' }]}>{selectedExercise}</Text> each training day
                                 </>
                             :   <>
-                                    Graph displays your <Text style={[styles.graphSubtext, { fontFamily: 'Poppins_600SemiBold' }]}>{selectedMacro.charAt(0).toUpperCase() + selectedMacro.slice(1)}</Text> intake by day
+                                    Graph displays your <Text style={[styles.graphSubtext, { fontFamily: 'Poppins_600SemiBold', color: '#22C933' }]}>{selectedMacro.charAt(0).toUpperCase() + selectedMacro.slice(1)}</Text> intake by day
                                 </>
                             }
                         </Text>
@@ -239,10 +239,10 @@ export default function ProgressScreen() {
                         <Text style={styles.graphSubtext}>
                             {mode ?
                                 <>
-                                    Graph displays <Text style={[styles.graphSubtext, { fontFamily: 'Poppins_600SemiBold' }]}>total sets</Text> by day
+                                    Graph displays <Text style={[styles.graphSubtext, { fontFamily: 'Poppins_600SemiBold', color: '#2f80ed' }]}>total sets</Text> by day
                                 </>
                             :   <>
-                                    Graph displays <Text style={[styles.graphSubtext, { fontFamily: 'Poppins_600SemiBold' }]}>body weight</Text> by day
+                                    Graph displays <Text style={[styles.graphSubtext, { fontFamily: 'Poppins_600SemiBold', color: '#22C933' }]}>body weight</Text> by day
                                 </>
                             }
                         </Text>

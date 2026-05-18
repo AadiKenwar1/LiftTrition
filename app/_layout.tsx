@@ -200,6 +200,7 @@ function StackLayout() {
                     <Stack.Screen name="settingsScreens/adjustMeasurements" options={{ headerShown: true, title: 'Adjust Measurements', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="settingsScreens/termsAndPrivacy" options={{ headerShown: true, title: 'Terms & Privacy', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="settingsScreens/support" options={{ headerShown: true, title: 'Support', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="settingsScreens/howItWorks" options={{ headerShown: true, title: 'How It Works', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="settingsScreens/devStatsModal" options={{ presentation: 'modal', headerShown: false }} />
                 </Stack.Protected>
             </Stack>
