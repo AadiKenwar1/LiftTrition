@@ -43,7 +43,7 @@ const SECTIONS = [
         steps: [
             {
                 label: 'Step 1 — Your Estimated Maximum',
-                body: 'For each exercise you log, we estimate your one-rep maximum based on the weight you lifted and the number of reps you completed. This gives us a personalised strength benchmark that updates as you get stronger.',
+                body: 'For each exercise you log, we estimate your one-rep maximum using your best set from the last 30 days — not just the current session. This rolling benchmark means a lighter day is still judged against your recent peak, keeping the score honest as you get stronger.',
             },
             {
                 label: 'Step 2 — Relative Intensity',
@@ -55,7 +55,7 @@ const SECTIONS = [
             },
             {
                 label: 'Step 4 — Exercise Type & Muscle Groups',
-                body: 'Compound barbell movements like squats and deadlifts stress more of your body than a cable curl. We account for this by weighting each exercise based on the muscles involved, whether it is a compound or isolation movement, and the equipment used.',
+                body: 'Compound barbell movements like squats and deadlifts stress more of your body than a cable curl. We account for this by weighting each exercise based on the muscles involved, whether it is a compound or isolation movement, and the equipment used. For bodyweight exercises like pull-ups and dips, your profile body weight is automatically used as the training load — so logging zero added weight still registers real fatigue.',
             },
             {
                 label: 'Step 5 — Your Activity Level',

@@ -64,14 +64,13 @@ export default function NutritionScreen() {
 
             {/* Section Header */}
             <View style={styles.sectionHeader}>
-                {isToday ? (
+                {isToday ?
                     <Text style={styles.sectionTitle}>Today&apos;s Logs</Text>
-                ) : (
-                    <View style={[styles.sectionTitleBlock, styles.sectionTitleStack]}>
+                :   <View style={[styles.sectionTitleBlock, styles.sectionTitleStack]}>
                         <Text style={styles.sectionTitleLine}>{formatDate(selectedDate, showYearInTitle)}&apos;s</Text>
                         <Text style={styles.sectionTitleLine}>Logs</Text>
                     </View>
-                )}
+                }
                 <View style={styles.dateActionsColumn}>
                     <TouchableOpacity style={styles.dateButton} activeOpacity={0.5} onPress={() => router.push('/nutritionScreens/dateModal')}>
                         <Calendar size={18} color="#22C922" strokeWidth={2.5} />

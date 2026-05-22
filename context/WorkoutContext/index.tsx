@@ -419,14 +419,14 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
     // ------------------------------------------------------------------
 
     const handleCalculateFatiguePercentage = useCallback(
-        (numDays: number, activityLevel: string, refByName?: Map<string, number>) =>
-            calculateFatiguePercentage(numDays, logs, exercises, fullExerciseLib, activityLevel, refByName),
+        (numDays: number, activityLevel: string, currentBodyWeight: number, bwProgress: Record<string, number>) =>
+            calculateFatiguePercentage(numDays, logs, exercises, fullExerciseLib, activityLevel, currentBodyWeight, bwProgress),
         [logs, exercises, fullExerciseLib]
     )
 
     const handleGetFatigueSummary = useCallback(
-        (activityLevel: string, refByName?: Map<string, number>) =>
-            calculateFatigueSummary(logs, exercises, fullExerciseLib, activityLevel, refByName),
+        (activityLevel: string, currentBodyWeight: number, bwProgress: Record<string, number>) =>
+            calculateFatigueSummary(logs, exercises, fullExerciseLib, activityLevel, currentBodyWeight, bwProgress),
         [logs, exercises, fullExerciseLib]
     )
 

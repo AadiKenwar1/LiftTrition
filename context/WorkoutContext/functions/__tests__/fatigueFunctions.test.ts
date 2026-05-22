@@ -45,6 +45,9 @@ function mockLib(fatigueFactor: number): ExerciseLib {
     }
 }
 
+const BW = 180
+const EMPTY_BW_PROGRESS: Record<string, number> = {}
+
 describe('fatigueFunctions', () => {
     beforeEach(() => {
         jest.useFakeTimers()
@@ -65,7 +68,7 @@ describe('fatigueFunctions', () => {
             const light = mockLog({ id: 'light', exerciseID: 'ex-1', date: new Date('2026-01-31'), weight: 50, reps: 5, rpe: 7 })
             const logs: Log[] = [heavy, light]
 
-            const pct = calculateFatiguePercentage(1, logs, exercises, lib, 'moderate')
+            const pct = calculateFatiguePercentage(1, logs, exercises, lib, 'moderate', BW, EMPTY_BW_PROGRESS)
 
             // Expected:
             // e1RM(100x5)=116.65; both sets use currentMax=116.65 due to rolling ref
@@ -97,7 +100,7 @@ describe('fatigueFunctions', () => {
             })
             const logs: Log[] = [oldLog]
 
-            const pct = calculateFatiguePercentage(60, logs, exercises, lib, 'moderate')
+            const pct = calculateFatiguePercentage(60, logs, exercises, lib, 'moderate', BW, EMPTY_BW_PROGRESS)
 
             // With no rolling reference, currentMax falls back to this set's e1RM.
             const e1 = 100 * (1 + 0.0333 * 5)
@@ -110,7 +113,75 @@ describe('fatigueFunctions', () => {
         test('returns 0 when there are no logs', () => {
             const exercises: Exercise[] = [mockExercise()]
             const lib = mockLib(1.0)
-            expect(calculateFatiguePercentage(1, [], exercises, lib, 'moderate')).toBe(0)
+            expect(calculateFatiguePercentage(1, [], exercises, lib, 'moderate', BW, EMPTY_BW_PROGRESS)).toBe(0)
+        })
+
+        test('bodyweight exercise logged as 0 uses profile body weight and produces fatigue > 0', () => {
+            const exercises: Exercise[] = [mockExercise({ id: 'ex-1', name: 'Pull Ups' })]
+            const lib: ExerciseLib = {
+                'Pull Ups': {
+                    mainMuscle: 'Lats',
+                    accessoryMuscles: ['Upper/Mid Back', 'Biceps'],
+                    fatigueFactor: 1.1,
+                    equipment: 'Bodyweight',
+                    isCompound: true,
+                },
+            }
+
+            const log = mockLog({ exerciseID: 'ex-1', weight: 0, reps: 10, rpe: 7 })
+            const pct = calculateFatiguePercentage(1, [log], exercises, lib, 'moderate', BW, EMPTY_BW_PROGRESS)
+
+            expect(pct).toBeGreaterThan(0)
+        })
+
+        test('weighted bodyweight exercise uses BW + added weight', () => {
+            const exercises: Exercise[] = [mockExercise({ id: 'ex-1', name: 'Pull Ups' })]
+            const lib: ExerciseLib = {
+                'Pull Ups': {
+                    mainMuscle: 'Lats',
+                    accessoryMuscles: [],
+                    fatigueFactor: 1.1,
+                    equipment: 'Bodyweight',
+                    isCompound: true,
+                },
+            }
+
+            const unweighted = mockLog({ id: 'bw', exerciseID: 'ex-1', weight: 0, reps: 5, rpe: 7 })
+            const weighted = mockLog({ id: 'belt', exerciseID: 'ex-1', weight: 25, reps: 5, rpe: 7 })
+
+            const pctUnweighted = calculateFatiguePercentage(1, [unweighted], exercises, lib, 'moderate', BW, EMPTY_BW_PROGRESS)
+            const pctWeighted = calculateFatiguePercentage(1, [weighted], exercises, lib, 'moderate', BW, EMPTY_BW_PROGRESS)
+
+            // BW+25 set should produce more fatigue than BW-only set at the same reps/RPE
+            expect(pctWeighted).toBeGreaterThan(pctUnweighted)
+        })
+
+        test('bwProgress uses historical body weight to compute effective load for old logs', () => {
+            // Two pull-up logs: a recent one (Jan 20) at high BW anchors the ref,
+            // and an old one (Jan 5) at lower historical BW. When bwProgress is provided,
+            // the old log's effective load uses the historical BW (160) instead of
+            // current BW (200), producing less fatigue than without bwProgress.
+            const pullUpEx = mockExercise({ id: 'pu', name: 'Pull Ups' })
+            const lib: ExerciseLib = {
+                'Pull Ups': { mainMuscle: 'Lats', accessoryMuscles: [], fatigueFactor: 1.1, equipment: 'Bodyweight', isCompound: true },
+            }
+
+            const currentBW = 200
+            // Recent log (Jan 20) — within 30d ref window; user was at 200 lbs.
+            const recentLog = mockLog({ id: 'recent', exerciseID: 'pu', date: new Date('2026-01-20'), weight: 0, reps: 5, rpe: 7 })
+            // Old log (Jan 5) — user was at 160 lbs historically.
+            const oldLog = mockLog({ id: 'old', exerciseID: 'pu', date: new Date('2026-01-05'), weight: 0, reps: 5, rpe: 7 })
+
+            // With bwProgress: oldLog uses 160, recentLog uses 200 (ref anchored at e1RM(200,5))
+            // Old log effective load 160 < ref anchor 200 → lower fatigue contribution
+            const bwProgress = { '2026-01-05': 160, '2026-01-20': 200 }
+            const pctHistorical = calculateFatiguePercentage(60, [recentLog, oldLog], [pullUpEx], lib, 'moderate', currentBW, bwProgress)
+
+            // Without bwProgress: both logs use currentBW=200 → old log effective load = 200 = ref anchor
+            const pctCurrent = calculateFatiguePercentage(60, [recentLog, oldLog], [pullUpEx], lib, 'moderate', currentBW, EMPTY_BW_PROGRESS)
+
+            // Using historical lighter BW for the old log produces less total fatigue
+            expect(pctHistorical).toBeLessThan(pctCurrent)
         })
     })
 
@@ -122,7 +193,7 @@ describe('fatigueFunctions', () => {
             const yesterday = new Date('2026-01-30T00:00:00')
             const yesterdayLog = mockLog({ id: 'y', exerciseID: 'ex-1', date: yesterday, weight: 100, reps: 5, rpe: 7 })
 
-            const summary = calculateFatigueSummary([yesterdayLog], exercises, lib, 'moderate')
+            const summary = calculateFatigueSummary([yesterdayLog], exercises, lib, 'moderate', BW, EMPTY_BW_PROGRESS)
             expect(summary.today).toBe(0)
             expect(summary.last3Days).toBeGreaterThan(0)
         })

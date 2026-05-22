@@ -1,6 +1,7 @@
+import { getDateKey } from '@/lib/utils/dateHelper'
 import { EQUIPMENT_FATIGUE_FACTORS, MUSCLE_FATIGUE_FACTORS } from '../exerciseLibrary/constants'
 import { Exercise, ExerciseLib, Log } from '../types'
-import { estimate1RM, oneRMMap } from './oneRepMaxFunctions'
+import { estimate1RM } from './oneRepMaxFunctions'
 
 // Daily fatigue "budget" by activity level (100% ≈ a hard day).
 const DAILY_BUDGETS: Record<string, number> = {
@@ -29,13 +30,33 @@ function addDays(d: Date, deltaDays: number) {
     return copy
 }
 
+// Returns the user's body weight on the date of a given log, using the closest
+// prior entry in bwProgress. Falls back to currentBodyWeight if no entry exists.
+function bwOnDate(bwProgress: Record<string, number>, date: Date, currentBodyWeight: number): number {
+    const logKey = getDateKey(date)
+    const sorted = Object.keys(bwProgress).sort()
+    let result = currentBodyWeight
+    for (const key of sorted) {
+        if (key <= logKey) result = bwProgress[key]
+        else break
+    }
+    return result
+}
+
+// Resolves the effective load for a set. Bodyweight exercises use the user's
+// body weight at the time of the log plus any added weight (e.g. belt/vest).
+function effectiveLoad(loggedWeight: number, equipment: string | undefined, bodyWeightAtTime: number): number {
+    if (equipment === 'Bodyweight') return bodyWeightAtTime + loggedWeight
+    return loggedWeight
+}
+
 //Calculate fatigue for a single set (activity level affects only daily budget, not per-set score)
-function calculateSetFatigue(log: Log, exerciseName: string, fatigueFactor: number, refByName: Map<string, number>): number {
+function calculateSetFatigue(weight: number, reps: number, rpe: number, exerciseName: string, fatigueFactor: number, refByName: Map<string, number>): number {
     const refMax = refByName.get(exerciseName) ?? 0
-    const estimatedMax = estimate1RM(log.weight, log.reps)
+    const estimatedMax = estimate1RM(weight, reps)
 
     // Best recent e1RM for this lift name (last 30 days); max with this set's e1RM handles
-    // missing/low rolling ref (sparse lifts, rename/keying), not “no fatigue sets.”
+    // missing/low rolling ref (sparse lifts, rename/keying), not "no fatigue sets."
     const currentMax = Math.max(refMax, estimatedMax)
     if (currentMax === 0) return 0
 
@@ -43,9 +64,45 @@ function calculateSetFatigue(log: Log, exerciseName: string, fatigueFactor: numb
     //   (w / 1RM) * (1 + reps/30)
     // scaled by perceived effort (RPE) and exercise fatigue factor.
     const defaultRPE = 7
-    const rpeScale = (log.rpe || defaultRPE) / 10
-    const base = (log.weight / currentMax) * (1 + log.reps / 30)
+    const rpeScale = (rpe || defaultRPE) / 10
+    const base = (weight / currentMax) * (1 + reps / 30)
     return base * rpeScale * fatigueFactor
+}
+
+// Builds a bodyweight-aware rolling 1RM reference map (exercise name → max e1RM over last refDays).
+// Uses effective load so the ref and the formula always use identical weights.
+function buildRefByName(
+    logs: Log[],
+    exercises: Exercise[],
+    fullExerciseLib: ExerciseLib,
+    refDays: number,
+    currentBodyWeight: number,
+    bwProgress: Record<string, number>,
+): Map<string, number> {
+    const refCutoff = addDays(new Date(), -refDays)
+    const idToName = new Map(exercises.map((e) => [e.id, e.name]))
+    const map = new Map<string, number>()
+
+    for (const log of logs) {
+        if (log.reps <= 0 || log.weight < 0) continue
+        if (getStartOfDay(log.date) < getStartOfDay(refCutoff)) continue
+
+        const name = idToName.get(log.exerciseID)
+        if (!name) continue
+
+        const def = fullExerciseLib[name]
+        const bwAtTime = bwOnDate(bwProgress, log.date, currentBodyWeight)
+        const w = effectiveLoad(log.weight, def?.equipment, bwAtTime)
+        if (w <= 0) continue
+
+        const e1 = estimate1RM(w, log.reps)
+        if (e1 <= 0) continue
+
+        const prev = map.get(name) ?? 0
+        if (e1 > prev) map.set(name, e1)
+    }
+
+    return map
 }
 
 export type FatigueSummary = {
@@ -56,12 +113,19 @@ export type FatigueSummary = {
 }
 
 //Calculate fatigue summary (today/3/6/9-day)
-export function calculateFatigueSummary(logs: Log[], exercises: Exercise[], fullExerciseLib: ExerciseLib, activityLevel: string = 'moderate', refByName?: Map<string, number>): FatigueSummary {
+export function calculateFatigueSummary(
+    logs: Log[],
+    exercises: Exercise[],
+    fullExerciseLib: ExerciseLib,
+    activityLevel: string = 'moderate',
+    currentBodyWeight: number,
+    bwProgress: Record<string, number>,
+): FatigueSummary {
     if (logs.length === 0) return { today: 0, last3Days: 0, last6Days: 0, last9Days: 0 }
 
     const DAYS = 30
 
-    const localRefByName = refByName ?? oneRMMap(exercises, logs, DAYS)
+    const localRefByName = buildRefByName(logs, exercises, fullExerciseLib, DAYS, currentBodyWeight, bwProgress)
     const exerciseMap = new Map(exercises.map((exercise) => [exercise.id, exercise]))
     const dailyBudget = getDailyBudget(activityLevel)
 
@@ -82,7 +146,7 @@ export function calculateFatigueSummary(logs: Log[], exercises: Exercise[], full
     let t9 = 0
 
     for (const log of logs) {
-        if (log.reps <= 0 || log.weight <= 0) continue
+        if (log.reps <= 0 || log.weight < 0) continue
         const logDay = getStartOfDay(log.date)
         if (logDay < cutoff9) continue
 
@@ -91,7 +155,11 @@ export function calculateFatigueSummary(logs: Log[], exercises: Exercise[], full
         const exerciseDef = fullExerciseLib[exercise.name]
         if (!exerciseDef?.fatigueFactor) continue
 
-        const setFatigue = calculateSetFatigue(log, exercise.name, exerciseDef.fatigueFactor, localRefByName)
+        const bwAtTime = bwOnDate(bwProgress, log.date, currentBodyWeight)
+        const w = effectiveLoad(log.weight, exerciseDef.equipment, bwAtTime)
+        if (w <= 0) continue
+
+        const setFatigue = calculateSetFatigue(w, log.reps, log.rpe, exercise.name, exerciseDef.fatigueFactor, localRefByName)
         if (setFatigue === 0) continue
 
         if (logDay >= cutoff1) {
@@ -159,11 +227,18 @@ export function calculateFatigueFactor(isCompound: boolean, mainMuscle: string, 
 }
 
 //Calculate fatigue percentage for the last X days (legacy function, used for specific day fatigue calculation)
-export function calculateFatiguePercentage(numDays: number, logs: Log[], exercises: Exercise[], fullExerciseLib: ExerciseLib, activityLevel: string = 'moderate', refByName?: Map<string, number>): number {
+export function calculateFatiguePercentage(
+    numDays: number,
+    logs: Log[],
+    exercises: Exercise[],
+    fullExerciseLib: ExerciseLib,
+    activityLevel: string = 'moderate',
+    currentBodyWeight: number,
+    bwProgress: Record<string, number>,
+): number {
     if (logs.length === 0) return 0
 
-    const localRefByName = refByName ?? oneRMMap(exercises, logs, 30)
-
+    const localRefByName = buildRefByName(logs, exercises, fullExerciseLib, 30, currentBodyWeight, bwProgress)
     const exerciseMap = new Map(exercises.map((exercise) => [exercise.id, exercise]))
 
     const cutoffDate = new Date()
@@ -172,21 +247,20 @@ export function calculateFatiguePercentage(numDays: number, logs: Log[], exercis
     let totalFatigue = 0
 
     for (const log of logs) {
-        // Skip invalid logs
-        if (log.reps <= 0 || log.weight <= 0) continue
-
-        // Skip logs outside date range
+        if (log.reps <= 0 || log.weight < 0) continue
         if (log.date < cutoffDate) continue
 
-        //Get the exercise the log is for
         const exercise = exerciseMap.get(log.exerciseID)
         if (!exercise) continue
 
-        //Find the exercises definition and get the fatigue factor
         const exerciseDef = fullExerciseLib[exercise.name]
         if (!exerciseDef?.fatigueFactor) continue
 
-        totalFatigue += calculateSetFatigue(log, exercise.name, exerciseDef.fatigueFactor, localRefByName)
+        const bwAtTime = bwOnDate(bwProgress, log.date, currentBodyWeight)
+        const w = effectiveLoad(log.weight, exerciseDef.equipment, bwAtTime)
+        if (w <= 0) continue
+
+        totalFatigue += calculateSetFatigue(w, log.reps, log.rpe, exercise.name, exerciseDef.fatigueFactor, localRefByName)
     }
 
     const dailyBudget = getDailyBudget(activityLevel) * numDays

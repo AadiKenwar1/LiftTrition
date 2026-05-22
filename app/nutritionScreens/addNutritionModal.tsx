@@ -77,8 +77,7 @@ export default function AddNutritionModal() {
             setLastGeneratedFood(currentFoodName)
             setCachedMacros(macros)
         } catch (error: unknown) {
-            const message =
-                (error instanceof Error ? error.message : null) ?? 'Unable to generate macros.'
+            const message = (error instanceof Error ? error.message : null) ?? 'Unable to generate macros.'
             Alert.alert('Generation Failed', `${message} Please check internet connection and try again.`, [{ text: 'OK' }])
         } finally {
             setGeneratingField(null)
@@ -93,12 +92,7 @@ export default function AddNutritionModal() {
         const buttonStyle = !hasPremium || isDimmed ? styles.aiButtonUnavailable : styles.aiButton
         const iconColor = !hasPremium || isDimmed ? '#666' : '#22C922'
         return (
-            <TouchableOpacity
-                style={buttonStyle}
-                activeOpacity={0.75}
-                onPress={() => (hasPremium ? handleGenerateMacros(field) : router.replace('/settingsScreens/subscription'))}
-                disabled={isGenerating}
-            >
+            <TouchableOpacity style={buttonStyle} activeOpacity={0.75} onPress={() => (hasPremium ? handleGenerateMacros(field) : router.replace('/settingsScreens/subscription'))} disabled={isGenerating}>
                 <View style={styles.aiButtonContent}>
                     {isLoading ?
                         <ActivityIndicator size="small" color="#22C922" />

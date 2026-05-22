@@ -12,7 +12,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Alert, Animated, FlatList, Keyboard, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
 
 export default function LogsModal() {
-    const { handleAddLog, handleDeleteLog, logs, setLastExercise } = useWorkout()
+    const { handleAddLog, handleDeleteLog, logs, setLastExercise, fullExerciseLib } = useWorkout()
     const { settings } = useSettings()
     const params = useLocalSearchParams<{ workoutId: string; exerciseId: string; exerciseName: string }>()
     const { userID } = useAuth()
@@ -22,6 +22,9 @@ export default function LogsModal() {
     const workoutId = typeof params.workoutId === 'string' ? params.workoutId : params.workoutId?.[0] || ''
     const exerciseId = typeof params.exerciseId === 'string' ? params.exerciseId : params.exerciseId?.[0] || ''
     const exerciseName = typeof params.exerciseName === 'string' ? params.exerciseName : params.exerciseName?.[0] || 'Log'
+    const isBodyweight = fullExerciseLib[exerciseName]?.equipment === 'Bodyweight'
+    const weightLabel = isBodyweight ? `Added weight (${weightUnit})` : `Weight (${weightUnit})`
+    const weightPlaceholder = '0'
 
     // State for the input (set information) fields
     const [weight, setWeight] = useState('')
@@ -127,10 +130,10 @@ export default function LogsModal() {
                                     <View style={styles.inputsRow}>
                                         {/* Weight Input */}
                                         <View style={styles.inputGroup}>
-                                            <Text style={styles.inputLabel}>Weight ({weightUnit})</Text>
+                                            <Text style={styles.inputLabel}>{weightLabel}</Text>
                                             <TextInput
                                                 style={[styles.input, focusedField === 'weight' && styles.inputFocused]}
-                                                placeholder="0"
+                                                placeholder={weightPlaceholder}
                                                 placeholderTextColor="#666"
                                                 value={weight}
                                                 onChangeText={setWeight}

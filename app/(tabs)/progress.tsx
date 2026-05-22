@@ -6,7 +6,7 @@ import ModeSwitcher from '@/components/NeutralComponents/ModeSwitcher'
 import { useNutrition } from '@/context/NutritionContext'
 import { useSettings } from '@/context/SettingsContext'
 import { useWorkout } from '@/context/WorkoutContext'
-import { oneRMMap } from '@/context/WorkoutContext/functions/oneRepMaxFunctions'
+
 import { downsampleData } from '@/lib/utils/downsample'
 import { useFonts } from 'expo-font'
 import { ChevronDown, Dumbbell, Scale } from 'lucide-react-native'
@@ -19,7 +19,7 @@ export default function ProgressScreen() {
     })
     const { mode, settings } = useSettings()
     const { handleGetMacrosForDate, handleGetMacroDataForGraph, nutritionData } = useNutrition()
-    const { handleGetFatigueSummary, getFatigueFeedback, logs, exercises, handleGetOneRepMaxData, handleGetSetsData, lastExercise, setLastExercise, fullExerciseLibAsList } = useWorkout()
+    const { handleGetFatigueSummary, getFatigueFeedback, logs, handleGetOneRepMaxData, handleGetSetsData, lastExercise, setLastExercise, fullExerciseLibAsList } = useWorkout()
     const { handleGetBodyWeightProgressData, bwProgress } = useSettings()
 
     // Local state for graph selections
@@ -53,22 +53,10 @@ export default function ProgressScreen() {
 
     const selectionData = mode ? fullExerciseLibAsList : macroList
 
-    // Get recent logs for the last 30 days used for fatigue calculations
-    const recentLogs30 = useMemo(() => {
-        const cutoff = new Date()
-        cutoff.setDate(cutoff.getDate() - 30)
-        return logs.filter((l) => l.date >= cutoff && l.reps > 0 && l.weight > 0)
-    }, [logs])
-
-    // Get one rep max map for fatigue calculations
-    const oneRmRefByName = useMemo(() => {
-        return oneRMMap(exercises, recentLogs30 ?? [], 30)
-    }, [recentLogs30])
-
     // Fatigue data for wheels
     const fatigueData = useMemo(() => {
-        return handleGetFatigueSummary(settings.activityLevel, oneRmRefByName)
-    }, [logs, settings.activityLevel, mode, oneRmRefByName, handleGetFatigueSummary])
+        return handleGetFatigueSummary(settings.activityLevel, settings.bodyWeight, bwProgress)
+    }, [logs, settings.activityLevel, settings.bodyWeight, bwProgress, handleGetFatigueSummary])
 
     //Macro data for wheels
     const todayMacros = useMemo(() => {
