@@ -1,4 +1,4 @@
-import { BicepsFlexed, FlaskConical, Utensils } from 'lucide-react-native'
+import { BicepsFlexed, FlaskConical, TrendingUp, Utensils } from 'lucide-react-native'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -64,6 +64,26 @@ const SECTIONS = [
         ],
         footnote:
             'The one-rep max estimation component is derived from the Epley formula, a foundational strength-science model that has been used in exercise physiology research for decades.',
+    },
+    {
+        Icon: TrendingUp,
+        iconColor: '#2f80ed',
+        badge: 'Epley Formula · Published 1985',
+        title: 'How Your 1 Rep Max Chart Works',
+        intro:
+            'On the Progress tab, pick an exercise to see how your estimated strength is trending. The graph shows your recent training history for that lift — only on days you actually logged sets.',
+        steps: [
+            {
+                label: 'Step 1 — One Point Per Day',
+                body: 'Each day you train that exercise, we plot one value: the highest estimated one-rep max from that day. If you log multiple sets, only your best set that day is used for the point.',
+            },
+            {
+                label: 'Step 2 — The Epley Formula',
+                body: 'We estimate your max from the weight and reps you logged. For more than one rep, estimated max = weight × (1 + reps ÷ 30). A true one-rep set counts as the weight you lifted. Values are rounded for display on the chart.',
+            },
+        ],
+        footnote:
+            'The chart applies the Epley formula to each day’s best set, a widely used method in strength training for estimating one-rep max from submaximal work and tracking progress over time without a true single-rep test.',
     },
 ]
 
