@@ -1,4 +1,4 @@
-import { useColorScheme } from '@/components/ExpoComponents/useColorScheme'
+import { ThemeProvider, useColorScheme } from '@/context/ThemeContext'
 import { AppLoadingScreen } from '@/components/GuardComponents/AppLoadingScreen'
 import { PowerSyncGuard } from '@/components/GuardComponents/PowerSyncGuard'
 import { SyncWatchdog } from '@/components/GuardComponents/SyncWatchdog'
@@ -29,7 +29,7 @@ import {
 } from '@expo-google-fonts/poppins'
 import { Ionicons } from '@expo/vector-icons'
 import FontAwesome from '@expo/vector-icons/FontAwesome'
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native'
+import { DarkTheme, DefaultTheme, ThemeProvider as NavigationThemeProvider } from '@react-navigation/native'
 import * as Sentry from '@sentry/react-native'
 import { Asset } from 'expo-asset'
 import { useFonts } from 'expo-font'
@@ -208,27 +208,34 @@ function StackLayout() {
     )
 }
 
-function RootLayoutNav() {
+function NavigationTheme({ children }: PropsWithChildren) {
     const colorScheme = useColorScheme()
+    return <NavigationThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>{children}</NavigationThemeProvider>
+}
+
+function RootLayoutNav() {
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
             <SafeAreaProvider>
-                <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-                    <AuthProvider>
-                        <PowerSyncGuard>
-                            <SyncWatchdog />
-                            <SettingsProvider>
-                                <BillingProvider>
-                                    <WorkoutProvider>
-                                        <NutritionProvider>
-                                            <StackLayout />
-                                        </NutritionProvider>
-                                    </WorkoutProvider>
-                                </BillingProvider>
-                            </SettingsProvider>
+                <ThemeProvider>
+                    <NavigationTheme>
+                        <AuthProvider>
+                            <PowerSyncGuard>
+                                <SyncWatchdog />
+                                <SettingsProvider>
+                                    <BillingProvider>
+                                        <WorkoutProvider>
+                                            <NutritionProvider>
+                                                <StackLayout />
+                                            </NutritionProvider>
+                                        </WorkoutProvider>
+                                    </BillingProvider>
+                                </SettingsProvider>
+                            </SyncWatchdog>
                         </PowerSyncGuard>
                     </AuthProvider>
-                </ThemeProvider>
+                </NavigationTheme>
+            </ThemeProvider>
             </SafeAreaProvider>
         </GestureHandlerRootView>
     )
