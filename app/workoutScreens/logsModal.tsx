@@ -7,7 +7,7 @@ import { Log } from '@/context/WorkoutContext/types'
 import { formatDateOrToday, getDateKey, isDateAfterToday, sortByDateDesc } from '@/lib/utils/dateHelper'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useLocalSearchParams } from 'expo-router'
-import { Calendar, Check } from 'lucide-react-native'
+import { BicepsFlexed, Calendar, Check, RotateCcw } from 'lucide-react-native'
 import { useEffect, useRef, useState } from 'react'
 import { Alert, Animated, FlatList, Keyboard, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
 
@@ -92,6 +92,7 @@ export default function LogsModal() {
     }
 
     const isValid = weight.trim() && reps.trim()
+    const isLogDateToday = getDateKey(new Date()) === getDateKey(selectedLogDate)
 
     // Filter and sort logs (most recent date first, then most recent time within same calendar day)
     const exerciseLogs = logs
@@ -114,9 +115,12 @@ export default function LogsModal() {
                     </View>
 
                     <View style={styles.content}>
-                        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
                             <View>
-                                <Text style={styles.exerciseTitle}>{exerciseName}</Text>
+                                <View style={styles.exerciseTitleRow}>
+                                    <Text style={styles.exerciseTitle}>{exerciseName}</Text>
+                                    <BicepsFlexed size={20} color="#2f80ed" strokeWidth={2} />
+                                </View>
                                 {/* Compact Input Section */}
                                 <View style={styles.inputSection}>
                                     {/* Input Fields Row */}
@@ -202,11 +206,15 @@ export default function LogsModal() {
                                                     </Text>
                                                 </View>
                                             </View>
-                                            <Text style={styles.changeDateButtonHint} adjustsFontSizeToFit minimumFontScale={0.65} numberOfLines={3}>
-                                                Logs will be added to the selected date
-                                            </Text>
                                         </View>
                                     </TouchableOpacity>
+
+                                    {!isLogDateToday && (
+                                        <TouchableOpacity onPress={() => setSelectedLogDate(new Date())} style={styles.todayButton} activeOpacity={0.5}>
+                                            <RotateCcw size={18} color="#2f80ed" strokeWidth={2.5} />
+                                            <Text style={styles.todayButtonText}>Today</Text>
+                                        </TouchableOpacity>
+                                    )}
                                 </View>
                             </View>
                         </TouchableWithoutFeedback>
@@ -258,12 +266,18 @@ const styles = StyleSheet.create({
         paddingTop: 12,
         paddingBottom: 32,
     },
+    exerciseTitleRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        marginBottom: 16,
+    },
     exerciseTitle: {
         fontSize: 20,
         color: '#FFF',
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
-        marginBottom: 16,
+        flexShrink: 1,
     },
     inputSection: {
         marginBottom: 20,
@@ -376,6 +390,25 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_600SemiBold',
         letterSpacing: -0.5,
         textAlign: 'left',
+    },
+    todayButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 6,
+        marginTop: 8,
+        paddingVertical: 10,
+        paddingHorizontal: 12,
+        backgroundColor: '#1e1e1e',
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: '#2a2a2a',
+    },
+    todayButtonText: {
+        fontSize: 14,
+        color: '#2f80ed',
+        fontFamily: 'Poppins_600SemiBold',
+        letterSpacing: -0.5,
     },
     changeDateButtonHint: {
         width: '100%',

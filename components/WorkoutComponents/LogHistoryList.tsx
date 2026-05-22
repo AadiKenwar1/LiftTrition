@@ -1,9 +1,9 @@
 import type { Log } from '@/context/WorkoutContext/types'
-import { formatDateOrToday } from '@/lib/utils/dateHelper'
+import { formatDateOrToday, getDateKey } from '@/lib/utils/dateHelper'
 import { Trash } from 'lucide-react-native'
 import type { RefObject } from 'react'
 import { useEffect, useRef, useState } from 'react'
-import { Animated, FlatList, Keyboard, LayoutAnimation, Platform, StyleSheet, Text, TouchableOpacity, UIManager, View } from 'react-native'
+import { Animated, FlatList, Keyboard, LayoutAnimation, Platform, Pressable, StyleSheet, Text, TouchableOpacity, UIManager, View } from 'react-native'
 
 type LogHistoryListProps = {
     logs: Log[]
@@ -45,34 +45,42 @@ export default function LogHistoryList({ logs, weightUnit, lastAddedLogId, onDel
         setDeletingLogId(id)
     }
 
-    const renderLog = ({ item }: { item: Log }) => {
+    const renderLog = ({ item, index }: { item: Log; index: number }) => {
         const isDeleting = item.id === deletingLogId
+        const showDateHeader = index === 0 || getDateKey(item.date) !== getDateKey(logs[index - 1].date)
         const wrapperStyle = [styles.logItemWrapper, item.id === lastAddedLogId && styles.logItemWrapperHighlight]
 
         const content = (
-            <View style={wrapperStyle}>
-                <View style={styles.logAccentBar} />
-                <View style={styles.logItem}>
-                    <View style={styles.logContent}>
-                        <View style={styles.logInfo}>
-                            <Text style={styles.logWeight}>
-                                {item.weight} {weightUnit}
-                            </Text>
-                            <Text style={styles.logSeparator}>×</Text>
-                            <Text style={styles.logReps}>{item.reps} reps</Text>
-                            {item.rpe > 0 && (
-                                <>
-                                    <Text style={styles.logSeparator}>•</Text>
-                                    <Text style={styles.logRpe}>RPE {item.rpe}</Text>
-                                </>
-                            )}
-                        </View>
-                        <Text style={styles.logDate}>{formatDateOrToday(item.date, true)}</Text>
+            <View>
+                {showDateHeader && (
+                    <View style={[styles.dateHeader, index > 0 && styles.dateHeaderSpaced]}>
+                        <Text style={styles.dateHeaderText}>{formatDateOrToday(item.date, true)}</Text>
                     </View>
+                )}
+                <View style={wrapperStyle}>
+                    <View style={styles.logAccentBar} />
+                    <View style={styles.logItem}>
+                        <View style={styles.logContent}>
+                            <View style={styles.logInfo}>
+                                <Text style={styles.logWeight}>
+                                    {item.weight} {weightUnit}
+                                </Text>
+                                <Text style={styles.logSeparator}>×</Text>
+                                <Text style={styles.logReps}>{item.reps} reps</Text>
+                                {item.rpe > 0 && (
+                                    <>
+                                        <Text style={styles.logSeparator}>•</Text>
+                                        <Text style={styles.logRpe}>RPE {item.rpe}</Text>
+                                    </>
+                                )}
+                            </View>
+                            {/* <Text style={styles.logDate}>{formatDateOrToday(item.date, true)}</Text> */}
+                        </View>
 
-                    <TouchableOpacity onPress={() => handleDelete(item.id)} style={styles.deleteButton} activeOpacity={0.6} disabled={isDeleting}>
-                        <Trash size={20} color="#FF453A" strokeWidth={2.5} />
-                    </TouchableOpacity>
+                        <TouchableOpacity onPress={() => handleDelete(item.id)} style={styles.deleteButton} activeOpacity={0.6} disabled={isDeleting}>
+                            <Trash size={20} color="#FF453A" strokeWidth={2.5} />
+                        </TouchableOpacity>
+                    </View>
                 </View>
             </View>
         )
@@ -86,7 +94,9 @@ export default function LogHistoryList({ logs, weightUnit, lastAddedLogId, onDel
 
     return (
         <View style={styles.logsSection}>
-            <Text style={styles.logsSectionTitle}>History</Text>
+            <Pressable onPress={Keyboard.dismiss}>
+                <Text style={styles.logsSectionTitle}>History</Text>
+            </Pressable>
             <FlatList
                 ref={flatListRef}
                 data={logs}
@@ -96,7 +106,7 @@ export default function LogHistoryList({ logs, weightUnit, lastAddedLogId, onDel
                 contentContainerStyle={styles.logsList}
                 style={styles.logsFlatList}
                 keyboardShouldPersistTaps="handled"
-                onScrollBeginDrag={Keyboard.dismiss}
+                keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
                 onScrollToIndexFailed={() => {}}
             />
         </View>
@@ -122,6 +132,20 @@ const styles = StyleSheet.create({
     },
     logsList: {
         paddingBottom: 20,
+    },
+    dateHeader: {
+        marginBottom: 8,
+        paddingBottom: 6,
+        borderBottomWidth: 1,
+        borderBottomColor: '#2a2a2a',
+    },
+    dateHeaderSpaced: {
+        marginTop: 8,
+    },
+    dateHeaderText: {
+        fontSize: 13,
+        color: '#888',
+        fontFamily: 'Poppins_600SemiBold',
     },
     logItemWrapper: {
         flexDirection: 'row',

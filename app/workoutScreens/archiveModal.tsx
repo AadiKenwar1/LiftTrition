@@ -13,9 +13,13 @@ export default function ArchiveModal() {
 
     let data: Workout[] | Exercise[] = []
     if (logType === 'workouts') {
-        data = workouts.filter((workout) => workout.archived)
+        data = workouts
+            .filter((workout) => workout.archived)
+            .sort((a, b) => a.order - b.order)
     } else if (logType === 'exercises') {
-        data = exercises.filter((exercise) => exercise.archived)
+        data = exercises
+            .filter((exercise) => exercise.archived)
+            .sort((a, b) => a.order - b.order)
     }
 
     const renderItem = ({ item }: { item: any }) => (
@@ -24,7 +28,6 @@ export default function ArchiveModal() {
             <View style={styles.item}>
                 <View style={styles.itemInfo}>
                     <Text style={styles.itemName}>{item.name}</Text>
-                    {item.note && <Text style={styles.itemNote}>{item.note}</Text>}
                 </View>
                 <View style={styles.iconContainer}>
                     <TouchableOpacity style={styles.iconButton} activeOpacity={0.5} onPress={() => (logType === 'workouts' ? handleArchiveWorkout(item.id, true) : handleArchiveExercise(item.id, item.workoutID, true))}>
@@ -169,13 +172,6 @@ const styles = StyleSheet.create({
         color: '#FFF',
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
-    },
-    itemNote: {
-        fontSize: 13,
-        color: '#999',
-        marginTop: 4,
-        letterSpacing: 0.2,
-        fontFamily: 'Poppins_400Regular',
     },
     iconContainer: {
         flexDirection: 'row',

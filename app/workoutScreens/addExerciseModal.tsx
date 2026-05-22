@@ -3,7 +3,7 @@ import { useAuth } from '@/context/AuthContext'
 import { useWorkout } from '@/context/WorkoutContext'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { Dumbbell } from 'lucide-react-native'
-import { KeyboardAvoidingView, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Keyboard, KeyboardAvoidingView, Platform, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
 
 export default function AddExerciseModal() {
     //Workout Context Functions
@@ -15,32 +15,36 @@ export default function AddExerciseModal() {
 
     return (
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
-            {/* Drag Handle */}
-            <View style={styles.handleContainer}>
-                <View style={styles.handle} />
-            </View>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+                <View style={styles.inner}>
+                    {/* Drag Handle */}
+                    <View style={styles.handleContainer}>
+                        <View style={styles.handle} />
+                    </View>
 
-            {/* Header Section */}
-            <View style={styles.header}>
-                <View style={styles.iconCircle}>
-                    <Dumbbell size={40} color="#2f80ed" strokeWidth={2} />
+                    {/* Header Section */}
+                    <View style={styles.header}>
+                        <View style={styles.iconCircle}>
+                            <Dumbbell size={40} color="#2f80ed" strokeWidth={2} />
+                        </View>
+                        <Text style={styles.title}>Add Exercise</Text>
+                        <Text style={styles.subtitle}>Choose from our exercise library</Text>
+                        <TouchableOpacity onPress={() => router.replace('/settingsScreens/createExercise/createExercise1')}>
+                            <Text style={[styles.subtitle, { color: '#2f80ed' }]}>Or Click Here to Add an Exercise</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    {/* Scrollable List */}
+                    <ScrollableList
+                        data={fullExerciseLibAsList}
+                        searchPlaceholder="Search exercises..."
+                        onPress={(item: ScrollableListItem) => {
+                            handleAddExercise(workoutId, userID, item.title)
+                            router.back()
+                        }}
+                    />
                 </View>
-                <Text style={styles.title}>Add Exercise</Text>
-                <Text style={styles.subtitle}>Choose from our exercise library</Text>
-                <TouchableOpacity onPress={() => router.replace('/settingsScreens/createExercise/createExercise1')}>
-                    <Text style={[styles.subtitle, { color: '#2f80ed' }]}>Or Click Here to Add an Exercise</Text>
-                </TouchableOpacity>
-            </View>
-
-            {/* Scrollable List */}
-            <ScrollableList
-                data={fullExerciseLibAsList}
-                searchPlaceholder="Search exercises..."
-                onPress={(item: ScrollableListItem) => {
-                    handleAddExercise(workoutId, userID, item.title)
-                    router.back()
-                }}
-            />
+            </TouchableWithoutFeedback>
         </KeyboardAvoidingView>
     )
 }
@@ -52,6 +56,9 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
         overflow: 'hidden',
+    },
+    inner: {
+        flex: 1,
         paddingHorizontal: 25,
     },
     handleContainer: {

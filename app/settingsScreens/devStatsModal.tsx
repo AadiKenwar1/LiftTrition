@@ -258,6 +258,7 @@ export default function DevStatsScreen() {
                     <Text style={[styles.line, styles.warn]}>Orchestrator error: {orchestrator.lastError}</Text>
                 :   <Text style={[styles.line, styles.subtle]}>Orchestrator error: none</Text>}
                 <Text style={[styles.line, styles.subtle]}>Kick cooldown: {kickCooldownMs > 0 ? `${Math.ceil(kickCooldownMs / 1000)}s until kick allowed` : 'Kick allowed now'}</Text>
+                <Text>Build Change</Text>
             </ScrollView>
         </View>
     )

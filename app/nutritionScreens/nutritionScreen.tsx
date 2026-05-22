@@ -4,11 +4,11 @@ import { useNutrition } from '@/context/NutritionContext'
 import { NutritionEntry } from '@/context/NutritionContext/types'
 import { formatDate, getDateKey } from '@/lib/utils/dateHelper'
 import { useRouter } from 'expo-router'
-import { Calendar, Utensils } from 'lucide-react-native'
+import { Calendar, RotateCcw, Utensils } from 'lucide-react-native'
 import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 export default function NutritionScreen() {
-    const { nutritionData, selectedDate, handleSaveNutrition, handleDeleteNutrition } = useNutrition()
+    const { nutritionData, selectedDate, setSelectedDate, handleSaveNutrition, handleDeleteNutrition } = useNutrition()
     const router = useRouter()
 
     // Filter entries for selected date
@@ -22,6 +22,7 @@ export default function NutritionScreen() {
 
     // Check if selected date is today
     const isToday = getDateKey(new Date()) === selectedDateKey
+    const showYearInTitle = selectedDate.getFullYear() !== new Date().getFullYear()
 
     function handleEdit(nutritionEntry: NutritionEntry) {
         Alert.alert(`Options for Nutrition Entry: ${nutritionEntry.name}`, ``, [
@@ -63,11 +64,26 @@ export default function NutritionScreen() {
 
             {/* Section Header */}
             <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>{isToday ? "Today's Logs" : `${formatDate(selectedDate, false)}'s Logs`}</Text>
-                <TouchableOpacity style={styles.dateButton} activeOpacity={0.5} onPress={() => router.push('/nutritionScreens/dateModal')}>
-                    <Calendar size={18} color="#22C922" strokeWidth={2.5} />
-                    <Text style={styles.dateButtonText}>Change Date</Text>
-                </TouchableOpacity>
+                {isToday ? (
+                    <Text style={styles.sectionTitle}>Today&apos;s Logs</Text>
+                ) : (
+                    <View style={[styles.sectionTitleBlock, styles.sectionTitleStack]}>
+                        <Text style={styles.sectionTitleLine}>{formatDate(selectedDate, showYearInTitle)}&apos;s</Text>
+                        <Text style={styles.sectionTitleLine}>Logs</Text>
+                    </View>
+                )}
+                <View style={styles.dateActionsColumn}>
+                    <TouchableOpacity style={styles.dateButton} activeOpacity={0.5} onPress={() => router.push('/nutritionScreens/dateModal')}>
+                        <Calendar size={18} color="#22C922" strokeWidth={2.5} />
+                        <Text style={styles.dateButtonText}>Change Date</Text>
+                    </TouchableOpacity>
+                    {!isToday && (
+                        <TouchableOpacity style={styles.dateButton} activeOpacity={0.5} onPress={() => setSelectedDate(new Date())}>
+                            <RotateCcw size={18} color="#22C922" strokeWidth={2.5} />
+                            <Text style={styles.dateButtonText}>Today</Text>
+                        </TouchableOpacity>
+                    )}
+                </View>
             </View>
         </>
     )
@@ -78,7 +94,7 @@ export default function NutritionScreen() {
                 <Utensils size={56} color="#22C922" strokeWidth={2} />
             </View>
             <Text style={styles.emptyText}>{isToday ? 'No Nutrition Logs Yet' : 'No Nutrition Logs Recorded'}</Text>
-            <Text style={styles.emptySubtext}>{isToday ? 'Tap the ⋮ button to add your first meal and start tracking your nutrition' : `No nutrition entries recorded for ${formatDate(selectedDate)}`}</Text>
+            <Text style={styles.emptySubtext}>{isToday ? 'Tap the ⋮ button to add your first meal and start tracking your nutrition' : `No nutrition entries recorded for ${formatDate(selectedDate, showYearInTitle)}`}</Text>
         </View>
     )
 
@@ -118,11 +134,29 @@ const styles = StyleSheet.create({
     },
     sectionTitle: {
         fontSize: 22,
+        flex: 1,
         flexShrink: 1,
         color: '#fff',
         letterSpacing: -0.5,
-        marginBottom: 12,
+        marginRight: 12,
         fontFamily: 'Poppins_600SemiBold',
+    },
+    sectionTitleBlock: {
+        flex: 1,
+        marginRight: 12,
+    },
+    sectionTitleStack: {
+        gap: 2,
+    },
+    sectionTitleLine: {
+        fontSize: 22,
+        color: '#fff',
+        letterSpacing: -0.5,
+        fontFamily: 'Poppins_600SemiBold',
+    },
+    dateActionsColumn: {
+        alignItems: 'flex-end',
+        gap: 8,
     },
     dateButton: {
         flexDirection: 'row',

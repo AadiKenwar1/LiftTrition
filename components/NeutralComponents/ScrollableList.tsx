@@ -1,7 +1,7 @@
 import { useSettings } from '@/context/SettingsContext'
 import { Search } from 'lucide-react-native'
 import { useState } from 'react'
-import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { FlatList, Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
 export interface ScrollableListItem {
     id: string
@@ -77,6 +77,9 @@ export default function ScrollableList({ data, searchPlaceholder = 'Search...', 
                 contentContainerStyle={styles.listContent}
                 showsVerticalScrollIndicator={false}
                 nestedScrollEnabled={nestedScrollEnabled}
+                keyboardShouldPersistTaps="handled"
+                keyboardDismissMode="on-drag"
+                onScrollBeginDrag={Keyboard.dismiss}
             />
         </View>
     )

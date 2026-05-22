@@ -154,14 +154,24 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
                 }
             }
         } else {
-            // Currently active → archiving
-            setWorkoutsState(prev => prev.map(w => w.id === id ? { ...w, archived: true, updatedAt: now } : w))
+            // Currently active → archiving: place at top of archived list, bump other archived
+            setWorkoutsState(prev => prev.map(w => {
+                if (w.id === id) return { ...w, archived: true, order: 0, updatedAt: now }
+                if (w.archived) return { ...w, order: w.order + 1, updatedAt: now }
+                return w
+            }))
             if (userID) {
                 try {
-                    await powerSync.execute(
-                        `UPDATE workouts SET archived = 1, updated_at = datetime('now') WHERE id = ?`,
-                        [id]
-                    )
+                    await powerSync.writeTransaction(async (tx) => {
+                        await tx.execute(
+                            `UPDATE workouts SET "order" = "order" + 1, updated_at = datetime('now') WHERE user_id = ? AND archived = 1 AND id != ?`,
+                            [userID, id]
+                        )
+                        await tx.execute(
+                            `UPDATE workouts SET archived = 1, "order" = 0, updated_at = datetime('now') WHERE id = ?`,
+                            [id]
+                        )
+                    })
                 } catch (e) {
                     console.warn('[WorkoutContext] Failed to archive workout', e)
                 }
@@ -285,14 +295,24 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
                 }
             }
         } else {
-            // Currently active → archiving
-            setExercisesState(prev => prev.map(e => e.id === id ? { ...e, archived: true, updatedAt: now } : e))
+            // Currently active → archiving: place at top of archived list, bump other archived in workout
+            setExercisesState(prev => prev.map(e => {
+                if (e.id === id) return { ...e, archived: true, order: 0, updatedAt: now }
+                if (e.workoutID === workoutID && e.archived) return { ...e, order: e.order + 1, updatedAt: now }
+                return e
+            }))
             if (userID) {
                 try {
-                    await powerSync.execute(
-                        `UPDATE exercises SET archived = 1, updated_at = datetime('now') WHERE id = ?`,
-                        [id]
-                    )
+                    await powerSync.writeTransaction(async (tx) => {
+                        await tx.execute(
+                            `UPDATE exercises SET "order" = "order" + 1, updated_at = datetime('now') WHERE workout_id = ? AND archived = 1 AND id != ?`,
+                            [workoutID, id]
+                        )
+                        await tx.execute(
+                            `UPDATE exercises SET archived = 1, "order" = 0, updated_at = datetime('now') WHERE id = ?`,
+                            [id]
+                        )
+                    })
                 } catch (e) {
                     console.warn('[WorkoutContext] Failed to archive exercise', e)
                 }

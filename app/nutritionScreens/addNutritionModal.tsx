@@ -11,6 +11,8 @@ import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView, S
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import uuid from 'react-native-uuid'
 
+type MacroField = 'calories' | 'protein' | 'carbs' | 'fats'
+
 export default function AddNutritionModal() {
     const { handleAddNutrition, selectedDate } = useNutrition()
     const router = useRouter()
@@ -24,8 +26,8 @@ export default function AddNutritionModal() {
     const [fats, setFats] = useState('')
     const [focusedField, setFocusedField] = useState<string | null>(null)
 
-    // AI generation state
-    const [generating, setGenerating] = useState(false)
+    // AI generation state — only the tapped field shows a spinner
+    const [generatingField, setGeneratingField] = useState<MacroField | null>(null)
     const [lastGeneratedFood, setLastGeneratedFood] = useState('')
     const [cachedMacros, setCachedMacros] = useState<{ calories: number; protein: number; carbs: number; fats: number } | null>(null)
     const insets = useSafeAreaInsets()
@@ -53,7 +55,7 @@ export default function AddNutritionModal() {
     }
 
     //Generates macros for a given field
-    const handleGenerateMacros = async (field: 'calories' | 'protein' | 'carbs' | 'fats') => {
+    const handleGenerateMacros = async (field: MacroField) => {
         if (!mealName.trim()) {
             Alert.alert('Missing Food Name', 'Please enter a food name before generating macros.')
             return
@@ -66,7 +68,7 @@ export default function AddNutritionModal() {
             macroSetters[field](cachedMacros[field].toString())
             return
         }
-        setGenerating(true)
+        setGeneratingField(field)
         try {
             const macros = await analyzeText(currentFoodName)
             // Update only the requested field
@@ -74,11 +76,36 @@ export default function AddNutritionModal() {
             // Cache all results for future use
             setLastGeneratedFood(currentFoodName)
             setCachedMacros(macros)
-        } catch (error: any) {
-            Alert.alert('Generation Failed', error.message + '. Please check internet connection and try again.' || 'Unable to generate macros. Please check internet connection and try again.', [{ text: 'OK' }])
+        } catch (error: unknown) {
+            const message =
+                (error instanceof Error ? error.message : null) ?? 'Unable to generate macros.'
+            Alert.alert('Generation Failed', `${message} Please check internet connection and try again.`, [{ text: 'OK' }])
         } finally {
-            setGenerating(false)
+            setGeneratingField(null)
         }
+    }
+
+    const isGenerating = generatingField !== null
+
+    function renderAiButton(field: MacroField) {
+        const isLoading = generatingField === field
+        const isDimmed = hasPremium && isGenerating && !isLoading
+        const buttonStyle = !hasPremium || isDimmed ? styles.aiButtonUnavailable : styles.aiButton
+        const iconColor = !hasPremium || isDimmed ? '#666' : '#22C922'
+        return (
+            <TouchableOpacity
+                style={buttonStyle}
+                activeOpacity={0.75}
+                onPress={() => (hasPremium ? handleGenerateMacros(field) : router.replace('/settingsScreens/subscription'))}
+                disabled={isGenerating}
+            >
+                <View style={styles.aiButtonContent}>
+                    {isLoading ?
+                        <ActivityIndicator size="small" color="#22C922" />
+                    :   <Ionicons name="sparkles-outline" size={25} color={iconColor} />}
+                </View>
+            </TouchableOpacity>
+        )
     }
 
     return (
@@ -101,7 +128,7 @@ export default function AddNutritionModal() {
                     Add Nutrition
                 </Text>
                 <Text style={styles.subtitle} adjustsFontSizeToFit minimumFontScale={0.65} numberOfLines={3}>
-                    Log your meal and macros
+                    Log your nutrition with AI assistance
                 </Text>
 
                 {/* Meal Name Input */}
@@ -148,16 +175,7 @@ export default function AddNutritionModal() {
                             onBlur={() => setFocusedField(null)}
                             keyboardType="numeric"
                         />
-                        <TouchableOpacity
-                            style={hasPremium ? styles.aiButton : styles.aiButtonUnavailable}
-                            activeOpacity={0.5}
-                            onPress={() => (hasPremium ? handleGenerateMacros('calories') : router.replace('/settingsScreens/subscription'))}
-                            disabled={generating}
-                        >
-                            {generating ?
-                                <ActivityIndicator size="small" color="#22C922" />
-                            :   <Ionicons name="sparkles-outline" size={25} color={hasPremium ? '#22C922' : '#666'} />}
-                        </TouchableOpacity>
+                        {renderAiButton('calories')}
                     </View>
 
                     {/* Protein */}
@@ -180,16 +198,7 @@ export default function AddNutritionModal() {
                             onBlur={() => setFocusedField(null)}
                             keyboardType="numeric"
                         />
-                        <TouchableOpacity
-                            style={hasPremium ? styles.aiButton : styles.aiButtonUnavailable}
-                            activeOpacity={0.75}
-                            onPress={() => (hasPremium ? handleGenerateMacros('protein') : router.replace('/settingsScreens/subscription'))}
-                            disabled={generating}
-                        >
-                            {generating ?
-                                <ActivityIndicator size="small" color="#22C922" />
-                            :   <Ionicons name="sparkles-outline" size={25} color={hasPremium ? '#22C922' : '#666'} />}
-                        </TouchableOpacity>
+                        {renderAiButton('protein')}
                     </View>
 
                     {/* Carbs */}
@@ -212,16 +221,7 @@ export default function AddNutritionModal() {
                             onBlur={() => setFocusedField(null)}
                             keyboardType="numeric"
                         />
-                        <TouchableOpacity
-                            style={hasPremium ? styles.aiButton : styles.aiButtonUnavailable}
-                            activeOpacity={0.75}
-                            onPress={() => (hasPremium ? handleGenerateMacros('carbs') : router.replace('/settingsScreens/subscription'))}
-                            disabled={generating}
-                        >
-                            {generating ?
-                                <ActivityIndicator size="small" color="#22C922" />
-                            :   <Ionicons name="sparkles-outline" size={25} color={hasPremium ? '#22C922' : '#666'} />}
-                        </TouchableOpacity>
+                        {renderAiButton('carbs')}
                     </View>
 
                     {/* Fats */}
@@ -244,16 +244,7 @@ export default function AddNutritionModal() {
                             onBlur={() => setFocusedField(null)}
                             keyboardType="numeric"
                         />
-                        <TouchableOpacity
-                            style={hasPremium ? styles.aiButton : styles.aiButtonUnavailable}
-                            activeOpacity={0.75}
-                            onPress={() => (hasPremium ? handleGenerateMacros('fats') : router.replace('/settingsScreens/subscription'))}
-                            disabled={generating}
-                        >
-                            {generating ?
-                                <ActivityIndicator size="small" color="#22C922" />
-                            :   <Ionicons name="sparkles-outline" size={25} color={hasPremium ? '#22C922' : '#666'} />}
-                        </TouchableOpacity>
+                        {renderAiButton('fats')}
                     </View>
                 </View>
 
@@ -399,6 +390,12 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: '#888',
         fontFamily: 'Poppins_500Medium',
+    },
+    aiButtonContent: {
+        width: 25,
+        height: 25,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     aiButton: {
         paddingHorizontal: 9,
