@@ -1,0 +1,992 @@
+{
+  "Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Dumbbell Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Push Ups": {
+    "imgUrl": "dataV2/exerciseImgs/push-ups.png",
+    "mainMuscle": "Chest",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Incline Dumbbell Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/incline-dumbbell-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Incline Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/incline-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Chest Press": {
+    "imgUrl": "dataV2/exerciseImgs/chest-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Machine",
+    "isCompound": true
+  },
+  "Machine Chest Fly": {
+    "imgUrl": "dataV2/exerciseImgs/machine-chest-fly.png",
+    "mainMuscle": "Chest",
+    "equipment": "Machine",
+    "isCompound": false
+  },
+  "One Arm Push Ups": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-push-ups.png",
+    "mainMuscle": "Chest",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Close Grip Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/close-grip-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Dumbbell Fly": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-fly.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Diamond Push Ups": {
+    "imgUrl": "dataV2/exerciseImgs/diamond-push-ups.png",
+    "mainMuscle": "Chest",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Smith Machine Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Decline Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/decline-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Incline Dumbbell Fly": {
+    "imgUrl": "dataV2/exerciseImgs/incline-dumbbell-fly.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Decline Push Up": {
+    "imgUrl": "dataV2/exerciseImgs/decline-push-up.png",
+    "mainMuscle": "Chest",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Floor Press": {
+    "imgUrl": "dataV2/exerciseImgs/floor-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Cable Fly": {
+    "imgUrl": "dataV2/exerciseImgs/cable-fly.png",
+    "mainMuscle": "Chest",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Dumbbell Floor Press": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-floor-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Close Grip Push Up": {
+    "imgUrl": "dataV2/exerciseImgs/close-grip-push-up.png",
+    "mainMuscle": "Chest",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Paused Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/paused-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Decline Dumbbell Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/decline-dumbbell-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Close Grip Dumbbell Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/close-grip-dumbbell-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Incline Push Up": {
+    "imgUrl": "dataV2/exerciseImgs/incline-push-up.png",
+    "mainMuscle": "Chest",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Reverse Grip Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/reverse-grip-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Bench Pin Press": {
+    "imgUrl": "dataV2/exerciseImgs/bench-pin-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Wide Grip Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/wide-grip-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Archer Push Ups": {
+    "imgUrl": "dataV2/exerciseImgs/archer-push-ups.png",
+    "mainMuscle": "Chest",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Close Grip Incline Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/close-grip-incline-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Spoto Press": {
+    "imgUrl": "dataV2/exerciseImgs/spoto-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Decline Dumbbell Fly": {
+    "imgUrl": "dataV2/exerciseImgs/decline-dumbbell-fly.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Alternating Decline Dumbbell Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/alternating-decline-dumbbell-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Alternating Dumbbell Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/alternating-dumbbell-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Alternating Dumbbell Fly": {
+    "imgUrl": "dataV2/exerciseImgs/alternating-dumbbell-fly.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Alternating Kettlebell Floor Press": {
+    "imgUrl": "dataV2/exerciseImgs/alternating-kettlebell-floor-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Alternating Low To High Cable Fly": {
+    "imgUrl": "dataV2/exerciseImgs/alternating-low-to-high-cable-fly.png",
+    "mainMuscle": "Chest",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Barbell Front Raise and Pullover": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-front-raise-and-pullover.png",
+    "mainMuscle": "Chest",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Bottoms Up Kettlebell Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/bottoms-up-kettlebell-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Bottoms Up Kettlebell Floor Press": {
+    "imgUrl": "dataV2/exerciseImgs/bottoms-up-kettlebell-floor-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Cable Chest Press": {
+    "imgUrl": "dataV2/exerciseImgs/cable-chest-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Cable",
+    "isCompound": true
+  },
+  "Cable Incline Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/cable-incline-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Cable",
+    "isCompound": true
+  },
+  "Cable Upper Chest Crossover": {
+    "imgUrl": "dataV2/exerciseImgs/cable-upper-chest-crossover.png",
+    "mainMuscle": "Chest",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Cliffhanger Push Up": {
+    "imgUrl": "dataV2/exerciseImgs/cliffhanger-push-up.png",
+    "mainMuscle": "Chest",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Clock Push Up": {
+    "imgUrl": "dataV2/exerciseImgs/clock-push-up.png",
+    "mainMuscle": "Chest",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Close Grip Bench Pin Press": {
+    "imgUrl": "dataV2/exerciseImgs/close-grip-bench-pin-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Close Grip Cable Chest Press": {
+    "imgUrl": "dataV2/exerciseImgs/close-grip-cable-chest-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Cable",
+    "isCompound": true
+  },
+  "Close Grip Larsen Press": {
+    "imgUrl": "dataV2/exerciseImgs/close-grip-larsen-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Close Grip Push Up Off Dumbbell": {
+    "imgUrl": "dataV2/exerciseImgs/close-grip-push-up-off-dumbbell.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Decline Cable Chest Press": {
+    "imgUrl": "dataV2/exerciseImgs/decline-cable-chest-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Cable",
+    "isCompound": true
+  },
+  "Decline Cable Fly": {
+    "imgUrl": "dataV2/exerciseImgs/decline-cable-fly.png",
+    "mainMuscle": "Chest",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Decline Dumbbell Twist Fly": {
+    "imgUrl": "dataV2/exerciseImgs/decline-dumbbell-twist-fly.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Decline Hammer Press": {
+    "imgUrl": "dataV2/exerciseImgs/decline-hammer-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Decline Paused Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/decline-paused-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Decline Wide Grip Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/decline-wide-grip-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Double Kettlebell Floor Fly": {
+    "imgUrl": "dataV2/exerciseImgs/double-kettlebell-floor-fly.png",
+    "mainMuscle": "Chest",
+    "equipment": "Kettlebell",
+    "isCompound": false
+  },
+  "Double Kettlebell Floor Press": {
+    "imgUrl": "dataV2/exerciseImgs/double-kettlebell-floor-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Drop Push Up": {
+    "imgUrl": "dataV2/exerciseImgs/drop-push-up.png",
+    "mainMuscle": "Chest",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Dumbbell Floor Fly": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-floor-fly.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Front Raise and Pullover": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-front-raise-and-pullover.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Larsen Press": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-larsen-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Push Up": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-push-up.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Push Up With Front Raise": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-push-up-with-front-raise.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Squeeze Press": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-squeeze-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Svend Press": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-svend-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Twist Fly": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-twist-fly.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dynamic Chest Stretch": {
+    "imgUrl": "dataV2/exerciseImgs/dynamic-chest-stretch.png",
+    "mainMuscle": "Chest",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Elbow Back Stretch": {
+    "imgUrl": "dataV2/exerciseImgs/elbow-back-stretch.png",
+    "mainMuscle": "Chest",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Feet Up Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/feet-up-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Floor Hammer Press": {
+    "imgUrl": "dataV2/exerciseImgs/floor-hammer-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Glute Bridge Dumbbell Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/glute-bridge-dumbbell-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Grasshopper Push Up": {
+    "imgUrl": "dataV2/exerciseImgs/grasshopper-push-up.png",
+    "mainMuscle": "Chest",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Guillotine Press": {
+    "imgUrl": "dataV2/exerciseImgs/guillotine-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Hammer Press": {
+    "imgUrl": "dataV2/exerciseImgs/hammer-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "High To Low Cable Chest Press": {
+    "imgUrl": "dataV2/exerciseImgs/high-to-low-cable-chest-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Cable",
+    "isCompound": true
+  },
+  "Hyght Dumbbell Fly": {
+    "imgUrl": "dataV2/exerciseImgs/hyght-dumbbell-fly.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Incline Cable Fly": {
+    "imgUrl": "dataV2/exerciseImgs/incline-cable-fly.png",
+    "mainMuscle": "Chest",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Incline Dumbbell Twist Press": {
+    "imgUrl": "dataV2/exerciseImgs/incline-dumbbell-twist-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Incline Hammer Press": {
+    "imgUrl": "dataV2/exerciseImgs/incline-hammer-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Incline Paused Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/incline-paused-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Incline Shoulder Raise": {
+    "imgUrl": "dataV2/exerciseImgs/incline-shoulder-raise.png",
+    "mainMuscle": "Chest",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Isometric Wipers": {
+    "imgUrl": "dataV2/exerciseImgs/isometric-wipers.png",
+    "mainMuscle": "Chest",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Kettlebell Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Floor Press": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-floor-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Push Up": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-push-up.png",
+    "mainMuscle": "Chest",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Larsen Press": {
+    "imgUrl": "dataV2/exerciseImgs/larsen-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Low Incline Dumbbell Fly": {
+    "imgUrl": "dataV2/exerciseImgs/low-incline-dumbbell-fly.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Low To High Cable Fly": {
+    "imgUrl": "dataV2/exerciseImgs/low-to-high-cable-fly.png",
+    "mainMuscle": "Chest",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Lying Cable Fly": {
+    "imgUrl": "dataV2/exerciseImgs/lying-cable-fly.png",
+    "mainMuscle": "Chest",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Lying Dumbbell Around The World": {
+    "imgUrl": "dataV2/exerciseImgs/lying-dumbbell-around-the-world.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Bent Over Cable Fly": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-bent-over-cable-fly.png",
+    "mainMuscle": "Chest",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "One Arm Cable Fly": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-cable-fly.png",
+    "mainMuscle": "Chest",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "One Arm Cable Incline Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-cable-incline-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Cable",
+    "isCompound": true
+  },
+  "One Arm Decline Cable Chest Press": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-decline-cable-chest-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Cable",
+    "isCompound": true
+  },
+  "One Arm Decline Cable Fly": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-decline-cable-fly.png",
+    "mainMuscle": "Chest",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "One Arm Decline Dumbbell Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-decline-dumbbell-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "One Arm Decline Dumbbell Fly": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-decline-dumbbell-fly.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Decline Hammer Press": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-decline-hammer-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "One Arm Dumbbell Floor Fly": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-dumbbell-floor-fly.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Dumbbell Floor Press": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-dumbbell-floor-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "One Arm Dumbbell Fly": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-dumbbell-fly.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Dumbbell Press": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-dumbbell-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "One Arm Hammer Press": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-hammer-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "One Arm Incline Dumbbell Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-incline-dumbbell-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "One Arm Incline Dumbbell Fly": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-incline-dumbbell-fly.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Incline Hammer Press": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-incline-hammer-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "One Arm Reverse Dumbbell Press": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-reverse-dumbbell-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "One Arm Standing Chest Press With Twist": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-standing-chest-press-with-twist.png",
+    "mainMuscle": "Chest",
+    "equipment": "Cable",
+    "isCompound": true
+  },
+  "One Arm Standing Dumbbell Fly": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-standing-dumbbell-fly.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Palms In Incline Dumbbell Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/palms-in-incline-dumbbell-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Plyo Kettlebell Push Up": {
+    "imgUrl": "dataV2/exerciseImgs/plyo-kettlebell-push-up.png",
+    "mainMuscle": "Chest",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Pronated Incline Dumbbell Fly": {
+    "imgUrl": "dataV2/exerciseImgs/pronated-incline-dumbbell-fly.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Pronating Incline Dumbbell Fly": {
+    "imgUrl": "dataV2/exerciseImgs/pronating-incline-dumbbell-fly.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Prone Incline Cable Fly": {
+    "imgUrl": "dataV2/exerciseImgs/prone-incline-cable-fly.png",
+    "mainMuscle": "Chest",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Pseudo Planche Push Up": {
+    "imgUrl": "dataV2/exerciseImgs/pseudo-planche-push-up.png",
+    "mainMuscle": "Chest",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Renegade Row Push Up": {
+    "imgUrl": "dataV2/exerciseImgs/renegade-row-push-up.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Reverse Close Grip Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/reverse-close-grip-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Reverse Dumbbell Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/reverse-dumbbell-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Reverse Grip Decline Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/reverse-grip-decline-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Reverse Grip Dumbbell Push Up": {
+    "imgUrl": "dataV2/exerciseImgs/reverse-grip-dumbbell-push-up.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Reverse Grip Dumbbell Squeeze Press": {
+    "imgUrl": "dataV2/exerciseImgs/reverse-grip-dumbbell-squeeze-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Reverse Grip Floor Press": {
+    "imgUrl": "dataV2/exerciseImgs/reverse-grip-floor-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Reverse Grip Incline Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/reverse-grip-incline-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Rotational Dumbbell Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/rotational-dumbbell-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Seated Cable Chest Press": {
+    "imgUrl": "dataV2/exerciseImgs/seated-cable-chest-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Cable",
+    "isCompound": true
+  },
+  "Seated Cable Fly": {
+    "imgUrl": "dataV2/exerciseImgs/seated-cable-fly.png",
+    "mainMuscle": "Chest",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Seated Close Grip Cable Chest Press": {
+    "imgUrl": "dataV2/exerciseImgs/seated-close-grip-cable-chest-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Cable",
+    "isCompound": true
+  },
+  "Smith Machine Close Grip Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-close-grip-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Smith Machine Close Grip Decline Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-close-grip-decline-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Smith Machine Decline Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-decline-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Smith Machine Hex Press": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-hex-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Smith Machine Incline Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-incline-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Smith Machine Incline Close Grip Push Up": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-incline-close-grip-push-up.png",
+    "mainMuscle": "Chest",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Smith Machine Incline Reverse Grip Push Up": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-incline-reverse-grip-push-up.png",
+    "mainMuscle": "Chest",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Smith Machine Incline Shoulder Raise": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-incline-shoulder-raise.png",
+    "mainMuscle": "Chest",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Smith Machine Reverse Close Grip Decline Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-reverse-close-grip-decline-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Smith Machine Reverse Grip Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-reverse-grip-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Smith Machine Reverse Grip Decline Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-reverse-grip-decline-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Smith Machine Reverse Grip Incline Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-reverse-grip-incline-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Smith Machine Wide Grip Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-wide-grip-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Smith Machine Wide Grip Decline Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-wide-grip-decline-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Spiderman Push Up": {
+    "imgUrl": "dataV2/exerciseImgs/spiderman-push-up.png",
+    "mainMuscle": "Chest",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Stability Ball Alternating Dumbbell Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-alternating-dumbbell-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Stability Ball Cable Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-cable-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Cable",
+    "isCompound": true
+  },
+  "Stability Ball Decline Push Up": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-decline-push-up.png",
+    "mainMuscle": "Chest",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Stability Ball Dumbbell Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-dumbbell-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Stability Ball Dumbbell Fly": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-dumbbell-fly.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Stability Ball Incline Cable Fly": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-incline-cable-fly.png",
+    "mainMuscle": "Chest",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Stability Ball Incline Dumbbell Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-incline-dumbbell-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Stability Ball Incline Dumbbell Fly": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-incline-dumbbell-fly.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Stability Ball Incline Hammer Press": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-incline-hammer-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Stability Ball One Arm Cable Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-one-arm-cable-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Cable",
+    "isCompound": true
+  },
+  "Stability Ball One Arm Cable Fly": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-one-arm-cable-fly.png",
+    "mainMuscle": "Chest",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Stability Ball One Arm Cable Incline Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-one-arm-cable-incline-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Cable",
+    "isCompound": true
+  },
+  "Stability Ball One Arm Dumbbell Fly": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-one-arm-dumbbell-fly.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Stability Ball One Arm Dumbbell Press": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-one-arm-dumbbell-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Stability Ball One Arm Hammer Press": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-one-arm-hammer-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Stability Ball One Arm Incline Cable Fly": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-one-arm-incline-cable-fly.png",
+    "mainMuscle": "Chest",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Stability Ball One Arm Incline Dumbbell Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-one-arm-incline-dumbbell-bench-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Stability Ball One Arm Incline Dumbbell Fly": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-one-arm-incline-dumbbell-fly.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Stability Ball One Arm Incline Hammer Press": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-one-arm-incline-hammer-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Stability Ball Single Leg Dumbbell Fly": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-single-leg-dumbbell-fly.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Standing Cable Chest Press": {
+    "imgUrl": "dataV2/exerciseImgs/standing-cable-chest-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Cable",
+    "isCompound": true
+  },
+  "Standing Close Grip Cable Chest Press": {
+    "imgUrl": "dataV2/exerciseImgs/standing-close-grip-cable-chest-press.png",
+    "mainMuscle": "Chest",
+    "equipment": "Cable",
+    "isCompound": true
+  },
+  "Standing Dumbbell Fly": {
+    "imgUrl": "dataV2/exerciseImgs/standing-dumbbell-fly.png",
+    "mainMuscle": "Chest",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Burpees": {
+    "imgUrl": "dataV2/exerciseImgs/burpees.png",
+    "mainMuscle": "Chest",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Corkscrew Push Up": {
+    "imgUrl": "dataV2/exerciseImgs/corkscrew-push-up.png",
+    "mainMuscle": "Chest",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  }
+}

@@ -1,10 +1,58 @@
 import { CameraType, CameraView, useCameraPermissions } from 'expo-camera'
 import * as ImageManipulator from 'expo-image-manipulator'
+import * as ImagePicker from 'expo-image-picker'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
-import { Camera, FlipHorizontal, Zap } from 'lucide-react-native'
+import { Camera, FlipHorizontal, Images, Zap } from 'lucide-react-native'
 import { useRef, useState } from 'react'
 import { Alert, Dimensions, Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+
+const MEAL_IMAGE_MAX_WIDTH = 800
+const MEAL_IMAGE_COMPRESS = 0.8
+
+/** Resize and compress any meal image URI for AI analysis (library picks). */
+async function processPickedImageUri(uri: string): Promise<string> {
+    const result = await ImageManipulator.manipulateAsync(
+        uri,
+        [{ resize: { width: MEAL_IMAGE_MAX_WIDTH } }],
+        { compress: MEAL_IMAGE_COMPRESS, format: ImageManipulator.SaveFormat.JPEG },
+    )
+    return result.uri
+}
+
+/** Crop toward on-screen frame, then resize (camera capture). */
+async function processCameraCapture(photo: { uri: string; width: number; height: number }): Promise<string> {
+    const screenWidth = Dimensions.get('window').width
+    const screenHeight = Dimensions.get('window').height
+    const frameWidthOnScreen = Math.min(screenWidth * 0.7, 320)
+    const frameHeightOnScreen = frameWidthOnScreen * (4 / 3)
+
+    const scaleX = photo.width / screenWidth
+    const scaleY = photo.height / screenHeight
+    const scale = Math.max(scaleX, scaleY)
+
+    const cropWidth = frameWidthOnScreen * scale
+    const cropHeight = frameHeightOnScreen * scale
+    const cropX = (photo.width - cropWidth) / 2
+    const cropY = (photo.height - cropHeight) / 2
+
+    const croppedImage = await ImageManipulator.manipulateAsync(
+        photo.uri,
+        [
+            {
+                crop: {
+                    originX: Math.max(0, cropX),
+                    originY: Math.max(0, cropY),
+                    width: Math.min(cropWidth, photo.width),
+                    height: Math.min(cropHeight, photo.height),
+                },
+            },
+            { resize: { width: MEAL_IMAGE_MAX_WIDTH } },
+        ],
+        { compress: MEAL_IMAGE_COMPRESS, format: ImageManipulator.SaveFormat.JPEG },
+    )
+    return croppedImage.uri
+}
 
 export default function CameraScreen() {
     const router = useRouter()
@@ -13,8 +61,8 @@ export default function CameraScreen() {
     const [permission, requestPermission] = useCameraPermissions()
     const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null)
     const [flashEnabled, setFlashEnabled] = useState(false)
+    const [pickingFromLibrary, setPickingFromLibrary] = useState(false)
 
-    // Handle permissions
     if (!permission) {
         return (
             <View style={styles.container}>
@@ -26,7 +74,6 @@ export default function CameraScreen() {
     if (!permission.granted) {
         return (
             <View style={styles.container}>
-                {/* Drag Handle */}
                 <View style={styles.handleContainer}>
                     <View style={styles.handle} />
                 </View>
@@ -61,54 +108,45 @@ export default function CameraScreen() {
     }
 
     async function takePicture() {
-        if (cameraRef.current) {
-            try {
-                const photo = await cameraRef.current.takePictureAsync({
-                    quality: 0.8,
-                    base64: false,
-                })
-                if (photo) {
-                    // Get screen dimensions
-                    const screenWidth = Dimensions.get('window').width
-                    const frameWidthOnScreen = Math.min(screenWidth * 0.7, 320)
-                    const frameHeightOnScreen = frameWidthOnScreen * (4 / 3) // 3:4 aspect ratio
-
-                    // Calculate the scale between photo and screen
-                    const scaleX = photo.width / screenWidth
-                    const scaleY = photo.height / Dimensions.get('window').height
-
-                    // Use the larger scale to ensure we don't cut off the frame
-                    const scale = Math.max(scaleX, scaleY)
-
-                    // Calculate crop dimensions in photo coordinates
-                    const cropWidth = frameWidthOnScreen * scale
-                    const cropHeight = frameHeightOnScreen * scale
-
-                    // Center the crop
-                    const cropX = (photo.width - cropWidth) / 2
-                    const cropY = (photo.height - cropHeight) / 2
-
-                    const croppedImage = await ImageManipulator.manipulateAsync(
-                        photo.uri,
-                        [
-                            {
-                                crop: {
-                                    originX: Math.max(0, cropX),
-                                    originY: Math.max(0, cropY),
-                                    width: Math.min(cropWidth, photo.width),
-                                    height: Math.min(cropHeight, photo.height),
-                                },
-                            },
-                            { resize: { width: 800 } }, // Resize to max 800px width to save costs
-                        ],
-                        { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG },
-                    )
-
-                    setCapturedPhoto(croppedImage.uri)
-                }
-            } catch (error) {
-                Alert.alert('Error', 'Failed to take picture. Please try again.')
+        if (!cameraRef.current) return
+        try {
+            const photo = await cameraRef.current.takePictureAsync({
+                quality: 0.8,
+                base64: false,
+            })
+            if (photo) {
+                const uri = await processCameraCapture(photo)
+                setCapturedPhoto(uri)
             }
+        } catch {
+            Alert.alert('Error', 'Failed to take picture. Please try again.')
+        }
+    }
+
+    async function pickFromLibrary() {
+        if (pickingFromLibrary) return
+        setPickingFromLibrary(true)
+        try {
+            const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync()
+            if (!permissionResult.granted) {
+                Alert.alert('Permission Required', 'Please allow access to your photo library to choose a meal photo.')
+                return
+            }
+
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ['images'],
+                allowsEditing: true,
+                quality: 0.8,
+            })
+
+            if (result.canceled || !result.assets[0]?.uri) return
+
+            const uri = await processPickedImageUri(result.assets[0].uri)
+            setCapturedPhoto(uri)
+        } catch {
+            Alert.alert('Error', 'Failed to load photo from library. Please try again.')
+        } finally {
+            setPickingFromLibrary(false)
         }
     }
 
@@ -118,7 +156,6 @@ export default function CameraScreen() {
 
     function usePhoto() {
         if (capturedPhoto) {
-            // Navigate to analyzing modal with photo
             router.push({
                 pathname: '/nutritionScreens/analyzingModal',
                 params: { photoUri: capturedPhoto },
@@ -126,18 +163,15 @@ export default function CameraScreen() {
         }
     }
 
-    // Preview captured photo
     if (capturedPhoto) {
         return (
             <View style={styles.container}>
-                {/* Drag Handle */}
                 <View style={styles.handleContainerAbsolute}>
                     <View style={styles.handle} />
                 </View>
 
                 <Image source={{ uri: capturedPhoto }} style={styles.preview} resizeMode="contain" />
 
-                {/* Bottom Actions */}
                 <View style={styles.previewActions}>
                     <TouchableOpacity onPress={retakePhoto} style={styles.retakeButton} activeOpacity={0.5}>
                         <Text style={styles.retakeButtonText}>Retake</Text>
@@ -153,16 +187,13 @@ export default function CameraScreen() {
         )
     }
 
-    // Camera view
     return (
         <View style={styles.container}>
-            {/* Drag Handle */}
             <View style={styles.handleContainerAbsolute}>
                 <View style={styles.handle} />
             </View>
 
             <CameraView ref={cameraRef} style={styles.camera} facing={facing} enableTorch={flashEnabled}>
-                {/* Flash Button */}
                 <View style={styles.topBar}>
                     <View style={styles.spacer} />
                     <TouchableOpacity onPress={toggleFlash} style={[styles.flashButton, flashEnabled && styles.flashButtonActive]} activeOpacity={0.5}>
@@ -170,10 +201,8 @@ export default function CameraScreen() {
                     </TouchableOpacity>
                 </View>
 
-                {/* Framing Box */}
                 <View style={styles.frameContainer}>
                     <View style={styles.frame}>
-                        {/* Corner guides */}
                         <View style={[styles.corner, styles.cornerTopLeft]} />
                         <View style={[styles.corner, styles.cornerTopRight]} />
                         <View style={[styles.corner, styles.cornerBottomLeft]} />
@@ -181,16 +210,24 @@ export default function CameraScreen() {
                     </View>
                 </View>
 
-                {/* Bottom Controls */}
                 <View style={styles.controls}>
                     <View style={styles.controlsInner}>
-                        <View style={styles.emptySpace} />
+                        <TouchableOpacity
+                            onPress={pickFromLibrary}
+                            style={[styles.sideButton, pickingFromLibrary && styles.sideButtonDisabled]}
+                            activeOpacity={0.5}
+                            disabled={pickingFromLibrary}
+                            accessibilityLabel="Choose photo from library"
+                            accessibilityRole="button"
+                        >
+                            <Images size={26} color="#FFF" strokeWidth={2.5} />
+                        </TouchableOpacity>
 
-                        <TouchableOpacity onPress={takePicture} style={styles.captureButton} activeOpacity={0.8}>
+                        <TouchableOpacity onPress={takePicture} style={styles.captureButton} activeOpacity={0.8} accessibilityLabel="Take photo" accessibilityRole="button">
                             <View style={styles.captureButtonInner} />
                         </TouchableOpacity>
 
-                        <TouchableOpacity onPress={toggleCameraFacing} style={styles.flipButton} activeOpacity={0.5}>
+                        <TouchableOpacity onPress={toggleCameraFacing} style={styles.sideButton} activeOpacity={0.5} accessibilityLabel="Flip camera" accessibilityRole="button">
                             <FlipHorizontal size={28} color="#FFF" strokeWidth={2.5} />
                         </TouchableOpacity>
                     </View>
@@ -391,8 +428,16 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
     },
-    emptySpace: {
+    sideButton: {
         width: 60,
+        height: 60,
+        borderRadius: 30,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    sideButtonDisabled: {
+        opacity: 0.5,
     },
     captureButton: {
         width: 80,
@@ -409,14 +454,6 @@ const styles = StyleSheet.create({
         height: 68,
         borderRadius: 34,
         backgroundColor: '#FFF',
-    },
-    flipButton: {
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        justifyContent: 'center',
-        alignItems: 'center',
     },
     preview: {
         flex: 1,

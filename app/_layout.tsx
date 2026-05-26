@@ -1,11 +1,11 @@
-import { ThemeProvider, useColorScheme } from '@/context/ThemeContext'
 import { AppLoadingScreen } from '@/components/GuardComponents/AppLoadingScreen'
 import { PowerSyncGuard } from '@/components/GuardComponents/PowerSyncGuard'
 import { SyncWatchdog } from '@/components/GuardComponents/SyncWatchdog'
 import { AuthProvider, useAuth } from '@/context/AuthContext'
-import { BillingProvider } from '@/context/BillingContext'
+import { BillingProvider, useBilling } from '@/context/BillingContext'
 import { NutritionProvider, useNutrition } from '@/context/NutritionContext'
 import { SettingsProvider, useSettings } from '@/context/SettingsContext'
+import { ThemeProvider, useColorScheme } from '@/context/ThemeContext'
 import { useWorkout, WorkoutProvider } from '@/context/WorkoutContext'
 import {
     Poppins_100Thin,
@@ -126,7 +126,8 @@ function StackLayout() {
     const { settings, loaded: settingsLoaded } = useSettings()
     const { loaded: nutritionLoaded } = useNutrition()
     const { loaded: workoutLoaded } = useWorkout()
-    const allContextsLoaded = settingsLoaded && nutritionLoaded && workoutLoaded
+    const { loaded: billingLoaded } = useBilling()
+    const allContextsLoaded = settingsLoaded && nutritionLoaded && workoutLoaded && billingLoaded
 
     if (!allContextsLoaded) {
         return (
@@ -221,7 +222,7 @@ function RootLayoutNav() {
                     <NavigationTheme>
                         <AuthProvider>
                             <PowerSyncGuard>
-                                <SyncWatchdog />
+                                <SyncWatchdog/>
                                 <SettingsProvider>
                                     <BillingProvider>
                                         <WorkoutProvider>
@@ -231,11 +232,10 @@ function RootLayoutNav() {
                                         </WorkoutProvider>
                                     </BillingProvider>
                                 </SettingsProvider>
-                            </SyncWatchdog>
-                        </PowerSyncGuard>
-                    </AuthProvider>
-                </NavigationTheme>
-            </ThemeProvider>
+                            </PowerSyncGuard>
+                        </AuthProvider>
+                    </NavigationTheme>
+                </ThemeProvider>
             </SafeAreaProvider>
         </GestureHandlerRootView>
     )

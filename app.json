@@ -2,7 +2,7 @@
     "expo": {
         "name": "LiftTrition",
         "slug": "App",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "orientation": "portrait",
         "icon": "./assets/images/AppIcon.png",
         "scheme": "app",
@@ -40,6 +40,13 @@
             "expo-apple-authentication",
             "@journeyapps/react-native-quick-sqlite",
             "expo-font",
+            [
+                "expo-image-picker",
+                {
+                    "photosPermission": "Allow LiftTrition to access your photos to log meals from your library.",
+                    "microphonePermission": false
+                }
+            ],
             [
                 "@sentry/react-native/expo",
                 {

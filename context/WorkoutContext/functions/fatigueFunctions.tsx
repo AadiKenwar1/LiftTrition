@@ -71,14 +71,7 @@ function calculateSetFatigue(weight: number, reps: number, rpe: number, exercise
 
 // Builds a bodyweight-aware rolling 1RM reference map (exercise name → max e1RM over last refDays).
 // Uses effective load so the ref and the formula always use identical weights.
-function buildRefByName(
-    logs: Log[],
-    exercises: Exercise[],
-    fullExerciseLib: ExerciseLib,
-    refDays: number,
-    currentBodyWeight: number,
-    bwProgress: Record<string, number>,
-): Map<string, number> {
+function buildRefByName(logs: Log[], exercises: Exercise[], fullExerciseLib: ExerciseLib, refDays: number, currentBodyWeight: number, bwProgress: Record<string, number>): Map<string, number> {
     const refCutoff = addDays(new Date(), -refDays)
     const idToName = new Map(exercises.map((e) => [e.id, e.name]))
     const map = new Map<string, number>()
@@ -113,14 +106,7 @@ export type FatigueSummary = {
 }
 
 //Calculate fatigue summary (today/3/6/9-day)
-export function calculateFatigueSummary(
-    logs: Log[],
-    exercises: Exercise[],
-    fullExerciseLib: ExerciseLib,
-    activityLevel: string = 'moderate',
-    currentBodyWeight: number,
-    bwProgress: Record<string, number>,
-): FatigueSummary {
+export function calculateFatigueSummary(logs: Log[], exercises: Exercise[], fullExerciseLib: ExerciseLib, activityLevel: string = 'moderate', currentBodyWeight: number, bwProgress: Record<string, number>): FatigueSummary {
     if (logs.length === 0) return { today: 0, last3Days: 0, last6Days: 0, last9Days: 0 }
 
     const DAYS = 30
@@ -190,21 +176,21 @@ export function calculateFatigueSummary(
 // Returns a casual feedback message based on fatigue percentage
 export function getFatigueFeedback(percentage: number): string {
     if (percentage >= 100) {
-        return 'Intense workout today! Make sure you get some good rest tonight.'
+        return "You went all out today! That's a full hard day. Rest up tonight."
     }
     if (percentage >= 75) {
-        return 'Nice work today. You pushed pretty hard! Make sure you recover well.'
+        return 'Heavy day from your logged sets. Prioritize recovery before stacking more hard sessions.'
     }
     if (percentage >= 50) {
-        return 'Solid session today. Keep it up!'
+        return "Strong work logged today. Fatigue's mid-range. Push a bit more or call it a win."
     }
     if (percentage >= 25) {
-        return 'Nice light session today. Good chance to work on form and keep things moving.'
+        return "Moderate fatigue from today's logged sets. Solid pace. Add more if you want, or stay the course."
     }
     if (percentage > 0) {
-        return 'Light work today, but it all adds up. Staying consistent is what matters.'
+        return 'Light day logged so far. Fatigue adds up per set. Easy day to focus on form or add more later.'
     }
-    return "No training today so far. If today is a rest day, that's great!"
+    return "No sets logged today. Start logging to see how demanding today's training was. Percentage rises with each set"
 }
 
 //Calculate fatigue factor for user added exercise
@@ -227,15 +213,7 @@ export function calculateFatigueFactor(isCompound: boolean, mainMuscle: string, 
 }
 
 //Calculate fatigue percentage for the last X days (legacy function, used for specific day fatigue calculation)
-export function calculateFatiguePercentage(
-    numDays: number,
-    logs: Log[],
-    exercises: Exercise[],
-    fullExerciseLib: ExerciseLib,
-    activityLevel: string = 'moderate',
-    currentBodyWeight: number,
-    bwProgress: Record<string, number>,
-): number {
+export function calculateFatiguePercentage(numDays: number, logs: Log[], exercises: Exercise[], fullExerciseLib: ExerciseLib, activityLevel: string = 'moderate', currentBodyWeight: number, bwProgress: Record<string, number>): number {
     if (logs.length === 0) return 0
 
     const localRefByName = buildRefByName(logs, exercises, fullExerciseLib, 30, currentBodyWeight, bwProgress)

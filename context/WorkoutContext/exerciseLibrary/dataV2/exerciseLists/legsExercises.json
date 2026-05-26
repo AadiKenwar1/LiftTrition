@@ -1,0 +1,2024 @@
+{
+  "Squat": {
+    "imgUrl": "dataV2/exerciseImgs/squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Sled Leg Press": {
+    "imgUrl": "dataV2/exerciseImgs/sled-leg-press.png",
+    "mainMuscle": "Legs",
+    "equipment": "Machine",
+    "isCompound": true
+  },
+  "Front Squat": {
+    "imgUrl": "dataV2/exerciseImgs/front-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Hip Thrust": {
+    "imgUrl": "dataV2/exerciseImgs/hip-thrust.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Leg Extension": {
+    "imgUrl": "dataV2/exerciseImgs/leg-extension.png",
+    "mainMuscle": "Legs",
+    "equipment": "Machine",
+    "isCompound": false
+  },
+  "Horizontal Leg Press": {
+    "imgUrl": "dataV2/exerciseImgs/horizontal-leg-press.png",
+    "mainMuscle": "Legs",
+    "equipment": "Machine",
+    "isCompound": true
+  },
+  "Hack Squat": {
+    "imgUrl": "dataV2/exerciseImgs/hack-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Machine",
+    "isCompound": true
+  },
+  "Bodyweight Squat": {
+    "imgUrl": "dataV2/exerciseImgs/bodyweight-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Dumbbell Bulgarian Split Squat": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-bulgarian-split-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Seated Leg Curl": {
+    "imgUrl": "dataV2/exerciseImgs/seated-leg-curl.png",
+    "mainMuscle": "Legs",
+    "equipment": "Machine",
+    "isCompound": false
+  },
+  "Goblet Squat": {
+    "imgUrl": "dataV2/exerciseImgs/goblet-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Lying Leg Curl": {
+    "imgUrl": "dataV2/exerciseImgs/lying-leg-curl.png",
+    "mainMuscle": "Legs",
+    "equipment": "Machine",
+    "isCompound": false
+  },
+  "Machine Calf Raise": {
+    "imgUrl": "dataV2/exerciseImgs/machine-calf-raise.png",
+    "mainMuscle": "Legs",
+    "equipment": "Machine",
+    "isCompound": false
+  },
+  "Hip Adduction": {
+    "imgUrl": "dataV2/exerciseImgs/hip-adduction.png",
+    "mainMuscle": "Legs",
+    "equipment": "Machine",
+    "isCompound": false
+  },
+  "Dumbbell Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Pistol Squat": {
+    "imgUrl": "dataV2/exerciseImgs/pistol-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Bulgarian Split Squat": {
+    "imgUrl": "dataV2/exerciseImgs/bulgarian-split-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Smith Machine Squat": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Box Squat": {
+    "imgUrl": "dataV2/exerciseImgs/box-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Seated Calf Raise": {
+    "imgUrl": "dataV2/exerciseImgs/seated-calf-raise.png",
+    "mainMuscle": "Legs",
+    "equipment": "Machine",
+    "isCompound": false
+  },
+  "Vertical Leg Press": {
+    "imgUrl": "dataV2/exerciseImgs/vertical-leg-press.png",
+    "mainMuscle": "Legs",
+    "equipment": "Machine",
+    "isCompound": true
+  },
+  "Zercher Squat": {
+    "imgUrl": "dataV2/exerciseImgs/zercher-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Good Morning": {
+    "imgUrl": "dataV2/exerciseImgs/good-morning.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Hip Abduction": {
+    "imgUrl": "dataV2/exerciseImgs/hip-abduction.png",
+    "mainMuscle": "Legs",
+    "equipment": "Machine",
+    "isCompound": false
+  },
+  "Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Barbell Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Single Leg Squat": {
+    "imgUrl": "dataV2/exerciseImgs/single-leg-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Dumbbell Squat": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Barbell Calf Raise": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-calf-raise.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Bodyweight Calf Raise": {
+    "imgUrl": "dataV2/exerciseImgs/bodyweight-calf-raise.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Overhead Squat": {
+    "imgUrl": "dataV2/exerciseImgs/overhead-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Glute Bridge": {
+    "imgUrl": "dataV2/exerciseImgs/glute-bridge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Split Squat": {
+    "imgUrl": "dataV2/exerciseImgs/split-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Dumbbell Calf Raise": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-calf-raise.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Squat Jump": {
+    "imgUrl": "dataV2/exerciseImgs/squat-jump.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Sissy Squat": {
+    "imgUrl": "dataV2/exerciseImgs/sissy-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Sled Press Calf Raise": {
+    "imgUrl": "dataV2/exerciseImgs/sled-press-calf-raise.png",
+    "mainMuscle": "Legs",
+    "equipment": "Machine",
+    "isCompound": false
+  },
+  "Single Leg Press": {
+    "imgUrl": "dataV2/exerciseImgs/single-leg-press.png",
+    "mainMuscle": "Legs",
+    "equipment": "Machine",
+    "isCompound": true
+  },
+  "Barbell Reverse Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-reverse-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Belt Squat": {
+    "imgUrl": "dataV2/exerciseImgs/belt-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Machine",
+    "isCompound": true
+  },
+  "Barbell Glute Bridge": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-glute-bridge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Reverse Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/reverse-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Standing Leg Curl": {
+    "imgUrl": "dataV2/exerciseImgs/standing-leg-curl.png",
+    "mainMuscle": "Legs",
+    "equipment": "Machine",
+    "isCompound": false
+  },
+  "Cable Pull Through": {
+    "imgUrl": "dataV2/exerciseImgs/cable-pull-through.png",
+    "mainMuscle": "Legs",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Landmine Squat": {
+    "imgUrl": "dataV2/exerciseImgs/landmine-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Safety Bar Squat": {
+    "imgUrl": "dataV2/exerciseImgs/safety-bar-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Sumo Squat": {
+    "imgUrl": "dataV2/exerciseImgs/sumo-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Barbell Hack Squat": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-hack-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Side Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/side-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Pin Squat": {
+    "imgUrl": "dataV2/exerciseImgs/pin-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Pause Squat": {
+    "imgUrl": "dataV2/exerciseImgs/pause-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Half Squat": {
+    "imgUrl": "dataV2/exerciseImgs/half-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Glute Kickback": {
+    "imgUrl": "dataV2/exerciseImgs/glute-kickback.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Hip Extension": {
+    "imgUrl": "dataV2/exerciseImgs/hip-extension.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Jefferson Squat": {
+    "imgUrl": "dataV2/exerciseImgs/jefferson-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Walking Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/walking-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Glute Ham Raise": {
+    "imgUrl": "dataV2/exerciseImgs/glute-ham-raise.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Side Leg Raise": {
+    "imgUrl": "dataV2/exerciseImgs/side-leg-raise.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Nordic Hamstring Curl": {
+    "imgUrl": "dataV2/exerciseImgs/nordic-hamstring-curl.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Cable Kickback": {
+    "imgUrl": "dataV2/exerciseImgs/cable-kickback.png",
+    "mainMuscle": "Legs",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Cable Leg Extension": {
+    "imgUrl": "dataV2/exerciseImgs/cable-leg-extension.png",
+    "mainMuscle": "Legs",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Single Leg Seated Calf Raise": {
+    "imgUrl": "dataV2/exerciseImgs/single-leg-seated-calf-raise.png",
+    "mainMuscle": "Legs",
+    "equipment": "Machine",
+    "isCompound": false
+  },
+  "Dumbbell Front Squat": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-front-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Floor Hip Extension": {
+    "imgUrl": "dataV2/exerciseImgs/floor-hip-extension.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Dumbbell Split Squat": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-split-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Floor Hip Abduction": {
+    "imgUrl": "dataV2/exerciseImgs/floor-hip-abduction.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Dumbbell Walking Calf Raise": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-walking-calf-raise.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Donkey Calf Raise": {
+    "imgUrl": "dataV2/exerciseImgs/donkey-calf-raise.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Balance Trainer Elevated Dumbbell Split Squat": {
+    "imgUrl": "dataV2/exerciseImgs/balance-trainer-elevated-dumbbell-split-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Barbell Curtsy Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-curtsy-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Barbell Front Rack Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-front-rack-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Barbell Front Rack Reverse Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-front-rack-reverse-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Barbell Front Rack Step Up": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-front-rack-step-up.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Barbell Front Rack Walking Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-front-rack-walking-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Barbell Jump Squat": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-jump-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Barbell Knee Raise Step Up": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-knee-raise-step-up.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Barbell Kneeling Jump Squat": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-kneeling-jump-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Barbell Seated Calf Raise": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-seated-calf-raise.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Barbell Side Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-side-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Barbell Side Split Squat": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-side-split-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Barbell Single Leg Squat": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-single-leg-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Barbell Speed Squat": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-speed-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Barbell Step Up": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-step-up.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Bench Flutter Kicks": {
+    "imgUrl": "dataV2/exerciseImgs/bench-flutter-kicks.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Bench Front Squat": {
+    "imgUrl": "dataV2/exerciseImgs/bench-front-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Bench Goblet Side Squat": {
+    "imgUrl": "dataV2/exerciseImgs/bench-goblet-side-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Bench Hip Extension": {
+    "imgUrl": "dataV2/exerciseImgs/bench-hip-extension.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Bench Squat": {
+    "imgUrl": "dataV2/exerciseImgs/bench-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Bodyweight Bulgarian Split Squat": {
+    "imgUrl": "dataV2/exerciseImgs/bodyweight-bulgarian-split-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Bodyweight Good Morning": {
+    "imgUrl": "dataV2/exerciseImgs/bodyweight-good-morning.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Bodyweight Hip Thrust": {
+    "imgUrl": "dataV2/exerciseImgs/bodyweight-hip-thrust.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Bodyweight Split Squat": {
+    "imgUrl": "dataV2/exerciseImgs/bodyweight-split-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Bodyweight Standing Leg Curl": {
+    "imgUrl": "dataV2/exerciseImgs/bodyweight-standing-leg-curl.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Bodyweight Sumo Squat": {
+    "imgUrl": "dataV2/exerciseImgs/bodyweight-sumo-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Butt Kicks": {
+    "imgUrl": "dataV2/exerciseImgs/butt-kicks.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Cable Forward Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/cable-forward-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Cable",
+    "isCompound": true
+  },
+  "Cable Goblet Squat": {
+    "imgUrl": "dataV2/exerciseImgs/cable-goblet-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Cable",
+    "isCompound": true
+  },
+  "Cable Hip Abduction": {
+    "imgUrl": "dataV2/exerciseImgs/cable-hip-abduction.png",
+    "mainMuscle": "Legs",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Cable Hip Adduction": {
+    "imgUrl": "dataV2/exerciseImgs/cable-hip-adduction.png",
+    "mainMuscle": "Legs",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Cable Hip Extension": {
+    "imgUrl": "dataV2/exerciseImgs/cable-hip-extension.png",
+    "mainMuscle": "Legs",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Cable Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/cable-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Cable",
+    "isCompound": true
+  },
+  "Cable Rear Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/cable-rear-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Cable",
+    "isCompound": true
+  },
+  "Cable Side Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/cable-side-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Cable",
+    "isCompound": true
+  },
+  "Contralateral Dumbbell Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/contralateral-dumbbell-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Contralateral Dumbbell Split Squat": {
+    "imgUrl": "dataV2/exerciseImgs/contralateral-dumbbell-split-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Decline Bench Barbell Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/decline-bench-barbell-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Decline Bench Dumbbell Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/decline-bench-dumbbell-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Deficit Romanian Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/deficit-romanian-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Double Kettlebell Calf Raise": {
+    "imgUrl": "dataV2/exerciseImgs/double-kettlebell-calf-raise.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": false
+  },
+  "Double Kettlebell Front Squat": {
+    "imgUrl": "dataV2/exerciseImgs/double-kettlebell-front-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Double Kettlebell Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/double-kettlebell-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Double Kettlebell Reverse Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/double-kettlebell-reverse-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Double Kettlebell Romanian Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/double-kettlebell-romanian-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Double Kettlebell Split Squat": {
+    "imgUrl": "dataV2/exerciseImgs/double-kettlebell-split-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Double Kettlebell Step Up": {
+    "imgUrl": "dataV2/exerciseImgs/double-kettlebell-step-up.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Double Kettlebell Sumo Deadlift High Pull": {
+    "imgUrl": "dataV2/exerciseImgs/double-kettlebell-sumo-deadlift-high-pull.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Dual Cable Front Squat": {
+    "imgUrl": "dataV2/exerciseImgs/dual-cable-front-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Cable",
+    "isCompound": true
+  },
+  "Dual Cable Side Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/dual-cable-side-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Cable",
+    "isCompound": true
+  },
+  "Dual Cable Step Up": {
+    "imgUrl": "dataV2/exerciseImgs/dual-cable-step-up.png",
+    "mainMuscle": "Legs",
+    "equipment": "Cable",
+    "isCompound": true
+  },
+  "Dumbbell Bench Squat": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-bench-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Cossack Squat": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-cossack-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Curtsy Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-curtsy-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Forward Leaning Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-forward-leaning-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Frog Hip Thrust": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-frog-hip-thrust.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Front Rack Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-front-rack-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Goblet Box Squat": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-goblet-box-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Goblet Curtsy Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-goblet-curtsy-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Hamstring Curl": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-hamstring-curl.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Hip Thrust": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-hip-thrust.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Kas Glute Bridge": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-kas-glute-bridge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Knee Raise Step Up": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-knee-raise-step-up.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Lateral Step Up": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-lateral-step-up.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Lunge Curl": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-lunge-curl.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Lunge With Bicep Curl": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-lunge-with-bicep-curl.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Overhead Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-overhead-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Overhead Side Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-overhead-side-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Pistol Squat": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-pistol-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Rear Lunge From Step": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-rear-lunge-from-step.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Reverse Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-reverse-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Side Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-side-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Side Lunge With Bicep Curl": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-side-lunge-with-bicep-curl.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Side Lunge With Shoulder Press": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-side-lunge-with-shoulder-press.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Single Leg Squat": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-single-leg-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Static Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-static-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Step Up": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-step-up.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Sumo Squat": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-sumo-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Swing": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-swing.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Transverse Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-transverse-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Wall Squat": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-wall-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Elevated Barbell Glute Bridge": {
+    "imgUrl": "dataV2/exerciseImgs/elevated-barbell-glute-bridge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Elevated Dumbbell Sumo Squat": {
+    "imgUrl": "dataV2/exerciseImgs/elevated-dumbbell-sumo-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Elevated Split Squat": {
+    "imgUrl": "dataV2/exerciseImgs/elevated-split-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Frog Jump": {
+    "imgUrl": "dataV2/exerciseImgs/frog-jump.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Frog Squat": {
+    "imgUrl": "dataV2/exerciseImgs/frog-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Front Foot Elevated Dumbbell Split Squat": {
+    "imgUrl": "dataV2/exerciseImgs/front-foot-elevated-dumbbell-split-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Front Foot Elevated Goblet Split Squat": {
+    "imgUrl": "dataV2/exerciseImgs/front-foot-elevated-goblet-split-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Front Rack Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/front-rack-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Front Rack Split Squat": {
+    "imgUrl": "dataV2/exerciseImgs/front-rack-split-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Glute Medius Kickback": {
+    "imgUrl": "dataV2/exerciseImgs/glute-medius-kickback.png",
+    "mainMuscle": "Legs",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Goblet Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/goblet-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Goblet Side Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/goblet-side-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Goblet Side Squat": {
+    "imgUrl": "dataV2/exerciseImgs/goblet-side-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Goblet Split Squat": {
+    "imgUrl": "dataV2/exerciseImgs/goblet-split-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Goblet Squat Calf Raise": {
+    "imgUrl": "dataV2/exerciseImgs/goblet-squat-calf-raise.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Goblet Squat Curl": {
+    "imgUrl": "dataV2/exerciseImgs/goblet-squat-curl.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "High Plank Kickback": {
+    "imgUrl": "dataV2/exerciseImgs/high-plank-kickback.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Incline Dumbbell Hamstring Curl": {
+    "imgUrl": "dataV2/exerciseImgs/incline-dumbbell-hamstring-curl.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Inverse Leg Curl": {
+    "imgUrl": "dataV2/exerciseImgs/inverse-leg-curl.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Jefferson Split Squat": {
+    "imgUrl": "dataV2/exerciseImgs/jefferson-split-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Jerk Dip Squat": {
+    "imgUrl": "dataV2/exerciseImgs/jerk-dip-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Kas Glute Bridge": {
+    "imgUrl": "dataV2/exerciseImgs/kas-glute-bridge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Kettlebell Bulgarian Split Squat": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-bulgarian-split-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Front Squat": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-front-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Goblet Box Squat": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-goblet-box-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Goblet Curtsy Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-goblet-curtsy-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Goblet Side Squat": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-goblet-side-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Goblet Squat": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-goblet-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Goblet Sumo Squat": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-goblet-sumo-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Good Morning": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-good-morning.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Lunge Twist": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-lunge-twist.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Overhead Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-overhead-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Overhead Squat": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-overhead-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Pass Through Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-pass-through-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Pistol Squat": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-pistol-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Rotational Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-rotational-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Side Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-side-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Squat and Calf Raise": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-squat-and-calf-raise.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": false
+  },
+  "Kettlebell Step Up": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-step-up.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Sumo Squat": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-sumo-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Swing": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-swing.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": false
+  },
+  "Knee Circles": {
+    "imgUrl": "dataV2/exerciseImgs/knee-circles.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Kneeling Barbell Squat": {
+    "imgUrl": "dataV2/exerciseImgs/kneeling-barbell-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Kneeling Cable Pull Through": {
+    "imgUrl": "dataV2/exerciseImgs/kneeling-cable-pull-through.png",
+    "mainMuscle": "Legs",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Kneeling Hip Flexor Stretch": {
+    "imgUrl": "dataV2/exerciseImgs/kneeling-hip-flexor-stretch.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Landmine Hack Squat": {
+    "imgUrl": "dataV2/exerciseImgs/landmine-hack-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Landmine Sumo Squat": {
+    "imgUrl": "dataV2/exerciseImgs/landmine-sumo-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Lateral Step Up": {
+    "imgUrl": "dataV2/exerciseImgs/lateral-step-up.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Narrow Stance Dumbbell Squat": {
+    "imgUrl": "dataV2/exerciseImgs/narrow-stance-dumbbell-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Narrow Stance Squat": {
+    "imgUrl": "dataV2/exerciseImgs/narrow-stance-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "One Arm Dumbbell Overhead Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-dumbbell-overhead-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "One Arm Dumbbell Overhead Squat": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-dumbbell-overhead-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Overhead Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/overhead-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Partner Lying Hamstring Curl": {
+    "imgUrl": "dataV2/exerciseImgs/partner-lying-hamstring-curl.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Pin Good Morning": {
+    "imgUrl": "dataV2/exerciseImgs/pin-good-morning.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Plank Kickback": {
+    "imgUrl": "dataV2/exerciseImgs/plank-kickback.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Seated Dumbbell Calf Raise": {
+    "imgUrl": "dataV2/exerciseImgs/seated-dumbbell-calf-raise.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Seated Good Morning": {
+    "imgUrl": "dataV2/exerciseImgs/seated-good-morning.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Seated Single Leg Dumbbell Calf Raise": {
+    "imgUrl": "dataV2/exerciseImgs/seated-single-leg-dumbbell-calf-raise.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Single Dumbbell Bulgarian Split Squat": {
+    "imgUrl": "dataV2/exerciseImgs/single-dumbbell-bulgarian-split-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Single Dumbbell Cossack Squat": {
+    "imgUrl": "dataV2/exerciseImgs/single-dumbbell-cossack-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Single Dumbbell Reverse Lunge Front Raise": {
+    "imgUrl": "dataV2/exerciseImgs/single-dumbbell-reverse-lunge-front-raise.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Single Dumbbell Sissy Squat": {
+    "imgUrl": "dataV2/exerciseImgs/single-dumbbell-sissy-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Single Dumbbell Step Up": {
+    "imgUrl": "dataV2/exerciseImgs/single-dumbbell-step-up.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Single Dumbbell Sumo Squat": {
+    "imgUrl": "dataV2/exerciseImgs/single-dumbbell-sumo-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Single Leg Dual Dumbbell Calf Raise": {
+    "imgUrl": "dataV2/exerciseImgs/single-leg-dual-dumbbell-calf-raise.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Single Leg Dumbbell Calf Raise": {
+    "imgUrl": "dataV2/exerciseImgs/single-leg-dumbbell-calf-raise.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Single Leg Dumbbell Glute Bridge": {
+    "imgUrl": "dataV2/exerciseImgs/single-leg-dumbbell-glute-bridge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Single Leg Dumbbell Hip Thrust": {
+    "imgUrl": "dataV2/exerciseImgs/single-leg-dumbbell-hip-thrust.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Single Leg Good Morning": {
+    "imgUrl": "dataV2/exerciseImgs/single-leg-good-morning.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Single Leg Hip Thrust": {
+    "imgUrl": "dataV2/exerciseImgs/single-leg-hip-thrust.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Single Leg Seated Dumbbell Calf Raise": {
+    "imgUrl": "dataV2/exerciseImgs/single-leg-seated-dumbbell-calf-raise.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Smith Machine Bench Squat": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-bench-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Smith Machine Bulgarian Split Squat": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-bulgarian-split-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Smith Machine Calf Raise": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-calf-raise.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Smith Machine Chair Squat": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-chair-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Smith Machine Front Squat": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-front-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Smith Machine Glute Kickback": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-glute-kickback.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Smith Machine Good Morning": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-good-morning.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Smith Machine Hack Squat": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-hack-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Smith Machine Hip Thrust": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-hip-thrust.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Smith Machine Kneeling Squat": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-kneeling-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Smith Machine Leg Press": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-leg-press.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Smith Machine Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Smith Machine Rack Pull": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-rack-pull.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Smith Machine Rear Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-rear-lunge.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Smith Machine Reverse Calf Raise": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-reverse-calf-raise.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Smith Machine Reverse Hyperextension": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-reverse-hyperextension.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Smith Machine Seated Calf Raise": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-seated-calf-raise.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Smith Machine Seated Single Leg Calf Raise": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-seated-single-leg-calf-raise.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Smith Machine Side Step Up": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-side-step-up.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Smith Machine Single Leg Calf Raise": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-single-leg-calf-raise.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Smith Machine Split Squat": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-split-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Smith Machine Stiff Leg Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-stiff-leg-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Smith Machine Sumo Squat": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-sumo-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Smith Machine Zercher Squat": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-zercher-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Smith Machine Zombie Squat": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-zombie-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Stability Ball Dumbbell Calf Raise": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-dumbbell-calf-raise.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Stability Ball Dumbbell Squat": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-dumbbell-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Stability Ball Dumbbell Sumo Squat": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-dumbbell-sumo-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Staggered Stance Hip Thrust": {
+    "imgUrl": "dataV2/exerciseImgs/staggered-stance-hip-thrust.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Standing Cable Leg Curl": {
+    "imgUrl": "dataV2/exerciseImgs/standing-cable-leg-curl.png",
+    "mainMuscle": "Legs",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Step Up": {
+    "imgUrl": "dataV2/exerciseImgs/step-up.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Stiff Leg Cable Pull Through": {
+    "imgUrl": "dataV2/exerciseImgs/stiff-leg-cable-pull-through.png",
+    "mainMuscle": "Legs",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Sumo Block Pull": {
+    "imgUrl": "dataV2/exerciseImgs/sumo-block-pull.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Wall Sit Kick": {
+    "imgUrl": "dataV2/exerciseImgs/wall-sit-kick.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Wide Stance Squat": {
+    "imgUrl": "dataV2/exerciseImgs/wide-stance-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Wide Stance Stiff Leg Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/wide-stance-stiff-leg-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Zombie Squat": {
+    "imgUrl": "dataV2/exerciseImgs/zombie-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Hex Bar Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/hex-bar-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Romanian Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/romanian-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Power Clean": {
+    "imgUrl": "dataV2/exerciseImgs/power-clean.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Sumo Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/sumo-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Clean": {
+    "imgUrl": "dataV2/exerciseImgs/clean.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Dumbbell Romanian Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-romanian-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Stiff Leg Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/stiff-leg-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Hang Clean": {
+    "imgUrl": "dataV2/exerciseImgs/hang-clean.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Dumbbell Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Deficit Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/deficit-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Hang Power Clean": {
+    "imgUrl": "dataV2/exerciseImgs/hang-power-clean.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Single Leg Romanian Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/single-leg-romanian-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Pause Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/pause-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Jefferson Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/jefferson-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Single Leg Dumbbell Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/single-leg-dumbbell-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Behind The Back Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/behind-the-back-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Squat Thrust": {
+    "imgUrl": "dataV2/exerciseImgs/squat-thrust.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Single Leg Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/single-leg-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Zercher Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/zercher-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Wall Ball": {
+    "imgUrl": "dataV2/exerciseImgs/wall-ball.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Dumbbell Hang Clean": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-hang-clean.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Alternating Kettlebell Hang Clean": {
+    "imgUrl": "dataV2/exerciseImgs/alternating-kettlebell-hang-clean.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Anderson Squat": {
+    "imgUrl": "dataV2/exerciseImgs/anderson-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Barbell One Arm Side Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-one-arm-side-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Barbell Split Jump": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-split-jump.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Block Clean": {
+    "imgUrl": "dataV2/exerciseImgs/block-clean.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Block Power Clean": {
+    "imgUrl": "dataV2/exerciseImgs/block-power-clean.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Bottoms Up Kettlebell Turkish Get Up To Knee": {
+    "imgUrl": "dataV2/exerciseImgs/bottoms-up-kettlebell-turkish-get-up-to-knee.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": false
+  },
+  "Cable Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/cable-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Cable",
+    "isCompound": true
+  },
+  "Cable Stiff Leg Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/cable-stiff-leg-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Cable",
+    "isCompound": true
+  },
+  "Clean Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/clean-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Cross Jacks": {
+    "imgUrl": "dataV2/exerciseImgs/cross-jacks.png",
+    "mainMuscle": "Legs",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Deficit Sumo Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/deficit-sumo-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Double Kettlebell Clean": {
+    "imgUrl": "dataV2/exerciseImgs/double-kettlebell-clean.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Double Kettlebell Sumo Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/double-kettlebell-sumo-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Dumbbell Clean": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-clean.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Full Swing": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-full-swing.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Good Morning Squat": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-good-morning-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Hang Power Clean": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-hang-power-clean.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Power Clean": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-power-clean.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Single Leg Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-single-leg-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Stiff Leg Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-stiff-leg-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Sumo Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-sumo-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Kettlebell Clean": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-clean.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Dead Clean": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-dead-clean.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Deck Squat": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-deck-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Figure 8": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-figure-8.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": false
+  },
+  "Kettlebell Full Swing": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-full-swing.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": false
+  },
+  "Kettlebell Half Turkish Get Up": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-half-turkish-get-up.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": false
+  },
+  "Kettlebell Hang Clean": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-hang-clean.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Kickstand Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-kickstand-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Pirate Ship": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-pirate-ship.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": false
+  },
+  "Kettlebell Quarter Turkish Get Up": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-quarter-turkish-get-up.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": false
+  },
+  "Kettlebell Single Leg Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-single-leg-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Stiff Leg Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-stiff-leg-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Suitcase Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-suitcase-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Sumo Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-sumo-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Turkish Get Up": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-turkish-get-up.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": false
+  },
+  "Landmine Romanian Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/landmine-romanian-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Low Hang Clean": {
+    "imgUrl": "dataV2/exerciseImgs/low-hang-clean.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Muscle Clean": {
+    "imgUrl": "dataV2/exerciseImgs/muscle-clean.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "One Arm Dumbbell Power Clean": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-dumbbell-power-clean.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "One Arm Kettlebell Swing": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-kettlebell-swing.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": false
+  },
+  "Open Palm Kettlebell Clean": {
+    "imgUrl": "dataV2/exerciseImgs/open-palm-kettlebell-clean.png",
+    "mainMuscle": "Legs",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Paused Sumo Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/paused-sumo-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Pin Front Squat": {
+    "imgUrl": "dataV2/exerciseImgs/pin-front-squat.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Reeves Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/reeves-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Smith Machine Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Smith Machine Hang Clean": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-hang-clean.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Smith Machine Single Leg Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-single-leg-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Split Clean": {
+    "imgUrl": "dataV2/exerciseImgs/split-clean.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Staggered Dumbbell Romanian Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/staggered-dumbbell-romanian-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Stiff Leg Deadlift On Bench": {
+    "imgUrl": "dataV2/exerciseImgs/stiff-leg-deadlift-on-bench.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Sumo Romanian Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/sumo-romanian-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Supported Dumbbell Single Leg Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/supported-dumbbell-single-leg-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Snatch Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/snatch-deadlift.png",
+    "mainMuscle": "Legs",
+    "equipment": "Barbell",
+    "isCompound": true
+  }
+}

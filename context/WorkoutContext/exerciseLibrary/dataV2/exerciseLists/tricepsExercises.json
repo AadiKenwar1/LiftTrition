@@ -1,0 +1,596 @@
+{
+  "Dips": {
+    "imgUrl": "dataV2/exerciseImgs/dips.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Tricep Pushdown": {
+    "imgUrl": "dataV2/exerciseImgs/tricep-pushdown.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Lying Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/lying-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Tricep Rope Pushdown": {
+    "imgUrl": "dataV2/exerciseImgs/tricep-rope-pushdown.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Dumbbell Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Seated Dip Machine": {
+    "imgUrl": "dataV2/exerciseImgs/seated-dip-machine.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Machine",
+    "isCompound": false
+  },
+  "Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Lying Dumbbell Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/lying-dumbbell-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Bench Dips": {
+    "imgUrl": "dataV2/exerciseImgs/bench-dips.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Cable Overhead Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/cable-overhead-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Dumbbell Tricep Kickback": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-tricep-kickback.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Machine Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/machine-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Machine",
+    "isCompound": false
+  },
+  "Seated Dumbbell Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/seated-dumbbell-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "JM Press": {
+    "imgUrl": "dataV2/exerciseImgs/jm-press.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Ring Dips": {
+    "imgUrl": "dataV2/exerciseImgs/ring-dips.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Reverse Grip Tricep Pushdown": {
+    "imgUrl": "dataV2/exerciseImgs/reverse-grip-tricep-pushdown.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Tate Press": {
+    "imgUrl": "dataV2/exerciseImgs/tate-press.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Alternating Cable Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/alternating-cable-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Alternating Cross Body Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/alternating-cross-body-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Alternating Dumbbell Seated Kickback": {
+    "imgUrl": "dataV2/exerciseImgs/alternating-dumbbell-seated-kickback.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Alternating Dumbbell Tricep Kickback": {
+    "imgUrl": "dataV2/exerciseImgs/alternating-dumbbell-tricep-kickback.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Alternating Lying Dumbbell Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/alternating-lying-dumbbell-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Alternating Seated Dumbbell Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/alternating-seated-dumbbell-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Bent Knee Bench Dip": {
+    "imgUrl": "dataV2/exerciseImgs/bent-knee-bench-dip.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Body Up": {
+    "imgUrl": "dataV2/exerciseImgs/body-up.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Cable Crossover Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/cable-crossover-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Cable Incline Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/cable-incline-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Cable Reverse Grip Pushdown": {
+    "imgUrl": "dataV2/exerciseImgs/cable-reverse-grip-pushdown.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Cable Tricep Kickback": {
+    "imgUrl": "dataV2/exerciseImgs/cable-tricep-kickback.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Cross Body Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/cross-body-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Decline Dumbbell Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/decline-dumbbell-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Decline Lying Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/decline-lying-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Double Kettlebell Lying Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/double-kettlebell-lying-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Kettlebell",
+    "isCompound": false
+  },
+  "Double Kettlebell Overhead Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/double-kettlebell-overhead-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Kettlebell",
+    "isCompound": false
+  },
+  "Dual Cable Tricep Kickback": {
+    "imgUrl": "dataV2/exerciseImgs/dual-cable-tricep-kickback.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Dual Dumbbell Incline Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/dual-dumbbell-incline-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dual Dumbbell Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/dual-dumbbell-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Bench Dip": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-bench-dip.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Curl Press Extension": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-curl-press-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Incline Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-incline-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Lunge Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-lunge-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Seated Kickback": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-seated-kickback.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Twist Press": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-twist-press.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Elevated Dumbbell Bench Dip": {
+    "imgUrl": "dataV2/exerciseImgs/elevated-dumbbell-bench-dip.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "EZ Bar Incline Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/ez-bar-incline-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "EZ Bar JM Press": {
+    "imgUrl": "dataV2/exerciseImgs/ez-bar-jm-press.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "EZ Bar Lying Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/ez-bar-lying-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Floor Lying Single Dumbbell Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/floor-lying-single-dumbbell-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "High Pulley Overhead Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/high-pulley-overhead-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Incline Dumbbell Squeeze Press": {
+    "imgUrl": "dataV2/exerciseImgs/incline-dumbbell-squeeze-press.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Incline Single Dumbbell Bench Press": {
+    "imgUrl": "dataV2/exerciseImgs/incline-single-dumbbell-bench-press.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Incline Single Dumbbell Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/incline-single-dumbbell-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Incline Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/incline-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Kettlebell Overhead Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-overhead-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Kettlebell",
+    "isCompound": false
+  },
+  "Kneeling Cable Concentration Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/kneeling-cable-concentration-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Kneeling Cable Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/kneeling-cable-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Lying Cable Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/lying-cable-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Lying Dual Dumbbell Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/lying-dual-dumbbell-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Lying Single Dumbbell Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/lying-single-dumbbell-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Barbell Floor Press": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-barbell-floor-press.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "One Arm Cable Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-cable-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "One Arm Dumbbell Seated Kickback": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-dumbbell-seated-kickback.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Dumbbell Tricep Kickback": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-dumbbell-tricep-kickback.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm High Pulley Overhead Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-high-pulley-overhead-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "One Arm Overhead Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-overhead-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "One Arm Reverse Grip Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-reverse-grip-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "One Arm Rope Overhead Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-rope-overhead-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "One Arm Seated  Reverse Grip Dumbbell Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-seated--reverse-grip-dumbbell-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Seated Dumbbell Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-seated-dumbbell-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Side Cable Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-side-cable-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "One Arm Tricep Rope Pushdown": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-tricep-rope-pushdown.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Overhead Cable Crossover Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/overhead-cable-crossover-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Partner Overhead Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/partner-overhead-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Pronated Lying Dumbbell Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/pronated-lying-dumbbell-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Prone Incline Dumbbell Tricep Kickback": {
+    "imgUrl": "dataV2/exerciseImgs/prone-incline-dumbbell-tricep-kickback.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Reverse Grip Lying Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/reverse-grip-lying-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Rope Cable Incline Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/rope-cable-incline-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Rope Floor Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/rope-floor-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Rope High Pulley Overhead Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/rope-high-pulley-overhead-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Rope Lying Cable Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/rope-lying-cable-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Rope Overhead Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/rope-overhead-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Rope Tricep Kickback": {
+    "imgUrl": "dataV2/exerciseImgs/rope-tricep-kickback.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Seated Dual Dumbbell Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/seated-dual-dumbbell-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Seated EZ Bar Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/seated-ez-bar-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Seated Front and Back Tate Press": {
+    "imgUrl": "dataV2/exerciseImgs/seated-front-and-back-tate-press.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Seated High Pulley Overhead Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/seated-high-pulley-overhead-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Seated Overhead Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/seated-overhead-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Seated Single Dumbbell Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/seated-single-dumbbell-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Side Overhead Cable Crossover Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/side-overhead-cable-crossover-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Single Dumbbell Close Grip Press": {
+    "imgUrl": "dataV2/exerciseImgs/single-dumbbell-close-grip-press.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Single Dumbbell Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/single-dumbbell-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Smith Machine Incline Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-incline-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Stability Ball Dumbbell Curl and Extension": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-dumbbell-curl-and-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Stability Ball Dumbbell Kickback": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-dumbbell-kickback.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Stability Ball Dumbbell Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-dumbbell-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Stability Ball One Arm Dumbbell Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-one-arm-dumbbell-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Stability Ball One Arm Lying Dumbbell Tricep Extension": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-one-arm-lying-dumbbell-tricep-extension.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Stork Stance Tricep Kickback": {
+    "imgUrl": "dataV2/exerciseImgs/stork-stance-tricep-kickback.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "V Bar Tricep Pushdown": {
+    "imgUrl": "dataV2/exerciseImgs/v-bar-tricep-pushdown.png",
+    "mainMuscle": "Triceps",
+    "equipment": "Cable",
+    "isCompound": false
+  }
+}

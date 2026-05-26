@@ -1,0 +1,1454 @@
+{
+  "Shoulder Press": {
+    "imgUrl": "dataV2/exerciseImgs/shoulder-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Dumbbell Shoulder Press": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-shoulder-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Lateral Raise": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-lateral-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Military Press": {
+    "imgUrl": "dataV2/exerciseImgs/military-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Seated Dumbbell Shoulder Press": {
+    "imgUrl": "dataV2/exerciseImgs/seated-dumbbell-shoulder-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Machine Shoulder Press": {
+    "imgUrl": "dataV2/exerciseImgs/machine-shoulder-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Machine",
+    "isCompound": true
+  },
+  "Seated Shoulder Press": {
+    "imgUrl": "dataV2/exerciseImgs/seated-shoulder-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Push Press": {
+    "imgUrl": "dataV2/exerciseImgs/push-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Upright Row": {
+    "imgUrl": "dataV2/exerciseImgs/upright-row.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Cable Lateral Raise": {
+    "imgUrl": "dataV2/exerciseImgs/cable-lateral-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Arnold Press": {
+    "imgUrl": "dataV2/exerciseImgs/arnold-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Front Raise": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-front-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Handstand Push Ups": {
+    "imgUrl": "dataV2/exerciseImgs/handstand-push-ups.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Face Pull": {
+    "imgUrl": "dataV2/exerciseImgs/face-pull.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Behind The Neck Press": {
+    "imgUrl": "dataV2/exerciseImgs/behind-the-neck-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Dumbbell Upright Row": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-upright-row.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Machine Lateral Raise": {
+    "imgUrl": "dataV2/exerciseImgs/machine-lateral-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Machine",
+    "isCompound": false
+  },
+  "Barbell Front Raise": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-front-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Log Press": {
+    "imgUrl": "dataV2/exerciseImgs/log-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Neck Curl": {
+    "imgUrl": "dataV2/exerciseImgs/neck-curl.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Pike Push Up": {
+    "imgUrl": "dataV2/exerciseImgs/pike-push-up.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Viking Press": {
+    "imgUrl": "dataV2/exerciseImgs/viking-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Z Press": {
+    "imgUrl": "dataV2/exerciseImgs/z-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Shoulder Pin Press": {
+    "imgUrl": "dataV2/exerciseImgs/shoulder-pin-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Landmine Press": {
+    "imgUrl": "dataV2/exerciseImgs/landmine-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Neck Extension": {
+    "imgUrl": "dataV2/exerciseImgs/neck-extension.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "One Arm Landmine Press": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-landmine-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Dumbbell Z Press": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-z-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Face Pull": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-face-pull.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell External Rotation": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-external-rotation.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Push Press": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-push-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Cable External Rotation": {
+    "imgUrl": "dataV2/exerciseImgs/cable-external-rotation.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Alternating Arnold Press": {
+    "imgUrl": "dataV2/exerciseImgs/alternating-arnold-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Alternating Bent Over Reverse Dumbbell Fly": {
+    "imgUrl": "dataV2/exerciseImgs/alternating-bent-over-reverse-dumbbell-fly.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Alternating Cable Shoulder Press": {
+    "imgUrl": "dataV2/exerciseImgs/alternating-cable-shoulder-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Cable",
+    "isCompound": true
+  },
+  "Alternating Dumbbell Lateral Raise": {
+    "imgUrl": "dataV2/exerciseImgs/alternating-dumbbell-lateral-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Alternating Dumbbell Shoulder Press": {
+    "imgUrl": "dataV2/exerciseImgs/alternating-dumbbell-shoulder-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Alternating Hammer Curl To Press": {
+    "imgUrl": "dataV2/exerciseImgs/alternating-hammer-curl-to-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Alternating Hammer Shoulder Press": {
+    "imgUrl": "dataV2/exerciseImgs/alternating-hammer-shoulder-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Alternating Incline Dumbbell Reverse Fly": {
+    "imgUrl": "dataV2/exerciseImgs/alternating-incline-dumbbell-reverse-fly.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Alternating Kettlebell Press": {
+    "imgUrl": "dataV2/exerciseImgs/alternating-kettlebell-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Alternating Seated Bent Over Dumbbell Fly": {
+    "imgUrl": "dataV2/exerciseImgs/alternating-seated-bent-over-dumbbell-fly.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Alternating Seated Dumbbell Forward Press": {
+    "imgUrl": "dataV2/exerciseImgs/alternating-seated-dumbbell-forward-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Alternating Seated Front Hammer Raise": {
+    "imgUrl": "dataV2/exerciseImgs/alternating-seated-front-hammer-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Alternating Seated Hammer Shoulder Press": {
+    "imgUrl": "dataV2/exerciseImgs/alternating-seated-hammer-shoulder-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Alternating Standing Arnold Press": {
+    "imgUrl": "dataV2/exerciseImgs/alternating-standing-arnold-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Angled Kettlebell Press": {
+    "imgUrl": "dataV2/exerciseImgs/angled-kettlebell-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Arm Circles": {
+    "imgUrl": "dataV2/exerciseImgs/arm-circles.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Barbell Overhead Front Raise": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-overhead-front-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Barbell Rear Delt Raise": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-rear-delt-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Barbell Rear Delt Row": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-rear-delt-row.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Barbell Skier": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-skier.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Bench Supported Dumbbell External Rotation": {
+    "imgUrl": "dataV2/exerciseImgs/bench-supported-dumbbell-external-rotation.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Bent Arm Dumbbell Lateral Raise": {
+    "imgUrl": "dataV2/exerciseImgs/bent-arm-dumbbell-lateral-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Bottoms Up Kettlebell Press": {
+    "imgUrl": "dataV2/exerciseImgs/bottoms-up-kettlebell-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Bradford Press": {
+    "imgUrl": "dataV2/exerciseImgs/bradford-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Cable Bent Over Reverse Fly": {
+    "imgUrl": "dataV2/exerciseImgs/cable-bent-over-reverse-fly.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Cable Crossover Face Pull": {
+    "imgUrl": "dataV2/exerciseImgs/cable-crossover-face-pull.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Cable External Rotation Press": {
+    "imgUrl": "dataV2/exerciseImgs/cable-external-rotation-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Cable Front Raise": {
+    "imgUrl": "dataV2/exerciseImgs/cable-front-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Cable Internal Rotation": {
+    "imgUrl": "dataV2/exerciseImgs/cable-internal-rotation.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Cable Seated Shoulder Internal Rotation": {
+    "imgUrl": "dataV2/exerciseImgs/cable-seated-shoulder-internal-rotation.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Cable Supine Reverse Fly": {
+    "imgUrl": "dataV2/exerciseImgs/cable-supine-reverse-fly.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Cable Twisting Overhead Press": {
+    "imgUrl": "dataV2/exerciseImgs/cable-twisting-overhead-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Cable",
+    "isCompound": true
+  },
+  "Cable Upright External Rotation": {
+    "imgUrl": "dataV2/exerciseImgs/cable-upright-external-rotation.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Cable Upright Internal Rotation": {
+    "imgUrl": "dataV2/exerciseImgs/cable-upright-internal-rotation.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Cable Y Raise": {
+    "imgUrl": "dataV2/exerciseImgs/cable-y-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Chin To Chest Stretch": {
+    "imgUrl": "dataV2/exerciseImgs/chin-to-chest-stretch.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Close Grip Shoulder Press": {
+    "imgUrl": "dataV2/exerciseImgs/close-grip-shoulder-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Double Kettlebell Front Raise": {
+    "imgUrl": "dataV2/exerciseImgs/double-kettlebell-front-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Kettlebell",
+    "isCompound": false
+  },
+  "Double Kettlebell Lateral Raise": {
+    "imgUrl": "dataV2/exerciseImgs/double-kettlebell-lateral-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Kettlebell",
+    "isCompound": false
+  },
+  "Double Kettlebell Press": {
+    "imgUrl": "dataV2/exerciseImgs/double-kettlebell-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Double Kettlebell Push Press": {
+    "imgUrl": "dataV2/exerciseImgs/double-kettlebell-push-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Dual Cable Front Raise": {
+    "imgUrl": "dataV2/exerciseImgs/dual-cable-front-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Dual Cable Lateral Raise": {
+    "imgUrl": "dataV2/exerciseImgs/dual-cable-lateral-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Dual Cable Shoulder Press": {
+    "imgUrl": "dataV2/exerciseImgs/dual-cable-shoulder-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Cable",
+    "isCompound": true
+  },
+  "Dumbbell Archer": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-archer.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Around The World": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-around-the-world.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Bus Driver": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-bus-driver.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Cuban Press": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-cuban-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Curl To Press": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-curl-to-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Full Can Lateral Raise": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-full-can-lateral-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Incline Shoulder Raise": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-incline-shoulder-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Iron Cross": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-iron-cross.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Lateral To Front Raise": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-lateral-to-front-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Rear Delt Raise": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-rear-delt-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Scott Press": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-scott-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Shrug Raise": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-shrug-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Upright External Rotation": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-upright-external-rotation.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell W Press": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-w-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Elbow Circles": {
+    "imgUrl": "dataV2/exerciseImgs/elbow-circles.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "EZ Bar Anti Gravity Press": {
+    "imgUrl": "dataV2/exerciseImgs/ez-bar-anti-gravity-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "EZ Bar Upright Row": {
+    "imgUrl": "dataV2/exerciseImgs/ez-bar-upright-row.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Flat Reverse Fly": {
+    "imgUrl": "dataV2/exerciseImgs/flat-reverse-fly.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Half Kneeling Cable External Rotation": {
+    "imgUrl": "dataV2/exerciseImgs/half-kneeling-cable-external-rotation.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Half Kneeling Dumbbell Shoulder Press": {
+    "imgUrl": "dataV2/exerciseImgs/half-kneeling-dumbbell-shoulder-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Half Kneeling Kettlebell Press": {
+    "imgUrl": "dataV2/exerciseImgs/half-kneeling-kettlebell-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Hammer Shoulder Press": {
+    "imgUrl": "dataV2/exerciseImgs/hammer-shoulder-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Incline Cable Reverse Fly": {
+    "imgUrl": "dataV2/exerciseImgs/incline-cable-reverse-fly.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Incline Dumbbell Around The World": {
+    "imgUrl": "dataV2/exerciseImgs/incline-dumbbell-around-the-world.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Incline Dumbbell Front Raise": {
+    "imgUrl": "dataV2/exerciseImgs/incline-dumbbell-front-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Incline Dumbbell Shrug": {
+    "imgUrl": "dataV2/exerciseImgs/incline-dumbbell-shrug.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Incline Dumbbell T Raise": {
+    "imgUrl": "dataV2/exerciseImgs/incline-dumbbell-t-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Incline Single Dumbbell Front Raise": {
+    "imgUrl": "dataV2/exerciseImgs/incline-single-dumbbell-front-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Kettlebell Arnold Press": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-arnold-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Bent Press": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-bent-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Halo": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-halo.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Kettlebell",
+    "isCompound": false
+  },
+  "Kettlebell Press": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Push Press": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-push-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Slingshot": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-slingshot.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Kettlebell",
+    "isCompound": false
+  },
+  "Kettlebell Sots Press": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-sots-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Strict Press": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-strict-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Upright Row": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-upright-row.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Kettlebell",
+    "isCompound": false
+  },
+  "Kneeling Arnold Press": {
+    "imgUrl": "dataV2/exerciseImgs/kneeling-arnold-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Kneeling High Face Pull": {
+    "imgUrl": "dataV2/exerciseImgs/kneeling-high-face-pull.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Kneeling Kettlebell Press": {
+    "imgUrl": "dataV2/exerciseImgs/kneeling-kettlebell-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kneeling One Arm Landmine Shoulder Press": {
+    "imgUrl": "dataV2/exerciseImgs/kneeling-one-arm-landmine-shoulder-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Landmine Lateral Raise": {
+    "imgUrl": "dataV2/exerciseImgs/landmine-lateral-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Leaning Cable Lateral Raise": {
+    "imgUrl": "dataV2/exerciseImgs/leaning-cable-lateral-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Leaning One Arm Dumbbell Lateral Raise": {
+    "imgUrl": "dataV2/exerciseImgs/leaning-one-arm-dumbbell-lateral-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Lying Cable Front Raise": {
+    "imgUrl": "dataV2/exerciseImgs/lying-cable-front-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Lying Cable Shrug": {
+    "imgUrl": "dataV2/exerciseImgs/lying-cable-shrug.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Lying Cable Upright Row": {
+    "imgUrl": "dataV2/exerciseImgs/lying-cable-upright-row.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Lying Dual Cable Lateral Raise": {
+    "imgUrl": "dataV2/exerciseImgs/lying-dual-cable-lateral-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Lying Dumbbell External Rotation": {
+    "imgUrl": "dataV2/exerciseImgs/lying-dumbbell-external-rotation.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Arnold Press": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-arnold-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "One Arm Cable Bent Over Reverse Fly": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-cable-bent-over-reverse-fly.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "One Arm Cable Front Raise": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-cable-front-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "One Arm Cable Reverse Fly": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-cable-reverse-fly.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "One Arm Dumbbell Front Raise": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-dumbbell-front-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Dumbbell Lateral Raise": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-dumbbell-lateral-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Dumbbell Reverse Fly": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-dumbbell-reverse-fly.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Dumbbell Shoulder Press": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-dumbbell-shoulder-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "One Arm Dumbbell Upright Row": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-dumbbell-upright-row.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Dumbbell Y Raise": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-dumbbell-y-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Floor Dumbbell Rear Delt Raise": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-floor-dumbbell-rear-delt-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Hammer Front Raise": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-hammer-front-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Incline Dumbbell Lateral Raise": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-incline-dumbbell-lateral-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Lying Dumbbell Lateral Raise": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-lying-dumbbell-lateral-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Lying Dumbbell Reverse Fly": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-lying-dumbbell-reverse-fly.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Palms In Dumbbell Shoulder Press": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-palms-in-dumbbell-shoulder-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "One Arm Prone Incline Dumbbell Front Raise": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-prone-incline-dumbbell-front-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Prone Incline Dumbbell Lateral Raise": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-prone-incline-dumbbell-lateral-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Reverse Grip Dumbbell Front Raise": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-reverse-grip-dumbbell-front-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Seated Arnold Press": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-seated-arnold-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "One Arm Seated Dumbbell Front Raise": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-seated-dumbbell-front-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Seated Dumbbell Shoulder Press": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-seated-dumbbell-shoulder-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Overhead Dumbbell Front Raise": {
+    "imgUrl": "dataV2/exerciseImgs/overhead-dumbbell-front-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Palms In Dumbbell Shoulder Press": {
+    "imgUrl": "dataV2/exerciseImgs/palms-in-dumbbell-shoulder-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Partial Dumbbell Lateral Raise": {
+    "imgUrl": "dataV2/exerciseImgs/partial-dumbbell-lateral-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Poliquin Dumbbell Lateral Raise": {
+    "imgUrl": "dataV2/exerciseImgs/poliquin-dumbbell-lateral-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Pronating Grip Dumbbell Shoulder Press": {
+    "imgUrl": "dataV2/exerciseImgs/pronating-grip-dumbbell-shoulder-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Pronating Incline Reverse Fly": {
+    "imgUrl": "dataV2/exerciseImgs/pronating-incline-reverse-fly.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Prone Dumbbell Shoulder Press": {
+    "imgUrl": "dataV2/exerciseImgs/prone-dumbbell-shoulder-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Prone Incline Barbell Front Raise": {
+    "imgUrl": "dataV2/exerciseImgs/prone-incline-barbell-front-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Prone Incline Cable Reverse Fly": {
+    "imgUrl": "dataV2/exerciseImgs/prone-incline-cable-reverse-fly.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Prone Incline Dumbbell Front Raise": {
+    "imgUrl": "dataV2/exerciseImgs/prone-incline-dumbbell-front-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Rear Delt Dumbbell Row": {
+    "imgUrl": "dataV2/exerciseImgs/rear-delt-dumbbell-row.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Reverse Arnold Press": {
+    "imgUrl": "dataV2/exerciseImgs/reverse-arnold-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Reverse Grip Dumbbell Shoulder Press": {
+    "imgUrl": "dataV2/exerciseImgs/reverse-grip-dumbbell-shoulder-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Seated Barbell Front Raise": {
+    "imgUrl": "dataV2/exerciseImgs/seated-barbell-front-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Seated Barbell Overhead Front Raise": {
+    "imgUrl": "dataV2/exerciseImgs/seated-barbell-overhead-front-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Seated Barbell Shrug": {
+    "imgUrl": "dataV2/exerciseImgs/seated-barbell-shrug.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Seated Behind The Neck Press": {
+    "imgUrl": "dataV2/exerciseImgs/seated-behind-the-neck-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Seated Bradford Press": {
+    "imgUrl": "dataV2/exerciseImgs/seated-bradford-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Seated Cable Neck Curl": {
+    "imgUrl": "dataV2/exerciseImgs/seated-cable-neck-curl.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Seated Cable Neck Extension": {
+    "imgUrl": "dataV2/exerciseImgs/seated-cable-neck-extension.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Seated Cable Row Shrug": {
+    "imgUrl": "dataV2/exerciseImgs/seated-cable-row-shrug.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Seated Double Kettlebell Press": {
+    "imgUrl": "dataV2/exerciseImgs/seated-double-kettlebell-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Seated Dumbbell Cuban Press": {
+    "imgUrl": "dataV2/exerciseImgs/seated-dumbbell-cuban-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Seated Dumbbell Curl To Press": {
+    "imgUrl": "dataV2/exerciseImgs/seated-dumbbell-curl-to-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Seated Dumbbell External Rotation": {
+    "imgUrl": "dataV2/exerciseImgs/seated-dumbbell-external-rotation.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Seated Dumbbell Front Raise": {
+    "imgUrl": "dataV2/exerciseImgs/seated-dumbbell-front-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Seated Dumbbell Lateral Raise": {
+    "imgUrl": "dataV2/exerciseImgs/seated-dumbbell-lateral-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Seated Face Pull": {
+    "imgUrl": "dataV2/exerciseImgs/seated-face-pull.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Seated Gittleson Shrug": {
+    "imgUrl": "dataV2/exerciseImgs/seated-gittleson-shrug.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Seated Hammer Shoulder Press": {
+    "imgUrl": "dataV2/exerciseImgs/seated-hammer-shoulder-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Seated Kettlebell Press": {
+    "imgUrl": "dataV2/exerciseImgs/seated-kettlebell-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Seated Low Pulley Rear Delt Row": {
+    "imgUrl": "dataV2/exerciseImgs/seated-low-pulley-rear-delt-row.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Seesaw Kettlebell Press": {
+    "imgUrl": "dataV2/exerciseImgs/seesaw-kettlebell-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Side Lying Cable Lateral Raise": {
+    "imgUrl": "dataV2/exerciseImgs/side-lying-cable-lateral-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Side Lying Dumbbell Reverse Fly": {
+    "imgUrl": "dataV2/exerciseImgs/side-lying-dumbbell-reverse-fly.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Single Dumbbell Front Raise": {
+    "imgUrl": "dataV2/exerciseImgs/single-dumbbell-front-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Smith Machine Behind The Back Shrug": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-behind-the-back-shrug.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Smith Machine Behind The Neck Press": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-behind-the-neck-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Smith Machine Shoulder Press": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-shoulder-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Smith Machine Upright Row": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-upright-row.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Snatch Grip Barbell Shrug": {
+    "imgUrl": "dataV2/exerciseImgs/snatch-grip-barbell-shrug.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Stability Ball Dumbbell Lateral Raise": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-dumbbell-lateral-raise.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Stability Ball Dumbbell Shoulder Press": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-dumbbell-shoulder-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Stability Ball Wall Circles": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-wall-circles.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Standing Arnold Press": {
+    "imgUrl": "dataV2/exerciseImgs/standing-arnold-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Standing High Pulley Rear Delt Row": {
+    "imgUrl": "dataV2/exerciseImgs/standing-high-pulley-rear-delt-row.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "V Bar Shoulder Press": {
+    "imgUrl": "dataV2/exerciseImgs/v-bar-shoulder-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Cable",
+    "isCompound": true
+  },
+  "Wide Grip Barbell Shrug": {
+    "imgUrl": "dataV2/exerciseImgs/wide-grip-barbell-shrug.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Wide Grip Behind The Back Shrug": {
+    "imgUrl": "dataV2/exerciseImgs/wide-grip-behind-the-back-shrug.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Wide Grip Shoulder Press": {
+    "imgUrl": "dataV2/exerciseImgs/wide-grip-shoulder-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Wide Grip Upright Row": {
+    "imgUrl": "dataV2/exerciseImgs/wide-grip-upright-row.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Clean and Jerk": {
+    "imgUrl": "dataV2/exerciseImgs/clean-and-jerk.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Snatch": {
+    "imgUrl": "dataV2/exerciseImgs/snatch.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Clean and Press": {
+    "imgUrl": "dataV2/exerciseImgs/clean-and-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Thruster": {
+    "imgUrl": "dataV2/exerciseImgs/thruster.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Power Snatch": {
+    "imgUrl": "dataV2/exerciseImgs/power-snatch.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Push Jerk": {
+    "imgUrl": "dataV2/exerciseImgs/push-jerk.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Split Jerk": {
+    "imgUrl": "dataV2/exerciseImgs/split-jerk.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Muscle Snatch": {
+    "imgUrl": "dataV2/exerciseImgs/muscle-snatch.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Dumbbell Snatch": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-snatch.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Hang Snatch": {
+    "imgUrl": "dataV2/exerciseImgs/hang-snatch.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Dumbbell Thruster": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-thruster.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Clean and Press": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-clean-and-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Barbell Squat To Shoulder Press": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-squat-to-shoulder-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Behind The Back Push Press": {
+    "imgUrl": "dataV2/exerciseImgs/behind-the-back-push-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Block Power Snatch": {
+    "imgUrl": "dataV2/exerciseImgs/block-power-snatch.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Block Snatch": {
+    "imgUrl": "dataV2/exerciseImgs/block-snatch.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Double Kettlebell Clean and Jerk": {
+    "imgUrl": "dataV2/exerciseImgs/double-kettlebell-clean-and-jerk.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Double Kettlebell Clean and Press": {
+    "imgUrl": "dataV2/exerciseImgs/double-kettlebell-clean-and-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Double Kettlebell Jerk": {
+    "imgUrl": "dataV2/exerciseImgs/double-kettlebell-jerk.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Double Kettlebell Lunge Press": {
+    "imgUrl": "dataV2/exerciseImgs/double-kettlebell-lunge-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Double Kettlebell Snatch": {
+    "imgUrl": "dataV2/exerciseImgs/double-kettlebell-snatch.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Kettlebell",
+    "isCompound": false
+  },
+  "Double Kettlebell Thruster": {
+    "imgUrl": "dataV2/exerciseImgs/double-kettlebell-thruster.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Kettlebell",
+    "isCompound": false
+  },
+  "Dumbbell Clean and Push Jerk": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-clean-and-push-jerk.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Hang Power Clean and Jerk": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-hang-power-clean-and-jerk.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Overhead Squat": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-overhead-squat.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Push Jerk": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-push-jerk.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Squat Press": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-squat-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Squat To Forward Press": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-squat-to-forward-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Heaving Snatch Balance": {
+    "imgUrl": "dataV2/exerciseImgs/heaving-snatch-balance.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Kettlebell Clean and Jerk": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-clean-and-jerk.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Clean and Press": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-clean-and-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Jerk": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-jerk.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Lunge Press": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-lunge-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Snatch": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-snatch.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Kettlebell",
+    "isCompound": false
+  },
+  "Kettlebell Split Snatch": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-split-snatch.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Kettlebell",
+    "isCompound": false
+  },
+  "Kettlebell Thruster": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-thruster.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Kettlebell",
+    "isCompound": false
+  },
+  "Kneeling Landmine Thruster": {
+    "imgUrl": "dataV2/exerciseImgs/kneeling-landmine-thruster.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Low Hang Snatch": {
+    "imgUrl": "dataV2/exerciseImgs/low-hang-snatch.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "One Arm Barbell Snatch": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-barbell-snatch.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "One Arm Dumbbell Clean and Jerk": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-dumbbell-clean-and-jerk.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "One Arm Dumbbell Thruster": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-dumbbell-thruster.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Landmine Clean and Press": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-landmine-clean-and-press.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Snatch Balance": {
+    "imgUrl": "dataV2/exerciseImgs/snatch-balance.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Squat Jerk": {
+    "imgUrl": "dataV2/exerciseImgs/squat-jerk.png",
+    "mainMuscle": "Shoulders",
+    "equipment": "Barbell",
+    "isCompound": true
+  }
+}

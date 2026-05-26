@@ -5,8 +5,8 @@ import { Ingredient, NutritionEntry } from '@/context/NutritionContext/types'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { Bookmark, Check, X } from 'lucide-react-native'
-import { useState } from 'react'
-import { FlatList, KeyboardAvoidingView, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { useMemo, useState } from 'react'
+import { Alert, FlatList, KeyboardAvoidingView, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import uuid from 'react-native-uuid'
 
 type StagedSavedMeal = {
@@ -36,6 +36,14 @@ export default function SavedNutritionModal() {
     const [addedItems, setAddedItems] = useState<StagedSavedMeal[]>([])
     const [quantityInputItem, setQuantityInputItem] = useState<NutritionEntry | null>(null)
     const [quantityValue, setQuantityValue] = useState('1')
+    const [searchQuery, setSearchQuery] = useState('')
+    const [isFocused, setIsFocused] = useState(false)
+
+    const filteredSavedEntries = useMemo(() => {
+        const q = searchQuery.trim().toLowerCase()
+        if (!q) return savedNutritionEntries
+        return savedNutritionEntries.filter((entry) => entry.name.toLowerCase().includes(q))
+    }, [savedNutritionEntries, searchQuery])
 
     function openQuantityModal(savedItem: NutritionEntry) {
         setQuantityInputItem(savedItem)
@@ -64,6 +72,13 @@ export default function SavedNutritionModal() {
 
     function handleRemoveStaged(lineId: string) {
         setAddedItems((prev) => prev.filter((row) => row.lineId !== lineId))
+    }
+
+    function confirmUnsave(savedItem: NutritionEntry) {
+        Alert.alert('Remove saved meal?', `"${savedItem.name}" will be removed from your saved meals.`, [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Remove', style: 'destructive', onPress: () => handleUnsaveNutrition(savedItem.id) },
+        ])
     }
 
     function handleAddAll() {
@@ -129,8 +144,25 @@ export default function SavedNutritionModal() {
                 </View>
             )}
 
+            {savedNutritionEntries.length > 0 && (
+                <View style={styles.searchContainer}>
+                    <TextInput
+                        style={[styles.searchInput, isFocused && styles.searchInputFocused]}
+                        placeholder="Search saved meals..."
+                        placeholderTextColor="#666"
+                        value={searchQuery}
+                        onChangeText={setSearchQuery}
+                        onFocus={() => setIsFocused(true)}
+                        onBlur={() => setIsFocused(false)}
+                        autoCorrect={false}
+                        autoCapitalize="none"
+                        returnKeyType="search"
+                    />
+                </View>
+            )}
+
             {savedNutritionEntries.length > 0 ?
-                <Text style={styles.sectionTitle}>Saved</Text>
+                <Text style={styles.sectionTitle}>{searchQuery.trim() ? `Results (${filteredSavedEntries.length})` : 'Saved'}</Text>
             :   null}
         </>
     )
@@ -141,6 +173,18 @@ export default function SavedNutritionModal() {
             <Text style={styles.emptySubtext}>Save meals to quickly add them later</Text>
         </View>
     )
+
+    const renderNoSearchResults = () => (
+        <View style={styles.emptyState}>
+            <Text style={styles.emptyText}>No meals match your search</Text>
+            <Text style={styles.emptySubtext}>Try a different name</Text>
+        </View>
+    )
+
+    const renderListEmpty = () => {
+        if (savedNutritionEntries.length === 0) return renderEmptyState()
+        return renderNoSearchResults()
+    }
 
     return (
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
@@ -170,15 +214,15 @@ export default function SavedNutritionModal() {
 
             <View style={styles.body}>
                 <FlatList
-                    data={savedNutritionEntries}
+                    data={filteredSavedEntries}
                     keyExtractor={(item) => item.id}
                     ListHeaderComponent={listHeader}
-                    renderItem={({ item }) => (
-                        <SavedEntry name={item.name} calories={item.calories} protein={item.protein} carbs={item.carbs} fats={item.fats} onAddPress={() => openQuantityModal(item)} onDeletePress={() => handleUnsaveNutrition(item.id)} />
-                    )}
-                    ListEmptyComponent={renderEmptyState}
+                    renderItem={({ item }) => <SavedEntry name={item.name} calories={item.calories} protein={item.protein} carbs={item.carbs} fats={item.fats} onAddPress={() => openQuantityModal(item)} onDeletePress={() => confirmUnsave(item)} />}
+                    ListEmptyComponent={renderListEmpty}
                     contentContainerStyle={[styles.listContent, savedNutritionEntries.length === 0 && styles.listContentEmpty]}
                     showsVerticalScrollIndicator={false}
+                    keyboardShouldPersistTaps="handled"
+                    keyboardDismissMode="on-drag"
                 />
 
                 {addedItems.length > 0 && (
@@ -257,6 +301,24 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         fontFamily: 'Poppins_400Regular',
         letterSpacing: 0.2,
+    },
+    searchContainer: {
+        marginBottom: 24,
+        position: 'relative',
+    },
+    searchInput: {
+        backgroundColor: '#1e1e1e',
+        borderRadius: 12,
+        paddingHorizontal: 16,
+        paddingVertical: 14,
+        fontSize: 15,
+        color: '#FFF',
+        borderWidth: 2,
+        borderColor: '#1e1e1e',
+        fontFamily: 'Poppins_400Regular',
+    },
+    searchInputFocused: {
+        borderColor: '#22C922',
     },
     section: {
         marginBottom: 20,

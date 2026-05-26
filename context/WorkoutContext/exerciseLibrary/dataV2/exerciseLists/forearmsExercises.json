@@ -1,0 +1,368 @@
+{
+  "Wrist Curl": {
+    "imgUrl": "dataV2/exerciseImgs/wrist-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Reverse Barbell Curl": {
+    "imgUrl": "dataV2/exerciseImgs/reverse-barbell-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Dumbbell Wrist Curl": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-wrist-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Reverse Wrist Curl": {
+    "imgUrl": "dataV2/exerciseImgs/reverse-wrist-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Dumbbell Reverse Wrist Curl": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-reverse-wrist-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Reverse Curl": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-reverse-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Alternating Dumbbell Reverse Curl": {
+    "imgUrl": "dataV2/exerciseImgs/alternating-dumbbell-reverse-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Behind The Back Cable Wrist Curl": {
+    "imgUrl": "dataV2/exerciseImgs/behind-the-back-cable-wrist-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Behind The Back Dumbbell Finger Curl": {
+    "imgUrl": "dataV2/exerciseImgs/behind-the-back-dumbbell-finger-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Behind The Back Finger Curl": {
+    "imgUrl": "dataV2/exerciseImgs/behind-the-back-finger-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Behind The Back Wrist Curl": {
+    "imgUrl": "dataV2/exerciseImgs/behind-the-back-wrist-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Cable Reverse Preacher Curl": {
+    "imgUrl": "dataV2/exerciseImgs/cable-reverse-preacher-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Cable Reverse Wrist Curl": {
+    "imgUrl": "dataV2/exerciseImgs/cable-reverse-wrist-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Cable Wrist Curl": {
+    "imgUrl": "dataV2/exerciseImgs/cable-wrist-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Cross Body Hammer Curl": {
+    "imgUrl": "dataV2/exerciseImgs/cross-body-hammer-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Double Kettlebell Wrist Curl": {
+    "imgUrl": "dataV2/exerciseImgs/double-kettlebell-wrist-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Kettlebell",
+    "isCompound": false
+  },
+  "Dumbbell Finger Curl": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-finger-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Lying Pronation": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-lying-pronation.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Lying Supination": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-lying-supination.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Neutral Wrist Curl": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-neutral-wrist-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Reverse Preacher Curl": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-reverse-preacher-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Wrist Rotation": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-wrist-rotation.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "EZ Bar Reverse Curl": {
+    "imgUrl": "dataV2/exerciseImgs/ez-bar-reverse-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "EZ Bar Reverse Preacher Curl": {
+    "imgUrl": "dataV2/exerciseImgs/ez-bar-reverse-preacher-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Finger Curl": {
+    "imgUrl": "dataV2/exerciseImgs/finger-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "One Arm Cable Reverse Preacher Curl": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-cable-reverse-preacher-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "One Arm Cable Wrist Curl": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-cable-wrist-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "One Arm Dumbbell Neutral Wrist Curl": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-dumbbell-neutral-wrist-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Dumbbell Reverse Wrist Curl": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-dumbbell-reverse-wrist-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Dumbbell Wrist Curl": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-dumbbell-wrist-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Hammer Wrist Curl": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-hammer-wrist-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Prone Incline Dumbbell Reverse Curl": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-prone-incline-dumbbell-reverse-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Reverse Cable Curl": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-reverse-cable-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "One Arm Reverse Dumbbell Preacher Curl": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-reverse-dumbbell-preacher-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Seated Dumbbell Wrist Rotation": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-seated-dumbbell-wrist-rotation.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Prone Incline Reverse Curl": {
+    "imgUrl": "dataV2/exerciseImgs/prone-incline-reverse-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Prone Incline Wrist Curl": {
+    "imgUrl": "dataV2/exerciseImgs/prone-incline-wrist-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Reverse Cable Curl": {
+    "imgUrl": "dataV2/exerciseImgs/reverse-cable-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Reverse Dumbbell Concentration Curl": {
+    "imgUrl": "dataV2/exerciseImgs/reverse-dumbbell-concentration-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Reverse Dumbbell Spider Curl": {
+    "imgUrl": "dataV2/exerciseImgs/reverse-dumbbell-spider-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Reverse Grip Dumbbell Curl": {
+    "imgUrl": "dataV2/exerciseImgs/reverse-grip-dumbbell-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Reverse Preacher Curl": {
+    "imgUrl": "dataV2/exerciseImgs/reverse-preacher-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Seated Reverse Grip Dumbbell Curl": {
+    "imgUrl": "dataV2/exerciseImgs/seated-reverse-grip-dumbbell-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Smith Machine Behind The Back Wrist Curl": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-behind-the-back-wrist-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Smith Machine Wrist Curl": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-wrist-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Standing Reverse Wrist Curl": {
+    "imgUrl": "dataV2/exerciseImgs/standing-reverse-wrist-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Standing Wrist Curl": {
+    "imgUrl": "dataV2/exerciseImgs/standing-wrist-curl.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Barbell Overhead Carry": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-overhead-carry.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Barbell Suitcase Carry": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-suitcase-carry.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Dumbbell High Low Carry": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-high-low-carry.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Overhead Carry": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-overhead-carry.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Suitcase Carry": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-suitcase-carry.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Farmers Walk": {
+    "imgUrl": "dataV2/exerciseImgs/farmers-walk.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Kettlebell Farmers Walk": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-farmers-walk.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Goblet Carry": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-goblet-carry.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kneeling Dumbbell Hold To Stand": {
+    "imgUrl": "dataV2/exerciseImgs/kneeling-dumbbell-hold-to-stand.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Kneeling Overhead Dumbbell Hold To Stand": {
+    "imgUrl": "dataV2/exerciseImgs/kneeling-overhead-dumbbell-hold-to-stand.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Neutral Grip Dumbbell Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/neutral-grip-dumbbell-deadlift.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "One Arm Dumbbell Overhead Carry": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-dumbbell-overhead-carry.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Trap Bar Farmers Walk": {
+    "imgUrl": "dataV2/exerciseImgs/trap-bar-farmers-walk.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Zercher Carry": {
+    "imgUrl": "dataV2/exerciseImgs/zercher-carry.png",
+    "mainMuscle": "Forearms",
+    "equipment": "Barbell",
+    "isCompound": true
+  }
+}

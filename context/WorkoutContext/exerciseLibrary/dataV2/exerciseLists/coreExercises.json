@@ -1,0 +1,950 @@
+{
+  "Crunches": {
+    "imgUrl": "dataV2/exerciseImgs/crunches.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Sit Ups": {
+    "imgUrl": "dataV2/exerciseImgs/sit-ups.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Hanging Leg Raise": {
+    "imgUrl": "dataV2/exerciseImgs/hanging-leg-raise.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Machine Seated Crunch": {
+    "imgUrl": "dataV2/exerciseImgs/machine-seated-crunch.png",
+    "mainMuscle": "Core",
+    "equipment": "Machine",
+    "isCompound": false
+  },
+  "Jumping Jack": {
+    "imgUrl": "dataV2/exerciseImgs/jumping-jack.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Cable Crunch": {
+    "imgUrl": "dataV2/exerciseImgs/cable-crunch.png",
+    "mainMuscle": "Core",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Russian Twist": {
+    "imgUrl": "dataV2/exerciseImgs/russian-twist.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Decline Sit Up": {
+    "imgUrl": "dataV2/exerciseImgs/decline-sit-up.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Lying Leg Raise": {
+    "imgUrl": "dataV2/exerciseImgs/lying-leg-raise.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Decline Crunch": {
+    "imgUrl": "dataV2/exerciseImgs/decline-crunch.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Bicycle Crunch": {
+    "imgUrl": "dataV2/exerciseImgs/bicycle-crunch.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Side Crunch": {
+    "imgUrl": "dataV2/exerciseImgs/side-crunch.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Dumbbell Side Bend": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-side-bend.png",
+    "mainMuscle": "Core",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Ab Wheel Rollout": {
+    "imgUrl": "dataV2/exerciseImgs/ab-wheel-rollout.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Hanging Knee Raise": {
+    "imgUrl": "dataV2/exerciseImgs/hanging-knee-raise.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Reverse Crunches": {
+    "imgUrl": "dataV2/exerciseImgs/reverse-crunches.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Toes To Bar": {
+    "imgUrl": "dataV2/exerciseImgs/toes-to-bar.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Cable Woodchopper": {
+    "imgUrl": "dataV2/exerciseImgs/cable-woodchopper.png",
+    "mainMuscle": "Core",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Standing Cable Crunch": {
+    "imgUrl": "dataV2/exerciseImgs/standing-cable-crunch.png",
+    "mainMuscle": "Core",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "High Pulley Crunch": {
+    "imgUrl": "dataV2/exerciseImgs/high-pulley-crunch.png",
+    "mainMuscle": "Core",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Roman Chair Side Bend": {
+    "imgUrl": "dataV2/exerciseImgs/roman-chair-side-bend.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Flutter Kicks": {
+    "imgUrl": "dataV2/exerciseImgs/flutter-kicks.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Mountain Climbers": {
+    "imgUrl": "dataV2/exerciseImgs/mountain-climbers.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Superman": {
+    "imgUrl": "dataV2/exerciseImgs/superman.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Scissor Kicks": {
+    "imgUrl": "dataV2/exerciseImgs/scissor-kicks.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Ab Bench Crunch": {
+    "imgUrl": "dataV2/exerciseImgs/ab-bench-crunch.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Alternating Cable Heel Touches": {
+    "imgUrl": "dataV2/exerciseImgs/alternating-cable-heel-touches.png",
+    "mainMuscle": "Core",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Alternating Heel Touches": {
+    "imgUrl": "dataV2/exerciseImgs/alternating-heel-touches.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Back Lever": {
+    "imgUrl": "dataV2/exerciseImgs/back-lever.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Barbell Lying Twisting Leg Raise": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-lying-twisting-leg-raise.png",
+    "mainMuscle": "Core",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Barbell Press Sit Up": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-press-sit-up.png",
+    "mainMuscle": "Core",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Barbell Rollout": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-rollout.png",
+    "mainMuscle": "Core",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Barbell Rollout From Bench": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-rollout-from-bench.png",
+    "mainMuscle": "Core",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Barbell Seated Twist": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-seated-twist.png",
+    "mainMuscle": "Core",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Barbell Side Bend": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-side-bend.png",
+    "mainMuscle": "Core",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Barbell Standing Ab Rollout": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-standing-ab-rollout.png",
+    "mainMuscle": "Core",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Barbell Standing Twist": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-standing-twist.png",
+    "mainMuscle": "Core",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Bear Plank": {
+    "imgUrl": "dataV2/exerciseImgs/bear-plank.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Bent Knee Hip Raise": {
+    "imgUrl": "dataV2/exerciseImgs/bent-knee-hip-raise.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Bent Knee Lying Twist": {
+    "imgUrl": "dataV2/exerciseImgs/bent-knee-lying-twist.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Bent Knee Plank": {
+    "imgUrl": "dataV2/exerciseImgs/bent-knee-plank.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Bent Knee Side Plank": {
+    "imgUrl": "dataV2/exerciseImgs/bent-knee-side-plank.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Bird Dog": {
+    "imgUrl": "dataV2/exerciseImgs/bird-dog.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Body Saw Plank": {
+    "imgUrl": "dataV2/exerciseImgs/body-saw-plank.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Bottoms Up": {
+    "imgUrl": "dataV2/exerciseImgs/bottoms-up.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Butt Ups": {
+    "imgUrl": "dataV2/exerciseImgs/butt-ups.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Butterfly Crunch": {
+    "imgUrl": "dataV2/exerciseImgs/butterfly-crunch.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Cable Hanging Leg Raise": {
+    "imgUrl": "dataV2/exerciseImgs/cable-hanging-leg-raise.png",
+    "mainMuscle": "Core",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Cable Judo Flip": {
+    "imgUrl": "dataV2/exerciseImgs/cable-judo-flip.png",
+    "mainMuscle": "Core",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Cable Reverse Crunch": {
+    "imgUrl": "dataV2/exerciseImgs/cable-reverse-crunch.png",
+    "mainMuscle": "Core",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Cable Side Bend": {
+    "imgUrl": "dataV2/exerciseImgs/cable-side-bend.png",
+    "mainMuscle": "Core",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Cable Side Crunch": {
+    "imgUrl": "dataV2/exerciseImgs/cable-side-crunch.png",
+    "mainMuscle": "Core",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Cable Standing Lift": {
+    "imgUrl": "dataV2/exerciseImgs/cable-standing-lift.png",
+    "mainMuscle": "Core",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Cable Tuck Reverse Crunch": {
+    "imgUrl": "dataV2/exerciseImgs/cable-tuck-reverse-crunch.png",
+    "mainMuscle": "Core",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Cable Twist": {
+    "imgUrl": "dataV2/exerciseImgs/cable-twist.png",
+    "mainMuscle": "Core",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Cat Stretch": {
+    "imgUrl": "dataV2/exerciseImgs/cat-stretch.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Cocoons": {
+    "imgUrl": "dataV2/exerciseImgs/cocoons.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Cross Body Mountain Climber": {
+    "imgUrl": "dataV2/exerciseImgs/cross-body-mountain-climber.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Crossover Crunch": {
+    "imgUrl": "dataV2/exerciseImgs/crossover-crunch.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Dead Bug": {
+    "imgUrl": "dataV2/exerciseImgs/dead-bug.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Decline Dual Dumbbell Overhead Sit Up": {
+    "imgUrl": "dataV2/exerciseImgs/decline-dual-dumbbell-overhead-sit-up.png",
+    "mainMuscle": "Core",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Decline Dumbbell Sit Up": {
+    "imgUrl": "dataV2/exerciseImgs/decline-dumbbell-sit-up.png",
+    "mainMuscle": "Core",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Decline Single Dumbbell Overhead Sit Up": {
+    "imgUrl": "dataV2/exerciseImgs/decline-single-dumbbell-overhead-sit-up.png",
+    "mainMuscle": "Core",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Decline Twisting Sit Up": {
+    "imgUrl": "dataV2/exerciseImgs/decline-twisting-sit-up.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Double Dumbbell Windmill": {
+    "imgUrl": "dataV2/exerciseImgs/double-dumbbell-windmill.png",
+    "mainMuscle": "Core",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Double Kettlebell Windmill": {
+    "imgUrl": "dataV2/exerciseImgs/double-kettlebell-windmill.png",
+    "mainMuscle": "Core",
+    "equipment": "Kettlebell",
+    "isCompound": false
+  },
+  "Dual Dumbbell Glute Bridge": {
+    "imgUrl": "dataV2/exerciseImgs/dual-dumbbell-glute-bridge.png",
+    "mainMuscle": "Core",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Crunch": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-crunch.png",
+    "mainMuscle": "Core",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Floor Wipers": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-floor-wipers.png",
+    "mainMuscle": "Core",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Glute Bridge": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-glute-bridge.png",
+    "mainMuscle": "Core",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell High Windmill": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-high-windmill.png",
+    "mainMuscle": "Core",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Jackknife": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-jackknife.png",
+    "mainMuscle": "Core",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Low Windmill": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-low-windmill.png",
+    "mainMuscle": "Core",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Overhead Sit Up": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-overhead-sit-up.png",
+    "mainMuscle": "Core",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Plank Pull Through": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-plank-pull-through.png",
+    "mainMuscle": "Core",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Reverse Hyperextension": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-reverse-hyperextension.png",
+    "mainMuscle": "Core",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Rollout": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-rollout.png",
+    "mainMuscle": "Core",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Russian Twist": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-russian-twist.png",
+    "mainMuscle": "Core",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Sit Up": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-sit-up.png",
+    "mainMuscle": "Core",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Woodchopper": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-woodchopper.png",
+    "mainMuscle": "Core",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Elbow To Knee Crunch": {
+    "imgUrl": "dataV2/exerciseImgs/elbow-to-knee-crunch.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Elbow To Knee Twist": {
+    "imgUrl": "dataV2/exerciseImgs/elbow-to-knee-twist.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Elevated Side Plank": {
+    "imgUrl": "dataV2/exerciseImgs/elevated-side-plank.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Flat Bench Hyperextension": {
+    "imgUrl": "dataV2/exerciseImgs/flat-bench-hyperextension.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Flat Bench Leg Pull In": {
+    "imgUrl": "dataV2/exerciseImgs/flat-bench-leg-pull-in.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Flat Bench Lying Leg Raise": {
+    "imgUrl": "dataV2/exerciseImgs/flat-bench-lying-leg-raise.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Floor Barbell Twist": {
+    "imgUrl": "dataV2/exerciseImgs/floor-barbell-twist.png",
+    "mainMuscle": "Core",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Front Lever": {
+    "imgUrl": "dataV2/exerciseImgs/front-lever.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Glute Bridge Pallof Press": {
+    "imgUrl": "dataV2/exerciseImgs/glute-bridge-pallof-press.png",
+    "mainMuscle": "Core",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Glute Bridge With Hip Abduction": {
+    "imgUrl": "dataV2/exerciseImgs/glute-bridge-with-hip-abduction.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Half Kneeling Dumbbell Chop and Lift": {
+    "imgUrl": "dataV2/exerciseImgs/half-kneeling-dumbbell-chop-and-lift.png",
+    "mainMuscle": "Core",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Half Kneeling Pallof Press": {
+    "imgUrl": "dataV2/exerciseImgs/half-kneeling-pallof-press.png",
+    "mainMuscle": "Core",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Hanging Leg Twist": {
+    "imgUrl": "dataV2/exerciseImgs/hanging-leg-twist.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Hanging Pike": {
+    "imgUrl": "dataV2/exerciseImgs/hanging-pike.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Hip Raise Crunch": {
+    "imgUrl": "dataV2/exerciseImgs/hip-raise-crunch.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Incline Hip Raise": {
+    "imgUrl": "dataV2/exerciseImgs/incline-hip-raise.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Jackknife": {
+    "imgUrl": "dataV2/exerciseImgs/jackknife.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Janda Sit Up": {
+    "imgUrl": "dataV2/exerciseImgs/janda-sit-up.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Kettlebell Dead Bug": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-dead-bug.png",
+    "mainMuscle": "Core",
+    "equipment": "Kettlebell",
+    "isCompound": false
+  },
+  "Kettlebell Russian Twist": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-russian-twist.png",
+    "mainMuscle": "Core",
+    "equipment": "Kettlebell",
+    "isCompound": false
+  },
+  "Kettlebell Side Bend": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-side-bend.png",
+    "mainMuscle": "Core",
+    "equipment": "Kettlebell",
+    "isCompound": false
+  },
+  "Kettlebell Sit and Press": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-sit-and-press.png",
+    "mainMuscle": "Core",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Sit Up": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-sit-up.png",
+    "mainMuscle": "Core",
+    "equipment": "Kettlebell",
+    "isCompound": false
+  },
+  "Kettlebell Windmill": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-windmill.png",
+    "mainMuscle": "Core",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kneeling Plank": {
+    "imgUrl": "dataV2/exerciseImgs/kneeling-plank.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "L Sit": {
+    "imgUrl": "dataV2/exerciseImgs/l-sit.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Landmine 180": {
+    "imgUrl": "dataV2/exerciseImgs/landmine-180.png",
+    "mainMuscle": "Core",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Lying Dumbbell Woodchopper": {
+    "imgUrl": "dataV2/exerciseImgs/lying-dumbbell-woodchopper.png",
+    "mainMuscle": "Core",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Lying Leg Raise With Hip Lift": {
+    "imgUrl": "dataV2/exerciseImgs/lying-leg-raise-with-hip-lift.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Lying Pallof Press": {
+    "imgUrl": "dataV2/exerciseImgs/lying-pallof-press.png",
+    "mainMuscle": "Core",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "One Arm Kettlebell Sit Up": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-kettlebell-sit-up.png",
+    "mainMuscle": "Core",
+    "equipment": "Kettlebell",
+    "isCompound": false
+  },
+  "One Arm Twisting Bent Over Cable Row": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-twisting-bent-over-cable-row.png",
+    "mainMuscle": "Core",
+    "equipment": "Cable",
+    "isCompound": true
+  },
+  "Pallof Press": {
+    "imgUrl": "dataV2/exerciseImgs/pallof-press.png",
+    "mainMuscle": "Core",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Partner Hanging Knee Raise With Throw Down": {
+    "imgUrl": "dataV2/exerciseImgs/partner-hanging-knee-raise-with-throw-down.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Partner Lying Leg Raise With Lateral Throw Down": {
+    "imgUrl": "dataV2/exerciseImgs/partner-lying-leg-raise-with-lateral-throw-down.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Partner Lying Leg Raise With Throw Down": {
+    "imgUrl": "dataV2/exerciseImgs/partner-lying-leg-raise-with-throw-down.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Plank": {
+    "imgUrl": "dataV2/exerciseImgs/plank.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Plank Hip Dip": {
+    "imgUrl": "dataV2/exerciseImgs/plank-hip-dip.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Plank Hip Raise": {
+    "imgUrl": "dataV2/exerciseImgs/plank-hip-raise.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Plank Jack": {
+    "imgUrl": "dataV2/exerciseImgs/plank-jack.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Plank Jump": {
+    "imgUrl": "dataV2/exerciseImgs/plank-jump.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Plank With Dumbbell Front Raise": {
+    "imgUrl": "dataV2/exerciseImgs/plank-with-dumbbell-front-raise.png",
+    "mainMuscle": "Core",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Plank With Twist": {
+    "imgUrl": "dataV2/exerciseImgs/plank-with-twist.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Reverse Plank": {
+    "imgUrl": "dataV2/exerciseImgs/reverse-plank.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Rope Standing Cable Crunch": {
+    "imgUrl": "dataV2/exerciseImgs/rope-standing-cable-crunch.png",
+    "mainMuscle": "Core",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Scissor Crunch": {
+    "imgUrl": "dataV2/exerciseImgs/scissor-crunch.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Seated Cable Twist": {
+    "imgUrl": "dataV2/exerciseImgs/seated-cable-twist.png",
+    "mainMuscle": "Core",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Seated Cross Arm Cable Twist": {
+    "imgUrl": "dataV2/exerciseImgs/seated-cross-arm-cable-twist.png",
+    "mainMuscle": "Core",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Side Plank": {
+    "imgUrl": "dataV2/exerciseImgs/side-plank.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Side Plank Dumbbell Fly": {
+    "imgUrl": "dataV2/exerciseImgs/side-plank-dumbbell-fly.png",
+    "mainMuscle": "Core",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Side Plank Leg Raise": {
+    "imgUrl": "dataV2/exerciseImgs/side-plank-leg-raise.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Single Arm Plank": {
+    "imgUrl": "dataV2/exerciseImgs/single-arm-plank.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Single Leg Bridge Kettlebell Pullover": {
+    "imgUrl": "dataV2/exerciseImgs/single-leg-bridge-kettlebell-pullover.png",
+    "mainMuscle": "Core",
+    "equipment": "Kettlebell",
+    "isCompound": false
+  },
+  "Smith Machine Hip Raise": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-hip-raise.png",
+    "mainMuscle": "Core",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Spell Caster": {
+    "imgUrl": "dataV2/exerciseImgs/spell-caster.png",
+    "mainMuscle": "Core",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Split Jackknife": {
+    "imgUrl": "dataV2/exerciseImgs/split-jackknife.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Split Stance Pallof Press": {
+    "imgUrl": "dataV2/exerciseImgs/split-stance-pallof-press.png",
+    "mainMuscle": "Core",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Stability Ball Barbell Seated Twist": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-barbell-seated-twist.png",
+    "mainMuscle": "Core",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Stability Ball Bent Knee Lying Twist": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-bent-knee-lying-twist.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Stability Ball Cable Russian Twist": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-cable-russian-twist.png",
+    "mainMuscle": "Core",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Stability Ball Crunch": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-crunch.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Stability Ball Dumbbell Russian Twist": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-dumbbell-russian-twist.png",
+    "mainMuscle": "Core",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Stability Ball Elevated Crunch": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-elevated-crunch.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Stability Ball Jackknife": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-jackknife.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Stability Ball Sit Up": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-sit-up.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Stability Ball Straight Arm Crunch": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-straight-arm-crunch.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Standing Cable High To Low Twist": {
+    "imgUrl": "dataV2/exerciseImgs/standing-cable-high-to-low-twist.png",
+    "mainMuscle": "Core",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Straight Arm Crunch": {
+    "imgUrl": "dataV2/exerciseImgs/straight-arm-crunch.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Straight Arm Decline Sit Up": {
+    "imgUrl": "dataV2/exerciseImgs/straight-arm-decline-sit-up.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Straight Arm Plank": {
+    "imgUrl": "dataV2/exerciseImgs/straight-arm-plank.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Straight Arm Side Plank": {
+    "imgUrl": "dataV2/exerciseImgs/straight-arm-side-plank.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Straight Arm Single Dumbbell Crunch": {
+    "imgUrl": "dataV2/exerciseImgs/straight-arm-single-dumbbell-crunch.png",
+    "mainMuscle": "Core",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Straight Arm Vertical Leg Crunch": {
+    "imgUrl": "dataV2/exerciseImgs/straight-arm-vertical-leg-crunch.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Straight Leg Dumbbell Russian Twist": {
+    "imgUrl": "dataV2/exerciseImgs/straight-leg-dumbbell-russian-twist.png",
+    "mainMuscle": "Core",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Three Quarter Sit Up": {
+    "imgUrl": "dataV2/exerciseImgs/three-quarter-sit-up.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  },
+  "Twisting Dumbbell Sit Up": {
+    "imgUrl": "dataV2/exerciseImgs/twisting-dumbbell-sit-up.png",
+    "mainMuscle": "Core",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Vertical Pallof Press": {
+    "imgUrl": "dataV2/exerciseImgs/vertical-pallof-press.png",
+    "mainMuscle": "Core",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Wide Arm Plank": {
+    "imgUrl": "dataV2/exerciseImgs/wide-arm-plank.png",
+    "mainMuscle": "Core",
+    "equipment": "Bodyweight",
+    "isCompound": false
+  }
+}

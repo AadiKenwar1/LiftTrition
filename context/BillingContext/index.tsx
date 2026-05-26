@@ -7,6 +7,8 @@ import { BillingContextInterface } from './types'
 
 const BillingContext = createContext<BillingContextInterface | undefined>(undefined)
 
+const BILLING_INIT_TIMEOUT_MS = 15_000
+
 export function BillingProvider({ children }: { children: React.ReactNode }) {
     const { user, loading: authLoading } = useAuth()
 
@@ -32,51 +34,80 @@ export function BillingProvider({ children }: { children: React.ReactNode }) {
         Purchases.configure({ apiKey })
     }, [])
 
-    // Initialize billing for user (runs when user changes)
+    // Initialize billing for user (runs when auth / user changes)
     useEffect(() => {
-        let listener: any
+        let cancelled = false
+        let listener: { remove?: () => void } | undefined
+        let timeoutId: ReturnType<typeof setTimeout> | undefined
 
         async function initializeBilling() {
-            if (authLoading || !user?.id) {
-                if (!authLoading && !user?.id) {
-                    // Only call logOut when transitioning from logged-in to logged-out.
-                    // Calling logOut when user is anonymous crashes the app (native exception).
-                    const hadUser = previousUserIdRef.current != null
-                    if (hadUser) {
-                        await Purchases.logOut().catch((e) => {
-                            console.warn('[BillingContext] Purchases.logOut failed (expected if already logged out)', e)
-                        })
-                    }
-                    previousUserIdRef.current = null
-                    setOfferings(null)
-                    setCustomerInfo(null)
+            if (authLoading) {
+                return
+            }
+
+            if (!user?.id) {
+                const hadUser = previousUserIdRef.current != null
+                if (hadUser) {
+                    await Purchases.logOut().catch((e) => {
+                        console.warn('[BillingContext] Purchases.logOut failed (expected if already logged out)', e)
+                    })
                 }
+                previousUserIdRef.current = null
+                if (cancelled) return
+                setOfferings(null)
+                setCustomerInfo(null)
+                setError(null)
                 setBillingLoading(false)
                 setLoaded(true)
                 return
             }
 
+            setLoaded(false)
+            setBillingLoading(true)
+            setError(null)
+
+            timeoutId = setTimeout(() => {
+                if (cancelled) return
+                console.warn('[BillingContext] RevenueCat init timed out; continuing without subscription data')
+                setLoaded(true)
+                setBillingLoading(false)
+            }, BILLING_INIT_TIMEOUT_MS)
+
             try {
                 previousUserIdRef.current = user.id
                 await Purchases.logIn(user.id)
+                if (cancelled) return
+
                 const [offeringsData, info] = await Promise.all([Purchases.getOfferings(), Purchases.getCustomerInfo()])
+                if (cancelled) return
                 setOfferings(offeringsData)
                 setCustomerInfo(info)
-                setLoaded(true)
             } catch (err) {
+                if (cancelled) return
                 setError(err instanceof Error ? err : new Error(String(err)))
-                setLoaded(true)
             } finally {
-                setBillingLoading(false)
+                if (timeoutId) clearTimeout(timeoutId)
+                if (!cancelled) {
+                    setLoaded(true)
+                    setBillingLoading(false)
+                }
             }
         }
 
-        ;(async () => {
+        void (async () => {
             await initializeBilling()
-            listener = Purchases.addCustomerInfoUpdateListener(setCustomerInfo)
+            if (!cancelled && user?.id) {
+                listener = Purchases.addCustomerInfoUpdateListener((info) => {
+                    if (!cancelled) setCustomerInfo(info)
+                })
+            }
         })()
 
-        return () => listener?.remove?.()
+        return () => {
+            cancelled = true
+            if (timeoutId) clearTimeout(timeoutId)
+            listener?.remove?.()
+        }
     }, [authLoading, user?.id])
 
     // Wrapper functions
@@ -90,21 +121,6 @@ export function BillingProvider({ children }: { children: React.ReactNode }) {
 
     const hasPremium = useMemo(() => {
         return Boolean(customerInfo?.entitlements?.active?.['LiftTrition Pro'])
-    }, [customerInfo])
-
-    // Debug: log entitlements and hasPremium when customerInfo changes
-    useEffect(() => {
-        if (!customerInfo) {
-            console.log('[Billing] customerInfo: null')
-            return
-        }
-        const active = customerInfo.entitlements?.active ?? {}
-        const activeKeys = Object.keys(active)
-        const premiumValue = active['LiftTrition Pro']
-        console.log('[Billing] customerInfo.entitlements.active keys:', activeKeys)
-        console.log('[Billing] customerInfo.entitlements.active (full):', JSON.stringify(active, null, 2))
-        console.log('[Billing] "LiftTrition Premium" value:', premiumValue)
-        console.log('[Billing] hasPremium:', Boolean(premiumValue))
     }, [customerInfo])
 
     // Helper values

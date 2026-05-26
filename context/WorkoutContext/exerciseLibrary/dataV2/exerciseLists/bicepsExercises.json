@@ -1,0 +1,626 @@
+{
+  "Dumbbell Curl": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Barbell Curl": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Hammer Curl": {
+    "imgUrl": "dataV2/exerciseImgs/hammer-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "EZ Bar Curl": {
+    "imgUrl": "dataV2/exerciseImgs/ez-bar-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Preacher Curl": {
+    "imgUrl": "dataV2/exerciseImgs/preacher-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Incline Dumbbell Curl": {
+    "imgUrl": "dataV2/exerciseImgs/incline-dumbbell-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Cable Bicep Curl": {
+    "imgUrl": "dataV2/exerciseImgs/cable-bicep-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Machine Bicep Curl": {
+    "imgUrl": "dataV2/exerciseImgs/machine-bicep-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Machine",
+    "isCompound": false
+  },
+  "Dumbbell Concentration Curl": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-concentration-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Dumbbell Preacher Curl": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-dumbbell-preacher-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Strict Curl": {
+    "imgUrl": "dataV2/exerciseImgs/strict-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "One Arm Cable Bicep Curl": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-cable-bicep-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Cheat Curl": {
+    "imgUrl": "dataV2/exerciseImgs/cheat-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Incline Hammer Curl": {
+    "imgUrl": "dataV2/exerciseImgs/incline-hammer-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Seated Dumbbell Curl": {
+    "imgUrl": "dataV2/exerciseImgs/seated-dumbbell-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Pulldown": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-pulldown.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Spider Curl": {
+    "imgUrl": "dataV2/exerciseImgs/spider-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Overhead Cable Curl": {
+    "imgUrl": "dataV2/exerciseImgs/overhead-cable-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Zottman Curl": {
+    "imgUrl": "dataV2/exerciseImgs/zottman-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Incline Cable Curl": {
+    "imgUrl": "dataV2/exerciseImgs/incline-cable-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Lying Cable Curl": {
+    "imgUrl": "dataV2/exerciseImgs/lying-cable-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Cable Hammer Curl": {
+    "imgUrl": "dataV2/exerciseImgs/cable-hammer-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Alternating Dumbbell Preacher Curl": {
+    "imgUrl": "dataV2/exerciseImgs/alternating-dumbbell-preacher-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Alternating Hammer Preacher Curl": {
+    "imgUrl": "dataV2/exerciseImgs/alternating-hammer-preacher-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Alternating Prone Incline Hammer Curl": {
+    "imgUrl": "dataV2/exerciseImgs/alternating-prone-incline-hammer-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Alternating Strict Hammer Curl": {
+    "imgUrl": "dataV2/exerciseImgs/alternating-strict-hammer-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Arm Blaster Barbell Curl": {
+    "imgUrl": "dataV2/exerciseImgs/arm-blaster-barbell-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Arm Blaster Dumbbell Curl": {
+    "imgUrl": "dataV2/exerciseImgs/arm-blaster-dumbbell-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Arm Blaster Hammer Curl": {
+    "imgUrl": "dataV2/exerciseImgs/arm-blaster-hammer-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Balance Trainer Dumbbell Curl": {
+    "imgUrl": "dataV2/exerciseImgs/balance-trainer-dumbbell-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Barbell Concentration Curl": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-concentration-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Barbell Drag Curl": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-drag-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Behind The Neck Cable Curl": {
+    "imgUrl": "dataV2/exerciseImgs/behind-the-neck-cable-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Cable Concentration Curl": {
+    "imgUrl": "dataV2/exerciseImgs/cable-concentration-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Cable Drag Curl": {
+    "imgUrl": "dataV2/exerciseImgs/cable-drag-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Cable Preacher Curl": {
+    "imgUrl": "dataV2/exerciseImgs/cable-preacher-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Close Grip Barbell Curl": {
+    "imgUrl": "dataV2/exerciseImgs/close-grip-barbell-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Close Grip Dumbbell Curl": {
+    "imgUrl": "dataV2/exerciseImgs/close-grip-dumbbell-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Close Grip EZ Bar Curl": {
+    "imgUrl": "dataV2/exerciseImgs/close-grip-ez-bar-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Double Kettlebell Curl": {
+    "imgUrl": "dataV2/exerciseImgs/double-kettlebell-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Kettlebell",
+    "isCompound": false
+  },
+  "Drag Hammer Curl": {
+    "imgUrl": "dataV2/exerciseImgs/drag-hammer-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dual Cable Bicep Curl": {
+    "imgUrl": "dataV2/exerciseImgs/dual-cable-bicep-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Dual Cable Incline Curl": {
+    "imgUrl": "dataV2/exerciseImgs/dual-cable-incline-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Dumbbell Curl Bowling Lunge": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-curl-bowling-lunge.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Drag Curl": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-drag-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Preacher Curl": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-preacher-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Dumbbell Step Up With Bicep Curl": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-step-up-with-bicep-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Waiter Curl": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-waiter-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "EZ Bar Spider Curl": {
+    "imgUrl": "dataV2/exerciseImgs/ez-bar-spider-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "High Dumbbell Curl": {
+    "imgUrl": "dataV2/exerciseImgs/high-dumbbell-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "High Pulley Incline Cable Curl": {
+    "imgUrl": "dataV2/exerciseImgs/high-pulley-incline-cable-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "High Pulley Lying Cable Curl": {
+    "imgUrl": "dataV2/exerciseImgs/high-pulley-lying-cable-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Incline Inner Dumbbell Curl": {
+    "imgUrl": "dataV2/exerciseImgs/incline-inner-dumbbell-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Inner Dumbbell Curl": {
+    "imgUrl": "dataV2/exerciseImgs/inner-dumbbell-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Kettlebell Concentration Curl": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-concentration-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Kettlebell",
+    "isCompound": false
+  },
+  "Lying High Bench Barbell Curl": {
+    "imgUrl": "dataV2/exerciseImgs/lying-high-bench-barbell-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Lying Supine Dumbbell Curl": {
+    "imgUrl": "dataV2/exerciseImgs/lying-supine-dumbbell-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Lying Wide Dumbbell Curl": {
+    "imgUrl": "dataV2/exerciseImgs/lying-wide-dumbbell-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Barbell Curl": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-barbell-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "One Arm Cable Concentration Curl": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-cable-concentration-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "One Arm Cable Preacher Curl": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-cable-preacher-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "One Arm Dumbbell Curl": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-dumbbell-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Hammer Curl": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-hammer-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Hammer Preacher Curl": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-hammer-preacher-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Overhead Cable Curl": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-overhead-cable-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "One Arm Prone Incline Dumbbell Curl": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-prone-incline-dumbbell-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Prone Incline Hammer Curl": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-prone-incline-hammer-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Rope Cable Preacher Curl": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-rope-cable-preacher-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "One Arm Rope Hammer Curl": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-rope-hammer-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "One Arm Seated Hammer Curl": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-seated-hammer-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "One Arm Zottman Preacher Curl": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-zottman-preacher-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Preacher Hammer Curl": {
+    "imgUrl": "dataV2/exerciseImgs/preacher-hammer-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Prone Incline Barbell Curl": {
+    "imgUrl": "dataV2/exerciseImgs/prone-incline-barbell-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Prone Incline Dumbbell Curl": {
+    "imgUrl": "dataV2/exerciseImgs/prone-incline-dumbbell-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Prone Incline Hammer Curl": {
+    "imgUrl": "dataV2/exerciseImgs/prone-incline-hammer-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Rope Cable Preacher Curl": {
+    "imgUrl": "dataV2/exerciseImgs/rope-cable-preacher-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Rope Overhead Cable Curl": {
+    "imgUrl": "dataV2/exerciseImgs/rope-overhead-cable-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Seated Cable Curl": {
+    "imgUrl": "dataV2/exerciseImgs/seated-cable-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Seated Double Dumbbell Concentration Curl": {
+    "imgUrl": "dataV2/exerciseImgs/seated-double-dumbbell-concentration-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Seated Dumbbell Drag Curl": {
+    "imgUrl": "dataV2/exerciseImgs/seated-dumbbell-drag-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Seated Hammer Curl": {
+    "imgUrl": "dataV2/exerciseImgs/seated-hammer-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Seated Inner Dumbbell Curl": {
+    "imgUrl": "dataV2/exerciseImgs/seated-inner-dumbbell-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Seated Overhead Cable Curl": {
+    "imgUrl": "dataV2/exerciseImgs/seated-overhead-cable-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Seated Zottman Curl": {
+    "imgUrl": "dataV2/exerciseImgs/seated-zottman-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Single Dumbbell Curl": {
+    "imgUrl": "dataV2/exerciseImgs/single-dumbbell-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Single Dumbbell Spider Curl": {
+    "imgUrl": "dataV2/exerciseImgs/single-dumbbell-spider-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Smith Machine Bicep Curl": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-bicep-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Smith Machine Drag Curl": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-drag-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Squat Curl": {
+    "imgUrl": "dataV2/exerciseImgs/squat-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Squatting Cable Curl": {
+    "imgUrl": "dataV2/exerciseImgs/squatting-cable-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Cable",
+    "isCompound": true
+  },
+  "Stability Ball Dumbbell Concentration Curl": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-dumbbell-concentration-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Stability Ball Dumbbell Curl": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-dumbbell-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Stability Ball Dumbbell Preacher Curl": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-dumbbell-preacher-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Stability Ball Hammer Curl": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-hammer-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Stability Ball Kneeling Dumbbell Curl": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-kneeling-dumbbell-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Stability Ball One Arm Dumbbell Curl": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-one-arm-dumbbell-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Stability Ball Overhead Cable Curl": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-overhead-cable-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Cable",
+    "isCompound": false
+  },
+  "Stability Ball Single Leg Dumbbell Curl": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-single-leg-dumbbell-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Stability Ball Single Leg One Arm Dumbbell Curl": {
+    "imgUrl": "dataV2/exerciseImgs/stability-ball-single-leg-one-arm-dumbbell-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Standing Dumbbell Kickback": {
+    "imgUrl": "dataV2/exerciseImgs/standing-dumbbell-kickback.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Stork Stance Dumbbell Curl": {
+    "imgUrl": "dataV2/exerciseImgs/stork-stance-dumbbell-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  },
+  "Wide Grip Barbell Curl": {
+    "imgUrl": "dataV2/exerciseImgs/wide-grip-barbell-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Wide Grip Barbell Drag Curl": {
+    "imgUrl": "dataV2/exerciseImgs/wide-grip-barbell-drag-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Barbell",
+    "isCompound": false
+  },
+  "Zottman Preacher Curl": {
+    "imgUrl": "dataV2/exerciseImgs/zottman-preacher-curl.png",
+    "mainMuscle": "Biceps",
+    "equipment": "Dumbbell",
+    "isCompound": false
+  }
+}
