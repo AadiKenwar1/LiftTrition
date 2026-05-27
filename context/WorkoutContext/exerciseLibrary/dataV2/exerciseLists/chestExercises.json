@@ -976,17 +976,5 @@
     "mainMuscle": "Chest",
     "equipment": "Dumbbell",
     "isCompound": false
-  },
-  "Burpees": {
-    "imgUrl": "dataV2/exerciseImgs/burpees.png",
-    "mainMuscle": "Chest",
-    "equipment": "Bodyweight",
-    "isCompound": false
-  },
-  "Corkscrew Push Up": {
-    "imgUrl": "dataV2/exerciseImgs/corkscrew-push-up.png",
-    "mainMuscle": "Chest",
-    "equipment": "Bodyweight",
-    "isCompound": true
   }
 }

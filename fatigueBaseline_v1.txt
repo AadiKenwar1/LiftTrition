@@ -1,0 +1,48 @@
+=== V1 FATIGUE BASELINE — 2026-01-31 ===
+
+--- TIER 1: Single Exercise Fatigue Factors ---
+[T1] Barbell Bench Press            factor: 1.0200
+[T1] Incline DB Press               factor: 0.8800
+[T1] Cable Fly                      factor: 0.5700
+[T1] Pull Ups                       factor: 0.9500
+[T1] Bent Over Row                  factor: 1.0000
+[T1] Lat Pulldown                   factor: 0.8100
+[T1] Overhead Press                 factor: 1.0100
+[T1] Lateral Raise                  factor: 0.6000
+[T1] Barbell Squat                  factor: 1.1000
+[T1] Romanian Deadlift              factor: 1.0800
+[T1] Leg Press                      factor: 0.8200
+[T1] Barbell Curl                   factor: 0.6500
+[T1] Tricep Pushdown                factor: 0.5300
+[T1] Plank                          factor: 0.5700
+
+--- TIER 2: Mini Sessions (single-day fatigue %) ---
+[T2-01] Chest Day                              fatigue%: 59.02
+[T2-02] Back Day                               fatigue%: 71.63
+[T2-03] Shoulder Day                           fatigue%: 53.28
+[T2-04] Arm Day                                fatigue%: 36.76
+[T2-05] Leg Day                                fatigue%: 70.71
+[T2-06] Push Day                               fatigue%: 60.91
+[T2-07] Pull Day                               fatigue%: 57.69
+[T2-08] Lower Day                              fatigue%: 63.98
+[T2-09] Machine-Only Day                       fatigue%: 48.94
+[T2-10] Bodyweight Day                         fatigue%: 50.60
+[T2-11] High RPE Day (RPE 9-10)                fatigue%: 117.81
+[T2-12] Low RPE Day (RPE 5)                    fatigue%: 58.91
+[T2-13] Heavy Low Rep Day (3 reps)             fatigue%: 84.81
+[T2-14] Light High Rep Day (15 reps)           fatigue%: 59.38
+[T2-15] Full Body Blitz (4 exercises)          fatigue%: 85.70
+
+--- TIER 3: Full Week Sessions (today / last3 / last6 / last9) ---
+[T3-01] PPL Split                        activity:moderate    today:  70.7%  last3:  66.6%  last6:  66.6%  last9:  44.4%
+[T3-02] Upper/Lower Split                activity:moderate    today:  80.8%  last3:  61.2%  last6:  56.5%  last9:  37.7%
+[T3-03] Full Body 3x Week                activity:moderate    today:   0.0%  last3:  21.5%  last6:  21.5%  last9:  21.5%
+[T3-04] Bro Split                        activity:moderate    today:   0.0%  last3:   0.0%  last6:  28.2%  last9:  33.3%
+[T3-05] Powerlifting Week                activity:moderate    today:   0.0%  last3:  13.6%  last6:  21.1%  last9:  19.5%
+[T3-06] Deload Week                      activity:moderate    today:  30.5%  last3:  10.2%  last6:  10.5%  last9:  10.3%
+[T3-07] Peak Week                        activity:active      today:   0.0%  last3:  15.3%  last6:  22.0%  last9:  20.3%
+[T3-08] Bodyweight Only Week             activity:moderate    today:  64.0%  last3:  21.3%  last6:  21.3%  last9:  21.3%
+[T3-09] Gymrat High Volume               activity:gymrat      today:  87.9%  last3:  81.0%  last6:  83.5%  last9:  55.7%
+[T3-10] Sedentary Light Week             activity:sedentary   today:  34.0%  last3:  11.3%  last6:  11.4%  last9:   7.6%
+[T3-11] Accumulated 9-Day Load           activity:active      today:  62.3%  last3:  62.3%  last6:  62.3%  last9:  62.3%
+[T3-12] Sporadic Week                    activity:moderate    today:  94.3%  last3:  31.4%  last6:  31.4%  last9:  31.4%

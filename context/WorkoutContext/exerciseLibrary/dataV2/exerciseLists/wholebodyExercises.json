@@ -1,0 +1,932 @@
+{
+  "Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Hex Bar Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/hex-bar-deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Romanian Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/romanian-deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Power Clean": {
+    "imgUrl": "dataV2/exerciseImgs/power-clean.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Sumo Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/sumo-deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Muscle Ups": {
+    "imgUrl": "dataV2/exerciseImgs/muscle-ups.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Clean and Jerk": {
+    "imgUrl": "dataV2/exerciseImgs/clean-and-jerk.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Snatch": {
+    "imgUrl": "dataV2/exerciseImgs/snatch.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Clean": {
+    "imgUrl": "dataV2/exerciseImgs/clean.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Dumbbell Romanian Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-romanian-deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Clean and Press": {
+    "imgUrl": "dataV2/exerciseImgs/clean-and-press.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Rack Pull": {
+    "imgUrl": "dataV2/exerciseImgs/rack-pull.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Stiff Leg Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/stiff-leg-deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Hang Clean": {
+    "imgUrl": "dataV2/exerciseImgs/hang-clean.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Burpees": {
+    "imgUrl": "dataV2/exerciseImgs/burpees.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Thruster": {
+    "imgUrl": "dataV2/exerciseImgs/thruster.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Power Snatch": {
+    "imgUrl": "dataV2/exerciseImgs/power-snatch.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Dumbbell Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Push Jerk": {
+    "imgUrl": "dataV2/exerciseImgs/push-jerk.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Deficit Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/deficit-deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Snatch Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/snatch-deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Hang Power Clean": {
+    "imgUrl": "dataV2/exerciseImgs/hang-power-clean.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Single Leg Romanian Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/single-leg-romanian-deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Pause Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/pause-deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Jefferson Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/jefferson-deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Single Leg Dumbbell Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/single-leg-dumbbell-deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Split Jerk": {
+    "imgUrl": "dataV2/exerciseImgs/split-jerk.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Clean High Pull": {
+    "imgUrl": "dataV2/exerciseImgs/clean-high-pull.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Behind The Back Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/behind-the-back-deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Clean Pull": {
+    "imgUrl": "dataV2/exerciseImgs/clean-pull.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Squat Thrust": {
+    "imgUrl": "dataV2/exerciseImgs/squat-thrust.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Single Leg Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/single-leg-deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Muscle Snatch": {
+    "imgUrl": "dataV2/exerciseImgs/muscle-snatch.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Zercher Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/zercher-deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Snatch Pull": {
+    "imgUrl": "dataV2/exerciseImgs/snatch-pull.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Dumbbell Snatch": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-snatch.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Hang Snatch": {
+    "imgUrl": "dataV2/exerciseImgs/hang-snatch.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Wall Ball": {
+    "imgUrl": "dataV2/exerciseImgs/wall-ball.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Clap Pull Up": {
+    "imgUrl": "dataV2/exerciseImgs/clap-pull-up.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Ring Muscle Ups": {
+    "imgUrl": "dataV2/exerciseImgs/ring-muscle-ups.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Dumbbell Thruster": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-thruster.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell High Pull": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-high-pull.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Hang Clean": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-hang-clean.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Clean and Press": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-clean-and-press.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Alternating Kettlebell Hang Clean": {
+    "imgUrl": "dataV2/exerciseImgs/alternating-kettlebell-hang-clean.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Anderson Squat": {
+    "imgUrl": "dataV2/exerciseImgs/anderson-squat.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Barbell One Arm Side Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-one-arm-side-deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Barbell Overhead Carry": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-overhead-carry.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Barbell Split Jump": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-split-jump.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Barbell Squat To Shoulder Press": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-squat-to-shoulder-press.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Barbell Squat To Upright Row": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-squat-to-upright-row.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Barbell Suitcase Carry": {
+    "imgUrl": "dataV2/exerciseImgs/barbell-suitcase-carry.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Behind The Back Push Press": {
+    "imgUrl": "dataV2/exerciseImgs/behind-the-back-push-press.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Block Clean": {
+    "imgUrl": "dataV2/exerciseImgs/block-clean.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Block Power Clean": {
+    "imgUrl": "dataV2/exerciseImgs/block-power-clean.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Block Power Snatch": {
+    "imgUrl": "dataV2/exerciseImgs/block-power-snatch.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Block Pull": {
+    "imgUrl": "dataV2/exerciseImgs/block-pull.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Block Snatch": {
+    "imgUrl": "dataV2/exerciseImgs/block-snatch.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Bottoms Up Kettlebell Turkish Get Up To Knee": {
+    "imgUrl": "dataV2/exerciseImgs/bottoms-up-kettlebell-turkish-get-up-to-knee.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Cable Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/cable-deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Cable",
+    "isCompound": true
+  },
+  "Cable Stiff Leg Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/cable-stiff-leg-deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Cable",
+    "isCompound": true
+  },
+  "Clean Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/clean-deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Corkscrew Push Up": {
+    "imgUrl": "dataV2/exerciseImgs/corkscrew-push-up.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Cross Jacks": {
+    "imgUrl": "dataV2/exerciseImgs/cross-jacks.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Bodyweight",
+    "isCompound": true
+  },
+  "Deficit Sumo Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/deficit-sumo-deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Double Kettlebell Clean": {
+    "imgUrl": "dataV2/exerciseImgs/double-kettlebell-clean.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Double Kettlebell Clean and Jerk": {
+    "imgUrl": "dataV2/exerciseImgs/double-kettlebell-clean-and-jerk.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Double Kettlebell Clean and Press": {
+    "imgUrl": "dataV2/exerciseImgs/double-kettlebell-clean-and-press.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Double Kettlebell Jerk": {
+    "imgUrl": "dataV2/exerciseImgs/double-kettlebell-jerk.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Double Kettlebell Lunge Press": {
+    "imgUrl": "dataV2/exerciseImgs/double-kettlebell-lunge-press.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Double Kettlebell Snatch": {
+    "imgUrl": "dataV2/exerciseImgs/double-kettlebell-snatch.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Double Kettlebell Sumo Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/double-kettlebell-sumo-deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Double Kettlebell Thruster": {
+    "imgUrl": "dataV2/exerciseImgs/double-kettlebell-thruster.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Dumbbell Clean": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-clean.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Clean and Push Jerk": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-clean-and-push-jerk.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Deadlift Bent Over Row": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-deadlift-bent-over-row.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Full Swing": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-full-swing.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Good Morning Squat": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-good-morning-squat.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Hang Power Clean": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-hang-power-clean.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Hang Power Clean and Jerk": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-hang-power-clean-and-jerk.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell High Low Carry": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-high-low-carry.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Overhead Carry": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-overhead-carry.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Overhead Squat": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-overhead-squat.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Power Clean": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-power-clean.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Pull Through": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-pull-through.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Push Jerk": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-push-jerk.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Romanian Deadlift Row": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-romanian-deadlift-row.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Single Leg Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-single-leg-deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Squat Press": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-squat-press.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Squat To Forward Press": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-squat-to-forward-press.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Step Back Lunge Row": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-step-back-lunge-row.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Stiff Leg Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-stiff-leg-deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Suitcase Carry": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-suitcase-carry.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Dumbbell Sumo Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/dumbbell-sumo-deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Farmers Walk": {
+    "imgUrl": "dataV2/exerciseImgs/farmers-walk.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Heaving Snatch Balance": {
+    "imgUrl": "dataV2/exerciseImgs/heaving-snatch-balance.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Kettlebell Clean": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-clean.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Clean and Jerk": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-clean-and-jerk.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Clean and Press": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-clean-and-press.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Dead Clean": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-dead-clean.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Deck Squat": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-deck-squat.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Farmers Walk": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-farmers-walk.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Figure 8": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-figure-8.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Full Swing": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-full-swing.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Goblet Carry": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-goblet-carry.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Half Turkish Get Up": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-half-turkish-get-up.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Hang Clean": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-hang-clean.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Jerk": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-jerk.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Kickstand Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-kickstand-deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Lunge Press": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-lunge-press.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Pirate Ship": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-pirate-ship.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Quarter Turkish Get Up": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-quarter-turkish-get-up.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Single Leg Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-single-leg-deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Snatch": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-snatch.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Split Snatch": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-split-snatch.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Stiff Leg Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-stiff-leg-deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Suitcase Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-suitcase-deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Sumo Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-sumo-deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Sumo Deadlift High Pull": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-sumo-deadlift-high-pull.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Thruster": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-thruster.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kettlebell Turkish Get Up": {
+    "imgUrl": "dataV2/exerciseImgs/kettlebell-turkish-get-up.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Kneeling Dumbbell Hold To Stand": {
+    "imgUrl": "dataV2/exerciseImgs/kneeling-dumbbell-hold-to-stand.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Kneeling Landmine Thruster": {
+    "imgUrl": "dataV2/exerciseImgs/kneeling-landmine-thruster.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Kneeling Overhead Dumbbell Hold To Stand": {
+    "imgUrl": "dataV2/exerciseImgs/kneeling-overhead-dumbbell-hold-to-stand.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Landmine Romanian Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/landmine-romanian-deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Low Hang Clean": {
+    "imgUrl": "dataV2/exerciseImgs/low-hang-clean.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Low Hang Snatch": {
+    "imgUrl": "dataV2/exerciseImgs/low-hang-snatch.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Muscle Clean": {
+    "imgUrl": "dataV2/exerciseImgs/muscle-clean.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Neutral Grip Dumbbell Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/neutral-grip-dumbbell-deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "One Arm Barbell Snatch": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-barbell-snatch.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "One Arm Dumbbell Clean and Jerk": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-dumbbell-clean-and-jerk.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "One Arm Dumbbell Overhead Carry": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-dumbbell-overhead-carry.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "One Arm Dumbbell Power Clean": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-dumbbell-power-clean.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "One Arm Dumbbell Thruster": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-dumbbell-thruster.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "One Arm Kettlebell Swing": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-kettlebell-swing.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "One Arm Landmine Clean and Press": {
+    "imgUrl": "dataV2/exerciseImgs/one-arm-landmine-clean-and-press.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Open Palm Kettlebell Clean": {
+    "imgUrl": "dataV2/exerciseImgs/open-palm-kettlebell-clean.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Kettlebell",
+    "isCompound": true
+  },
+  "Paused Sumo Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/paused-sumo-deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Pin Front Squat": {
+    "imgUrl": "dataV2/exerciseImgs/pin-front-squat.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Reeves Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/reeves-deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Renegade Row To Squat": {
+    "imgUrl": "dataV2/exerciseImgs/renegade-row-to-squat.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Smith Machine Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Smith Machine Hang Clean": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-hang-clean.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Smith Machine Single Leg Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/smith-machine-single-leg-deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Snatch Balance": {
+    "imgUrl": "dataV2/exerciseImgs/snatch-balance.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Split Clean": {
+    "imgUrl": "dataV2/exerciseImgs/split-clean.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Squat Jerk": {
+    "imgUrl": "dataV2/exerciseImgs/squat-jerk.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Staggered Dumbbell Romanian Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/staggered-dumbbell-romanian-deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Stiff Leg Deadlift On Bench": {
+    "imgUrl": "dataV2/exerciseImgs/stiff-leg-deadlift-on-bench.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Sumo Deadlift High Pull": {
+    "imgUrl": "dataV2/exerciseImgs/sumo-deadlift-high-pull.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Sumo Romanian Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/sumo-romanian-deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Supported Dumbbell Single Leg Deadlift": {
+    "imgUrl": "dataV2/exerciseImgs/supported-dumbbell-single-leg-deadlift.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Dumbbell",
+    "isCompound": true
+  },
+  "Trap Bar Farmers Walk": {
+    "imgUrl": "dataV2/exerciseImgs/trap-bar-farmers-walk.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  },
+  "Zercher Carry": {
+    "imgUrl": "dataV2/exerciseImgs/zercher-carry.png",
+    "mainMuscle": "Whole Body",
+    "equipment": "Barbell",
+    "isCompound": true
+  }
+}
