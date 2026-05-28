@@ -48,7 +48,7 @@ export default function ScrollableList({ data, searchPlaceholder = 'Search...', 
                     <View style={[styles.accentBar, { backgroundColor: mode ? '#2f80ed' : '#22C922' }]} />
                     <View style={styles.item}>
                         <View style={styles.itemInfo}>
-                            <Text style={styles.itemTitle} numberOfLines={1}>
+                            <Text style={styles.itemTitle} numberOfLines={3}>
                                 {item.title}
                             </Text>
                             {item.exerciseMetadata && (

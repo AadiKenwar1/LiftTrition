@@ -1,21 +1,31 @@
 import { Menu } from 'lucide-react-native'
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { memo } from 'react'
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 interface LogProps {
     text: string
     subtitle?: string
+    imgSource?: number
     onPress: () => void
     onEditPress: () => void
     onMenuPress: () => void
 }
 
-export default function Log({ text, subtitle, onPress, onEditPress, onMenuPress }: LogProps) {
+function Log({ text, subtitle, imgSource, onPress, onEditPress, onMenuPress }: LogProps) {
     return (
         <TouchableOpacity onPress={onPress}>
             <View style={styles.outerwrapper}>
                 <View style={styles.wrapper}>
                     <View style={styles.accentBar} />
                     <View style={styles.container}>
+                        {imgSource && (
+                            <View style={styles.imageGlowRing}>
+                                <View style={styles.imageCircle}>
+                                    <Image source={imgSource} style={styles.exerciseImage} resizeMode="contain" />
+                                </View>
+                            </View>
+                        )}
+
                         <View style={styles.content}>
                             <Text style={styles.text} numberOfLines={1}>
                                 {text}
@@ -40,6 +50,8 @@ export default function Log({ text, subtitle, onPress, onEditPress, onMenuPress 
         </TouchableOpacity>
     )
 }
+
+export default memo(Log)
 
 const styles = StyleSheet.create({
     outerwrapper: {
@@ -74,6 +86,37 @@ const styles = StyleSheet.create({
     content: {
         flex: 1,
         marginRight: 12,
+        marginLeft: 4,
+    },
+    imageGlowRing: {
+        width: 52,
+        height: 52,
+        borderRadius: 26,
+        marginRight: 10,
+        flexShrink: 0,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#2f80ed',
+        shadowColor: '#2f80ed',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.8,
+        shadowRadius: 8,
+        elevation: 10,
+    },
+    imageCircle: {
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        backgroundColor: '#1e1e1e',
+        justifyContent: 'center',
+        alignItems: 'center',
+        overflow: 'hidden',
+    },
+    exerciseImage: {
+        width: 36,
+        height: 36,
+        tintColor: '#ffffff',
     },
     icons: {
         flexDirection: 'row',

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import { StyleSheet, ViewStyle } from 'react-native'
 import DraggableFlatList, { RenderItemParams, ScaleDecorator } from 'react-native-draggable-flatlist'
 
@@ -12,12 +12,22 @@ interface DraggableListProps<T> {
 }
 
 export default function DraggableList<T>({ data, onDragEnd, renderItem, keyExtractor, contentContainerStyle, ListHeaderComponent }: DraggableListProps<T>) {
+    const wrappedRenderItem = useCallback(
+        (params: RenderItemParams<T>) => <ScaleDecorator>{renderItem(params)}</ScaleDecorator>,
+        [renderItem],
+    )
+
+    const wrappedOnDragEnd = useCallback(
+        ({ data: reordered }: { data: T[] }) => onDragEnd(reordered),
+        [onDragEnd],
+    )
+
     return (
         <DraggableFlatList
             data={data}
-            onDragEnd={({ data }) => onDragEnd(data)}
+            onDragEnd={wrappedOnDragEnd}
             keyExtractor={keyExtractor}
-            renderItem={(params) => <ScaleDecorator>{renderItem(params)}</ScaleDecorator>}
+            renderItem={wrappedRenderItem}
             contentContainerStyle={[styles.content, contentContainerStyle]}
             ListHeaderComponent={ListHeaderComponent}
         />

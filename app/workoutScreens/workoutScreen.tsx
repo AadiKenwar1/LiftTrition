@@ -18,8 +18,8 @@ export default function WorkoutScreen() {
     // Filter and sort for archived workouts (deleted items are already removed from array)
     const activeWorkouts = workouts.filter((w) => !w.archived).sort((a, b) => a.order - b.order)
 
-    // Create a key that changes when order changes (forces remount to avoid glitchy drag and drop)
-    const listKey = activeWorkouts.map((w) => w.id).join('-')
+    // Key changes only when workouts are added/deleted — not on reorder — so items don't remount during drag
+    const listKey = [...activeWorkouts].map((w) => w.id).sort().join('-')
 
     //Render logs as a Draggable List item
     function renderItem({ item, drag }: RenderItemParams<Workout>) {

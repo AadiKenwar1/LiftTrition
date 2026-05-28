@@ -3,36 +3,57 @@ import DraggableList from '@/components/WorkoutComponents/DraggableList'
 import Log from '@/components/WorkoutComponents/Log'
 import { useAuth } from '@/context/AuthContext'
 import { useWorkout } from '@/context/WorkoutContext'
+import { IMAGE_MAP } from '@/context/WorkoutContext/exerciseLibrary/dataV2/imageMap'
 import { Exercise } from '@/context/WorkoutContext/types'
 import { Ionicons } from '@expo/vector-icons'
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
-import { useLayoutEffect } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react'
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { RenderItemParams } from 'react-native-draggable-flatlist'
 
 export default function ExerciseScreen() {
-    //Navigation and Router
     const navigation = useNavigation()
     const router = useRouter()
     const { userID } = useAuth()
-    //Get the workout from the workoutID
+
     const params = useLocalSearchParams<{ workoutId: string }>()
     const workoutId = typeof params.workoutId === 'string' ? params.workoutId : params.workoutId?.[0] || ''
 
-    //Workout Context Functions
     const { workouts, exercises, handleUpdateExerciseOrder, handleArchiveExercise, handleDeleteExercise, fullExerciseLib } = useWorkout()
     const workout = workouts.find((w) => w.id === workoutId)
 
-    // Filter and sort exercises for this workout (only non-archived)
-    const activeExercises = exercises.filter((exercise) => exercise.workoutID === workoutId && !exercise.archived).sort((a, b) => a.order - b.order)
+    const activeExercises = exercises
+        .filter((e) => e.workoutID === workoutId && !e.archived)
+        .sort((a, b) => a.order - b.order)
 
-    // Create a key that changes when order changes (forces remount to avoid glitchy drag and drop)
-    const listKey = activeExercises.map((exercise) => exercise.id).join('-')
+    // Stable key — changes only when exercises are added/deleted, not on reorder
+    const listKey = [...activeExercises].map((e) => e.id).sort().join('-')
 
-    //Dynamically set top bar title of screen
+    // Local order state: what the list actually renders. Immune to PowerSync subscription re-renders.
+    const [localOrder, setLocalOrder] = useState<Exercise[]>(activeExercises)
+
+    // Sync from context only when the exercise SET changes (add/delete), not on PowerSync order updates
+    useEffect(() => {
+        setLocalOrder(activeExercises)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [listKey])
+
+    // Image sources — only resolved for exercises in this workout (5-20 items, not all 1318)
+    const exerciseImageSources = useMemo(() => {
+        const map: Record<string, number> = {}
+        for (const exercise of activeExercises) {
+            const entry = fullExerciseLib[exercise.name]
+            const filename = entry?.imgUrl?.split('/').pop()
+            if (filename && IMAGE_MAP[filename]) map[exercise.name] = IMAGE_MAP[filename]
+        }
+        return map
+    // listKey as proxy — only rebuilds when exercises are added/deleted
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [listKey, fullExerciseLib])
+
     useLayoutEffect(() => navigation.setOptions({ title: `Exercises in ${workout?.name}` }), [navigation, workout?.name])
 
-    function handleEdit(exercise: Exercise) {
+    const handleEdit = useCallback((exercise: Exercise) => {
         Alert.alert(`Options for Exercise: ${exercise.name}`, `Warning: Deleting an exercise will delete all logs associated with it. To preserve logs archiving is recommended.`, [
             {
                 text: 'Archive',
@@ -49,28 +70,28 @@ export default function ExerciseScreen() {
                 style: 'cancel',
             },
         ])
-    }
+    }, [handleArchiveExercise, handleDeleteExercise, workoutId])
 
-    //Render logs as a Draggable List item
-    function renderItem({ item, drag }: RenderItemParams<Exercise>) {
-        // Look up exercise in library to get muscle groups
-        const libraryExercise = fullExerciseLib[item.name]
+    const handleDragEnd = useCallback((reordered: Exercise[]) => {
+        setLocalOrder(reordered)
+        handleUpdateExerciseOrder(workoutId, reordered)
+    }, [handleUpdateExerciseOrder, workoutId])
 
-        let muscleGroups = ''
-        if (libraryExercise) {
-            muscleGroups = libraryExercise.mainMuscle
-        }
+    const renderItem = useCallback(({ item, drag }: RenderItemParams<Exercise>) => {
+        const muscleGroups = fullExerciseLib[item.name]?.mainMuscle ?? ''
+        const imgSource = exerciseImageSources[item.name]
 
         return (
             <Log
                 text={item.name}
                 subtitle={muscleGroups}
+                imgSource={imgSource}
                 onPress={() => router.push({ pathname: '/workoutScreens/logsModal', params: { workoutId: workoutId, exerciseId: item.id, exerciseName: item.name } })}
                 onMenuPress={drag}
                 onEditPress={() => handleEdit(item)}
             />
         )
-    }
+    }, [exerciseImageSources, fullExerciseLib, workoutId, handleEdit, router])
 
     return (
         <View style={styles.container}>
@@ -83,8 +104,13 @@ export default function ExerciseScreen() {
                     {'\nHold ☰ to rearrange'}
                 </Text>
             </View>
-            {/* Draggable List */}
-            <DraggableList key={listKey} data={activeExercises} renderItem={renderItem} keyExtractor={(item) => item.id} onDragEnd={(reorderedExercises) => handleUpdateExerciseOrder(workoutId, reorderedExercises)} />
+            <DraggableList
+                key={listKey}
+                data={localOrder}
+                renderItem={renderItem}
+                keyExtractor={(item) => item.id}
+                onDragEnd={handleDragEnd}
+            />
             <Fab>
                 {[
                     <TouchableOpacity key="add-exercise" style={[styles.workoutFabButtons]} onPress={() => router.push({ pathname: '/workoutScreens/addExerciseModal', params: { workoutId: workoutId } })}>
