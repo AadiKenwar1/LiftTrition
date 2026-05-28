@@ -22,9 +22,7 @@ export default function ExerciseScreen() {
     const { workouts, exercises, handleUpdateExerciseOrder, handleArchiveExercise, handleDeleteExercise, fullExerciseLib } = useWorkout()
     const workout = workouts.find((w) => w.id === workoutId)
 
-    const activeExercises = exercises
-        .filter((e) => e.workoutID === workoutId && !e.archived)
-        .sort((a, b) => a.order - b.order)
+    const activeExercises = exercises.filter((e) => e.workoutID === workoutId && !e.archived).sort((a, b) => a.order - b.order)
 
     // Image sources — resolved for exercises in this workout
     const exerciseImageSources = useMemo(() => {
@@ -35,7 +33,7 @@ export default function ExerciseScreen() {
             if (filename && IMAGE_MAP[filename]) map[exercise.name] = IMAGE_MAP[filename]
         }
         return map
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [fullExerciseLib])
 
     useLayoutEffect(() => navigation.setOptions({ title: `Exercises in ${workout?.name}` }), [navigation, workout?.name])
@@ -90,13 +88,7 @@ export default function ExerciseScreen() {
                     {'\nHold ☰ to rearrange'}
                 </Text>
             </View>
-            <DraggableList
-                key={activeExercises.map((e) => e.id).join('-')}
-                data={activeExercises}
-                renderItem={renderItem}
-                keyExtractor={(item) => item.id}
-                onDragEnd={handleDragEnd}
-            />
+            <DraggableList key={activeExercises.map((e) => e.id).join('-')} data={activeExercises} renderItem={renderItem} keyExtractor={(item) => item.id} onDragEnd={handleDragEnd} />
             <Fab>
                 {[
                     <TouchableOpacity key="add-exercise" style={[styles.workoutFabButtons]} onPress={() => router.push({ pathname: '/workoutScreens/addExerciseModal', params: { workoutId: workoutId } })}>
