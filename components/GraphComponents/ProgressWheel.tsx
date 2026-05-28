@@ -19,7 +19,7 @@ function lerpHex(c1: string, c2: string, t: number): string {
 }
 
 // Internal constants - not exposed as props since they're never customized
-const ANIMATION_DURATION = 1000
+const ANIMATION_DURATION = 1500
 const BACKGROUND_COLOR = '#2a2a2a'
 const TEXT_COLOR = 'white'
 
@@ -31,8 +31,8 @@ interface ProgressWheelProps {
 }
 
 export default function ProgressWheel({ percent = 0, size = 120, strokeWidth = 12, fontSize = 32 }: ProgressWheelProps) {
-    // Validate and sanitize the percent value
-    const sanitizedPercent = isNaN(percent) || !isFinite(percent) ? 0 : Math.max(0, Math.min(100, percent))
+    const actualPercent = isNaN(percent) || !isFinite(percent) ? 0 : Math.max(0, percent)
+    const wheelPercent = Math.min(actualPercent, 100)
     const { mode } = useSettings()
 
     // Define gradient stops matching app theme
@@ -56,22 +56,20 @@ export default function ProgressWheel({ percent = 0, size = 120, strokeWidth = 1
     const animatedValue = useRef(new Animated.Value(0)).current
     const numberValue = useRef(new Animated.Value(0)).current
 
-    const [displayPercent, setDisplayPercent] = useState<number>(Math.round(sanitizedPercent))
+    const [displayPercent, setDisplayPercent] = useState<number>(Math.round(actualPercent))
 
     useEffect(() => {
-        const clampedPercent = Math.min(sanitizedPercent, 100)
-
         Animated.timing(animatedValue, {
-            toValue: clampedPercent,
+            toValue: wheelPercent,
             duration: ANIMATION_DURATION,
-            useNativeDriver: false,
+            useNativeDriver: true,
         }).start()
 
         numberValue.setValue(displayPercent)
         Animated.timing(numberValue, {
-            toValue: sanitizedPercent,
+            toValue: actualPercent,
             duration: ANIMATION_DURATION,
-            useNativeDriver: false,
+            useNativeDriver: true,
         }).start()
 
         const listener = numberValue.addListener(({ value }) => {
@@ -81,20 +79,20 @@ export default function ProgressWheel({ percent = 0, size = 120, strokeWidth = 1
         return () => {
             numberValue.removeListener(listener)
         }
-    }, [sanitizedPercent])
+    }, [actualPercent, wheelPercent])
 
     const radius = (size - strokeWidth) / 2
     const circumference = 2 * Math.PI * radius
 
     // Marker position at current percentage (clockwise from right, 3 o'clock)
-    const angle = (Math.min(sanitizedPercent, 100) / 100) * 2 * Math.PI
+    const angle = (wheelPercent / 100) * 2 * Math.PI
     const markerX = size / 2 + radius * Math.cos(angle)
     const markerY = size / 2 + radius * Math.sin(angle)
     const markerRadius = Math.max(strokeWidth * 0.5, 4)
 
     // Interpolate marker color from gradient based on current percent
     const markerColor = useMemo(() => {
-        const p = Math.min(sanitizedPercent, 100) / 100
+        const p = wheelPercent / 100
         const stops = mode ? workoutStops : nutritionStops
         if (p <= 0.5) {
             const t = p * 2 // 0->1 as p goes 0->0.5
@@ -103,7 +101,7 @@ export default function ProgressWheel({ percent = 0, size = 120, strokeWidth = 1
             const t = (p - 0.5) * 2
             return lerpHex(stops[1].color, stops[2].color, t)
         }
-    }, [sanitizedPercent, mode])
+    }, [wheelPercent, mode])
 
     const strokeDashoffset = animatedValue.interpolate({
         inputRange: [0, 100],
@@ -126,7 +124,7 @@ export default function ProgressWheel({ percent = 0, size = 120, strokeWidth = 1
 
                 <AnimatedCircle stroke="url(#grad)" fill="none" cx={size / 2} cy={size / 2} r={radius} strokeWidth={strokeWidth} strokeDasharray={circumference} strokeDashoffset={strokeDashoffset} strokeLinecap="round" />
 
-                <Circle cx={markerX} cy={markerY} r={markerRadius} fill={markerColor} stroke="rgba(0,0,0,0.0)" strokeWidth={1} />
+                {wheelPercent === 0 && <Circle cx={markerX} cy={markerY} r={markerRadius} fill={markerColor} stroke="rgba(0,0,0,0.0)" strokeWidth={1} />}
             </Svg>
 
             <View style={styles.percentContainer}>

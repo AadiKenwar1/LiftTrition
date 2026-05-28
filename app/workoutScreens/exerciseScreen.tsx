@@ -7,7 +7,7 @@ import { IMAGE_MAP } from '@/context/WorkoutContext/exerciseLibrary/dataV2/image
 import { Exercise } from '@/context/WorkoutContext/types'
 import { Ionicons } from '@expo/vector-icons'
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
-import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react'
+import { useLayoutEffect, useMemo } from 'react'
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { RenderItemParams } from 'react-native-draggable-flatlist'
 
@@ -26,19 +26,7 @@ export default function ExerciseScreen() {
         .filter((e) => e.workoutID === workoutId && !e.archived)
         .sort((a, b) => a.order - b.order)
 
-    // Stable key — changes only when exercises are added/deleted, not on reorder
-    const listKey = [...activeExercises].map((e) => e.id).sort().join('-')
-
-    // Local order state: what the list actually renders. Immune to PowerSync subscription re-renders.
-    const [localOrder, setLocalOrder] = useState<Exercise[]>(activeExercises)
-
-    // Sync from context only when the exercise SET changes (add/delete), not on PowerSync order updates
-    useEffect(() => {
-        setLocalOrder(activeExercises)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [listKey])
-
-    // Image sources — only resolved for exercises in this workout (5-20 items, not all 1318)
+    // Image sources — resolved for exercises in this workout
     const exerciseImageSources = useMemo(() => {
         const map: Record<string, number> = {}
         for (const exercise of activeExercises) {
@@ -47,13 +35,12 @@ export default function ExerciseScreen() {
             if (filename && IMAGE_MAP[filename]) map[exercise.name] = IMAGE_MAP[filename]
         }
         return map
-    // listKey as proxy — only rebuilds when exercises are added/deleted
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [listKey, fullExerciseLib])
+    }, [fullExerciseLib])
 
     useLayoutEffect(() => navigation.setOptions({ title: `Exercises in ${workout?.name}` }), [navigation, workout?.name])
 
-    const handleEdit = useCallback((exercise: Exercise) => {
+    function handleEdit(exercise: Exercise) {
         Alert.alert(`Options for Exercise: ${exercise.name}`, `Warning: Deleting an exercise will delete all logs associated with it. To preserve logs archiving is recommended.`, [
             {
                 text: 'Archive',
@@ -70,14 +57,13 @@ export default function ExerciseScreen() {
                 style: 'cancel',
             },
         ])
-    }, [handleArchiveExercise, handleDeleteExercise, workoutId])
+    }
 
-    const handleDragEnd = useCallback((reordered: Exercise[]) => {
-        setLocalOrder(reordered)
+    function handleDragEnd(reordered: Exercise[]) {
         handleUpdateExerciseOrder(workoutId, reordered)
-    }, [handleUpdateExerciseOrder, workoutId])
+    }
 
-    const renderItem = useCallback(({ item, drag }: RenderItemParams<Exercise>) => {
+    function renderItem({ item, drag }: RenderItemParams<Exercise>) {
         const muscleGroups = fullExerciseLib[item.name]?.mainMuscle ?? ''
         const imgSource = exerciseImageSources[item.name]
 
@@ -91,7 +77,7 @@ export default function ExerciseScreen() {
                 onEditPress={() => handleEdit(item)}
             />
         )
-    }, [exerciseImageSources, fullExerciseLib, workoutId, handleEdit, router])
+    }
 
     return (
         <View style={styles.container}>
@@ -105,8 +91,8 @@ export default function ExerciseScreen() {
                 </Text>
             </View>
             <DraggableList
-                key={listKey}
-                data={localOrder}
+                key={activeExercises.map((e) => e.id).join('-')}
+                data={activeExercises}
                 renderItem={renderItem}
                 keyExtractor={(item) => item.id}
                 onDragEnd={handleDragEnd}

@@ -1,6 +1,6 @@
+import { Image } from 'expo-image'
 import { Menu } from 'lucide-react-native'
-import { memo } from 'react'
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 interface LogProps {
     text: string
@@ -11,7 +11,7 @@ interface LogProps {
     onMenuPress: () => void
 }
 
-function Log({ text, subtitle, imgSource, onPress, onEditPress, onMenuPress }: LogProps) {
+export default function Log({ text, subtitle, imgSource, onPress, onEditPress, onMenuPress }: LogProps) {
     return (
         <TouchableOpacity onPress={onPress}>
             <View style={styles.outerwrapper}>
@@ -21,13 +21,13 @@ function Log({ text, subtitle, imgSource, onPress, onEditPress, onMenuPress }: L
                         {imgSource && (
                             <View style={styles.imageGlowRing}>
                                 <View style={styles.imageCircle}>
-                                    <Image source={imgSource} style={styles.exerciseImage} resizeMode="contain" />
+                                    <Image source={imgSource} style={styles.exerciseImage} contentFit="contain" />
                                 </View>
                             </View>
                         )}
 
                         <View style={styles.content}>
-                            <Text style={styles.text} numberOfLines={1}>
+                            <Text style={styles.text} numberOfLines={2}>
                                 {text}
                             </Text>
                             {subtitle && (
@@ -51,8 +51,6 @@ function Log({ text, subtitle, imgSource, onPress, onEditPress, onMenuPress }: L
     )
 }
 
-export default memo(Log)
-
 const styles = StyleSheet.create({
     outerwrapper: {
         shadowColor: '#000',
@@ -63,6 +61,7 @@ const styles = StyleSheet.create({
     },
     wrapper: {
         flexDirection: 'row',
+        height: 84,
         marginVertical: 6,
         borderRadius: 16,
         overflow: 'hidden',

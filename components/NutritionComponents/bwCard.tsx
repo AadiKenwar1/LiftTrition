@@ -33,7 +33,7 @@ export default function BwCard({ height = 120 }: CardProps) {
                                 <Text style={styles.mainUnit}>{settings.unitSystem === 'imperial' ? 'lbs' : 'kg'}</Text>
                             </View>
                             <Text style={styles.goalText}>
-                                Goal: {formatWeight(settings.goalWeight)} {settings.unitSystem === 'imperial' ? 'lbs' : 'kg'}
+                                Goal: {formatWeight(settings.goalWeight)} {settings.unitSystem === 'imperial' ? 'lbs' : 'kg'} {settings.bodyWeight == settings.goalWeight ? '🎉' : ''}
                             </Text>
                             <Text style={styles.hintText}>(Tap pencil to update)</Text>
                         </View>
