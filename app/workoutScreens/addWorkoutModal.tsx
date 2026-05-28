@@ -55,9 +55,7 @@ export default function AddWorkoutModal() {
                 <TouchableOpacity
                     onPress={() => {
                         const trimmed = workoutName.trim()
-                        const alreadyExists = workouts.some(
-                            (w) => !w.archived && w.name.trim().toLowerCase() === trimmed.toLowerCase()
-                        )
+                        const alreadyExists = workouts.some((w) => !w.archived && w.name.trim().toLowerCase() === trimmed.toLowerCase())
                         if (alreadyExists) {
                             Alert.alert('Workout Name Taken', `A workout named '${trimmed}' already exists. Please choose a different name.`)
                             return
