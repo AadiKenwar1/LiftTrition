@@ -41,6 +41,7 @@ export interface ExerciseLibraryEntry {
     equipment: string
     isCompound: boolean
     fatigueFactor: number
+    imgUrl?: string
 }
 
 export type ExerciseLib = Record<string, ExerciseLibraryEntry>

@@ -27,6 +27,7 @@ function buildFromV2(data: Record<string, V2Entry>): ExerciseLib {
             fatigueFactor: calculateFatigueFactor(entry.isCompound, entry.mainMuscle, entry.equipment),
             equipment: entry.equipment,
             isCompound: entry.isCompound,
+            imgUrl: entry.imgUrl,
         }
     }
     return lib
@@ -47,6 +48,7 @@ export function convertExerciseLibraryToList(library: ExerciseLib): ScrollableLi
         exerciseMetadata: {
             equipment: exercise.equipment,
             muscles: exercise.mainMuscle,
+            imgUrl: exercise.imgUrl,
         },
     }));
 }

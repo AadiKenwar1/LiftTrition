@@ -1,7 +1,8 @@
 import { useSettings } from '@/context/SettingsContext'
+import { IMAGE_MAP } from '@/context/WorkoutContext/exerciseLibrary/dataV2/imageMap'
 import { Search } from 'lucide-react-native'
 import { useState } from 'react'
-import { FlatList, Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { FlatList, Image, Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
 export interface ScrollableListItem {
     id: string
@@ -9,6 +10,7 @@ export interface ScrollableListItem {
     exerciseMetadata?: {
         equipment?: string
         muscles?: string
+        imgUrl?: string
     }
 }
 
@@ -37,6 +39,9 @@ export default function ScrollableList({ data, searchPlaceholder = 'Search...', 
         const ItemWrapper = onPress ? TouchableOpacity : View
         const isSelected = selectedIds?.includes(item.id) ?? false
 
+        const filename = item.exerciseMetadata?.imgUrl?.split('/').pop()
+        const imageSource = filename ? IMAGE_MAP[filename] : undefined
+
         return (
             <ItemWrapper onPress={onPress ? () => onPress(item) : undefined} activeOpacity={0.5}>
                 <View style={[styles.itemWrapper, isSelected && styles.itemWrapperSelected]}>
@@ -53,6 +58,13 @@ export default function ScrollableList({ data, searchPlaceholder = 'Search...', 
                                 </View>
                             )}
                         </View>
+                        {imageSource && (
+                            <View style={styles.imageGlowRing}>
+                                <View style={styles.imageCircle}>
+                                    <Image source={imageSource} style={styles.exerciseImage} resizeMode="contain" />
+                                </View>
+                            </View>
+                        )}
                     </View>
                 </View>
             </ItemWrapper>
@@ -183,6 +195,36 @@ const styles = StyleSheet.create({
         fontWeight: '400',
         color: '#888',
         letterSpacing: 0.2,
+    },
+    imageGlowRing: {
+        width: 72,
+        height: 72,
+        borderRadius: 36,
+        marginLeft: 12,
+        flexShrink: 0,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#2f80ed',
+        shadowColor: '#2f80ed',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.9,
+        shadowRadius: 10,
+        elevation: 12,
+    },
+    imageCircle: {
+        width: 68,
+        height: 68,
+        borderRadius: 34,
+        backgroundColor: '#1e1e1e',
+        justifyContent: 'center',
+        alignItems: 'center',
+        overflow: 'hidden',
+    },
+    exerciseImage: {
+        width: 52,
+        height: 52,
+        tintColor: '#fff',
     },
     rightContent: {
         justifyContent: 'center',
