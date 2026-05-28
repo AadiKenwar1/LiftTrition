@@ -75,7 +75,13 @@ export default function ExerciseScreen() {
     return (
         <View style={styles.container}>
             <View paddingHorizontal={25}>
-                <Text style={styles.sectionSubtitle}>Tap exercise to log. Tap pencil to edit. Hold stacked lines to rearrange</Text>
+                <Text style={styles.sectionSubtitle}>
+                    {'Tap to log '}
+                    <Text style={{ fontSize: 18 }}>·</Text>
+                    {' Tap ☰ to edit '}
+                    <Text style={{ fontSize: 18 }}>·</Text>
+                    {'\nHold ☰ to rearrange'}
+                </Text>
             </View>
             {/* Draggable List */}
             <DraggableList key={listKey} data={activeExercises} renderItem={renderItem} keyExtractor={(item) => item.id} onDragEnd={(reorderedExercises) => handleUpdateExerciseOrder(workoutId, reorderedExercises)} />

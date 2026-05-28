@@ -61,7 +61,13 @@ export default function WorkoutScreen() {
         return (
             <>
                 <Text style={styles.sectionTitle}>Workouts</Text>
-                <Text style={styles.sectionSubtitle}>Tap workout to open. Tap pencil to edit. Hold stacked lines to rearrange</Text>
+                <Text style={styles.sectionSubtitle}>
+                    {'Tap to open '}
+                    <Text style={{ fontSize: 18 }}>·</Text>
+                    {' Tap ☰ to edit '}
+                    <Text style={{ fontSize: 18 }}>·</Text>
+                    {'\nHold ☰ to rearrange'}
+                </Text>
             </>
         )
     }
