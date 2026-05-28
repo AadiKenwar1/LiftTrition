@@ -4,9 +4,9 @@ import { useAuth } from '@/context/AuthContext'
 import { useWorkout } from '@/context/WorkoutContext'
 import { Workout } from '@/context/WorkoutContext/types'
 import { useRouter } from 'expo-router'
-import { Dumbbell } from 'lucide-react-native'
+import { Dumbbell, Pencil } from 'lucide-react-native'
 import { Alert, StyleSheet, Text, View } from 'react-native'
-import { RenderItemParams } from 'react-native-draggable-flatlist'
+import { DraggableListRenderParams } from '@/components/WorkoutComponents/DraggableList'
 
 export default function WorkoutScreen() {
     //Workout Context Functions
@@ -18,10 +18,7 @@ export default function WorkoutScreen() {
     // Filter and sort for archived workouts (deleted items are already removed from array)
     const activeWorkouts = workouts.filter((w) => !w.archived).sort((a, b) => a.order - b.order)
 
-    const listKey = [...activeWorkouts].map((w) => w.id).join('-')
-
-    //Render logs as a Draggable List item
-    function renderItem({ item, drag }: RenderItemParams<Workout>) {
+    function renderItem({ item, drag }: DraggableListRenderParams<Workout>) {
         return <Log text={item.name} subtitle={''} onPress={() => router.push({ pathname: '/workoutScreens/exerciseScreen', params: { workoutId: item.id } })} onMenuPress={drag} onEditPress={() => handleEdit(item)} />
     }
 
@@ -60,13 +57,14 @@ export default function WorkoutScreen() {
         return (
             <>
                 <Text style={styles.sectionTitle}>Workouts</Text>
-                <Text style={styles.sectionSubtitle}>
-                    {'Tap to open '}
-                    <Text style={{ fontSize: 18 }}>·</Text>
-                    {' Tap ☰ to edit '}
-                    <Text style={{ fontSize: 18 }}>·</Text>
-                    {'\nHold ☰ to rearrange'}
-                </Text>
+                <View style={styles.hintRow}>
+                    <Text style={styles.sectionSubtitle}>{'Tap to open '}</Text>
+                    <Text style={[styles.sectionSubtitle, { fontSize: 18 }]}>·</Text>
+                    <Text style={styles.sectionSubtitle}>{' Tap '}</Text>
+                    <Pencil size={13} color="#aaa" strokeWidth={2} />
+                    <Text style={styles.sectionSubtitle}>{' to edit'}</Text>
+                </View>
+                <Text style={styles.sectionSubtitle}>{'Hold to rearrange'}</Text>
             </>
         )
     }
@@ -84,7 +82,7 @@ export default function WorkoutScreen() {
                         <Text style={styles.emptySubtitle}>Tap the ⋮ button to create your first workout and start tracking your progress</Text>
                     </View>
                     // Draggable List
-                :   <DraggableList key={listKey} data={activeWorkouts} renderItem={renderItem} keyExtractor={(item) => item.id} onDragEnd={handleUpdateWorkoutOrder} ListHeaderComponent={renderHeader} />
+                :   <DraggableList data={activeWorkouts} renderItem={renderItem} keyExtractor={(item) => item.id} onDragEnd={handleUpdateWorkoutOrder} ListHeaderComponent={renderHeader} />
             }
         </View>
     )
@@ -104,12 +102,16 @@ const styles = StyleSheet.create({
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },
+    hintRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
     sectionSubtitle: {
         fontSize: 14,
         color: '#aaa',
         letterSpacing: 0.2,
         fontFamily: 'Poppins_400Regular',
-        marginBottom: 10,
+        marginBottom: 4,
     },
     emptyContainer: {
         flex: 1,

@@ -1,33 +1,35 @@
 import { Image } from 'expo-image'
-import { Menu } from 'lucide-react-native'
+import { Pencil } from 'lucide-react-native'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 interface LogProps {
     text: string
     subtitle?: string
     imgSource?: number
+    wrapperHeight?: number
+    textLines?: number
     onPress: () => void
     onEditPress: () => void
     onMenuPress: () => void
 }
 
-export default function Log({ text, subtitle, imgSource, onPress, onEditPress, onMenuPress }: LogProps) {
+export default function Log({ text, subtitle, imgSource, wrapperHeight = 96, textLines = 2, onPress, onEditPress, onMenuPress }: LogProps) {
     return (
-        <TouchableOpacity onPress={onPress}>
+        <TouchableOpacity onPress={onPress} onLongPress={onMenuPress} delayLongPress={300}>
             <View style={styles.outerwrapper}>
-                <View style={styles.wrapper}>
+                <View style={[styles.wrapper, { height: wrapperHeight }]}>
                     <View style={styles.accentBar} />
                     <View style={styles.container}>
                         {imgSource && (
                             <View style={styles.imageGlowRing}>
                                 <View style={styles.imageCircle}>
-                                    <Image source={imgSource} style={styles.exerciseImage} contentFit="contain" />
+                                    <Image source={imgSource} style={styles.exerciseImage} contentFit="contain" cachePolicy="memory" />
                                 </View>
                             </View>
                         )}
 
                         <View style={styles.content}>
-                            <Text style={styles.text} numberOfLines={2}>
+                            <Text style={styles.text} numberOfLines={textLines}>
                                 {text}
                             </Text>
                             {subtitle && (
@@ -38,9 +40,9 @@ export default function Log({ text, subtitle, imgSource, onPress, onEditPress, o
                         </View>
 
                         <View style={styles.icons}>
-                            <TouchableOpacity style={styles.iconButton} onPress={onEditPress} onLongPress={onMenuPress} delayLongPress={200} hitSlop={5} activeOpacity={0.5}>
+                            <TouchableOpacity style={styles.iconButton} onPress={onEditPress} hitSlop={5} activeOpacity={0.5}>
                                 <View style={styles.iconCircle}>
-                                    <Menu size={20} color="#2f80ed" strokeWidth={2.5} />
+                                    <Pencil size={18} color="#2f80ed" strokeWidth={2.5} />
                                 </View>
                             </TouchableOpacity>
                         </View>
@@ -61,7 +63,7 @@ const styles = StyleSheet.create({
     },
     wrapper: {
         flexDirection: 'row',
-        height: 84,
+        height: 96,
         marginVertical: 6,
         borderRadius: 16,
         overflow: 'hidden',
@@ -99,9 +101,9 @@ const styles = StyleSheet.create({
         borderColor: '#2f80ed',
         shadowColor: '#2f80ed',
         shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0.8,
+        shadowOpacity: 0.65,
         shadowRadius: 8,
-        elevation: 10,
+        elevation: 6,
     },
     imageCircle: {
         width: 48,

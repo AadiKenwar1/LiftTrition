@@ -9,7 +9,8 @@ import { Ionicons } from '@expo/vector-icons'
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
 import { useLayoutEffect, useMemo } from 'react'
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import { RenderItemParams } from 'react-native-draggable-flatlist'
+import { Pencil } from 'lucide-react-native'
+import { DraggableListRenderParams } from '@/components/WorkoutComponents/DraggableList'
 
 export default function ExerciseScreen() {
     const navigation = useNavigation()
@@ -33,8 +34,7 @@ export default function ExerciseScreen() {
             if (filename && IMAGE_MAP[filename]) map[exercise.name] = IMAGE_MAP[filename]
         }
         return map
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [fullExerciseLib])
+    }, [fullExerciseLib, activeExercises])
 
     useLayoutEffect(() => navigation.setOptions({ title: `Exercises in ${workout?.name}` }), [navigation, workout?.name])
 
@@ -61,34 +61,37 @@ export default function ExerciseScreen() {
         handleUpdateExerciseOrder(workoutId, reordered)
     }
 
-    function renderItem({ item, drag }: RenderItemParams<Exercise>) {
+    function renderItem({ item, drag }: DraggableListRenderParams<Exercise>) {
         const muscleGroups = fullExerciseLib[item.name]?.mainMuscle ?? ''
         const imgSource = exerciseImageSources[item.name]
 
         return (
             <Log
-                text={item.name}
-                subtitle={muscleGroups}
-                imgSource={imgSource}
-                onPress={() => router.push({ pathname: '/workoutScreens/logsModal', params: { workoutId: workoutId, exerciseId: item.id, exerciseName: item.name } })}
-                onMenuPress={drag}
-                onEditPress={() => handleEdit(item)}
-            />
+                    text={item.name}
+                    subtitle={muscleGroups}
+                    imgSource={imgSource}
+                    wrapperHeight={120}
+                    textLines={3}
+                    onPress={() => router.push({ pathname: '/workoutScreens/logsModal', params: { workoutId: workoutId, exerciseId: item.id, exerciseName: item.name } })}
+                    onMenuPress={drag}
+                    onEditPress={() => handleEdit(item)}
+                />
         )
     }
 
     return (
         <View style={styles.container}>
-            <View paddingHorizontal={25}>
-                <Text style={styles.sectionSubtitle}>
-                    {'Tap to log '}
-                    <Text style={{ fontSize: 18 }}>·</Text>
-                    {' Tap ☰ to edit '}
-                    <Text style={{ fontSize: 18 }}>·</Text>
-                    {'\nHold ☰ to rearrange'}
-                </Text>
+            <View style={{ paddingHorizontal: 25 }}>
+                <View style={styles.hintRow}>
+                    <Text style={styles.sectionSubtitle}>{'Tap to log '}</Text>
+                    <Text style={[styles.sectionSubtitle, { fontSize: 18 }]}>·</Text>
+                    <Text style={styles.sectionSubtitle}>{' Tap '}</Text>
+                    <Pencil size={13} color="#aaa" strokeWidth={2} />
+                    <Text style={styles.sectionSubtitle}>{' to edit'}</Text>
+                </View>
+                <Text style={styles.sectionSubtitle}>{'Hold to rearrange'}</Text>
             </View>
-            <DraggableList key={activeExercises.map((e) => e.id).join('-')} data={activeExercises} renderItem={renderItem} keyExtractor={(item) => item.id} onDragEnd={handleDragEnd} />
+            <DraggableList data={activeExercises} renderItem={renderItem} keyExtractor={(item) => item.id} onDragEnd={handleDragEnd} />
             <Fab>
                 {[
                     <TouchableOpacity key="add-exercise" style={[styles.workoutFabButtons]} onPress={() => router.push({ pathname: '/workoutScreens/addExerciseModal', params: { workoutId: workoutId } })}>
@@ -136,11 +139,15 @@ const styles = StyleSheet.create({
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },
+    hintRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
     sectionSubtitle: {
         fontSize: 14,
         color: '#aaa',
         letterSpacing: 0.2,
         fontFamily: 'Poppins_400Regular',
-        marginBottom: 10,
+        marginBottom: 4,
     },
 })

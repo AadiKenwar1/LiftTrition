@@ -2,7 +2,8 @@ import { useSettings } from '@/context/SettingsContext'
 import { IMAGE_MAP } from '@/context/WorkoutContext/exerciseLibrary/dataV2/imageMap'
 import { Search } from 'lucide-react-native'
 import { useState } from 'react'
-import { FlatList, Image, Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { Image } from 'expo-image'
+import { FlatList, Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
 export interface ScrollableListItem {
     id: string
@@ -61,7 +62,7 @@ export default function ScrollableList({ data, searchPlaceholder = 'Search...', 
                         {imageSource && (
                             <View style={styles.imageGlowRing}>
                                 <View style={styles.imageCircle}>
-                                    <Image source={imageSource} style={styles.exerciseImage} resizeMode="contain" />
+                                    <Image source={imageSource} style={styles.exerciseImage} contentFit="contain" />
                                 </View>
                             </View>
                         )}

@@ -1,22 +1,49 @@
 import React, { useCallback } from 'react'
-import { StyleSheet, ViewStyle } from 'react-native'
-import DraggableFlatList, { RenderItemParams, ScaleDecorator } from 'react-native-draggable-flatlist'
+import { ListRenderItemInfo, StyleSheet, ViewStyle } from 'react-native'
+import ReorderableList, { ReorderableListReorderEvent, reorderItems, useReorderableDrag } from 'react-native-reorderable-list'
+
+export interface DraggableListRenderParams<T> {
+    item: T
+    drag: () => void
+}
 
 interface DraggableListProps<T> {
     data: T[]
     onDragEnd: (data: T[]) => void
-    renderItem: (params: RenderItemParams<T>) => React.ReactElement
+    renderItem: (params: DraggableListRenderParams<T>) => React.ReactElement
     keyExtractor: (item: T) => string
     contentContainerStyle?: ViewStyle
     ListHeaderComponent?: React.ComponentType<any> | React.ReactElement | null
 }
 
+function DraggableItem<T>({ item, renderItem }: { item: T; renderItem: (p: DraggableListRenderParams<T>) => React.ReactElement }) {
+    const drag = useReorderableDrag()
+    return renderItem({ item, drag })
+}
+
 export default function DraggableList<T>({ data, onDragEnd, renderItem, keyExtractor, contentContainerStyle, ListHeaderComponent }: DraggableListProps<T>) {
-    const wrappedRenderItem = useCallback((params: RenderItemParams<T>) => <ScaleDecorator>{renderItem(params)}</ScaleDecorator>, [renderItem])
+    const handleReorder = useCallback(
+        ({ from, to }: ReorderableListReorderEvent) => {
+            onDragEnd(reorderItems(data, from, to))
+        },
+        [data, onDragEnd],
+    )
 
-    const wrappedOnDragEnd = useCallback(({ data: reordered }: { data: T[] }) => onDragEnd(reordered), [onDragEnd])
+    const wrappedRenderItem = useCallback(
+        ({ item }: ListRenderItemInfo<T>) => <DraggableItem item={item} renderItem={renderItem} />,
+        [renderItem],
+    )
 
-    return <DraggableFlatList data={data} onDragEnd={wrappedOnDragEnd} keyExtractor={keyExtractor} renderItem={wrappedRenderItem} contentContainerStyle={[styles.content, contentContainerStyle]} ListHeaderComponent={ListHeaderComponent} />
+    return (
+        <ReorderableList
+            data={data}
+            onReorder={handleReorder}
+            keyExtractor={keyExtractor}
+            renderItem={wrappedRenderItem}
+            contentContainerStyle={[styles.content, contentContainerStyle]}
+            ListHeaderComponent={ListHeaderComponent}
+        />
+    )
 }
 
 const styles = StyleSheet.create({
