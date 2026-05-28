@@ -25,7 +25,7 @@ export default function LogScreen() {
                     [
                         // Add Workout Button
                         <TouchableOpacity activeOpacity={0.75} key="add-workout" style={[styles.workoutFabButtons]} onPress={() => router.push('/workoutScreens/addWorkoutModal')}>
-                            <Ionicons name="add" size={35} color="white" shadowColor="black" shadowRadius={1} shadowOpacity={0.2} />
+                            <Ionicons name="add" size={35} color="white" shadowColor="black" shadowRadius={0} shadowOpacity={0} />
                         </TouchableOpacity>,
 
                         // View Archived Workouts Button
@@ -40,7 +40,7 @@ export default function LogScreen() {
                                 })
                             }
                         >
-                            <Ionicons name="archive-outline" size={35} color="white" shadowColor="black" shadowRadius={1} shadowOpacity={0.2} />
+                            <Ionicons name="archive-outline" size={35} color="white" shadowColor="black" shadowRadius={0} shadowOpacity={0} />
                         </TouchableOpacity>,
 
                         //Coming Soon - AI Workout Generator (react fragment to even out the buttons)
@@ -52,7 +52,7 @@ export default function LogScreen() {
                 :   [
                         //Add Nutrition Button
                         <TouchableOpacity activeOpacity={0.75} key="add-nutrition" style={[styles.nutritionFabButtons]} onPress={() => router.push('/nutritionScreens/addNutritionModal')}>
-                            <Ionicons name="add" size={35} color="#FFFFFF" shadowColor="white" shadowRadius={1} shadowOpacity={0.2} />
+                            <Ionicons name="add" size={35} color="#FFFFFF" shadowColor="white" shadowRadius={0} shadowOpacity={0} />
                         </TouchableOpacity>,
 
                         //Camera Button
@@ -62,7 +62,7 @@ export default function LogScreen() {
                             style={[hasPremium ? styles.nutritionFabButtons : styles.nutritionUnavailableFabButtons]}
                             onPress={() => (hasPremium ? router.push('/nutritionScreens/cameraScreen') : router.push('/settingsScreens/subscription'))}
                         >
-                            <Ionicons name="camera" size={35} color="#FFFFFF" shadowColor="white" shadowRadius={1} shadowOpacity={0.2} />
+                            <Ionicons name="camera" size={35} color="#FFFFFF" shadowColor="white" shadowRadius={0} shadowOpacity={0} />
                         </TouchableOpacity>,
 
                         //Food Database Button
@@ -72,12 +72,12 @@ export default function LogScreen() {
                             style={[hasPremium ? styles.nutritionFabButtons : styles.nutritionUnavailableFabButtons]}
                             onPress={() => (hasPremium ? router.push('/nutritionScreens/foodDBModal') : router.push('/settingsScreens/subscription'))}
                         >
-                            <MaterialCommunityIcons name="database-search" size={35} color="#FFFFFF" shadowColor="white" shadowRadius={1} shadowOpacity={0.2} />
+                            <MaterialCommunityIcons name="database-search" size={35} color="#FFFFFF" shadowColor="white" shadowRadius={0} shadowOpacity={0} />
                         </TouchableOpacity>,
 
                         //Saved Foods Button
                         <TouchableOpacity activeOpacity={0.75} key="saved-foods" style={[styles.nutritionFabButtons]} onPress={() => router.push('/nutritionScreens/savedNutritionModal')}>
-                            <Ionicons name="bookmark" size={35} color="#FFFFFF" shadowColor="white" shadowRadius={1} shadowOpacity={0.2} />
+                            <Ionicons name="bookmark" size={35} color="#FFFFFF" shadowColor="white" shadowRadius={0} shadowOpacity={0} />
                         </TouchableOpacity>,
                     ]
                 }
@@ -99,11 +99,11 @@ const styles = StyleSheet.create({
         borderColor: 'black',
         alignItems: 'center',
         justifyContent: 'center',
-        elevation: 5,
+        elevation: 3,
         shadowColor: 'black',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.6,
-        shadowRadius: 3,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.2,
+        shadowRadius: 2,
         borderWidth: 0.3,
         zIndex: 10,
     },
@@ -115,11 +115,11 @@ const styles = StyleSheet.create({
         borderColor: 'black',
         alignItems: 'center',
         justifyContent: 'center',
-        elevation: 5,
+        elevation: 3,
         shadowColor: 'black',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.6,
-        shadowRadius: 3,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.2,
+        shadowRadius: 2,
         borderWidth: 0.3,
         zIndex: 10,
     },
@@ -131,11 +131,11 @@ const styles = StyleSheet.create({
         borderColor: 'black',
         alignItems: 'center',
         justifyContent: 'center',
-        elevation: 5,
+        elevation: 3,
         shadowColor: 'black',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.6,
-        shadowRadius: 3,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.2,
+        shadowRadius: 2,
         borderWidth: 0.3,
         zIndex: 10,
     },
@@ -147,11 +147,11 @@ const styles = StyleSheet.create({
         borderColor: 'black',
         alignItems: 'center',
         justifyContent: 'center',
-        elevation: 5,
+        elevation: 3,
         shadowColor: 'black',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.6,
-        shadowRadius: 3,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.2,
+        shadowRadius: 2,
         borderWidth: 0.3,
         zIndex: 10,
     },

@@ -29,21 +29,9 @@ export default function DraggableList<T>({ data, onDragEnd, renderItem, keyExtra
         [data, onDragEnd],
     )
 
-    const wrappedRenderItem = useCallback(
-        ({ item }: ListRenderItemInfo<T>) => <DraggableItem item={item} renderItem={renderItem} />,
-        [renderItem],
-    )
+    const wrappedRenderItem = useCallback(({ item }: ListRenderItemInfo<T>) => <DraggableItem item={item} renderItem={renderItem} />, [renderItem])
 
-    return (
-        <ReorderableList
-            data={data}
-            onReorder={handleReorder}
-            keyExtractor={keyExtractor}
-            renderItem={wrappedRenderItem}
-            contentContainerStyle={[styles.content, contentContainerStyle]}
-            ListHeaderComponent={ListHeaderComponent}
-        />
-    )
+    return <ReorderableList data={data} onReorder={handleReorder} keyExtractor={keyExtractor} renderItem={wrappedRenderItem} contentContainerStyle={[styles.content, contentContainerStyle]} ListHeaderComponent={ListHeaderComponent} />
 }
 
 const styles = StyleSheet.create({

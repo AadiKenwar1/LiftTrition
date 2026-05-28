@@ -1,4 +1,5 @@
 import SavedEntry from '@/components/NutritionComponents/SavedEntry'
+import StagedSection from '@/components/NeutralComponents/StagedSection'
 import { useAuth } from '@/context/AuthContext'
 import { useNutrition } from '@/context/NutritionContext'
 import { Ingredient, NutritionEntry } from '@/context/NutritionContext/types'
@@ -119,8 +120,7 @@ export default function SavedNutritionModal() {
             <Text style={styles.subtitle}>Your frequently used meals</Text>
 
             {addedItems.length > 0 && (
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Added Items ({addedItems.length})</Text>
+                <StagedSection label="Added" count={addedItems.length} color="#22C922">
                     {addedItems.map((row) => {
                         const q = row.quantity
                         const s = row.savedItem
@@ -128,20 +128,30 @@ export default function SavedNutritionModal() {
                             <View key={row.lineId} style={styles.stagedRow}>
                                 <View style={styles.stagedInfo}>
                                     <Text style={styles.stagedName}>
-                                        {s.name}
-                                        {q > 1 ? ` (x${q})` : ''}
+                                        {s.name}{q > 1 ? <Text style={styles.stagedQty}> ×{q}</Text> : ''}
                                     </Text>
-                                    <Text style={styles.stagedMacros}>
-                                        {Math.round(s.calories * q)} cal • {Math.round(s.protein * q * 10) / 10}g P • {Math.round(s.carbs * q * 10) / 10}g C • {Math.round(s.fats * q * 10) / 10}g F
-                                    </Text>
+                                    <View style={styles.macroRow}>
+                                        <View style={styles.macroPill}>
+                                            <Text style={styles.macroPillText}>{Math.round(s.calories * q)} cal</Text>
+                                        </View>
+                                        <View style={[styles.macroPill, styles.macroPillP]}>
+                                            <Text style={[styles.macroPillText, styles.macroPillTextP]}>{Math.round(s.protein * q * 10) / 10}g P</Text>
+                                        </View>
+                                        <View style={[styles.macroPill, styles.macroPillC]}>
+                                            <Text style={[styles.macroPillText, styles.macroPillTextC]}>{Math.round(s.carbs * q * 10) / 10}g C</Text>
+                                        </View>
+                                        <View style={[styles.macroPill, styles.macroPillF]}>
+                                            <Text style={[styles.macroPillText, styles.macroPillTextF]}>{Math.round(s.fats * q * 10) / 10}g F</Text>
+                                        </View>
+                                    </View>
                                 </View>
                                 <TouchableOpacity style={styles.removeButton} onPress={() => handleRemoveStaged(row.lineId)} activeOpacity={0.5}>
-                                    <X size={18} color="#FF453A" strokeWidth={2.5} />
+                                    <X size={14} color="#22C922" strokeWidth={3} />
                                 </TouchableOpacity>
                             </View>
                         )
                     })}
-                </View>
+                </StagedSection>
             )}
 
             {savedNutritionEntries.length > 0 && (
@@ -160,10 +170,6 @@ export default function SavedNutritionModal() {
                     />
                 </View>
             )}
-
-            {savedNutritionEntries.length > 0 ?
-                <Text style={styles.sectionTitle}>{searchQuery.trim() ? `Results (${filteredSavedEntries.length})` : 'Saved'}</Text>
-            :   null}
         </>
     )
 
@@ -187,57 +193,59 @@ export default function SavedNutritionModal() {
     }
 
     return (
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
-            <View style={styles.handleContainer}>
-                <View style={styles.handle} />
-            </View>
+        <View style={styles.container}>
+            <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.keyboardView}>
+                <View style={styles.handleContainer}>
+                    <View style={styles.handle} />
+                </View>
 
-            <Modal visible={quantityInputItem !== null} transparent animationType="fade" onRequestClose={cancelAddItem}>
-                <View style={styles.quantityModal}>
-                    <View style={styles.quantityContent}>
-                        <Text style={styles.quantityTitle}>How many servings?</Text>
-                        <Text style={styles.quantitySubtitle}>{quantityInputItem?.name}</Text>
-                        <TextInput style={styles.quantityInput} placeholder="1" placeholderTextColor="#666" value={quantityValue} onChangeText={setQuantityValue} keyboardType="numeric" autoFocus />
-                        <View style={styles.quantityButtons}>
-                            <TouchableOpacity style={[styles.quantityButton, styles.cancelButton]} onPress={cancelAddItem} activeOpacity={0.5}>
-                                <X size={18} color="#FF453A" strokeWidth={2.5} />
-                                <Text style={[styles.quantityButtonText, styles.cancelButtonText]}>Cancel</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={[styles.quantityButton, styles.confirmButton]} onPress={confirmAddItem} activeOpacity={0.5}>
-                                <Check size={18} color="#22C922" strokeWidth={2.5} />
-                                <Text style={[styles.quantityButtonText, styles.confirmButtonText]}>Add</Text>
-                            </TouchableOpacity>
+                <Modal visible={quantityInputItem !== null} transparent animationType="fade" onRequestClose={cancelAddItem}>
+                    <View style={styles.quantityModal}>
+                        <View style={styles.quantityContent}>
+                            <Text style={styles.quantityTitle}>How many servings?</Text>
+                            <Text style={styles.quantitySubtitle}>{quantityInputItem?.name}</Text>
+                            <TextInput style={styles.quantityInput} placeholder="1" placeholderTextColor="#666" value={quantityValue} onChangeText={setQuantityValue} keyboardType="numeric" autoFocus />
+                            <View style={styles.quantityButtons}>
+                                <TouchableOpacity style={[styles.quantityButton, styles.cancelButton]} onPress={cancelAddItem} activeOpacity={0.5}>
+                                    <X size={18} color="#FF453A" strokeWidth={2.5} />
+                                    <Text style={[styles.quantityButtonText, styles.cancelButtonText]}>Cancel</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={[styles.quantityButton, styles.confirmButton]} onPress={confirmAddItem} activeOpacity={0.5}>
+                                    <Check size={18} color="#22C922" strokeWidth={2.5} />
+                                    <Text style={[styles.quantityButtonText, styles.confirmButtonText]}>Add</Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
                     </View>
+                </Modal>
+
+                <View style={styles.body}>
+                    <FlatList
+                        data={filteredSavedEntries}
+                        keyExtractor={(item) => item.id}
+                        ListHeaderComponent={listHeader}
+                        renderItem={({ item }) => <SavedEntry name={item.name} calories={item.calories} protein={item.protein} carbs={item.carbs} fats={item.fats} onAddPress={() => openQuantityModal(item)} onDeletePress={() => confirmUnsave(item)} />}
+                        ListEmptyComponent={renderListEmpty}
+                        contentContainerStyle={[styles.listContent, savedNutritionEntries.length === 0 && styles.listContentEmpty]}
+                        showsVerticalScrollIndicator={false}
+                        keyboardShouldPersistTaps="handled"
+                        keyboardDismissMode="on-drag"
+                    />
                 </View>
-            </Modal>
+            </KeyboardAvoidingView>
 
-            <View style={styles.body}>
-                <FlatList
-                    data={filteredSavedEntries}
-                    keyExtractor={(item) => item.id}
-                    ListHeaderComponent={listHeader}
-                    renderItem={({ item }) => <SavedEntry name={item.name} calories={item.calories} protein={item.protein} carbs={item.carbs} fats={item.fats} onAddPress={() => openQuantityModal(item)} onDeletePress={() => confirmUnsave(item)} />}
-                    ListEmptyComponent={renderListEmpty}
-                    contentContainerStyle={[styles.listContent, savedNutritionEntries.length === 0 && styles.listContentEmpty]}
-                    showsVerticalScrollIndicator={false}
-                    keyboardShouldPersistTaps="handled"
-                    keyboardDismissMode="on-drag"
-                />
-
-                {addedItems.length > 0 && (
-                    <View style={styles.addAllContainer}>
-                        <TouchableOpacity onPress={handleAddAll} activeOpacity={0.8} style={styles.addAllButtonTouchable}>
-                            <LinearGradient colors={['#3CB855', '#22C922', '#5CE073']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.addAllButton}>
-                                <Text style={styles.addAllButtonText}>
-                                    Add {addedItems.length} Item{addedItems.length > 1 ? 's' : ''}
-                                </Text>
-                            </LinearGradient>
-                        </TouchableOpacity>
-                    </View>
-                )}
-            </View>
-        </KeyboardAvoidingView>
+            {addedItems.length > 0 && (
+                <View style={styles.addAllContainer}>
+                    <TouchableOpacity onPress={handleAddAll} activeOpacity={0.8} style={styles.addAllButtonTouchable}>
+                        <LinearGradient colors={['#3CB855', '#22C922', '#5CE073']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.addAllButton}>
+                            <Text style={styles.addAllButtonText}>
+                                Add {addedItems.length} Item{addedItems.length > 1 ? 's' : ''}
+                            </Text>
+                        </LinearGradient>
+                    </TouchableOpacity>
+                </View>
+            )}
+        </View>
     )
 }
 
@@ -248,6 +256,9 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
         overflow: 'hidden',
+    },
+    keyboardView: {
+        flex: 1,
     },
     handleContainer: {
         alignItems: 'center',
@@ -303,7 +314,7 @@ const styles = StyleSheet.create({
         letterSpacing: 0.2,
     },
     searchContainer: {
-        marginBottom: 24,
+        marginBottom: 8,
         position: 'relative',
     },
     searchInput: {
@@ -320,52 +331,63 @@ const styles = StyleSheet.create({
     searchInputFocused: {
         borderColor: '#22C922',
     },
-    section: {
-        marginBottom: 20,
-    },
-    sectionTitle: {
-        fontSize: 16,
-        color: '#FFF',
-        marginBottom: 12,
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
     stagedRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#1e1e1e',
+        backgroundColor: 'rgba(34, 201, 34, 0.06)',
         borderRadius: 12,
-        padding: 14,
-        marginBottom: 8,
-        borderWidth: 2,
-        borderColor: '#1e1e1e',
+        paddingVertical: 10,
+        paddingHorizontal: 12,
+        marginTop: 6,
+        borderWidth: 1,
+        borderColor: 'rgba(34, 201, 34, 0.15)',
     },
     stagedInfo: {
         flex: 1,
-        marginRight: 12,
+        marginRight: 10,
     },
     stagedName: {
-        fontSize: 15,
+        fontSize: 14,
         color: '#FFF',
-        marginBottom: 4,
-        letterSpacing: -0.5,
+        marginBottom: 6,
+        letterSpacing: -0.3,
         fontFamily: 'Poppins_600SemiBold',
     },
-    stagedMacros: {
-        fontSize: 12,
-        color: '#888',
-        letterSpacing: 0.2,
+    stagedQty: {
+        color: '#22C922',
         fontFamily: 'Poppins_400Regular',
     },
+    macroRow: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 5,
+    },
+    macroPill: {
+        backgroundColor: 'rgba(255,255,255,0.07)',
+        borderRadius: 6,
+        paddingHorizontal: 7,
+        paddingVertical: 2,
+    },
+    macroPillText: {
+        fontSize: 11,
+        color: '#aaa',
+        fontFamily: 'Poppins_500Medium',
+    },
+    macroPillP: { backgroundColor: 'rgba(255, 107, 107, 0.15)' },
+    macroPillTextP: { color: '#FF6B6B' },
+    macroPillC: { backgroundColor: 'rgba(255, 217, 61, 0.15)' },
+    macroPillTextC: { color: '#FFD93D' },
+    macroPillF: { backgroundColor: 'rgba(34, 201, 34, 0.15)' },
+    macroPillTextF: { color: '#22C922' },
     removeButton: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        backgroundColor: 'rgba(255, 69, 58, 0.12)',
+        width: 28,
+        height: 28,
+        borderRadius: 14,
+        backgroundColor: 'rgba(34, 201, 34, 0.12)',
         justifyContent: 'center',
         alignItems: 'center',
-        borderWidth: 1.5,
-        borderColor: 'rgba(255, 69, 58, 0.25)',
+        borderWidth: 1,
+        borderColor: 'rgba(34, 201, 34, 0.25)',
     },
     emptyState: {
         flex: 1,

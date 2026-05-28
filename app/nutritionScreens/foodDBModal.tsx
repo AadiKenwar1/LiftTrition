@@ -1,3 +1,4 @@
+import StagedSection from '@/components/NeutralComponents/StagedSection'
 import { useAuth } from '@/context/AuthContext'
 import { useNutrition } from '@/context/NutritionContext'
 import { getFoodItem, getFoodSearchResults } from '@/lib/foodDB/foodDB'
@@ -115,7 +116,8 @@ export default function FoodDBModal() {
     }
 
     return (
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
+        <View style={styles.container}>
+            <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.keyboardView}>
             {/* Drag Handle */}
             <View style={styles.handleContainer}>
                 <View style={styles.handle} />
@@ -185,24 +187,37 @@ export default function FoodDBModal() {
 
                     {/* Added Items Section */}
                     {addedItems.length > 0 && (
-                        <View style={styles.section}>
-                            <Text style={styles.sectionTitle}>Added Items ({addedItems.length})</Text>
-                            {addedItems.map((item) => (
-                                <View key={item.id} style={styles.foodItem}>
-                                    <View style={styles.foodInfo}>
-                                        <Text style={styles.foodName}>
-                                            {item.name} {item.quantity && item.quantity > 1 ? `(x${item.quantity})` : ''}
-                                        </Text>
-                                        <Text style={styles.foodMacros}>
-                                            {item.calories * (item.quantity || 1)} cal • {item.protein * (item.quantity || 1)}g P • {item.carbs * (item.quantity || 1)}g C • {item.fats * (item.quantity || 1)}g F
-                                        </Text>
+                        <StagedSection label="Added" count={addedItems.length} color="#22C922">
+                            {addedItems.map((item) => {
+                                const q = item.quantity || 1
+                                return (
+                                    <View key={item.id} style={styles.stagedRow}>
+                                        <View style={styles.stagedInfo}>
+                                            <Text style={styles.stagedName}>
+                                                {item.name}{q > 1 ? <Text style={styles.stagedQty}> ×{q}</Text> : ''}
+                                            </Text>
+                                            <View style={styles.macroRow}>
+                                                <View style={styles.macroPill}>
+                                                    <Text style={styles.macroPillText}>{Math.round(item.calories * q)} cal</Text>
+                                                </View>
+                                                <View style={[styles.macroPill, styles.macroPillP]}>
+                                                    <Text style={[styles.macroPillText, styles.macroPillTextP]}>{Math.round(item.protein * q * 10) / 10}g P</Text>
+                                                </View>
+                                                <View style={[styles.macroPill, styles.macroPillC]}>
+                                                    <Text style={[styles.macroPillText, styles.macroPillTextC]}>{Math.round(item.carbs * q * 10) / 10}g C</Text>
+                                                </View>
+                                                <View style={[styles.macroPill, styles.macroPillF]}>
+                                                    <Text style={[styles.macroPillText, styles.macroPillTextF]}>{Math.round(item.fats * q * 10) / 10}g F</Text>
+                                                </View>
+                                            </View>
+                                        </View>
+                                        <TouchableOpacity style={styles.removeButton} onPress={() => handleRemoveItem(item.id)} activeOpacity={0.5}>
+                                            <X size={14} color="#22C922" strokeWidth={3} />
+                                        </TouchableOpacity>
                                     </View>
-                                    <TouchableOpacity style={styles.removeButton} onPress={() => handleRemoveItem(item.id)} activeOpacity={0.5}>
-                                        <X size={18} color="#FF453A" strokeWidth={2.5} />
-                                    </TouchableOpacity>
-                                </View>
-                            ))}
-                        </View>
+                                )
+                            })}
+                        </StagedSection>
                     )}
 
                     {/* Search Results Section */}
@@ -245,6 +260,8 @@ export default function FoodDBModal() {
                 </View>
             </ScrollView>
 
+            </KeyboardAvoidingView>
+
             {/* Add All Button - Fixed at bottom */}
             {addedItems.length > 0 && (
                 <View style={styles.addAllContainer}>
@@ -257,7 +274,7 @@ export default function FoodDBModal() {
                     </TouchableOpacity>
                 </View>
             )}
-        </KeyboardAvoidingView>
+        </View>
     )
 }
 
@@ -268,6 +285,9 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
         overflow: 'hidden',
+    },
+    keyboardView: {
+        flex: 1,
     },
     handleContainer: {
         alignItems: 'center',
@@ -381,6 +401,54 @@ const styles = StyleSheet.create({
         letterSpacing: 0.2,
         fontFamily: 'Poppins_400Regular',
     },
+    stagedRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'rgba(34, 201, 34, 0.06)',
+        borderRadius: 12,
+        paddingVertical: 10,
+        paddingHorizontal: 12,
+        marginTop: 6,
+        borderWidth: 1,
+        borderColor: 'rgba(34, 201, 34, 0.15)',
+    },
+    stagedInfo: {
+        flex: 1,
+        marginRight: 10,
+    },
+    stagedName: {
+        fontSize: 14,
+        color: '#FFF',
+        marginBottom: 6,
+        letterSpacing: -0.3,
+        fontFamily: 'Poppins_600SemiBold',
+    },
+    stagedQty: {
+        color: '#22C922',
+        fontFamily: 'Poppins_400Regular',
+    },
+    macroRow: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 5,
+    },
+    macroPill: {
+        backgroundColor: 'rgba(255,255,255,0.07)',
+        borderRadius: 6,
+        paddingHorizontal: 7,
+        paddingVertical: 2,
+    },
+    macroPillText: {
+        fontSize: 11,
+        color: '#aaa',
+        fontFamily: 'Poppins_500Medium',
+    },
+    macroPillP: { backgroundColor: 'rgba(255, 107, 107, 0.15)' },
+    macroPillTextP: { color: '#FF6B6B' },
+    macroPillC: { backgroundColor: 'rgba(255, 217, 61, 0.15)' },
+    macroPillTextC: { color: '#FFD93D' },
+    macroPillF: { backgroundColor: 'rgba(34, 201, 34, 0.15)' },
+    macroPillTextF: { color: '#22C922' },
     addButton: {
         width: 32,
         height: 32,
@@ -396,14 +464,14 @@ const styles = StyleSheet.create({
         borderColor: 'rgba(102, 102, 102, 0.25)',
     },
     removeButton: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        backgroundColor: 'rgba(255, 69, 58, 0.12)',
+        width: 28,
+        height: 28,
+        borderRadius: 14,
+        backgroundColor: 'rgba(34, 201, 34, 0.12)',
         justifyContent: 'center',
         alignItems: 'center',
-        borderWidth: 1.5,
-        borderColor: 'rgba(255, 69, 58, 0.25)',
+        borderWidth: 1,
+        borderColor: 'rgba(34, 201, 34, 0.25)',
     },
     emptyState: {
         paddingVertical: 40,

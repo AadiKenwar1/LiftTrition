@@ -1,8 +1,8 @@
 import { useSettings } from '@/context/SettingsContext'
 import { IMAGE_MAP } from '@/context/WorkoutContext/exerciseLibrary/dataV2/imageMap'
+import { Image } from 'expo-image'
 import { Search } from 'lucide-react-native'
 import { useState } from 'react'
-import { Image } from 'expo-image'
 import { FlatList, Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
 export interface ScrollableListItem {

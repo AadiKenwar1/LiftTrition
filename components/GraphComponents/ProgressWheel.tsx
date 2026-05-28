@@ -19,7 +19,7 @@ function lerpHex(c1: string, c2: string, t: number): string {
 }
 
 // Internal constants - not exposed as props since they're never customized
-const ANIMATION_DURATION = 2000
+const ANIMATION_DURATION = 1000
 const BACKGROUND_COLOR = '#2a2a2a'
 const TEXT_COLOR = 'white'
 

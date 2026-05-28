@@ -1,6 +1,6 @@
 import { useSettings } from '@/context/SettingsContext'
 import { validateHeightWeight } from '@/context/SettingsContext/functions/validator'
-import { cmToInches, feetInchesToInches, inchesToCm, inchesToFeetInches, kgToLbs, lbsToKg } from '@/lib/utils/unitConversions'
+import { feetInchesToInches, inchesToFeetInches } from '@/lib/utils/unitConversions'
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5'
 import { router } from 'expo-router'
 import { useState } from 'react'
@@ -8,36 +8,14 @@ import { Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text,
 
 export default function AdjustMeasurementsScreen() {
     const { settings, setSettings, handleUpdateBw, calculateMacros } = useSettings()
-    const [unitSystem, setUnitSystem] = useState<'imperial' | 'metric'>(settings.unitSystem)
+    const unitSystem = settings.unitSystem
 
     // Imperial: initialise from stored total inches
     const initialFtIn = inchesToFeetInches(settings.height)
-    const [heightFt, setHeightFt] = useState(settings.unitSystem === 'imperial' ? initialFtIn.feet.toString() : '')
-    const [heightIn, setHeightIn] = useState(settings.unitSystem === 'imperial' ? initialFtIn.inches.toString() : '')
-    const [height, setHeight] = useState(settings.unitSystem === 'metric' ? settings.height.toString() : '')
+    const [heightFt, setHeightFt] = useState(unitSystem === 'imperial' ? initialFtIn.feet.toString() : '')
+    const [heightIn, setHeightIn] = useState(unitSystem === 'imperial' ? initialFtIn.inches.toString() : '')
+    const [height, setHeight] = useState(unitSystem === 'metric' ? settings.height.toString() : '')
     const [weight, setWeight] = useState(settings.bodyWeight.toString())
-
-    function handleUnitToggle(next: 'imperial' | 'metric') {
-        if (next === unitSystem) return
-        if (next === 'metric') {
-            // imperial → metric
-            const totalIn = feetInchesToInches(Number(heightFt) || 0, Number(heightIn) || 0)
-            if (totalIn > 0) setHeight(inchesToCm(totalIn).toString())
-            const lbs = Number(weight) || 0
-            if (lbs > 0) setWeight(lbsToKg(lbs).toString())
-        } else {
-            // metric → imperial
-            const cm = Number(height) || 0
-            if (cm > 0) {
-                const { feet, inches } = inchesToFeetInches(cmToInches(cm))
-                setHeightFt(feet.toString())
-                setHeightIn(inches.toString())
-            }
-            const kg = Number(weight) || 0
-            if (kg > 0) setWeight(kgToLbs(kg).toString())
-        }
-        setUnitSystem(next)
-    }
 
     function handleSave() {
         const totalHeight = unitSystem === 'imperial' ? feetInchesToInches(Number(heightFt), Number(heightIn)) : Number(height)
@@ -48,7 +26,6 @@ export default function AdjustMeasurementsScreen() {
             ...settings,
             height: totalHeight,
             bodyWeight: Number(weight),
-            unitSystem,
         }
         const macros = calculateMacros(updatedSettings, unitSystem === 'imperial')
 
@@ -83,17 +60,7 @@ export default function AdjustMeasurementsScreen() {
                     <Text style={styles.titleText}>Update Your Measurements</Text>
 
                     {/* Subtitle */}
-                    <Text style={styles.subtitleText}>Updates Nutrition Goals and Unit System</Text>
-
-                    {/* Unit System Toggle */}
-                    <View style={styles.toggleContainer}>
-                        <TouchableOpacity style={[styles.toggleButton, unitSystem === 'imperial' && { borderColor: '#FBBF24' }]} onPress={() => handleUnitToggle('imperial')} activeOpacity={0.5}>
-                            <Text style={[styles.toggleText, unitSystem === 'imperial' && styles.toggleTextActive]}>Imperial</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={[styles.toggleButton, unitSystem === 'metric' && { borderColor: '#FBBF24' }]} onPress={() => handleUnitToggle('metric')} activeOpacity={0.5}>
-                            <Text style={[styles.toggleText, unitSystem === 'metric' && styles.toggleTextActive]}>Metric</Text>
-                        </TouchableOpacity>
-                    </View>
+                    <Text style={styles.subtitleText}>Updates your measurements and nutrition goals</Text>
 
                     {/* Input Fields */}
                     <View style={styles.inputContainer}>
@@ -194,29 +161,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 8,
         fontFamily: 'Poppins_400Regular',
     },
-    toggleContainer: {
-        flexDirection: 'row',
-        width: '100%',
-        gap: 12,
-        marginBottom: 24,
-    },
-    toggleButton: {
-        flex: 1,
-        height: 60,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#1e1e1e',
-        borderRadius: 14,
-        borderWidth: 2,
-        borderColor: '#242424',
-    },
-    toggleText: {
-        fontSize: 16,
-        color: '#888',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    toggleTextActive: { color: '#fff' },
     inputContainer: {
         width: '100%',
         gap: 16,

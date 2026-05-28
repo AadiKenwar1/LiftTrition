@@ -3,7 +3,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { Pencil } from 'lucide-react-native'
 import { useEffect, useState } from 'react'
-import { KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { Alert, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
 export default function RenameModal() {
     const { workouts, handleRenameWorkout } = useWorkout()
@@ -27,10 +27,17 @@ export default function RenameModal() {
     }, [workout])
 
     const handleRename = () => {
-        if (workoutName.trim()) {
-            handleRenameWorkout(workoutId, workoutName.trim())
-            router.back()
+        const trimmed = workoutName.trim()
+        if (!trimmed) return
+        const alreadyExists = workouts.some(
+            (w) => !w.archived && w.id !== workoutId && w.name.trim().toLowerCase() === trimmed.toLowerCase()
+        )
+        if (alreadyExists) {
+            Alert.alert('Workout Name Taken', `A workout named '${trimmed}' already exists. Please choose a different name.`)
+            return
         }
+        handleRenameWorkout(workoutId, trimmed)
+        router.back()
     }
 
     const isValid = workoutName.trim()

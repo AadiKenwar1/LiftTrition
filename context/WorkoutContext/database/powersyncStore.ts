@@ -212,6 +212,27 @@ export async function insertExerciseWithOrderBump(exercise: Exercise): Promise<v
 }
 
 /**
+ * Insert multiple new exercises in one transaction and bump sibling orders by the count.
+ */
+export async function insertExercisesWithOrderBump(exercises: Exercise[]): Promise<void> {
+    if (exercises.length === 0) return
+    const workoutID = exercises[0].workoutID
+    await powerSync.writeTransaction(async (tx) => {
+        await tx.execute(
+            'UPDATE exercises SET "order" = "order" + ?, updated_at = datetime(\'now\') WHERE workout_id = ? AND archived = 0',
+            [exercises.length, workoutID]
+        )
+        for (const exercise of exercises) {
+            await tx.execute(
+                `INSERT INTO exercises (id, user_id, workout_id, name, user_max, "order", archived, created_at, updated_at)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
+                [exercise.id, exercise.userID, exercise.workoutID, exercise.name, exercise.userMax, exercise.order, exercise.archived ? 1 : 0]
+            )
+        }
+    })
+}
+
+/**
  * Upsert a single exercise row (for archive toggle, userMax update, etc.).
  */
 export async function upsertExercise(exercise: Exercise): Promise<void> {

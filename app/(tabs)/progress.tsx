@@ -1,4 +1,5 @@
 import Graph1 from '@/components/GraphComponents/Graph1'
+import GraphStats from '@/components/GraphComponents/GraphStats'
 import ProgressWheel from '@/components/GraphComponents/ProgressWheel'
 import RangeSelectionModal from '@/components/GraphComponents/RangeSelectionModal'
 import SelectionModal from '@/components/GraphComponents/SelectionModal'
@@ -111,7 +112,11 @@ export default function ProgressScreen() {
                         )}
                         {mode === false && (
                             <Text style={styles.mainSubtext} numberOfLines={5} adjustsFontSizeToFit>
-                                {caloriesLeft > 0 ? `You have ${caloriesLeft} calories to go!` : `You hit your calories goal!`}
+                                {caloriesLeft > 100
+                                    ? `You have ${Math.round(caloriesLeft)} calories to go. Keep fueling! 🍽️`
+                                    : caloriesLeft >= -100
+                                      ? `You hit your calorie goal! Great discipline today 🎯`
+                                      : `You went over by ${Math.round(Math.abs(caloriesLeft))} calories. You got this tomorrow! 😤`}
                             </Text>
                         )}
                         {mode === true && (
@@ -199,6 +204,7 @@ export default function ProgressScreen() {
                             </View>
                         }
                     </View>
+                    <GraphStats graphType={mode ? 'orm' : selectedMacro} data={graph1Data} unitSystem={settings.unitSystem} mode={mode} />
                     {/* Button Row */}
                     <View style={styles.buttonRow}>
                         <TouchableOpacity style={[styles.graphButton, { backgroundColor: mode === true ? '#2f80ed' : '#22C933' }]} onPress={() => setRangeModalVisible1(true)}>
@@ -249,6 +255,7 @@ export default function ProgressScreen() {
                             </View>
                         }
                     </View>
+                    <GraphStats graphType={mode ? 'sets' : 'bodyweight'} data={graph2Data} unitSystem={settings.unitSystem} mode={mode} goalWeight={settings.goalWeight} />
                     {/* Button Row */}
                     <View style={styles.buttonRow}>
                         <TouchableOpacity style={[styles.graphButton, { backgroundColor: mode === true ? '#2f80ed' : '#22C933' }]} onPress={() => setRangeModalVisible2(true)}>
@@ -389,7 +396,7 @@ const styles = StyleSheet.create({
     },
     graphCard: {
         width: '100%',
-        height: 450,
+        height: 540,
         backgroundColor: '#1e1e1e',
         borderRadius: 15,
         marginBottom: 15,

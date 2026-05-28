@@ -74,6 +74,7 @@ export interface WorkoutContextInterface {
     handleUpdateWorkoutNote: (id: string, note: string) => void
     handleUpdateWorkoutOrder: (reorderedWorkouts: Workout[]) => void
     handleAddExercise: (workoutID: string, userID: string, name: string) => void
+    handleAddExercises: (workoutID: string, userID: string, names: string[]) => void
     handleDeleteExercise: (id: string) => void
     handleArchiveExercise: (id: string, workoutID: string, archived: boolean) => void
     handleUpdateExerciseOrder: (workoutID: string, reorderedExercises: Exercise[]) => void

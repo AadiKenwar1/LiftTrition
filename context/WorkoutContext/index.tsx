@@ -7,6 +7,7 @@ import uuid from 'react-native-uuid'
 import {
     insertDuplicateWorkout,
     insertExerciseWithOrderBump,
+    insertExercisesWithOrderBump,
     insertLog,
     insertWorkoutWithOrderBump,
     loadWorkoutData,
@@ -252,6 +253,31 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
             await insertExerciseWithOrderBump(newExercise)
         } catch (e) {
             console.warn('[WorkoutContext] Failed to insert exercise', e)
+        }
+    }, [])
+
+    const handleAddExercises = useCallback(async (workoutID: string, userIDParam: string, names: string[]) => {
+        if (names.length === 0) return
+        const now = new Date()
+        const newExercises: Exercise[] = names.map((name, i) => ({
+            id: uuid.v4() as string,
+            userID: userIDParam,
+            workoutID,
+            name,
+            userMax: 0,
+            order: i,
+            archived: false,
+            createdAt: now,
+            updatedAt: now,
+        }))
+        setExercisesState(prev => [
+            ...prev.map(e => e.workoutID === workoutID ? { ...e, order: e.order + names.length, updatedAt: now } : e),
+            ...newExercises,
+        ])
+        try {
+            await insertExercisesWithOrderBump(newExercises)
+        } catch (e) {
+            console.warn('[WorkoutContext] Failed to insert exercises', e)
         }
     }, [])
 
@@ -545,6 +571,7 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
                 handleUpdateWorkoutNote,
                 handleUpdateWorkoutOrder,
                 handleAddExercise,
+                handleAddExercises,
                 handleDeleteExercise,
                 handleArchiveExercise,
                 handleUpdateExerciseOrder,

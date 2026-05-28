@@ -1,4 +1,4 @@
-import DraggableList from '@/components/WorkoutComponents/DraggableList'
+import DraggableList, { DraggableListRenderParams } from '@/components/WorkoutComponents/DraggableList'
 import Log from '@/components/WorkoutComponents/Log'
 import { useAuth } from '@/context/AuthContext'
 import { useWorkout } from '@/context/WorkoutContext'
@@ -6,7 +6,6 @@ import { Workout } from '@/context/WorkoutContext/types'
 import { useRouter } from 'expo-router'
 import { Dumbbell, Pencil } from 'lucide-react-native'
 import { Alert, StyleSheet, Text, View } from 'react-native'
-import { DraggableListRenderParams } from '@/components/WorkoutComponents/DraggableList'
 
 export default function WorkoutScreen() {
     //Workout Context Functions
@@ -64,7 +63,7 @@ export default function WorkoutScreen() {
                     <Pencil size={13} color="#aaa" strokeWidth={2} />
                     <Text style={styles.sectionSubtitle}>{' to edit'}</Text>
                 </View>
-                <Text style={styles.sectionSubtitle}>{'Hold to rearrange'}</Text>
+                <Text style={[styles.sectionSubtitle, { marginBottom: 14 }]}>{'Hold to rearrange'}</Text>
             </>
         )
     }
@@ -79,7 +78,7 @@ export default function WorkoutScreen() {
                             <Dumbbell size={56} color="#2f80ed" strokeWidth={2} />
                         </View>
                         <Text style={styles.emptyTitle}>No Workouts Yet</Text>
-                        <Text style={styles.emptySubtitle}>Tap the ⋮ button to create your first workout and start tracking your progress</Text>
+                        <Text style={styles.emptySubtitle}>Tap the ⋮ button to create your first workout</Text>
                     </View>
                     // Draggable List
                 :   <DraggableList data={activeWorkouts} renderItem={renderItem} keyExtractor={(item) => item.id} onDragEnd={handleUpdateWorkoutOrder} ListHeaderComponent={renderHeader} />
@@ -92,8 +91,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#121212',
-        paddingHorizontal: 10,
-        paddingTop: 10,
+        paddingTop: 16,
     },
     sectionTitle: {
         fontSize: 22,
@@ -111,13 +109,14 @@ const styles = StyleSheet.create({
         color: '#aaa',
         letterSpacing: 0.2,
         fontFamily: 'Poppins_400Regular',
-        marginBottom: 4,
+        marginBottom: 1,
     },
     emptyContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         paddingHorizontal: 40,
+        marginBottom: 50,
     },
     emptyIconCircle: {
         width: 120,

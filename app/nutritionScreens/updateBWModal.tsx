@@ -1,4 +1,5 @@
 import { useSettings } from '@/context/SettingsContext'
+import { validateHeightWeight } from '@/context/SettingsContext/functions/validator'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
 import { Scale } from 'lucide-react-native'
@@ -54,7 +55,9 @@ export default function UpdateBWModal() {
                 {/* Update Button */}
                 <TouchableOpacity
                     onPress={() => {
-                        handleUpdateBw(Number(weight))
+                        const parsed = Number(weight)
+                        if (!validateHeightWeight(settings.height, parsed, settings.unitSystem)) return
+                        handleUpdateBw(parsed)
                         router.back()
                     }}
                     disabled={!weight.trim()}

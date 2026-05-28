@@ -23,7 +23,7 @@ export default function Log({ text, subtitle, imgSource, wrapperHeight = 96, tex
                         {imgSource && (
                             <View style={styles.imageGlowRing}>
                                 <View style={styles.imageCircle}>
-                                    <Image source={imgSource} style={styles.exerciseImage} contentFit="contain" cachePolicy="memory" />
+                                    <Image source={imgSource} style={styles.exerciseImage} contentFit="contain" cachePolicy="memory" transition={300} />
                                 </View>
                             </View>
                         )}
@@ -101,8 +101,8 @@ const styles = StyleSheet.create({
         borderColor: '#2f80ed',
         shadowColor: '#2f80ed',
         shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0.65,
-        shadowRadius: 8,
+        shadowOpacity: 0.4,
+        shadowRadius: 6,
         elevation: 6,
     },
     imageCircle: {

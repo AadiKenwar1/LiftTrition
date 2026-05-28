@@ -4,11 +4,11 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { Dumbbell } from 'lucide-react-native'
 import { useState } from 'react'
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 export default function AddWorkoutModal() {
-    const { handleAddWorkout } = useWorkout()
+    const { handleAddWorkout, workouts } = useWorkout()
     const router = useRouter()
     const { userID } = useAuth()
     const [workoutName, setWorkoutName] = useState('')
@@ -54,7 +54,15 @@ export default function AddWorkoutModal() {
                 {/* Add Button */}
                 <TouchableOpacity
                     onPress={() => {
-                        handleAddWorkout(workoutName, userID)
+                        const trimmed = workoutName.trim()
+                        const alreadyExists = workouts.some(
+                            (w) => !w.archived && w.name.trim().toLowerCase() === trimmed.toLowerCase()
+                        )
+                        if (alreadyExists) {
+                            Alert.alert('Workout Name Taken', `A workout named '${trimmed}' already exists. Please choose a different name.`)
+                            return
+                        }
+                        handleAddWorkout(trimmed, userID)
                         router.back()
                     }}
                     disabled={!workoutName.trim()}

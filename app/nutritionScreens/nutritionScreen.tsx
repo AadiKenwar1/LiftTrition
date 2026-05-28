@@ -93,7 +93,7 @@ export default function NutritionScreen() {
                 <Utensils size={56} color="#22C922" strokeWidth={2} />
             </View>
             <Text style={styles.emptyText}>{isToday ? 'No Nutrition Logs Yet' : 'No Nutrition Logs Recorded'}</Text>
-            <Text style={styles.emptySubtext}>{isToday ? 'Tap the ⋮ button to add your first meal and start tracking your nutrition' : `No nutrition entries recorded for ${formatDate(selectedDate, showYearInTitle)}`}</Text>
+            <Text style={styles.emptySubtext}>{isToday ? 'Tap the ⋮ button to add your first meal' : `No nutrition entries recorded for ${formatDate(selectedDate, showYearInTitle)}`}</Text>
         </View>
     )
 

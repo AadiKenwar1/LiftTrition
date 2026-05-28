@@ -20,12 +20,12 @@ export function cmToInches(cm: number): number {
     return cm / 2.54
 }
 
-/** lbs → kg */
+/** lbs → kg (1 decimal place) */
 export function lbsToKg(lbs: number): number {
-    return Math.round(lbs / 2.20462)
+    return Math.round((lbs / 2.20462) * 10) / 10
 }
 
-/** kg → lbs */
+/** kg → lbs (1 decimal place) */
 export function kgToLbs(kg: number): number {
-    return Math.round(kg * 2.20462)
+    return Math.round((kg * 2.20462) * 10) / 10
 }
