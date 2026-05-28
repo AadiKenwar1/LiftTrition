@@ -1,812 +1,806 @@
 {
-  "Pull Ups": {
-    "imgUrl": "dataV2/exerciseImgs/pull-ups.png",
-    "mainMuscle": "Back",
-    "equipment": "Bodyweight",
-    "isCompound": true
-  },
-  "Bent Over Row": {
-    "imgUrl": "dataV2/exerciseImgs/bent-over-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Barbell",
-    "isCompound": true
-  },
-  "Lat Pulldown": {
-    "imgUrl": "dataV2/exerciseImgs/lat-pulldown.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "Chin Ups": {
-    "imgUrl": "dataV2/exerciseImgs/chin-ups.png",
-    "mainMuscle": "Back",
-    "equipment": "Bodyweight",
-    "isCompound": true
-  },
-  "Dumbbell Row": {
-    "imgUrl": "dataV2/exerciseImgs/dumbbell-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Dumbbell",
-    "isCompound": true
-  },
-  "Seated Cable Row": {
-    "imgUrl": "dataV2/exerciseImgs/seated-cable-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "Barbell Shrug": {
-    "imgUrl": "dataV2/exerciseImgs/barbell-shrug.png",
-    "mainMuscle": "Back",
-    "equipment": "Barbell",
-    "isCompound": false
-  },
-  "T Bar Row": {
-    "imgUrl": "dataV2/exerciseImgs/t-bar-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Barbell",
-    "isCompound": true
-  },
-  "Neutral Grip Pull Ups": {
-    "imgUrl": "dataV2/exerciseImgs/neutral-grip-pull-ups.png",
-    "mainMuscle": "Back",
-    "equipment": "Bodyweight",
-    "isCompound": true
-  },
-  "Dumbbell Shrug": {
-    "imgUrl": "dataV2/exerciseImgs/dumbbell-shrug.png",
-    "mainMuscle": "Back",
-    "equipment": "Dumbbell",
-    "isCompound": false
-  },
-  "Machine Row": {
-    "imgUrl": "dataV2/exerciseImgs/machine-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Machine",
-    "isCompound": true
-  },
-  "Chest Supported Dumbbell Row": {
-    "imgUrl": "dataV2/exerciseImgs/chest-supported-dumbbell-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Dumbbell",
-    "isCompound": false
-  },
-  "Pendlay Row": {
-    "imgUrl": "dataV2/exerciseImgs/pendlay-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Barbell",
-    "isCompound": true
-  },
-  "Close Grip Lat Pulldown": {
-    "imgUrl": "dataV2/exerciseImgs/close-grip-lat-pulldown.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "Dumbbell Reverse Fly": {
-    "imgUrl": "dataV2/exerciseImgs/dumbbell-reverse-fly.png",
-    "mainMuscle": "Back",
-    "equipment": "Dumbbell",
-    "isCompound": false
-  },
-  "Back Extension": {
-    "imgUrl": "dataV2/exerciseImgs/back-extension.png",
-    "mainMuscle": "Back",
-    "equipment": "Bodyweight",
-    "isCompound": true
-  },
-  "One Arm Pull Ups": {
-    "imgUrl": "dataV2/exerciseImgs/one-arm-pull-ups.png",
-    "mainMuscle": "Back",
-    "equipment": "Bodyweight",
-    "isCompound": true
-  },
-  "Dumbbell Pullover": {
-    "imgUrl": "dataV2/exerciseImgs/dumbbell-pullover.png",
-    "mainMuscle": "Back",
-    "equipment": "Dumbbell",
-    "isCompound": false
-  },
-  "Machine Reverse Fly": {
-    "imgUrl": "dataV2/exerciseImgs/machine-reverse-fly.png",
-    "mainMuscle": "Back",
-    "equipment": "Machine",
-    "isCompound": false
-  },
-  "Cable Reverse Fly": {
-    "imgUrl": "dataV2/exerciseImgs/cable-reverse-fly.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": false
-  },
-  "Reverse Grip Lat Pulldown": {
-    "imgUrl": "dataV2/exerciseImgs/reverse-grip-lat-pulldown.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "Straight Arm Pulldown": {
-    "imgUrl": "dataV2/exerciseImgs/straight-arm-pulldown.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": false
-  },
-  "Machine Back Extension": {
-    "imgUrl": "dataV2/exerciseImgs/machine-back-extension.png",
-    "mainMuscle": "Back",
-    "equipment": "Machine",
-    "isCompound": true
-  },
-  "Bench Pull": {
-    "imgUrl": "dataV2/exerciseImgs/bench-pull.png",
-    "mainMuscle": "Back",
-    "equipment": "Barbell",
-    "isCompound": true
-  },
-  "Yates Row": {
-    "imgUrl": "dataV2/exerciseImgs/yates-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Barbell",
-    "isCompound": true
-  },
-  "Inverted Row": {
-    "imgUrl": "dataV2/exerciseImgs/inverted-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Bodyweight",
-    "isCompound": true
-  },
-  "Hex Bar Shrug": {
-    "imgUrl": "dataV2/exerciseImgs/hex-bar-shrug.png",
-    "mainMuscle": "Back",
-    "equipment": "Barbell",
-    "isCompound": false
-  },
-  "Smith Machine Shrug": {
-    "imgUrl": "dataV2/exerciseImgs/smith-machine-shrug.png",
-    "mainMuscle": "Back",
-    "equipment": "Barbell",
-    "isCompound": false
-  },
-  "Barbell Power Shrug": {
-    "imgUrl": "dataV2/exerciseImgs/barbell-power-shrug.png",
-    "mainMuscle": "Back",
-    "equipment": "Barbell",
-    "isCompound": false
-  },
-  "Behind The Back Barbell Shrug": {
-    "imgUrl": "dataV2/exerciseImgs/behind-the-back-barbell-shrug.png",
-    "mainMuscle": "Back",
-    "equipment": "Barbell",
-    "isCompound": false
-  },
-  "Bent Over Dumbbell Row": {
-    "imgUrl": "dataV2/exerciseImgs/bent-over-dumbbell-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Dumbbell",
-    "isCompound": true
-  },
-  "Reverse Hyperextension": {
-    "imgUrl": "dataV2/exerciseImgs/reverse-hyperextension.png",
-    "mainMuscle": "Back",
-    "equipment": "Bodyweight",
-    "isCompound": true
-  },
-  "Cable Upright Row": {
-    "imgUrl": "dataV2/exerciseImgs/cable-upright-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": false
-  },
-  "Barbell Pullover": {
-    "imgUrl": "dataV2/exerciseImgs/barbell-pullover.png",
-    "mainMuscle": "Back",
-    "equipment": "Barbell",
-    "isCompound": false
-  },
-  "Machine Shrug": {
-    "imgUrl": "dataV2/exerciseImgs/machine-shrug.png",
-    "mainMuscle": "Back",
-    "equipment": "Machine",
-    "isCompound": false
-  },
-  "Meadows Row": {
-    "imgUrl": "dataV2/exerciseImgs/meadows-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Barbell",
-    "isCompound": true
-  },
-  "Cable Shrug": {
-    "imgUrl": "dataV2/exerciseImgs/cable-shrug.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": false
-  },
-  "One Arm Lat Pulldown": {
-    "imgUrl": "dataV2/exerciseImgs/one-arm-lat-pulldown.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "Renegade Row": {
-    "imgUrl": "dataV2/exerciseImgs/renegade-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Dumbbell",
-    "isCompound": true
-  },
-  "Dumbbell Bench Pull": {
-    "imgUrl": "dataV2/exerciseImgs/dumbbell-bench-pull.png",
-    "mainMuscle": "Back",
-    "equipment": "Dumbbell",
-    "isCompound": true
-  },
-  "One Arm Seated Cable Row": {
-    "imgUrl": "dataV2/exerciseImgs/one-arm-seated-cable-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "Bent Arm Barbell Pullover": {
-    "imgUrl": "dataV2/exerciseImgs/bent-arm-barbell-pullover.png",
-    "mainMuscle": "Back",
-    "equipment": "Barbell",
-    "isCompound": false
-  },
-  "Dumbbell Incline Y Raise": {
-    "imgUrl": "dataV2/exerciseImgs/dumbbell-incline-y-raise.png",
-    "mainMuscle": "Back",
-    "equipment": "Dumbbell",
-    "isCompound": false
-  },
-  "3 Month Position Kettlebell Pullover": {
-    "imgUrl": "dataV2/exerciseImgs/3-month-position-kettlebell-pullover.png",
-    "mainMuscle": "Back",
-    "equipment": "Kettlebell",
-    "isCompound": false
-  },
-  "Alternating Kettlebell Renegade Row": {
-    "imgUrl": "dataV2/exerciseImgs/alternating-kettlebell-renegade-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Kettlebell",
-    "isCompound": true
-  },
-  "Alternating Kettlebell Row": {
-    "imgUrl": "dataV2/exerciseImgs/alternating-kettlebell-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Kettlebell",
-    "isCompound": true
-  },
-  "Barbell Pullover To Press": {
-    "imgUrl": "dataV2/exerciseImgs/barbell-pullover-to-press.png",
-    "mainMuscle": "Back",
-    "equipment": "Barbell",
-    "isCompound": false
-  },
-  "Bench Supported Cable Row": {
-    "imgUrl": "dataV2/exerciseImgs/bench-supported-cable-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "Cable Bent Over Row": {
-    "imgUrl": "dataV2/exerciseImgs/cable-bent-over-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "Cable Crossover Lat Pulldown": {
-    "imgUrl": "dataV2/exerciseImgs/cable-crossover-lat-pulldown.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "Close Grip Bench Pull": {
-    "imgUrl": "dataV2/exerciseImgs/close-grip-bench-pull.png",
-    "mainMuscle": "Back",
-    "equipment": "Barbell",
-    "isCompound": true
-  },
-  "Close Grip Bent Over Row": {
-    "imgUrl": "dataV2/exerciseImgs/close-grip-bent-over-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Barbell",
-    "isCompound": true
-  },
-  "Decline Barbell Pullover": {
-    "imgUrl": "dataV2/exerciseImgs/decline-barbell-pullover.png",
-    "mainMuscle": "Back",
-    "equipment": "Barbell",
-    "isCompound": false
-  },
-  "Decline Wide Grip Barbell Pullover": {
-    "imgUrl": "dataV2/exerciseImgs/decline-wide-grip-barbell-pullover.png",
-    "mainMuscle": "Back",
-    "equipment": "Barbell",
-    "isCompound": false
-  },
-  "Double Kettlebell Row": {
-    "imgUrl": "dataV2/exerciseImgs/double-kettlebell-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Kettlebell",
-    "isCompound": true
-  },
-  "Dual Cable Lat Pulldown": {
-    "imgUrl": "dataV2/exerciseImgs/dual-cable-lat-pulldown.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "Dual Dumbbell Bent Over Row": {
-    "imgUrl": "dataV2/exerciseImgs/dual-dumbbell-bent-over-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Dumbbell",
-    "isCompound": true
-  },
-  "Dual Dumbbell Pullover": {
-    "imgUrl": "dataV2/exerciseImgs/dual-dumbbell-pullover.png",
-    "mainMuscle": "Back",
-    "equipment": "Dumbbell",
-    "isCompound": false
-  },
-  "Dumbbell Pullover On Floor": {
-    "imgUrl": "dataV2/exerciseImgs/dumbbell-pullover-on-floor.png",
-    "mainMuscle": "Back",
-    "equipment": "Dumbbell",
-    "isCompound": false
-  },
-  "Dumbbell Scapula Row": {
-    "imgUrl": "dataV2/exerciseImgs/dumbbell-scapula-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Dumbbell",
-    "isCompound": false
-  },
-  "Dynamic Back Stretch": {
-    "imgUrl": "dataV2/exerciseImgs/dynamic-back-stretch.png",
-    "mainMuscle": "Back",
-    "equipment": "Bodyweight",
-    "isCompound": false
-  },
-  "Elevated Cable Row": {
-    "imgUrl": "dataV2/exerciseImgs/elevated-cable-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "Elevated Rope Seated Cable Row": {
-    "imgUrl": "dataV2/exerciseImgs/elevated-rope-seated-cable-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "Gironda Sternum Chin Up": {
-    "imgUrl": "dataV2/exerciseImgs/gironda-sternum-chin-up.png",
-    "mainMuscle": "Back",
-    "equipment": "Bodyweight",
-    "isCompound": true
-  },
-  "Gorilla Chin Up": {
-    "imgUrl": "dataV2/exerciseImgs/gorilla-chin-up.png",
-    "mainMuscle": "Back",
-    "equipment": "Bodyweight",
-    "isCompound": true
-  },
-  "Half Kneeling Cable Push Pull": {
-    "imgUrl": "dataV2/exerciseImgs/half-kneeling-cable-push-pull.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": false
-  },
-  "Half Kneeling Forward Leaning One Arm Cable Row": {
-    "imgUrl": "dataV2/exerciseImgs/half-kneeling-forward-leaning-one-arm-cable-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "Half Kneeling One Arm Cable Row": {
-    "imgUrl": "dataV2/exerciseImgs/half-kneeling-one-arm-cable-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "Half Kneeling One Arm Lat Pulldown": {
-    "imgUrl": "dataV2/exerciseImgs/half-kneeling-one-arm-lat-pulldown.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "Head Supported Dumbbell Row": {
-    "imgUrl": "dataV2/exerciseImgs/head-supported-dumbbell-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Dumbbell",
-    "isCompound": true
-  },
-  "Incline Bent Over Row": {
-    "imgUrl": "dataV2/exerciseImgs/incline-bent-over-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Barbell",
-    "isCompound": true
-  },
-  "Incline Cable Row": {
-    "imgUrl": "dataV2/exerciseImgs/incline-cable-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "Incline Rope Cable Row": {
-    "imgUrl": "dataV2/exerciseImgs/incline-rope-cable-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "Incline Straight Arm Pulldown": {
-    "imgUrl": "dataV2/exerciseImgs/incline-straight-arm-pulldown.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": false
-  },
-  "Kettlebell Pullover": {
-    "imgUrl": "dataV2/exerciseImgs/kettlebell-pullover.png",
-    "mainMuscle": "Back",
-    "equipment": "Kettlebell",
-    "isCompound": false
-  },
-  "Kettlebell Row": {
-    "imgUrl": "dataV2/exerciseImgs/kettlebell-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Kettlebell",
-    "isCompound": true
-  },
-  "Kneeling Dual Cable Lat Pulldown": {
-    "imgUrl": "dataV2/exerciseImgs/kneeling-dual-cable-lat-pulldown.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "Kneeling One Arm Lat Pulldown": {
-    "imgUrl": "dataV2/exerciseImgs/kneeling-one-arm-lat-pulldown.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "Landmine Row": {
-    "imgUrl": "dataV2/exerciseImgs/landmine-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Barbell",
-    "isCompound": true
-  },
-  "Low To High Seated Cable Row": {
-    "imgUrl": "dataV2/exerciseImgs/low-to-high-seated-cable-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "Lying Cable Pullover": {
-    "imgUrl": "dataV2/exerciseImgs/lying-cable-pullover.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": false
-  },
-  "One Arm Bent Over Cable Row": {
-    "imgUrl": "dataV2/exerciseImgs/one-arm-bent-over-cable-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "One Arm Cable Rotational Row": {
-    "imgUrl": "dataV2/exerciseImgs/one-arm-cable-rotational-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "One Arm Dumbbell Bent Over Row": {
-    "imgUrl": "dataV2/exerciseImgs/one-arm-dumbbell-bent-over-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Dumbbell",
-    "isCompound": true
-  },
-  "One Arm Landmine Row": {
-    "imgUrl": "dataV2/exerciseImgs/one-arm-landmine-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Barbell",
-    "isCompound": true
-  },
-  "One Arm Reverse Grip Prone Incline Dumbbell Row": {
-    "imgUrl": "dataV2/exerciseImgs/one-arm-reverse-grip-prone-incline-dumbbell-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Dumbbell",
-    "isCompound": true
-  },
-  "One Arm Seated Cable Row With Twist": {
-    "imgUrl": "dataV2/exerciseImgs/one-arm-seated-cable-row-with-twist.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "One Arm Side Straight Arm Pulldown": {
-    "imgUrl": "dataV2/exerciseImgs/one-arm-side-straight-arm-pulldown.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": false
-  },
-  "One Arm Standing Cable Row With Twist": {
-    "imgUrl": "dataV2/exerciseImgs/one-arm-standing-cable-row-with-twist.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "One Arm Standing High Cable Row With Twist": {
-    "imgUrl": "dataV2/exerciseImgs/one-arm-standing-high-cable-row-with-twist.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "One Arm Straight Arm Pulldown": {
-    "imgUrl": "dataV2/exerciseImgs/one-arm-straight-arm-pulldown.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": false
-  },
-  "Overhead Shrug": {
-    "imgUrl": "dataV2/exerciseImgs/overhead-shrug.png",
-    "mainMuscle": "Back",
-    "equipment": "Barbell",
-    "isCompound": false
-  },
-  "Prone Cambered Bar Row": {
-    "imgUrl": "dataV2/exerciseImgs/prone-cambered-bar-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Barbell",
-    "isCompound": true
-  },
-  "Prone Incline Barbell Row": {
-    "imgUrl": "dataV2/exerciseImgs/prone-incline-barbell-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Barbell",
-    "isCompound": true
-  },
-  "Prone Incline Dumbbell Row": {
-    "imgUrl": "dataV2/exerciseImgs/prone-incline-dumbbell-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Dumbbell",
-    "isCompound": true
-  },
-  "Prone Incline Dumbbell Shrug": {
-    "imgUrl": "dataV2/exerciseImgs/prone-incline-dumbbell-shrug.png",
-    "mainMuscle": "Back",
-    "equipment": "Dumbbell",
-    "isCompound": false
-  },
-  "Rear Lat Pulldown": {
-    "imgUrl": "dataV2/exerciseImgs/rear-lat-pulldown.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "Reverse Close Grip Bench Pull": {
-    "imgUrl": "dataV2/exerciseImgs/reverse-close-grip-bench-pull.png",
-    "mainMuscle": "Back",
-    "equipment": "Barbell",
-    "isCompound": true
-  },
-  "Reverse Dumbbell Bent Over Row": {
-    "imgUrl": "dataV2/exerciseImgs/reverse-dumbbell-bent-over-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Dumbbell",
-    "isCompound": true
-  },
-  "Reverse Grip Cable Bent Over Row": {
-    "imgUrl": "dataV2/exerciseImgs/reverse-grip-cable-bent-over-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "Reverse Grip Cable Row": {
-    "imgUrl": "dataV2/exerciseImgs/reverse-grip-cable-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "Reverse Grip Prone Incline Barbell Row": {
-    "imgUrl": "dataV2/exerciseImgs/reverse-grip-prone-incline-barbell-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Barbell",
-    "isCompound": true
-  },
-  "Reverse Grip Prone Incline Dumbbell Row": {
-    "imgUrl": "dataV2/exerciseImgs/reverse-grip-prone-incline-dumbbell-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Dumbbell",
-    "isCompound": true
-  },
-  "Rope Cable Bent Over Row": {
-    "imgUrl": "dataV2/exerciseImgs/rope-cable-bent-over-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "Rope Cable Squat Row": {
-    "imgUrl": "dataV2/exerciseImgs/rope-cable-squat-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "Rope Crossover Seated Cable Row": {
-    "imgUrl": "dataV2/exerciseImgs/rope-crossover-seated-cable-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "Rope Floor Cable Row": {
-    "imgUrl": "dataV2/exerciseImgs/rope-floor-cable-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "Rope Kneeling High Row": {
-    "imgUrl": "dataV2/exerciseImgs/rope-kneeling-high-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "Rope Lat Pulldown": {
-    "imgUrl": "dataV2/exerciseImgs/rope-lat-pulldown.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "Rope Seated Cable Row": {
-    "imgUrl": "dataV2/exerciseImgs/rope-seated-cable-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "Rope Straight Arm Pulldown": {
-    "imgUrl": "dataV2/exerciseImgs/rope-straight-arm-pulldown.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": false
-  },
-  "Rotational Bent Over Dumbbell Row": {
-    "imgUrl": "dataV2/exerciseImgs/rotational-bent-over-dumbbell-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Dumbbell",
-    "isCompound": true
-  },
-  "Scapular Pull Up": {
-    "imgUrl": "dataV2/exerciseImgs/scapular-pull-up.png",
-    "mainMuscle": "Back",
-    "equipment": "Bodyweight",
-    "isCompound": false
-  },
-  "Seated Cable Pullover": {
-    "imgUrl": "dataV2/exerciseImgs/seated-cable-pullover.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": false
-  },
-  "Seesaw Kettlebell Row": {
-    "imgUrl": "dataV2/exerciseImgs/seesaw-kettlebell-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Kettlebell",
-    "isCompound": true
-  },
-  "Smith Machine Bent Over Row": {
-    "imgUrl": "dataV2/exerciseImgs/smith-machine-bent-over-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Barbell",
-    "isCompound": true
-  },
-  "Smith Machine One Arm Bent Over Row": {
-    "imgUrl": "dataV2/exerciseImgs/smith-machine-one-arm-bent-over-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Barbell",
-    "isCompound": true
-  },
-  "Smith Machine Reverse Grip Bent Over Row": {
-    "imgUrl": "dataV2/exerciseImgs/smith-machine-reverse-grip-bent-over-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Barbell",
-    "isCompound": true
-  },
-  "Smith Machine Wide Grip Behind The Back Shrug": {
-    "imgUrl": "dataV2/exerciseImgs/smith-machine-wide-grip-behind-the-back-shrug.png",
-    "mainMuscle": "Back",
-    "equipment": "Barbell",
-    "isCompound": false
-  },
-  "Smith Machine Wide Grip Shrug": {
-    "imgUrl": "dataV2/exerciseImgs/smith-machine-wide-grip-shrug.png",
-    "mainMuscle": "Back",
-    "equipment": "Barbell",
-    "isCompound": false
-  },
-  "Stability Ball Dumbbell Pullover": {
-    "imgUrl": "dataV2/exerciseImgs/stability-ball-dumbbell-pullover.png",
-    "mainMuscle": "Back",
-    "equipment": "Dumbbell",
-    "isCompound": false
-  },
-  "Stability Ball Dumbbell Pullover Hip Extension": {
-    "imgUrl": "dataV2/exerciseImgs/stability-ball-dumbbell-pullover-hip-extension.png",
-    "mainMuscle": "Back",
-    "equipment": "Dumbbell",
-    "isCompound": false
-  },
-  "Stability Ball One Arm Dumbbell Pullover": {
-    "imgUrl": "dataV2/exerciseImgs/stability-ball-one-arm-dumbbell-pullover.png",
-    "mainMuscle": "Back",
-    "equipment": "Dumbbell",
-    "isCompound": false
-  },
-  "Standing Cable Row": {
-    "imgUrl": "dataV2/exerciseImgs/standing-cable-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "Thibaudeau Kayak Row": {
-    "imgUrl": "dataV2/exerciseImgs/thibaudeau-kayak-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "Upside Down Row": {
-    "imgUrl": "dataV2/exerciseImgs/upside-down-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Bodyweight",
-    "isCompound": true
-  },
-  "V Bar Lat Pulldown": {
-    "imgUrl": "dataV2/exerciseImgs/v-bar-lat-pulldown.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "V Bar Pull Up": {
-    "imgUrl": "dataV2/exerciseImgs/v-bar-pull-up.png",
-    "mainMuscle": "Back",
-    "equipment": "Bodyweight",
-    "isCompound": true
-  },
-  "V Bar Seated Cable Row": {
-    "imgUrl": "dataV2/exerciseImgs/v-bar-seated-cable-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "V Bar Standing Cable Row": {
-    "imgUrl": "dataV2/exerciseImgs/v-bar-standing-cable-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "V Bar Standing Cable Row With Twist": {
-    "imgUrl": "dataV2/exerciseImgs/v-bar-standing-cable-row-with-twist.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  },
-  "Wide Grip Barbell Pullover": {
-    "imgUrl": "dataV2/exerciseImgs/wide-grip-barbell-pullover.png",
-    "mainMuscle": "Back",
-    "equipment": "Barbell",
-    "isCompound": false
-  },
-  "Wide Grip Bent Over Row": {
-    "imgUrl": "dataV2/exerciseImgs/wide-grip-bent-over-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Barbell",
-    "isCompound": true
-  },
-  "Wide Grip Pull Ups": {
-    "imgUrl": "dataV2/exerciseImgs/wide-grip-pull-ups.png",
-    "mainMuscle": "Back",
-    "equipment": "Bodyweight",
-    "isCompound": true
-  },
-  "Wide Grip Seated Cable Row": {
-    "imgUrl": "dataV2/exerciseImgs/wide-grip-seated-cable-row.png",
-    "mainMuscle": "Back",
-    "equipment": "Cable",
-    "isCompound": true
-  }
+    "Pull Ups": {
+        "imgUrl": "dataV2/exerciseImgs/pull-ups.png",
+        "mainMuscle": "Back",
+        "equipment": "Bodyweight",
+        "isCompound": true
+    },
+    "Bent Over Row": {
+        "imgUrl": "dataV2/exerciseImgs/bent-over-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Barbell",
+        "isCompound": true
+    },
+    "Lat Pulldown": {
+        "imgUrl": "dataV2/exerciseImgs/lat-pulldown.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "Chin Ups": {
+        "imgUrl": "dataV2/exerciseImgs/chin-ups.png",
+        "mainMuscle": "Back",
+        "equipment": "Bodyweight",
+        "isCompound": true
+    },
+    "Dumbbell Row": {
+        "imgUrl": "dataV2/exerciseImgs/dumbbell-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Dumbbell",
+        "isCompound": true
+    },
+    "Seated Cable Row": {
+        "imgUrl": "dataV2/exerciseImgs/seated-cable-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "Barbell Shrug": {
+        "imgUrl": "dataV2/exerciseImgs/barbell-shrug.png",
+        "mainMuscle": "Back",
+        "equipment": "Barbell",
+        "isCompound": false
+    },
+    "T Bar Row": {
+        "imgUrl": "dataV2/exerciseImgs/t-bar-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Barbell",
+        "isCompound": true
+    },
+    "Neutral Grip Pull Ups": {
+        "imgUrl": "dataV2/exerciseImgs/neutral-grip-pull-ups.png",
+        "mainMuscle": "Back",
+        "equipment": "Bodyweight",
+        "isCompound": true
+    },
+    "Dumbbell Shrug": {
+        "imgUrl": "dataV2/exerciseImgs/dumbbell-shrug.png",
+        "mainMuscle": "Back",
+        "equipment": "Dumbbell",
+        "isCompound": false
+    },
+    "Machine Row": {
+        "imgUrl": "dataV2/exerciseImgs/machine-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Machine",
+        "isCompound": true
+    },
+    "Chest Supported Dumbbell Row": {
+        "imgUrl": "dataV2/exerciseImgs/chest-supported-dumbbell-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Dumbbell",
+        "isCompound": false
+    },
+    "Pendlay Row": {
+        "imgUrl": "dataV2/exerciseImgs/pendlay-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Barbell",
+        "isCompound": true
+    },
+    "Close Grip Lat Pulldown": {
+        "imgUrl": "dataV2/exerciseImgs/close-grip-lat-pulldown.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "Dumbbell Reverse Fly": {
+        "imgUrl": "dataV2/exerciseImgs/dumbbell-reverse-fly.png",
+        "mainMuscle": "Back",
+        "equipment": "Dumbbell",
+        "isCompound": false
+    },
+    "Back Extension": {
+        "imgUrl": "dataV2/exerciseImgs/back-extension.png",
+        "mainMuscle": "Back",
+        "equipment": "Bodyweight",
+        "isCompound": true
+    },
+    "One Arm Pull Ups": {
+        "imgUrl": "dataV2/exerciseImgs/one-arm-pull-ups.png",
+        "mainMuscle": "Back",
+        "equipment": "Bodyweight",
+        "isCompound": true
+    },
+    "Dumbbell Pullover": {
+        "imgUrl": "dataV2/exerciseImgs/dumbbell-pullover.png",
+        "mainMuscle": "Back",
+        "equipment": "Dumbbell",
+        "isCompound": false
+    },
+    "Machine Reverse Fly": {
+        "imgUrl": "dataV2/exerciseImgs/machine-reverse-fly.png",
+        "mainMuscle": "Back",
+        "equipment": "Machine",
+        "isCompound": false
+    },
+    "Cable Reverse Fly": {
+        "imgUrl": "dataV2/exerciseImgs/cable-reverse-fly.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": false
+    },
+    "Reverse Grip Lat Pulldown": {
+        "imgUrl": "dataV2/exerciseImgs/reverse-grip-lat-pulldown.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "Straight Arm Pulldown": {
+        "imgUrl": "dataV2/exerciseImgs/straight-arm-pulldown.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": false
+    },
+    "Machine Back Extension": {
+        "imgUrl": "dataV2/exerciseImgs/machine-back-extension.png",
+        "mainMuscle": "Back",
+        "equipment": "Machine",
+        "isCompound": true
+    },
+    "Bench Pull": {
+        "imgUrl": "dataV2/exerciseImgs/bench-pull.png",
+        "mainMuscle": "Back",
+        "equipment": "Barbell",
+        "isCompound": true
+    },
+    "Yates Row": {
+        "imgUrl": "dataV2/exerciseImgs/yates-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Barbell",
+        "isCompound": true
+    },
+    "Inverted Row": {
+        "imgUrl": "dataV2/exerciseImgs/inverted-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Bodyweight",
+        "isCompound": true
+    },
+    "Hex Bar Shrug": {
+        "imgUrl": "dataV2/exerciseImgs/hex-bar-shrug.png",
+        "mainMuscle": "Back",
+        "equipment": "Barbell",
+        "isCompound": false
+    },
+    "Smith Machine Shrug": {
+        "imgUrl": "dataV2/exerciseImgs/smith-machine-shrug.png",
+        "mainMuscle": "Back",
+        "equipment": "Barbell",
+        "isCompound": false
+    },
+    "Barbell Power Shrug": {
+        "imgUrl": "dataV2/exerciseImgs/barbell-power-shrug.png",
+        "mainMuscle": "Back",
+        "equipment": "Barbell",
+        "isCompound": false
+    },
+    "Behind The Back Barbell Shrug": {
+        "imgUrl": "dataV2/exerciseImgs/behind-the-back-barbell-shrug.png",
+        "mainMuscle": "Back",
+        "equipment": "Barbell",
+        "isCompound": false
+    },
+    "Bent Over Dumbbell Row": {
+        "imgUrl": "dataV2/exerciseImgs/bent-over-dumbbell-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Dumbbell",
+        "isCompound": true
+    },
+    "Reverse Hyperextension": {
+        "imgUrl": "dataV2/exerciseImgs/reverse-hyperextension.png",
+        "mainMuscle": "Back",
+        "equipment": "Bodyweight",
+        "isCompound": true
+    },
+    "Cable Upright Row": {
+        "imgUrl": "dataV2/exerciseImgs/cable-upright-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": false
+    },
+    "Barbell Pullover": {
+        "imgUrl": "dataV2/exerciseImgs/barbell-pullover.png",
+        "mainMuscle": "Back",
+        "equipment": "Barbell",
+        "isCompound": false
+    },
+    "Machine Shrug": {
+        "imgUrl": "dataV2/exerciseImgs/machine-shrug.png",
+        "mainMuscle": "Back",
+        "equipment": "Machine",
+        "isCompound": false
+    },
+    "Meadows Row": {
+        "imgUrl": "dataV2/exerciseImgs/meadows-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Barbell",
+        "isCompound": true
+    },
+    "Cable Shrug": {
+        "imgUrl": "dataV2/exerciseImgs/cable-shrug.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": false
+    },
+    "One Arm Lat Pulldown": {
+        "imgUrl": "dataV2/exerciseImgs/one-arm-lat-pulldown.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "Renegade Row": {
+        "imgUrl": "dataV2/exerciseImgs/renegade-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Dumbbell",
+        "isCompound": true
+    },
+    "Dumbbell Bench Pull": {
+        "imgUrl": "dataV2/exerciseImgs/dumbbell-bench-pull.png",
+        "mainMuscle": "Back",
+        "equipment": "Dumbbell",
+        "isCompound": true
+    },
+    "One Arm Seated Cable Row": {
+        "imgUrl": "dataV2/exerciseImgs/one-arm-seated-cable-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "Bent Arm Barbell Pullover": {
+        "imgUrl": "dataV2/exerciseImgs/bent-arm-barbell-pullover.png",
+        "mainMuscle": "Back",
+        "equipment": "Barbell",
+        "isCompound": false
+    },
+    "Dumbbell Incline Y Raise": {
+        "imgUrl": "dataV2/exerciseImgs/dumbbell-incline-y-raise.png",
+        "mainMuscle": "Back",
+        "equipment": "Dumbbell",
+        "isCompound": false
+    },
+    "Alternating Kettlebell Renegade Row": {
+        "imgUrl": "dataV2/exerciseImgs/alternating-kettlebell-renegade-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Kettlebell",
+        "isCompound": true
+    },
+    "Alternating Kettlebell Row": {
+        "imgUrl": "dataV2/exerciseImgs/alternating-kettlebell-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Kettlebell",
+        "isCompound": true
+    },
+    "Barbell Pullover To Press": {
+        "imgUrl": "dataV2/exerciseImgs/barbell-pullover-to-press.png",
+        "mainMuscle": "Back",
+        "equipment": "Barbell",
+        "isCompound": false
+    },
+    "Bench Supported Cable Row": {
+        "imgUrl": "dataV2/exerciseImgs/bench-supported-cable-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "Cable Bent Over Row": {
+        "imgUrl": "dataV2/exerciseImgs/cable-bent-over-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "Cable Crossover Lat Pulldown": {
+        "imgUrl": "dataV2/exerciseImgs/cable-crossover-lat-pulldown.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "Close Grip Bench Pull": {
+        "imgUrl": "dataV2/exerciseImgs/close-grip-bench-pull.png",
+        "mainMuscle": "Back",
+        "equipment": "Barbell",
+        "isCompound": true
+    },
+    "Close Grip Bent Over Row": {
+        "imgUrl": "dataV2/exerciseImgs/close-grip-bent-over-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Barbell",
+        "isCompound": true
+    },
+    "Decline Barbell Pullover": {
+        "imgUrl": "dataV2/exerciseImgs/decline-barbell-pullover.png",
+        "mainMuscle": "Back",
+        "equipment": "Barbell",
+        "isCompound": false
+    },
+    "Decline Wide Grip Barbell Pullover": {
+        "imgUrl": "dataV2/exerciseImgs/decline-wide-grip-barbell-pullover.png",
+        "mainMuscle": "Back",
+        "equipment": "Barbell",
+        "isCompound": false
+    },
+    "Double Kettlebell Row": {
+        "imgUrl": "dataV2/exerciseImgs/double-kettlebell-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Kettlebell",
+        "isCompound": true
+    },
+    "Dual Cable Lat Pulldown": {
+        "imgUrl": "dataV2/exerciseImgs/dual-cable-lat-pulldown.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "Dual Dumbbell Bent Over Row": {
+        "imgUrl": "dataV2/exerciseImgs/dual-dumbbell-bent-over-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Dumbbell",
+        "isCompound": true
+    },
+    "Dual Dumbbell Pullover": {
+        "imgUrl": "dataV2/exerciseImgs/dual-dumbbell-pullover.png",
+        "mainMuscle": "Back",
+        "equipment": "Dumbbell",
+        "isCompound": false
+    },
+    "Dumbbell Pullover On Floor": {
+        "imgUrl": "dataV2/exerciseImgs/dumbbell-pullover-on-floor.png",
+        "mainMuscle": "Back",
+        "equipment": "Dumbbell",
+        "isCompound": false
+    },
+    "Dumbbell Scapula Row": {
+        "imgUrl": "dataV2/exerciseImgs/dumbbell-scapula-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Dumbbell",
+        "isCompound": false
+    },
+    "Dynamic Back Stretch": {
+        "imgUrl": "dataV2/exerciseImgs/dynamic-back-stretch.png",
+        "mainMuscle": "Back",
+        "equipment": "Bodyweight",
+        "isCompound": false
+    },
+    "Elevated Cable Row": {
+        "imgUrl": "dataV2/exerciseImgs/elevated-cable-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "Elevated Rope Seated Cable Row": {
+        "imgUrl": "dataV2/exerciseImgs/elevated-rope-seated-cable-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "Gironda Sternum Chin Up": {
+        "imgUrl": "dataV2/exerciseImgs/gironda-sternum-chin-up.png",
+        "mainMuscle": "Back",
+        "equipment": "Bodyweight",
+        "isCompound": true
+    },
+    "Gorilla Chin Up": {
+        "imgUrl": "dataV2/exerciseImgs/gorilla-chin-up.png",
+        "mainMuscle": "Back",
+        "equipment": "Bodyweight",
+        "isCompound": true
+    },
+    "Half Kneeling Cable Push Pull": {
+        "imgUrl": "dataV2/exerciseImgs/half-kneeling-cable-push-pull.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": false
+    },
+    "Half Kneeling Forward Leaning One Arm Cable Row": {
+        "imgUrl": "dataV2/exerciseImgs/half-kneeling-forward-leaning-one-arm-cable-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "Half Kneeling One Arm Cable Row": {
+        "imgUrl": "dataV2/exerciseImgs/half-kneeling-one-arm-cable-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "Half Kneeling One Arm Lat Pulldown": {
+        "imgUrl": "dataV2/exerciseImgs/half-kneeling-one-arm-lat-pulldown.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "Head Supported Dumbbell Row": {
+        "imgUrl": "dataV2/exerciseImgs/head-supported-dumbbell-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Dumbbell",
+        "isCompound": true
+    },
+    "Incline Bent Over Row": {
+        "imgUrl": "dataV2/exerciseImgs/incline-bent-over-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Barbell",
+        "isCompound": true
+    },
+    "Incline Cable Row": {
+        "imgUrl": "dataV2/exerciseImgs/incline-cable-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "Incline Rope Cable Row": {
+        "imgUrl": "dataV2/exerciseImgs/incline-rope-cable-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "Incline Straight Arm Pulldown": {
+        "imgUrl": "dataV2/exerciseImgs/incline-straight-arm-pulldown.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": false
+    },
+    "Kettlebell Pullover": {
+        "imgUrl": "dataV2/exerciseImgs/kettlebell-pullover.png",
+        "mainMuscle": "Back",
+        "equipment": "Kettlebell",
+        "isCompound": false
+    },
+    "Kettlebell Row": {
+        "imgUrl": "dataV2/exerciseImgs/kettlebell-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Kettlebell",
+        "isCompound": true
+    },
+    "Kneeling Dual Cable Lat Pulldown": {
+        "imgUrl": "dataV2/exerciseImgs/kneeling-dual-cable-lat-pulldown.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "Kneeling One Arm Lat Pulldown": {
+        "imgUrl": "dataV2/exerciseImgs/kneeling-one-arm-lat-pulldown.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "Landmine Row": {
+        "imgUrl": "dataV2/exerciseImgs/landmine-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Barbell",
+        "isCompound": true
+    },
+    "Low To High Seated Cable Row": {
+        "imgUrl": "dataV2/exerciseImgs/low-to-high-seated-cable-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "Lying Cable Pullover": {
+        "imgUrl": "dataV2/exerciseImgs/lying-cable-pullover.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": false
+    },
+    "One Arm Bent Over Cable Row": {
+        "imgUrl": "dataV2/exerciseImgs/one-arm-bent-over-cable-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "One Arm Cable Rotational Row": {
+        "imgUrl": "dataV2/exerciseImgs/one-arm-cable-rotational-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "One Arm Dumbbell Bent Over Row": {
+        "imgUrl": "dataV2/exerciseImgs/one-arm-dumbbell-bent-over-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Dumbbell",
+        "isCompound": true
+    },
+    "One Arm Landmine Row": {
+        "imgUrl": "dataV2/exerciseImgs/one-arm-landmine-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Barbell",
+        "isCompound": true
+    },
+    "One Arm Reverse Grip Prone Incline Dumbbell Row": {
+        "imgUrl": "dataV2/exerciseImgs/one-arm-reverse-grip-prone-incline-dumbbell-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Dumbbell",
+        "isCompound": true
+    },
+    "One Arm Seated Cable Row With Twist": {
+        "imgUrl": "dataV2/exerciseImgs/one-arm-seated-cable-row-with-twist.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "One Arm Side Straight Arm Pulldown": {
+        "imgUrl": "dataV2/exerciseImgs/one-arm-side-straight-arm-pulldown.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": false
+    },
+    "One Arm Standing Cable Row With Twist": {
+        "imgUrl": "dataV2/exerciseImgs/one-arm-standing-cable-row-with-twist.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "One Arm Standing High Cable Row With Twist": {
+        "imgUrl": "dataV2/exerciseImgs/one-arm-standing-high-cable-row-with-twist.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "One Arm Straight Arm Pulldown": {
+        "imgUrl": "dataV2/exerciseImgs/one-arm-straight-arm-pulldown.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": false
+    },
+    "Overhead Shrug": {
+        "imgUrl": "dataV2/exerciseImgs/overhead-shrug.png",
+        "mainMuscle": "Back",
+        "equipment": "Barbell",
+        "isCompound": false
+    },
+    "Prone Cambered Bar Row": {
+        "imgUrl": "dataV2/exerciseImgs/prone-cambered-bar-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Barbell",
+        "isCompound": true
+    },
+    "Prone Incline Barbell Row": {
+        "imgUrl": "dataV2/exerciseImgs/prone-incline-barbell-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Barbell",
+        "isCompound": true
+    },
+    "Prone Incline Dumbbell Row": {
+        "imgUrl": "dataV2/exerciseImgs/prone-incline-dumbbell-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Dumbbell",
+        "isCompound": true
+    },
+    "Prone Incline Dumbbell Shrug": {
+        "imgUrl": "dataV2/exerciseImgs/prone-incline-dumbbell-shrug.png",
+        "mainMuscle": "Back",
+        "equipment": "Dumbbell",
+        "isCompound": false
+    },
+    "Rear Lat Pulldown": {
+        "imgUrl": "dataV2/exerciseImgs/rear-lat-pulldown.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "Reverse Close Grip Bench Pull": {
+        "imgUrl": "dataV2/exerciseImgs/reverse-close-grip-bench-pull.png",
+        "mainMuscle": "Back",
+        "equipment": "Barbell",
+        "isCompound": true
+    },
+    "Reverse Dumbbell Bent Over Row": {
+        "imgUrl": "dataV2/exerciseImgs/reverse-dumbbell-bent-over-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Dumbbell",
+        "isCompound": true
+    },
+    "Reverse Grip Cable Bent Over Row": {
+        "imgUrl": "dataV2/exerciseImgs/reverse-grip-cable-bent-over-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "Reverse Grip Cable Row": {
+        "imgUrl": "dataV2/exerciseImgs/reverse-grip-cable-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "Reverse Grip Prone Incline Barbell Row": {
+        "imgUrl": "dataV2/exerciseImgs/reverse-grip-prone-incline-barbell-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Barbell",
+        "isCompound": true
+    },
+    "Reverse Grip Prone Incline Dumbbell Row": {
+        "imgUrl": "dataV2/exerciseImgs/reverse-grip-prone-incline-dumbbell-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Dumbbell",
+        "isCompound": true
+    },
+    "Rope Cable Bent Over Row": {
+        "imgUrl": "dataV2/exerciseImgs/rope-cable-bent-over-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "Rope Cable Squat Row": {
+        "imgUrl": "dataV2/exerciseImgs/rope-cable-squat-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "Rope Crossover Seated Cable Row": {
+        "imgUrl": "dataV2/exerciseImgs/rope-crossover-seated-cable-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "Rope Floor Cable Row": {
+        "imgUrl": "dataV2/exerciseImgs/rope-floor-cable-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "Rope Kneeling High Row": {
+        "imgUrl": "dataV2/exerciseImgs/rope-kneeling-high-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "Rope Lat Pulldown": {
+        "imgUrl": "dataV2/exerciseImgs/rope-lat-pulldown.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "Rope Seated Cable Row": {
+        "imgUrl": "dataV2/exerciseImgs/rope-seated-cable-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "Rope Straight Arm Pulldown": {
+        "imgUrl": "dataV2/exerciseImgs/rope-straight-arm-pulldown.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": false
+    },
+    "Rotational Bent Over Dumbbell Row": {
+        "imgUrl": "dataV2/exerciseImgs/rotational-bent-over-dumbbell-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Dumbbell",
+        "isCompound": true
+    },
+    "Scapular Pull Up": {
+        "imgUrl": "dataV2/exerciseImgs/scapular-pull-up.png",
+        "mainMuscle": "Back",
+        "equipment": "Bodyweight",
+        "isCompound": false
+    },
+    "Seated Cable Pullover": {
+        "imgUrl": "dataV2/exerciseImgs/seated-cable-pullover.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": false
+    },
+    "Seesaw Kettlebell Row": {
+        "imgUrl": "dataV2/exerciseImgs/seesaw-kettlebell-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Kettlebell",
+        "isCompound": true
+    },
+    "Smith Machine Bent Over Row": {
+        "imgUrl": "dataV2/exerciseImgs/smith-machine-bent-over-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Barbell",
+        "isCompound": true
+    },
+    "Smith Machine One Arm Bent Over Row": {
+        "imgUrl": "dataV2/exerciseImgs/smith-machine-one-arm-bent-over-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Barbell",
+        "isCompound": true
+    },
+    "Smith Machine Reverse Grip Bent Over Row": {
+        "imgUrl": "dataV2/exerciseImgs/smith-machine-reverse-grip-bent-over-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Barbell",
+        "isCompound": true
+    },
+    "Smith Machine Wide Grip Behind The Back Shrug": {
+        "imgUrl": "dataV2/exerciseImgs/smith-machine-wide-grip-behind-the-back-shrug.png",
+        "mainMuscle": "Back",
+        "equipment": "Barbell",
+        "isCompound": false
+    },
+    "Smith Machine Wide Grip Shrug": {
+        "imgUrl": "dataV2/exerciseImgs/smith-machine-wide-grip-shrug.png",
+        "mainMuscle": "Back",
+        "equipment": "Barbell",
+        "isCompound": false
+    },
+    "Stability Ball Dumbbell Pullover": {
+        "imgUrl": "dataV2/exerciseImgs/stability-ball-dumbbell-pullover.png",
+        "mainMuscle": "Back",
+        "equipment": "Dumbbell",
+        "isCompound": false
+    },
+    "Stability Ball Dumbbell Pullover Hip Extension": {
+        "imgUrl": "dataV2/exerciseImgs/stability-ball-dumbbell-pullover-hip-extension.png",
+        "mainMuscle": "Back",
+        "equipment": "Dumbbell",
+        "isCompound": false
+    },
+    "Stability Ball One Arm Dumbbell Pullover": {
+        "imgUrl": "dataV2/exerciseImgs/stability-ball-one-arm-dumbbell-pullover.png",
+        "mainMuscle": "Back",
+        "equipment": "Dumbbell",
+        "isCompound": false
+    },
+    "Standing Cable Row": {
+        "imgUrl": "dataV2/exerciseImgs/standing-cable-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "Thibaudeau Kayak Row": {
+        "imgUrl": "dataV2/exerciseImgs/thibaudeau-kayak-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "Upside Down Row": {
+        "imgUrl": "dataV2/exerciseImgs/upside-down-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Bodyweight",
+        "isCompound": true
+    },
+    "V Bar Lat Pulldown": {
+        "imgUrl": "dataV2/exerciseImgs/v-bar-lat-pulldown.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "V Bar Pull Up": {
+        "imgUrl": "dataV2/exerciseImgs/v-bar-pull-up.png",
+        "mainMuscle": "Back",
+        "equipment": "Bodyweight",
+        "isCompound": true
+    },
+    "V Bar Seated Cable Row": {
+        "imgUrl": "dataV2/exerciseImgs/v-bar-seated-cable-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "V Bar Standing Cable Row": {
+        "imgUrl": "dataV2/exerciseImgs/v-bar-standing-cable-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "V Bar Standing Cable Row With Twist": {
+        "imgUrl": "dataV2/exerciseImgs/v-bar-standing-cable-row-with-twist.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    },
+    "Wide Grip Barbell Pullover": {
+        "imgUrl": "dataV2/exerciseImgs/wide-grip-barbell-pullover.png",
+        "mainMuscle": "Back",
+        "equipment": "Barbell",
+        "isCompound": false
+    },
+    "Wide Grip Bent Over Row": {
+        "imgUrl": "dataV2/exerciseImgs/wide-grip-bent-over-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Barbell",
+        "isCompound": true
+    },
+    "Wide Grip Pull Ups": {
+        "imgUrl": "dataV2/exerciseImgs/wide-grip-pull-ups.png",
+        "mainMuscle": "Back",
+        "equipment": "Bodyweight",
+        "isCompound": true
+    },
+    "Wide Grip Seated Cable Row": {
+        "imgUrl": "dataV2/exerciseImgs/wide-grip-seated-cable-row.png",
+        "mainMuscle": "Back",
+        "equipment": "Cable",
+        "isCompound": true
+    }
 }

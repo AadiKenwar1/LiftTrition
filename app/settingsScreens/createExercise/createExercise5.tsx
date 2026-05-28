@@ -18,7 +18,6 @@ export default function CreateExercise5Screen() {
         exerciseName: string
         isCompound: string
         mainMuscle: string
-        secondaryMuscles: string
     }>()
     const [selectedEquipment, setSelectedEquipment] = useState<string>('')
     const insets = useSafeAreaInsets()
@@ -36,7 +35,6 @@ export default function CreateExercise5Screen() {
                 exerciseName: params.exerciseName || '',
                 isCompound: params.isCompound || 'false',
                 mainMuscle: params.mainMuscle || '',
-                secondaryMuscles: params.secondaryMuscles || '[]',
                 equipment: selectedEquipment,
             },
         })

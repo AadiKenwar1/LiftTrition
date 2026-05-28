@@ -56,11 +56,9 @@ export default function ExerciseScreen() {
         // Look up exercise in library to get muscle groups
         const libraryExercise = fullExerciseLib[item.name]
 
-        // Format muscle groups (mainMuscle + accessoryMuscles)
         let muscleGroups = ''
         if (libraryExercise) {
-            const muscles = [libraryExercise.mainMuscle, ...libraryExercise.accessoryMuscles]
-            muscleGroups = muscles.join(' • ')
+            muscleGroups = libraryExercise.mainMuscle
         }
 
         return (

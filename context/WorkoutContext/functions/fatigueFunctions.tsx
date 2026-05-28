@@ -193,22 +193,12 @@ export function getFatigueFeedback(percentage: number): string {
     return "No sets logged today. Start logging to see how demanding today's training was. Percentage rises with each set"
 }
 
-//Calculate fatigue factor for user added exercise
-export function calculateFatigueFactor(isCompound: boolean, mainMuscle: string, accessoryMuscles: string[], equipment: string): number {
-    const baseFatigue = isCompound ? 0.7 : 0.5
+//Calculate fatigue factor for an exercise
+export function calculateFatigueFactor(isCompound: boolean, mainMuscle: string, equipment: string): number {
+    const baseFatigue = isCompound ? 0.75 : 0.47
     const mainMuscleFatigue = MUSCLE_FATIGUE_FACTORS[mainMuscle] || 0.08
-    const accessoryFatigue =
-        accessoryMuscles.length > 0 ?
-            Math.min(
-                accessoryMuscles.reduce((total, muscle) => {
-                    return total + (MUSCLE_FATIGUE_FACTORS[muscle] || 0.05) * 0.5
-                }, 0),
-                0.2,
-            )
-        :   0
-
     const equipmentFatigue = EQUIPMENT_FATIGUE_FACTORS[equipment] || 0.0
-    const fatigue = baseFatigue + mainMuscleFatigue + accessoryFatigue + equipmentFatigue
+    const fatigue = baseFatigue + mainMuscleFatigue + equipmentFatigue
     return Math.min(1.1, Math.max(0.5, parseFloat(fatigue.toFixed(2))))
 }
 

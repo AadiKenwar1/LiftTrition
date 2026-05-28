@@ -31,7 +31,7 @@ export default function CreateExercise3Screen() {
         }
 
         router.push({
-            pathname: './createExercise4',
+            pathname: './createExercise5',
             params: {
                 exerciseName: params.exerciseName || '',
                 isCompound: params.isCompound || 'false',

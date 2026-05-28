@@ -387,9 +387,9 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
     // ------------------------------------------------------------------
 
     const handleCreateUserExercise = useCallback(async (exerciseData: CreateExerciseData, userIDParam: string) => {
-        const { name, mainMuscle, accessoryMuscles, isCompound, equipment } = exerciseData
-        const fatigueFactor = calculateFatigueFactor(isCompound, mainMuscle, accessoryMuscles, equipment)
-        const newEntry: ExerciseLibraryEntry = { mainMuscle, accessoryMuscles, fatigueFactor, equipment, isCompound }
+        const { name, mainMuscle, isCompound, equipment } = exerciseData
+        const fatigueFactor = calculateFatigueFactor(isCompound, mainMuscle, equipment)
+        const newEntry: ExerciseLibraryEntry = { mainMuscle, fatigueFactor, equipment, isCompound }
         setUserExercisesState(prev => ({ ...prev, [name]: newEntry }))
         try {
             await upsertUserExercise(userIDParam, name, newEntry)

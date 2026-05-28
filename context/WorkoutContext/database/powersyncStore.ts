@@ -100,17 +100,8 @@ export async function loadWorkoutData(userId: string): Promise<{
     const userExercises: ExerciseLib = {};
     for (const row of userExerciseRows) {
         if (row.name) {
-            let accessoryMuscles: string[] = [];
-            if (row.accessory_muscles) {
-                if (typeof row.accessory_muscles === 'string') {
-                    try { accessoryMuscles = JSON.parse(row.accessory_muscles); } catch { accessoryMuscles = []; }
-                } else if (Array.isArray(row.accessory_muscles)) {
-                    accessoryMuscles = row.accessory_muscles;
-                }
-            }
             userExercises[row.name] = {
                 mainMuscle: row.main_muscle || '',
-                accessoryMuscles,
                 fatigueFactor: row.fatigue_factor ?? 0,
                 equipment: row.equipment || '',
                 isCompound: !!row.is_compound,
@@ -277,7 +268,6 @@ export async function insertLog(log: Log): Promise<void> {
  * Upsert a single user_exercises row by (userId, name).
  */
 export async function upsertUserExercise(userId: string, name: string, entry: ExerciseLibraryEntry): Promise<void> {
-    const accessoryMusclesJson = JSON.stringify(entry.accessoryMuscles);
     await powerSync.writeTransaction(async (tx) => {
         const existing = await tx.getAll(
             'SELECT name FROM user_exercises WHERE user_id = ? AND name = ?', [userId, name]
@@ -287,13 +277,13 @@ export async function upsertUserExercise(userId: string, name: string, entry: Ex
             await tx.execute(
                 `UPDATE user_exercises SET main_muscle = ?, accessory_muscles = ?, fatigue_factor = ?, equipment = ?, is_compound = ?, updated_at = datetime('now')
                  WHERE user_id = ? AND name = ?`,
-                [entry.mainMuscle, accessoryMusclesJson, entry.fatigueFactor, entry.equipment, entry.isCompound ? 1 : 0, userId, name]
+                [entry.mainMuscle, '[]', entry.fatigueFactor, entry.equipment, entry.isCompound ? 1 : 0, userId, name]
             );
         } else {
             await tx.execute(
                 `INSERT INTO user_exercises (id, user_id, name, main_muscle, accessory_muscles, fatigue_factor, equipment, is_compound, created_at, updated_at)
                  VALUES (uuid(), ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
-                [userId, name, entry.mainMuscle, accessoryMusclesJson, entry.fatigueFactor, entry.equipment, entry.isCompound ? 1 : 0]
+                [userId, name, entry.mainMuscle, '[]', entry.fatigueFactor, entry.equipment, entry.isCompound ? 1 : 0]
             );
         }
     });

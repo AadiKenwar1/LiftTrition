@@ -38,10 +38,9 @@ export interface Log {
 
 export interface ExerciseLibraryEntry {
     mainMuscle: string
-    accessoryMuscles: string[]
-    fatigueFactor: number
     equipment: string
     isCompound: boolean
+    fatigueFactor: number
 }
 
 export type ExerciseLib = Record<string, ExerciseLibraryEntry>
@@ -49,7 +48,6 @@ export type ExerciseLib = Record<string, ExerciseLibraryEntry>
 export interface CreateExerciseData {
     name: string
     mainMuscle: string
-    accessoryMuscles: string[]
     isCompound: boolean
     equipment: string
 }

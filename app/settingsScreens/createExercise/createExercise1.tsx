@@ -37,7 +37,7 @@ export default function CreateExerciseScreen() {
     }
 
     const renderExerciseCard = ({ item }: any) => {
-        const allMuscles = [item.mainMuscle, ...item.accessoryMuscles].filter(Boolean).join(' • ')
+        const allMuscles = item.mainMuscle
 
         return (
             <View style={styles.exerciseCard}>

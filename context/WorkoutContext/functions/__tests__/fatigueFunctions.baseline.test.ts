@@ -1,9 +1,9 @@
 /**
- * V1 Fatigue Baseline Test
+ * V2 Fatigue Baseline Test
  *
- * Captures numeric fatigue outputs from the current V1 exercise library so they
- * can be compared against V2 after the migration.  All results are written to
- * fatigueBaseline_v1.txt at the project root.
+ * Captures numeric fatigue outputs from the V2 exercise library.
+ * Results are written to fatigueBaseline_v2.txt at the project root
+ * so they can be diffed against fatigueBaseline_v1.txt.
  *
  * Three tiers:
  *   T1 — 14 single-exercise fatigue-factor values
@@ -23,7 +23,7 @@ import type { Exercise, ExerciseLib, ExerciseLibraryEntry, Log } from '../../typ
 const NOW = new Date('2026-01-31T12:00:00')
 const BW = 180
 const EMPTY_BW: Record<string, number> = {}
-const output: string[] = [`=== V1 FATIGUE BASELINE — ${NOW.toISOString().slice(0, 10)} ===`]
+const output: string[] = [`=== V2 FATIGUE BASELINE — ${NOW.toISOString().slice(0, 10)} ===`]
 
 // ─────────────────────────────────────────────────────────────
 // HELPERS
@@ -31,14 +31,12 @@ const output: string[] = [`=== V1 FATIGUE BASELINE — ${NOW.toISOString().slice
 
 function libEntry(
     mainMuscle: string,
-    accessories: string[],
     equipment: string,
     isCompound: boolean,
 ): ExerciseLibraryEntry {
     return {
         mainMuscle,
-        accessoryMuscles: accessories,
-        fatigueFactor: calculateFatigueFactor(isCompound, mainMuscle, accessories, equipment),
+        fatigueFactor: calculateFatigueFactor(isCompound, mainMuscle, equipment),
         equipment,
         isCompound,
     }
@@ -69,35 +67,35 @@ function sets(exId: string, date: Date, w: number, reps: number, rpe: number, n:
 // ─────────────────────────────────────────────────────────────
 
 const LIB: ExerciseLib = {
-    'Barbell Bench Press':  libEntry('Upper Chest',    ['Triceps', 'Front Delts'],               'Barbell',    true),
-    'Incline DB Press':     libEntry('Upper Chest',    ['Front Delts'],                           'Dumbbell',   true),
-    'Cable Fly':            libEntry('Lower Chest',    [],                                        'Cable',      false),
-    'Dips':                 libEntry('Lower Chest',    ['Triceps', 'Front Delts'],                'Bodyweight', true),
-    'Pull Ups':             libEntry('Lats',           ['Upper/Mid Back', 'Biceps'],              'Bodyweight', true),
-    'Bent Over Row':        libEntry('Upper/Mid Back', ['Lats', 'Biceps'],                        'Barbell',    true),
-    'Lat Pulldown':         libEntry('Lats',           ['Rear Delts'],                            'Cable',      true),
-    'Seated Cable Row':     libEntry('Upper/Mid Back', ['Rear Delts', 'Biceps'],                  'Cable',      true),
-    'Overhead Press':       libEntry('Front Delts',    ['Triceps', 'Side Delts'],                 'Barbell',    true),
-    'Lateral Raise':        libEntry('Side Delts',     [],                                        'Dumbbell',   false),
-    'Face Pull':            libEntry('Rear Delts',     ['Upper/Mid Back'],                        'Cable',      false),
-    'Barbell Squat':        libEntry('Quads',          ['Hamstrings', 'Glutes'],                  'Barbell',    true),
-    'Romanian Deadlift':    libEntry('Hamstrings',     ['Glutes', 'Lower Back'],                  'Barbell',    true),
-    'Leg Press':            libEntry('Quads',          ['Glutes'],                                'Machine',    true),
-    'Leg Curl':             libEntry('Hamstrings',     [],                                        'Machine',    false),
-    'Deadlift':             libEntry('Lower Back',     ['Hamstrings', 'Glutes', 'Upper/Mid Back'], 'Barbell',   true),
-    'Barbell Curl':         libEntry('Biceps',         [],                                        'Barbell',    false),
-    'Tricep Pushdown':      libEntry('Triceps',        [],                                        'Cable',      false),
-    'Hammer Curl':          libEntry('Biceps',         ['Forearms'],                              'Dumbbell',   false),
-    'Chest Press Machine':  libEntry('Upper Chest',    [],                                        'Machine',    true),
-    'Cable Row':            libEntry('Upper/Mid Back', ['Biceps'],                                'Cable',      true),
-    'Plank':                libEntry('Abs',            [],                                        'Bodyweight', false),
-    'Cable Crunch':         libEntry('Abs',            ['Obliques'],                              'Cable',      false),
-    'DB Shoulder Press':    libEntry('Front Delts',    ['Triceps', 'Side Delts'],                 'Dumbbell',   true),
-    'Incline DB Curl':      libEntry('Biceps',         [],                                        'Dumbbell',   false),
-    'Tricep Extension':     libEntry('Triceps',        [],                                        'Dumbbell',   false),
-    'Calf Raise':           libEntry('Calves',         [],                                        'Machine',    false),
-    'Hip Thrust':           libEntry('Glutes',         ['Hamstrings'],                            'Barbell',    true),
-    'Close Grip Bench':     libEntry('Triceps',        ['Upper Chest', 'Front Delts'],            'Barbell',    true),
+    'Barbell Bench Press':  libEntry('Chest',      'Barbell',    true),
+    'Incline DB Press':     libEntry('Chest',      'Dumbbell',   true),
+    'Cable Fly':            libEntry('Chest',      'Cable',      false),
+    'Dips':                 libEntry('Chest',      'Bodyweight', true),
+    'Pull Ups':             libEntry('Back',       'Bodyweight', true),
+    'Bent Over Row':        libEntry('Back',       'Barbell',    true),
+    'Lat Pulldown':         libEntry('Back',       'Cable',      true),
+    'Seated Cable Row':     libEntry('Back',       'Cable',      true),
+    'Overhead Press':       libEntry('Shoulders',  'Barbell',    true),
+    'Lateral Raise':        libEntry('Shoulders',  'Dumbbell',   false),
+    'Face Pull':            libEntry('Shoulders',  'Cable',      false),
+    'Barbell Squat':        libEntry('Legs',       'Barbell',    true),
+    'Romanian Deadlift':    libEntry('Legs',       'Barbell',    true),
+    'Leg Press':            libEntry('Legs',       'Machine',    true),
+    'Leg Curl':             libEntry('Legs',       'Machine',    false),
+    'Deadlift':             libEntry('Legs',       'Barbell',    true),
+    'Barbell Curl':         libEntry('Biceps',     'Barbell',    false),
+    'Tricep Pushdown':      libEntry('Triceps',    'Cable',      false),
+    'Hammer Curl':          libEntry('Biceps',     'Dumbbell',   false),
+    'Chest Press Machine':  libEntry('Chest',      'Machine',    true),
+    'Cable Row':            libEntry('Back',       'Cable',      true),
+    'Plank':                libEntry('Core',       'Bodyweight', false),
+    'Cable Crunch':         libEntry('Core',       'Cable',      false),
+    'DB Shoulder Press':    libEntry('Shoulders',  'Dumbbell',   true),
+    'Incline DB Curl':      libEntry('Biceps',     'Dumbbell',   false),
+    'Tricep Extension':     libEntry('Triceps',    'Dumbbell',   false),
+    'Calf Raise':           libEntry('Legs',       'Machine',    false),
+    'Hip Thrust':           libEntry('Legs',       'Barbell',    true),
+    'Close Grip Bench':     libEntry('Triceps',    'Barbell',    true),
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -159,7 +157,7 @@ describe('V1 Fatigue Baseline', () => {
 
     afterAll(() => {
         jest.useRealTimers()
-        const filePath = path.resolve(__dirname, '../../../../fatigueBaseline_v1.txt')
+        const filePath = path.resolve(__dirname, '../../../../fatigueBaseline_v2.txt')
         fs.writeFileSync(filePath, output.join('\n') + '\n', 'utf-8')
         console.log(`\nBaseline written → ${filePath}`)
     })
@@ -175,28 +173,27 @@ describe('V1 Fatigue Baseline', () => {
             label: string
             isCompound: boolean
             main: string
-            acc: string[]
             eq: string
         }> = [
-            { label: 'Barbell Bench Press',  isCompound: true,  main: 'Upper Chest',    acc: ['Triceps', 'Front Delts'],               eq: 'Barbell'    },
-            { label: 'Incline DB Press',     isCompound: true,  main: 'Upper Chest',    acc: ['Front Delts'],                          eq: 'Dumbbell'   },
-            { label: 'Cable Fly',            isCompound: false, main: 'Lower Chest',    acc: [],                                       eq: 'Cable'      },
-            { label: 'Pull Ups',             isCompound: true,  main: 'Lats',           acc: ['Upper/Mid Back', 'Biceps'],             eq: 'Bodyweight' },
-            { label: 'Bent Over Row',        isCompound: true,  main: 'Upper/Mid Back', acc: ['Lats', 'Biceps'],                       eq: 'Barbell'    },
-            { label: 'Lat Pulldown',         isCompound: true,  main: 'Lats',           acc: ['Rear Delts'],                           eq: 'Cable'      },
-            { label: 'Overhead Press',       isCompound: true,  main: 'Front Delts',    acc: ['Triceps', 'Side Delts'],                eq: 'Barbell'    },
-            { label: 'Lateral Raise',        isCompound: false, main: 'Side Delts',     acc: [],                                       eq: 'Dumbbell'   },
-            { label: 'Barbell Squat',        isCompound: true,  main: 'Quads',          acc: ['Hamstrings', 'Glutes'],                 eq: 'Barbell'    },
-            { label: 'Romanian Deadlift',    isCompound: true,  main: 'Hamstrings',     acc: ['Glutes', 'Lower Back'],                 eq: 'Barbell'    },
-            { label: 'Leg Press',            isCompound: true,  main: 'Quads',          acc: ['Glutes'],                               eq: 'Machine'    },
-            { label: 'Barbell Curl',         isCompound: false, main: 'Biceps',         acc: [],                                       eq: 'Barbell'    },
-            { label: 'Tricep Pushdown',      isCompound: false, main: 'Triceps',        acc: [],                                       eq: 'Cable'      },
-            { label: 'Plank',               isCompound: false, main: 'Abs',            acc: [],                                       eq: 'Bodyweight' },
+            { label: 'Barbell Bench Press',  isCompound: true,  main: 'Chest',     eq: 'Barbell'    },
+            { label: 'Incline DB Press',     isCompound: true,  main: 'Chest',     eq: 'Dumbbell'   },
+            { label: 'Cable Fly',            isCompound: false, main: 'Chest',     eq: 'Cable'      },
+            { label: 'Pull Ups',             isCompound: true,  main: 'Back',      eq: 'Bodyweight' },
+            { label: 'Bent Over Row',        isCompound: true,  main: 'Back',      eq: 'Barbell'    },
+            { label: 'Lat Pulldown',         isCompound: true,  main: 'Back',      eq: 'Cable'      },
+            { label: 'Overhead Press',       isCompound: true,  main: 'Shoulders', eq: 'Barbell'    },
+            { label: 'Lateral Raise',        isCompound: false, main: 'Shoulders', eq: 'Dumbbell'   },
+            { label: 'Barbell Squat',        isCompound: true,  main: 'Legs',      eq: 'Barbell'    },
+            { label: 'Romanian Deadlift',    isCompound: true,  main: 'Legs',      eq: 'Barbell'    },
+            { label: 'Leg Press',            isCompound: true,  main: 'Legs',      eq: 'Machine'    },
+            { label: 'Barbell Curl',         isCompound: false, main: 'Biceps',    eq: 'Barbell'    },
+            { label: 'Tricep Pushdown',      isCompound: false, main: 'Triceps',   eq: 'Cable'      },
+            { label: 'Plank',               isCompound: false, main: 'Core',      eq: 'Bodyweight' },
         ]
 
-        T1_CASES.forEach(({ label, isCompound, main, acc, eq }) => {
+        T1_CASES.forEach(({ label, isCompound, main, eq }) => {
             test(label, () => {
-                const factor = calculateFatigueFactor(isCompound, main, acc, eq)
+                const factor = calculateFatigueFactor(isCompound, main, eq)
                 output.push(`[T1] ${label.padEnd(30)} factor: ${factor.toFixed(4)}`)
                 expect(factor).toBeGreaterThanOrEqual(0.5)
                 expect(factor).toBeLessThanOrEqual(1.1)

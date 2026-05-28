@@ -20,11 +20,9 @@ export default function CreateExercise6Screen() {
         exerciseName: string
         isCompound: string
         mainMuscle: string
-        secondaryMuscles: string
         equipment: string
     }>()
 
-    const secondaryMuscles = params.secondaryMuscles ? JSON.parse(params.secondaryMuscles) : []
     const isCompound = params.isCompound === 'true'
     const insets = useSafeAreaInsets()
     const scrollBottomPad = Math.max(insets.bottom, 20) + 48
@@ -33,7 +31,6 @@ export default function CreateExercise6Screen() {
         const exerciseData: CreateExerciseData = {
             name: params.exerciseName,
             mainMuscle: params.mainMuscle,
-            accessoryMuscles: secondaryMuscles,
             isCompound: isCompound,
             equipment: params.equipment,
         }
@@ -84,14 +81,6 @@ export default function CreateExercise6Screen() {
                         <View style={styles.summaryCard}>
                             <Text style={styles.cardLabel}>Main Muscle</Text>
                             <Text style={styles.cardValue}>{params.mainMuscle}</Text>
-                        </View>
-
-                        {/* Secondary Muscles */}
-                        <View style={styles.summaryCard}>
-                            <Text style={styles.cardLabel}>Secondary Muscles</Text>
-                            {secondaryMuscles.length > 0 ?
-                                <Text style={styles.cardValue}>{secondaryMuscles.join(', ')}</Text>
-                            :   <Text style={styles.cardValueEmpty}>None selected</Text>}
                         </View>
 
                         {/* Equipment */}

@@ -28,7 +28,7 @@ export default function AddExerciseModal() {
                             <Dumbbell size={40} color="#2f80ed" strokeWidth={2} />
                         </View>
                         <Text style={styles.title}>Add Exercise</Text>
-                        <Text style={styles.subtitle}>Choose from our exercise library</Text>
+                        <Text style={styles.subtitle}>Choose from over 1300 exercises</Text>
                         <TouchableOpacity onPress={() => router.replace('/settingsScreens/createExercise/createExercise1')}>
                             <Text style={[styles.subtitle, { color: '#2f80ed' }]}>Or Click Here to Add an Exercise</Text>
                         </TouchableOpacity>

@@ -36,8 +36,7 @@ function mockLog(overrides: Partial<Log> = {}): Log {
 function mockLib(fatigueFactor: number): ExerciseLib {
     return {
         'Bench Press': {
-            mainMuscle: 'Upper Chest',
-            accessoryMuscles: [],
+            mainMuscle: 'Chest',
             fatigueFactor,
             equipment: 'Barbell',
             isCompound: true,
@@ -120,8 +119,7 @@ describe('fatigueFunctions', () => {
             const exercises: Exercise[] = [mockExercise({ id: 'ex-1', name: 'Pull Ups' })]
             const lib: ExerciseLib = {
                 'Pull Ups': {
-                    mainMuscle: 'Lats',
-                    accessoryMuscles: ['Upper/Mid Back', 'Biceps'],
+                    mainMuscle: 'Back',
                     fatigueFactor: 1.1,
                     equipment: 'Bodyweight',
                     isCompound: true,
@@ -138,8 +136,7 @@ describe('fatigueFunctions', () => {
             const exercises: Exercise[] = [mockExercise({ id: 'ex-1', name: 'Pull Ups' })]
             const lib: ExerciseLib = {
                 'Pull Ups': {
-                    mainMuscle: 'Lats',
-                    accessoryMuscles: [],
+                    mainMuscle: 'Back',
                     fatigueFactor: 1.1,
                     equipment: 'Bodyweight',
                     isCompound: true,
@@ -163,7 +160,7 @@ describe('fatigueFunctions', () => {
             // current BW (200), producing less fatigue than without bwProgress.
             const pullUpEx = mockExercise({ id: 'pu', name: 'Pull Ups' })
             const lib: ExerciseLib = {
-                'Pull Ups': { mainMuscle: 'Lats', accessoryMuscles: [], fatigueFactor: 1.1, equipment: 'Bodyweight', isCompound: true },
+                'Pull Ups': { mainMuscle: 'Back', fatigueFactor: 1.1, equipment: 'Bodyweight', isCompound: true },
             }
 
             const currentBW = 200
@@ -201,8 +198,8 @@ describe('fatigueFunctions', () => {
 
     describe('calculateFatigueFactor', () => {
         test('returns a bounded fatigue factor', () => {
-            const f1 = calculateFatigueFactor(true, 'Upper Chest', ['Triceps'], 'Barbell')
-            const f2 = calculateFatigueFactor(false, 'Forearms', [], 'Machine')
+            const f1 = calculateFatigueFactor(true, 'Chest', 'Barbell')
+            const f2 = calculateFatigueFactor(false, 'Forearms', 'Machine')
 
             expect(f1).toBeGreaterThanOrEqual(0.5)
             expect(f1).toBeLessThanOrEqual(1.1)

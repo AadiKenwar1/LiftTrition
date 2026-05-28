@@ -5,7 +5,6 @@ import { calculateFatigueFactor } from './fatigueFunctions';
 export interface CreateExerciseData {
     name: string;
     mainMuscle: string;
-    accessoryMuscles: string[];
     isCompound: boolean;
     equipment: string;
 }
@@ -16,9 +15,9 @@ export function createUserExercise(
     userID: string,
     setUserExercises: Dispatch<SetStateAction<ExerciseLib>>
 ): ExerciseLibraryEntry {
-    const { name, mainMuscle, accessoryMuscles, isCompound, equipment } = exerciseData;
-    const fatigueFactor = calculateFatigueFactor(isCompound, mainMuscle, accessoryMuscles, equipment);
-    const newEntry: ExerciseLibraryEntry = { mainMuscle, accessoryMuscles, fatigueFactor, equipment, isCompound };
+    const { name, mainMuscle, isCompound, equipment } = exerciseData;
+    const fatigueFactor = calculateFatigueFactor(isCompound, mainMuscle, equipment);
+    const newEntry: ExerciseLibraryEntry = { mainMuscle, fatigueFactor, equipment, isCompound };
     setUserExercises(prev => ({ ...prev, [name]: newEntry }));
     return newEntry;
 }

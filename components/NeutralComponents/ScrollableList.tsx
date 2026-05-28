@@ -25,8 +25,13 @@ export default function ScrollableList({ data, searchPlaceholder = 'Search...', 
     const { mode } = useSettings()
     const [searchQuery, setSearchQuery] = useState('')
 
-    // Filter data based on search query
-    const filteredData = data.filter((item) => item.title.toLowerCase().includes(searchQuery.toLowerCase()))
+    const queryLower = searchQuery.toLowerCase()
+    const filteredData = data
+        .filter((item) => item.title.toLowerCase().includes(queryLower))
+        .sort((a, b) => {
+            if (!queryLower) return 0
+            return a.title.toLowerCase().indexOf(queryLower) - b.title.toLowerCase().indexOf(queryLower)
+        })
 
     const renderItem = ({ item }: { item: ScrollableListItem }) => {
         const ItemWrapper = onPress ? TouchableOpacity : View
