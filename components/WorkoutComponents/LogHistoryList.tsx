@@ -108,6 +108,9 @@ export default function LogHistoryList({ logs, weightUnit, lastAddedLogId, onDel
                 keyboardShouldPersistTaps="handled"
                 keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
                 onScrollToIndexFailed={() => {}}
+                ListEmptyComponent={
+                    <Text style={styles.emptyText}>Add your first log above</Text>
+                }
             />
         </View>
     )
@@ -132,6 +135,13 @@ const styles = StyleSheet.create({
     },
     logsList: {
         paddingBottom: 20,
+    },
+    emptyText: {
+        fontSize: 14,
+        color: '#555',
+        fontFamily: 'Poppins_400Regular',
+        letterSpacing: 0.1,
+        marginTop: 4,
     },
     dateHeader: {
         marginBottom: 8,

@@ -140,7 +140,6 @@ export default function LogsModal() {
                                                 onFocus={() => setFocusedField('weight')}
                                                 onBlur={() => setFocusedField(null)}
                                                 keyboardType="numeric"
-                                                autoFocus
                                             />
                                         </View>
 

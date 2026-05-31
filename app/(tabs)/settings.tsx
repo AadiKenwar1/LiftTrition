@@ -2,7 +2,7 @@ import { powerSync } from '@/lib/powersync/system'
 import { getPendingUploadEstimate } from '@/lib/powersync/uploadQueueStats'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
-import { ChevronRight, CreditCard, Dumbbell, FileText, FlaskConical, HelpCircle, Plus, Scale, User, Utensils } from 'lucide-react-native'
+import { ChevronRight, CreditCard, Dumbbell, FileText, FlaskConical, HelpCircle, Scale, User, Utensils } from 'lucide-react-native'
 import { useEffect, useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 interface SettingsOption {
@@ -78,13 +78,6 @@ export default function SettingsScreen() {
             title: 'Adjust Training',
             subtitle: 'Personalize your workout plan',
             onPress: () => router.push('/settingsScreens/adjustTraining'),
-        },
-        {
-            icon: Plus,
-            iconColor: '#FFF',
-            title: 'Add Exercise',
-            subtitle: 'Create custom exercises',
-            onPress: () => router.push('/settingsScreens/createExercise/createExercise1'),
         },
         {
             icon: FileText,
@@ -163,7 +156,6 @@ export default function SettingsScreen() {
                     <Text style={styles.sectionTitle}>SUPPORT</Text>
                     {renderSettingItem(settingsOptions[6], 6)}
                     {renderSettingItem(settingsOptions[7], 7)}
-                    {renderSettingItem(settingsOptions[8], 8)}
                 </View>
             </ScrollView>
         </View>

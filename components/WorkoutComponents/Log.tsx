@@ -1,11 +1,12 @@
 import { Image } from 'expo-image'
-import { Pencil } from 'lucide-react-native'
+import { Dumbbell, Pencil } from 'lucide-react-native'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 interface LogProps {
     text: string
     subtitle?: string
     imgSource?: number
+    showImageFallback?: boolean
     wrapperHeight?: number
     textLines?: number
     onPress: () => void
@@ -13,17 +14,19 @@ interface LogProps {
     onMenuPress: () => void
 }
 
-export default function Log({ text, subtitle, imgSource, wrapperHeight = 96, textLines = 2, onPress, onEditPress, onMenuPress }: LogProps) {
+export default function Log({ text, subtitle, imgSource, showImageFallback = false, wrapperHeight = 96, textLines = 2, onPress, onEditPress, onMenuPress }: LogProps) {
     return (
         <TouchableOpacity onPress={onPress} onLongPress={onMenuPress} delayLongPress={300}>
             <View style={styles.outerwrapper}>
                 <View style={[styles.wrapper, { height: wrapperHeight }]}>
                     <View style={styles.accentBar} />
                     <View style={styles.container}>
-                        {imgSource && (
+                        {(imgSource || showImageFallback) && (
                             <View style={styles.imageGlowRing}>
                                 <View style={styles.imageCircle}>
-                                    <Image source={imgSource} style={styles.exerciseImage} contentFit="contain" cachePolicy="memory" transition={300} />
+                                    {imgSource ?
+                                        <Image source={imgSource} style={styles.exerciseImage} contentFit="contain" cachePolicy="memory" transition={300} />
+                                    :   <Dumbbell size={25} color="#ffffff" strokeWidth={1.8} />}
                                 </View>
                             </View>
                         )}

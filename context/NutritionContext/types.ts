@@ -38,4 +38,5 @@ export interface NutritionContextInterface {
     handleAnalyzeAndAddPhoto: (photoUri: string, userID: string) => Promise<void>;
     handleGetMacrosForDate: (date: Date) => { totalProtein: number; totalCarbs: number; totalFats: number; totalCalories: number };
     handleGetMacroDataForGraph: (macroType: 'calories' | 'protein' | 'carbs' | 'fats', onboardingCompletedAt?: Date) => Array<{ day: string; value: number }>;
+    nutritionStreak: number;
 }

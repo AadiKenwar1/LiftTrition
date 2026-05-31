@@ -176,19 +176,19 @@ export function calculateFatigueSummary(logs: Log[], exercises: Exercise[], full
 // Returns a casual feedback message based on fatigue percentage
 export function getFatigueFeedback(percentage: number): string {
     if (percentage >= 100) {
-        return '🔥 You went all out today! Recover hard tonight.'
+        return 'You went all out today🔥! Recover hard tonight.'
     }
     if (percentage >= 75) {
-        return '💪 Heavy day logged. Great work! Make sure to prioritize recovery.'
+        return 'Heavy day logged💪. Great work! Make sure to prioritize recovery.'
     }
     if (percentage >= 50) {
-        return '⚡ Strong day logged. Push a little more or call it a win, your choice'
+        return 'Strong day logged⚡. Push a little more or call it a win, your choice'
     }
     if (percentage >= 25) {
-        return '🏋️‍♂️ Solid day logged so far. Add more if you want, or stay the course.'
+        return 'Solid day logged🏋️. Add more if you want, or stay the course.'
     }
     if (percentage > 0) {
-        return '🧘‍♂️ Light day logged so far. Easy day to focus on form or add more later.'
+        return 'Light day logged🧘. Easy day to focus on form or add more later.'
     }
     return '📋 No sets logged today. Fatigue shows how demanding your training was.'
 }

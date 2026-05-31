@@ -87,4 +87,5 @@ export interface WorkoutContextInterface {
     handleGetSetsData: (onboardingCompletedAt?: Date) => Array<{ day: string; value: number }>
     handleCreateUserExercise: (exerciseData: CreateExerciseData, userID: string) => void
     handleDeleteUserExercise: (exerciseName: string) => void
+    workoutDaysThisWeek: number
 }

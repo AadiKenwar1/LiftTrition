@@ -1,7 +1,7 @@
 import { useSettings } from '@/context/SettingsContext'
 import { IMAGE_MAP } from '@/context/WorkoutContext/exerciseLibrary/dataV2/imageMap'
 import { Image } from 'expo-image'
-import { Search } from 'lucide-react-native'
+import { Dumbbell, Search } from 'lucide-react-native'
 import { useState } from 'react'
 import { FlatList, Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
@@ -59,13 +59,13 @@ export default function ScrollableList({ data, searchPlaceholder = 'Search...', 
                                 </View>
                             )}
                         </View>
-                        {imageSource && (
-                            <View style={styles.imageGlowRing}>
-                                <View style={styles.imageCircle}>
+                        <View style={styles.imageGlowRing}>
+                            <View style={styles.imageCircle}>
+                                {imageSource ?
                                     <Image source={imageSource} style={styles.exerciseImage} contentFit="contain" />
-                                </View>
+                                :   <Dumbbell size={25} color="#ffffff" strokeWidth={1.8} />}
                             </View>
-                        )}
+                        </View>
                     </View>
                 </View>
             </ItemWrapper>
@@ -209,9 +209,9 @@ const styles = StyleSheet.create({
         borderColor: '#2f80ed',
         shadowColor: '#2f80ed',
         shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0.9,
-        shadowRadius: 10,
-        elevation: 12,
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        elevation: 4,
     },
     imageCircle: {
         width: 68,

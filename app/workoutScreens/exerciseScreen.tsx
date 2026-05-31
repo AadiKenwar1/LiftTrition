@@ -70,6 +70,7 @@ export default function ExerciseScreen() {
                     text={item.name}
                     subtitle={muscleGroups}
                     imgSource={imgSource}
+                    showImageFallback
                     wrapperHeight={120}
                     textLines={3}
                     onPress={() => router.push({ pathname: '/workoutScreens/logsModal', params: { workoutId: workoutId, exerciseId: item.id, exerciseName: item.name } })}

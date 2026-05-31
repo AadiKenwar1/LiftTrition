@@ -1,6 +1,6 @@
 import { useAuth } from '@/context/AuthContext';
 import { powerSync } from '@/lib/powersync/system';
-import { createContext, PropsWithChildren, useContext, useEffect, useState } from "react";
+import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useState } from "react";
 import { loadNutritionData, upsertNutritionEntry, upsertSavedNutritionEntry } from './database/powersyncStore';
 import { analyzeAndAddPhoto } from "./functions/aiFunctions";
 import { addNutrition, deleteNutrition, editNutrition, saveNutrition, unsaveNutrition } from "./functions/crudFunctions";
@@ -99,6 +99,20 @@ export const NutritionProvider = ({ children }: PropsWithChildren) => {
     const handleGetMacroDataForGraph = (macroType: 'calories' | 'protein' | 'carbs' | 'fats', onboardingCompletedAt?: Date) =>
         getMacroDataForGraph(macroType, nutritionData, onboardingCompletedAt);
 
+    const nutritionStreak = useMemo(() => {
+        const loggedDays = new Set(
+            nutritionData.map(e => new Date(e.date).toDateString())
+        )
+        let streak = 0
+        const cursor = new Date()
+        cursor.setHours(0, 0, 0, 0)
+        while (loggedDays.has(cursor.toDateString())) {
+            streak++
+            cursor.setDate(cursor.getDate() - 1)
+        }
+        return streak
+    }, [nutritionData]);
+
     return (
         <NutritionContext.Provider
             value={{
@@ -115,6 +129,7 @@ export const NutritionProvider = ({ children }: PropsWithChildren) => {
                 handleAnalyzeAndAddPhoto,
                 handleGetMacrosForDate,
                 handleGetMacroDataForGraph,
+                nutritionStreak,
             }}>
             {children}
         </NutritionContext.Provider>

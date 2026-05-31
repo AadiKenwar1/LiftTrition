@@ -1,4 +1,4 @@
-export function downsampleData(data: Array<{ day: string; value: number }>, bucketSize: number): Array<{ day: string; value: number }> {
+export function downsampleData(data: Array<{ day: string; value: number }>, bucketSize: number, precision = 0): Array<{ day: string; value: number }> {
     if (bucketSize === 1) return data
 
     // If we don't have enough data to form even 1 complete bucket, return original data
@@ -6,7 +6,8 @@ export function downsampleData(data: Array<{ day: string; value: number }>, buck
 
     const result: Array<{ day: string; value: number }> = []
 
-    const averageValue = (values: number[]) => Math.round(values.reduce((a, v) => a + v, 0) / values.length)
+    const factor = Math.pow(10, precision)
+    const averageValue = (values: number[]) => Math.round(values.reduce((a, v) => a + v, 0) / values.length * factor) / factor
 
     for (let i = 0; i < data.length; i += bucketSize) {
         const bucket = data.slice(i, i + bucketSize)

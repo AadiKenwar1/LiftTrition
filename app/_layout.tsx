@@ -192,12 +192,6 @@ function StackLayout() {
                     <Stack.Screen name="settingsScreens/adjustNutrition/adjustNutrition1" options={{ headerShown: true, title: 'Step 1 of 3', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="settingsScreens/adjustNutrition/adjustNutrition2" options={{ headerShown: true, title: 'Step 2 of 3', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="settingsScreens/adjustNutrition/adjustNutrition3" options={{ headerShown: true, title: 'Step 3 of 3', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
-                    <Stack.Screen name="settingsScreens/createExercise/createExercise1" options={{ headerShown: true, title: 'My Exercises', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
-                    <Stack.Screen name="settingsScreens/createExercise/createExercise2" options={{ headerShown: true, title: 'Step 1 of 4', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
-                    <Stack.Screen name="settingsScreens/createExercise/createExercise3" options={{ headerShown: true, title: 'Step 2 of 4', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
-                    <Stack.Screen name="settingsScreens/createExercise/createExercise4" options={{ headerShown: true, title: 'Step 3 of 4', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
-                    <Stack.Screen name="settingsScreens/createExercise/createExercise5" options={{ headerShown: true, title: 'Step 3 of 4', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
-                    <Stack.Screen name="settingsScreens/createExercise/createExercise6" options={{ headerShown: true, title: 'Step 4 of 4', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="settingsScreens/adjustMeasurements" options={{ headerShown: true, title: 'Adjust Measurements', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="settingsScreens/termsAndPrivacy" options={{ headerShown: true, title: 'Terms & Privacy', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="settingsScreens/support" options={{ headerShown: true, title: 'Support', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />

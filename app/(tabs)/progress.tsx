@@ -1,3 +1,4 @@
+import ActivityBanner from '@/components/GraphComponents/ActivityBanner'
 import Graph1 from '@/components/GraphComponents/Graph1'
 import GraphStats from '@/components/GraphComponents/GraphStats'
 import ProgressWheel from '@/components/GraphComponents/ProgressWheel'
@@ -19,8 +20,8 @@ export default function ProgressScreen() {
         'SpaceMono-Regular': require('@/assets/fonts/SpaceMono-Regular.ttf'),
     })
     const { mode, settings } = useSettings()
-    const { handleGetMacrosForDate, handleGetMacroDataForGraph, nutritionData } = useNutrition()
-    const { handleGetFatigueSummary, getFatigueFeedback, logs, handleGetOneRepMaxData, handleGetSetsData, lastExercise, setLastExercise, fullExerciseLibAsList } = useWorkout()
+    const { handleGetMacrosForDate, handleGetMacroDataForGraph, nutritionData, nutritionStreak } = useNutrition()
+    const { handleGetFatigueSummary, getFatigueFeedback, logs, handleGetOneRepMaxData, handleGetSetsData, lastExercise, setLastExercise, fullExerciseLibAsList, workoutDaysThisWeek } = useWorkout()
     const { handleGetBodyWeightProgressData, bwProgress } = useSettings()
 
     // Local state for graph selections
@@ -79,7 +80,8 @@ export default function ProgressScreen() {
         const startIndex = Math.max(0, rawData.length - selectedRange2)
         const slicedData = rawData.slice(startIndex)
         const bucketSize = selectedRange2 / 7
-        const downsampled = downsampleData(slicedData, bucketSize)
+        const precision = mode === false ? 1 : 0
+        const downsampled = downsampleData(slicedData, bucketSize, precision)
         return downsampled
     }, [mode, logs, bwProgress, selectedRange2, settings.onboardingCompletedAt, handleGetSetsData, handleGetBodyWeightProgressData])
 
@@ -98,6 +100,8 @@ export default function ProgressScreen() {
         <>
             <ModeSwitcher />
             <ScrollView contentContainerStyle={styles.container} style={{ flex: 1, backgroundColor: '#121212' }}>
+                <ActivityBanner mode={mode} workoutDaysThisWeek={workoutDaysThisWeek} nutritionStreak={nutritionStreak} />
+
                 {/*Rectangular Card */}
                 <Text style={styles.mainTitle} numberOfLines={2} adjustsFontSizeToFit>
                     {mode === true ? 'Todays Fatigue' : 'Todays Calories'}
@@ -112,11 +116,11 @@ export default function ProgressScreen() {
                         )}
                         {mode === false && (
                             <Text style={styles.mainSubtext} numberOfLines={5} adjustsFontSizeToFit>
-                                {caloriesLeft > 100
-                                    ? `You have ${Math.round(caloriesLeft)} calories to go. Keep fueling! 🍽️`
-                                    : caloriesLeft >= -100
-                                      ? `You hit your calorie goal! Great discipline today 🎯`
-                                      : `You went over by ${Math.round(Math.abs(caloriesLeft))} calories. You got this tomorrow! 😤`}
+                                {caloriesLeft > 75 ?
+                                    `You have ${Math.round(caloriesLeft)} calories to go. Keep fueling! 🍽️`
+                                : caloriesLeft >= -75 ?
+                                    `You hit your calorie goal! Nice Job! 🎯`
+                                :   `You went over by ${Math.round(Math.abs(caloriesLeft))} calories. You got this tomorrow! 😤`}
                             </Text>
                         )}
                         {mode === true && (
