@@ -1,5 +1,5 @@
 import Fab from '@/components/NeutralComponents/Fab'
-import DraggableList from '@/components/WorkoutComponents/DraggableList'
+import DraggableList, { DraggableListRenderParams } from '@/components/WorkoutComponents/DraggableList'
 import Log from '@/components/WorkoutComponents/Log'
 import { useAuth } from '@/context/AuthContext'
 import { useWorkout } from '@/context/WorkoutContext'
@@ -7,10 +7,9 @@ import { IMAGE_MAP } from '@/context/WorkoutContext/exerciseLibrary/dataV2/image
 import { Exercise } from '@/context/WorkoutContext/types'
 import { Ionicons } from '@expo/vector-icons'
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
+import { Dumbbell, Pencil } from 'lucide-react-native'
 import { useLayoutEffect, useMemo } from 'react'
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import { Dumbbell, Pencil } from 'lucide-react-native'
-import { DraggableListRenderParams } from '@/components/WorkoutComponents/DraggableList'
 
 export default function ExerciseScreen() {
     const navigation = useNavigation()
@@ -36,7 +35,7 @@ export default function ExerciseScreen() {
         return map
     }, [fullExerciseLib, activeExercises])
 
-    useLayoutEffect(() => navigation.setOptions({ title: `Exercises in ${workout?.name}` }), [navigation, workout?.name])
+    useLayoutEffect(() => navigation.setOptions({ title: `${workout?.name}` }), [navigation, workout?.name])
 
     function handleEdit(exercise: Exercise) {
         Alert.alert(`Options for Exercise: ${exercise.name}`, `Warning: Deleting an exercise will delete all logs associated with it. To preserve logs archiving is recommended.`, [
@@ -61,28 +60,41 @@ export default function ExerciseScreen() {
         handleUpdateExerciseOrder(workoutId, reordered)
     }
 
+    const renderHeader = () => (
+        <>
+            <View style={styles.hintRow}>
+                <Text style={styles.sectionSubtitle}>{'Tap to log '}</Text>
+                <Text style={[styles.sectionSubtitle, { fontSize: 18 }]}>·</Text>
+                <Text style={styles.sectionSubtitle}>{' Tap '}</Text>
+                <Pencil size={13} color="#aaa" strokeWidth={2} />
+                <Text style={styles.sectionSubtitle}>{' to edit'}</Text>
+            </View>
+            <Text style={[styles.sectionSubtitle, { marginBottom: 14 }]}>{'Hold to rearrange'}</Text>
+        </>
+    )
+
     function renderItem({ item, drag }: DraggableListRenderParams<Exercise>) {
         const muscleGroups = fullExerciseLib[item.name]?.mainMuscle ?? ''
         const imgSource = exerciseImageSources[item.name]
 
         return (
             <Log
-                    text={item.name}
-                    subtitle={muscleGroups}
-                    imgSource={imgSource}
-                    showImageFallback
-                    wrapperHeight={120}
-                    textLines={3}
-                    onPress={() => router.push({ pathname: '/workoutScreens/logsModal', params: { workoutId: workoutId, exerciseId: item.id, exerciseName: item.name } })}
-                    onMenuPress={drag}
-                    onEditPress={() => handleEdit(item)}
-                />
+                text={item.name}
+                subtitle={muscleGroups}
+                imgSource={imgSource}
+                showImageFallback
+                wrapperHeight={120}
+                textLines={3}
+                onPress={() => router.push({ pathname: '/workoutScreens/logsModal', params: { workoutId: workoutId, exerciseId: item.id, exerciseName: item.name } })}
+                onMenuPress={drag}
+                onEditPress={() => handleEdit(item)}
+            />
         )
     }
 
     return (
         <View style={styles.container}>
-            {activeExercises.length === 0 ? (
+            {activeExercises.length === 0 ?
                 <View style={styles.emptyContainer}>
                     <View style={styles.emptyIconCircle}>
                         <Dumbbell size={56} color="#2f80ed" strokeWidth={2} />
@@ -90,21 +102,7 @@ export default function ExerciseScreen() {
                     <Text style={styles.emptyTitle}>No Exercises Yet</Text>
                     <Text style={styles.emptySubtitle}>Tap the ⋮ button to add your first exercise and start logging your sets</Text>
                 </View>
-            ) : (
-                <>
-                    <View style={{ paddingHorizontal: 25 }}>
-                        <View style={styles.hintRow}>
-                            <Text style={styles.sectionSubtitle}>{'Tap to log '}</Text>
-                            <Text style={[styles.sectionSubtitle, { fontSize: 18 }]}>·</Text>
-                            <Text style={styles.sectionSubtitle}>{' Tap '}</Text>
-                            <Pencil size={13} color="#aaa" strokeWidth={2} />
-                            <Text style={styles.sectionSubtitle}>{' to edit'}</Text>
-                        </View>
-                        <Text style={[styles.sectionSubtitle, { marginBottom: 14 }]}>{'Hold to rearrange'}</Text>
-                    </View>
-                    <DraggableList data={activeExercises} renderItem={renderItem} keyExtractor={(item) => item.id} onDragEnd={handleDragEnd} />
-                </>
-            )}
+            :   <DraggableList data={activeExercises} renderItem={renderItem} keyExtractor={(item) => item.id} onDragEnd={handleDragEnd} ListHeaderComponent={renderHeader} contentContainerStyle={{ paddingTop: 8 }} />}
             <Fab>
                 {[
                     <TouchableOpacity activeOpacity={0.75} key="add-exercise" style={[styles.workoutFabButtons]} onPress={() => router.push({ pathname: '/workoutScreens/addExerciseModal', params: { workoutId: workoutId } })}>
@@ -126,8 +124,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#121212',
-        paddingTop: 10,
-        paddingHorizontal: 10,
     },
     workoutFabButtons: {
         height: 60,
@@ -183,13 +179,6 @@ const styles = StyleSheet.create({
         lineHeight: 24,
         letterSpacing: 0.2,
         fontFamily: 'Poppins_400Regular',
-    },
-    sectionTitle: {
-        fontSize: 22,
-        flexShrink: 1,
-        color: '#fff',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
     },
     hintRow: {
         flexDirection: 'row',

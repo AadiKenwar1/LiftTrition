@@ -41,7 +41,7 @@ export default function IntroductionScreen() {
                 </View>
 
                 {/* App name + tagline */}
-                <Text style={styles.appName}>LiftTrition</Text>
+                <Text style={styles.appName}>LIFTRI</Text>
                 <Text style={styles.tagline}>Training, Nutrition, and Progress. Built together.</Text>
 
                 {/* 2×2 feature cards */}

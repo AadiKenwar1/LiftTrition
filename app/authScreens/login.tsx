@@ -41,7 +41,7 @@ export default function LoginScreen() {
                     </View>
 
                     <Text style={styles.appName} adjustsFontSizeToFit minimumFontScale={0.45} numberOfLines={1}>
-                        LiftTrition
+                        LIFTRI
                     </Text>
                     <Text style={styles.tagline}>Built for Strength, Physique, and Performance.</Text>
                 </View>
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
         fontSize: 60,
         fontWeight: '800',
         color: '#fff',
-        letterSpacing: -1.5,
+        letterSpacing: -0,
         marginBottom: 0,
         textAlign: 'center',
         fontFamily: 'Poppins_800ExtraBold',

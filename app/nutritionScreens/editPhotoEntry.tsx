@@ -6,7 +6,7 @@ import { Camera, Plus, Trash2 } from 'lucide-react-native'
 import { useState } from 'react'
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
-const INGREDIENT_MACROS: (keyof Ingredient)[] = ['calories', 'protein', 'carbs', 'fats']
+const INGREDIENT_MACROS: (keyof Ingredient)[] = ['calories', 'fats', 'carbs', 'protein']
 
 function calcTotals(ings: Ingredient[]) {
     let totalProtein = 0
@@ -208,16 +208,16 @@ export default function EditPhotoEntry() {
                                         <Text style={styles.ingredientTotalLabel}>Calories{'\n'}(kcal)</Text>
                                     </View>
                                     <View style={styles.ingredientTotalItem}>
-                                        <Text style={styles.ingredientTotalValue}>{Math.round(ingredient.protein * ingredient.quantity * 10) / 10}</Text>
-                                        <Text style={styles.ingredientTotalLabel}>Protein{'\n'}(g)</Text>
+                                        <Text style={styles.ingredientTotalValue}>{Math.round(ingredient.fats * ingredient.quantity * 10) / 10}</Text>
+                                        <Text style={styles.ingredientTotalLabel}>Fats{'\n'}(g)</Text>
                                     </View>
                                     <View style={styles.ingredientTotalItem}>
                                         <Text style={styles.ingredientTotalValue}>{Math.round(ingredient.carbs * ingredient.quantity * 10) / 10}</Text>
                                         <Text style={styles.ingredientTotalLabel}>Carbs{'\n'}(g)</Text>
                                     </View>
                                     <View style={styles.ingredientTotalItem}>
-                                        <Text style={styles.ingredientTotalValue}>{Math.round(ingredient.fats * ingredient.quantity * 10) / 10}</Text>
-                                        <Text style={styles.ingredientTotalLabel}>Fats{'\n'}(g)</Text>
+                                        <Text style={styles.ingredientTotalValue}>{Math.round(ingredient.protein * ingredient.quantity * 10) / 10}</Text>
+                                        <Text style={styles.ingredientTotalLabel}>Protein{'\n'}(g)</Text>
                                     </View>
                                 </View>
                             </View>
@@ -239,9 +239,9 @@ export default function EditPhotoEntry() {
                         <View style={styles.totalsRow}>
                             {[
                                 { label: 'Calories', value: `${totals.calories}`, unit: 'kcal' },
-                                { label: 'Protein', value: `${totals.protein}`, unit: 'g' },
-                                { label: 'Carbs', value: `${totals.carbs}`, unit: 'g' },
                                 { label: 'Fats', value: `${totals.fats}`, unit: 'g' },
+                                { label: 'Carbs', value: `${totals.carbs}`, unit: 'g' },
+                                { label: 'Protein', value: `${totals.protein}`, unit: 'g' },
                             ].map((item, idx, arr) => (
                                 <View key={item.label} style={styles.totalCol}>
                                     <Text style={styles.totalValue}>{item.value}</Text>

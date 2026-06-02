@@ -7,11 +7,11 @@ interface RangeSelectionModalProps {
     selectedRange: 7 | 14 | 21
     onSelectRange: (range: 7 | 14 | 21) => void
     mode: boolean
+    rangeUnit: 'Lifts' | 'Days'
 }
 
-export default function RangeSelectionModal({ visible, onClose, selectedRange, onSelectRange, mode }: RangeSelectionModalProps) {
+export default function RangeSelectionModal({ visible, onClose, selectedRange, onSelectRange, mode, rangeUnit }: RangeSelectionModalProps) {
     const ranges: Array<7 | 14 | 21> = [7, 14, 21]
-    const unit = mode ? 'Lifts' : 'Days'
 
     return (
         <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose} transparent={false}>
@@ -43,7 +43,7 @@ export default function RangeSelectionModal({ visible, onClose, selectedRange, o
                             activeOpacity={0.5}
                         >
                             <Text style={[styles.optionText, selectedRange === range && styles.optionTextSelected, selectedRange === range && { color: mode ? '#2f80ed' : '#34C759' }]}>
-                                Last {range} {unit}
+                                Last {range} {rangeUnit}
                             </Text>
                             {selectedRange === range && <View style={[styles.checkmark, { backgroundColor: mode ? '#2f80ed' : '#34C759' }]} />}
                         </TouchableOpacity>

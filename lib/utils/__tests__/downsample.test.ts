@@ -1,4 +1,4 @@
-import { downsampleData } from '../downsample';
+import { downsampleData, downsampleDataPreserveEndpoints } from '../downsample';
 
 describe('downsampleData', () => {
     // Test data factory
@@ -27,7 +27,7 @@ describe('downsampleData', () => {
     describe('Bucket Size 2 (14 Days)', () => {
         it('should group even number of points into pairs', () => {
             const data = createData(14)
-            const result = downsampleData(data, 2)
+            const result = downsampleData(data, 2, 0, 'max')
 
             expect(result.length).toBe(7)
             expect(result[0]).toEqual({ day: '2/1-2/2', value: 20 }) // max of 10, 20
@@ -37,7 +37,7 @@ describe('downsampleData', () => {
 
         it('should include incomplete bucket with odd number of points', () => {
             const data = createData(11)
-            const result = downsampleData(data, 2)
+            const result = downsampleData(data, 2, 0, 'max')
 
             expect(result.length).toBe(6) // 5 complete pairs + 1 leftover point
             expect(result[0]).toEqual({ day: '2/1-2/2', value: 20 })
@@ -60,7 +60,7 @@ describe('downsampleData', () => {
                 { day: '2/3', value: 75 },
                 { day: '2/4', value: 150 },
             ]
-            const result = downsampleData(data, 2)
+            const result = downsampleData(data, 2, 0, 'max')
 
             expect(result.length).toBe(2)
             expect(result[0]).toEqual({ day: '2/1-2/2', value: 100 })
@@ -71,7 +71,7 @@ describe('downsampleData', () => {
     describe('Bucket Size 3 (21 Days)', () => {
         it('should group points into triplets', () => {
             const data = createData(21)
-            const result = downsampleData(data, 3)
+            const result = downsampleData(data, 3, 0, 'max')
 
             expect(result.length).toBe(7)
             expect(result[0]).toEqual({ day: '2/1-2/3', value: 30 }) // max of 10, 20, 30
@@ -81,7 +81,7 @@ describe('downsampleData', () => {
 
         it('should include incomplete bucket when not divisible by 3', () => {
             const data = createData(20)
-            const result = downsampleData(data, 3)
+            const result = downsampleData(data, 3, 0, 'max')
 
             expect(result.length).toBe(7) // 6 complete triplets + 1 incomplete bucket (2 points)
             expect(result[5]).toEqual({ day: '2/16-2/18', value: 180 })
@@ -90,7 +90,7 @@ describe('downsampleData', () => {
 
         it('should include two incomplete points', () => {
             const data = createData(8)
-            const result = downsampleData(data, 3)
+            const result = downsampleData(data, 3, 0, 'max')
 
             expect(result.length).toBe(3) // 2 complete triplets + 1 incomplete bucket (2 points)
             expect(result[0]).toEqual({ day: '2/1-2/3', value: 30 })
@@ -100,7 +100,7 @@ describe('downsampleData', () => {
 
         it('should include single leftover point with single date label', () => {
             const data = createData(7)
-            const result = downsampleData(data, 3)
+            const result = downsampleData(data, 3, 0, 'max')
 
             expect(result.length).toBe(3) // 2 complete triplets + 1 single leftover point
             expect(result[0]).toEqual({ day: '2/1-2/3', value: 30 })
@@ -125,10 +125,40 @@ describe('downsampleData', () => {
 
         it('should handle exactly one complete bucket', () => {
             const data = createData(2)
-            const result = downsampleData(data, 2)
+            const result = downsampleData(data, 2, 0, 'max')
 
             expect(result.length).toBe(1)
             expect(result[0]).toEqual({ day: '2/1-2/2', value: 20 })
+        })
+
+        it('should average values when aggregation is avg', () => {
+            const data = [
+                { day: '2/1', value: 10 },
+                { day: '2/2', value: 20 },
+                { day: '2/3', value: 30 },
+                { day: '2/4', value: 40 },
+            ]
+            const result = downsampleData(data, 2, 0, 'avg')
+
+            expect(result).toEqual([
+                { day: '2/1-2/2', value: 15 },
+                { day: '2/3-2/4', value: 35 },
+            ])
+        })
+
+        it('should sum values when aggregation is sum', () => {
+            const data = [
+                { day: '2/1', value: 18 },
+                { day: '2/2', value: 0 },
+                { day: '2/3', value: 12 },
+                { day: '2/4', value: 0 },
+            ]
+            const result = downsampleData(data, 2, 0, 'sum')
+
+            expect(result).toEqual([
+                { day: '2/1-2/2', value: 18 },
+                { day: '2/3-2/4', value: 12 },
+            ])
         })
 
         it('should handle all same values', () => {
@@ -151,7 +181,7 @@ describe('downsampleData', () => {
                 { day: '2/3', value: -20 },
                 { day: '2/4', value: -15 },
             ]
-            const result = downsampleData(data, 2)
+            const result = downsampleData(data, 2, 0, 'max')
 
             expect(result.length).toBe(2)
             expect(result[0]).toEqual({ day: '2/1-2/2', value: -5 }) // max of -10, -5
@@ -168,6 +198,52 @@ describe('downsampleData', () => {
             expect(result.length).toBe(2)
             expect(result[0].value).toBe(0)
             expect(result[1].value).toBe(0)
+        })
+    })
+
+    describe('downsampleDataPreserveEndpoints', () => {
+        it('should return original data when length is at most targetCount', () => {
+            const data = createData(7)
+            expect(downsampleDataPreserveEndpoints(data, 7, 0, 'max')).toEqual(data)
+            expect(downsampleDataPreserveEndpoints(createData(5), 7, 0, 'max')).toHaveLength(5)
+        })
+
+        it('should return exactly 7 points for 14 lifts with raw first and last', () => {
+            const data = createData(14)
+            const result = downsampleDataPreserveEndpoints(data, 7, 0, 'max')
+
+            expect(result).toHaveLength(7)
+            expect(result[0]).toEqual({ day: '2/1', value: 10 })
+            expect(result[6]).toEqual({ day: '2/14', value: 140 })
+            // middle bucket 2/2-2/3: max(20, 30) = 30
+            expect(result[1]).toEqual({ day: '2/2-2/3', value: 30 })
+        })
+
+        it('should return exactly 7 points for 21 lifts', () => {
+            const data = createData(21)
+            const result = downsampleDataPreserveEndpoints(data, 7, 0, 'max')
+
+            expect(result).toHaveLength(7)
+            expect(result[0]).toEqual({ day: '2/1', value: 10 })
+            expect(result[6]).toEqual({ day: '2/21', value: 210 })
+        })
+
+        it('should use max in middle buckets', () => {
+            const data = [
+                { day: '2/1', value: 100 },
+                { day: '2/2', value: 50 },
+                { day: '2/3', value: 90 },
+                { day: '2/4', value: 40 },
+                { day: '2/5', value: 80 },
+                { day: '2/6', value: 30 },
+                { day: '2/7', value: 70 },
+                { day: '2/8', value: 110 },
+            ]
+            const result = downsampleDataPreserveEndpoints(data, 7, 0, 'max')
+
+            expect(result[0].value).toBe(100)
+            expect(result[6].value).toBe(110)
+            expect(result.some((p) => p.value === 90)).toBe(true)
         })
     })
 

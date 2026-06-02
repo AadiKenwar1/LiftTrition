@@ -30,8 +30,8 @@ export default function SavedEntry({ name, calories, protein, carbs, fats, onAdd
                         {/* Macros Row */}
                         <View style={styles.macrosRow}>
                             <View style={styles.macroBox}>
-                                <Text style={styles.macroValue}>{protein}g</Text>
-                                <Text style={styles.macroLabel}>Protein</Text>
+                                <Text style={styles.macroValue}>{fats}g</Text>
+                                <Text style={styles.macroLabel}>Fats</Text>
                             </View>
                             <View style={styles.macroDivider} />
                             <View style={styles.macroBox}>
@@ -40,8 +40,8 @@ export default function SavedEntry({ name, calories, protein, carbs, fats, onAdd
                             </View>
                             <View style={styles.macroDivider} />
                             <View style={styles.macroBox}>
-                                <Text style={styles.macroValue}>{fats}g</Text>
-                                <Text style={styles.macroLabel}>Fats</Text>
+                                <Text style={styles.macroValue}>{protein}g</Text>
+                                <Text style={styles.macroLabel}>Protein</Text>
                             </View>
                         </View>
                     </View>

@@ -22,11 +22,21 @@ interface ScrollableListProps {
     selectedIds?: string[]
     /** Enable when this list sits inside another vertical scroll (e.g. screen ScrollView). Android only; improves nested scroll handoff. */
     nestedScrollEnabled?: boolean
+    /** Exercise lists only: show thumbnail or dumbbell fallback. Hide for macro/other pickers. */
+    showExerciseThumbnail?: boolean
 }
 
-export default function ScrollableList({ data, searchPlaceholder = 'Search...', onPress, selectedIds, nestedScrollEnabled }: ScrollableListProps) {
+export default function ScrollableList({
+    data,
+    searchPlaceholder = 'Search...',
+    onPress,
+    selectedIds,
+    nestedScrollEnabled,
+    showExerciseThumbnail = false,
+}: ScrollableListProps) {
     const { mode } = useSettings()
     const [searchQuery, setSearchQuery] = useState('')
+    const thumbnailAccent = mode ? '#2f80ed' : '#22C922'
 
     const queryLower = searchQuery.toLowerCase()
     const filteredData = data
@@ -40,7 +50,7 @@ export default function ScrollableList({ data, searchPlaceholder = 'Search...', 
         const ItemWrapper = onPress ? TouchableOpacity : View
         const isSelected = selectedIds?.includes(item.id) ?? false
 
-        const filename = item.exerciseMetadata?.imgUrl?.split('/').pop()
+        const filename = showExerciseThumbnail ? item.exerciseMetadata?.imgUrl?.split('/').pop() : undefined
         const imageSource = filename ? IMAGE_MAP[filename] : undefined
 
         return (
@@ -59,13 +69,20 @@ export default function ScrollableList({ data, searchPlaceholder = 'Search...', 
                                 </View>
                             )}
                         </View>
-                        <View style={styles.imageGlowRing}>
-                            <View style={styles.imageCircle}>
-                                {imageSource ?
-                                    <Image source={imageSource} style={styles.exerciseImage} contentFit="contain" />
-                                :   <Dumbbell size={25} color="#ffffff" strokeWidth={1.8} />}
+                        {showExerciseThumbnail && (
+                            <View
+                                style={[
+                                    styles.imageGlowRing,
+                                    { borderColor: thumbnailAccent, shadowColor: thumbnailAccent },
+                                ]}
+                            >
+                                <View style={styles.imageCircle}>
+                                    {imageSource ?
+                                        <Image source={imageSource} style={styles.exerciseImage} contentFit="contain" />
+                                    :   <Dumbbell size={25} color="#ffffff" strokeWidth={1.8} />}
+                                </View>
                             </View>
-                        </View>
+                        )}
                     </View>
                 </View>
             </ItemWrapper>
@@ -206,8 +223,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: '#2f80ed',
-        shadowColor: '#2f80ed',
         shadowOffset: { width: 0, height: 0 },
         shadowOpacity: 0.3,
         shadowRadius: 4,

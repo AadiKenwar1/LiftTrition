@@ -80,7 +80,7 @@ export default function SupportScreen() {
                         <View style={styles.typeToggleContainer}>
                             <TouchableOpacity style={[styles.typeButton, subjectType === 'support' && { backgroundColor: ACCENT_MUTED, borderColor: ACCENT }]} onPress={() => setSubjectType('support')} activeOpacity={0.5} disabled={loading}>
                                 <Text style={[styles.typeButtonText, subjectType === 'support' && styles.typeButtonTextActive]} adjustsFontSizeToFit minimumFontScale={0.65} numberOfLines={2}>
-                                    LiftTrition Support
+                                    Liftri Support
                                 </Text>
                             </TouchableOpacity>
                             <TouchableOpacity

@@ -9,7 +9,8 @@ import { useNutrition } from '@/context/NutritionContext'
 import { useSettings } from '@/context/SettingsContext'
 import { useWorkout } from '@/context/WorkoutContext'
 
-import { downsampleData } from '@/lib/utils/downsample'
+import { downsampleData, downsampleDataPreserveEndpoints } from '@/lib/utils/downsample'
+import { getGraphChartNote } from '@/lib/utils/graphChartNote'
 import { useFonts } from 'expo-font'
 import { ChevronDown, Dumbbell, Scale } from 'lucide-react-native'
 import { useEffect, useMemo, useState } from 'react'
@@ -65,25 +66,34 @@ export default function ProgressScreen() {
         return handleGetMacrosForDate(new Date())
     }, [nutritionData, settings])
 
-    //Graph 1 data (one rep max or macro data)
-    const graph1Data = useMemo(() => {
+    // Graph 1 — display (downsampled) + stats (raw daily slice)
+    const graph1RawData = useMemo(() => {
         const rawData = mode === true ? handleGetOneRepMaxData(selectedExercise) : handleGetMacroDataForGraph(selectedMacro, settings.onboardingCompletedAt)
         const startIndex = Math.max(0, rawData.length - selectedRange1)
-        const slicedData = rawData.slice(startIndex)
-        const bucketSize = selectedRange1 / 7
-        return downsampleData(slicedData, bucketSize)
+        return rawData.slice(startIndex)
     }, [mode, selectedExercise, selectedMacro, selectedRange1, logs, nutritionData, lastExercise, handleGetOneRepMaxData, handleGetMacroDataForGraph, settings.onboardingCompletedAt])
 
-    //Graph 2 data (sets or body weight data)
-    const graph2Data = useMemo(() => {
+    const graph1Data = useMemo(() => {
+        if (mode) {
+            return downsampleDataPreserveEndpoints(graph1RawData, 7, 0, 'max')
+        }
+        const bucketSize = selectedRange1 / 7
+        return downsampleData(graph1RawData, bucketSize, 0, 'avg')
+    }, [graph1RawData, selectedRange1, mode])
+
+    // Graph 2 — display (downsampled) + stats (raw daily slice)
+    const graph2RawData = useMemo(() => {
         const rawData = mode === true ? handleGetSetsData(settings.onboardingCompletedAt) : handleGetBodyWeightProgressData(settings.onboardingCompletedAt)
         const startIndex = Math.max(0, rawData.length - selectedRange2)
-        const slicedData = rawData.slice(startIndex)
+        return rawData.slice(startIndex)
+    }, [mode, logs, bwProgress, selectedRange2, settings.onboardingCompletedAt, handleGetSetsData, handleGetBodyWeightProgressData])
+
+    const graph2Data = useMemo(() => {
         const bucketSize = selectedRange2 / 7
         const precision = mode === false ? 1 : 0
-        const downsampled = downsampleData(slicedData, bucketSize, precision)
-        return downsampled
-    }, [mode, logs, bwProgress, selectedRange2, settings.onboardingCompletedAt, handleGetSetsData, handleGetBodyWeightProgressData])
+        const aggregation = mode ? 'sum' : 'avg'
+        return downsampleData(graph2RawData, bucketSize, precision, aggregation)
+    }, [graph2RawData, selectedRange2, mode])
 
     //Graph 1 and 2 signatures for keying so that the graph re-renders when the data changes
     const graph1Sig = `${graph1Data.length}:${graph1Data.at(-1)?.day ?? ''}:${graph1Data.at(-1)?.value ?? ''}`
@@ -136,13 +146,13 @@ export default function ProgressScreen() {
                     {/*1/3 Square Card*/}
                     <View style={styles.oneThirdColumn}>
                         <Text style={styles.oneThirdTopText} numberOfLines={2}>
-                            {mode === true ? `Last 3 Days` : `Todays Protein`}
+                            {mode === true ? `Last 3 Days` : `Todays Fats`}
                         </Text>
                         <View style={styles.oneThirdSquareCard}>
-                            <ProgressWheel percent={mode === true ? fatigueData.last3Days : proteinPercent} size={95} strokeWidth={9.5} fontSize={20} />
+                            <ProgressWheel percent={mode === true ? fatigueData.last3Days : fatsPercent} size={95} strokeWidth={9.5} fontSize={20} />
                             {mode === false && (
                                 <Text style={styles.oneThirdBottomText}>
-                                    {Math.round(todayMacros.totalProtein)}/{settings.proteinGoal}g
+                                    {Math.round(todayMacros.totalFats)}/{settings.fatsGoal}g
                                 </Text>
                             )}
                         </View>
@@ -166,13 +176,13 @@ export default function ProgressScreen() {
                     {/*1/3 Square Card*/}
                     <View style={styles.oneThirdColumn}>
                         <Text style={styles.oneThirdTopText} numberOfLines={2}>
-                            {mode === true ? `Last 9 Days` : `Todays Fats`}
+                            {mode === true ? `Last 9 Days` : `Todays Protein`}
                         </Text>
                         <View style={styles.oneThirdSquareCard}>
-                            <ProgressWheel percent={mode === true ? fatigueData.last9Days : fatsPercent} size={95} strokeWidth={9.5} fontSize={20} />
+                            <ProgressWheel percent={mode === true ? fatigueData.last9Days : proteinPercent} size={95} strokeWidth={9.5} fontSize={20} />
                             {mode === false && (
                                 <Text style={styles.oneThirdBottomText}>
-                                    {Math.round(todayMacros.totalFats)}/{settings.fatsGoal}g
+                                    {Math.round(todayMacros.totalProtein)}/{settings.proteinGoal}g
                                 </Text>
                             )}
                         </View>
@@ -196,7 +206,13 @@ export default function ProgressScreen() {
                     )}
                     <View style={styles.chartContainer}>
                         {graph1Data.length > 0 ?
-                            <Graph1 key={`graph1-${mode ? 'lift' : 'nutrition'}-${selectedRange1}-${mode ? selectedExercise : selectedMacro}-${graph1Sig}`} mode={mode} data={graph1Data} selectedRange={selectedRange1} />
+                            <Graph1
+                                key={`graph1-${mode ? 'lift' : 'nutrition'}-${selectedRange1}-${mode ? selectedExercise : selectedMacro}-${graph1Sig}`}
+                                mode={mode}
+                                data={graph1Data}
+                                selectedRange={selectedRange1}
+                                chartNote={getGraphChartNote(mode ? 'strength' : 'macro', selectedRange1)}
+                            />
                         :   <View style={styles.emptyGraphState}>
                                 <View style={[styles.emptyIconCircle, { backgroundColor: mode === true ? 'rgba(45, 156, 255, 0.1)' : 'rgba(52, 199, 89, 0.1)' }]}>
                                     {mode === true ?
@@ -208,7 +224,7 @@ export default function ProgressScreen() {
                             </View>
                         }
                     </View>
-                    <GraphStats graphType={mode ? 'orm' : selectedMacro} data={graph1Data} unitSystem={settings.unitSystem} mode={mode} />
+                    <GraphStats graphType={mode ? 'orm' : selectedMacro} data={graph1Data} statsData={graph1RawData} unitSystem={settings.unitSystem} mode={mode} />
                     {/* Button Row */}
                     <View style={styles.buttonRow}>
                         <TouchableOpacity style={[styles.graphButton, { backgroundColor: mode === true ? '#2f80ed' : '#22C933' }]} onPress={() => setRangeModalVisible1(true)}>
@@ -247,7 +263,13 @@ export default function ProgressScreen() {
                     )}
                     <View style={styles.chartContainer}>
                         {graph2Data.length > 0 ?
-                            <Graph1 key={`graph2-${mode ? 'lift' : 'nutrition'}-${selectedRange2}-${graph2Sig}`} mode={mode} data={graph2Data} selectedRange={selectedRange2} />
+                            <Graph1
+                                key={`graph2-${mode ? 'lift' : 'nutrition'}-${selectedRange2}-${graph2Sig}`}
+                                mode={mode}
+                                data={graph2Data}
+                                selectedRange={selectedRange2}
+                                chartNote={getGraphChartNote(mode ? 'sets' : 'bodyweight', selectedRange2)}
+                            />
                         :   <View style={styles.emptyGraphState}>
                                 <View style={[styles.emptyIconCircle, { backgroundColor: mode === true ? 'rgba(45, 156, 255, 0.1)' : 'rgba(52, 199, 89, 0.1)' }]}>
                                     {mode === true ?
@@ -259,7 +281,7 @@ export default function ProgressScreen() {
                             </View>
                         }
                     </View>
-                    <GraphStats graphType={mode ? 'sets' : 'bodyweight'} data={graph2Data} unitSystem={settings.unitSystem} mode={mode} goalWeight={settings.goalWeight} />
+                    <GraphStats graphType={mode ? 'sets' : 'bodyweight'} data={graph2Data} statsData={graph2RawData} unitSystem={settings.unitSystem} mode={mode} goalWeight={settings.goalWeight} />
                     {/* Button Row */}
                     <View style={styles.buttonRow}>
                         <TouchableOpacity style={[styles.graphButton, { backgroundColor: mode === true ? '#2f80ed' : '#22C933' }]} onPress={() => setRangeModalVisible2(true)}>
@@ -275,9 +297,9 @@ export default function ProgressScreen() {
             </ScrollView>
 
             {/* Modals */}
-            <RangeSelectionModal visible={rangeModalVisible1} onClose={() => setRangeModalVisible1(false)} selectedRange={selectedRange1} onSelectRange={setSelectedRange1} mode={mode} />
+            <RangeSelectionModal visible={rangeModalVisible1} onClose={() => setRangeModalVisible1(false)} selectedRange={selectedRange1} onSelectRange={setSelectedRange1} mode={mode} rangeUnit={mode ? 'Lifts' : 'Days'} />
 
-            <RangeSelectionModal visible={rangeModalVisible2} onClose={() => setRangeModalVisible2(false)} selectedRange={selectedRange2} onSelectRange={setSelectedRange2} mode={mode} />
+            <RangeSelectionModal visible={rangeModalVisible2} onClose={() => setRangeModalVisible2(false)} selectedRange={selectedRange2} onSelectRange={setSelectedRange2} mode={mode} rangeUnit="Days" />
 
             <SelectionModal
                 visible={selectionModalVisible}

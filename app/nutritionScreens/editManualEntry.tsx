@@ -36,9 +36,9 @@ export default function EditManualEntry() {
 
     const macroFields = [
         { label: 'Calories', value: calories, setter: setCalories, key: 'calories', unit: 'kcal' },
-        { label: 'Protein', value: protein, setter: setProtein, key: 'protein', unit: 'g' },
-        { label: 'Carbs', value: carbs, setter: setCarbs, key: 'carbs', unit: 'g' },
         { label: 'Fats', value: fats, setter: setFats, key: 'fats', unit: 'g' },
+        { label: 'Carbs', value: carbs, setter: setCarbs, key: 'carbs', unit: 'g' },
+        { label: 'Protein', value: protein, setter: setProtein, key: 'protein', unit: 'g' },
     ] as const
 
     function handleSave() {

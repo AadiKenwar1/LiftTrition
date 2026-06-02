@@ -200,14 +200,14 @@ export default function FoodDBModal() {
                                                 <View style={styles.macroPill}>
                                                     <Text style={styles.macroPillText}>{Math.round(item.calories * q)} cal</Text>
                                                 </View>
-                                                <View style={[styles.macroPill, styles.macroPillP]}>
-                                                    <Text style={[styles.macroPillText, styles.macroPillTextP]}>{Math.round(item.protein * q * 10) / 10}g P</Text>
+                                                <View style={[styles.macroPill, styles.macroPillF]}>
+                                                    <Text style={[styles.macroPillText, styles.macroPillTextF]}>{Math.round(item.fats * q * 10) / 10}g F</Text>
                                                 </View>
                                                 <View style={[styles.macroPill, styles.macroPillC]}>
                                                     <Text style={[styles.macroPillText, styles.macroPillTextC]}>{Math.round(item.carbs * q * 10) / 10}g C</Text>
                                                 </View>
-                                                <View style={[styles.macroPill, styles.macroPillF]}>
-                                                    <Text style={[styles.macroPillText, styles.macroPillTextF]}>{Math.round(item.fats * q * 10) / 10}g F</Text>
+                                                <View style={[styles.macroPill, styles.macroPillP]}>
+                                                    <Text style={[styles.macroPillText, styles.macroPillTextP]}>{Math.round(item.protein * q * 10) / 10}g P</Text>
                                                 </View>
                                             </View>
                                         </View>

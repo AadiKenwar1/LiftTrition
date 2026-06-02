@@ -172,27 +172,27 @@ export default function AddNutritionModal() {
                         {renderAiButton('calories')}
                     </View>
 
-                    {/* Protein */}
+                    {/* Fats */}
                     <View style={styles.macroInputRow}>
                         <View style={styles.macroLabelColumn}>
                             <Text style={styles.macroLabel} adjustsFontSizeToFit minimumFontScale={0.6} numberOfLines={2}>
-                                Protein
+                                Fats
                             </Text>
                             <Text style={styles.macroUnit} adjustsFontSizeToFit minimumFontScale={0.65} numberOfLines={1}>
                                 (g)
                             </Text>
                         </View>
                         <TextInput
-                            style={[styles.macroInput, focusedField === 'protein' && styles.inputFocused]}
+                            style={[styles.macroInput, focusedField === 'fats' && styles.inputFocused]}
                             placeholder="0"
                             placeholderTextColor="#666"
-                            value={protein}
-                            onChangeText={setProtein}
-                            onFocus={() => setFocusedField('protein')}
+                            value={fats}
+                            onChangeText={setFats}
+                            onFocus={() => setFocusedField('fats')}
                             onBlur={() => setFocusedField(null)}
                             keyboardType="numeric"
                         />
-                        {renderAiButton('protein')}
+                        {renderAiButton('fats')}
                     </View>
 
                     {/* Carbs */}
@@ -218,27 +218,27 @@ export default function AddNutritionModal() {
                         {renderAiButton('carbs')}
                     </View>
 
-                    {/* Fats */}
+                    {/* Protein */}
                     <View style={styles.macroInputRow}>
                         <View style={styles.macroLabelColumn}>
                             <Text style={styles.macroLabel} adjustsFontSizeToFit minimumFontScale={0.6} numberOfLines={2}>
-                                Fats
+                                Protein
                             </Text>
                             <Text style={styles.macroUnit} adjustsFontSizeToFit minimumFontScale={0.65} numberOfLines={1}>
                                 (g)
                             </Text>
                         </View>
                         <TextInput
-                            style={[styles.macroInput, focusedField === 'fats' && styles.inputFocused]}
+                            style={[styles.macroInput, focusedField === 'protein' && styles.inputFocused]}
                             placeholder="0"
                             placeholderTextColor="#666"
-                            value={fats}
-                            onChangeText={setFats}
-                            onFocus={() => setFocusedField('fats')}
+                            value={protein}
+                            onChangeText={setProtein}
+                            onFocus={() => setFocusedField('protein')}
                             onBlur={() => setFocusedField(null)}
                             keyboardType="numeric"
                         />
-                        {renderAiButton('fats')}
+                        {renderAiButton('protein')}
                     </View>
                 </View>
 

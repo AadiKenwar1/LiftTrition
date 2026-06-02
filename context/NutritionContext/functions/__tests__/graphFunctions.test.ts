@@ -1,5 +1,5 @@
 import { NutritionEntry } from '../../types'
-import { getMacroDataForGraph, getMacrosForDate } from '../graphFunctions'
+import { getMacroDataForGraph, getMacrosForDate, getNutritionStreakState } from '../graphFunctions'
 
 // Helper function to create mock nutrition entry
 function createMockNutritionEntry(overrides: Partial<NutritionEntry> = {}): NutritionEntry {
@@ -484,6 +484,52 @@ describe('Graph Functions', () => {
                     // Day should be in M/D format (e.g., "2/14")
                     expect(entry.day).toMatch(/^\d+\/\d+$/)
                 })
+            })
+        })
+    })
+
+    describe('getNutritionStreakState', () => {
+        const now = new Date('2026-06-01T12:00:00')
+
+        test('returns zeros when no entries', () => {
+            expect(getNutritionStreakState([], now)).toEqual({
+                loggedToday: false,
+                streakIncludingToday: 0,
+                streakThroughYesterday: 0,
+            })
+        })
+
+        test('active streak when logged today and prior days', () => {
+            const data = [
+                createMockNutritionEntry({ date: daysFromDate(now, 0) }),
+                createMockNutritionEntry({ date: daysFromDate(now, -1) }),
+                createMockNutritionEntry({ date: daysFromDate(now, -2) }),
+            ]
+            expect(getNutritionStreakState(data, now)).toEqual({
+                loggedToday: true,
+                streakIncludingToday: 3,
+                streakThroughYesterday: 2,
+            })
+        })
+
+        test('at-risk streak when logged yesterday but not today', () => {
+            const data = [
+                createMockNutritionEntry({ date: daysFromDate(now, -1) }),
+                createMockNutritionEntry({ date: daysFromDate(now, -2) }),
+            ]
+            expect(getNutritionStreakState(data, now)).toEqual({
+                loggedToday: false,
+                streakIncludingToday: 0,
+                streakThroughYesterday: 2,
+            })
+        })
+
+        test('broken streak when yesterday was missed', () => {
+            const data = [createMockNutritionEntry({ date: daysFromDate(now, -2) })]
+            expect(getNutritionStreakState(data, now)).toEqual({
+                loggedToday: false,
+                streakIncludingToday: 0,
+                streakThroughYesterday: 0,
             })
         })
     })

@@ -4,8 +4,18 @@ import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useSt
 import { loadNutritionData, upsertNutritionEntry, upsertSavedNutritionEntry } from './database/powersyncStore';
 import { analyzeAndAddPhoto } from "./functions/aiFunctions";
 import { addNutrition, deleteNutrition, editNutrition, saveNutrition, unsaveNutrition } from "./functions/crudFunctions";
-import { getMacroDataForGraph, getMacrosForDate } from "./functions/graphFunctions";
+import { getMacroDataForGraph, getMacrosForDate, getNutritionStreakState } from "./functions/graphFunctions";
 import { NutritionContextInterface, NutritionEntry } from "./types";
+import uuid from 'react-native-uuid';
+
+function savedMealName(name: string, existing: { name: string }[]): string {
+    const base = name.trim()
+    const taken = existing.map((e) => e.name.trim().toLowerCase())
+    if (!taken.includes(base.toLowerCase())) return base
+    let n = 2
+    while (taken.includes(`${base.toLowerCase()} (${n})`)) n++
+    return `${base} (${n})`
+}
 
 const NutritionContext = createContext<NutritionContextInterface | undefined>(undefined);
 
@@ -71,11 +81,20 @@ export const NutritionProvider = ({ children }: PropsWithChildren) => {
         }
     }
 
-    const handleSaveNutrition = async (nutritionEntry: NutritionEntry) => {
-        const saved = saveNutrition(nutritionEntry, setSavedNutritionEntries);
+    const handleSaveNutrition = async (logEntry: NutritionEntry) => {
+        const now = new Date()
+        const savedEntry: NutritionEntry = {
+            ...logEntry,
+            id: uuid.v4() as string,
+            name: savedMealName(logEntry.name, savedNutritionEntries),
+            createdAt: now,
+            updatedAt: now,
+        }
+
+        const saved = saveNutrition(savedEntry, setSavedNutritionEntries);
         if (!saved || !userID) return;
         try {
-            await upsertSavedNutritionEntry(nutritionEntry);
+            await upsertSavedNutritionEntry(savedEntry);
         } catch (e) {
             console.warn('[NutritionContext] Failed to persist saved nutrition entry to PowerSync', e);
         }
@@ -99,19 +118,10 @@ export const NutritionProvider = ({ children }: PropsWithChildren) => {
     const handleGetMacroDataForGraph = (macroType: 'calories' | 'protein' | 'carbs' | 'fats', onboardingCompletedAt?: Date) =>
         getMacroDataForGraph(macroType, nutritionData, onboardingCompletedAt);
 
-    const nutritionStreak = useMemo(() => {
-        const loggedDays = new Set(
-            nutritionData.map(e => new Date(e.date).toDateString())
-        )
-        let streak = 0
-        const cursor = new Date()
-        cursor.setHours(0, 0, 0, 0)
-        while (loggedDays.has(cursor.toDateString())) {
-            streak++
-            cursor.setDate(cursor.getDate() - 1)
-        }
-        return streak
-    }, [nutritionData]);
+    const nutritionStreak = useMemo(
+        () => getNutritionStreakState(nutritionData),
+        [nutritionData],
+    );
 
     return (
         <NutritionContext.Provider

@@ -1,24 +1,39 @@
+import type { NutritionStreakState } from '@/context/NutritionContext/types'
 import { StyleSheet, Text, View } from 'react-native'
 
 interface ActivityBannerProps {
     mode: boolean
     workoutDaysThisWeek: number
-    nutritionStreak: number
+    nutritionStreak: NutritionStreakState
+}
+
+function getNutritionBannerText(streak: NutritionStreakState): string {
+    const { loggedToday, streakIncludingToday, streakThroughYesterday } = streak
+
+    if (loggedToday) {
+        if (streakIncludingToday === 1) return 'You logged today! Keep it up 💪'
+        return `You've logged ${streakIncludingToday} days in a row! 🔥`
+    }
+    if (streakThroughYesterday >= 1) {
+        const days = streakThroughYesterday
+        return `You're on a ${days}-day streak. Log today to keep it going 🔥`
+    }
+    return 'Log a meal to start your streak 🍽️'
 }
 
 export default function ActivityBanner({ mode, workoutDaysThisWeek, nutritionStreak }: ActivityBannerProps) {
     const text =
         mode ?
             workoutDaysThisWeek === 0 ?
-                "You haven't trained yet this week. Let's go! 💪"
+                "No training yet this week. Let's go! 💪"
             :   `You've trained ${workoutDaysThisWeek} day${workoutDaysThisWeek !== 1 ? 's' : ''} this week 🔥`
-        : nutritionStreak === 0 ? 'Log a meal to start your streak 🍽️'
-        : nutritionStreak === 1 ? 'You logged today! Keep it up 💪'
-        : `You've logged ${nutritionStreak} days in a row! 🔥`
+        :   getNutritionBannerText(nutritionStreak)
 
     return (
         <View style={styles.banner}>
-            <Text style={styles.text}>{text}</Text>
+            <Text style={styles.text} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.85}>
+                {text}
+            </Text>
         </View>
     )
 }

@@ -33,6 +33,7 @@ export default function SelectionModal({ visible, onClose, onSelect, mode, data 
                 {/* Scrollable List */}
                 <ScrollableList
                     data={data}
+                    showExerciseThumbnail={mode}
                     searchPlaceholder={mode ? 'Search exercises...' : 'Search macros...'}
                     onPress={(item: ScrollableListItem) => {
                         onSelect(item.title)

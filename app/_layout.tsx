@@ -115,7 +115,7 @@ export default Sentry.wrap(function RootLayout() {
 function HeaderBackButton() {
     const router = useRouter()
     return (
-        <Pressable onPress={() => router.back()} style={{ paddingHorizontal: 0 }}>
+        <Pressable onPress={() => router.back()}>
             <Ionicons name="arrow-back" size={24} color="#FFF" />
         </Pressable>
     )

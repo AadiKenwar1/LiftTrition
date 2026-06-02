@@ -1,5 +1,5 @@
 import { calculateStartDate, formatDateMinimal, getDateKey } from "@/lib/utils/dateHelper";
-import { NutritionEntry } from "../types";
+import { NutritionEntry, NutritionStreakState } from "../types";
 
 
 export function getMacrosForDate(nutritionData: NutritionEntry[], date: Date){
@@ -79,4 +79,34 @@ export function getMacroDataForGraph(macroType: 'calories' | 'protein' | 'carbs'
     }
 
     return result;
+}
+
+function countConsecutiveLoggedDays(loggedDays: Set<string>, startDate: Date): number {
+    let streak = 0
+    const cursor = new Date(startDate)
+    cursor.setHours(0, 0, 0, 0)
+    while (loggedDays.has(getDateKey(cursor))) {
+        streak++
+        cursor.setDate(cursor.getDate() - 1)
+    }
+    return streak
+}
+
+export function getNutritionStreakState(
+    nutritionData: NutritionEntry[],
+    now: Date = new Date(),
+): NutritionStreakState {
+    const loggedDays = new Set(nutritionData.map((e) => getDateKey(new Date(e.date))))
+
+    const today = new Date(now)
+    today.setHours(0, 0, 0, 0)
+    const yesterday = new Date(today)
+    yesterday.setDate(yesterday.getDate() - 1)
+
+    const loggedToday = loggedDays.has(getDateKey(today))
+    const streakIncludingToday = loggedToday ? countConsecutiveLoggedDays(loggedDays, today) : 0
+    const streakThroughYesterday =
+        loggedDays.has(getDateKey(yesterday)) ? countConsecutiveLoggedDays(loggedDays, yesterday) : 0
+
+    return { loggedToday, streakIncludingToday, streakThroughYesterday }
 }

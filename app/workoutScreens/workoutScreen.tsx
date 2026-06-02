@@ -81,7 +81,7 @@ export default function WorkoutScreen() {
                         <Text style={styles.emptySubtitle}>Tap the ⋮ button to create your first workout</Text>
                     </View>
                     // Draggable List
-                :   <DraggableList data={activeWorkouts} renderItem={renderItem} keyExtractor={(item) => item.id} onDragEnd={handleUpdateWorkoutOrder} ListHeaderComponent={renderHeader} />
+                :   <DraggableList data={activeWorkouts} renderItem={renderItem} keyExtractor={(item) => item.id} onDragEnd={handleUpdateWorkoutOrder} ListHeaderComponent={renderHeader} contentContainerStyle={{ paddingTop: 16 }} />
             }
         </View>
     )
@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#121212',
-        paddingTop: 16,
+        paddingTop: 0,
     },
     sectionTitle: {
         fontSize: 22,

@@ -5,6 +5,7 @@ type GraphType = 'orm' | 'sets' | 'calories' | 'protein' | 'carbs' | 'fats' | 'b
 interface GraphStatsProps {
     graphType: GraphType
     data: Array<{ day: string; value: number }>
+    statsData?: Array<{ day: string; value: number }>
     unitSystem: 'imperial' | 'metric'
     mode: boolean
     goalWeight?: number
@@ -15,22 +16,29 @@ interface StatChip {
     value: string
 }
 
-function computeStats(graphType: GraphType, data: Array<{ day: string; value: number }>, unitSystem: 'imperial' | 'metric', goalWeight?: number): StatChip[] {
+function computeStats(
+    graphType: GraphType,
+    data: Array<{ day: string; value: number }>,
+    unitSystem: 'imperial' | 'metric',
+    goalWeight?: number,
+    statsData?: Array<{ day: string; value: number }>,
+): StatChip[] {
     const values = data.map((d) => d.value)
-    const first = values[0]
-    const last = values[values.length - 1]
-    const avg = Math.round(values.reduce((a, b) => a + b, 0) / values.length)
+    const rawValues = (statsData ?? data).map((d) => d.value)
+    const first = values[0] ?? 0
+    const last = values[values.length - 1] ?? 0
+    const avg = values.length > 0 ? Math.round(values.reduce((a, b) => a + b, 0) / values.length) : 0
     const change = last - first
     const weightUnit = unitSystem === 'imperial' ? 'lbs' : 'kg'
 
     if (graphType === 'orm') {
+        const best = rawValues.length > 0 ? Math.max(...rawValues) : 0
         const changePercent = first !== 0 ? Math.round((change / first) * 100) : 0
         const sign = change >= 0 ? '+' : ''
         const arrow =
             change > 0 ? ' ↑'
             : change < 0 ? ' ↓'
             : ' →'
-        const best = Math.max(...values)
         return [
             { label: 'ESTIMATED BEST', value: `${best} ${weightUnit}` },
             { label: 'CHANGE', value: `${sign}${Math.round(change)} ${weightUnit} (${sign}${changePercent}%)${arrow}` },
@@ -38,8 +46,8 @@ function computeStats(graphType: GraphType, data: Array<{ day: string; value: nu
     }
 
     if (graphType === 'sets') {
-        const total = Math.round(values.reduce((a, b) => a + b, 0))
-        const activeDays = values.filter((v) => v > 0)
+        const total = Math.round(rawValues.reduce((a, b) => a + b, 0))
+        const activeDays = rawValues.filter((v) => v > 0)
         const avgActive = activeDays.length > 0 ? Math.round(activeDays.reduce((a, b) => a + b, 0) / activeDays.length) : 0
         return [
             { label: 'AVG SETS / DAY', value: `${avgActive} sets` },
@@ -94,22 +102,22 @@ function computeStats(graphType: GraphType, data: Array<{ day: string; value: nu
     return []
 }
 
-export default function GraphStats({ graphType, data, unitSystem, mode, goalWeight }: GraphStatsProps) {
+export default function GraphStats({ graphType, data, statsData, unitSystem, mode, goalWeight }: GraphStatsProps) {
     const chartColor = mode ? '#2f80ed' : '#22C933'
 
     if (data.length === 0) return null
 
-    if (data.length < 2) return null
-
-    const stats = computeStats(graphType, data, unitSystem, goalWeight)
+    const stats = computeStats(graphType, data, unitSystem, goalWeight, statsData)
 
     return (
         <View style={styles.container}>
             <View style={styles.chipsRow}>
                 {stats.map((stat, i) => (
-                    <View key={i} style={styles.chip}>
+                    <View key={i} style={[styles.chip, { borderColor: chartColor + '44' }]}>
                         <Text style={styles.chipLabel}>{stat.label}</Text>
-                        <Text style={styles.chipValue}>{stat.value}</Text>
+                        <Text style={styles.chipValue} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.75}>
+                            {stat.value}
+                        </Text>
                     </View>
                 ))}
             </View>
@@ -129,7 +137,8 @@ const styles = StyleSheet.create({
     chip: {
         flex: 1,
         backgroundColor: '#252525',
-        borderRadius: 10,
+        borderRadius: 14,
+        borderWidth: 1,
         paddingVertical: 8,
         paddingHorizontal: 10,
         alignItems: 'center',
@@ -148,12 +157,5 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_600SemiBold',
         letterSpacing: -0.3,
         textAlign: 'center',
-    },
-    fallback: {
-        fontSize: 12,
-        color: '#666',
-        fontFamily: 'Poppins_400Regular',
-        textAlign: 'center',
-        paddingVertical: 8,
     },
 })

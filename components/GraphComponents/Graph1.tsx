@@ -8,9 +8,10 @@ interface Graph1Props {
     mode: boolean
     data: Array<{ day: string; value: number }>
     selectedRange: 7 | 14 | 21
+    chartNote?: { lines: string[] }
 }
 
-export default function Graph1({ mode, data, selectedRange }: Graph1Props) {
+export default function Graph1({ mode, data, selectedRange, chartNote }: Graph1Props) {
     const font = useFont(Poppins_400Regular, 12)
     const { state, isActive } = useChartPressState({ x: '', y: { value: 0 } })
 
@@ -103,22 +104,27 @@ export default function Graph1({ mode, data, selectedRange }: Graph1Props) {
                     },
                 ]}
                 renderOutside={({ canvasSize, chartBounds }) => {
-                    const bucketSize = selectedRange / 7 // 2 for 14, 3 for 21
-                    const timeUnit = mode ? 'lifts' : 'days'
-                    const line1 = `Data is downsampled for every ${bucketSize} ${timeUnit}`
-                    const line2 = "X-axis labels won't be shown"
-                    const line1Width = font ? font.getTextWidth(line1) : 0
-                    const line2Width = font ? font.getTextWidth(line2) : 0
+                    if (!chartNote) return null
+
+                    const lineHeight = 14
+                    const firstLineY = chartBounds.bottom + 16
 
                     return (
                         <>
-                            {/* Downsampled data message when range is 14 or 21 */}
-                            {selectedRange !== 7 && (
-                                <>
-                                    <Text x={(canvasSize.width - line1Width) / 2} y={chartBounds.bottom + 16} text={line1} font={font} color="#888888" style="fill" />
-                                    <Text x={(canvasSize.width - line2Width) / 2} y={chartBounds.bottom + 30} text={line2} font={font} color="#888888" style="fill" />
-                                </>
-                            )}
+                            {chartNote.lines.map((line, index) => {
+                                const lineWidth = font.getTextWidth(line)
+                                return (
+                                    <Text
+                                        key={index}
+                                        x={(canvasSize.width - lineWidth) / 2}
+                                        y={firstLineY + index * lineHeight}
+                                        text={line}
+                                        font={font}
+                                        color="#888888"
+                                        style="fill"
+                                    />
+                                )
+                            })}
                         </>
                     )
                 }}
