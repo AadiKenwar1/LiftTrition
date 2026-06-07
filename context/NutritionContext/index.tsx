@@ -3,7 +3,7 @@ import { powerSync } from '@/lib/powersync/system';
 import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useState } from "react";
 import { loadNutritionData, upsertNutritionEntry, upsertSavedNutritionEntry } from './database/powersyncStore';
 import { analyzeAndAddPhoto } from "./functions/aiFunctions";
-import { addNutrition, deleteNutrition, editNutrition, saveNutrition, unsaveNutrition } from "./functions/crudFunctions";
+import { addNutrition, bumpSavedNutrition, deleteNutrition, editNutrition, saveNutrition, unsaveNutrition } from "./functions/crudFunctions";
 import { getMacroDataForGraph, getMacrosForDate, getNutritionStreakState } from "./functions/graphFunctions";
 import { NutritionContextInterface, NutritionEntry } from "./types";
 import uuid from 'react-native-uuid';
@@ -100,6 +100,16 @@ export const NutritionProvider = ({ children }: PropsWithChildren) => {
         }
     }
 
+    const handleBumpSavedNutrition = async (id: string) => {
+        const bumped = bumpSavedNutrition(id, setSavedNutritionEntries);
+        if (!bumped || !userID) return;
+        try {
+            await upsertSavedNutritionEntry(bumped);
+        } catch (e) {
+            console.warn('[NutritionContext] Failed to bump saved nutrition entry in PowerSync', e);
+        }
+    }
+
     const handleUnsaveNutrition = async (id: string) => {
         await unsaveNutrition(id, setSavedNutritionEntries, userID);
     }
@@ -135,6 +145,7 @@ export const NutritionProvider = ({ children }: PropsWithChildren) => {
                 handleDeleteNutrition,
                 handleEditNutrition,
                 handleSaveNutrition,
+                handleBumpSavedNutrition,
                 handleUnsaveNutrition,
                 handleAnalyzeAndAddPhoto,
                 handleGetMacrosForDate,

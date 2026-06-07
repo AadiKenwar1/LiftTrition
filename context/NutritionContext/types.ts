@@ -40,6 +40,7 @@ export interface NutritionContextInterface {
     handleDeleteNutrition: (id: string) => Promise<void>;
     handleEditNutrition: (id: string, nutritionEntry: NutritionEntry) => Promise<void>;
     handleSaveNutrition: (nutritionEntry: NutritionEntry) => Promise<void>;
+    handleBumpSavedNutrition: (id: string) => Promise<void>;
     handleUnsaveNutrition: (id: string) => Promise<void>;
     handleAnalyzeAndAddPhoto: (photoUri: string, userID: string) => Promise<void>;
     handleGetMacrosForDate: (date: Date) => { totalProtein: number; totalCarbs: number; totalFats: number; totalCalories: number };

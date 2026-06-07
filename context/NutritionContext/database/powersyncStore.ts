@@ -150,7 +150,7 @@ export async function loadNutritionData(userId: string): Promise<{
     });
 
     const savedEntryRows = await powerSync.getAll(
-        'SELECT * FROM saved_nutrition_entries WHERE user_id = ? ORDER BY created_at DESC',
+        'SELECT * FROM saved_nutrition_entries WHERE user_id = ? ORDER BY updated_at DESC, created_at DESC',
         [userId]
     ) as SavedNutritionEntryRecord[];
 

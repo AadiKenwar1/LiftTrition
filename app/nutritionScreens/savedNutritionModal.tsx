@@ -1,12 +1,12 @@
-import SavedEntry from '@/components/NutritionComponents/SavedEntry'
 import StagedSection from '@/components/NeutralComponents/StagedSection'
+import SavedEntry from '@/components/NutritionComponents/SavedEntry'
 import { useAuth } from '@/context/AuthContext'
 import { useNutrition } from '@/context/NutritionContext'
 import { Ingredient, NutritionEntry } from '@/context/NutritionContext/types'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { Bookmark, Check, X } from 'lucide-react-native'
-import { useMemo, useState, useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Alert, FlatList, KeyboardAvoidingView, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import uuid from 'react-native-uuid'
 
@@ -30,7 +30,7 @@ function scaleIngredients(ingredients: Ingredient[], factor: number): Ingredient
 }
 
 export default function SavedNutritionModal() {
-    const { savedNutritionEntries, handleUnsaveNutrition, handleAddNutrition, selectedDate } = useNutrition()
+    const { savedNutritionEntries, handleUnsaveNutrition, handleBumpSavedNutrition, handleAddNutrition, selectedDate } = useNutrition()
     const { userID } = useAuth()
     const router = useRouter()
 
@@ -42,9 +42,10 @@ export default function SavedNutritionModal() {
     const [isFocused, setIsFocused] = useState(false)
 
     const filteredSavedEntries = useMemo(() => {
+        const sorted = [...savedNutritionEntries].sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
         const q = searchQuery.trim().toLowerCase()
-        if (!q) return savedNutritionEntries
-        return savedNutritionEntries.filter((entry) => entry.name.toLowerCase().includes(q))
+        if (!q) return sorted
+        return sorted.filter((entry) => entry.name.toLowerCase().includes(q))
     }, [savedNutritionEntries, searchQuery])
 
     useEffect(() => {
@@ -148,6 +149,9 @@ export default function SavedNutritionModal() {
                 handleAddNutrition(nutritionEntry)
             }
         }
+        for (const row of addedItems) {
+            handleBumpSavedNutrition(row.savedItem.id)
+        }
         router.back()
     }
 
@@ -160,16 +164,10 @@ export default function SavedNutritionModal() {
             </View>
 
             <Text style={styles.title}>Saved Meals</Text>
-            <Text style={styles.subtitle}>Your frequently used meals</Text>
+            <Text style={styles.subtitle}>Sorted by most recently used</Text>
 
             {addedItems.length > 0 && (
-                <StagedSection
-                    label="Added"
-                    count={addedItems.length}
-                    color="#22C922"
-                    combineItems={combineItems}
-                    onCombineItemsChange={setCombineItems}
-                >
+                <StagedSection label="Added" count={addedItems.length} color="#22C922" combineItems={combineItems} onCombineItemsChange={setCombineItems}>
                     {addedItems.map((row) => {
                         const q = row.quantity
                         const s = row.savedItem
@@ -177,7 +175,10 @@ export default function SavedNutritionModal() {
                             <View key={row.lineId} style={styles.stagedRow}>
                                 <View style={styles.stagedInfo}>
                                     <Text style={styles.stagedName}>
-                                        {s.name}{q > 1 ? <Text style={styles.stagedQty}> ×{q}</Text> : ''}
+                                        {s.name}
+                                        {q > 1 ?
+                                            <Text style={styles.stagedQty}> ×{q}</Text>
+                                        :   ''}
                                     </Text>
                                     <View style={styles.macroRow}>
                                         <View style={styles.macroPill}>
@@ -205,18 +206,7 @@ export default function SavedNutritionModal() {
 
             {savedNutritionEntries.length > 0 && (
                 <View style={styles.searchContainer}>
-                    <TextInput
-                        style={[styles.searchInput, isFocused && styles.searchInputFocused]}
-                        placeholder="Search saved meals..."
-                        placeholderTextColor="#666"
-                        value={searchQuery}
-                        onChangeText={setSearchQuery}
-                        onFocus={() => setIsFocused(true)}
-                        onBlur={() => setIsFocused(false)}
-                        autoCorrect={false}
-                        autoCapitalize="none"
-                        returnKeyType="search"
-                    />
+                    <TextInput style={[styles.searchInput, isFocused && styles.searchInputFocused]} placeholder="Search saved meals..." placeholderTextColor="#666" value={searchQuery} onChangeText={setSearchQuery} onFocus={() => setIsFocused(true)} onBlur={() => setIsFocused(false)} autoCorrect={false} autoCapitalize="none" returnKeyType="search" />
                 </View>
             )}
         </>
@@ -287,11 +277,7 @@ export default function SavedNutritionModal() {
                 <View style={styles.addAllContainer}>
                     <TouchableOpacity onPress={handleAddAll} activeOpacity={0.8} style={styles.addAllButtonTouchable}>
                         <LinearGradient colors={['#3CB855', '#22C922', '#5CE073']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.addAllButton}>
-                            <Text style={styles.addAllButtonText}>
-                                {combineItems && addedItems.length >= 2
-                                    ? 'Add 1 combined meal'
-                                    : `Add ${addedItems.length} Item${addedItems.length > 1 ? 's' : ''}`}
-                            </Text>
+                            <Text style={styles.addAllButtonText}>{combineItems && addedItems.length >= 2 ? 'Add 1 combined meal' : `Add ${addedItems.length} Item${addedItems.length > 1 ? 's' : ''}`}</Text>
                         </LinearGradient>
                     </TouchableOpacity>
                 </View>

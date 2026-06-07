@@ -131,15 +131,7 @@ export default function AddNutritionModal() {
                         Meal Name
                     </Text>
                     <View style={styles.inputContainer}>
-                        <TextInput
-                            style={[styles.input, focusedField === 'mealName' && styles.inputFocused]}
-                            placeholder="e.g., Grilled Chicken Salad"
-                            placeholderTextColor="#666"
-                            value={mealName}
-                            onChangeText={setMealName}
-                            onFocus={() => setFocusedField('mealName')}
-                            onBlur={() => setFocusedField(null)}
-                        />
+                        <TextInput style={[styles.input, focusedField === 'mealName' && styles.inputFocused]} placeholder="e.g., Grilled Chicken Salad" placeholderTextColor="#666" value={mealName} onChangeText={setMealName} onFocus={() => setFocusedField('mealName')} onBlur={() => setFocusedField(null)} />
                     </View>
                 </View>
 
@@ -159,16 +151,7 @@ export default function AddNutritionModal() {
                                 (kcal)
                             </Text>
                         </View>
-                        <TextInput
-                            style={[styles.macroInput, focusedField === 'calories' && styles.inputFocused]}
-                            placeholder="0"
-                            placeholderTextColor="#666"
-                            value={calories}
-                            onChangeText={setCalories}
-                            onFocus={() => setFocusedField('calories')}
-                            onBlur={() => setFocusedField(null)}
-                            keyboardType="numeric"
-                        />
+                        <TextInput style={[styles.macroInput, focusedField === 'calories' && styles.inputFocused]} placeholder="0" placeholderTextColor="#666" value={calories} onChangeText={setCalories} onFocus={() => setFocusedField('calories')} onBlur={() => setFocusedField(null)} keyboardType="numeric" />
                         {renderAiButton('calories')}
                     </View>
 
@@ -182,16 +165,7 @@ export default function AddNutritionModal() {
                                 (g)
                             </Text>
                         </View>
-                        <TextInput
-                            style={[styles.macroInput, focusedField === 'fats' && styles.inputFocused]}
-                            placeholder="0"
-                            placeholderTextColor="#666"
-                            value={fats}
-                            onChangeText={setFats}
-                            onFocus={() => setFocusedField('fats')}
-                            onBlur={() => setFocusedField(null)}
-                            keyboardType="numeric"
-                        />
+                        <TextInput style={[styles.macroInput, focusedField === 'fats' && styles.inputFocused]} placeholder="0" placeholderTextColor="#666" value={fats} onChangeText={setFats} onFocus={() => setFocusedField('fats')} onBlur={() => setFocusedField(null)} keyboardType="numeric" />
                         {renderAiButton('fats')}
                     </View>
 
@@ -205,16 +179,7 @@ export default function AddNutritionModal() {
                                 (g)
                             </Text>
                         </View>
-                        <TextInput
-                            style={[styles.macroInput, focusedField === 'carbs' && styles.inputFocused]}
-                            placeholder="0"
-                            placeholderTextColor="#666"
-                            value={carbs}
-                            onChangeText={setCarbs}
-                            onFocus={() => setFocusedField('carbs')}
-                            onBlur={() => setFocusedField(null)}
-                            keyboardType="numeric"
-                        />
+                        <TextInput style={[styles.macroInput, focusedField === 'carbs' && styles.inputFocused]} placeholder="0" placeholderTextColor="#666" value={carbs} onChangeText={setCarbs} onFocus={() => setFocusedField('carbs')} onBlur={() => setFocusedField(null)} keyboardType="numeric" />
                         {renderAiButton('carbs')}
                     </View>
 
@@ -228,16 +193,7 @@ export default function AddNutritionModal() {
                                 (g)
                             </Text>
                         </View>
-                        <TextInput
-                            style={[styles.macroInput, focusedField === 'protein' && styles.inputFocused]}
-                            placeholder="0"
-                            placeholderTextColor="#666"
-                            value={protein}
-                            onChangeText={setProtein}
-                            onFocus={() => setFocusedField('protein')}
-                            onBlur={() => setFocusedField(null)}
-                            keyboardType="numeric"
-                        />
+                        <TextInput style={[styles.macroInput, focusedField === 'protein' && styles.inputFocused]} placeholder="0" placeholderTextColor="#666" value={protein} onChangeText={setProtein} onFocus={() => setFocusedField('protein')} onBlur={() => setFocusedField(null)} keyboardType="numeric" />
                         {renderAiButton('protein')}
                     </View>
                 </View>

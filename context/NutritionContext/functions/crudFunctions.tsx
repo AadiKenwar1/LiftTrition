@@ -52,6 +52,20 @@ export function saveNutrition(
     return true;
 }
 
+export function bumpSavedNutrition(
+    id: string,
+    setSavedNutritionEntries: Dispatch<SetStateAction<NutritionEntry[]>>
+): NutritionEntry | null {
+    let bumped: NutritionEntry | null = null
+    setSavedNutritionEntries(prev => {
+        const entry = prev.find(item => item.id === id)
+        if (!entry) return prev
+        bumped = { ...entry, updatedAt: new Date() }
+        return [bumped, ...prev.filter(item => item.id !== id)]
+    })
+    return bumped
+}
+
 export async function unsaveNutrition(
     id: string,
     setSavedNutritionEntries: Dispatch<SetStateAction<NutritionEntry[]>>,
