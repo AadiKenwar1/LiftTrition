@@ -1,14 +1,18 @@
 import React from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Switch, Text, View } from 'react-native'
 
 interface StagedSectionProps {
     label: string
     count: number
     color: string
     children: React.ReactNode
+    combineItems?: boolean
+    onCombineItemsChange?: (value: boolean) => void
 }
 
-export default function StagedSection({ label, count, color, children }: StagedSectionProps) {
+export default function StagedSection({ label, count, color, children, combineItems, onCombineItemsChange }: StagedSectionProps) {
+    const showCombineToggle = count >= 2 && onCombineItemsChange != null
+
     return (
         <View style={[styles.container, { backgroundColor: `${color}12`, borderColor: `${color}40` }]}>
             <View style={styles.header}>
@@ -18,6 +22,17 @@ export default function StagedSection({ label, count, color, children }: StagedS
                     <Text style={styles.badgeText}>{count}</Text>
                 </View>
             </View>
+            {showCombineToggle && (
+                <View style={styles.combineRow}>
+                    <Text style={styles.combineLabel}>Combine items</Text>
+                    <Switch
+                        value={combineItems ?? false}
+                        onValueChange={onCombineItemsChange}
+                        trackColor={{ false: '#333', true: `${color}88` }}
+                        thumbColor={combineItems ? color : '#888'}
+                    />
+                </View>
+            )}
             {children}
         </View>
     )
@@ -62,5 +77,18 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontFamily: 'Poppins_600SemiBold',
         lineHeight: 14,
+    },
+    combineRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginBottom: 10,
+        paddingVertical: 4,
+    },
+    combineLabel: {
+        fontSize: 14,
+        color: '#ccc',
+        fontFamily: 'Poppins_500Medium',
+        letterSpacing: -0.2,
     },
 })

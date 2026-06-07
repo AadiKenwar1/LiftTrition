@@ -21,6 +21,7 @@ export default function FoodDBModal() {
 
     const [searchQuery, setSearchQuery] = useState('')
     const [addedItems, setAddedItems] = useState<FoodItemWithQuantity[]>([])
+    const [combineItems, setCombineItems] = useState(false)
     const [isFocused, setIsFocused] = useState(false)
     const [quantityInputItem, setQuantityInputItem] = useState<FoodItem | null>(null)
     const [quantityValue, setQuantityValue] = useState('1')
@@ -51,6 +52,10 @@ export default function FoodDBModal() {
         }, 500)
         return () => clearTimeout(timeoutId)
     }, [searchQuery])
+
+    useEffect(() => {
+        if (addedItems.length < 2) setCombineItems(false)
+    }, [addedItems.length])
 
     //Adds item from the list of search results
     async function handleAddItem(searchItem: FoodSearchResult) {
@@ -92,25 +97,59 @@ export default function FoodDBModal() {
 
     //Adds all items from the list of added items to the nutrition context
     function handleAddAll() {
-        for (const item of addedItems) {
+        if (combineItems && addedItems.length >= 2) {
             const createdAt = new Date()
-            const quantity = item.quantity || 1
-            const nutritionEntry = {
+            let protein = 0
+            let carbs = 0
+            let fats = 0
+            let calories = 0
+            const names: string[] = []
+
+            for (const item of addedItems) {
+                const quantity = item.quantity || 1
+                names.push(quantity > 1 ? `${item.name} ×${quantity}` : item.name)
+                protein += item.protein * quantity
+                carbs += item.carbs * quantity
+                fats += item.fats * quantity
+                calories += item.calories * quantity
+            }
+
+            handleAddNutrition({
                 id: uuid.v4() as string,
                 userId: userID,
-                name: item.name,
+                name: names.join(' + '),
                 date: new Date(selectedDate),
                 time: createdAt.getTime(),
-                protein: item.protein * quantity,
-                carbs: item.carbs * quantity,
-                fats: item.fats * quantity,
-                calories: item.calories * quantity,
+                protein,
+                carbs,
+                fats,
+                calories,
                 isPhoto: false,
                 ingredients: [],
                 createdAt,
                 updatedAt: createdAt,
+            })
+        } else {
+            for (const item of addedItems) {
+                const createdAt = new Date()
+                const quantity = item.quantity || 1
+                const nutritionEntry = {
+                    id: uuid.v4() as string,
+                    userId: userID,
+                    name: item.name,
+                    date: new Date(selectedDate),
+                    time: createdAt.getTime(),
+                    protein: item.protein * quantity,
+                    carbs: item.carbs * quantity,
+                    fats: item.fats * quantity,
+                    calories: item.calories * quantity,
+                    isPhoto: false,
+                    ingredients: [],
+                    createdAt,
+                    updatedAt: createdAt,
+                }
+                handleAddNutrition(nutritionEntry)
             }
-            handleAddNutrition(nutritionEntry)
         }
         router.back()
     }
@@ -187,7 +226,13 @@ export default function FoodDBModal() {
 
                     {/* Added Items Section */}
                     {addedItems.length > 0 && (
-                        <StagedSection label="Added" count={addedItems.length} color="#22C922">
+                        <StagedSection
+                            label="Added"
+                            count={addedItems.length}
+                            color="#22C922"
+                            combineItems={combineItems}
+                            onCombineItemsChange={setCombineItems}
+                        >
                             {addedItems.map((item) => {
                                 const q = item.quantity || 1
                                 return (
@@ -268,7 +313,9 @@ export default function FoodDBModal() {
                     <TouchableOpacity onPress={handleAddAll} activeOpacity={0.8} style={styles.addAllButtonTouchable}>
                         <LinearGradient colors={['#3CB855', '#22C922', '#5CE073']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.addAllButton}>
                             <Text style={styles.addAllButtonText}>
-                                Add {addedItems.length} Item{addedItems.length > 1 ? 's' : ''}
+                                {combineItems && addedItems.length >= 2
+                                    ? 'Add 1 combined meal'
+                                    : `Add ${addedItems.length} Item${addedItems.length > 1 ? 's' : ''}`}
                             </Text>
                         </LinearGradient>
                     </TouchableOpacity>

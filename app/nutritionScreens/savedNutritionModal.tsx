@@ -6,7 +6,7 @@ import { Ingredient, NutritionEntry } from '@/context/NutritionContext/types'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { Bookmark, Check, X } from 'lucide-react-native'
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { Alert, FlatList, KeyboardAvoidingView, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import uuid from 'react-native-uuid'
 
@@ -35,6 +35,7 @@ export default function SavedNutritionModal() {
     const router = useRouter()
 
     const [addedItems, setAddedItems] = useState<StagedSavedMeal[]>([])
+    const [combineItems, setCombineItems] = useState(false)
     const [quantityInputItem, setQuantityInputItem] = useState<NutritionEntry | null>(null)
     const [quantityValue, setQuantityValue] = useState('1')
     const [searchQuery, setSearchQuery] = useState('')
@@ -45,6 +46,10 @@ export default function SavedNutritionModal() {
         if (!q) return savedNutritionEntries
         return savedNutritionEntries.filter((entry) => entry.name.toLowerCase().includes(q))
     }, [savedNutritionEntries, searchQuery])
+
+    useEffect(() => {
+        if (addedItems.length < 2) setCombineItems(false)
+    }, [addedItems.length])
 
     function openQuantityModal(savedItem: NutritionEntry) {
         setQuantityInputItem(savedItem)
@@ -83,27 +88,65 @@ export default function SavedNutritionModal() {
     }
 
     function handleAddAll() {
-        for (const row of addedItems) {
+        if (combineItems && addedItems.length >= 2) {
             const createdAt = new Date()
-            const q = row.quantity
-            const base = row.savedItem
+            let protein = 0
+            let carbs = 0
+            let fats = 0
+            let calories = 0
+            const ingredients: Ingredient[] = []
+            const names: string[] = []
+
+            for (const row of addedItems) {
+                const q = row.quantity
+                const base = row.savedItem
+                names.push(q > 1 ? `${base.name} ×${q}` : base.name)
+                protein += base.protein * q
+                carbs += base.carbs * q
+                fats += base.fats * q
+                calories += base.calories * q
+                ingredients.push(...scaleIngredients(base.ingredients, q))
+            }
+
             const nutritionEntry: NutritionEntry = {
                 id: uuid.v4() as string,
                 userId: userID,
-                name: base.name,
+                name: names.join(' + '),
                 date: new Date(selectedDate),
                 time: createdAt.getTime(),
-                protein: Math.round(base.protein * q * 10) / 10,
-                carbs: Math.round(base.carbs * q * 10) / 10,
-                fats: Math.round(base.fats * q * 10) / 10,
-                calories: Math.round(base.calories * q),
-                isPhoto: base.isPhoto,
-                photoUri: base.photoUri,
-                ingredients: scaleIngredients(base.ingredients, q),
+                protein: Math.round(protein * 10) / 10,
+                carbs: Math.round(carbs * 10) / 10,
+                fats: Math.round(fats * 10) / 10,
+                calories: Math.round(calories),
+                isPhoto: false,
+                ingredients,
                 createdAt,
                 updatedAt: createdAt,
             }
             handleAddNutrition(nutritionEntry)
+        } else {
+            for (const row of addedItems) {
+                const createdAt = new Date()
+                const q = row.quantity
+                const base = row.savedItem
+                const nutritionEntry: NutritionEntry = {
+                    id: uuid.v4() as string,
+                    userId: userID,
+                    name: base.name,
+                    date: new Date(selectedDate),
+                    time: createdAt.getTime(),
+                    protein: Math.round(base.protein * q * 10) / 10,
+                    carbs: Math.round(base.carbs * q * 10) / 10,
+                    fats: Math.round(base.fats * q * 10) / 10,
+                    calories: Math.round(base.calories * q),
+                    isPhoto: base.isPhoto,
+                    photoUri: base.photoUri,
+                    ingredients: scaleIngredients(base.ingredients, q),
+                    createdAt,
+                    updatedAt: createdAt,
+                }
+                handleAddNutrition(nutritionEntry)
+            }
         }
         router.back()
     }
@@ -120,7 +163,13 @@ export default function SavedNutritionModal() {
             <Text style={styles.subtitle}>Your frequently used meals</Text>
 
             {addedItems.length > 0 && (
-                <StagedSection label="Added" count={addedItems.length} color="#22C922">
+                <StagedSection
+                    label="Added"
+                    count={addedItems.length}
+                    color="#22C922"
+                    combineItems={combineItems}
+                    onCombineItemsChange={setCombineItems}
+                >
                     {addedItems.map((row) => {
                         const q = row.quantity
                         const s = row.savedItem
@@ -239,7 +288,9 @@ export default function SavedNutritionModal() {
                     <TouchableOpacity onPress={handleAddAll} activeOpacity={0.8} style={styles.addAllButtonTouchable}>
                         <LinearGradient colors={['#3CB855', '#22C922', '#5CE073']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.addAllButton}>
                             <Text style={styles.addAllButtonText}>
-                                Add {addedItems.length} Item{addedItems.length > 1 ? 's' : ''}
+                                {combineItems && addedItems.length >= 2
+                                    ? 'Add 1 combined meal'
+                                    : `Add ${addedItems.length} Item${addedItems.length > 1 ? 's' : ''}`}
                             </Text>
                         </LinearGradient>
                     </TouchableOpacity>

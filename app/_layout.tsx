@@ -7,26 +7,7 @@ import { NutritionProvider, useNutrition } from '@/context/NutritionContext'
 import { SettingsProvider, useSettings } from '@/context/SettingsContext'
 import { ThemeProvider, useColorScheme } from '@/context/ThemeContext'
 import { useWorkout, WorkoutProvider } from '@/context/WorkoutContext'
-import {
-    Poppins_100Thin,
-    Poppins_100Thin_Italic,
-    Poppins_200ExtraLight,
-    Poppins_200ExtraLight_Italic,
-    Poppins_300Light,
-    Poppins_300Light_Italic,
-    Poppins_400Regular,
-    Poppins_400Regular_Italic,
-    Poppins_500Medium,
-    Poppins_500Medium_Italic,
-    Poppins_600SemiBold,
-    Poppins_600SemiBold_Italic,
-    Poppins_700Bold,
-    Poppins_700Bold_Italic,
-    Poppins_800ExtraBold,
-    Poppins_800ExtraBold_Italic,
-    Poppins_900Black,
-    Poppins_900Black_Italic,
-} from '@expo-google-fonts/poppins'
+import { Poppins_100Thin, Poppins_100Thin_Italic, Poppins_200ExtraLight, Poppins_200ExtraLight_Italic, Poppins_300Light, Poppins_300Light_Italic, Poppins_400Regular, Poppins_400Regular_Italic, Poppins_500Medium, Poppins_500Medium_Italic, Poppins_600SemiBold, Poppins_600SemiBold_Italic, Poppins_700Bold, Poppins_700Bold_Italic, Poppins_800ExtraBold, Poppins_800ExtraBold_Italic, Poppins_900Black, Poppins_900Black_Italic } from '@expo-google-fonts/poppins'
 import { Ionicons } from '@expo/vector-icons'
 import FontAwesome from '@expo/vector-icons/FontAwesome'
 import { DarkTheme, DefaultTheme, ThemeProvider as NavigationThemeProvider } from '@react-navigation/native'
@@ -44,6 +25,12 @@ import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 /** Largest common iPhone portrait width (~Pro Max); on iPad this centers a phone-width column with side gutters. */
 const PHONE_MAX_WIDTH = 400
+
+/** Modal routes keep swipe-to-dismiss; all other stack screens use header back only. */
+const modalPresentation = {
+    presentation: 'modal' as const,
+    gestureEnabled: true,
+}
 
 function AppColumn({ children }: PropsWithChildren) {
     return (
@@ -140,6 +127,7 @@ function StackLayout() {
         <AppColumn>
             <Stack
                 screenOptions={{
+                    gestureEnabled: false,
                     headerLeft: ({ canGoBack }) => (canGoBack ? <HeaderBackButton /> : null),
                     headerShadowVisible: false,
                     headerTitleStyle: {
@@ -168,24 +156,24 @@ function StackLayout() {
 
                 <Stack.Protected guard={!!session && allContextsLoaded && settings.onboardingComplete}>
                     <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                    <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-                    <Stack.Screen name="workoutScreens/addWorkoutModal" options={{ presentation: 'modal', title: 'Add Workout', headerShown: false }} />
-                    <Stack.Screen name="workoutScreens/archiveModal" options={{ presentation: 'modal', headerShown: false }} />
+                    <Stack.Screen name="modal" options={modalPresentation} />
+                    <Stack.Screen name="workoutScreens/addWorkoutModal" options={{ ...modalPresentation, title: 'Add Workout', headerShown: false }} />
+                    <Stack.Screen name="workoutScreens/archiveModal" options={{ ...modalPresentation, headerShown: false }} />
                     <Stack.Screen name="workoutScreens/exerciseScreen" options={{ title: 'Exercises', headerShown: true, headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
-                    <Stack.Screen name="workoutScreens/addExerciseModal" options={{ presentation: 'modal', headerShown: false }} />
-                    <Stack.Screen name="workoutScreens/logsModal" options={{ presentation: 'modal', headerShown: false }} />
-                    <Stack.Screen name="workoutScreens/notesModal" options={{ presentation: 'modal', headerShown: false }} />
-                    <Stack.Screen name="workoutScreens/renameModal" options={{ presentation: 'modal', headerShown: false }} />
-                    <Stack.Screen name="nutritionScreens/addNutritionModal" options={{ presentation: 'modal', headerShown: false }} />
-                    <Stack.Screen name="nutritionScreens/savedNutritionModal" options={{ presentation: 'modal', headerShown: false }} />
-                    <Stack.Screen name="nutritionScreens/foodDBModal" options={{ presentation: 'modal', headerShown: false }} />
-                    <Stack.Screen name="nutritionScreens/cameraScreen" options={{ presentation: 'modal', headerShown: false }} />
-                    <Stack.Screen name="nutritionScreens/barcodeScreen" options={{ presentation: 'modal', headerShown: false }} />
-                    <Stack.Screen name="nutritionScreens/analyzingModal" options={{ presentation: 'modal', headerShown: false }} />
-                    <Stack.Screen name="nutritionScreens/updateBWModal" options={{ presentation: 'modal', headerShown: false }} />
-                    <Stack.Screen name="nutritionScreens/dateModal" options={{ presentation: 'modal', headerShown: false }} />
-                    <Stack.Screen name="nutritionScreens/editManualEntry" options={{ presentation: 'modal', headerShown: false }} />
-                    <Stack.Screen name="nutritionScreens/editPhotoEntry" options={{ presentation: 'modal', headerShown: false }} />
+                    <Stack.Screen name="workoutScreens/addExerciseModal" options={{ ...modalPresentation, headerShown: false }} />
+                    <Stack.Screen name="workoutScreens/logsModal" options={{ ...modalPresentation, headerShown: false }} />
+                    <Stack.Screen name="workoutScreens/notesModal" options={{ ...modalPresentation, headerShown: false }} />
+                    <Stack.Screen name="workoutScreens/renameModal" options={{ ...modalPresentation, headerShown: false }} />
+                    <Stack.Screen name="nutritionScreens/addNutritionModal" options={{ ...modalPresentation, headerShown: false }} />
+                    <Stack.Screen name="nutritionScreens/savedNutritionModal" options={{ ...modalPresentation, headerShown: false }} />
+                    <Stack.Screen name="nutritionScreens/foodDBModal" options={{ ...modalPresentation, headerShown: false }} />
+                    <Stack.Screen name="nutritionScreens/cameraScreen" options={{ ...modalPresentation, headerShown: false }} />
+                    <Stack.Screen name="nutritionScreens/barcodeScreen" options={{ ...modalPresentation, headerShown: false }} />
+                    <Stack.Screen name="nutritionScreens/analyzingModal" options={{ ...modalPresentation, headerShown: false }} />
+                    <Stack.Screen name="nutritionScreens/updateBWModal" options={{ ...modalPresentation, headerShown: false }} />
+                    <Stack.Screen name="nutritionScreens/dateModal" options={{ ...modalPresentation, headerShown: false }} />
+                    <Stack.Screen name="nutritionScreens/editManualEntry" options={{ ...modalPresentation, headerShown: false }} />
+                    <Stack.Screen name="nutritionScreens/editPhotoEntry" options={{ ...modalPresentation, headerShown: false }} />
                     <Stack.Screen name="settingsScreens/profile" options={{ headerShown: true, title: 'Profile', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="settingsScreens/subscription" options={{ headerShown: true, title: 'Subscription', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="settingsScreens/adjustTraining" options={{ headerShown: true, title: 'Adjust Training', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
@@ -196,7 +184,7 @@ function StackLayout() {
                     <Stack.Screen name="settingsScreens/termsAndPrivacy" options={{ headerShown: true, title: 'Terms & Privacy', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="settingsScreens/support" options={{ headerShown: true, title: 'Support', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="settingsScreens/howItWorks" options={{ headerShown: true, title: 'How It Works', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
-                    <Stack.Screen name="settingsScreens/devStatsModal" options={{ presentation: 'modal', headerShown: false }} />
+                    <Stack.Screen name="settingsScreens/devStatsModal" options={{ ...modalPresentation, headerShown: false }} />
                 </Stack.Protected>
             </Stack>
         </AppColumn>
