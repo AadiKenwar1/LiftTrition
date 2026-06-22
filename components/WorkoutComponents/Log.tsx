@@ -1,5 +1,7 @@
+import { fonts, radius, useColorScheme, useColors, type Colors } from '@/context/ThemeContext'
 import { Image } from 'expo-image'
 import { Dumbbell, Pencil } from 'lucide-react-native'
+import { useMemo } from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 interface LogProps {
@@ -15,6 +17,10 @@ interface LogProps {
 }
 
 export default function Log({ text, subtitle, imgSource, showImageFallback = false, wrapperHeight = 96, textLines = 2, onPress, onEditPress, onMenuPress }: LogProps) {
+    const colors = useColors()
+    const isDark = useColorScheme() === 'dark'
+    const styles = useMemo(() => makeStyles(colors, isDark), [colors, isDark])
+
     return (
         <TouchableOpacity onPress={onPress} onLongPress={onMenuPress} delayLongPress={300}>
             <View style={styles.outerwrapper}>
@@ -26,7 +32,7 @@ export default function Log({ text, subtitle, imgSource, showImageFallback = fal
                                 <View style={styles.imageCircle}>
                                     {imgSource ?
                                         <Image source={imgSource} style={styles.exerciseImage} contentFit="contain" cachePolicy="memory" transition={300} />
-                                    :   <Dumbbell size={25} color="#ffffff" strokeWidth={1.8} />}
+                                    :   <Dumbbell size={25} color={colors.text} strokeWidth={1.8} />}
                                 </View>
                             </View>
                         )}
@@ -45,7 +51,7 @@ export default function Log({ text, subtitle, imgSource, showImageFallback = fal
                         <View style={styles.icons}>
                             <TouchableOpacity style={styles.iconButton} onPress={onEditPress} hitSlop={5} activeOpacity={0.5}>
                                 <View style={styles.iconCircle}>
-                                    <Pencil size={18} color="#2f80ed" strokeWidth={2.5} />
+                                    <Pencil size={16} color={colors.workout} strokeWidth={2.5} />
                                 </View>
                             </TouchableOpacity>
                         </View>
@@ -56,101 +62,98 @@ export default function Log({ text, subtitle, imgSource, showImageFallback = fal
     )
 }
 
-const styles = StyleSheet.create({
-    outerwrapper: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 6,
-        elevation: 6,
-    },
-    wrapper: {
-        flexDirection: 'row',
-        height: 96,
-        marginVertical: 6,
-        borderRadius: 16,
-        overflow: 'hidden',
-        backgroundColor: '#1e1e1e',
-    },
-    accentBar: {
-        width: 4,
-        backgroundColor: '#2f80ed',
-        shadowColor: '#2f80ed',
-        shadowOffset: { width: 2, height: 0 },
-        shadowOpacity: 0.5,
-        shadowRadius: 4,
-    },
-    container: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingVertical: 16,
-        paddingHorizontal: 16,
-    },
-    content: {
-        flex: 1,
-        marginRight: 12,
-        marginLeft: 4,
-    },
-    imageGlowRing: {
-        width: 52,
-        height: 52,
-        borderRadius: 26,
-        marginRight: 10,
-        flexShrink: 0,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: '#2f80ed',
-        shadowColor: '#2f80ed',
-        shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0.4,
-        shadowRadius: 6,
-        elevation: 6,
-    },
-    imageCircle: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
-        backgroundColor: '#1e1e1e',
-        justifyContent: 'center',
-        alignItems: 'center',
-        overflow: 'hidden',
-    },
-    exerciseImage: {
-        width: 36,
-        height: 36,
-        tintColor: '#ffffff',
-    },
-    icons: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-    },
-    iconButton: {
-        padding: 2,
-    },
-    iconCircle: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        backgroundColor: 'rgba(47, 128, 237, 0.15)',
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1.5,
-        borderColor: 'rgba(47, 128, 237, 0.5)',
-    },
-    text: {
-        fontSize: 17,
-        color: '#FFF',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    subtitle: {
-        fontSize: 13,
-        color: '#aaa',
-        marginTop: 4,
-        letterSpacing: 0.2,
-        fontFamily: 'Poppins_400Regular',
-    },
-})
+function makeStyles(colors: Colors, isDark: boolean) {
+    return StyleSheet.create({
+        outerwrapper:
+            isDark ?
+                {}
+            :   {
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.08,
+                    shadowRadius: 6,
+                    elevation: 3,
+                },
+        wrapper: {
+            flexDirection: 'row',
+            height: 96,
+            marginVertical: 6,
+            borderRadius: radius.card,
+            overflow: 'hidden',
+            backgroundColor: colors.surface,
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: colors.hairline,
+        },
+        accentBar: {
+            width: 3,
+            backgroundColor: colors.workout,
+        },
+        container: {
+            flex: 1,
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingVertical: 16,
+            paddingHorizontal: 16,
+        },
+        content: {
+            flex: 1,
+            marginRight: 12,
+            marginLeft: 4,
+        },
+        imageGlowRing: {
+            width: 52,
+            height: 52,
+            borderRadius: 26,
+            marginRight: 10,
+            flexShrink: 0,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderWidth: 1,
+            borderColor: colors.workout,
+        },
+        imageCircle: {
+            width: 48,
+            height: 48,
+            borderRadius: 24,
+            backgroundColor: colors.surfaceInset,
+            justifyContent: 'center',
+            alignItems: 'center',
+            overflow: 'hidden',
+        },
+        exerciseImage: {
+            width: 36,
+            height: 36,
+            tintColor: colors.text,
+        },
+        icons: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 8,
+        },
+        iconButton: {
+            padding: 2,
+        },
+        iconCircle: {
+            width: 34,
+            height: 34,
+            borderRadius: radius.iconButton,
+            backgroundColor: colors.iconChipBg,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderWidth: 1,
+            borderColor: colors.workout + '66',
+        },
+        text: {
+            fontSize: 16,
+            color: colors.text,
+            letterSpacing: -0.3,
+            fontFamily: fonts.bold,
+        },
+        subtitle: {
+            fontSize: 13,
+            color: colors.labelMuted,
+            marginTop: 4,
+            fontFamily: fonts.regular,
+        },
+    })
+}
