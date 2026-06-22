@@ -12,6 +12,7 @@
     "test:ci": "jest"
   },
   "dependencies": {
+    "@expo-google-fonts/archivo": "^0.4.2",
     "@expo-google-fonts/poppins": "^0.4.1",
     "@expo/vector-icons": "^15.0.3",
     "@journeyapps/react-native-quick-sqlite": "^2.5.1",
