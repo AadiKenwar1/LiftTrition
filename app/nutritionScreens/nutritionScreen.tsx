@@ -1,15 +1,19 @@
-import BwCard from '@/components/NutritionComponents/bwCard'
+import DailyIntakeCard from '@/components/NutritionComponents/DailyIntakeCard'
 import Entry from '@/components/NutritionComponents/Entry'
 import { useNutrition } from '@/context/NutritionContext'
 import { NutritionEntry } from '@/context/NutritionContext/types'
+import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { formatDate, getDateKey } from '@/lib/utils/dateHelper'
 import { useRouter } from 'expo-router'
 import { Calendar, RotateCcw, Utensils } from 'lucide-react-native'
+import { useMemo } from 'react'
 import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 export default function NutritionScreen() {
     const { nutritionData, selectedDate, setSelectedDate, handleSaveNutrition, handleDeleteNutrition } = useNutrition()
     const router = useRouter()
+    const colors = useColors()
+    const styles = useMemo(() => makeStyles(colors), [colors])
 
     // Filter entries for selected date
     const selectedDateKey = getDateKey(selectedDate)
@@ -56,10 +60,9 @@ export default function NutritionScreen() {
 
     const renderHeader = () => (
         <>
-            <View style={styles.bodyWeightContainer}>
-                {/* Body Weight Card */}
-                <Text style={styles.sectionTitle}>Body Weight</Text>
-                <BwCard />
+            {/* Daily Intake summary for the selected date */}
+            <View style={styles.intakeContainer}>
+                <DailyIntakeCard date={selectedDate} />
             </View>
 
             {/* Section Header */}
@@ -72,14 +75,14 @@ export default function NutritionScreen() {
                     </View>
                 }
                 <View style={styles.dateActionsColumn}>
-                    <TouchableOpacity style={styles.dateButton} activeOpacity={0.5} onPress={() => router.push('/nutritionScreens/dateModal')}>
-                        <Calendar size={18} color="#22C922" strokeWidth={2.5} />
-                        <Text style={styles.dateButtonText}>Change Date</Text>
+                    <TouchableOpacity style={styles.dateChip} activeOpacity={0.5} onPress={() => router.push('/nutritionScreens/dateModal')}>
+                        <Calendar size={13} color={colors.nutrition} strokeWidth={2.5} />
+                        <Text style={styles.dateChipText}>Change Date</Text>
                     </TouchableOpacity>
                     {!isToday && (
-                        <TouchableOpacity style={styles.dateButton} activeOpacity={0.5} onPress={() => setSelectedDate(new Date())}>
-                            <RotateCcw size={18} color="#22C922" strokeWidth={2.5} />
-                            <Text style={styles.dateButtonText}>Today</Text>
+                        <TouchableOpacity style={styles.dateChip} activeOpacity={0.5} onPress={() => setSelectedDate(new Date())}>
+                            <RotateCcw size={13} color={colors.nutrition} strokeWidth={2.5} />
+                            <Text style={styles.dateChipText}>Today</Text>
                         </TouchableOpacity>
                     )}
                 </View>
@@ -90,7 +93,7 @@ export default function NutritionScreen() {
     const renderEmptyState = () => (
         <View style={styles.emptyState}>
             <View style={styles.emptyIconCircle}>
-                <Utensils size={56} color="#22C922" strokeWidth={2} />
+                <Utensils size={56} color={colors.nutrition} strokeWidth={2} />
             </View>
             <Text style={styles.emptyText}>{isToday ? 'No Nutrition Logs Yet' : 'No Nutrition Logs Recorded'}</Text>
             <Text style={styles.emptySubtext}>{isToday ? 'Tap the ⋮ button to add your first meal' : `No nutrition entries recorded for ${formatDate(selectedDate, showYearInTitle)}`}</Text>
@@ -111,108 +114,100 @@ export default function NutritionScreen() {
     )
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#121212',
-    },
-    bodyWeightContainer: {
-        paddingHorizontal: 20,
-    },
-    listContent: {
-        paddingTop: 16,
-        paddingBottom: 100,
-    },
-    sectionHeader: {
-        paddingHorizontal: 20,
-        marginTop: 24,
-        marginBottom: 12,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    sectionTitle: {
-        fontSize: 22,
-        flex: 1,
-        flexShrink: 1,
-        color: '#fff',
-        letterSpacing: -0.5,
-        marginRight: 12,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    sectionTitleBlock: {
-        flex: 1,
-        marginRight: 12,
-    },
-    sectionTitleStack: {
-        gap: 2,
-    },
-    sectionTitleLine: {
-        fontSize: 22,
-        color: '#fff',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    dateActionsColumn: {
-        alignItems: 'flex-end',
-        gap: 8,
-    },
-    dateButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        backgroundColor: '#1e1e1e',
-        borderRadius: 10,
-        borderWidth: 1,
-        borderColor: '#2a2a2a',
-    },
-    dateButtonText: {
-        fontSize: 13,
-        color: '#22C922',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    emptyState: {
-        paddingVertical: 60,
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingHorizontal: 40,
-    },
-    emptyIconCircle: {
-        width: 120,
-        height: 120,
-        borderRadius: 60,
-        backgroundColor: '#1e1e1e',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 24,
-        borderWidth: 3,
-        borderColor: '#22C922',
-        shadowColor: '#22C922',
-        shadowOffset: {
-            width: 0,
-            height: 8,
+function makeStyles(colors: Colors) {
+    return StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: colors.background,
         },
-        shadowOpacity: 0.1,
-        shadowRadius: 12,
-        elevation: 10,
-    },
-    emptyText: {
-        fontSize: 28,
-        color: '#FFF',
-        marginBottom: 12,
-        textAlign: 'center',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    emptySubtext: {
-        fontSize: 16,
-        color: '#aaa',
-        textAlign: 'center',
-        lineHeight: 24,
-        letterSpacing: 0.2,
-        fontFamily: 'Poppins_400Regular',
-    },
-})
+        intakeContainer: {
+            paddingHorizontal: 20,
+        },
+        listContent: {
+            paddingTop: 16,
+            paddingBottom: 100,
+        },
+        sectionHeader: {
+            paddingHorizontal: 20,
+            marginTop: 10,
+            marginBottom: 12,
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+        },
+        sectionTitle: {
+            fontSize: 19,
+            flex: 1,
+            flexShrink: 1,
+            color: colors.text,
+            letterSpacing: -0.4,
+            marginRight: 12,
+            fontFamily: fonts.extrabold,
+        },
+        sectionTitleBlock: {
+            flex: 1,
+            marginRight: 12,
+        },
+        sectionTitleStack: {
+            gap: 2,
+        },
+        sectionTitleLine: {
+            fontSize: 19,
+            color: colors.text,
+            letterSpacing: -0.4,
+            fontFamily: fonts.extrabold,
+        },
+        dateActionsColumn: {
+            alignItems: 'flex-end',
+            gap: 8,
+        },
+        dateChip: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 6,
+            paddingVertical: 7,
+            paddingHorizontal: 12,
+            backgroundColor: colors.surface,
+            borderRadius: radius.chip,
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: colors.hairline,
+        },
+        dateChipText: {
+            fontSize: 11,
+            color: colors.nutrition,
+            fontFamily: fonts.bold,
+        },
+        emptyState: {
+            paddingVertical: 60,
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingHorizontal: 40,
+        },
+        emptyIconCircle: {
+            width: 120,
+            height: 120,
+            borderRadius: 60,
+            backgroundColor: colors.surface,
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginBottom: 24,
+            borderWidth: 2,
+            borderColor: colors.nutrition,
+        },
+        emptyText: {
+            fontSize: 26,
+            color: colors.text,
+            marginBottom: 12,
+            textAlign: 'center',
+            letterSpacing: -0.5,
+            fontFamily: fonts.extrabold,
+        },
+        emptySubtext: {
+            fontSize: 15,
+            color: colors.labelMuted,
+            textAlign: 'center',
+            lineHeight: 22,
+            fontFamily: fonts.regular,
+        },
+    })
+}
