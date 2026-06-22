@@ -11,12 +11,12 @@ function getNutritionBannerText(streak: NutritionStreakState): string {
     const { loggedToday, streakIncludingToday, streakThroughYesterday } = streak
 
     if (loggedToday) {
-        if (streakIncludingToday === 1) return 'You logged today! Keep it up 💪'
-        return `You've logged ${streakIncludingToday} days in a row! 🔥`
+        if (streakIncludingToday === 1) return 'Your on a 1 day streak! 🔥'
+        return `Your on a ${streakIncludingToday} day streak! 🔥`
     }
     if (streakThroughYesterday >= 1) {
         const days = streakThroughYesterday
-        return `You're on a ${days}-day streak. Log today to keep it going 🔥`
+        return `Keep it up! Your on a ${days} day streak! 🔥`
     }
     return 'Log a meal to start your streak 🍽️'
 }

@@ -2,6 +2,7 @@ import StagedSection from '@/components/NeutralComponents/StagedSection'
 import SavedEntry from '@/components/NutritionComponents/SavedEntry'
 import { useAuth } from '@/context/AuthContext'
 import { useNutrition } from '@/context/NutritionContext'
+import { getFilteredSavedNutritionEntries } from '@/context/NutritionContext/functions/crudFunctions'
 import { Ingredient, NutritionEntry } from '@/context/NutritionContext/types'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
@@ -30,7 +31,7 @@ function scaleIngredients(ingredients: Ingredient[], factor: number): Ingredient
 }
 
 export default function SavedNutritionModal() {
-    const { savedNutritionEntries, handleUnsaveNutrition, handleBumpSavedNutrition, handleAddNutrition, selectedDate } = useNutrition()
+    const { savedNutritionEntries, handleUnsaveNutrition, handleAddNutrition, selectedDate } = useNutrition()
     const { userID } = useAuth()
     const router = useRouter()
 
@@ -41,12 +42,7 @@ export default function SavedNutritionModal() {
     const [searchQuery, setSearchQuery] = useState('')
     const [isFocused, setIsFocused] = useState(false)
 
-    const filteredSavedEntries = useMemo(() => {
-        const sorted = [...savedNutritionEntries].sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
-        const q = searchQuery.trim().toLowerCase()
-        if (!q) return sorted
-        return sorted.filter((entry) => entry.name.toLowerCase().includes(q))
-    }, [savedNutritionEntries, searchQuery])
+    const filteredSavedEntries = useMemo(() => getFilteredSavedNutritionEntries(savedNutritionEntries, searchQuery), [savedNutritionEntries, searchQuery])
 
     useEffect(() => {
         if (addedItems.length < 2) setCombineItems(false)
@@ -88,7 +84,7 @@ export default function SavedNutritionModal() {
         ])
     }
 
-    function handleAddAll() {
+    async function handleAddAll() {
         if (combineItems && addedItems.length >= 2) {
             const createdAt = new Date()
             let protein = 0
@@ -149,9 +145,6 @@ export default function SavedNutritionModal() {
                 handleAddNutrition(nutritionEntry)
             }
         }
-        for (const row of addedItems) {
-            handleBumpSavedNutrition(row.savedItem.id)
-        }
         router.back()
     }
 
@@ -164,7 +157,7 @@ export default function SavedNutritionModal() {
             </View>
 
             <Text style={styles.title}>Saved Meals</Text>
-            <Text style={styles.subtitle}>Sorted by most recently used</Text>
+            <Text style={styles.subtitle}>Sorted by most recently saved</Text>
 
             {addedItems.length > 0 && (
                 <StagedSection label="Added" count={addedItems.length} color="#22C922" combineItems={combineItems} onCombineItemsChange={setCombineItems}>
@@ -221,8 +214,9 @@ export default function SavedNutritionModal() {
 
     const renderNoSearchResults = () => (
         <View style={styles.emptyState}>
-            <Text style={styles.emptyText}>No meals match your search</Text>
-            <Text style={styles.emptySubtext}>Try a different name</Text>
+            <Text style={styles.noResultsText}>
+                No meals match your search. <Text style={styles.noResultsHint}>Try a different name.</Text>
+            </Text>
         </View>
     )
 
@@ -261,6 +255,7 @@ export default function SavedNutritionModal() {
                 <View style={styles.body}>
                     <FlatList
                         data={filteredSavedEntries}
+                        extraData={savedNutritionEntries.length}
                         keyExtractor={(item) => item.id}
                         ListHeaderComponent={listHeader}
                         renderItem={({ item }) => <SavedEntry name={item.name} calories={item.calories} protein={item.protein} carbs={item.carbs} fats={item.fats} onAddPress={() => openQuantityModal(item)} onDeletePress={() => confirmUnsave(item)} />}
@@ -444,6 +439,17 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#aaa',
         textAlign: 'center',
+        fontFamily: 'Poppins_400Regular',
+    },
+    noResultsText: {
+        fontSize: 15,
+        color: '#888',
+        textAlign: 'center',
+        lineHeight: 22,
+        fontFamily: 'Poppins_500Medium',
+    },
+    noResultsHint: {
+        color: '#666',
         fontFamily: 'Poppins_400Regular',
     },
     addAllContainer: {

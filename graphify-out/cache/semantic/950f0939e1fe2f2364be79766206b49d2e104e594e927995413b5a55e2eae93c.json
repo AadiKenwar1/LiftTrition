@@ -1,0 +1,1 @@
+{"nodes": [{"id": "fatigue-baseline-v1", "label": "Fatigue Baseline v1", "type": "data", "summary": "2026-01-31 calibration notes documenting expected fatigue factors and session fatigue% for tuning the algorithm.", "source_file": "fatigueBaseline_v1.txt", "confidence": "EXTRACTED"}], "edges": [], "hyperedges": []}

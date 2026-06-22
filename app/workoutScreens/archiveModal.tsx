@@ -1,15 +1,19 @@
 import { useWorkout } from '@/context/WorkoutContext'
+import { IMAGE_MAP } from '@/context/WorkoutContext/exerciseLibrary/dataV2/imageMap'
 import { Exercise, Workout } from '@/context/WorkoutContext/types'
+import { Image } from 'expo-image'
 import { useLocalSearchParams } from 'expo-router'
-import { Archive, ArchiveRestore, Trash } from 'lucide-react-native'
+import { Archive, ArchiveRestore, Dumbbell, Trash } from 'lucide-react-native'
+import { useMemo } from 'react'
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 export default function ArchiveModal() {
-    const { workouts, exercises, handleArchiveWorkout, handleDeleteWorkout, handleArchiveExercise, handleDeleteExercise } = useWorkout()
+    const { workouts, exercises, fullExerciseLib, handleArchiveWorkout, handleDeleteWorkout, handleArchiveExercise, handleDeleteExercise } = useWorkout()
     const params = useLocalSearchParams()
 
     // Normalize logType to a string (handle both string and string[] cases)
     const logType = typeof params.logType === 'string' ? params.logType : params.logType?.[0] || 'workouts'
+    const workoutId = typeof params.workoutId === 'string' ? params.workoutId : params.workoutId?.[0] || ''
 
     let data: Workout[] | Exercise[] = []
     if (logType === 'workouts') {
@@ -18,32 +22,55 @@ export default function ArchiveModal() {
             .sort((a, b) => a.order - b.order)
     } else if (logType === 'exercises') {
         data = exercises
-            .filter((exercise) => exercise.archived)
+            .filter((exercise) => exercise.archived && (!workoutId || exercise.workoutID === workoutId))
             .sort((a, b) => a.order - b.order)
     }
 
-    const renderItem = ({ item }: { item: any }) => (
-        <View style={styles.itemWrapper}>
-            <View style={styles.accentBar} />
-            <View style={styles.item}>
-                <View style={styles.itemInfo}>
-                    <Text style={styles.itemName}>{item.name}</Text>
-                </View>
-                <View style={styles.iconContainer}>
-                    <TouchableOpacity style={styles.iconButton} activeOpacity={0.5} onPress={() => (logType === 'workouts' ? handleArchiveWorkout(item.id, true) : handleArchiveExercise(item.id, item.workoutID, true))}>
-                        <View style={styles.iconCircle}>
-                            <ArchiveRestore size={20 * 1.5} color="#2f80ed" strokeWidth={2} />
+    const exerciseImageSources = useMemo(() => {
+        const map: Record<string, number> = {}
+        for (const exercise of exercises) {
+            const entry = fullExerciseLib[exercise.name]
+            const filename = entry?.imgUrl?.split('/').pop()
+            if (filename && IMAGE_MAP[filename]) map[exercise.name] = IMAGE_MAP[filename]
+        }
+        return map
+    }, [fullExerciseLib, exercises])
+
+    const renderItem = ({ item }: { item: any }) => {
+        const imgSource = logType === 'exercises' ? exerciseImageSources[item.name] : undefined
+
+        return (
+            <View style={styles.itemWrapper}>
+                <View style={styles.accentBar} />
+                <View style={styles.item}>
+                    {logType === 'exercises' && (
+                        <View style={styles.imageGlowRing}>
+                            <View style={styles.imageCircle}>
+                                {imgSource
+                                    ? <Image source={imgSource} style={styles.exerciseImage} contentFit="contain" cachePolicy="memory" transition={300} />
+                                    : <Dumbbell size={25} color="#ffffff" strokeWidth={1.8} />}
+                            </View>
                         </View>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.iconButton} activeOpacity={0.5} onPress={() => (logType === 'workouts' ? handleDeleteWorkout(item.id) : handleDeleteExercise(item.id))}>
-                        <View style={[styles.iconCircle, styles.deleteIconCircle]}>
-                            <Trash size={20} color="#FF453A" strokeWidth={2.5} />
-                        </View>
-                    </TouchableOpacity>
+                    )}
+                    <View style={styles.itemInfo}>
+                        <Text style={styles.itemName}>{item.name}</Text>
+                    </View>
+                    <View style={styles.iconContainer}>
+                        <TouchableOpacity style={styles.iconButton} activeOpacity={0.5} onPress={() => (logType === 'workouts' ? handleArchiveWorkout(item.id, true) : handleArchiveExercise(item.id, item.workoutID, true))}>
+                            <View style={styles.iconCircle}>
+                                <ArchiveRestore size={20 * 1.5} color="#2f80ed" strokeWidth={2} />
+                            </View>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.iconButton} activeOpacity={0.5} onPress={() => (logType === 'workouts' ? handleDeleteWorkout(item.id) : handleDeleteExercise(item.id))}>
+                            <View style={[styles.iconCircle, styles.deleteIconCircle]}>
+                                <Trash size={20} color="#FF453A" strokeWidth={2.5} />
+                            </View>
+                        </TouchableOpacity>
+                    </View>
                 </View>
             </View>
-        </View>
-    )
+        )
+    }
 
     return (
         <View style={styles.container}>
@@ -162,6 +189,36 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingVertical: 16,
         paddingHorizontal: 16,
+    },
+    imageGlowRing: {
+        width: 52,
+        height: 52,
+        borderRadius: 26,
+        marginRight: 10,
+        flexShrink: 0,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: '#2f80ed',
+        shadowColor: '#2f80ed',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.4,
+        shadowRadius: 6,
+        elevation: 6,
+    },
+    imageCircle: {
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        backgroundColor: '#1e1e1e',
+        justifyContent: 'center',
+        alignItems: 'center',
+        overflow: 'hidden',
+    },
+    exerciseImage: {
+        width: 36,
+        height: 36,
+        tintColor: '#ffffff',
     },
     itemInfo: {
         flex: 1,

@@ -1,0 +1,957 @@
+{
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\.vscode\\extensions.json": {
+    "mtime": 499162500.0,
+    "ast_hash": "b2354ba0225f5689d13651ec0fac0de0",
+    "semantic_hash": "b2354ba0225f5689d13651ec0fac0de0"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\.vscode\\settings.json": {
+    "mtime": 1772748449.672871,
+    "ast_hash": "25a78e908537754527a283a87318215c",
+    "semantic_hash": "25a78e908537754527a283a87318215c"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app.json": {
+    "mtime": 1780360715.938082,
+    "ast_hash": "00a256e1185ffa1eb38cce61bbae729c",
+    "semantic_hash": "00a256e1185ffa1eb38cce61bbae729c"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\(tabs)\\_layout.tsx": {
+    "mtime": 1779767749.610075,
+    "ast_hash": "b4f8cc27d64896aab8e4aa056f011ee6",
+    "semantic_hash": "b4f8cc27d64896aab8e4aa056f011ee6"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\(tabs)\\index.tsx": {
+    "mtime": 1780360821.0043,
+    "ast_hash": "0fec720c8a65db6c72a38af0ed0d0ee1",
+    "semantic_hash": "0fec720c8a65db6c72a38af0ed0d0ee1"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\(tabs)\\progress.tsx": {
+    "mtime": 1780438652.0284438,
+    "ast_hash": "caa0b41890946b74aace0477e3973190",
+    "semantic_hash": "caa0b41890946b74aace0477e3973190"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\(tabs)\\settings.tsx": {
+    "mtime": 1780192761.8179553,
+    "ast_hash": "f29a0db96b67418dcd99cb8f37b5b4f5",
+    "semantic_hash": "f29a0db96b67418dcd99cb8f37b5b4f5"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\+not-found.tsx": {
+    "mtime": 1781749767.5463054,
+    "ast_hash": "0a3b843907090b78235d921fc099cb66",
+    "semantic_hash": "0a3b843907090b78235d921fc099cb66"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\_layout.tsx": {
+    "mtime": 1780864609.4094164,
+    "ast_hash": "ddca1b41c99229b9128445490086daf4",
+    "semantic_hash": "ddca1b41c99229b9128445490086daf4"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\authScreens\\login.tsx": {
+    "mtime": 1780359377.060969,
+    "ast_hash": "906382497e6379f8f6037b98c395f7bb",
+    "semantic_hash": "906382497e6379f8f6037b98c395f7bb"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\modal.tsx": {
+    "mtime": 1781749767.5355606,
+    "ast_hash": "ed514808911fa81279a96cbcbad465cd",
+    "semantic_hash": "ed514808911fa81279a96cbcbad465cd"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\nutritionScreens\\addNutritionModal.tsx": {
+    "mtime": 1780874145.6872816,
+    "ast_hash": "123e2657517035d1b3a0c82dc79bf8b2",
+    "semantic_hash": "123e2657517035d1b3a0c82dc79bf8b2"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\nutritionScreens\\analyzingModal.tsx": {
+    "mtime": 1781749767.5563183,
+    "ast_hash": "8cc82cef56b434fd5e253b13a9713aa1",
+    "semantic_hash": "8cc82cef56b434fd5e253b13a9713aa1"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\nutritionScreens\\barcodeScreen.tsx": {
+    "mtime": 1781749767.527028,
+    "ast_hash": "d346df36cfe81f392667a748659a89b7",
+    "semantic_hash": "d346df36cfe81f392667a748659a89b7"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\nutritionScreens\\cameraScreen.tsx": {
+    "mtime": 1780183826.7476044,
+    "ast_hash": "f80cc866973e90a6e0bf69597786fc38",
+    "semantic_hash": "f80cc866973e90a6e0bf69597786fc38"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\nutritionScreens\\dateModal.tsx": {
+    "mtime": 1779646674.4032288,
+    "ast_hash": "677cc25e2d501631942c618c2068317c",
+    "semantic_hash": "677cc25e2d501631942c618c2068317c"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\nutritionScreens\\editManualEntry.tsx": {
+    "mtime": 1780438634.3946817,
+    "ast_hash": "ff26fe76c9b95ef23e0d8b188bfe4a49",
+    "semantic_hash": "ff26fe76c9b95ef23e0d8b188bfe4a49"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\nutritionScreens\\editPhotoEntry.tsx": {
+    "mtime": 1780438637.7389064,
+    "ast_hash": "3afc1cd08f377a0c6bda29a5839317e3",
+    "semantic_hash": "3afc1cd08f377a0c6bda29a5839317e3"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\nutritionScreens\\foodDBModal.tsx": {
+    "mtime": 1780871151.1798818,
+    "ast_hash": "cee8979869fca430e8382041f36f87d8",
+    "semantic_hash": "cee8979869fca430e8382041f36f87d8"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\nutritionScreens\\nutritionScreen.tsx": {
+    "mtime": 1780360821.6947515,
+    "ast_hash": "b177535f06a7b594a7312d0fd138bd2f",
+    "semantic_hash": "b177535f06a7b594a7312d0fd138bd2f"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\nutritionScreens\\openAiTestScreen.tsx": {
+    "mtime": 1779646674.343897,
+    "ast_hash": "4b09130ba629b01001cded2a76da3987",
+    "semantic_hash": "4b09130ba629b01001cded2a76da3987"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\nutritionScreens\\savedNutritionModal.tsx": {
+    "mtime": 1782081031.2632234,
+    "ast_hash": "fb8299cacf29f5ecb5f6ea00332b0040",
+    "semantic_hash": "fb8299cacf29f5ecb5f6ea00332b0040"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\nutritionScreens\\updateBWModal.tsx": {
+    "mtime": 1780007084.2161458,
+    "ast_hash": "f02baec2bc28457b01c3ed9519c464c9",
+    "semantic_hash": "f02baec2bc28457b01c3ed9519c464c9"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\onboardingScreens\\introduction.tsx": {
+    "mtime": 1781749767.5452018,
+    "ast_hash": "2f8ba66d4ba7e8a80ee6ce66be85ebad",
+    "semantic_hash": "2f8ba66d4ba7e8a80ee6ce66be85ebad"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\onboardingScreens\\onboarding10.tsx": {
+    "mtime": 1779489946.4559774,
+    "ast_hash": "75b9bd954567559d35c27f17595c781e",
+    "semantic_hash": "75b9bd954567559d35c27f17595c781e"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\onboardingScreens\\onboarding2.tsx": {
+    "mtime": 1781749767.527028,
+    "ast_hash": "491f4f603b6bdb9d773e4439dfd4a9c8",
+    "semantic_hash": "491f4f603b6bdb9d773e4439dfd4a9c8"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\onboardingScreens\\onboarding3.tsx": {
+    "mtime": 1781749767.563841,
+    "ast_hash": "71a7911e7d1c3f420a954b862b6af019",
+    "semantic_hash": "71a7911e7d1c3f420a954b862b6af019"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\onboardingScreens\\onboarding4.tsx": {
+    "mtime": 1781749767.549317,
+    "ast_hash": "860a44d8ab2ef0110289052099f09666",
+    "semantic_hash": "860a44d8ab2ef0110289052099f09666"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\onboardingScreens\\onboarding5.tsx": {
+    "mtime": 1781749767.5452018,
+    "ast_hash": "714bb561674669bcf441b5d425dd035a",
+    "semantic_hash": "714bb561674669bcf441b5d425dd035a"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\onboardingScreens\\onboarding6.tsx": {
+    "mtime": 1781749767.5365598,
+    "ast_hash": "ae83e15626b93ec1ec84746860543bf7",
+    "semantic_hash": "ae83e15626b93ec1ec84746860543bf7"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\onboardingScreens\\onboarding7.tsx": {
+    "mtime": 1781749767.5513175,
+    "ast_hash": "814382b0768a28445d49344228644628",
+    "semantic_hash": "814382b0768a28445d49344228644628"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\onboardingScreens\\onboarding8.tsx": {
+    "mtime": 1781749767.5648384,
+    "ast_hash": "ae379d6a85d217a31b704cd7d3d121b8",
+    "semantic_hash": "ae379d6a85d217a31b704cd7d3d121b8"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\onboardingScreens\\onboarding9.tsx": {
+    "mtime": 1781749767.5375602,
+    "ast_hash": "be5b3b24c09ca6e627e5493591cd640f",
+    "semantic_hash": "be5b3b24c09ca6e627e5493591cd640f"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\onboardingScreens\\preboard.tsx": {
+    "mtime": 1779646674.3479078,
+    "ast_hash": "01169f1fbea8bc1ad6506561e375f1f3",
+    "semantic_hash": "01169f1fbea8bc1ad6506561e375f1f3"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\settingsScreens\\adjustMeasurements.tsx": {
+    "mtime": 1780007084.4814737,
+    "ast_hash": "ffd1ad9bf59285a9a1d37a9a95bb70e6",
+    "semantic_hash": "ffd1ad9bf59285a9a1d37a9a95bb70e6"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\settingsScreens\\adjustNutrition\\adjustNutrition1.tsx": {
+    "mtime": 1779646674.3283656,
+    "ast_hash": "b6c224fe22a6c7c3dac6c122e1b561a8",
+    "semantic_hash": "b6c224fe22a6c7c3dac6c122e1b561a8"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\settingsScreens\\adjustNutrition\\adjustNutrition2.tsx": {
+    "mtime": 1779646674.3888905,
+    "ast_hash": "3097f6231fd1977b8e99f4a1e776fcf2",
+    "semantic_hash": "3097f6231fd1977b8e99f4a1e776fcf2"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\settingsScreens\\adjustNutrition\\adjustNutrition3.tsx": {
+    "mtime": 1781749767.5603168,
+    "ast_hash": "bdae36abbb01094210618dff0ab35853",
+    "semantic_hash": "bdae36abbb01094210618dff0ab35853"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\settingsScreens\\adjustTraining.tsx": {
+    "mtime": 1779646674.3313785,
+    "ast_hash": "cbeb74cbeafb88deb26bbfdcd84d747d",
+    "semantic_hash": "cbeb74cbeafb88deb26bbfdcd84d747d"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\settingsScreens\\devStatsModal.tsx": {
+    "mtime": 1781749767.5335608,
+    "ast_hash": "7ad567baa8e6370f6335506e161cc4eb",
+    "semantic_hash": "7ad567baa8e6370f6335506e161cc4eb"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\settingsScreens\\howItWorks.tsx": {
+    "mtime": 1781126464.7872276,
+    "ast_hash": "df27ff48307db25e69ef31f048619113",
+    "semantic_hash": "df27ff48307db25e69ef31f048619113"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\settingsScreens\\profile.tsx": {
+    "mtime": 1781749767.527028,
+    "ast_hash": "bc3da57157598d93fcf39599c4291374",
+    "semantic_hash": "bc3da57157598d93fcf39599c4291374"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\settingsScreens\\subscription.tsx": {
+    "mtime": 1781749767.541562,
+    "ast_hash": "b53a5e02c4e917b3e73d0a3b7da7538b",
+    "semantic_hash": "b53a5e02c4e917b3e73d0a3b7da7538b"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\settingsScreens\\support.tsx": {
+    "mtime": 1781749767.5648384,
+    "ast_hash": "9d6078a6aa1e4c09f6d179faf1f79cbe",
+    "semantic_hash": "9d6078a6aa1e4c09f6d179faf1f79cbe"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\settingsScreens\\termsAndPrivacy.tsx": {
+    "mtime": 1781749767.5648384,
+    "ast_hash": "13554cf6344fe30bc7ad7a0ffc34a5bb",
+    "semantic_hash": "13554cf6344fe30bc7ad7a0ffc34a5bb"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\workoutScreens\\addExerciseModal.tsx": {
+    "mtime": 1780183826.744606,
+    "ast_hash": "a57da331556005365f1799aaaa8a0446",
+    "semantic_hash": "a57da331556005365f1799aaaa8a0446"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\workoutScreens\\addWorkoutModal.tsx": {
+    "mtime": 1780012375.611194,
+    "ast_hash": "ebcf67ff7070b6420c7c73b93dc36842",
+    "semantic_hash": "ebcf67ff7070b6420c7c73b93dc36842"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\workoutScreens\\archiveModal.tsx": {
+    "mtime": 1779767749.6252613,
+    "ast_hash": "4aa4f0757b597d7b5adbb54709e2835d",
+    "semantic_hash": "4aa4f0757b597d7b5adbb54709e2835d"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\workoutScreens\\exerciseScreen.tsx": {
+    "mtime": 1781749767.548322,
+    "ast_hash": "b8cf909c5b912701c4d848ecd4235cb4",
+    "semantic_hash": "b8cf909c5b912701c4d848ecd4235cb4"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\workoutScreens\\logsModal.tsx": {
+    "mtime": 1781146198.432284,
+    "ast_hash": "b258d85448f07af103fe27f5192bf317",
+    "semantic_hash": "b258d85448f07af103fe27f5192bf317"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\workoutScreens\\notesModal.tsx": {
+    "mtime": 1779767749.608066,
+    "ast_hash": "6ced4d6192e64afde3c6b36dd22f92d3",
+    "semantic_hash": "6ced4d6192e64afde3c6b36dd22f92d3"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\workoutScreens\\renameModal.tsx": {
+    "mtime": 1780007084.3528726,
+    "ast_hash": "328c61897b87761ee579ec1cf270bad5",
+    "semantic_hash": "328c61897b87761ee579ec1cf270bad5"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\app\\workoutScreens\\workoutScreen.tsx": {
+    "mtime": 1781749767.5285375,
+    "ast_hash": "9d4f6d1d2cf5ade33c134fcb7b9ad4a4",
+    "semantic_hash": "9d4f6d1d2cf5ade33c134fcb7b9ad4a4"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\components\\ExpoComponents\\EditScreenInfo.tsx": {
+    "mtime": 1781749767.5563183,
+    "ast_hash": "135d8af0c620109716e5fb1a0144d922",
+    "semantic_hash": "135d8af0c620109716e5fb1a0144d922"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\components\\ExpoComponents\\ExternalLink.tsx": {
+    "mtime": 1781749767.5335608,
+    "ast_hash": "a5409dc5f9585f94a89efd4eacae914c",
+    "semantic_hash": "a5409dc5f9585f94a89efd4eacae914c"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\components\\ExpoComponents\\StyledText.tsx": {
+    "mtime": 1781749767.5603168,
+    "ast_hash": "c50b6e360fa81e992b0edb46473bfbb4",
+    "semantic_hash": "c50b6e360fa81e992b0edb46473bfbb4"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\components\\ExpoComponents\\Themed.tsx": {
+    "mtime": 1781749767.5441918,
+    "ast_hash": "24252c22489cd005fb0087008700c477",
+    "semantic_hash": "24252c22489cd005fb0087008700c477"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\components\\ExpoComponents\\useClientOnlyValue.ts": {
+    "mtime": 1781749767.527028,
+    "ast_hash": "1cac2ad5842f4258c04fde5f72d99a06",
+    "semantic_hash": "1cac2ad5842f4258c04fde5f72d99a06"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\components\\ExpoComponents\\useClientOnlyValue.web.ts": {
+    "mtime": 1781749767.5648384,
+    "ast_hash": "89b7d949967750bf9187d0a2c68dd525",
+    "semantic_hash": "89b7d949967750bf9187d0a2c68dd525"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\components\\ExpoComponents\\useColorScheme.ts": {
+    "mtime": 1781749767.5335608,
+    "ast_hash": "dbdfa59e3af16620dc3f51af4d21f532",
+    "semantic_hash": "dbdfa59e3af16620dc3f51af4d21f532"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\components\\ExpoComponents\\useColorScheme.web.ts": {
+    "mtime": 1781749767.563841,
+    "ast_hash": "6a389d007a21ab67f970269ecca612dc",
+    "semantic_hash": "6a389d007a21ab67f970269ecca612dc"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\components\\GraphComponents\\ActivityBanner.tsx": {
+    "mtime": 1781291978.2370348,
+    "ast_hash": "397d477beb3b47aea1c56bcec2c2451e",
+    "semantic_hash": "397d477beb3b47aea1c56bcec2c2451e"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\components\\GraphComponents\\Graph1.tsx": {
+    "mtime": 1780435988.5034246,
+    "ast_hash": "e57cf982c693cb7775588044a220e17c",
+    "semantic_hash": "e57cf982c693cb7775588044a220e17c"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\components\\GraphComponents\\Graph2.tsx": {
+    "mtime": 1779767749.6264622,
+    "ast_hash": "0dbaceae79c9e9dc08c5067dad0d58ab",
+    "semantic_hash": "0dbaceae79c9e9dc08c5067dad0d58ab"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\components\\GraphComponents\\GraphStats.tsx": {
+    "mtime": 1780369499.2363174,
+    "ast_hash": "bab53fcbc5106472c965182f85cefc16",
+    "semantic_hash": "bab53fcbc5106472c965182f85cefc16"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\components\\GraphComponents\\ProgressWheel.tsx": {
+    "mtime": 1780001821.6646633,
+    "ast_hash": "1c4c33f7641aaab0d20ea8c1256ceb63",
+    "semantic_hash": "1c4c33f7641aaab0d20ea8c1256ceb63"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\components\\GraphComponents\\RangeSelectionModal.tsx": {
+    "mtime": 1780369499.3461194,
+    "ast_hash": "22c2626445a08b20b33d382b68887e8d",
+    "semantic_hash": "22c2626445a08b20b33d382b68887e8d"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\components\\GraphComponents\\SelectionModal.tsx": {
+    "mtime": 1780439098.1930318,
+    "ast_hash": "75f6d7b68680818dd473c96f3529aeaa",
+    "semantic_hash": "75f6d7b68680818dd473c96f3529aeaa"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\components\\GuardComponents\\AppLoadingScreen.tsx": {
+    "mtime": 1779489946.5208654,
+    "ast_hash": "a26544ac1622e8c2f461dcede5f626a0",
+    "semantic_hash": "a26544ac1622e8c2f461dcede5f626a0"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\components\\GuardComponents\\PowerSyncGuard.tsx": {
+    "mtime": 1779487233.560745,
+    "ast_hash": "e7cb1de634b39ee718b7016a9b1f8093",
+    "semantic_hash": "e7cb1de634b39ee718b7016a9b1f8093"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\components\\GuardComponents\\SyncWatchdog.tsx": {
+    "mtime": 1781749767.5365598,
+    "ast_hash": "324904a0e2dac94e70ad13ba1976951b",
+    "semantic_hash": "324904a0e2dac94e70ad13ba1976951b"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\components\\NeutralComponents\\CustomHeader.tsx": {
+    "mtime": 1779767749.6264622,
+    "ast_hash": "795d094849d6ce13f11840e4f25fb153",
+    "semantic_hash": "795d094849d6ce13f11840e4f25fb153"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\components\\NeutralComponents\\DatePicker.tsx": {
+    "mtime": 1779767749.6212416,
+    "ast_hash": "21dd62ea221cd8cf08033a83cb9430e2",
+    "semantic_hash": "21dd62ea221cd8cf08033a83cb9430e2"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\components\\NeutralComponents\\Fab.tsx": {
+    "mtime": 1779489946.5310357,
+    "ast_hash": "dba3528fc7a3772009a13bccaa3098ae",
+    "semantic_hash": "dba3528fc7a3772009a13bccaa3098ae"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\components\\NeutralComponents\\ModeSwitcher.tsx": {
+    "mtime": 1780270495.2626374,
+    "ast_hash": "5b67ec343aa82f4f3fd1d45813245e34",
+    "semantic_hash": "5b67ec343aa82f4f3fd1d45813245e34"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\components\\NeutralComponents\\ScrollableList.tsx": {
+    "mtime": 1780439098.3005443,
+    "ast_hash": "2352394b87aafb5b51aa7624c71490d1",
+    "semantic_hash": "2352394b87aafb5b51aa7624c71490d1"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\components\\NeutralComponents\\StagedSection.tsx": {
+    "mtime": 1780871142.3174708,
+    "ast_hash": "62ab513d6bd6e85673911271a2866185",
+    "semantic_hash": "62ab513d6bd6e85673911271a2866185"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\components\\NeutralComponents\\TermsAndPrivacyContent.tsx": {
+    "mtime": 1781749767.5463054,
+    "ast_hash": "8325bd975c2587099d53e5456dd93ca2",
+    "semantic_hash": "8325bd975c2587099d53e5456dd93ca2"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\components\\NeutralComponents\\TermsAndPrivacyModal.tsx": {
+    "mtime": 1779489946.537568,
+    "ast_hash": "68564bf0eb4349bd1bf4e1bba4c138c1",
+    "semantic_hash": "68564bf0eb4349bd1bf4e1bba4c138c1"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\components\\NutritionComponents\\EditMacroGoalModal.tsx": {
+    "mtime": 1779646674.3988898,
+    "ast_hash": "259e3a7b228d138230e431fb4cd95d3f",
+    "semantic_hash": "259e3a7b228d138230e431fb4cd95d3f"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\components\\NutritionComponents\\Entry.tsx": {
+    "mtime": 1780438639.8592873,
+    "ast_hash": "3ebfd1fc3628b7e3e346c9cb219554e6",
+    "semantic_hash": "3ebfd1fc3628b7e3e346c9cb219554e6"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\components\\NutritionComponents\\SavedEntry.tsx": {
+    "mtime": 1780438642.1287584,
+    "ast_hash": "c20b32aa736f6c2f39cfbbbc0a973e8e",
+    "semantic_hash": "c20b32aa736f6c2f39cfbbbc0a973e8e"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\components\\NutritionComponents\\bwCard.tsx": {
+    "mtime": 1779992779.4314911,
+    "ast_hash": "bc53a7076b352bd9d360967f99abe295",
+    "semantic_hash": "bc53a7076b352bd9d360967f99abe295"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\components\\WorkoutComponents\\DraggableList.tsx": {
+    "mtime": 1781749767.549317,
+    "ast_hash": "8bd80790bab0b6b9c7610647b1625217",
+    "semantic_hash": "8bd80790bab0b6b9c7610647b1625217"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\components\\WorkoutComponents\\Log.tsx": {
+    "mtime": 1781749767.5365598,
+    "ast_hash": "f05dc481b7f1870115a295ed4007abdb",
+    "semantic_hash": "f05dc481b7f1870115a295ed4007abdb"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\components\\WorkoutComponents\\LogDateModal.tsx": {
+    "mtime": 1779767749.6060548,
+    "ast_hash": "e68befc8c960f8623bdbbbfcd596734e",
+    "semantic_hash": "e68befc8c960f8623bdbbbfcd596734e"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\components\\WorkoutComponents\\LogHistoryList.tsx": {
+    "mtime": 1781126473.7473695,
+    "ast_hash": "5499565a355ad5a47b2d5829a360ddd5",
+    "semantic_hash": "5499565a355ad5a47b2d5829a360ddd5"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\constants\\Colors.ts": {
+    "mtime": 1779646674.3543363,
+    "ast_hash": "1e3c46a540e419b85441321e3305aa8c",
+    "semantic_hash": "1e3c46a540e419b85441321e3305aa8c"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\AuthContext\\functions\\accountFunctions.tsx": {
+    "mtime": 1778787233.352461,
+    "ast_hash": "6e6d19eefeaa82bed8b578dd1b6faf4e",
+    "semantic_hash": "6e6d19eefeaa82bed8b578dd1b6faf4e"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\AuthContext\\functions\\authFunctions.tsx": {
+    "mtime": 1772751298.0947852,
+    "ast_hash": "d25916a0e7024022fe7b5cf74c42aa98",
+    "semantic_hash": "d25916a0e7024022fe7b5cf74c42aa98"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\AuthContext\\index.tsx": {
+    "mtime": 1778185993.305105,
+    "ast_hash": "712de3ffddab6256c6e7fecd60709f9f",
+    "semantic_hash": "712de3ffddab6256c6e7fecd60709f9f"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\AuthContext\\types.ts": {
+    "mtime": 1772946213.3714783,
+    "ast_hash": "ad34be2de0e997fad0c431e27484dd6d",
+    "semantic_hash": "ad34be2de0e997fad0c431e27484dd6d"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\BillingContext\\functions\\billingFunctions.tsx": {
+    "mtime": 1773603258.4313402,
+    "ast_hash": "e91ae2e562301c66fb5871d0938a0763",
+    "semantic_hash": "e91ae2e562301c66fb5871d0938a0763"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\BillingContext\\index.tsx": {
+    "mtime": 1780193363.581488,
+    "ast_hash": "d878be286d44fdee686f3c5e067eb385",
+    "semantic_hash": "d878be286d44fdee686f3c5e067eb385"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\BillingContext\\types.ts": {
+    "mtime": 1773603258.498927,
+    "ast_hash": "431c07a4aebbe1d9b79c6ccb412651dd",
+    "semantic_hash": "431c07a4aebbe1d9b79c6ccb412651dd"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\NutritionContext\\database\\powersyncStore.ts": {
+    "mtime": 1782080964.6434047,
+    "ast_hash": "2ed0ce853105aacb19cccfa6d7b98fd1",
+    "semantic_hash": "2ed0ce853105aacb19cccfa6d7b98fd1"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\NutritionContext\\functions\\__tests__\\crudFunctions.test.ts": {
+    "mtime": 1782081118.0351882,
+    "ast_hash": "af78748cb22834b54d87995ddc30a5df",
+    "semantic_hash": "af78748cb22834b54d87995ddc30a5df"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\NutritionContext\\functions\\__tests__\\graphFunctions.test.ts": {
+    "mtime": 1780361961.1520066,
+    "ast_hash": "e84ccea74981fc35fd2d7c9ad752da83",
+    "semantic_hash": "e84ccea74981fc35fd2d7c9ad752da83"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\NutritionContext\\functions\\aiFunctions.tsx": {
+    "mtime": 1778704016.8798432,
+    "ast_hash": "d9e51dd3b1269c8c8605704e7c4d6456",
+    "semantic_hash": "d9e51dd3b1269c8c8605704e7c4d6456"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\NutritionContext\\functions\\crudFunctions.tsx": {
+    "mtime": 1782080959.262112,
+    "ast_hash": "6fa91e95d92791681e93d174f50bae95",
+    "semantic_hash": "6fa91e95d92791681e93d174f50bae95"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\NutritionContext\\functions\\graphFunctions.tsx": {
+    "mtime": 1780369499.331461,
+    "ast_hash": "96890037f02be30a4d16bf6ae1a2dcc5",
+    "semantic_hash": "96890037f02be30a4d16bf6ae1a2dcc5"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\NutritionContext\\functions\\validator.tsx": {
+    "mtime": 1770915088.9979577,
+    "ast_hash": "00c9f7e0d5c864a9ea7f6deff6eb4fa1",
+    "semantic_hash": "00c9f7e0d5c864a9ea7f6deff6eb4fa1"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\NutritionContext\\index.tsx": {
+    "mtime": 1782080978.5479734,
+    "ast_hash": "34f1f4f449f97db2eee77817ee2b20b8",
+    "semantic_hash": "34f1f4f449f97db2eee77817ee2b20b8"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\NutritionContext\\types.ts": {
+    "mtime": 1782080983.4262588,
+    "ast_hash": "dfe1ab0403b7ef151407e3b87b68befe",
+    "semantic_hash": "dfe1ab0403b7ef151407e3b87b68befe"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\SettingsContext\\database\\powersyncStore.ts": {
+    "mtime": 1778705595.876511,
+    "ast_hash": "c5a00a2e1fcf64030d7ca294701ba85a",
+    "semantic_hash": "c5a00a2e1fcf64030d7ca294701ba85a"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\SettingsContext\\functions\\__tests__\\bodyWeightFunctions.test.ts": {
+    "mtime": 1772225390.7548594,
+    "ast_hash": "03b0e0158ce8a99a7667aafd5472bd49",
+    "semantic_hash": "03b0e0158ce8a99a7667aafd5472bd49"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\SettingsContext\\functions\\bodyWeightFunctions.tsx": {
+    "mtime": 1778705615.917937,
+    "ast_hash": "b570a73c61864923a14ed1342dd06718",
+    "semantic_hash": "b570a73c61864923a14ed1342dd06718"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\SettingsContext\\functions\\macroCalculation.tsx": {
+    "mtime": 1772916157.7712228,
+    "ast_hash": "b31c222ac62157121ebbb204b90ff38a",
+    "semantic_hash": "b31c222ac62157121ebbb204b90ff38a"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\SettingsContext\\functions\\validator.tsx": {
+    "mtime": 1781749767.563841,
+    "ast_hash": "6d1f70794e77cb76e960004392ffc99d",
+    "semantic_hash": "6d1f70794e77cb76e960004392ffc99d"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\SettingsContext\\index.tsx": {
+    "mtime": 1778727250.5524094,
+    "ast_hash": "4075e7df72cd18953075ced10b6448a9",
+    "semantic_hash": "4075e7df72cd18953075ced10b6448a9"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\SettingsContext\\types.ts": {
+    "mtime": 1778699364.1743228,
+    "ast_hash": "d4e4c59e3528fd7668ddfb0ae4e0a59f",
+    "semantic_hash": "d4e4c59e3528fd7668ddfb0ae4e0a59f"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\ThemeContext\\colors.ts": {
+    "mtime": 1779489946.5535157,
+    "ast_hash": "6a68c1108a2121b14319ae0465dba24e",
+    "semantic_hash": "6a68c1108a2121b14319ae0465dba24e"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\ThemeContext\\index.tsx": {
+    "mtime": 1779489946.5559816,
+    "ast_hash": "64a6ccc5b1547c0eff81d898e19d720f",
+    "semantic_hash": "64a6ccc5b1547c0eff81d898e19d720f"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\ThemeContext\\types.ts": {
+    "mtime": 1779646674.374848,
+    "ast_hash": "a893f2e03331247be0c48f3e0232ad09",
+    "semantic_hash": "a893f2e03331247be0c48f3e0232ad09"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\WorkoutContext\\database\\powersyncStore.ts": {
+    "mtime": 1780183826.681627,
+    "ast_hash": "452702aa08951f7d7198def5b2b34865",
+    "semantic_hash": "452702aa08951f7d7198def5b2b34865"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\WorkoutContext\\exerciseLibrary\\constants.ts": {
+    "mtime": 1780183826.7201364,
+    "ast_hash": "de31e2319cb0ceb7f6d5fab2664e5e82",
+    "semantic_hash": "de31e2319cb0ceb7f6d5fab2664e5e82"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\WorkoutContext\\exerciseLibrary\\dataV2\\exerciseLists\\backExercises.json": {
+    "mtime": 1779939093.2447367,
+    "ast_hash": "705f60450f09e824bb844608095b7268",
+    "semantic_hash": "705f60450f09e824bb844608095b7268"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\WorkoutContext\\exerciseLibrary\\dataV2\\exerciseLists\\bicepsExercises.json": {
+    "mtime": 1779836570.9869342,
+    "ast_hash": "4c43c9bbc67631fd25f93a72156822cf",
+    "semantic_hash": "4c43c9bbc67631fd25f93a72156822cf"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\WorkoutContext\\exerciseLibrary\\dataV2\\exerciseLists\\chestExercises.json": {
+    "mtime": 1779836570.9869342,
+    "ast_hash": "e6af26b921f676ce9d2986ba948d6310",
+    "semantic_hash": "e6af26b921f676ce9d2986ba948d6310"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\WorkoutContext\\exerciseLibrary\\dataV2\\exerciseLists\\coreExercises.json": {
+    "mtime": 1779836570.9869342,
+    "ast_hash": "0420e01a7794f1c6e0a2a9d2a49c5367",
+    "semantic_hash": "0420e01a7794f1c6e0a2a9d2a49c5367"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\WorkoutContext\\exerciseLibrary\\dataV2\\exerciseLists\\forearmsExercises.json": {
+    "mtime": 1779836570.9869342,
+    "ast_hash": "6e9a88092c131aee4c2f81b46198d1d7",
+    "semantic_hash": "6e9a88092c131aee4c2f81b46198d1d7"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\WorkoutContext\\exerciseLibrary\\dataV2\\exerciseLists\\legsExercises.json": {
+    "mtime": 1779836570.9869342,
+    "ast_hash": "5a2d65c198958da36f00802a6f4ed93e",
+    "semantic_hash": "5a2d65c198958da36f00802a6f4ed93e"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\WorkoutContext\\exerciseLibrary\\dataV2\\exerciseLists\\shouldersExercises.json": {
+    "mtime": 1779836570.9869342,
+    "ast_hash": "8247fa4db699f879d0ba729144723ce7",
+    "semantic_hash": "8247fa4db699f879d0ba729144723ce7"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\WorkoutContext\\exerciseLibrary\\dataV2\\exerciseLists\\tricepsExercises.json": {
+    "mtime": 1779836570.9982607,
+    "ast_hash": "b4fb0e3214d90f41fbe53d6db14fc2c7",
+    "semantic_hash": "b4fb0e3214d90f41fbe53d6db14fc2c7"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\WorkoutContext\\exerciseLibrary\\dataV2\\exerciseLists\\wholebodyExercises.json": {
+    "mtime": 1779836570.9869342,
+    "ast_hash": "c1bc19866e0c4a1f533d93f459df2fad",
+    "semantic_hash": "c1bc19866e0c4a1f533d93f459df2fad"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\WorkoutContext\\exerciseLibrary\\dataV2\\imageMap.ts": {
+    "mtime": 1779942017.5262923,
+    "ast_hash": "472aa9d0a0bd829acb2da67e613e0962",
+    "semantic_hash": "472aa9d0a0bd829acb2da67e613e0962"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\WorkoutContext\\exerciseLibrary\\index.ts": {
+    "mtime": 1780183826.7456038,
+    "ast_hash": "86f38406165043870d14ac34f66d1d8c",
+    "semantic_hash": "86f38406165043870d14ac34f66d1d8c"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\WorkoutContext\\functions\\__tests__\\exerciseFunctions.test.ts": {
+    "mtime": 1774746321.8333435,
+    "ast_hash": "e83e8cc4b604d71769a4f155bcfe409c",
+    "semantic_hash": "e83e8cc4b604d71769a4f155bcfe409c"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\WorkoutContext\\functions\\__tests__\\fatigueFunctions.baseline.test.ts": {
+    "mtime": 1780183826.7488055,
+    "ast_hash": "074dc2d0f36adb48e558718241cd200f",
+    "semantic_hash": "074dc2d0f36adb48e558718241cd200f"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\WorkoutContext\\functions\\__tests__\\fatigueFunctions.test.ts": {
+    "mtime": 1780183826.7283633,
+    "ast_hash": "e7dce3c32ab2874bf23b79a471f6874f",
+    "semantic_hash": "e7dce3c32ab2874bf23b79a471f6874f"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\WorkoutContext\\functions\\__tests__\\flowOfLayers.test.ts": {
+    "mtime": 1774746434.6545157,
+    "ast_hash": "025e1b580b8a87009cb606e822636af8",
+    "semantic_hash": "025e1b580b8a87009cb606e822636af8"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\WorkoutContext\\functions\\__tests__\\graphFunctions.test.ts": {
+    "mtime": 1774746430.6566267,
+    "ast_hash": "4ca2584fe36a0d4ee372e90c48c37cdd",
+    "semantic_hash": "4ca2584fe36a0d4ee372e90c48c37cdd"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\WorkoutContext\\functions\\__tests__\\logFunctions.test.ts": {
+    "mtime": 1781749767.5295498,
+    "ast_hash": "d8c630880eeb55b98f0c55c8dda0dc48",
+    "semantic_hash": "d8c630880eeb55b98f0c55c8dda0dc48"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\WorkoutContext\\functions\\__tests__\\oneRepMaxFunctions.test.ts": {
+    "mtime": 1779043459.9001958,
+    "ast_hash": "835e043504bc1674db9ec0aa2e0603b6",
+    "semantic_hash": "835e043504bc1674db9ec0aa2e0603b6"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\WorkoutContext\\functions\\__tests__\\progressionFunctions.test.ts": {
+    "mtime": 1781143670.555804,
+    "ast_hash": "0196f50cbf3e806013697f76cbd4f646",
+    "semantic_hash": "0196f50cbf3e806013697f76cbd4f646"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\WorkoutContext\\functions\\__tests__\\validator.test.ts": {
+    "mtime": 1772752224.666036,
+    "ast_hash": "e728a1fd8ec30037a972f6eb019728c8",
+    "semantic_hash": "e728a1fd8ec30037a972f6eb019728c8"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\WorkoutContext\\functions\\__tests__\\volumeFunctions.test.ts": {
+    "mtime": 1778440383.5631022,
+    "ast_hash": "4c5ec9e31ae569edb2351c31994d6eef",
+    "semantic_hash": "4c5ec9e31ae569edb2351c31994d6eef"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\WorkoutContext\\functions\\__tests__\\workoutFunctions.test.ts": {
+    "mtime": 1774746328.1828086,
+    "ast_hash": "b2358fc06b08e88521b3571b5ff53c32",
+    "semantic_hash": "b2358fc06b08e88521b3571b5ff53c32"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\WorkoutContext\\functions\\createExerciseFunctions.tsx": {
+    "mtime": 1780183826.6826265,
+    "ast_hash": "1788ec3f8887722d22ae9615af55e71f",
+    "semantic_hash": "1788ec3f8887722d22ae9615af55e71f"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\WorkoutContext\\functions\\exerciseFunctions.tsx": {
+    "mtime": 1778704848.990827,
+    "ast_hash": "620253eba7198306901a453a57a82cc4",
+    "semantic_hash": "620253eba7198306901a453a57a82cc4"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\WorkoutContext\\functions\\fatigueFunctions.tsx": {
+    "mtime": 1780183826.7456038,
+    "ast_hash": "a42c5b85e43ca2a7c28ecc68409c6dfe",
+    "semantic_hash": "a42c5b85e43ca2a7c28ecc68409c6dfe"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\WorkoutContext\\functions\\graphFunctions.tsx": {
+    "mtime": 1770425040.0730004,
+    "ast_hash": "0a9e21bc8fbd80652819f1498bf56eaa",
+    "semantic_hash": "0a9e21bc8fbd80652819f1498bf56eaa"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\WorkoutContext\\functions\\logFunctions.tsx": {
+    "mtime": 1778704496.1710196,
+    "ast_hash": "5646254402c1e84f1b592a1b88ca410e",
+    "semantic_hash": "5646254402c1e84f1b592a1b88ca410e"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\WorkoutContext\\functions\\oneRepMaxFunctions.tsx": {
+    "mtime": 1779043441.4866412,
+    "ast_hash": "e1fc65ee2755e74bf7c2db53ad8f91fc",
+    "semantic_hash": "e1fc65ee2755e74bf7c2db53ad8f91fc"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\WorkoutContext\\functions\\progressionFunctions.ts": {
+    "mtime": 1781143665.71397,
+    "ast_hash": "a71171c93e5eded19746142f2607626b",
+    "semantic_hash": "a71171c93e5eded19746142f2607626b"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\WorkoutContext\\functions\\validator.tsx": {
+    "mtime": 1778441318.5828905,
+    "ast_hash": "c66f53205570db86f7dc6cb2fe95fe19",
+    "semantic_hash": "c66f53205570db86f7dc6cb2fe95fe19"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\WorkoutContext\\functions\\volumeFunctions.tsx": {
+    "mtime": 1778440380.1237314,
+    "ast_hash": "cd88919076c4a42cf57301a701a646f6",
+    "semantic_hash": "cd88919076c4a42cf57301a701a646f6"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\WorkoutContext\\functions\\workoutFunctions.tsx": {
+    "mtime": 1778704844.023579,
+    "ast_hash": "e4d0a50e0e3cf7fddc79c2262b71e9c6",
+    "semantic_hash": "e4d0a50e0e3cf7fddc79c2262b71e9c6"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\WorkoutContext\\index.tsx": {
+    "mtime": 1781749767.5405598,
+    "ast_hash": "673e0ff0e5bd8c4e05c255f6294bea63",
+    "semantic_hash": "673e0ff0e5bd8c4e05c255f6294bea63"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\context\\WorkoutContext\\types.ts": {
+    "mtime": 1780332125.8689075,
+    "ast_hash": "f10df715fc371bc5f139ede82c9b0bf9",
+    "semantic_hash": "f10df715fc371bc5f139ede82c9b0bf9"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\eas.json": {
+    "mtime": 1774483628.6887558,
+    "ast_hash": "0102cf4baec1a708d2eb18d7210523c2",
+    "semantic_hash": "0102cf4baec1a708d2eb18d7210523c2"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\lib\\foodDB\\__tests__\\foodDB.test.ts": {
+    "mtime": 1781749767.5441918,
+    "ast_hash": "56120c09bae352c5092b1854b7095491",
+    "semantic_hash": "56120c09bae352c5092b1854b7095491"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\lib\\foodDB\\foodDB.ts": {
+    "mtime": 1772759448.9382443,
+    "ast_hash": "9b9a03dc326d6cf06bc4e33e9406fd6b",
+    "semantic_hash": "9b9a03dc326d6cf06bc4e33e9406fd6b"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\lib\\foodDB\\types.ts": {
+    "mtime": 1772578433.3608432,
+    "ast_hash": "6613600c7f51c3cc9da2d692e41232a3",
+    "semantic_hash": "6613600c7f51c3cc9da2d692e41232a3"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\lib\\openAI\\__tests__\\openAI.test.ts": {
+    "mtime": 1772933754.0786228,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\lib\\openAI\\openAI.ts": {
+    "mtime": 1774478995.2108674,
+    "ast_hash": "068a0bd84eee18e68165febf0be7d375",
+    "semantic_hash": "068a0bd84eee18e68165febf0be7d375"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\lib\\powersync\\AppSchema.ts": {
+    "mtime": 1774746261.2741675,
+    "ast_hash": "161620d65b88492716666743845c5786",
+    "semantic_hash": "161620d65b88492716666743845c5786"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\lib\\powersync\\Connector.ts": {
+    "mtime": 1772751286.871583,
+    "ast_hash": "9cc75ec22b424bf2c94e783f1ad2c22d",
+    "semantic_hash": "9cc75ec22b424bf2c94e783f1ad2c22d"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\lib\\powersync\\FlushUploads.ts": {
+    "mtime": 1781749767.563841,
+    "ast_hash": "69ed8acecf9233badde2bf314ff52b5b",
+    "semantic_hash": "69ed8acecf9233badde2bf314ff52b5b"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\lib\\powersync\\__tests__\\connector.test.ts": {
+    "mtime": 1781749767.5648384,
+    "ast_hash": "fa6f26d2e75d76948c407d996e38d885",
+    "semantic_hash": "fa6f26d2e75d76948c407d996e38d885"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\lib\\powersync\\orchestrator.ts": {
+    "mtime": 1781749767.5648384,
+    "ast_hash": "3a31fe58efedc0113968158193a05ea3",
+    "semantic_hash": "3a31fe58efedc0113968158193a05ea3"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\lib\\powersync\\system.ts": {
+    "mtime": 1772415499.6499765,
+    "ast_hash": "af94d5770cccba574b421634d1d78525",
+    "semantic_hash": "af94d5770cccba574b421634d1d78525"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\lib\\powersync\\uploadQueueStats.ts": {
+    "mtime": 1778697353.380643,
+    "ast_hash": "711e8f77b890b1b6533314453fe09b20",
+    "semantic_hash": "711e8f77b890b1b6533314453fe09b20"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\lib\\powersync\\watchdogStatus.ts": {
+    "mtime": 1777347394.0187755,
+    "ast_hash": "d9a65d328d0d68ef799258ec0ae59741",
+    "semantic_hash": "d9a65d328d0d68ef799258ec0ae59741"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\lib\\supabase\\client.ts": {
+    "mtime": 1770784141.0826318,
+    "ast_hash": "7f05eda02bf7baa4c721af1bc3bd35ef",
+    "semantic_hash": "7f05eda02bf7baa4c721af1bc3bd35ef"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\lib\\supabase\\functions\\deleteAccount\\index.ts": {
+    "mtime": 1772943839.3779972,
+    "ast_hash": "9b5553aee9bc399afa03f6647a0850a8",
+    "semantic_hash": "9b5553aee9bc399afa03f6647a0850a8"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\lib\\supabase\\functions\\fetchFoodDB\\index.ts": {
+    "mtime": 1772750821.8595328,
+    "ast_hash": "d7f888577921940e1ad270f3235a65cd",
+    "semantic_hash": "d7f888577921940e1ad270f3235a65cd"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\lib\\supabase\\functions\\fetchOpenAI\\index.ts": {
+    "mtime": 1775856022.7434428,
+    "ast_hash": "aa0cebf3b108c0b4a7cf8d54d19c7d34",
+    "semantic_hash": "aa0cebf3b108c0b4a7cf8d54d19c7d34"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\lib\\supabase\\migrations\\log_timeAttribute.sql": {
+    "mtime": 1774745990.55956,
+    "ast_hash": "911b9e15868e7f18a056a275dff627fc",
+    "semantic_hash": "911b9e15868e7f18a056a275dff627fc"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\lib\\supabase\\migrations\\powersync_setup.sql": {
+    "mtime": 1771652123.4773648,
+    "ast_hash": "f0879188c6858b5eb6c8530331b38d22",
+    "semantic_hash": "f0879188c6858b5eb6c8530331b38d22"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\lib\\supabase\\migrations\\rls_policies.sql": {
+    "mtime": 1771648893.6065454,
+    "ast_hash": "7798fae91e16456e69c21f52a3c2ff5a",
+    "semantic_hash": "7798fae91e16456e69c21f52a3c2ff5a"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\lib\\supabase\\migrations\\schema.sql": {
+    "mtime": 1774746261.7761552,
+    "ast_hash": "a596c5dd61745bef4c81719070ddaee8",
+    "semantic_hash": "a596c5dd61745bef4c81719070ddaee8"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\lib\\supabase\\migrations\\support_request.sql": {
+    "mtime": 1773016659.7362547,
+    "ast_hash": "f4eb478435b08cb6021ff7ed9d18a204",
+    "semantic_hash": "f4eb478435b08cb6021ff7ed9d18a204"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\lib\\utils\\__tests__\\downsample.test.ts": {
+    "mtime": 1780370574.6238651,
+    "ast_hash": "6e15dd5b62e75567f0b4962591d77604",
+    "semantic_hash": "6e15dd5b62e75567f0b4962591d77604"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\lib\\utils\\__tests__\\graphChartNote.test.ts": {
+    "mtime": 1780437172.0236535,
+    "ast_hash": "35ca1298c9e5fde207d0956ba8070551",
+    "semantic_hash": "35ca1298c9e5fde207d0956ba8070551"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\lib\\utils\\dateDeserialization.ts": {
+    "mtime": 1770162719.0878808,
+    "ast_hash": "4fc9f9f126b4d37ab6637ff53b1977c6",
+    "semantic_hash": "4fc9f9f126b4d37ab6637ff53b1977c6"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\lib\\utils\\dateHelper.ts": {
+    "mtime": 1774323563.7974079,
+    "ast_hash": "0e601c65190f21ad6635ef958231f069",
+    "semantic_hash": "0e601c65190f21ad6635ef958231f069"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\lib\\utils\\downsample.ts": {
+    "mtime": 1780370557.7449236,
+    "ast_hash": "cf0237596e62b85a4d7e76ecdad67f4e",
+    "semantic_hash": "cf0237596e62b85a4d7e76ecdad67f4e"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\lib\\utils\\graphChartNote.ts": {
+    "mtime": 1780437744.447738,
+    "ast_hash": "dc97d0bcd266eab600301d942307b39c",
+    "semantic_hash": "dc97d0bcd266eab600301d942307b39c"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\lib\\utils\\unitConversions.ts": {
+    "mtime": 1780007084.5649724,
+    "ast_hash": "24013f1c901cb028f22c7a1b86436b70",
+    "semantic_hash": "24013f1c901cb028f22c7a1b86436b70"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\metro.config.js": {
+    "mtime": 1773114437.33674,
+    "ast_hash": "25df8d195bc25eeb369b2cf80af7e9f6",
+    "semantic_hash": "25df8d195bc25eeb369b2cf80af7e9f6"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\package.json": {
+    "mtime": 1780012432.1918492,
+    "ast_hash": "bbdcae66810a8d7b9cd718ed042aadb3",
+    "semantic_hash": "bbdcae66810a8d7b9cd718ed042aadb3"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\scripts\\generateImageMap.js": {
+    "mtime": 1779942000.0534775,
+    "ast_hash": "d76e5d07b6634d057afaee3f6d4171c6",
+    "semantic_hash": "d76e5d07b6634d057afaee3f6d4171c6"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\tsconfig.json": {
+    "mtime": 499162500.0,
+    "ast_hash": "54dc64d62868350b1d819e47e2ac8e9a",
+    "semantic_hash": "54dc64d62868350b1d819e47e2ac8e9a"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\ARCHITECTURE.md": {
+    "mtime": 1782081067.6964805,
+    "ast_hash": "a5f736d04aecc26a7e4520e8b4f83259",
+    "semantic_hash": "a5f736d04aecc26a7e4520e8b4f83259"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\CLAUDE.md": {
+    "mtime": 1781392044.5232806,
+    "ast_hash": "584712f181782a209c1d40dbe1018dbf",
+    "semantic_hash": "584712f181782a209c1d40dbe1018dbf"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\README.md": {
+    "mtime": 1780360721.9393413,
+    "ast_hash": "faf633337e82de4f9ae8500701a2d84b",
+    "semantic_hash": "faf633337e82de4f9ae8500701a2d84b"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\TOSandPrivacy.txt": {
+    "mtime": 1780193909.342553,
+    "ast_hash": "dd7f9cb7aa548cb16d9a9907a18ffaaf",
+    "semantic_hash": "dd7f9cb7aa548cb16d9a9907a18ffaaf"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\fatigueBaseline_v1.txt": {
+    "mtime": 1779850727.9844277,
+    "ast_hash": "687032725a726526c6d465f976c5140d",
+    "semantic_hash": "687032725a726526c6d465f976c5140d"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\fatigueBaseline_v2.txt": {
+    "mtime": 1779900037.9855182,
+    "ast_hash": "e31cf6827537e4e4b47f0bc40e8cdc85",
+    "semantic_hash": "e31cf6827537e4e4b47f0bc40e8cdc85"
+  },
+  "C:\\Users\\aadik\\OneDrive\\Desktop\\Hackathon\\App\\notes.txt": {
+    "mtime": 1781126380.2792058,
+    "ast_hash": "25da6226722aa8a5c7b73bb1efbe5783",
+    "semantic_hash": "25da6226722aa8a5c7b73bb1efbe5783"
+  }
+}

@@ -3,12 +3,13 @@ import LogHistoryList from '@/components/WorkoutComponents/LogHistoryList'
 import { useAuth } from '@/context/AuthContext'
 import { useSettings } from '@/context/SettingsContext'
 import { useWorkout } from '@/context/WorkoutContext'
+import { getDailyGoal, isGoalHitToday } from '@/context/WorkoutContext/functions/progressionFunctions'
 import { Log } from '@/context/WorkoutContext/types'
 import { formatDateOrToday, getDateKey, isDateAfterToday, sortByDateDesc } from '@/lib/utils/dateHelper'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useLocalSearchParams } from 'expo-router'
 import { BicepsFlexed, Calendar, Check, RotateCcw } from 'lucide-react-native'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Alert, Animated, FlatList, Keyboard, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
 
 export default function LogsModal() {
@@ -23,13 +24,13 @@ export default function LogsModal() {
     const exerciseId = typeof params.exerciseId === 'string' ? params.exerciseId : params.exerciseId?.[0] || ''
     const exerciseName = typeof params.exerciseName === 'string' ? params.exerciseName : params.exerciseName?.[0] || 'Log'
     const isBodyweight = fullExerciseLib[exerciseName]?.equipment === 'Bodyweight'
+    const isCompound = fullExerciseLib[exerciseName]?.isCompound ?? true
     const weightLabel = isBodyweight ? `Added weight (${weightUnit})` : `Weight (${weightUnit})`
     const weightPlaceholder = '0'
 
     // State for the input (set information) fields
     const [weight, setWeight] = useState('')
     const [reps, setReps] = useState('')
-    const [rpe, setRpe] = useState('')
     const [focusedField, setFocusedField] = useState<string | null>(null)
 
     //State for date choice
@@ -84,9 +85,8 @@ export default function LogsModal() {
             }
             const weightVal = parseFloat(weight)
             const repsVal = parseInt(reps)
-            const rpeValue = rpe.trim() ? parseFloat(rpe) : 0
             pendingAddRef.current = { weight: weightVal, reps: repsVal, dateKey: getDateKey(selectedLogDate) }
-            handleAddLog(workoutId, exerciseId, userID, weightVal, repsVal, rpeValue, selectedLogDate)
+            handleAddLog(workoutId, exerciseId, userID, weightVal, repsVal, 0, selectedLogDate)
             setLastExercise(params.exerciseName)
             setShowAddSuccess(true)
             Animated.sequence([Animated.timing(addButtonScale, { toValue: 1.2, duration: 100, useNativeDriver: true }), Animated.timing(addButtonScale, { toValue: 1, duration: 200, useNativeDriver: true })]).start()
@@ -108,6 +108,12 @@ export default function LogsModal() {
             return b.id.localeCompare(a.id)
         })
 
+    const progressionOptions = useMemo(() => ({ weightUnit: weightUnit as 'lbs' | 'kg', isCompound }), [weightUnit, isCompound])
+
+    const dailyGoal = useMemo(() => getDailyGoal(logs, exerciseId, selectedLogDate, progressionOptions), [logs, exerciseId, selectedLogDate, progressionOptions])
+
+    const goalHitToday = useMemo(() => (dailyGoal ? isGoalHitToday(logs, exerciseId, selectedLogDate, dailyGoal) : false), [logs, exerciseId, selectedLogDate, dailyGoal])
+
     return (
         <>
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
@@ -124,6 +130,7 @@ export default function LogsModal() {
                                     <Text style={styles.exerciseTitle}>{exerciseName}</Text>
                                     <BicepsFlexed size={20} color="#2f80ed" strokeWidth={2} />
                                 </View>
+
                                 {/* Compact Input Section */}
                                 <View style={styles.inputSection}>
                                     {/* Input Fields Row */}
@@ -131,49 +138,19 @@ export default function LogsModal() {
                                         {/* Weight Input */}
                                         <View style={styles.inputGroup}>
                                             <Text style={styles.inputLabel}>{weightLabel}</Text>
-                                            <TextInput
-                                                style={[styles.input, focusedField === 'weight' && styles.inputFocused]}
-                                                placeholder={weightPlaceholder}
-                                                placeholderTextColor="#666"
-                                                value={weight}
-                                                onChangeText={setWeight}
-                                                onFocus={() => setFocusedField('weight')}
-                                                onBlur={() => setFocusedField(null)}
-                                                keyboardType="numeric"
-                                            />
+                                            <TextInput style={[styles.input, focusedField === 'weight' && styles.inputFocused]} placeholder={weightPlaceholder} placeholderTextColor="#666" value={weight} onChangeText={setWeight} onFocus={() => setFocusedField('weight')} onBlur={() => setFocusedField(null)} keyboardType="numeric" />
                                         </View>
 
                                         {/* Reps Input */}
                                         <View style={styles.inputGroup}>
                                             <Text style={styles.inputLabel}>Reps</Text>
-                                            <TextInput
-                                                style={[styles.input, focusedField === 'reps' && styles.inputFocused]}
-                                                placeholder="0"
-                                                placeholderTextColor="#666"
-                                                value={reps}
-                                                onChangeText={setReps}
-                                                onFocus={() => setFocusedField('reps')}
-                                                onBlur={() => setFocusedField(null)}
-                                                keyboardType="numeric"
-                                            />
+                                            <TextInput style={[styles.input, focusedField === 'reps' && styles.inputFocused]} placeholder="0" placeholderTextColor="#666" value={reps} onChangeText={setReps} onFocus={() => setFocusedField('reps')} onBlur={() => setFocusedField(null)} keyboardType="numeric" />
                                         </View>
 
-                                        {/* RPE Input - Optional */}
-                                        <View style={styles.inputGroup}>
-                                            <Text style={styles.inputLabel}>
-                                                RPE <Text style={styles.optionalBadge}>(opt)</Text>
-                                            </Text>
-                                            <TextInput
-                                                style={[styles.input, styles.inputOptional, focusedField === 'rpe' && styles.inputFocused]}
-                                                placeholder="-"
-                                                placeholderTextColor="#555"
-                                                value={rpe}
-                                                onChangeText={setRpe}
-                                                onFocus={() => setFocusedField('rpe')}
-                                                onBlur={() => setFocusedField(null)}
-                                                keyboardType="numeric"
-                                            />
-                                        </View>
+                                        {/* Change Date */}
+                                        <TouchableOpacity onPress={() => setShowDateModal(true)} style={[styles.dateButtonTouchable, !isLogDateToday && styles.dateButtonNotToday]} activeOpacity={0.5} accessibilityLabel="Change log date" accessibilityRole="button">
+                                            <Calendar size={22} color="#2f80ed" strokeWidth={2.5} />
+                                        </TouchableOpacity>
 
                                         {/* Add Button */}
                                         <TouchableOpacity onPress={handleAdd} disabled={!isValid} activeOpacity={0.8} style={styles.addButtonTouchable}>
@@ -182,7 +159,7 @@ export default function LogsModal() {
                                                     colors={
                                                         showAddSuccess ? ['#22C55E', '#16A34A']
                                                         : !isValid ?
-                                                            ['#333', '#333']
+                                                            ['#1e1e1e', '#1e1e1e']
                                                         :   ['#1A7AD4', '#2f80ed', '#5BA3F5']
                                                     }
                                                     start={{ x: 0, y: 0 }}
@@ -197,25 +174,22 @@ export default function LogsModal() {
                                         </TouchableOpacity>
                                     </View>
 
-                                    {/* Change Date Button */}
-                                    <TouchableOpacity onPress={() => setShowDateModal(true)} style={styles.changeDateButton} activeOpacity={0.5}>
-                                        <View style={styles.changeDateButtonInner}>
-                                            <View style={styles.changeDateButtonTopRow}>
-                                                <View style={styles.changeDateInlineGroup}>
-                                                    <Calendar size={18} color="#2f80ed" strokeWidth={2.5} />
-                                                    <Text style={styles.changeDateButtonPrimaryText} adjustsFontSizeToFit minimumFontScale={0.65} numberOfLines={2}>
-                                                        {formatDateOrToday(selectedLogDate, true)} (Tap to change)
-                                                    </Text>
-                                                </View>
-                                            </View>
-                                        </View>
-                                    </TouchableOpacity>
+                                    {dailyGoal && (
+                                        <Text style={styles.goalText}>
+                                            <Text style={styles.goalLabel}>LIFTRI suggested goal: </Text>
+                                            {dailyGoal.weight} {weightUnit} × {dailyGoal.reps}
+                                            {goalHitToday ? ' 🎉' : ''}
+                                        </Text>
+                                    )}
 
                                     {!isLogDateToday && (
-                                        <TouchableOpacity onPress={() => setSelectedLogDate(new Date())} style={styles.todayButton} activeOpacity={0.5}>
-                                            <RotateCcw size={18} color="#2f80ed" strokeWidth={2.5} />
-                                            <Text style={styles.todayButtonText}>Today</Text>
-                                        </TouchableOpacity>
+                                        <View style={styles.todayRow}>
+                                            <Text style={styles.selectedDateHint}>Logging for {formatDateOrToday(selectedLogDate, true)}</Text>
+                                            <TouchableOpacity onPress={() => setSelectedLogDate(new Date())} style={styles.todayButton} activeOpacity={0.5}>
+                                                <RotateCcw size={18} color="#2f80ed" strokeWidth={2.5} />
+                                                <Text style={styles.todayButtonText}>Today</Text>
+                                            </TouchableOpacity>
+                                        </View>
                                     )}
                                 </View>
                             </View>
@@ -281,6 +255,18 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_600SemiBold',
         flexShrink: 1,
     },
+    goalText: {
+        marginTop: 12,
+        fontSize: 13,
+        color: '#aaa',
+        textAlign: 'center',
+        fontFamily: 'Poppins_500Medium',
+        letterSpacing: -0.2,
+    },
+    goalLabel: {
+        color: '#2f80ed',
+        fontFamily: 'Poppins_600SemiBold',
+    },
     inputSection: {
         marginBottom: 20,
     },
@@ -299,11 +285,6 @@ const styles = StyleSheet.create({
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },
-    optionalBadge: {
-        fontSize: 10,
-        color: '#aaa',
-        fontFamily: 'Poppins_500Medium',
-    },
     input: {
         backgroundColor: '#1e1e1e',
         borderRadius: 12,
@@ -316,9 +297,6 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
-    },
-    inputOptional: {
-        opacity: 0.7,
     },
     inputFocused: {
         borderColor: '#2f80ed',
@@ -356,49 +334,35 @@ const styles = StyleSheet.create({
         letterSpacing: -0.5,
         fontFamily: 'Poppins_400Regular',
     },
-    changeDateButton: {
-        flexDirection: 'row',
+    dateButtonTouchable: {
+        width: 50,
+        height: 50,
+        borderRadius: 12,
+        backgroundColor: '#1e1e1e',
+        borderWidth: 2,
+        borderColor: '#1e1e1e',
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    dateButtonNotToday: {
+        borderColor: '#2f80ed',
+    },
+    todayRow: {
         marginTop: 12,
-        paddingVertical: 10,
-        paddingHorizontal: 12,
-        backgroundColor: '#1e1e1e',
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: '#2a2a2a',
+        gap: 8,
     },
-    changeDateButtonInner: {
-        width: '100%',
-        flexDirection: 'column',
-        alignItems: 'center',
-    },
-    changeDateButtonTopRow: {
-        width: '100%',
-        alignItems: 'center',
-    },
-    changeDateInlineGroup: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        alignSelf: 'center',
-        maxWidth: '100%',
-        gap: 6,
-    },
-    changeDateButtonPrimaryText: {
-        flexShrink: 1,
-        minWidth: 0,
-        fontSize: 14,
-        color: '#2f80ed',
-        fontFamily: 'Poppins_600SemiBold',
-        letterSpacing: -0.5,
-        textAlign: 'left',
+    selectedDateHint: {
+        fontSize: 13,
+        color: '#aaa',
+        textAlign: 'center',
+        fontFamily: 'Poppins_500Medium',
+        letterSpacing: -0.2,
     },
     todayButton: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         gap: 6,
-        marginTop: 8,
         paddingVertical: 10,
         paddingHorizontal: 12,
         backgroundColor: '#1e1e1e',
@@ -411,15 +375,5 @@ const styles = StyleSheet.create({
         color: '#2f80ed',
         fontFamily: 'Poppins_600SemiBold',
         letterSpacing: -0.5,
-    },
-    changeDateButtonHint: {
-        width: '100%',
-        marginTop: 6,
-        fontSize: 13,
-        color: '#2f80ed',
-        fontFamily: 'Poppins_600SemiBold',
-        letterSpacing: -0.5,
-        textAlign: 'center',
-        lineHeight: 18,
     },
 })

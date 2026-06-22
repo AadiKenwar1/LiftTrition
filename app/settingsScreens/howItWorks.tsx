@@ -23,7 +23,7 @@ const SECTIONS = [
         title: 'What Is My Fatigue Score?',
         intro: 'Fatigue in LIFTRI shows how demanding your logged training was. We use a modified version of the Epley formula to estimate your fatigue score.',
         bullets: [
-            "Each set gets a score — for each set, fatigue is estimated from the set's weight, reps, muscle group, exercise equipment, and optional RPE.",
+            "Each set gets a score — for each set, fatigue is estimated from the set's weight, reps, muscle group, and exercise equipment.",
             'Relative to you — each set is rated against your best performance on that exercise in the last 30 days.',
             "Daily budget — based on your activity level, you're assigned a daily budget. Your set scores are totaled against it to produce the fatigue percentage.",
         ],

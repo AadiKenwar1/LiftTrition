@@ -108,7 +108,7 @@ export default function ExerciseScreen() {
                     <TouchableOpacity activeOpacity={0.75} key="add-exercise" style={[styles.workoutFabButtons]} onPress={() => router.push({ pathname: '/workoutScreens/addExerciseModal', params: { workoutId: workoutId } })}>
                         <Ionicons name="add" size={35} color="white" shadowColor="black" shadowRadius={0} shadowOpacity={0} />
                     </TouchableOpacity>,
-                    <TouchableOpacity activeOpacity={0.75} key="archive" style={[styles.workoutFabButtons]} onPress={() => router.push({ pathname: '/workoutScreens/archiveModal', params: { logType: 'exercises' } })}>
+                    <TouchableOpacity activeOpacity={0.75} key="archive" style={[styles.workoutFabButtons]} onPress={() => router.push({ pathname: '/workoutScreens/archiveModal', params: { logType: 'exercises', workoutId } })}>
                         <Ionicons name="archive-outline" size={35} color="white" shadowColor="black" shadowRadius={0} shadowOpacity={0} />
                     </TouchableOpacity>,
                     <TouchableOpacity activeOpacity={0.75} key="notes" style={[styles.workoutFabButtons]} onPress={() => router.push({ pathname: '/workoutScreens/notesModal', params: { workoutId: workoutId } })}>

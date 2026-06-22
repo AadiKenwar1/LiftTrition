@@ -1,0 +1,1 @@
+{"nodes": [{"id": "rpe", "label": "RPE Logic", "type": "concept", "summary": "Rate of Perceived Exertion used in fatigue scoring; UI-facing RPE removed per notes while logic retained.", "source_file": "notes.txt", "confidence": "EXTRACTED"}], "edges": [], "hyperedges": []}

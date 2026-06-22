@@ -67,12 +67,6 @@ export default function LogHistoryList({ logs, weightUnit, lastAddedLogId, onDel
                                 </Text>
                                 <Text style={styles.logSeparator}>×</Text>
                                 <Text style={styles.logReps}>{item.reps} reps</Text>
-                                {item.rpe > 0 && (
-                                    <>
-                                        <Text style={styles.logSeparator}>•</Text>
-                                        <Text style={styles.logRpe}>RPE {item.rpe}</Text>
-                                    </>
-                                )}
                             </View>
                             {/* <Text style={styles.logDate}>{formatDateOrToday(item.date, true)}</Text> */}
                         </View>
@@ -217,12 +211,6 @@ const styles = StyleSheet.create({
     logReps: {
         fontSize: 17,
         color: '#FFF',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    logRpe: {
-        fontSize: 14,
-        color: '#aaa',
         letterSpacing: -0.5,
         fontFamily: 'Poppins_600SemiBold',
     },
