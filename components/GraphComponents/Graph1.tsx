@@ -1,5 +1,7 @@
+import { FONT_FAMILY, useColorScheme, useColors } from '@/context/ThemeContext'
+import { Archivo_400Regular } from '@expo-google-fonts/archivo'
 import { Poppins_400Regular } from '@expo-google-fonts/poppins'
-import { Circle, Group, Text, useFont } from '@shopify/react-native-skia'
+import { Circle, Group, LinearGradient, Text, useFont, vec } from '@shopify/react-native-skia'
 import { useEffect, useState } from 'react'
 import { ActivityIndicator, StyleSheet, View } from 'react-native'
 import { Area, CartesianChart, Line, useChartPressState } from 'victory-native'
@@ -12,10 +14,12 @@ interface Graph1Props {
 }
 
 export default function Graph1({ mode, data, selectedRange, chartNote }: Graph1Props) {
-    const font = useFont(Poppins_400Regular, 12)
+    const colors = useColors()
+    const isDark = useColorScheme() === 'dark'
+    const font = useFont(FONT_FAMILY === 'archivo' ? Archivo_400Regular : Poppins_400Regular, 12)
     const { state, isActive } = useChartPressState({ x: '', y: { value: 0 } })
 
-    const chartColor = mode === true ? '#2f80ed' : '#22C933'
+    const chartColor = mode === true ? colors.workout : colors.nutrition
     const [minDelayDone, setMinDelayDone] = useState(false)
 
     // Keep chart in a placeholder state briefly on mount/remount.
@@ -30,7 +34,7 @@ export default function Graph1({ mode, data, selectedRange, chartNote }: Graph1P
     if (!font || !minDelayDone) {
         return (
             <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#888" />
+                <ActivityIndicator size="large" color={colors.labelMuted} />
             </View>
         )
     }
@@ -49,7 +53,7 @@ export default function Graph1({ mode, data, selectedRange, chartNote }: Graph1P
                     //tickCount: data.length,
                     labelRotate: data.length > 3 ? 45 : 0,
                     labelOffset: 0,
-                    labelColor: '#D3D3D3',
+                    labelColor: colors.textSecondary,
                     formatXLabel: (value) => {
                         // ✅ Hide undefined/null labels
                         if (value === undefined || value === null || value === 'undefined') {
@@ -57,7 +61,7 @@ export default function Graph1({ mode, data, selectedRange, chartNote }: Graph1P
                         }
                         return `${value}`
                     },
-                    lineColor: '#363739',
+                    lineColor: colors.ringTrack,
                     lineWidth: 1,
                 }}
                 yAxis={[
@@ -97,9 +101,9 @@ export default function Graph1({ mode, data, selectedRange, chartNote }: Graph1P
                             return Array.from(new Set(ticks)).sort((a, b) => a - b)
                         })(),
                         labelOffset: 8,
-                        labelColor: '#D3D3D3',
+                        labelColor: colors.textSecondary,
                         formatYLabel: (value) => `${value}`, // No rounding needed - already integers
-                        lineColor: '#363739',
+                        lineColor: colors.ringTrack,
                         lineWidth: 1,
                     },
                 ]}
@@ -120,7 +124,7 @@ export default function Graph1({ mode, data, selectedRange, chartNote }: Graph1P
                                         y={firstLineY + index * lineHeight}
                                         text={line}
                                         font={font}
-                                        color="#888888"
+                                        color={colors.labelMuted}
                                         style="fill"
                                     />
                                 )
@@ -129,42 +133,43 @@ export default function Graph1({ mode, data, selectedRange, chartNote }: Graph1P
                     )
                 }}
             >
-                {({ points, chartBounds }) => (
-                    <>
-                        {/* Gradient area fill under the line */}
-                        <Area points={points.value} y0={chartBounds.bottom} color={chartColor} opacity={0.15} curveType="monotoneX" />
+                {({ points, chartBounds }) => {
+                    // Render a single dot at the most recent data point (handoff: end dot only).
+                    const lastPoint = [...points.value].reverse().find((p) => p.y != null)
+                    return (
+                        <>
+                            {/* Gradient area fill under the line (0.45 -> 0) */}
+                            <Area points={points.value} y0={chartBounds.bottom} curveType="monotoneX">
+                                <LinearGradient start={vec(0, chartBounds.top)} end={vec(0, chartBounds.bottom)} colors={[chartColor + '73', chartColor + '00']} />
+                            </Area>
 
-                        {/* Main line */}
-                        <Line points={points.value} color={chartColor} strokeWidth={3.5} curveType="monotoneX" />
+                            {/* Main line */}
+                            <Line points={points.value} color={chartColor} strokeWidth={2.5} curveType="monotoneX" />
 
-                        {/* Render circles for each data point with white border */}
-                        {points.value.map((point, index) => {
-                            if (!point.y) return null
-                            return (
-                                <Group key={`point-${index}`}>
-                                    {/* Outer white border */}
-                                    <Circle cx={point.x} cy={point.y} r={7.5} color={chartColor} opacity={1} />
-                                    {/* Inner colored circle */}
-                                    <Circle cx={point.x} cy={point.y} r={6.5} color={chartColor} opacity={1} />
+                            {/* End dot with a subtle glow (dark only) */}
+                            {lastPoint?.y != null && (
+                                <Group>
+                                    {isDark && <Circle cx={lastPoint.x} cy={lastPoint.y} r={8} color={chartColor} opacity={0.25} />}
+                                    <Circle cx={lastPoint.x} cy={lastPoint.y} r={4.5} color={chartColor} />
                                 </Group>
-                            )
-                        })}
+                            )}
 
-                        {/* Highlight active point with enhanced effect */}
-                        {isActive && state.y.value.position && (
-                            <Group>
-                                {/* Outer glow */}
-                                <Circle cx={state.x.position} cy={state.y.value.position} r={16} color={chartColor} opacity={0.2} />
-                                {/* Middle glow */}
-                                <Circle cx={state.x.position} cy={state.y.value.position} r={12} color={chartColor} opacity={0.4} />
-                                {/* Border */}
-                                <Circle cx={state.x.position} cy={state.y.value.position} r={9.5} color="#1e1e1e" opacity={1} />
-                                {/* Inner circle */}
-                                <Circle cx={state.x.position} cy={state.y.value.position} r={7.5} color={chartColor} opacity={1} />
-                            </Group>
-                        )}
-                    </>
-                )}
+                            {/* Highlight active point with enhanced effect */}
+                            {isActive && state.y.value.position && (
+                                <Group>
+                                    {/* Outer glow */}
+                                    <Circle cx={state.x.position} cy={state.y.value.position} r={16} color={chartColor} opacity={0.2} />
+                                    {/* Middle glow */}
+                                    <Circle cx={state.x.position} cy={state.y.value.position} r={12} color={chartColor} opacity={0.4} />
+                                    {/* Border */}
+                                    <Circle cx={state.x.position} cy={state.y.value.position} r={9.5} color={colors.surface} opacity={1} />
+                                    {/* Inner circle */}
+                                    <Circle cx={state.x.position} cy={state.y.value.position} r={7.5} color={chartColor} opacity={1} />
+                                </Group>
+                            )}
+                        </>
+                    )
+                }}
             </CartesianChart>
         </>
     )
