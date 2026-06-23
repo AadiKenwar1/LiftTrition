@@ -144,13 +144,13 @@ export default function Graph1({ mode, data, selectedRange, chartNote }: Graph1P
                             </Area>
 
                             {/* Main line */}
-                            <Line points={points.value} color={chartColor} strokeWidth={2.5} curveType="monotoneX" />
+                            <Line points={points.value} color={chartColor} strokeWidth={3} curveType="monotoneX" />
 
                             {/* End dot with a subtle glow (dark only) */}
                             {lastPoint?.y != null && (
                                 <Group>
-                                    {isDark && <Circle cx={lastPoint.x} cy={lastPoint.y} r={8} color={chartColor} opacity={0.25} />}
-                                    <Circle cx={lastPoint.x} cy={lastPoint.y} r={4.5} color={chartColor} />
+                                    {isDark && <Circle cx={lastPoint.x} cy={lastPoint.y} r={9} color={chartColor} opacity={0.25} />}
+                                    <Circle cx={lastPoint.x} cy={lastPoint.y} r={5.5} color={chartColor} />
                                 </Group>
                             )}
 

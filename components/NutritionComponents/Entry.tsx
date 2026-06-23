@@ -34,7 +34,7 @@ export default function Entry({ name, calories, protein, carbs, fats, onEditPres
                         </View>
                         <TouchableOpacity style={styles.iconButton} onPress={onEditPress} activeOpacity={0.5}>
                             <View style={styles.iconCircle}>
-                                <Pencil size={16} color={colors.nutrition} strokeWidth={2.5} />
+                                <Pencil size={18} color={colors.nutrition} strokeWidth={2.5} />
                             </View>
                         </TouchableOpacity>
                     </View>
@@ -82,13 +82,13 @@ function makeStyles(colors: Colors, isDark: boolean) {
             borderColor: colors.hairline,
         },
         accentBar: {
-            width: 3,
+            width: 4,
             backgroundColor: colors.nutrition,
         },
         container: {
             flex: 1,
-            paddingVertical: 14,
-            paddingHorizontal: 14,
+            paddingVertical: 16,
+            paddingHorizontal: 16,
         },
         header: {
             flexDirection: 'row',
@@ -100,7 +100,7 @@ function makeStyles(colors: Colors, isDark: boolean) {
             marginRight: 10,
         },
         name: {
-            fontSize: 16,
+            fontSize: 17,
             color: colors.text,
             letterSpacing: -0.3,
             fontFamily: fonts.bold,
@@ -109,16 +109,16 @@ function makeStyles(colors: Colors, isDark: boolean) {
             flexDirection: 'row',
             alignItems: 'baseline',
             gap: 5,
-            marginTop: 3,
+            marginTop: 4,
         },
         caloriesValue: {
-            fontSize: 17,
+            fontSize: 20,
             color: colors.nutritionInk,
             letterSpacing: -0.3,
             fontFamily: fonts.extrabold,
         },
         caloriesLabel: {
-            fontSize: 10,
+            fontSize: 11,
             color: colors.labelMuted,
             fontFamily: fonts.medium,
         },
@@ -126,8 +126,8 @@ function makeStyles(colors: Colors, isDark: boolean) {
             padding: 2,
         },
         iconCircle: {
-            width: 32,
-            height: 32,
+            width: 36,
+            height: 36,
             borderRadius: radius.iconButton,
             backgroundColor: colors.nutrition + '22',
             justifyContent: 'center',
@@ -138,23 +138,23 @@ function makeStyles(colors: Colors, isDark: boolean) {
         macrosRow: {
             flexDirection: 'row',
             gap: 8,
-            marginTop: 11,
+            marginTop: 12,
         },
         macroCell: {
             flex: 1,
             alignItems: 'center',
             backgroundColor: colors.surfaceInset,
             borderRadius: radius.macroCell,
-            paddingVertical: 7,
+            paddingVertical: 9,
         },
         macroValue: {
-            fontSize: 13,
+            fontSize: 15,
             color: colors.text,
             letterSpacing: -0.3,
             fontFamily: fonts.bold,
         },
         macroLabel: {
-            fontSize: 10,
+            fontSize: 11,
             color: colors.labelMuted,
             marginTop: 1,
             fontFamily: fonts.medium,

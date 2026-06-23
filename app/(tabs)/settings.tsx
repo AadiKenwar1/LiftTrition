@@ -113,20 +113,20 @@ export default function SettingsScreen() {
         return (
             <TouchableOpacity key={index} style={styles.settingItem} onPress={option.onPress} activeOpacity={0.5}>
                 <View style={styles.iconContainer}>
-                    <Icon size={20} color={colors.text} strokeWidth={2.5} />
+                    <Icon size={22} color={colors.text} strokeWidth={2.5} />
                 </View>
                 <View style={styles.itemTextContainer}>
                     <Text style={styles.settingTitle}>{option.title}</Text>
                     {option.subtitle && <Text style={styles.settingSubtitle}>{option.subtitle}</Text>}
                 </View>
-                <ChevronRight size={18} color={colors.chevron} strokeWidth={2} />
+                <ChevronRight size={20} color={colors.chevron} strokeWidth={2} />
             </TouchableOpacity>
         )
     }
 
     const renderAppearanceItem = () => (
         <TouchableOpacity style={styles.settingItem} onPress={() => setColorScheme(isDark ? 'light' : 'dark')} activeOpacity={0.5}>
-            <View style={styles.iconContainer}>{isDark ? <Moon size={20} color={colors.text} strokeWidth={2.5} /> : <Sun size={20} color={colors.text} strokeWidth={2.5} />}</View>
+            <View style={styles.iconContainer}>{isDark ? <Moon size={22} color={colors.text} strokeWidth={2.5} /> : <Sun size={22} color={colors.text} strokeWidth={2.5} />}</View>
             <View style={styles.itemTextContainer}>
                 <Text style={styles.settingTitle}>Appearance</Text>
                 <Text style={styles.settingSubtitle}>Switch between dark and light mode</Text>
@@ -250,7 +250,7 @@ function makeStyles(colors: Colors) {
             marginRight: 14,
         },
         avatarText: {
-            fontSize: 18,
+            fontSize: 20,
             color: '#FFFFFF',
             fontFamily: fonts.extrabold,
         },
@@ -259,13 +259,13 @@ function makeStyles(colors: Colors) {
             marginRight: 10,
         },
         profileName: {
-            fontSize: 16,
+            fontSize: 17,
             color: colors.text,
             letterSpacing: -0.3,
             fontFamily: fonts.bold,
         },
         profileEmail: {
-            fontSize: 12,
+            fontSize: 13,
             color: colors.textSecondary,
             marginTop: 2,
             fontFamily: fonts.regular,
@@ -277,7 +277,7 @@ function makeStyles(colors: Colors) {
             paddingVertical: 4,
         },
         proBadgeText: {
-            fontSize: 9,
+            fontSize: 10,
             letterSpacing: 0.5,
             color: colors.nutritionInk,
             fontFamily: fonts.extrabold,
@@ -287,7 +287,7 @@ function makeStyles(colors: Colors) {
             paddingHorizontal: 20,
         },
         sectionTitle: {
-            fontSize: 12,
+            fontSize: 13,
             color: colors.labelMuted,
             letterSpacing: 0.2,
             marginBottom: 10,
@@ -306,8 +306,8 @@ function makeStyles(colors: Colors) {
             borderColor: colors.hairline,
         },
         iconContainer: {
-            width: 34,
-            height: 34,
+            width: 40,
+            height: 40,
             borderRadius: radius.iconTile,
             justifyContent: 'center',
             alignItems: 'center',
@@ -320,20 +320,20 @@ function makeStyles(colors: Colors) {
             flex: 1,
         },
         settingTitle: {
-            fontSize: 14,
+            fontSize: 16,
             color: colors.text,
             marginBottom: 2,
             letterSpacing: -0.2,
             fontFamily: fonts.semibold,
         },
         settingSubtitle: {
-            fontSize: 12,
+            fontSize: 13,
             color: colors.labelMuted,
-            lineHeight: 16,
+            lineHeight: 17,
             fontFamily: fonts.regular,
         },
         trailingValue: {
-            fontSize: 13,
+            fontSize: 14,
             color: colors.textSecondary,
             marginLeft: 8,
             fontFamily: fonts.medium,

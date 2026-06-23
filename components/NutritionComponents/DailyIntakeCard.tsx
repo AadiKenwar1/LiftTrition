@@ -46,7 +46,7 @@ export default function DailyIntakeCard({ date = new Date() }: DailyIntakeCardPr
 
     return (
         <View style={styles.card}>
-            <ProgressWheel percent={caloriePct} size={84} strokeWidth={11} color={colors.nutrition}>
+            <ProgressWheel percent={caloriePct} size={110} strokeWidth={13} color={colors.nutrition}>
                 <View style={styles.center}>
                     <Text style={styles.calNumber}>{Math.round(macros.totalCalories)}</Text>
                     <Text style={styles.calGoal}>/ {settings.calorieGoal}</Text>
@@ -69,13 +69,13 @@ function makeStyles(colors: Colors) {
         card: {
             flexDirection: 'row',
             alignItems: 'center',
-            gap: 16,
+            gap: 18,
             backgroundColor: colors.surface,
             borderRadius: radius.cardLg,
             borderWidth: StyleSheet.hairlineWidth,
             borderColor: colors.hairline,
-            padding: 16,
-            marginBottom: 14,
+            padding: 20,
+            marginBottom: 16,
         },
         center: {
             alignItems: 'center',
@@ -83,53 +83,53 @@ function makeStyles(colors: Colors) {
         },
         calNumber: {
             fontFamily: fonts.extrabold,
-            fontSize: 20,
+            fontSize: 28,
             color: colors.text,
-            lineHeight: 22,
+            lineHeight: 30,
         },
         calGoal: {
             fontFamily: fonts.medium,
-            fontSize: 10,
+            fontSize: 12,
             color: colors.labelMuted,
-            marginTop: 2,
+            marginTop: 3,
         },
         right: {
             flex: 1,
         },
         kcalLeft: {
             fontFamily: fonts.medium,
-            fontSize: 11,
+            fontSize: 13,
             color: colors.labelMuted,
-            marginBottom: 10,
+            marginBottom: 12,
         },
         bars: {
-            gap: 9,
+            gap: 11,
         },
         barHeader: {
             flexDirection: 'row',
             justifyContent: 'space-between',
-            marginBottom: 4,
+            marginBottom: 5,
         },
         barLabel: {
             fontFamily: fonts.semibold,
-            fontSize: 11,
+            fontSize: 12,
             color: colors.textSecondary,
         },
         barValue: {
             fontFamily: fonts.bold,
-            fontSize: 11,
+            fontSize: 13,
             color: colors.text,
         },
         track: {
-            height: 5,
+            height: 7,
             backgroundColor: colors.ringTrack,
-            borderRadius: 3,
+            borderRadius: 4,
             overflow: 'hidden',
         },
         fill: {
             height: '100%',
             backgroundColor: colors.nutrition,
-            borderRadius: 3,
+            borderRadius: 4,
         },
     })
 }

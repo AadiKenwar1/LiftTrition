@@ -51,7 +51,7 @@ export default function Log({ text, subtitle, imgSource, showImageFallback = fal
                         <View style={styles.icons}>
                             <TouchableOpacity style={styles.iconButton} onPress={onEditPress} hitSlop={5} activeOpacity={0.5}>
                                 <View style={styles.iconCircle}>
-                                    <Pencil size={16} color={colors.workout} strokeWidth={2.5} />
+                                    <Pencil size={18} color={colors.workout} strokeWidth={2.5} />
                                 </View>
                             </TouchableOpacity>
                         </View>
@@ -85,7 +85,7 @@ function makeStyles(colors: Colors, isDark: boolean) {
             borderColor: colors.hairline,
         },
         accentBar: {
-            width: 3,
+            width: 4,
             backgroundColor: colors.workout,
         },
         container: {
@@ -134,8 +134,8 @@ function makeStyles(colors: Colors, isDark: boolean) {
             padding: 2,
         },
         iconCircle: {
-            width: 34,
-            height: 34,
+            width: 36,
+            height: 36,
             borderRadius: radius.iconButton,
             backgroundColor: colors.iconChipBg,
             justifyContent: 'center',
@@ -144,7 +144,7 @@ function makeStyles(colors: Colors, isDark: boolean) {
             borderColor: colors.workout + '66',
         },
         text: {
-            fontSize: 16,
+            fontSize: 17,
             color: colors.text,
             letterSpacing: -0.3,
             fontFamily: fonts.bold,

@@ -248,10 +248,10 @@ function makeStyles(colors: Colors, isDark: boolean) {
             marginBottom: 6,
         },
         mainTitle: {
-            fontSize: 19,
+            fontSize: 22,
             flexShrink: 1,
             color: colors.text,
-            letterSpacing: -0.4,
+            letterSpacing: -0.5,
             marginBottom: 8,
             fontFamily: fonts.extrabold,
         },

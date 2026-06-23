@@ -60,6 +60,12 @@ export default function NutritionScreen() {
 
     const renderHeader = () => (
         <>
+            {/* Screen title — mirrors the "Workouts" title on the lift screen for a seamless mode switch */}
+            <View style={styles.titleBlock}>
+                <Text style={styles.screenTitle}>Nutrition</Text>
+                <Text style={styles.screenSubtitle}>{isToday ? 'Today' : formatDate(selectedDate, showYearInTitle)}</Text>
+            </View>
+
             {/* Daily Intake summary for the selected date */}
             <View style={styles.intakeContainer}>
                 <DailyIntakeCard date={selectedDate} />
@@ -76,12 +82,12 @@ export default function NutritionScreen() {
                 }
                 <View style={styles.dateActionsColumn}>
                     <TouchableOpacity style={styles.dateChip} activeOpacity={0.5} onPress={() => router.push('/nutritionScreens/dateModal')}>
-                        <Calendar size={13} color={colors.nutrition} strokeWidth={2.5} />
+                        <Calendar size={18} color={colors.nutrition} strokeWidth={2.5} />
                         <Text style={styles.dateChipText}>Change Date</Text>
                     </TouchableOpacity>
                     {!isToday && (
                         <TouchableOpacity style={styles.dateChip} activeOpacity={0.5} onPress={() => setSelectedDate(new Date())}>
-                            <RotateCcw size={13} color={colors.nutrition} strokeWidth={2.5} />
+                            <RotateCcw size={18} color={colors.nutrition} strokeWidth={2.5} />
                             <Text style={styles.dateChipText}>Today</Text>
                         </TouchableOpacity>
                     )}
@@ -120,6 +126,22 @@ function makeStyles(colors: Colors) {
             flex: 1,
             backgroundColor: colors.background,
         },
+        titleBlock: {
+            paddingHorizontal: 20,
+        },
+        screenTitle: {
+            fontSize: 26,
+            color: colors.text,
+            letterSpacing: -0.5,
+            fontFamily: fonts.extrabold,
+        },
+        screenSubtitle: {
+            fontSize: 13,
+            color: colors.labelMuted,
+            marginTop: 2,
+            marginBottom: 14,
+            fontFamily: fonts.medium,
+        },
         intakeContainer: {
             paddingHorizontal: 20,
         },
@@ -136,11 +158,11 @@ function makeStyles(colors: Colors) {
             alignItems: 'center',
         },
         sectionTitle: {
-            fontSize: 19,
+            fontSize: 22,
             flex: 1,
             flexShrink: 1,
             color: colors.text,
-            letterSpacing: -0.4,
+            letterSpacing: -0.5,
             marginRight: 12,
             fontFamily: fonts.extrabold,
         },
@@ -152,9 +174,9 @@ function makeStyles(colors: Colors) {
             gap: 2,
         },
         sectionTitleLine: {
-            fontSize: 19,
+            fontSize: 22,
             color: colors.text,
-            letterSpacing: -0.4,
+            letterSpacing: -0.5,
             fontFamily: fonts.extrabold,
         },
         dateActionsColumn: {
@@ -165,15 +187,15 @@ function makeStyles(colors: Colors) {
             flexDirection: 'row',
             alignItems: 'center',
             gap: 6,
-            paddingVertical: 7,
-            paddingHorizontal: 12,
+            paddingVertical: 9,
+            paddingHorizontal: 14,
             backgroundColor: colors.surface,
             borderRadius: radius.chip,
             borderWidth: StyleSheet.hairlineWidth,
             borderColor: colors.hairline,
         },
         dateChipText: {
-            fontSize: 11,
+            fontSize: 13,
             color: colors.nutrition,
             fontFamily: fonts.bold,
         },
