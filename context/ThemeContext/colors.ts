@@ -35,6 +35,8 @@ export const palettes = {
         iconChipBg: 'rgba(47,128,237,0.10)',
         // Brand (nutritionInk = AA-contrast green for numerals on light bg)
         nutritionInk: '#1BA81B',
+        // Amber for "off-target" stat tone (AA-contrast on light bg)
+        warning: '#C77700',
         ...brand,
     },
     dark: {
@@ -63,6 +65,8 @@ export const palettes = {
         iconChipBg: 'rgba(47,128,237,0.16)',
         // Brand (bright green reads fine on dark, so numerals use the base nutrition green)
         nutritionInk: '#22C922',
+        // Amber for "off-target" stat tone
+        warning: '#FFB020',
         ...brand,
     },
 } as const satisfies Record<ColorScheme, Colors>

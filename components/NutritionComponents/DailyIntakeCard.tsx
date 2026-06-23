@@ -83,7 +83,7 @@ function makeStyles(colors: Colors) {
         },
         calNumber: {
             fontFamily: fonts.extrabold,
-            fontSize: 28,
+            fontSize: 24,
             color: colors.text,
             lineHeight: 30,
         },

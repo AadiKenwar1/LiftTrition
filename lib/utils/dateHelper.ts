@@ -73,13 +73,23 @@ export function formatDate(date: Date, showYear: boolean = true): string {
 
 /**
  * Format date string to minimal M/D format
- * 
+ *
  * @param dateKey - Date string in YYYY-MM-DD format (e.g., "2024-01-15")
  * @returns Formatted date string in M/D format (e.g., "1/15")
  */
 export function formatDateMinimal(dateKey: string): string {
     const [year, month, day] = dateKey.split('-');
     return `${parseInt(month)}/${parseInt(day)}`;
+}
+
+/**
+ * Format a Date as M/D/YY (no leading zeros, 2-digit year), e.g. "6/22/26".
+ *
+ * @param date - Date object to format
+ * @returns Formatted date string in M/D/YY format
+ */
+export function formatDateShort(date: Date): string {
+    return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear() % 100}`;
 }
 
 /**

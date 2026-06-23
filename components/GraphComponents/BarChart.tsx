@@ -1,14 +1,14 @@
-import { FONT_FAMILY, useColorScheme, useColors } from '@/context/ThemeContext'
+import { FONT_FAMILY, useColors } from '@/context/ThemeContext'
 import { Archivo_400Regular, Archivo_800ExtraBold } from '@expo-google-fonts/archivo'
 import { Poppins_400Regular, Poppins_800ExtraBold } from '@expo-google-fonts/poppins'
-import { Circle, Group, LinearGradient, Text, useFont, vec } from '@shopify/react-native-skia'
+import { Text, useFont } from '@shopify/react-native-skia'
 import { useEffect, useState } from 'react'
 import { ActivityIndicator, StyleSheet, View } from 'react-native'
-import { Area, CartesianChart, Line, useChartPressState } from 'victory-native'
+import { CartesianChart, useChartPressState } from 'victory-native'
 import ChartReadoutPill from './ChartReadoutPill'
-import { EndValueFlag, GoalLine, PressDot, PressGuideline } from './chartPrimitives'
+import { BarRect, EndValueFlag, GoalLine } from './chartPrimitives'
 
-interface Graph1Props {
+interface BarChartProps {
     mode: boolean
     data: Array<{ day: string; value: number }>
     selectedRange: 7 | 14 | 21
@@ -18,9 +18,8 @@ interface Graph1Props {
     showEndFlag?: boolean
 }
 
-export default function Graph1({ mode, data, selectedRange, chartNote, goal, formatValue, showEndFlag = true }: Graph1Props) {
+export default function BarChart({ mode, data, selectedRange, chartNote, goal, formatValue, showEndFlag = true }: BarChartProps) {
     const colors = useColors()
-    const isDark = useColorScheme() === 'dark'
     const font = useFont(FONT_FAMILY === 'archivo' ? Archivo_400Regular : Poppins_400Regular, 12)
     const flagFont = useFont(FONT_FAMILY === 'archivo' ? Archivo_800ExtraBold : Poppins_800ExtraBold, 11)
     const { state, isActive } = useChartPressState({ x: '', y: { value: 0 } })
@@ -31,22 +30,16 @@ export default function Graph1({ mode, data, selectedRange, chartNote, goal, for
     const [minDelayDone, setMinDelayDone] = useState(false)
     const [containerWidth, setContainerWidth] = useState(0)
 
-    // Keep chart in a placeholder state briefly on mount/remount.
-    // This smooths over a one-frame visual glitch during fast prop-driven remounts.
     useEffect(() => {
         setMinDelayDone(false)
         const id = setTimeout(() => setMinDelayDone(true), 200)
         return () => clearTimeout(id)
     }, [])
 
-    // y-domain widened to include the goal so its reference line is always visible.
-    const yDomain = (() => {
-        if (goal == null || data.length === 0) return undefined
-        const values = data.map((d) => d.value)
-        return [Math.min(...values, goal), Math.max(...values, goal)] as [number, number]
-    })()
+    // Bars sit on a 0 baseline; domain top includes the goal so its line stays in view.
+    const maxValue = data.length > 0 ? Math.max(...data.map((d) => d.value), goal ?? 0) : 1
+    const topTick = Math.max(1, Math.ceil(maxValue))
 
-    // Show placeholder while fonts load, and for a minimum duration.
     if (!font || !flagFont || !minDelayDone) {
         return (
             <View style={styles.loadingContainer}>
@@ -62,11 +55,11 @@ export default function Graph1({ mode, data, selectedRange, chartNote, goal, for
                 xKey="day"
                 yKeys={['value']}
                 chartPressState={state}
-                domain={yDomain ? { y: yDomain } : undefined}
+                domain={{ y: [0, topTick] }}
                 padding={{ left: 10, right: 10, top: 10, bottom: 10 }}
-                domainPadding={{ left: 20, right: 20, top: 20, bottom: 10 }}
+                domainPadding={{ left: 24, right: 24, top: 20, bottom: 0 }}
                 xAxis={{
-                    font: selectedRange === 7 ? font : null, // Only show labels when range is 7
+                    font: selectedRange === 7 ? font : null,
                     labelRotate: data.length > 3 ? 45 : 0,
                     labelOffset: 0,
                     labelColor: colors.textSecondary,
@@ -82,39 +75,7 @@ export default function Graph1({ mode, data, selectedRange, chartNote, goal, for
                 yAxis={[
                     {
                         font,
-                        tickValues: (() => {
-                            if (data.length === 0) return [0, 100, 200, 300, 400]
-
-                            const values = data.map((d) => d.value)
-                            const min = Math.floor(Math.min(...values))
-                            const max = Math.ceil(Math.max(...values))
-                            const range = max - min
-
-                            let ticks: number[]
-
-                            // All same value - show range around it
-                            if (range === 0) {
-                                ticks = [Math.max(0, min - 10), min, min + 10]
-                            }
-                            // Small range - show every integer
-                            else if (range <= 4) {
-                                ticks = Array.from({ length: range + 1 }, (_, i) => min + i)
-                            }
-                            // Larger range - space by whole numbers
-                            else {
-                                const step = Math.max(1, Math.ceil(range / 4))
-                                ticks = []
-                                for (let i = min; i <= max; i += step) {
-                                    ticks.push(i)
-                                }
-                                if (ticks[ticks.length - 1] !== max) {
-                                    ticks.push(max)
-                                }
-                            }
-
-                            // Remove duplicates and sort (fixes React key warning)
-                            return Array.from(new Set(ticks)).sort((a, b) => a - b)
-                        })(),
+                        tickValues: [0, topTick],
                         labelOffset: 8,
                         labelColor: colors.textSecondary,
                         formatYLabel: (value) => `${value}`,
@@ -149,47 +110,49 @@ export default function Graph1({ mode, data, selectedRange, chartNote, goal, for
                 }}
             >
                 {({ points, chartBounds, canvasSize, yScale }) => {
-                    const lastPoint = [...points.value].reverse().find((p) => p.y != null)
+                    const count = points.value.length || 1
+                    const barWidth = Math.min(18, ((chartBounds.right - chartBounds.left) / count) * 0.55)
+
+                    // Most-recent bar that actually exists (non-zero) → full accent + end flag anchor.
+                    let lastBarIndex = -1
+                    for (let i = points.value.length - 1; i >= 0; i--) {
+                        const v = points.value[i].yValue
+                        if (v != null && v > 0) {
+                            lastBarIndex = i
+                            break
+                        }
+                    }
+                    const lastBar = lastBarIndex >= 0 ? points.value[lastBarIndex] : undefined
+
                     return (
                         <>
-                            {/* Gradient area fill under the line (accent 0.45 -> 0) */}
-                            <Area points={points.value} y0={chartBounds.bottom} curveType="monotoneX">
-                                <LinearGradient start={vec(0, chartBounds.top)} end={vec(0, chartBounds.bottom)} colors={[chartColor + '73', chartColor + '00']} />
-                            </Area>
+                            {points.value.map((p, i) => (
+                                <BarRect
+                                    key={`bar-${i}`}
+                                    x={p.x}
+                                    barWidth={barWidth}
+                                    top={p.y ?? chartBounds.bottom}
+                                    bottom={chartBounds.bottom}
+                                    color={chartColor}
+                                    isLast={i === lastBarIndex}
+                                    index={i}
+                                    matchedIndex={state.matchedIndex}
+                                    isActive={isActive}
+                                />
+                            ))}
 
-                            {/* Main line */}
-                            <Line points={points.value} color={chartColor} strokeWidth={2.5} curveType="monotoneX" />
-
-                            {/* Goal reference line */}
                             {goal != null && <GoalLine y={yScale(goal)} left={chartBounds.left} right={chartBounds.right} color={chartColor} />}
 
-                            {/* End dot with a subtle glow (dark only) */}
-                            {lastPoint?.y != null && (
-                                <Group>
-                                    {isDark && <Circle cx={lastPoint.x} cy={lastPoint.y} r={7} color={chartColor} opacity={0.22} />}
-                                    <Circle cx={lastPoint.x} cy={lastPoint.y} r={4.5} color={chartColor} />
-                                </Group>
-                            )}
-
-                            {/* End value flag */}
-                            {showEndFlag && lastPoint?.y != null && lastPoint.yValue != null && (
+                            {showEndFlag && lastBar?.y != null && lastBar.yValue != null && (
                                 <EndValueFlag
-                                    x={lastPoint.x}
-                                    y={lastPoint.y}
-                                    value={fmt(lastPoint.yValue)}
+                                    x={lastBar.x}
+                                    y={lastBar.y}
+                                    value={fmt(lastBar.yValue)}
                                     color={chartColor}
                                     textColor={flagTextColor}
                                     font={flagFont}
                                     canvasWidth={canvasSize.width}
                                 />
-                            )}
-
-                            {/* Press read-out: thin guideline + single dot (pill rendered as RN overlay) */}
-                            {isActive && (
-                                <>
-                                    <PressGuideline xPosition={state.x.position} top={chartBounds.top} bottom={chartBounds.bottom} color={chartColor} />
-                                    <PressDot xPosition={state.x.position} yPosition={state.y.value.position} color={chartColor} ring={colors.surface} />
-                                </>
                             )}
                         </>
                     )

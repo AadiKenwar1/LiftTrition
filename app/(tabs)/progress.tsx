@@ -1,4 +1,5 @@
 import ActivityBanner from '@/components/GraphComponents/ActivityBanner'
+import BarChart from '@/components/GraphComponents/BarChart'
 import Graph1 from '@/components/GraphComponents/Graph1'
 import GraphStats from '@/components/GraphComponents/GraphStats'
 import RangeSelectionModal from '@/components/GraphComponents/RangeSelectionModal'
@@ -24,15 +25,15 @@ export default function ProgressScreen() {
     const isDark = useColorScheme() === 'dark'
     const styles = useMemo(() => makeStyles(colors, isDark), [colors, isDark])
 
-    // Local state for graph selections
-    const [selectedRange1, setSelectedRange1] = useState<7 | 14 | 21>(7)
-    const [selectedRange2, setSelectedRange2] = useState<7 | 14 | 21>(7)
+    // Local state for graph selections — topRange drives the line card, bottomRange the bar card.
+    const [topRange, setTopRange] = useState<7 | 14 | 21>(7)
+    const [bottomRange, setBottomRange] = useState<7 | 14 | 21>(7)
     const [selectedExercise, setSelectedExercise] = useState<string>(lastExercise || 'Barbell Bench Press')
     const [selectedMacro, setSelectedMacro] = useState<'calories' | 'protein' | 'carbs' | 'fats'>('calories')
 
     // Modal visibility state
-    const [rangeModalVisible1, setRangeModalVisible1] = useState(false)
-    const [rangeModalVisible2, setRangeModalVisible2] = useState(false)
+    const [topRangeModalVisible, setTopRangeModalVisible] = useState(false)
+    const [bottomRangeModalVisible, setBottomRangeModalVisible] = useState(false)
     const [selectionModalVisible, setSelectionModalVisible] = useState(false)
 
     // Set selected exercise to last exercise if it exists
@@ -42,7 +43,7 @@ export default function ProgressScreen() {
         }
     }, [lastExercise])
 
-    // Data for selection modal
+    // Data for selection modal — exercise picker (lift, top card) or macro picker (nutrition, bottom card)
     const macroList = useMemo(
         () => [
             { id: 'calories', title: 'Calories', subtitle: 'Total caloric intake' },
@@ -55,40 +56,58 @@ export default function ProgressScreen() {
 
     const selectionData = mode ? fullExerciseLibAsList : macroList
 
-    // Graph 1 — display (downsampled) + stats (raw daily slice)
-    const graph1RawData = useMemo(() => {
-        const rawData = mode === true ? handleGetOneRepMaxData(selectedExercise) : handleGetMacroDataForGraph(selectedMacro, settings.onboardingCompletedAt)
-        const startIndex = Math.max(0, rawData.length - selectedRange1)
+    // TOP card (line) — Strength (lift) / Body Weight (nutrition)
+    const topRawData = useMemo(() => {
+        const rawData = mode === true ? handleGetOneRepMaxData(selectedExercise) : handleGetBodyWeightProgressData(settings.onboardingCompletedAt)
+        const startIndex = Math.max(0, rawData.length - topRange)
         return rawData.slice(startIndex)
-    }, [mode, selectedExercise, selectedMacro, selectedRange1, logs, nutritionData, lastExercise, handleGetOneRepMaxData, handleGetMacroDataForGraph, settings.onboardingCompletedAt])
+    }, [mode, selectedExercise, topRange, logs, bwProgress, lastExercise, handleGetOneRepMaxData, handleGetBodyWeightProgressData, settings.onboardingCompletedAt])
 
-    const graph1Data = useMemo(() => {
+    const topData = useMemo(() => {
         if (mode) {
-            return downsampleDataPreserveEndpoints(graph1RawData, 7, 0, 'max')
+            return downsampleDataPreserveEndpoints(topRawData, 7, 0, 'max')
         }
-        const bucketSize = selectedRange1 / 7
-        return downsampleData(graph1RawData, bucketSize, 0, 'avg')
-    }, [graph1RawData, selectedRange1, mode])
+        const bucketSize = topRange / 7
+        return downsampleData(topRawData, bucketSize, 1, 'avg')
+    }, [topRawData, topRange, mode])
 
-    // Graph 2 — display (downsampled) + stats (raw daily slice)
-    const graph2RawData = useMemo(() => {
-        const rawData = mode === true ? handleGetSetsData(settings.onboardingCompletedAt) : handleGetBodyWeightProgressData(settings.onboardingCompletedAt)
-        const startIndex = Math.max(0, rawData.length - selectedRange2)
+    // BOTTOM card (bars) — Sets (lift) / Calories+Macros (nutrition)
+    const bottomRawData = useMemo(() => {
+        const rawData = mode === true ? handleGetSetsData(settings.onboardingCompletedAt) : handleGetMacroDataForGraph(selectedMacro, settings.onboardingCompletedAt)
+        const startIndex = Math.max(0, rawData.length - bottomRange)
         return rawData.slice(startIndex)
-    }, [mode, logs, bwProgress, selectedRange2, settings.onboardingCompletedAt, handleGetSetsData, handleGetBodyWeightProgressData])
+    }, [mode, selectedMacro, bottomRange, logs, nutritionData, handleGetSetsData, handleGetMacroDataForGraph, settings.onboardingCompletedAt])
 
-    const graph2Data = useMemo(() => {
-        const bucketSize = selectedRange2 / 7
-        const precision = mode === false ? 1 : 0
+    const bottomData = useMemo(() => {
+        const bucketSize = bottomRange / 7
         const aggregation = mode ? 'sum' : 'avg'
-        return downsampleData(graph2RawData, bucketSize, precision, aggregation)
-    }, [graph2RawData, selectedRange2, mode])
+        return downsampleData(bottomRawData, bucketSize, 0, aggregation)
+    }, [bottomRawData, bottomRange, mode])
 
-    //Graph 1 and 2 signatures for keying so that the graph re-renders when the data changes
-    const graph1Sig = `${graph1Data.length}:${graph1Data.at(-1)?.day ?? ''}:${graph1Data.at(-1)?.value ?? ''}`
-    const graph2Sig = `${graph2Data.length}:${graph2Data.at(-1)?.day ?? ''}:${graph2Data.at(-1)?.value ?? ''}`
+    // Signatures for keying so the chart re-renders when data changes
+    const topSig = `${topData.length}:${topData.at(-1)?.day ?? ''}:${topData.at(-1)?.value ?? ''}`
+    const bottomSig = `${bottomData.length}:${bottomData.at(-1)?.day ?? ''}:${bottomData.at(-1)?.value ?? ''}`
 
     const accent = mode ? colors.workout : colors.nutrition
+
+    // Goal + value formatting per card
+    const nutritionGoal =
+        selectedMacro === 'calories' ? settings.calorieGoal
+        : selectedMacro === 'protein' ? settings.proteinGoal
+        : selectedMacro === 'carbs' ? settings.carbsGoal
+        : settings.fatsGoal
+
+    const topGoal = mode ? undefined : settings.goalWeight
+    const topFormat = mode ? (n: number) => `${Math.round(n)}` : (n: number) => n.toFixed(1)
+
+    const bottomGoal = mode ? undefined : nutritionGoal
+    const bottomFormat = (n: number) => Math.round(n).toLocaleString()
+
+    // Card headers (title + simple subtitle, shown inside each card)
+    const topTitle = mode ? 'Strength' : 'Body Weight'
+    const topSubtitle = mode ? 'Estimated 1 rep max' : 'Daily'
+    const bottomTitle = mode ? 'Sets' : selectedMacro.charAt(0).toUpperCase() + selectedMacro.slice(1)
+    const bottomSubtitle = mode ? 'Total per day' : 'Daily intake'
 
     return (
         <>
@@ -96,29 +115,22 @@ export default function ProgressScreen() {
             <ScrollView contentContainerStyle={styles.container} style={styles.scroll}>
                 <ActivityBanner mode={mode} workoutDaysThisWeek={workoutDaysThisWeek} nutritionStreak={nutritionStreak} />
 
-                {/* Graph 1 Card */}
-                <Text style={styles.mainTitle}>{mode === true ? `Strength Graph` : `Nutrition Graph`}</Text>
+                {/* TOP card — line chart */}
                 <View style={styles.graphCard}>
-                    {graph1Data.length > 0 && (
-                        <Text style={styles.graphSubtext}>
-                            {mode ?
-                                <>
-                                    Graph displays estimated one rep max for <Text style={styles.graphSubtextAccent}>{selectedExercise}</Text> each training day
-                                </>
-                            :   <>
-                                    Graph displays your <Text style={styles.graphSubtextAccent}>{selectedMacro.charAt(0).toUpperCase() + selectedMacro.slice(1)}</Text> intake by day
-                                </>
-                            }
-                        </Text>
-                    )}
+                    <View style={styles.cardHeader}>
+                        <Text style={styles.cardTitle}>{topTitle}</Text>
+                        <Text style={styles.cardSubtitle}>{topSubtitle}</Text>
+                    </View>
                     <View style={styles.chartContainer}>
-                        {graph1Data.length > 0 ?
+                        {topData.length > 0 ?
                             <Graph1
-                                key={`graph1-${mode ? 'lift' : 'nutrition'}-${selectedRange1}-${mode ? selectedExercise : selectedMacro}-${graph1Sig}`}
+                                key={`top-${mode ? 'lift' : 'nutrition'}-${topRange}-${mode ? selectedExercise : 'bw'}-${topSig}`}
                                 mode={mode}
-                                data={graph1Data}
-                                selectedRange={selectedRange1}
-                                chartNote={getGraphChartNote(mode ? 'strength' : 'macro', selectedRange1)}
+                                data={topData}
+                                selectedRange={topRange}
+                                chartNote={getGraphChartNote(mode ? 'strength' : 'bodyweight', topRange)}
+                                goal={topGoal}
+                                formatValue={topFormat}
                             />
                         :   <View style={styles.emptyGraphState}>
                                 <View style={[styles.emptyIconCircle, { backgroundColor: accent + '1A' }]}>
@@ -126,63 +138,58 @@ export default function ProgressScreen() {
                                         <Dumbbell size={48} color={colors.workout} strokeWidth={2} />
                                     :   <Scale size={48} color={colors.nutrition} strokeWidth={2} />}
                                 </View>
-                                <Text style={styles.emptyGraphText}>No data yet for this exercise</Text>
-                                <Text style={styles.emptyGraphSubtext}>Start logging workouts to see your progress</Text>
+                                <Text style={styles.emptyGraphText}>{mode === true ? 'No data yet for this exercise' : 'No weight data yet'}</Text>
+                                <Text style={styles.emptyGraphSubtext}>{mode === true ? 'Start logging workouts to see your progress' : 'Update your body weight to see progress'}</Text>
                             </View>
                         }
                     </View>
-                    <GraphStats graphType={mode ? 'orm' : selectedMacro} data={graph1Data} statsData={graph1RawData} unitSystem={settings.unitSystem} mode={mode} />
+                    <GraphStats graphType={mode ? 'orm' : 'bodyweight'} data={topData} statsData={topRawData} unitSystem={settings.unitSystem} mode={mode} goalWeight={settings.goalWeight} />
                     {/* Button Row */}
                     <View style={styles.buttonRow}>
-                        <TouchableOpacity style={[styles.graphButton, { backgroundColor: accent }]} onPress={() => setRangeModalVisible1(true)}>
+                        <TouchableOpacity style={[styles.graphButton, { backgroundColor: accent }]} onPress={() => setTopRangeModalVisible(true)}>
                             <View style={styles.graphButtonInner}>
                                 <Text style={styles.graphButtonText} numberOfLines={1} adjustsFontSizeToFit={true}>
-                                    Last {selectedRange1} {mode ? 'Lifts' : 'Days'}
+                                    Last {topRange} {mode ? 'Lifts' : 'Days'}
                                 </Text>
                                 <ChevronDown size={20} color="#fff" strokeWidth={2} />
                             </View>
                         </TouchableOpacity>
-                        <TouchableOpacity style={[styles.graphButton, { backgroundColor: accent }]} onPress={() => setSelectionModalVisible(true)}>
-                            <View style={styles.graphButtonInner}>
-                                <Text style={styles.graphButtonText} numberOfLines={1} adjustsFontSizeToFit={true}>
-                                    {mode ? selectedExercise : selectedMacro.charAt(0).toUpperCase() + selectedMacro.slice(1)}
-                                </Text>
-                                <ChevronDown size={20} color="#fff" strokeWidth={2} />
-                            </View>
-                        </TouchableOpacity>
+                        {mode && (
+                            <TouchableOpacity style={[styles.graphButton, { backgroundColor: accent }]} onPress={() => setSelectionModalVisible(true)}>
+                                <View style={styles.graphButtonInner}>
+                                    <Text style={styles.graphButtonText} numberOfLines={1} adjustsFontSizeToFit={true}>
+                                        {selectedExercise}
+                                    </Text>
+                                    <ChevronDown size={20} color="#fff" strokeWidth={2} />
+                                </View>
+                            </TouchableOpacity>
+                        )}
                     </View>
                 </View>
 
-                {/* Body Weight card (nutrition mode) — lives next to the body-weight graph */}
+                {/* Body Weight card (nutrition mode) — sits next to the body-weight graph */}
                 {mode === false && (
                     <View style={styles.bwContainer}>
                         <BwCard />
                     </View>
                 )}
 
-                {/* Graph 2 Card */}
-                <Text style={styles.mainTitle}>{mode === true ? `Sets Graph` : `Body Weight Graph`}</Text>
+                {/* BOTTOM card — bar chart */}
                 <View style={styles.graphCard}>
-                    {graph2Data.length > 0 && (
-                        <Text style={styles.graphSubtext}>
-                            {mode ?
-                                <>
-                                    Graph displays <Text style={styles.graphSubtextAccent}>total sets</Text> by day
-                                </>
-                            :   <>
-                                    Graph displays <Text style={styles.graphSubtextAccent}>body weight</Text> by day
-                                </>
-                            }
-                        </Text>
-                    )}
+                    <View style={styles.cardHeader}>
+                        <Text style={styles.cardTitle}>{bottomTitle}</Text>
+                        <Text style={styles.cardSubtitle}>{bottomSubtitle}</Text>
+                    </View>
                     <View style={styles.chartContainer}>
-                        {graph2Data.length > 0 ?
-                            <Graph1
-                                key={`graph2-${mode ? 'lift' : 'nutrition'}-${selectedRange2}-${graph2Sig}`}
+                        {bottomData.length > 0 ?
+                            <BarChart
+                                key={`bottom-${mode ? 'lift' : 'nutrition'}-${bottomRange}-${mode ? 'sets' : selectedMacro}-${bottomSig}`}
                                 mode={mode}
-                                data={graph2Data}
-                                selectedRange={selectedRange2}
-                                chartNote={getGraphChartNote(mode ? 'sets' : 'bodyweight', selectedRange2)}
+                                data={bottomData}
+                                selectedRange={bottomRange}
+                                chartNote={getGraphChartNote(mode ? 'sets' : 'macro', bottomRange)}
+                                goal={bottomGoal}
+                                formatValue={bottomFormat}
                             />
                         :   <View style={styles.emptyGraphState}>
                                 <View style={[styles.emptyIconCircle, { backgroundColor: accent + '1A' }]}>
@@ -190,30 +197,40 @@ export default function ProgressScreen() {
                                         <Dumbbell size={48} color={colors.workout} strokeWidth={2} />
                                     :   <Scale size={48} color={colors.nutrition} strokeWidth={2} />}
                                 </View>
-                                <Text style={styles.emptyGraphText}>{mode === true ? 'No set data yet' : 'No weight data yet'}</Text>
-                                <Text style={styles.emptyGraphSubtext}>{mode === true ? 'Start logging workouts to see your sets' : 'Update your body weight to see progress'}</Text>
+                                <Text style={styles.emptyGraphText}>{mode === true ? 'No set data yet' : 'No nutrition data yet'}</Text>
+                                <Text style={styles.emptyGraphSubtext}>{mode === true ? 'Start logging workouts to see your sets' : 'Start logging meals to see your intake'}</Text>
                             </View>
                         }
                     </View>
-                    <GraphStats graphType={mode ? 'sets' : 'bodyweight'} data={graph2Data} statsData={graph2RawData} unitSystem={settings.unitSystem} mode={mode} goalWeight={settings.goalWeight} />
+                    <GraphStats graphType={mode ? 'sets' : selectedMacro} data={bottomData} statsData={bottomRawData} unitSystem={settings.unitSystem} mode={mode} goal={mode ? undefined : nutritionGoal} />
                     {/* Button Row */}
                     <View style={styles.buttonRow}>
-                        <TouchableOpacity style={[styles.graphButton, { backgroundColor: accent }]} onPress={() => setRangeModalVisible2(true)}>
+                        <TouchableOpacity style={[styles.graphButton, { backgroundColor: accent }]} onPress={() => setBottomRangeModalVisible(true)}>
                             <View style={styles.graphButtonInner}>
                                 <Text style={styles.graphButtonText} numberOfLines={1} adjustsFontSizeToFit={true}>
-                                    Last {selectedRange2} Days
+                                    Last {bottomRange} Days
                                 </Text>
                                 <ChevronDown size={20} color="#fff" strokeWidth={2} />
                             </View>
                         </TouchableOpacity>
+                        {!mode && (
+                            <TouchableOpacity style={[styles.graphButton, { backgroundColor: accent }]} onPress={() => setSelectionModalVisible(true)}>
+                                <View style={styles.graphButtonInner}>
+                                    <Text style={styles.graphButtonText} numberOfLines={1} adjustsFontSizeToFit={true}>
+                                        {selectedMacro.charAt(0).toUpperCase() + selectedMacro.slice(1)}
+                                    </Text>
+                                    <ChevronDown size={20} color="#fff" strokeWidth={2} />
+                                </View>
+                            </TouchableOpacity>
+                        )}
                     </View>
                 </View>
             </ScrollView>
 
             {/* Modals */}
-            <RangeSelectionModal visible={rangeModalVisible1} onClose={() => setRangeModalVisible1(false)} selectedRange={selectedRange1} onSelectRange={setSelectedRange1} mode={mode} rangeUnit={mode ? 'Lifts' : 'Days'} />
+            <RangeSelectionModal visible={topRangeModalVisible} onClose={() => setTopRangeModalVisible(false)} selectedRange={topRange} onSelectRange={setTopRange} mode={mode} rangeUnit={mode ? 'Lifts' : 'Days'} />
 
-            <RangeSelectionModal visible={rangeModalVisible2} onClose={() => setRangeModalVisible2(false)} selectedRange={selectedRange2} onSelectRange={setSelectedRange2} mode={mode} rangeUnit="Days" />
+            <RangeSelectionModal visible={bottomRangeModalVisible} onClose={() => setBottomRangeModalVisible(false)} selectedRange={bottomRange} onSelectRange={setBottomRange} mode={mode} rangeUnit="Days" />
 
             <SelectionModal
                 visible={selectionModalVisible}
@@ -247,17 +264,24 @@ function makeStyles(colors: Colors, isDark: boolean) {
         bwContainer: {
             marginBottom: 6,
         },
-        mainTitle: {
-            fontSize: 22,
-            flexShrink: 1,
-            color: colors.text,
-            letterSpacing: -0.5,
+        cardHeader: {
             marginBottom: 8,
+        },
+        cardTitle: {
+            fontSize: 20,
+            color: colors.text,
+            letterSpacing: -0.4,
             fontFamily: fonts.extrabold,
+        },
+        cardSubtitle: {
+            fontSize: 13,
+            color: colors.textSecondary,
+            marginTop: 2,
+            fontFamily: fonts.medium,
         },
         graphCard: {
             width: '100%',
-            height: 540,
+            height: 450,
             backgroundColor: colors.surface,
             borderRadius: radius.cardLg,
             borderWidth: StyleSheet.hairlineWidth,
@@ -274,20 +298,6 @@ function makeStyles(colors: Colors, isDark: boolean) {
                     shadowRadius: 6,
                     elevation: 3,
                 }),
-        },
-        graphSubtext: {
-            fontFamily: fonts.regular,
-            fontSize: 14,
-            color: colors.textSecondary,
-            letterSpacing: -0.2,
-            textAlign: 'center',
-            paddingHorizontal: 8,
-            marginBottom: 16,
-            lineHeight: 18,
-        },
-        graphSubtextAccent: {
-            fontFamily: fonts.semibold,
-            color: colors.text,
         },
         chartContainer: {
             flex: 1,

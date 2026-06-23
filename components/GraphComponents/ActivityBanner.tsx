@@ -1,4 +1,7 @@
 import type { NutritionStreakState } from '@/context/NutritionContext/types'
+import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
+import { Dumbbell, Flame } from 'lucide-react-native'
+import { useMemo } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 
 interface ActivityBannerProps {
@@ -22,6 +25,10 @@ function getNutritionBannerText(streak: NutritionStreakState): string {
 }
 
 export default function ActivityBanner({ mode, workoutDaysThisWeek, nutritionStreak }: ActivityBannerProps) {
+    const colors = useColors()
+    const styles = useMemo(() => makeStyles(colors), [colors])
+    const accent = mode ? colors.workout : colors.nutrition
+
     const text =
         mode ?
             workoutDaysThisWeek === 0 ?
@@ -31,32 +38,64 @@ export default function ActivityBanner({ mode, workoutDaysThisWeek, nutritionStr
 
     return (
         <View style={styles.banner}>
-            <Text style={styles.text} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.85}>
-                {text}
-            </Text>
+            <View style={[styles.iconTile, { backgroundColor: accent + '1A' }]}>
+                {mode ?
+                    <Dumbbell size={22} color={accent} strokeWidth={2.4} />
+                :   <Flame size={22} color={accent} strokeWidth={2.4} />}
+            </View>
+            <View style={styles.textCol}>
+                <Text style={styles.text} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.85}>
+                    {text}
+                </Text>
+                {mode && (
+                    <View style={styles.dotRow}>
+                        {Array.from({ length: 7 }).map((_, i) => (
+                            <View key={i} style={[styles.dot, { backgroundColor: i < workoutDaysThisWeek ? colors.workout : colors.ringTrack }]} />
+                        ))}
+                    </View>
+                )}
+            </View>
         </View>
     )
 }
 
-const styles = StyleSheet.create({
-    banner: {
-        width: '100%',
-        backgroundColor: '#1e1e1e',
-        borderRadius: 14,
-        paddingVertical: 14,
-        paddingHorizontal: 18,
-        marginBottom: 12,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.3,
-        shadowRadius: 5,
-        elevation: 5,
-    },
-    text: {
-        fontSize: 14,
-        color: '#fff',
-        fontFamily: 'Poppins_500Medium',
-        letterSpacing: -0.2,
-        textAlign: 'center',
-    },
-})
+function makeStyles(colors: Colors) {
+    return StyleSheet.create({
+        banner: {
+            width: '100%',
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 13,
+            backgroundColor: colors.surfaceInset,
+            borderRadius: radius.cardLg,
+            padding: 14,
+            marginBottom: 12,
+        },
+        iconTile: {
+            width: 40,
+            height: 40,
+            borderRadius: radius.cardLg,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        textCol: {
+            flex: 1,
+        },
+        text: {
+            fontSize: 14,
+            color: colors.text,
+            fontFamily: fonts.bold,
+            letterSpacing: -0.2,
+        },
+        dotRow: {
+            flexDirection: 'row',
+            gap: 5,
+            marginTop: 7,
+        },
+        dot: {
+            width: 14,
+            height: 6,
+            borderRadius: 3,
+        },
+    })
+}

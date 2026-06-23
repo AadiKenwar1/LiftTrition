@@ -27,6 +27,7 @@ export type Colors = {
     nutrition: string
     nutritionInk: string
     destructive: string
+    warning: string
     workoutGradient: readonly [string, string]
     nutritionGradient: readonly [string, string]
 }

@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git --no-pager diff --stat)",
+      "Bash(npx jest *)",
+      "Bash(node -e \"const r=require\\('./jest-p1.json'\\); console.log\\('Tests:',r.numPassedTests,'passed /',r.numFailedTests,'failed /',r.numTotalTests,'total \\('+r.numFailedTestSuites+' suites failed\\)'\\);\")"
+    ]
+  }
+}

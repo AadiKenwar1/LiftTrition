@@ -11,7 +11,7 @@ import { Alert, StyleSheet, Text, View } from 'react-native'
 
 export default function WorkoutScreen() {
     //Workout Context Functions
-    const { handleUpdateWorkoutOrder, handleArchiveWorkout, handleDeleteWorkout, handleDuplicateWorkout, workouts } = useWorkout()
+    const { handleUpdateWorkoutOrder, handleArchiveWorkout, handleDeleteWorkout, handleDuplicateWorkout, workouts, exercises } = useWorkout()
     //Router
     const router = useRouter()
     //Auth Context Functions

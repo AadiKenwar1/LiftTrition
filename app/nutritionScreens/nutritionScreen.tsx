@@ -3,14 +3,14 @@ import Entry from '@/components/NutritionComponents/Entry'
 import { useNutrition } from '@/context/NutritionContext'
 import { NutritionEntry } from '@/context/NutritionContext/types'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
-import { formatDate, getDateKey } from '@/lib/utils/dateHelper'
+import { formatDate, formatDateShort, getDateKey } from '@/lib/utils/dateHelper'
 import { useRouter } from 'expo-router'
-import { Calendar, RotateCcw, Utensils } from 'lucide-react-native'
+import { Calendar, Utensils } from 'lucide-react-native'
 import { useMemo } from 'react'
 import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 export default function NutritionScreen() {
-    const { nutritionData, selectedDate, setSelectedDate, handleSaveNutrition, handleDeleteNutrition } = useNutrition()
+    const { nutritionData, selectedDate, handleSaveNutrition, handleDeleteNutrition } = useNutrition()
     const router = useRouter()
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
@@ -63,7 +63,6 @@ export default function NutritionScreen() {
             {/* Screen title — mirrors the "Workouts" title on the lift screen for a seamless mode switch */}
             <View style={styles.titleBlock}>
                 <Text style={styles.screenTitle}>Nutrition</Text>
-                <Text style={styles.screenSubtitle}>{isToday ? 'Today' : formatDate(selectedDate, showYearInTitle)}</Text>
             </View>
 
             {/* Daily Intake summary for the selected date */}
@@ -73,25 +72,11 @@ export default function NutritionScreen() {
 
             {/* Section Header */}
             <View style={styles.sectionHeader}>
-                {isToday ?
-                    <Text style={styles.sectionTitle}>Today&apos;s Logs</Text>
-                :   <View style={[styles.sectionTitleBlock, styles.sectionTitleStack]}>
-                        <Text style={styles.sectionTitleLine}>{formatDate(selectedDate, showYearInTitle)}&apos;s</Text>
-                        <Text style={styles.sectionTitleLine}>Logs</Text>
-                    </View>
-                }
-                <View style={styles.dateActionsColumn}>
-                    <TouchableOpacity style={styles.dateChip} activeOpacity={0.5} onPress={() => router.push('/nutritionScreens/dateModal')}>
-                        <Calendar size={18} color={colors.nutrition} strokeWidth={2.5} />
-                        <Text style={styles.dateChipText}>Change Date</Text>
-                    </TouchableOpacity>
-                    {!isToday && (
-                        <TouchableOpacity style={styles.dateChip} activeOpacity={0.5} onPress={() => setSelectedDate(new Date())}>
-                            <RotateCcw size={18} color={colors.nutrition} strokeWidth={2.5} />
-                            <Text style={styles.dateChipText}>Today</Text>
-                        </TouchableOpacity>
-                    )}
-                </View>
+                <Text style={styles.sectionTitle}>Logged Meals</Text>
+                <TouchableOpacity style={styles.dateChip} activeOpacity={0.5} onPress={() => router.push('/nutritionScreens/dateModal')}>
+                    <Calendar size={18} color={colors.nutrition} strokeWidth={2.5} />
+                    <Text style={styles.dateChipText}>{isToday ? 'Today' : formatDateShort(selectedDate)}</Text>
+                </TouchableOpacity>
             </View>
         </>
     )
@@ -133,14 +118,8 @@ function makeStyles(colors: Colors) {
             fontSize: 26,
             color: colors.text,
             letterSpacing: -0.5,
-            fontFamily: fonts.extrabold,
-        },
-        screenSubtitle: {
-            fontSize: 13,
-            color: colors.labelMuted,
-            marginTop: 2,
             marginBottom: 14,
-            fontFamily: fonts.medium,
+            fontFamily: fonts.extrabold,
         },
         intakeContainer: {
             paddingHorizontal: 20,
@@ -165,23 +144,6 @@ function makeStyles(colors: Colors) {
             letterSpacing: -0.5,
             marginRight: 12,
             fontFamily: fonts.extrabold,
-        },
-        sectionTitleBlock: {
-            flex: 1,
-            marginRight: 12,
-        },
-        sectionTitleStack: {
-            gap: 2,
-        },
-        sectionTitleLine: {
-            fontSize: 22,
-            color: colors.text,
-            letterSpacing: -0.5,
-            fontFamily: fonts.extrabold,
-        },
-        dateActionsColumn: {
-            alignItems: 'flex-end',
-            gap: 8,
         },
         dateChip: {
             flexDirection: 'row',
