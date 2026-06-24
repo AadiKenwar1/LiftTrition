@@ -5,35 +5,34 @@ import GraphStats from '@/components/GraphComponents/GraphStats'
 import RangeSelectionModal from '@/components/GraphComponents/RangeSelectionModal'
 import SelectionModal from '@/components/GraphComponents/SelectionModal'
 import ModeSwitcher from '@/components/NeutralComponents/ModeSwitcher'
-import BwCard from '@/components/NutritionComponents/bwCard'
 import { useNutrition } from '@/context/NutritionContext'
 import { useSettings } from '@/context/SettingsContext'
 import { fonts, radius, useColorScheme, useColors, type Colors } from '@/context/ThemeContext'
 import { useWorkout } from '@/context/WorkoutContext'
 
+import { addDays, formatDate, getWeekStart } from '@/lib/utils/dateHelper'
 import { downsampleData, downsampleDataPreserveEndpoints } from '@/lib/utils/downsample'
 import { getGraphChartNote } from '@/lib/utils/graphChartNote'
-import { ChevronDown, Dumbbell, Scale } from 'lucide-react-native'
+import { ChevronDown, ChevronLeft, ChevronRight, Dumbbell, History, Scale } from 'lucide-react-native'
 import { useEffect, useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 export default function ProgressScreen() {
     const { mode, settings, handleGetBodyWeightProgressData, bwProgress } = useSettings()
-    const { handleGetMacroDataForGraph, nutritionData, nutritionStreak } = useNutrition()
-    const { logs, handleGetOneRepMaxData, handleGetSetsData, lastExercise, fullExerciseLibAsList, workoutDaysThisWeek } = useWorkout()
+    const { handleGetMacroForWeek, nutritionData, nutritionStreak } = useNutrition()
+    const { logs, handleGetOneRepMaxData, handleGetSetsForWeek, lastExercise, fullExerciseLibAsList, trainedDaysThisWeek } = useWorkout()
     const colors = useColors()
     const isDark = useColorScheme() === 'dark'
     const styles = useMemo(() => makeStyles(colors, isDark), [colors, isDark])
 
-    // Local state for graph selections — topRange drives the line card, bottomRange the bar card.
+    // Local state for graph selections — topRange drives the line card; the bar card pages by week.
     const [topRange, setTopRange] = useState<7 | 14 | 21>(7)
-    const [bottomRange, setBottomRange] = useState<7 | 14 | 21>(7)
+    const [bottomWeekOffset, setBottomWeekOffset] = useState(0)
     const [selectedExercise, setSelectedExercise] = useState<string>(lastExercise || 'Barbell Bench Press')
     const [selectedMacro, setSelectedMacro] = useState<'calories' | 'protein' | 'carbs' | 'fats'>('calories')
 
     // Modal visibility state
     const [topRangeModalVisible, setTopRangeModalVisible] = useState(false)
-    const [bottomRangeModalVisible, setBottomRangeModalVisible] = useState(false)
     const [selectionModalVisible, setSelectionModalVisible] = useState(false)
 
     // Set selected exercise to last exercise if it exists
@@ -42,6 +41,11 @@ export default function ProgressScreen() {
             setSelectedExercise(lastExercise)
         }
     }, [lastExercise])
+
+    // Reset the bar card to the current week when switching modes
+    useEffect(() => {
+        setBottomWeekOffset(0)
+    }, [mode])
 
     // Data for selection modal — exercise picker (lift, top card) or macro picker (nutrition, bottom card)
     const macroList = useMemo(
@@ -71,22 +75,22 @@ export default function ProgressScreen() {
         return downsampleData(topRawData, bucketSize, 1, 'avg')
     }, [topRawData, topRange, mode])
 
-    // BOTTOM card (bars) — Sets (lift) / Calories+Macros (nutrition)
-    const bottomRawData = useMemo(() => {
-        const rawData = mode === true ? handleGetSetsData(settings.onboardingCompletedAt) : handleGetMacroDataForGraph(selectedMacro, settings.onboardingCompletedAt)
-        const startIndex = Math.max(0, rawData.length - bottomRange)
-        return rawData.slice(startIndex)
-    }, [mode, selectedMacro, bottomRange, logs, nutritionData, handleGetSetsData, handleGetMacroDataForGraph, settings.onboardingCompletedAt])
+    // BOTTOM card (bars) — Sets (lift) / Calories+Macros (nutrition), one calendar week at a time
+    const weekStart = useMemo(() => addDays(getWeekStart(new Date()), bottomWeekOffset * 7), [bottomWeekOffset])
 
-    const bottomData = useMemo(() => {
-        const bucketSize = bottomRange / 7
-        const aggregation = mode ? 'sum' : 'avg'
-        return downsampleData(bottomRawData, bucketSize, 0, aggregation)
-    }, [bottomRawData, bottomRange, mode])
+    const bottomData = useMemo(() => (mode ? handleGetSetsForWeek(weekStart) : handleGetMacroForWeek(selectedMacro, weekStart)), [mode, selectedMacro, weekStart, logs, nutritionData, handleGetSetsForWeek, handleGetMacroForWeek])
 
-    // Signatures for keying so the chart re-renders when data changes
+    // Week navigation bounds + label
+    const minWeekStart = useMemo(() => (settings.onboardingCompletedAt ? getWeekStart(new Date(settings.onboardingCompletedAt)) : addDays(getWeekStart(new Date()), -52 * 7)), [settings.onboardingCompletedAt])
+    const canGoPrev = weekStart.getTime() > minWeekStart.getTime()
+    const canGoNext = bottomWeekOffset < 0
+    const weekLabel =
+        bottomWeekOffset === 0 ? 'This week'
+        : bottomWeekOffset === -1 ? 'Last week'
+        : `${formatDate(weekStart, false)} – ${formatDate(addDays(weekStart, 6), false)}`
+
+    // Signature for keying the line chart so it re-renders when data changes
     const topSig = `${topData.length}:${topData.at(-1)?.day ?? ''}:${topData.at(-1)?.value ?? ''}`
-    const bottomSig = `${bottomData.length}:${bottomData.at(-1)?.day ?? ''}:${bottomData.at(-1)?.value ?? ''}`
 
     const accent = mode ? colors.workout : colors.nutrition
 
@@ -104,7 +108,7 @@ export default function ProgressScreen() {
     const bottomFormat = (n: number) => Math.round(n).toLocaleString()
 
     // Card headers (title + simple subtitle, shown inside each card)
-    const topTitle = mode ? 'Strength' : 'Body Weight'
+    const topTitle = mode ? selectedExercise : 'Body Weight'
     const topSubtitle = mode ? 'Estimated 1 rep max' : 'Daily'
     const bottomTitle = mode ? 'Sets' : selectedMacro.charAt(0).toUpperCase() + selectedMacro.slice(1)
     const bottomSubtitle = mode ? 'Total per day' : 'Daily intake'
@@ -113,25 +117,32 @@ export default function ProgressScreen() {
         <>
             <ModeSwitcher />
             <ScrollView contentContainerStyle={styles.container} style={styles.scroll}>
-                <ActivityBanner mode={mode} workoutDaysThisWeek={workoutDaysThisWeek} nutritionStreak={nutritionStreak} />
+                <ActivityBanner mode={mode} trainedDays={trainedDaysThisWeek} nutritionStreak={nutritionStreak} />
 
                 {/* TOP card — line chart */}
                 <View style={styles.graphCard}>
                     <View style={styles.cardHeader}>
-                        <Text style={styles.cardTitle}>{topTitle}</Text>
-                        <Text style={styles.cardSubtitle}>{topSubtitle}</Text>
+                        <View style={styles.headerLeft}>
+                            {mode ?
+                                <TouchableOpacity style={styles.titleRow} onPress={() => setSelectionModalVisible(true)} activeOpacity={0.6} hitSlop={8}>
+                                    <Text style={styles.cardTitle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6}>
+                                        {topTitle}
+                                    </Text>
+                                    <ChevronDown size={18} color={accent} strokeWidth={2.5} />
+                                </TouchableOpacity>
+                            :   <Text style={styles.cardTitle} numberOfLines={1}>
+                                    {topTitle}
+                                </Text>
+                            }
+                            <Text style={styles.cardSubtitle}>{topSubtitle}</Text>
+                        </View>
+                        <TouchableOpacity style={[styles.rangeButton, { backgroundColor: accent + '1A', borderColor: accent + '40' }]} onPress={() => setTopRangeModalVisible(true)} activeOpacity={0.6} hitSlop={8} accessibilityRole="button" accessibilityLabel="Change time range">
+                            <History size={20} color={accent} strokeWidth={2} />
+                        </TouchableOpacity>
                     </View>
                     <View style={styles.chartContainer}>
                         {topData.length > 0 ?
-                            <Graph1
-                                key={`top-${mode ? 'lift' : 'nutrition'}-${topRange}-${mode ? selectedExercise : 'bw'}-${topSig}`}
-                                mode={mode}
-                                data={topData}
-                                selectedRange={topRange}
-                                chartNote={getGraphChartNote(mode ? 'strength' : 'bodyweight', topRange)}
-                                goal={topGoal}
-                                formatValue={topFormat}
-                            />
+                            <Graph1 key={`top-${mode ? 'lift' : 'nutrition'}-${topRange}-${mode ? selectedExercise : 'bw'}-${topSig}`} mode={mode} data={topData} selectedRange={topRange} chartNote={getGraphChartNote(mode ? 'strength' : 'bodyweight', topRange)} goal={topGoal} formatValue={topFormat} />
                         :   <View style={styles.emptyGraphState}>
                                 <View style={[styles.emptyIconCircle, { backgroundColor: accent + '1A' }]}>
                                     {mode === true ?
@@ -144,93 +155,47 @@ export default function ProgressScreen() {
                         }
                     </View>
                     <GraphStats graphType={mode ? 'orm' : 'bodyweight'} data={topData} statsData={topRawData} unitSystem={settings.unitSystem} mode={mode} goalWeight={settings.goalWeight} />
-                    {/* Button Row */}
-                    <View style={styles.buttonRow}>
-                        <TouchableOpacity style={[styles.graphButton, { backgroundColor: accent }]} onPress={() => setTopRangeModalVisible(true)}>
-                            <View style={styles.graphButtonInner}>
-                                <Text style={styles.graphButtonText} numberOfLines={1} adjustsFontSizeToFit={true}>
-                                    Last {topRange} {mode ? 'Lifts' : 'Days'}
-                                </Text>
-                                <ChevronDown size={20} color="#fff" strokeWidth={2} />
-                            </View>
-                        </TouchableOpacity>
-                        {mode && (
-                            <TouchableOpacity style={[styles.graphButton, { backgroundColor: accent }]} onPress={() => setSelectionModalVisible(true)}>
-                                <View style={styles.graphButtonInner}>
-                                    <Text style={styles.graphButtonText} numberOfLines={1} adjustsFontSizeToFit={true}>
-                                        {selectedExercise}
-                                    </Text>
-                                    <ChevronDown size={20} color="#fff" strokeWidth={2} />
-                                </View>
-                            </TouchableOpacity>
-                        )}
-                    </View>
                 </View>
 
-                {/* Body Weight card (nutrition mode) — sits next to the body-weight graph */}
-                {mode === false && (
-                    <View style={styles.bwContainer}>
-                        <BwCard />
-                    </View>
-                )}
-
-                {/* BOTTOM card — bar chart */}
+                {/* BOTTOM card — bar chart (one calendar week at a time) */}
                 <View style={styles.graphCard}>
                     <View style={styles.cardHeader}>
-                        <Text style={styles.cardTitle}>{bottomTitle}</Text>
-                        <Text style={styles.cardSubtitle}>{bottomSubtitle}</Text>
+                        <View style={styles.headerLeft}>
+                            {!mode ?
+                                <TouchableOpacity style={styles.titleRow} onPress={() => setSelectionModalVisible(true)} activeOpacity={0.6} hitSlop={8}>
+                                    <Text style={styles.cardTitle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6}>
+                                        {bottomTitle}
+                                    </Text>
+                                    <ChevronDown size={18} color={accent} strokeWidth={2.5} />
+                                </TouchableOpacity>
+                            :   <Text style={styles.cardTitle} numberOfLines={1}>
+                                    {bottomTitle}
+                                </Text>
+                            }
+                            <Text style={styles.cardSubtitle}>{bottomSubtitle}</Text>
+                        </View>
+                    </View>
+                    {/* Week stepper — label + paging arrows above the chart */}
+                    <View style={styles.weekStepper}>
+                        <TouchableOpacity onPress={() => setBottomWeekOffset((o) => o - 1)} disabled={!canGoPrev} hitSlop={12} style={styles.weekStepperArrow} activeOpacity={0.6} accessibilityRole="button" accessibilityLabel="Previous week">
+                            <ChevronLeft size={22} color={accent} strokeWidth={2.5} style={{ opacity: canGoPrev ? 1 : 0.25 }} />
+                        </TouchableOpacity>
+                        <Text style={styles.weekStepperLabel} numberOfLines={1}>
+                            {weekLabel}
+                        </Text>
+                        <TouchableOpacity onPress={() => setBottomWeekOffset((o) => Math.min(0, o + 1))} disabled={!canGoNext} hitSlop={12} style={styles.weekStepperArrow} activeOpacity={0.6} accessibilityRole="button" accessibilityLabel="Next week">
+                            <ChevronRight size={22} color={accent} strokeWidth={2.5} style={{ opacity: canGoNext ? 1 : 0.7 }} />
+                        </TouchableOpacity>
                     </View>
                     <View style={styles.chartContainer}>
-                        {bottomData.length > 0 ?
-                            <BarChart
-                                key={`bottom-${mode ? 'lift' : 'nutrition'}-${bottomRange}-${mode ? 'sets' : selectedMacro}-${bottomSig}`}
-                                mode={mode}
-                                data={bottomData}
-                                selectedRange={bottomRange}
-                                chartNote={getGraphChartNote(mode ? 'sets' : 'macro', bottomRange)}
-                                goal={bottomGoal}
-                                formatValue={bottomFormat}
-                            />
-                        :   <View style={styles.emptyGraphState}>
-                                <View style={[styles.emptyIconCircle, { backgroundColor: accent + '1A' }]}>
-                                    {mode === true ?
-                                        <Dumbbell size={48} color={colors.workout} strokeWidth={2} />
-                                    :   <Scale size={48} color={colors.nutrition} strokeWidth={2} />}
-                                </View>
-                                <Text style={styles.emptyGraphText}>{mode === true ? 'No set data yet' : 'No nutrition data yet'}</Text>
-                                <Text style={styles.emptyGraphSubtext}>{mode === true ? 'Start logging workouts to see your sets' : 'Start logging meals to see your intake'}</Text>
-                            </View>
-                        }
+                        <BarChart key={`bottom-${mode ? 'lift' : 'nutrition'}-${mode ? 'sets' : selectedMacro}`} mode={mode} data={bottomData} goal={bottomGoal} formatValue={bottomFormat} showXLabels highlightIndex={bottomWeekOffset === 0 ? new Date().getDay() : -1} />
                     </View>
-                    <GraphStats graphType={mode ? 'sets' : selectedMacro} data={bottomData} statsData={bottomRawData} unitSystem={settings.unitSystem} mode={mode} goal={mode ? undefined : nutritionGoal} />
-                    {/* Button Row */}
-                    <View style={styles.buttonRow}>
-                        <TouchableOpacity style={[styles.graphButton, { backgroundColor: accent }]} onPress={() => setBottomRangeModalVisible(true)}>
-                            <View style={styles.graphButtonInner}>
-                                <Text style={styles.graphButtonText} numberOfLines={1} adjustsFontSizeToFit={true}>
-                                    Last {bottomRange} Days
-                                </Text>
-                                <ChevronDown size={20} color="#fff" strokeWidth={2} />
-                            </View>
-                        </TouchableOpacity>
-                        {!mode && (
-                            <TouchableOpacity style={[styles.graphButton, { backgroundColor: accent }]} onPress={() => setSelectionModalVisible(true)}>
-                                <View style={styles.graphButtonInner}>
-                                    <Text style={styles.graphButtonText} numberOfLines={1} adjustsFontSizeToFit={true}>
-                                        {selectedMacro.charAt(0).toUpperCase() + selectedMacro.slice(1)}
-                                    </Text>
-                                    <ChevronDown size={20} color="#fff" strokeWidth={2} />
-                                </View>
-                            </TouchableOpacity>
-                        )}
-                    </View>
+                    <GraphStats graphType={mode ? 'sets' : selectedMacro} data={bottomData} unitSystem={settings.unitSystem} mode={mode} goal={mode ? undefined : nutritionGoal} />
                 </View>
             </ScrollView>
 
             {/* Modals */}
             <RangeSelectionModal visible={topRangeModalVisible} onClose={() => setTopRangeModalVisible(false)} selectedRange={topRange} onSelectRange={setTopRange} mode={mode} rangeUnit={mode ? 'Lifts' : 'Days'} />
-
-            <RangeSelectionModal visible={bottomRangeModalVisible} onClose={() => setBottomRangeModalVisible(false)} selectedRange={bottomRange} onSelectRange={setBottomRange} mode={mode} rangeUnit="Days" />
 
             <SelectionModal
                 visible={selectionModalVisible}
@@ -265,13 +230,37 @@ function makeStyles(colors: Colors, isDark: boolean) {
             marginBottom: 6,
         },
         cardHeader: {
+            flexDirection: 'row',
+            alignItems: 'flex-start',
+            justifyContent: 'space-between',
+            gap: 10,
             marginBottom: 8,
+        },
+        headerLeft: {
+            flex: 1,
+            minWidth: 0,
+        },
+        rangeButton: {
+            width: 40,
+            height: 40,
+            borderRadius: radius.iconButton,
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderWidth: StyleSheet.hairlineWidth,
+        },
+        titleRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 6,
+            alignSelf: 'flex-start',
+            maxWidth: '100%',
         },
         cardTitle: {
             fontSize: 20,
             color: colors.text,
             letterSpacing: -0.4,
             fontFamily: fonts.extrabold,
+            flexShrink: 1,
         },
         cardSubtitle: {
             fontSize: 13,
@@ -281,7 +270,7 @@ function makeStyles(colors: Colors, isDark: boolean) {
         },
         graphCard: {
             width: '100%',
-            height: 450,
+            height: 400,
             backgroundColor: colors.surface,
             borderRadius: radius.cardLg,
             borderWidth: StyleSheet.hairlineWidth,
@@ -327,31 +316,22 @@ function makeStyles(colors: Colors, isDark: boolean) {
             color: colors.labelMuted,
             fontFamily: fonts.regular,
         },
-        buttonRow: {
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            gap: 12,
-            marginTop: 12,
-        },
-        graphButton: {
-            flex: 1,
-            flexDirection: 'row',
-            paddingVertical: 14,
-            borderRadius: radius.card,
-            alignItems: 'center',
-            justifyContent: 'center',
-        },
-        graphButtonInner: {
+        weekStepper: {
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'center',
-            paddingHorizontal: 20,
+            gap: 8,
+            marginBottom: 10,
         },
-        graphButtonText: {
+        weekStepperArrow: {
+            padding: 4,
+        },
+        weekStepperLabel: {
+            textAlign: 'center',
             fontSize: 14,
-            color: '#fff',
-            letterSpacing: -0.3,
-            fontFamily: fonts.bold,
+            color: colors.text,
+            letterSpacing: -0.2,
+            fontFamily: fonts.semibold,
         },
     })
 }

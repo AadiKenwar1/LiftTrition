@@ -1,7 +1,7 @@
 import { FONT_FAMILY, useColors } from '@/context/ThemeContext'
 import { Archivo_400Regular, Archivo_800ExtraBold } from '@expo-google-fonts/archivo'
 import { Poppins_400Regular, Poppins_800ExtraBold } from '@expo-google-fonts/poppins'
-import { Text, useFont } from '@shopify/react-native-skia'
+import { useFont } from '@shopify/react-native-skia'
 import { useEffect, useState } from 'react'
 import { ActivityIndicator, StyleSheet, View } from 'react-native'
 import { CartesianChart, useChartPressState } from 'victory-native'
@@ -11,21 +11,22 @@ import { BarRect, EndValueFlag, GoalLine } from './chartPrimitives'
 interface BarChartProps {
     mode: boolean
     data: Array<{ day: string; value: number }>
-    selectedRange: 7 | 14 | 21
-    chartNote?: { lines: string[] }
     goal?: number
     formatValue?: (value: number) => string
     showEndFlag?: boolean
+    showXLabels?: boolean
+    /** Index of "today" within the week (Sun-indexed) for the current week; -1 to feature the most recent logged bar. */
+    highlightIndex?: number
 }
 
-export default function BarChart({ mode, data, selectedRange, chartNote, goal, formatValue, showEndFlag = true }: BarChartProps) {
+export default function BarChart({ mode, data, goal, formatValue, showEndFlag = true, showXLabels = true, highlightIndex }: BarChartProps) {
     const colors = useColors()
     const font = useFont(FONT_FAMILY === 'archivo' ? Archivo_400Regular : Poppins_400Regular, 12)
     const flagFont = useFont(FONT_FAMILY === 'archivo' ? Archivo_800ExtraBold : Poppins_800ExtraBold, 11)
     const { state, isActive } = useChartPressState({ x: '', y: { value: 0 } })
 
     const chartColor = mode === true ? colors.workout : colors.nutrition
-    const flagTextColor = mode ? '#ffffff' : '#062a06'
+    const flagTextColor = '#ffffff'
     const fmt = formatValue ?? ((n: number) => Math.round(n).toLocaleString())
     const [minDelayDone, setMinDelayDone] = useState(false)
     const [containerWidth, setContainerWidth] = useState(0)
@@ -40,6 +41,11 @@ export default function BarChart({ mode, data, selectedRange, chartNote, goal, f
     const maxValue = data.length > 0 ? Math.max(...data.map((d) => d.value), goal ?? 0) : 1
     const topTick = Math.max(1, Math.ceil(maxValue))
 
+    // Value-based signature: remount the inner chart when the data changes so it repaints
+    // (the persisted Skia canvas won't refresh on a data prop change alone). Scoped to the
+    // chart, not the wrapper, so the loading spinner never re-triggers on week paging.
+    const chartKey = data.map((d) => `${d.day}:${d.value}`).join('|')
+
     if (!font || !flagFont || !minDelayDone) {
         return (
             <View style={styles.loadingContainer}>
@@ -51,16 +57,18 @@ export default function BarChart({ mode, data, selectedRange, chartNote, goal, f
     return (
         <View style={styles.wrapper} onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}>
             <CartesianChart
+                key={chartKey}
                 data={data}
                 xKey="day"
                 yKeys={['value']}
                 chartPressState={state}
                 domain={{ y: [0, topTick] }}
-                padding={{ left: 10, right: 10, top: 10, bottom: 10 }}
-                domainPadding={{ left: 24, right: 24, top: 20, bottom: 0 }}
+                padding={{ left: 10, right: 10, top: 14, bottom: 10 }}
+                domainPadding={{ left: 24, right: 24, top: 30, bottom: 0 }}
                 xAxis={{
-                    font: selectedRange === 7 ? font : null,
-                    labelRotate: data.length > 3 ? 45 : 0,
+                    font: showXLabels ? font : null,
+                    tickCount: data.length,
+                    labelRotate: 0,
                     labelOffset: 0,
                     labelColor: colors.textSecondary,
                     formatXLabel: (value) => {
@@ -70,7 +78,7 @@ export default function BarChart({ mode, data, selectedRange, chartNote, goal, f
                         return `${value}`
                     },
                     lineColor: colors.ringTrack,
-                    lineWidth: 1,
+                    lineWidth: 1, // vertical grid lines on
                 }}
                 yAxis={[
                     {
@@ -80,40 +88,15 @@ export default function BarChart({ mode, data, selectedRange, chartNote, goal, f
                         labelColor: colors.textSecondary,
                         formatYLabel: (value) => `${value}`,
                         lineColor: colors.ringTrack,
-                        lineWidth: 1,
+                        lineWidth: 0, // horizontal grid lines off (vertical-only on the bar chart)
                     },
                 ]}
-                renderOutside={({ canvasSize, chartBounds }) => {
-                    if (!chartNote) return null
-
-                    const lineHeight = 14
-                    const firstLineY = chartBounds.bottom + 16
-
-                    return (
-                        <>
-                            {chartNote.lines.map((line, index) => {
-                                const lineWidth = font.getTextWidth(line)
-                                return (
-                                    <Text
-                                        key={index}
-                                        x={(canvasSize.width - lineWidth) / 2}
-                                        y={firstLineY + index * lineHeight}
-                                        text={line}
-                                        font={font}
-                                        color={colors.labelMuted}
-                                        style="fill"
-                                    />
-                                )
-                            })}
-                        </>
-                    )
-                }}
             >
                 {({ points, chartBounds, canvasSize, yScale }) => {
                     const count = points.value.length || 1
                     const barWidth = Math.min(18, ((chartBounds.right - chartBounds.left) / count) * 0.55)
 
-                    // Most-recent bar that actually exists (non-zero) → full accent + end flag anchor.
+                    // Most-recent bar that actually has data (featured bar on past weeks).
                     let lastBarIndex = -1
                     for (let i = points.value.length - 1; i >= 0; i--) {
                         const v = points.value[i].yValue
@@ -122,38 +105,25 @@ export default function BarChart({ mode, data, selectedRange, chartNote, goal, f
                             break
                         }
                     }
-                    const lastBar = lastBarIndex >= 0 ? points.value[lastBarIndex] : undefined
+
+                    // Featured bar (full accent + end flag): today on the current week (only when logged),
+                    // otherwise the most recent logged day (past weeks).
+                    let featuredIndex = lastBarIndex
+                    if (highlightIndex != null && highlightIndex >= 0) {
+                        const todayVal = points.value[highlightIndex]?.yValue
+                        featuredIndex = todayVal != null && todayVal > 0 ? highlightIndex : -1
+                    }
+                    const featuredBar = featuredIndex >= 0 ? points.value[featuredIndex] : undefined
 
                     return (
                         <>
                             {points.value.map((p, i) => (
-                                <BarRect
-                                    key={`bar-${i}`}
-                                    x={p.x}
-                                    barWidth={barWidth}
-                                    top={p.y ?? chartBounds.bottom}
-                                    bottom={chartBounds.bottom}
-                                    color={chartColor}
-                                    isLast={i === lastBarIndex}
-                                    index={i}
-                                    matchedIndex={state.matchedIndex}
-                                    isActive={isActive}
-                                />
+                                <BarRect key={`bar-${i}`} x={p.x} barWidth={barWidth} top={p.y ?? chartBounds.bottom} bottom={chartBounds.bottom} color={chartColor} isLast={i === featuredIndex} index={i} matchedIndex={state.matchedIndex} isActive={isActive} />
                             ))}
 
                             {goal != null && <GoalLine y={yScale(goal)} left={chartBounds.left} right={chartBounds.right} color={chartColor} />}
 
-                            {showEndFlag && lastBar?.y != null && lastBar.yValue != null && (
-                                <EndValueFlag
-                                    x={lastBar.x}
-                                    y={lastBar.y}
-                                    value={fmt(lastBar.yValue)}
-                                    color={chartColor}
-                                    textColor={flagTextColor}
-                                    font={flagFont}
-                                    canvasWidth={canvasSize.width}
-                                />
-                            )}
+                            {showEndFlag && featuredBar?.y != null && featuredBar.yValue != null && <EndValueFlag x={featuredBar.x} y={featuredBar.y} value={fmt(featuredBar.yValue)} color={chartColor} textColor={flagTextColor} font={flagFont} canvasWidth={canvasSize.width} />}
                         </>
                     )
                 }}

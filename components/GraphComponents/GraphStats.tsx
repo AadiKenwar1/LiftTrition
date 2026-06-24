@@ -36,9 +36,15 @@ function computeStats(graphType: GraphType, data: Array<{ day: string; value: nu
     const rawValues = (statsData ?? data).map((d) => d.value)
     const first = values[0] ?? 0
     const last = values[values.length - 1] ?? 0
-    const avg = values.length > 0 ? Math.round(values.reduce((a, b) => a + b, 0) / values.length) : 0
     const change = last - first
     const weightUnit = unitSystem === 'imperial' ? 'lb' : 'kg'
+
+    // For per-day nutrition metrics, average/trend over days actually logged (ignore unlogged 0 days).
+    const loggedValues = values.filter((v) => v > 0)
+    const loggedAvg = loggedValues.length > 0 ? Math.round(loggedValues.reduce((a, b) => a + b, 0) / loggedValues.length) : 0
+    const firstLogged = loggedValues[0] ?? 0
+    const lastLogged = loggedValues[loggedValues.length - 1] ?? 0
+    const loggedChange = lastLogged - firstLogged
 
     if (graphType === 'orm') {
         const best = rawValues.length > 0 ? Math.max(...rawValues) : 0
@@ -68,20 +74,20 @@ function computeStats(graphType: GraphType, data: Array<{ day: string; value: nu
     }
 
     if (graphType === 'calories') {
-        const trendPercent = first !== 0 ? Math.round((change / first) * 100) : 0
+        const trendPercent = firstLogged !== 0 ? Math.round((loggedChange / firstLogged) * 100) : 0
         const sign = trendPercent >= 0 ? '+' : ''
         const dir =
             trendPercent > 2 ? 'up'
             : trendPercent < -2 ? 'down'
             : 'flat'
         return [
-            { label: 'Avg intake', value: `${avg.toLocaleString()} kcal` },
-            { label: 'Trend', value: `${sign}${trendPercent}%`, trend: { dir, tone: targetTone(avg, goal) } },
+            { label: 'Avg intake', value: `${loggedAvg.toLocaleString()} kcal` },
+            { label: 'Trend', value: `${sign}${trendPercent}%`, trend: { dir, tone: targetTone(loggedAvg, goal) } },
         ]
     }
 
     if (graphType === 'protein' || graphType === 'carbs' || graphType === 'fats') {
-        const trendPercent = first !== 0 ? Math.round((change / first) * 100) : 0
+        const trendPercent = firstLogged !== 0 ? Math.round((loggedChange / firstLogged) * 100) : 0
         const sign = trendPercent >= 0 ? '+' : ''
         const dir =
             trendPercent > 2 ? 'up'
@@ -89,8 +95,8 @@ function computeStats(graphType: GraphType, data: Array<{ day: string; value: nu
             : 'flat'
         const macroLabel = graphType.charAt(0).toUpperCase() + graphType.slice(1)
         return [
-            { label: `Avg ${macroLabel.toLowerCase()}`, value: `${avg} g` },
-            { label: 'Trend', value: `${sign}${trendPercent}%`, trend: { dir, tone: targetTone(avg, goal) } },
+            { label: `Avg ${macroLabel.toLowerCase()}`, value: `${loggedAvg} g` },
+            { label: 'Trend', value: `${sign}${trendPercent}%`, trend: { dir, tone: targetTone(loggedAvg, goal) } },
         ]
     }
 

@@ -43,7 +43,8 @@ The four screens match the Refined mockup in dark mode, are driven entirely by t
 - Load **Archivo** (`@expo-google-fonts/archivo`, weights 400/500/600/700/800) alongside the existing Poppins in `app/_layout.tsx`. Remove the redundant `useFonts({ 'SpaceMono-Regular' })` in `app/(tabs)/progress.tsx`.
 
 ### 2. Centralize color tokens — `context/ThemeContext/types.ts` + `context/ThemeContext/colors.ts`
-- Extend the `Colors` type and **both** `light`/`dark` palettes with the new handoff tokens: `surface`, `surfaceInset`, `toggleTrack`, `hairline`, `divider`, `navBorder`, `labelMuted`, `tabInactive`, `ringTrack`, `chevron`, `iconChipBg`, `nutritionInk`, plus gradient tuples `workoutGradient` and `nutritionGradient` (`readonly [string, string]` for `expo-linear-gradient`). Keep existing values.
+- Extend the `Colors` type and **both** `light`/`dark` palettes with the new handoff tokens: `surface`, `surfaceInset`, `toggleTrack`, `hairline`, `divider`, `navBorder`, `labelMuted`, `tabInactive`, `ringTrack`, `chevron`, `iconChipBg`, `nutritionInk`, `warning` (amber — "off-target" stat tone; dark `#FFB020` / light `#C77700`), plus gradient tuples `workoutGradient` and `nutritionGradient` (`readonly [string, string]` for `expo-linear-gradient`). Keep existing values.
+- **Accents are per-theme** (no longer in the shared `brand` object). The bright values are dark-only; light uses the **same hue deepened** for legibility on white (the bright green ≈ 1.7:1 on white). Values: `workout` dark `#2F80ED` / light `#2570D8`; `nutrition` dark `#22C922` / light `#1A9E1A`; gradients land on the same deepened base on light. `nutritionInk` stays for tiny green text (AA). Everything reading `useColors().workout/nutrition` (graphs, FAB, toggle, accent bars, chevrons) updates automatically.
 - Add a radii/spacing constant set (`context/ThemeContext/tokens.ts`): `radius.card=10`, `radius.cardLg=12`, `radius.toggle=9`, `radius.macroCell=9`, `radius.iconButton=full`, `radius.chip=999`; screen padding 18, card padding 14–16, card gap 11.
 - `useColors()`, `useColorScheme()`, `useSetColorScheme()` already exist in `context/ThemeContext/index.tsx` — no API change.
 
@@ -75,16 +76,29 @@ For restyled files, adopt `const styles = useMemo(() => makeStyles(colors), [col
 - `Entry` meal card: `radius` 16→10, accent 4px→3px, macro cells → `surfaceInset` + `radius.macroCell`, order Protein/Carbs/Fats, `kcal` label, calorie number in `nutrition`/`nutritionInk`, round edit button. Tokens + fonts.
 - Date control → pill chip (`radius.chip`, hairline, green calendar icon + label).
 
-### Progress — `app/(tabs)/progress.tsx`, `components/GraphComponents/Graph1.tsx` / `Graph2.tsx`
-- **Remove** the fatigue UI (lift mode: "Todays Fatigue" title + fatigue card + 3-card fatigue mini-wheel row) **and** the nutrition calorie/macro UI (nutrition mode: "Todays Calories" card + 3 macro mini-wheels). `handleGetFatigueSummary`/`getFatigueFeedback` drop out of this screen; leave the WorkoutContext functions intact.
-- **Add `BwCard`** in nutrition mode, above/near the body-weight graph (`components/NutritionComponents/bwCard.tsx`; self-contains its edit→`updateBWModal` flow).
-- Result: `ActivityBanner` → Graph 1 (strength / nutrition) → Graph 2 (sets / body weight, with `BwCard` in nutrition mode) → existing selection modals. Restyle remaining cards to `radius.cardLg` (12), `surface`, hairline, tokens.
-- **Graph restyle (victory-native, in place):**
-  - `Line`: `strokeWidth` 3.5→~2.5, keep `curveType="monotoneX"`, round cap.
-  - `Area`: replace the flat `opacity={0.15}` fill with a Skia gradient — nest `<LinearGradient start={vec(0,0)} end={vec(0, <chartHeight>)} colors={[accent + 'CC', accent + '00']} />` (from `@shopify/react-native-skia`) as a **child of `<Area>`** (documented children pass-through) for the 0.45→0 ramp.
-  - Gridlines: thin to ~3 horizontal lines via `yAxis` `tickValues`; gridline color `ringTrack`.
-  - Dots: render only the **end** point (filter the per-point loop) with the subtle layered-circle glow already used for the active-press state.
-  - Axis label colors/fonts from tokens; route graph fonts through `context/ThemeContext/typography.ts` (replaces Graph2's SpaceMono).
+### Progress — `app/(tabs)/progress.tsx` + `components/GraphComponents/*`
+- **Removed** the fatigue UI (lift) and the nutrition calorie/macro mini-wheel UI. `WorkoutContext` fatigue functions stay intact (dormant), just not displayed.
+- **`BwCard`** shows in nutrition mode next to the body-weight graph (`components/NutritionComponents/bwCard.tsx`; self-contained `updateBWModal` flow).
+- **Layout:** `ActivityBanner` → **top card** → (`BwCard`, nutrition) → **bottom card**. Cards are `radius.cardLg`, `surface`, hairline; each has its **header inside the card** (title + subtitle).
+- **Card type is fixed by position, not mode** — the **top card is always a line chart** (`Graph1`), the **bottom card is always a bar chart** (`BarChart`):
+  - Top (line): lift = Strength (Est. 1RM), nutrition = Body Weight (+ goal line).
+  - Bottom (bars): lift = Sets, nutrition = Calories/Macros (+ goal line).
+
+#### Graph system (built state — supersedes the original handoff's line-only restyle)
+> Two decisions postdate the handoff: **calories/macros render as bars** (not a line), and the bar charts use a **fixed Sun–Sat weekday view with ← → week paging** (no range selector). Sunday is the single week-start everywhere, via `getWeekStart`.
+
+- **Shared chart primitives — `components/GraphComponents/chartPrimitives.tsx`** (Skia; rendered inside a `CartesianChart` children render-prop, each a component so it owns its hooks):
+  - `EndValueFlag` — pill labelling the latest value above the end point/bar, clamped in-canvas.
+  - `GoalLine` — dashed accent reference line (**no** text label).
+  - `PressGuideline` + `PressDot` — line-chart press read-out (dashed guideline + ringed dot).
+  - `BarRect` — one bar; featured bar = full accent, others 0.55, pressed bar lifts; zero/rest days render nothing.
+- **`ChartReadoutPill.tsx`** — RN overlay value+date pill driven by `useChartPressState` (reanimated position, clamped). Shared by line + bar.
+- **`Graph1.tsx` (line)** — 2.5px line + Skia `Area` gradient (`accent+'73'`→`'00'`), end dot (+dark glow), `EndValueFlag`, press read-out, optional `goal` line (y-domain widened to include the goal). Top headroom (`padding.top` 14 / `domainPadding.top` 30) so the flag never clips. Keyed by a data-signature in `progress.tsx` so it refreshes on data change.
+- **`BarChart.tsx` (bars)** — weekday Sun–Sat bars on a 0 baseline; `tickCount={data.length}` so all 7 labels show; optional `goal` line; `highlightIndex` features **today** (current week, only when logged — nothing featured otherwise); inner `<CartesianChart key={valueSig}>` so it repaints on data change **without** re-triggering the load spinner (week paging stays smooth).
+- **`GraphStats.tsx`** — single inset two-up row (`surfaceInset` bg, hairline divider), sentence-case labels, lucide arrow + **goal-aware tone**: 1RM/sets up=`nutrition`/down=`destructive`; body weight by direction toward `goalWeight`; calories/macros near-target=`textSecondary`, off=`warning`, far=`destructive` (averaged over **logged days only**).
+- **`ActivityBanner.tsx`** — accent-tinted banner; lift shows a 7-dot Sun–Sat week strip lit from `trainedDaysThisWeek` (same source as the Sets bars, so dots and bars align).
+- **`RangeSelectionModal.tsx`** — token-restyled sheet, 7/14/21 as pills (now used by the **top** line card only).
+- **Data (Sunday week):** `getWeekStart` / `addDays` / `WEEKDAY_INITIALS` / `WeekDayPoint` in `lib/utils/dateHelper.ts`; `getSetsForWeek` (`volumeFunctions.tsx`) + `getMacroForWeek` (`graphFunctions.tsx`), exposed as `handleGetSetsForWeek` / `handleGetMacroForWeek`. `Graph2.tsx` deleted. The old range-based `getSetsData` / `getMacroDataForGraph` are now unused (kept + unit-tested; candidates for cleanup).
 
 ### Settings — `app/(tabs)/settings.tsx`
 - **Add a profile card** at the top: 52px avatar with initials on a `workout→nutrition` gradient, name (`useAuth().user.user_metadata?.full_name`), email (`useAuth().user.email`), and a **PRO badge** when `useBilling().hasPremium` (green, tinted, pill).
@@ -101,7 +115,7 @@ For restyled files, adopt `const styles = useMemo(() => makeStyles(colors), [col
 | Chrome / primitives | `components/NeutralComponents/ModeSwitcher.tsx`, `components/NeutralComponents/Fab.tsx`, `app/(tabs)/_layout.tsx`, `components/GraphComponents/ProgressWheel.tsx` |
 | Workouts | `app/workoutScreens/workoutScreen.tsx`, `components/WorkoutComponents/Log.tsx` |
 | Nutrition | `app/nutritionScreens/nutritionScreen.tsx`, `components/NutritionComponents/Entry.tsx`, `components/NutritionComponents/DailyIntakeCard.tsx` (new) |
-| Progress | `app/(tabs)/progress.tsx`, `components/GraphComponents/Graph1.tsx`, `components/GraphComponents/Graph2.tsx` |
+| Progress | `app/(tabs)/progress.tsx`; `components/GraphComponents/{Graph1,BarChart,chartPrimitives,ChartReadoutPill,GraphStats,ActivityBanner,RangeSelectionModal}.tsx` (`Graph2.tsx` removed); data: `lib/utils/dateHelper.ts`, `context/WorkoutContext/functions/volumeFunctions.tsx`, `context/NutritionContext/functions/graphFunctions.tsx` |
 | Settings | `app/(tabs)/settings.tsx` |
 
 ## Reuse (don't rebuild)
@@ -144,6 +158,8 @@ This is a styling/refactor effort — the headline invariant is **behavior prese
 
 ### Full-app rollout (onboarding, modals, settings sub-screens, …) — later
 Same recipe at scale, mechanical once the token set is proven by the 4 screens. After extending tokens for any gaps, fan out **one agent per folder** (disjoint sets): `onboardingScreens/`, `authScreens/`, `workoutScreens/*Modal`, `nutritionScreens/*Modal`, `settingsScreens/`, `GuardComponents/`, etc. Same per-phase gate (diff → behavior review → tsc/test → commit) applies per folder. **Gate the light-mode toggle behind "all folders migrated"** — until then ship dark-only or feature-flag it.
+
+> **Tracked follow-up — hardcoded accent hexes.** ~44 files still hardcode the raw brand hexes (`#2f80ed` / `#22C922` / `#34C759` …) instead of reading `useColors().workout/nutrition`. These won't pick up the new **per-theme** light accents, so they'll show the bright dark-mode green/blue on white. Almost all are not-yet-migrated screens (onboarding, most modals, login). Sweep them to the token during the per-folder rollout above; until then, light mode is only fully accent-correct on the migrated surfaces (the 4 main screens + graph components).
 
 ## Verification (Phase 3 — full sweep before merging the branch to `main`)
 - Run the app (`npm start`, Expo Go / device) and walk all four tabs.

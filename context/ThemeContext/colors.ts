@@ -1,42 +1,45 @@
 import type { ColorScheme, Colors } from './types'
 
+// Accents (workout/nutrition + their gradients) are per-theme — see each palette below.
+// Bright values live on dark; light uses the same hue deepened for legibility on white.
 const brand = {
-    workout: '#2f80ed',
-    nutrition: '#22C922',
     destructive: '#FF453A',
-    workoutGradient: ['#3A8BF0', '#2F80ED'] as const,
-    nutritionGradient: ['#34D63A', '#22C922'] as const,
 } as const
 
 export const palettes = {
     light: {
-        // Surfaces
-        background: '#F2F2F7',
-        surface: '#FFFFFF',
-        surfaceInset: '#F2F2F7',
-        toggleTrack: '#E6E6EC',
-        // Lines
-        border: '#E5E5EA',
-        hairline: '#E9E9EF',
-        divider: '#EFEFF3',
-        navBorder: '#E1E1E6',
-        // Text
-        text: '#000000',
+        // Surfaces — deeper cool-slate canvas so cards lift off it; cards softened off pure white
+        background: '#E8E9ED',
+        surface: '#FBFBFC',
+        surfaceInset: '#E8E9ED',
+        toggleTrack: '#DEDFE5',
+        // Lines — strengthened so card edges and dividers are actually visible
+        border: '#D7D8DF',
+        hairline: '#DADBE2',
+        divider: '#E4E5EA',
+        navBorder: '#D7D8DF',
+        // Text — near-black (cool) instead of pure #000 to cut glare
+        text: '#16171A',
         textSecondary: '#3C3C43',
         textMuted: '#888888',
         textFaint: '#666666',
-        labelMuted: '#9A9AA0',
+        labelMuted: '#8E8F97',
         tabInactive: '#A0A0A8',
         placeholder: '#AEAEB2',
         disabled: '#D1D1D6',
         // Data-viz / controls
-        ringTrack: '#E5E5EA',
-        chevron: '#C0C0C8',
+        ringTrack: '#DBDCE2',
+        chevron: '#B8B9C1',
         iconChipBg: 'rgba(47,128,237,0.10)',
         // Brand (nutritionInk = AA-contrast green for numerals on light bg)
         nutritionInk: '#1BA81B',
         // Amber for "off-target" stat tone (AA-contrast on light bg)
         warning: '#C77700',
+        // Accents — same hue as dark, deepened for legibility on light surfaces
+        workout: '#2570D8',
+        nutrition: '#1A9E1A',
+        workoutGradient: ['#3A8BF0', '#2570D8'] as const,
+        nutritionGradient: ['#34D63A', '#1A9E1A'] as const,
         ...brand,
     },
     dark: {
@@ -67,6 +70,11 @@ export const palettes = {
         nutritionInk: '#22C922',
         // Amber for "off-target" stat tone
         warning: '#FFB020',
+        // Accents — vivid on dark surfaces
+        workout: '#2F80ED',
+        nutrition: '#22C922',
+        workoutGradient: ['#3A8BF0', '#2F80ED'] as const,
+        nutritionGradient: ['#34D63A', '#22C922'] as const,
         ...brand,
     },
 } as const satisfies Record<ColorScheme, Colors>

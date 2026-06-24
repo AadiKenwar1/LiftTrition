@@ -43,7 +43,7 @@ export function EndValueFlag({ x, y, value, color, textColor, font, canvasWidth 
     const textW = font.getTextWidth(value)
     const pillW = textW + padH * 2
     const pillH = height + padV * 2
-    const px = Math.max(2, Math.min(x - pillW / 2, canvasWidth - pillW - 2))
+    const px = Math.max(4, Math.min(x - pillW / 2, canvasWidth - pillW - 4))
     const py = Math.max(2, y - pillH - 10)
     const baseline = py + padV - ascent
     return (

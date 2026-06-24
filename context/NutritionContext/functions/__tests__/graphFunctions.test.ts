@@ -1,5 +1,6 @@
+import { getWeekStart } from '@/lib/utils/dateHelper'
 import { NutritionEntry } from '../../types'
-import { getMacroDataForGraph, getMacrosForDate, getNutritionStreakState } from '../graphFunctions'
+import { getMacroDataForGraph, getMacroForWeek, getMacrosForDate, getNutritionStreakState } from '../graphFunctions'
 
 // Helper function to create mock nutrition entry
 function createMockNutritionEntry(overrides: Partial<NutritionEntry> = {}): NutritionEntry {
@@ -531,6 +532,65 @@ describe('Graph Functions', () => {
                 streakIncludingToday: 0,
                 streakThroughYesterday: 0,
             })
+        })
+    })
+
+    describe('getMacroForWeek', () => {
+        // Local-time constructors (month is 0-indexed): Thu Feb 15 2024; week is Sun 2/11 .. Sat 2/17
+        const mockToday = new Date(2024, 1, 15)
+        const tue = () => new Date(2024, 1, 13)
+        const thu = () => new Date(2024, 1, 15)
+        const prevWeek = () => new Date(2024, 1, 4)
+        const originalDate = Date
+
+        beforeEach(() => {
+            global.Date = jest.fn((...args: unknown[]) => {
+                if (args.length === 0) return new originalDate(mockToday)
+                return new originalDate(...(args as ConstructorParameters<typeof Date>))
+            }) as any
+            Object.setPrototypeOf(global.Date, originalDate)
+            global.Date.now = jest.fn(() => mockToday.getTime())
+        })
+
+        afterEach(() => {
+            global.Date = originalDate
+        })
+
+        test('returns 7 days labeled Sun..Sat', () => {
+            const result = getMacroForWeek('calories', [], getWeekStart(new Date()))
+            expect(result).toHaveLength(7)
+            expect(result.map((d) => d.day)).toEqual(['S', 'M', 'T', 'W', 'Th', 'F', 'S'])
+        })
+
+        test('sums the chosen macro per day and zero-fills the rest', () => {
+            const data: NutritionEntry[] = [
+                createMockNutritionEntry({ date: tue(), calories: 300, protein: 20 }),
+                createMockNutritionEntry({ date: tue(), calories: 250, protein: 15 }),
+                createMockNutritionEntry({ date: thu(), calories: 500, protein: 40 }),
+            ]
+            const cal = getMacroForWeek('calories', data, getWeekStart(new Date()))
+            expect(cal[2].value).toBe(550) // Tuesday
+            expect(cal[4].value).toBe(500) // Thursday
+            expect(cal[0].value).toBe(0) // Sunday
+
+            const protein = getMacroForWeek('protein', data, getWeekStart(new Date()))
+            expect(protein[2].value).toBe(35) // Tuesday
+        })
+
+        test('excludes entries outside the week', () => {
+            const data: NutritionEntry[] = [
+                createMockNutritionEntry({ date: prevWeek(), calories: 999 }),
+                createMockNutritionEntry({ date: tue(), calories: 300 }),
+            ]
+            const result = getMacroForWeek('calories', data, getWeekStart(new Date()))
+            expect(result.reduce((s, d) => s + d.value, 0)).toBe(300)
+        })
+
+        test('flags days after today as future', () => {
+            const result = getMacroForWeek('calories', [], getWeekStart(new Date()))
+            expect(result[4].isFuture).toBe(false) // Thursday (today)
+            expect(result[5].isFuture).toBe(true) // Friday
+            expect(result[6].isFuture).toBe(true) // Saturday
         })
     })
 })

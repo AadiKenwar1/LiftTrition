@@ -24,7 +24,7 @@ export default function Entry({ name, calories, protein, carbs, fats, onEditPres
                 <View style={styles.container}>
                     <View style={styles.header}>
                         <View style={styles.headerText}>
-                            <Text style={styles.name} numberOfLines={1}>
+                            <Text style={styles.name} numberOfLines={7}>
                                 {name}
                             </Text>
                             <View style={styles.caloriesRow}>
@@ -41,16 +41,16 @@ export default function Entry({ name, calories, protein, carbs, fats, onEditPres
 
                     <View style={styles.macrosRow}>
                         <View style={styles.macroCell}>
-                            <Text style={styles.macroValue}>{protein}g</Text>
-                            <Text style={styles.macroLabel}>Protein</Text>
+                            <Text style={styles.macroValue}>{fats}g</Text>
+                            <Text style={styles.macroLabel}>Fats</Text>
                         </View>
                         <View style={styles.macroCell}>
                             <Text style={styles.macroValue}>{carbs}g</Text>
                             <Text style={styles.macroLabel}>Carbs</Text>
                         </View>
                         <View style={styles.macroCell}>
-                            <Text style={styles.macroValue}>{fats}g</Text>
-                            <Text style={styles.macroLabel}>Fats</Text>
+                            <Text style={styles.macroValue}>{protein}g</Text>
+                            <Text style={styles.macroLabel}>Protein</Text>
                         </View>
                     </View>
                 </View>

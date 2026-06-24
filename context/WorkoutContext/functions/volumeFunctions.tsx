@@ -1,4 +1,4 @@
-import { formatDateMinimal, getDateKey, calculateStartDate } from "@/lib/utils/dateHelper";
+import { formatDateMinimal, getDateKey, calculateStartDate, addDays, WEEKDAY_INITIALS, type WeekDayPoint } from "@/lib/utils/dateHelper";
 import { Log } from "../types";
 
 /**
@@ -100,6 +100,41 @@ export function getSetsData(logs: Log[], onboardingCompletedAt?: Date): Array<{ 
         result.push({
             day: formatDateMinimal(dateKey),
             value: count,
+        });
+    }
+
+    return result;
+}
+
+/**
+ * Get set-count data for a single calendar week (7 days from `weekStart`).
+ * One set = one log with reps > 0 and non-negative weight, per calendar day.
+ * Days with no logs are 0; days after today are flagged isFuture.
+ * Labels are weekday initials (S M T W Th F S).
+ */
+export function getSetsForWeek(logs: Log[], weekStart: Date): WeekDayPoint[] {
+    const start = new Date(weekStart);
+    start.setHours(0, 0, 0, 0);
+    const todayKey = getDateKey(new Date());
+
+    const setsByDate = new Map<string, number>();
+    for (const log of logs) {
+        if (log.reps <= 0 || log.weight < 0) continue;
+        const logDate = new Date(log.date);
+        logDate.setHours(0, 0, 0, 0);
+        const dateKey = getDateKey(logDate);
+        setsByDate.set(dateKey, (setsByDate.get(dateKey) || 0) + 1);
+    }
+
+    const result: WeekDayPoint[] = [];
+    for (let i = 0; i < 7; i++) {
+        const date = addDays(start, i);
+        const dateKey = getDateKey(date);
+        result.push({
+            day: WEEKDAY_INITIALS[date.getDay()],
+            value: setsByDate.get(dateKey) || 0,
+            dateKey,
+            isFuture: dateKey > todayKey,
         });
     }
 

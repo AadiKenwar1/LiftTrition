@@ -26,7 +26,7 @@ export default function Graph1({ mode, data, selectedRange, chartNote, goal, for
     const { state, isActive } = useChartPressState({ x: '', y: { value: 0 } })
 
     const chartColor = mode === true ? colors.workout : colors.nutrition
-    const flagTextColor = mode ? '#ffffff' : '#062a06'
+    const flagTextColor = '#ffffff'
     const fmt = formatValue ?? ((n: number) => Math.round(n).toLocaleString())
     const [minDelayDone, setMinDelayDone] = useState(false)
     const [containerWidth, setContainerWidth] = useState(0)
@@ -39,11 +39,23 @@ export default function Graph1({ mode, data, selectedRange, chartNote, goal, for
         return () => clearTimeout(id)
     }, [])
 
-    // y-domain widened to include the goal so its reference line is always visible.
+    // y-domain: include the goal (so its reference line shows) and widen a degenerate
+    // single-point / all-equal range so the gridlines render instead of collapsing.
     const yDomain = (() => {
-        if (goal == null || data.length === 0) return undefined
+        if (data.length === 0) return undefined
         const values = data.map((d) => d.value)
-        return [Math.min(...values, goal), Math.max(...values, goal)] as [number, number]
+        let lo = Math.min(...values)
+        let hi = Math.max(...values)
+        if (goal != null) {
+            lo = Math.min(lo, goal)
+            hi = Math.max(hi, goal)
+        }
+        if (hi - lo < 1e-6) {
+            // Single point or all values equal — match the ±10 tick band so ~3 gridlines show
+            // and the dot sits mid-chart instead of the range collapsing to nothing.
+            return [Math.max(0, lo - 10), hi + 10] as [number, number]
+        }
+        return goal != null ? ([lo, hi] as [number, number]) : undefined
     })()
 
     // Show placeholder while fonts load, and for a minimum duration.
@@ -63,8 +75,8 @@ export default function Graph1({ mode, data, selectedRange, chartNote, goal, for
                 yKeys={['value']}
                 chartPressState={state}
                 domain={yDomain ? { y: yDomain } : undefined}
-                padding={{ left: 10, right: 10, top: 10, bottom: 10 }}
-                domainPadding={{ left: 20, right: 20, top: 20, bottom: 10 }}
+                padding={{ left: 10, right: 10, top: 14, bottom: 10 }}
+                domainPadding={{ left: 20, right: 20, top: 30, bottom: 10 }}
                 xAxis={{
                     font: selectedRange === 7 ? font : null, // Only show labels when range is 7
                     labelRotate: data.length > 3 ? 45 : 0,
@@ -77,13 +89,13 @@ export default function Graph1({ mode, data, selectedRange, chartNote, goal, for
                         return `${value}`
                     },
                     lineColor: colors.ringTrack,
-                    lineWidth: 1,
+                    lineWidth: 0, // horizontal-only grid (no vertical lines); x labels kept
                 }}
                 yAxis={[
                     {
                         font,
                         tickValues: (() => {
-                            if (data.length === 0) return [0, 100, 200, 300, 400]
+                            if (data.length === 0) return [0, 100, 200, 300]
 
                             const values = data.map((d) => d.value)
                             const min = Math.floor(Math.min(...values))
@@ -96,13 +108,13 @@ export default function Graph1({ mode, data, selectedRange, chartNote, goal, for
                             if (range === 0) {
                                 ticks = [Math.max(0, min - 10), min, min + 10]
                             }
-                            // Small range - show every integer
-                            else if (range <= 4) {
+                            // Small range - show every integer (cap at 4 points)
+                            else if (range <= 3) {
                                 ticks = Array.from({ length: range + 1 }, (_, i) => min + i)
                             }
-                            // Larger range - space by whole numbers
+                            // Larger range - space by whole numbers (3 intervals -> max 4 points)
                             else {
-                                const step = Math.max(1, Math.ceil(range / 4))
+                                const step = Math.max(1, Math.ceil(range / 3))
                                 ticks = []
                                 for (let i = min; i <= max; i += step) {
                                     ticks.push(i)
@@ -132,17 +144,7 @@ export default function Graph1({ mode, data, selectedRange, chartNote, goal, for
                         <>
                             {chartNote.lines.map((line, index) => {
                                 const lineWidth = font.getTextWidth(line)
-                                return (
-                                    <Text
-                                        key={index}
-                                        x={(canvasSize.width - lineWidth) / 2}
-                                        y={firstLineY + index * lineHeight}
-                                        text={line}
-                                        font={font}
-                                        color={colors.labelMuted}
-                                        style="fill"
-                                    />
-                                )
+                                return <Text key={index} x={(canvasSize.width - lineWidth) / 2} y={firstLineY + index * lineHeight} text={line} font={font} color={colors.labelMuted} style="fill" />
                             })}
                         </>
                     )
@@ -172,17 +174,7 @@ export default function Graph1({ mode, data, selectedRange, chartNote, goal, for
                             )}
 
                             {/* End value flag */}
-                            {showEndFlag && lastPoint?.y != null && lastPoint.yValue != null && (
-                                <EndValueFlag
-                                    x={lastPoint.x}
-                                    y={lastPoint.y}
-                                    value={fmt(lastPoint.yValue)}
-                                    color={chartColor}
-                                    textColor={flagTextColor}
-                                    font={flagFont}
-                                    canvasWidth={canvasSize.width}
-                                />
-                            )}
+                            {showEndFlag && lastPoint?.y != null && lastPoint.yValue != null && <EndValueFlag x={lastPoint.x} y={lastPoint.y} value={fmt(lastPoint.yValue)} color={chartColor} textColor={flagTextColor} font={flagFont} canvasWidth={canvasSize.width} />}
 
                             {/* Press read-out: thin guideline + single dot (pill rendered as RN overlay) */}
                             {isActive && (

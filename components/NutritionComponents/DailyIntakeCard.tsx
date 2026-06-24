@@ -55,9 +55,9 @@ export default function DailyIntakeCard({ date = new Date() }: DailyIntakeCardPr
             <View style={styles.right}>
                 <Text style={styles.kcalLeft}>{remaining >= 0 ? `${remaining.toLocaleString()} kcal left` : `${Math.abs(remaining).toLocaleString()} kcal over`}</Text>
                 <View style={styles.bars}>
-                    <MacroBarRow label="Protein" value={`${Math.round(macros.totalProtein)}g`} pct={pct(macros.totalProtein, settings.proteinGoal)} colors={colors} styles={styles} />
-                    <MacroBarRow label="Carbs" value={`${Math.round(macros.totalCarbs)}g`} pct={pct(macros.totalCarbs, settings.carbsGoal)} colors={colors} styles={styles} />
                     <MacroBarRow label="Fats" value={`${Math.round(macros.totalFats)}g`} pct={pct(macros.totalFats, settings.fatsGoal)} colors={colors} styles={styles} />
+                    <MacroBarRow label="Carbs" value={`${Math.round(macros.totalCarbs)}g`} pct={pct(macros.totalCarbs, settings.carbsGoal)} colors={colors} styles={styles} />
+                    <MacroBarRow label="Protein" value={`${Math.round(macros.totalProtein)}g`} pct={pct(macros.totalProtein, settings.proteinGoal)} colors={colors} styles={styles} />
                 </View>
             </View>
         </View>

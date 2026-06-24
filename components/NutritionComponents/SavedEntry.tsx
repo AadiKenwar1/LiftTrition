@@ -17,7 +17,7 @@ export default function SavedEntry({ name, calories, protein, carbs, fats, onAdd
             <View style={styles.accentBar} />
             <View style={styles.container}>
                 <View style={styles.content}>
-                    <Text style={styles.name} numberOfLines={1}>
+                    <Text style={styles.name} numberOfLines={7}>
                         {name}
                     </Text>
                     <View style={styles.macrosGrid}>

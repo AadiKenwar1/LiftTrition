@@ -6,7 +6,8 @@ import { StyleSheet, Text, View } from 'react-native'
 
 interface ActivityBannerProps {
     mode: boolean
-    workoutDaysThisWeek: number
+    /** Per-day training flags for the current Sunday-start week (index 0 = Sun … 6 = Sat). */
+    trainedDays: boolean[]
     nutritionStreak: NutritionStreakState
 }
 
@@ -24,21 +25,23 @@ function getNutritionBannerText(streak: NutritionStreakState): string {
     return 'Log a meal to start your streak 🍽️'
 }
 
-export default function ActivityBanner({ mode, workoutDaysThisWeek, nutritionStreak }: ActivityBannerProps) {
+export default function ActivityBanner({ mode, trainedDays, nutritionStreak }: ActivityBannerProps) {
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
     const accent = mode ? colors.workout : colors.nutrition
 
+    const trainedCount = trainedDays.filter(Boolean).length
+
     const text =
         mode ?
-            workoutDaysThisWeek === 0 ?
+            trainedCount === 0 ?
                 "No training yet this week. Let's go! 💪"
-            :   `You've trained ${workoutDaysThisWeek} day${workoutDaysThisWeek !== 1 ? 's' : ''} this week 🔥`
+            :   `You've trained ${trainedCount} day${trainedCount !== 1 ? 's' : ''} this week 🔥`
         :   getNutritionBannerText(nutritionStreak)
 
     return (
-        <View style={styles.banner}>
-            <View style={[styles.iconTile, { backgroundColor: accent + '1A' }]}>
+        <View style={[styles.banner, { backgroundColor: accent + '1A', borderColor: accent + '80' }]}>
+            <View style={[styles.iconTile, { backgroundColor: accent + '33' }]}>
                 {mode ?
                     <Dumbbell size={22} color={accent} strokeWidth={2.4} />
                 :   <Flame size={22} color={accent} strokeWidth={2.4} />}
@@ -50,7 +53,7 @@ export default function ActivityBanner({ mode, workoutDaysThisWeek, nutritionStr
                 {mode && (
                     <View style={styles.dotRow}>
                         {Array.from({ length: 7 }).map((_, i) => (
-                            <View key={i} style={[styles.dot, { backgroundColor: i < workoutDaysThisWeek ? colors.workout : colors.ringTrack }]} />
+                            <View key={i} style={[styles.dot, { backgroundColor: trainedDays[i] ? colors.workout : colors.ringTrack }]} />
                         ))}
                     </View>
                 )}
@@ -66,7 +69,7 @@ function makeStyles(colors: Colors) {
             flexDirection: 'row',
             alignItems: 'center',
             gap: 13,
-            backgroundColor: colors.surfaceInset,
+            borderWidth: 0,
             borderRadius: radius.cardLg,
             padding: 14,
             marginBottom: 12,

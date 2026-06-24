@@ -104,6 +104,41 @@ export function sortByDateDesc(a: Date, b: Date): number {
 }
 
 /**
+ * Returns a new Date offset by `n` days (positive or negative). Does not mutate the input.
+ */
+export function addDays(date: Date, n: number): Date {
+    const d = new Date(date);
+    d.setDate(d.getDate() + n);
+    return d;
+}
+
+/**
+ * Returns the start (00:00 local) of the calendar week containing `date`.
+ * weekStartsOn: 0 = Sunday (default), 1 = Monday.
+ */
+export function getWeekStart(date: Date, weekStartsOn: 0 | 1 = 0): Date {
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    const diff = (d.getDay() - weekStartsOn + 7) % 7;
+    d.setDate(d.getDate() - diff);
+    return d;
+}
+
+/**
+ * Single-letter weekday labels, Sunday-indexed (`Th` disambiguates Thursday from Tuesday).
+ * Index with `date.getDay()`.
+ */
+export const WEEKDAY_INITIALS = ['S', 'M', 'T', 'W', 'Th', 'F', 'S'] as const;
+
+/** One day in a calendar-week graph series. */
+export interface WeekDayPoint {
+    day: string;
+    value: number;
+    dateKey: string;
+    isFuture: boolean;
+}
+
+/**
  * Sort comparator for createdAt (most recently created first)
  */
 export function sortByCreatedAtDesc<T extends { createdAt: Date }>(a: T, b: T): number {

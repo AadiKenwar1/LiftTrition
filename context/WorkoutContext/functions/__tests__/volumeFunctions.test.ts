@@ -1,6 +1,6 @@
-import { formatDateMinimal, getDateKey } from '@/lib/utils/dateHelper';
+import { formatDateMinimal, getDateKey, getWeekStart } from '@/lib/utils/dateHelper';
 import { Log } from '../../types';
-import { getSetsData, getVolumeData } from '../volumeFunctions';
+import { getSetsData, getSetsForWeek, getVolumeData } from '../volumeFunctions';
 
 // Helper function to create mock log
 function createMockLog(overrides: Partial<Log> = {}): Log {
@@ -556,6 +556,73 @@ describe('Volume Functions', () => {
             const dayString = formatDayString(sameDate);
             const entry = result.find((e) => e.day === dayString);
             expect(entry?.value).toBe(1);
+        });
+    });
+
+    describe('getSetsForWeek', () => {
+        // Local-time constructors (month is 0-indexed): Thu Feb 15 2024; week is Sun 2/11 .. Sat 2/17
+        const mockToday = new Date(2024, 1, 15);
+        const tue = () => new Date(2024, 1, 13);
+        const thu = () => new Date(2024, 1, 15);
+        const prevWeek = () => new Date(2024, 1, 4);
+        const originalDate = Date;
+
+        beforeEach(() => {
+            global.Date = jest.fn((...args: unknown[]) => {
+                if (args.length === 0) return new originalDate(mockToday);
+                return new originalDate(...(args as ConstructorParameters<typeof Date>));
+            }) as any;
+            Object.setPrototypeOf(global.Date, originalDate);
+            global.Date.now = jest.fn(() => mockToday.getTime());
+        });
+
+        afterEach(() => {
+            global.Date = originalDate;
+        });
+
+        test('returns 7 days labeled Sun..Sat', () => {
+            const result = getSetsForWeek([], getWeekStart(new Date()));
+            expect(result).toHaveLength(7);
+            expect(result.map((d) => d.day)).toEqual(['S', 'M', 'T', 'W', 'Th', 'F', 'S']);
+        });
+
+        test('counts sets per day within the week and zero-fills the rest', () => {
+            const logs: Log[] = [
+                createMockLog({ date: tue(), weight: 100, reps: 8 }),
+                createMockLog({ date: tue(), weight: 80, reps: 10 }),
+                createMockLog({ date: thu(), weight: 0, reps: 12 }), // bodyweight
+            ];
+            const result = getSetsForWeek(logs, getWeekStart(new Date()));
+            expect(result[2].value).toBe(2); // Tuesday
+            expect(result[4].value).toBe(1); // Thursday
+            expect(result[0].value).toBe(0); // Sunday
+        });
+
+        test('flags days after today as future', () => {
+            const result = getSetsForWeek([], getWeekStart(new Date()));
+            expect(result[3].isFuture).toBe(false); // Wednesday
+            expect(result[4].isFuture).toBe(false); // Thursday (today)
+            expect(result[5].isFuture).toBe(true); // Friday
+            expect(result[6].isFuture).toBe(true); // Saturday
+        });
+
+        test('excludes logs outside the week', () => {
+            const logs: Log[] = [
+                createMockLog({ date: prevWeek(), weight: 100, reps: 8 }),
+                createMockLog({ date: tue(), weight: 100, reps: 8 }),
+            ];
+            const result = getSetsForWeek(logs, getWeekStart(new Date()));
+            expect(result.reduce((s, d) => s + d.value, 0)).toBe(1);
+        });
+
+        test('skips zero/negative reps and negative weight', () => {
+            const logs: Log[] = [
+                createMockLog({ date: tue(), weight: 100, reps: 0 }),
+                createMockLog({ date: tue(), weight: -5, reps: 10 }),
+                createMockLog({ date: tue(), weight: 100, reps: 8 }),
+            ];
+            const result = getSetsForWeek(logs, getWeekStart(new Date()));
+            expect(result[2].value).toBe(1); // Tuesday
         });
     });
 });

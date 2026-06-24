@@ -21,8 +21,26 @@ export default function WorkoutScreen() {
     // Filter and sort for archived workouts (deleted items are already removed from array)
     const activeWorkouts = workouts.filter((w) => !w.archived).sort((a, b) => a.order - b.order)
 
+    // Active (non-archived) exercise count per workout — computed once, O(1) lookup per card
+    const activeExerciseCounts = useMemo(() => {
+        const counts = new Map<string, number>()
+        for (const exercise of exercises) {
+            if (!exercise.archived) counts.set(exercise.workoutID, (counts.get(exercise.workoutID) ?? 0) + 1)
+        }
+        return counts
+    }, [exercises])
+
     function renderItem({ item, drag }: DraggableListRenderParams<Workout>) {
-        return <Log text={item.name} subtitle={''} onPress={() => router.push({ pathname: '/workoutScreens/exerciseScreen', params: { workoutId: item.id } })} onMenuPress={drag} onEditPress={() => handleEdit(item)} />
+        const count = activeExerciseCounts.get(item.id) ?? 0
+        return (
+            <Log
+                text={item.name}
+                subtitle={`${count} ${count === 1 ? 'exercise' : 'exercises'}`}
+                onPress={() => router.push({ pathname: '/workoutScreens/exerciseScreen', params: { workoutId: item.id } })}
+                onMenuPress={drag}
+                onEditPress={() => handleEdit(item)}
+            />
+        )
     }
 
     function handleEdit(workout: Workout) {
