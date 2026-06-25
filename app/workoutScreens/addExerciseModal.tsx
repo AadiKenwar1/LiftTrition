@@ -1,6 +1,7 @@
 import { ScrollableListItem } from '@/components/NeutralComponents/ScrollableList'
 import StagedSection from '@/components/NeutralComponents/StagedSection'
 import { useAuth } from '@/context/AuthContext'
+import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { useWorkout } from '@/context/WorkoutContext'
 import { EQUIPMENT_TYPES, MUSCLE_GROUPS } from '@/context/WorkoutContext/exerciseLibrary/constants'
 import { IMAGE_MAP } from '@/context/WorkoutContext/exerciseLibrary/dataV2/imageMap'
@@ -17,6 +18,8 @@ export default function AddExerciseModal() {
     const { workoutId } = useLocalSearchParams<{ workoutId: string }>()
     const { userID } = useAuth()
     const router = useRouter()
+    const colors = useColors()
+    const styles = useMemo(() => makeStyles(colors), [colors])
 
     // Add exercise state
     const [selectedItems, setSelectedItems] = useState<ScrollableListItem[]>([])
@@ -113,25 +116,25 @@ export default function AddExerciseModal() {
         <>
             <View style={styles.iconContainer}>
                 <View style={styles.iconCircle}>
-                    <Dumbbell size={40} color="#2f80ed" strokeWidth={2} />
+                    <Dumbbell size={40} color={colors.workout} strokeWidth={2} />
                 </View>
             </View>
             <Text style={styles.title}>Add Exercises</Text>
             <Text style={styles.subtitle}>Choose from over 1300 exercises</Text>
 
             <TouchableOpacity style={styles.createExerciseButton} onPress={openCreateSheet} activeOpacity={0.8}>
-                <Plus size={15} color="#2f80ed" strokeWidth={2.5} />
+                <Plus size={15} color={colors.workout} strokeWidth={2.5} />
                 <Text style={styles.createExerciseText}>Create custom exercise</Text>
             </TouchableOpacity>
 
             {selectedItems.length > 0 && (
-                <StagedSection label="Selected" count={selectedItems.length} color="#2f80ed">
+                <StagedSection label="Selected" count={selectedItems.length} color={colors.workout}>
                     <View style={styles.chipsRow}>
                         {selectedItems.map((item) => (
                             <View key={item.id} style={styles.chip}>
                                 <Text style={styles.chipText}>{item.title}</Text>
                                 <TouchableOpacity onPress={() => handleRemoveStaged(item.id)} activeOpacity={0.5} hitSlop={6} style={styles.chipRemove}>
-                                    <X size={12} color="#2f80ed" strokeWidth={3} />
+                                    <X size={12} color={colors.workout} strokeWidth={3} />
                                 </TouchableOpacity>
                             </View>
                         ))}
@@ -143,7 +146,7 @@ export default function AddExerciseModal() {
                 <TextInput
                     style={[styles.searchInput, isFocused && styles.searchInputFocused]}
                     placeholder="Search exercises..."
-                    placeholderTextColor="#666"
+                    placeholderTextColor={colors.placeholder}
                     value={searchQuery}
                     onChangeText={setSearchQuery}
                     onFocus={() => setIsFocused(true)}
@@ -198,7 +201,7 @@ export default function AddExerciseModal() {
                             <View style={styles.imageCircle}>
                                 {imageSource
                                     ? <Image source={imageSource} style={styles.exerciseImage} contentFit="contain" transition={150} />
-                                    : <Dumbbell size={22} color="#ffffff" strokeWidth={1.8} />
+                                    : <Dumbbell size={22} color={colors.text} strokeWidth={1.8} />
                                 }
                             </View>
                         </View>
@@ -255,7 +258,7 @@ export default function AddExerciseModal() {
                                     value={createName}
                                     onChangeText={setCreateName}
                                     placeholder="e.g. Cable Chest Fly"
-                                    placeholderTextColor="#555"
+                                    placeholderTextColor={colors.placeholder}
                                     autoCapitalize="words"
                                     autoCorrect={false}
                                 />
@@ -322,430 +325,422 @@ export default function AddExerciseModal() {
     )
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#121212',
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        overflow: 'hidden',
-    },
-    keyboardView: {
-        flex: 1,
-    },
-    handleContainer: {
-        alignItems: 'center',
-        paddingTop: 12,
-        paddingBottom: 8,
-    },
-    handle: {
-        width: 40,
-        height: 5,
-        backgroundColor: '#333',
-        borderRadius: 3,
-    },
-    body: {
-        flex: 1,
-    },
-    listContent: {
-        paddingHorizontal: 24,
-        paddingTop: 12,
-        paddingBottom: 24,
-    },
-    iconContainer: {
-        alignItems: 'center',
-        marginBottom: 16,
-        marginTop: 4,
-    },
-    iconCircle: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
-        backgroundColor: '#1e1e1e',
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 2,
-        borderColor: '#2f80ed',
-    },
-    title: {
-        fontSize: 24,
-        color: '#FFF',
-        textAlign: 'center',
-        marginBottom: 4,
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    subtitle: {
-        fontSize: 16,
-        color: '#aaa',
-        textAlign: 'center',
-        marginBottom: 10,
-        fontFamily: 'Poppins_400Regular',
-        letterSpacing: 0.2,
-    },
-    createExerciseButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 6,
-        alignSelf: 'center',
-        borderWidth: 1,
-        borderColor: 'rgba(47, 128, 237, 0.4)',
-        borderRadius: 20,
-        paddingVertical: 7,
-        paddingHorizontal: 14,
-        marginBottom: 14,
-        backgroundColor: 'rgba(47, 128, 237, 0.08)',
-    },
-    createExerciseText: {
-        fontSize: 13,
-        color: '#2f80ed',
-        fontFamily: 'Poppins_500Medium',
-        letterSpacing: -0.2,
-    },
-    chipsRow: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: 8,
-    },
-    chip: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: 'rgba(47, 128, 237, 0.15)',
-        borderWidth: 1,
-        borderColor: 'rgba(47, 128, 237, 0.4)',
-        borderRadius: 20,
-        paddingVertical: 5,
-        paddingLeft: 12,
-        paddingRight: 8,
-        gap: 6,
-        flexShrink: 1,
-        minWidth: 0,
-        maxWidth: '100%',
-    },
-    chipText: {
-        fontSize: 13,
-        color: '#fff',
-        fontFamily: 'Poppins_500Medium',
-        letterSpacing: -0.2,
-        flexShrink: 1,
-        flexWrap: 'wrap',
-    },
-    chipRemove: {
-        width: 18,
-        height: 18,
-        borderRadius: 9,
-        backgroundColor: 'rgba(47, 128, 237, 0.2)',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    searchContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#1e1e1e',
-        borderRadius: 12,
-        marginBottom: 8,
-        paddingHorizontal: 14,
-        borderWidth: 1,
-        borderColor: '#242424',
-    },
-    searchInput: {
-        flex: 1,
-        fontSize: 15,
-        color: '#FFF',
-        paddingVertical: 12,
-        fontFamily: 'Poppins_400Regular',
-    },
-    searchInputFocused: {
-        color: '#fff',
-    },
-    clearButton: {
-        padding: 4,
-        marginLeft: 8,
-    },
-    clearText: {
-        fontSize: 16,
-        color: '#888',
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    emptyContainer: {
-        alignItems: 'center',
-        paddingTop: 24,
-        gap: 14,
-    },
-    emptyText: {
-        fontSize: 14,
-        color: '#666',
-        fontFamily: 'Poppins_400Regular',
-        textAlign: 'center',
-    },
-    createPromptButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-        backgroundColor: '#2f80ed',
-        borderRadius: 14,
-        paddingVertical: 12,
-        paddingHorizontal: 20,
-        shadowColor: '#2f80ed',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 6,
-    },
-    createPromptText: {
-        fontSize: 14,
-        color: '#fff',
-        fontFamily: 'Poppins_600SemiBold',
-        letterSpacing: -0.3,
-    },
-    itemWrapper: {
-        flexDirection: 'row',
-        marginVertical: 5,
-        borderRadius: 14,
-        overflow: 'hidden',
-        backgroundColor: '#1e1e1e',
-        borderWidth: 1,
-        borderColor: '#242424',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 3 },
-        shadowOpacity: 0.25,
-        shadowRadius: 5,
-        elevation: 5,
-    },
-    itemWrapperSelected: {
-        backgroundColor: 'rgba(47, 128, 237, 0.12)',
-        borderColor: '#2f80ed',
-    },
-    accentBar: {
-        width: 4,
-        backgroundColor: '#2f80ed',
-    },
-    item: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingVertical: 14,
-        paddingHorizontal: 14,
-    },
-    itemInfo: {
-        flex: 1,
-        marginRight: 10,
-    },
-    itemTitle: {
-        fontSize: 15,
-        fontWeight: '600',
-        color: '#FFF',
-        letterSpacing: -0.3,
-        marginBottom: 3,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    itemMeta: {
-        fontSize: 12,
-        color: '#888',
-        fontFamily: 'Poppins_400Regular',
-        letterSpacing: 0.1,
-    },
-    imageGlowRing: {
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-        flexShrink: 0,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: '#2f80ed',
-        shadowColor: '#2f80ed',
-        shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
-        elevation: 4,
-    },
-    imageCircle: {
-        width: 56,
-        height: 56,
-        borderRadius: 28,
-        backgroundColor: '#1e1e1e',
-        justifyContent: 'center',
-        alignItems: 'center',
-        overflow: 'hidden',
-    },
-    exerciseImage: {
-        width: 42,
-        height: 42,
-        tintColor: '#fff',
-    },
-    addAllContainer: {
-        paddingHorizontal: 24,
-        paddingBottom: Platform.OS === 'ios' ? 32 : 20,
-        paddingTop: 12,
-        backgroundColor: '#121212',
-        borderTopWidth: 1,
-        borderTopColor: '#1e1e1e',
-    },
-    addAllButton: {
-        backgroundColor: '#2f80ed',
-        borderRadius: 14,
-        paddingVertical: 16,
-        alignItems: 'center',
-        shadowColor: '#2f80ed',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 6,
-    },
-    addAllButtonText: {
-        fontSize: 16,
-        color: '#fff',
-        fontFamily: 'Poppins_600SemiBold',
-        letterSpacing: -0.3,
-    },
+function makeStyles(colors: Colors) {
+    return StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: colors.background,
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            overflow: 'hidden',
+        },
+        keyboardView: {
+            flex: 1,
+        },
+        handleContainer: {
+            alignItems: 'center',
+            paddingTop: 12,
+            paddingBottom: 8,
+        },
+        handle: {
+            width: 40,
+            height: 5,
+            backgroundColor: colors.border,
+            borderRadius: 3,
+        },
+        body: {
+            flex: 1,
+        },
+        listContent: {
+            paddingHorizontal: 24,
+            paddingTop: 12,
+            paddingBottom: 24,
+        },
+        iconContainer: {
+            alignItems: 'center',
+            marginBottom: 16,
+            marginTop: 4,
+        },
+        iconCircle: {
+            width: 80,
+            height: 80,
+            borderRadius: 40,
+            backgroundColor: colors.surface,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderWidth: 2,
+            borderColor: colors.workout,
+        },
+        title: {
+            fontSize: 24,
+            color: colors.text,
+            textAlign: 'center',
+            marginBottom: 4,
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+        subtitle: {
+            fontSize: 16,
+            color: colors.labelMuted,
+            textAlign: 'center',
+            marginBottom: 10,
+            fontFamily: fonts.regular,
+            letterSpacing: 0.2,
+        },
+        createExerciseButton: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 6,
+            alignSelf: 'center',
+            borderWidth: 1,
+            borderColor: colors.workout + '66',
+            borderRadius: 20,
+            paddingVertical: 7,
+            paddingHorizontal: 14,
+            marginBottom: 14,
+            backgroundColor: colors.iconChipBg,
+        },
+        createExerciseText: {
+            fontSize: 13,
+            color: colors.workout,
+            fontFamily: fonts.medium,
+            letterSpacing: -0.2,
+        },
+        chipsRow: {
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            gap: 8,
+        },
+        chip: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: colors.iconChipBg,
+            borderWidth: 1,
+            borderColor: colors.workout + '66',
+            borderRadius: 20,
+            paddingVertical: 5,
+            paddingLeft: 12,
+            paddingRight: 8,
+            gap: 6,
+            flexShrink: 1,
+            minWidth: 0,
+            maxWidth: '100%',
+        },
+        chipText: {
+            fontSize: 13,
+            color: colors.text,
+            fontFamily: fonts.medium,
+            letterSpacing: -0.2,
+            flexShrink: 1,
+            flexWrap: 'wrap',
+        },
+        chipRemove: {
+            width: 18,
+            height: 18,
+            borderRadius: 9,
+            backgroundColor: colors.workout + '33',
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        searchContainer: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: colors.surface,
+            borderRadius: 12,
+            marginBottom: 8,
+            paddingHorizontal: 14,
+            borderWidth: 1,
+            borderColor: colors.hairline,
+        },
+        searchInput: {
+            flex: 1,
+            fontSize: 15,
+            color: colors.text,
+            paddingVertical: 12,
+            fontFamily: fonts.regular,
+        },
+        searchInputFocused: {
+            color: colors.text,
+        },
+        clearButton: {
+            padding: 4,
+            marginLeft: 8,
+        },
+        clearText: {
+            fontSize: 16,
+            color: colors.textMuted,
+            fontFamily: fonts.semibold,
+        },
+        emptyContainer: {
+            alignItems: 'center',
+            paddingTop: 24,
+            gap: 14,
+        },
+        emptyText: {
+            fontSize: 14,
+            color: colors.textMuted,
+            fontFamily: fonts.regular,
+            textAlign: 'center',
+        },
+        createPromptButton: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 8,
+            backgroundColor: colors.workout,
+            borderRadius: 14,
+            paddingVertical: 12,
+            paddingHorizontal: 20,
+            shadowColor: colors.workout,
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 6,
+        },
+        createPromptText: {
+            fontSize: 14,
+            color: '#fff',
+            fontFamily: fonts.semibold,
+            letterSpacing: -0.3,
+        },
+        itemWrapper: {
+            flexDirection: 'row',
+            marginVertical: 5,
+            borderRadius: radius.card,
+            overflow: 'hidden',
+            backgroundColor: colors.surface,
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: colors.hairline,
+        },
+        itemWrapperSelected: {
+            backgroundColor: colors.workout + '1F',
+            borderColor: colors.workout,
+        },
+        accentBar: {
+            width: 4,
+            backgroundColor: colors.workout,
+        },
+        item: {
+            flex: 1,
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingVertical: 14,
+            paddingHorizontal: 14,
+        },
+        itemInfo: {
+            flex: 1,
+            marginRight: 10,
+        },
+        itemTitle: {
+            fontSize: 15,
+            fontWeight: '600',
+            color: colors.text,
+            letterSpacing: -0.3,
+            marginBottom: 3,
+            fontFamily: fonts.semibold,
+        },
+        itemMeta: {
+            fontSize: 12,
+            color: colors.textMuted,
+            fontFamily: fonts.regular,
+            letterSpacing: 0.1,
+        },
+        imageGlowRing: {
+            width: 60,
+            height: 60,
+            borderRadius: 30,
+            flexShrink: 0,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderWidth: 1,
+            borderColor: colors.workout,
+        },
+        imageCircle: {
+            width: 56,
+            height: 56,
+            borderRadius: 28,
+            backgroundColor: colors.surfaceInset,
+            justifyContent: 'center',
+            alignItems: 'center',
+            overflow: 'hidden',
+        },
+        exerciseImage: {
+            width: 42,
+            height: 42,
+            tintColor: colors.text,
+        },
+        addAllContainer: {
+            paddingHorizontal: 24,
+            paddingBottom: Platform.OS === 'ios' ? 32 : 20,
+            paddingTop: 12,
+            backgroundColor: colors.background,
+            borderTopWidth: 1,
+            borderTopColor: colors.hairline,
+        },
+        addAllButton: {
+            backgroundColor: colors.workout,
+            borderRadius: 14,
+            paddingVertical: 16,
+            alignItems: 'center',
+            shadowColor: colors.workout,
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 6,
+        },
+        addAllButtonText: {
+            fontSize: 16,
+            color: '#fff',
+            fontFamily: fonts.semibold,
+            letterSpacing: -0.3,
+        },
 
-    // Quick-create sheet
-    sheetOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.65)',
-        justifyContent: 'flex-end',
-    },
-    sheet: {
-        backgroundColor: '#121212',
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        maxHeight: '88%',
-    },
-    sheetContent: {
-        paddingHorizontal: 24,
-        paddingTop: 20,
-        paddingBottom: 16,
-    },
-    sheetTitle: {
-        fontSize: 22,
-        color: '#fff',
-        fontFamily: 'Poppins_600SemiBold',
-        letterSpacing: -0.5,
-        marginBottom: 4,
-    },
-    sheetSubtitle: {
-        fontSize: 14,
-        color: '#888',
-        fontFamily: 'Poppins_400Regular',
-        marginBottom: 20,
-        letterSpacing: 0.1,
-    },
-    sheetLabel: {
-        fontSize: 13,
-        color: '#aaa',
-        fontFamily: 'Poppins_600SemiBold',
-        letterSpacing: 0.3,
-        textTransform: 'uppercase',
-        marginBottom: 8,
-    },
-    sheetInput: {
-        backgroundColor: '#1e1e1e',
-        borderRadius: 12,
-        paddingHorizontal: 14,
-        paddingVertical: 13,
-        fontSize: 16,
-        color: '#fff',
-        fontFamily: 'Poppins_500Medium',
-        borderWidth: 1,
-        borderColor: '#2a2a2a',
-        marginBottom: 20,
-    },
-    toggleRow: {
-        flexDirection: 'row',
-        gap: 10,
-        marginBottom: 20,
-    },
-    toggleButton: {
-        flex: 1,
-        paddingVertical: 12,
-        borderRadius: 12,
-        borderWidth: 1.5,
-        borderColor: '#2a2a2a',
-        backgroundColor: '#1e1e1e',
-        alignItems: 'center',
-    },
-    toggleButtonActive: {
-        backgroundColor: 'rgba(47, 128, 237, 0.15)',
-        borderColor: '#2f80ed',
-    },
-    toggleText: {
-        fontSize: 14,
-        color: '#666',
-        fontFamily: 'Poppins_600SemiBold',
-        letterSpacing: -0.3,
-    },
-    toggleTextActive: {
-        color: '#fff',
-    },
-    chipGrid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: 8,
-        marginBottom: 20,
-    },
-    gridChip: {
-        paddingVertical: 8,
-        paddingHorizontal: 14,
-        borderRadius: 20,
-        borderWidth: 1.5,
-        borderColor: '#2a2a2a',
-        backgroundColor: '#1e1e1e',
-    },
-    gridChipActive: {
-        backgroundColor: 'rgba(47, 128, 237, 0.15)',
-        borderColor: '#2f80ed',
-    },
-    gridChipText: {
-        fontSize: 13,
-        color: '#666',
-        fontFamily: 'Poppins_500Medium',
-        letterSpacing: -0.2,
-    },
-    gridChipTextActive: {
-        color: '#fff',
-    },
-    sheetButtons: {
-        flexDirection: 'row',
-        gap: 10,
-        paddingHorizontal: 24,
-        paddingTop: 12,
-        paddingBottom: Platform.OS === 'ios' ? 36 : 24,
-        borderTopWidth: 1,
-        borderTopColor: '#1e1e1e',
-    },
-    sheetCancelButton: {
-        flex: 1,
-        paddingVertical: 14,
-        borderRadius: 14,
-        borderWidth: 1,
-        borderColor: '#2a2a2a',
-        backgroundColor: '#1e1e1e',
-        alignItems: 'center',
-    },
-    sheetCancelText: {
-        fontSize: 15,
-        color: '#aaa',
-        fontFamily: 'Poppins_600SemiBold',
-        letterSpacing: -0.3,
-    },
-    sheetCreateButton: {
-        flex: 2,
-        paddingVertical: 14,
-        borderRadius: 14,
-        backgroundColor: '#2f80ed',
-        alignItems: 'center',
-        shadowColor: '#2f80ed',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 6,
-    },
-    sheetCreateText: {
-        fontSize: 15,
-        color: '#fff',
-        fontFamily: 'Poppins_600SemiBold',
-        letterSpacing: -0.3,
-    },
-})
+        // Quick-create sheet
+        sheetOverlay: {
+            flex: 1,
+            backgroundColor: 'rgba(0,0,0,0.65)',
+            justifyContent: 'flex-end',
+        },
+        sheet: {
+            backgroundColor: colors.background,
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            maxHeight: '88%',
+        },
+        sheetContent: {
+            paddingHorizontal: 24,
+            paddingTop: 20,
+            paddingBottom: 16,
+        },
+        sheetTitle: {
+            fontSize: 22,
+            color: colors.text,
+            fontFamily: fonts.semibold,
+            letterSpacing: -0.5,
+            marginBottom: 4,
+        },
+        sheetSubtitle: {
+            fontSize: 14,
+            color: colors.textMuted,
+            fontFamily: fonts.regular,
+            marginBottom: 20,
+            letterSpacing: 0.1,
+        },
+        sheetLabel: {
+            fontSize: 13,
+            color: colors.labelMuted,
+            fontFamily: fonts.semibold,
+            letterSpacing: 0.3,
+            textTransform: 'uppercase',
+            marginBottom: 8,
+        },
+        sheetInput: {
+            backgroundColor: colors.surface,
+            borderRadius: 12,
+            paddingHorizontal: 14,
+            paddingVertical: 13,
+            fontSize: 16,
+            color: colors.text,
+            fontFamily: fonts.medium,
+            borderWidth: 1,
+            borderColor: colors.hairline,
+            marginBottom: 20,
+        },
+        toggleRow: {
+            flexDirection: 'row',
+            gap: 10,
+            marginBottom: 20,
+        },
+        toggleButton: {
+            flex: 1,
+            paddingVertical: 12,
+            borderRadius: 12,
+            borderWidth: 1.5,
+            borderColor: colors.hairline,
+            backgroundColor: colors.surface,
+            alignItems: 'center',
+        },
+        toggleButtonActive: {
+            backgroundColor: colors.iconChipBg,
+            borderColor: colors.workout,
+        },
+        toggleText: {
+            fontSize: 14,
+            color: colors.textMuted,
+            fontFamily: fonts.semibold,
+            letterSpacing: -0.3,
+        },
+        toggleTextActive: {
+            color: colors.text,
+        },
+        chipGrid: {
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            gap: 8,
+            marginBottom: 20,
+        },
+        gridChip: {
+            paddingVertical: 8,
+            paddingHorizontal: 14,
+            borderRadius: 20,
+            borderWidth: 1.5,
+            borderColor: colors.hairline,
+            backgroundColor: colors.surface,
+        },
+        gridChipActive: {
+            backgroundColor: colors.iconChipBg,
+            borderColor: colors.workout,
+        },
+        gridChipText: {
+            fontSize: 13,
+            color: colors.textMuted,
+            fontFamily: fonts.medium,
+            letterSpacing: -0.2,
+        },
+        gridChipTextActive: {
+            color: colors.text,
+        },
+        sheetButtons: {
+            flexDirection: 'row',
+            gap: 10,
+            paddingHorizontal: 24,
+            paddingTop: 12,
+            paddingBottom: Platform.OS === 'ios' ? 36 : 24,
+            borderTopWidth: 1,
+            borderTopColor: colors.hairline,
+        },
+        sheetCancelButton: {
+            flex: 1,
+            paddingVertical: 14,
+            borderRadius: 14,
+            borderWidth: 1,
+            borderColor: colors.hairline,
+            backgroundColor: colors.surface,
+            alignItems: 'center',
+        },
+        sheetCancelText: {
+            fontSize: 15,
+            color: colors.labelMuted,
+            fontFamily: fonts.semibold,
+            letterSpacing: -0.3,
+        },
+        sheetCreateButton: {
+            flex: 2,
+            paddingVertical: 14,
+            borderRadius: 14,
+            backgroundColor: colors.workout,
+            alignItems: 'center',
+            shadowColor: colors.workout,
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 6,
+        },
+        sheetCreateText: {
+            fontSize: 15,
+            color: '#fff',
+            fontFamily: fonts.semibold,
+            letterSpacing: -0.3,
+        },
+    })
+}

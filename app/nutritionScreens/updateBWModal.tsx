@@ -1,14 +1,17 @@
 import { useSettings } from '@/context/SettingsContext'
 import { validateHeightWeight } from '@/context/SettingsContext/functions/validator'
+import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
 import { Scale } from 'lucide-react-native'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 export default function UpdateBWModal() {
     const { settings, handleUpdateBw } = useSettings()
+    const colors = useColors()
+    const styles = useMemo(() => makeStyles(colors), [colors])
     const [weight, setWeight] = useState('')
     const [isFocused, setIsFocused] = useState(false)
     const insets = useSafeAreaInsets()
@@ -27,7 +30,7 @@ export default function UpdateBWModal() {
                 {/* Icon Section */}
                 <View style={styles.iconContainer}>
                     <View style={styles.iconCircle}>
-                        <Scale size={72} color="#22C922" strokeWidth={2.5} />
+                        <Scale size={72} color={colors.nutrition} strokeWidth={2.5} />
                     </View>
                 </View>
 
@@ -42,7 +45,7 @@ export default function UpdateBWModal() {
                     <TextInput
                         style={[styles.input, isFocused && styles.inputFocused]}
                         placeholder="Enter new weight"
-                        placeholderTextColor="#666"
+                        placeholderTextColor={colors.placeholder}
                         value={weight}
                         onChangeText={setWeight}
                         onFocus={() => setIsFocused(true)}
@@ -64,7 +67,7 @@ export default function UpdateBWModal() {
                     activeOpacity={0.8}
                     style={styles.updateButtonTouchable}
                 >
-                    <LinearGradient colors={!weight.trim() ? ['#333', '#333'] : ['#32CD32', '#22C922']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.updateButton}>
+                    <LinearGradient colors={!weight.trim() ? [colors.disabled, colors.disabled] : colors.nutritionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.updateButton}>
                         <Text style={styles.updateButtonText}>Update Weight</Text>
                     </LinearGradient>
                 </TouchableOpacity>
@@ -73,104 +76,106 @@ export default function UpdateBWModal() {
     )
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#121212',
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        overflow: 'hidden',
-    },
-    handleContainer: {
-        alignItems: 'center',
-        paddingTop: 12,
-        paddingBottom: 8,
-    },
-    handle: {
-        width: 40,
-        height: 5,
-        backgroundColor: '#333',
-        borderRadius: 3,
-    },
-    scroll: {
-        flex: 1,
-    },
-    scrollContent: {
-        flexGrow: 1,
-        paddingHorizontal: 24,
-        paddingTop: 12,
-    },
-    iconContainer: {
-        alignItems: 'center',
-        marginBottom: 16,
-        marginTop: 12,
-    },
-    iconCircle: {
-        width: 130,
-        height: 130,
-        borderRadius: 65,
-        backgroundColor: '#1e1e1e',
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 2,
-        borderColor: '#22C922',
-    },
-    title: {
-        fontSize: 24,
-        color: '#FFF',
-        textAlign: 'center',
-        marginBottom: 4,
-        fontFamily: 'Poppins_600SemiBold',
-        letterSpacing: -0.5,
-    },
-    subtitle: {
-        fontSize: 16,
-        color: '#aaa',
-        textAlign: 'center',
-        marginBottom: 20,
-        fontFamily: 'Poppins_400Regular',
-        letterSpacing: 0.2,
-    },
-    inputContainer: {
-        marginBottom: 16,
-    },
-    input: {
-        backgroundColor: '#1e1e1e',
-        borderRadius: 12,
-        paddingHorizontal: 16,
-        paddingVertical: 14,
-        fontSize: 15,
-        color: '#FFF',
-        borderWidth: 2,
-        borderColor: '#1e1e1e',
-        fontFamily: 'Poppins_400Regular',
-    },
-    inputFocused: {
-        borderColor: '#22C922',
-    },
-    updateButtonTouchable: {
-        borderRadius: 12,
-        overflow: 'hidden',
-        shadowColor: '#22C922',
-        shadowOffset: {
-            width: 0,
-            height: 4,
+function makeStyles(colors: Colors) {
+    return StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: colors.background,
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            overflow: 'hidden',
         },
-        shadowOpacity: 0.4,
-        shadowRadius: 8,
-        elevation: 8,
-    },
-    updateButton: {
-        borderRadius: 12,
-        paddingVertical: 16,
-        paddingHorizontal: 20,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    updateButtonText: {
-        fontSize: 17,
-        color: '#FFF',
-        fontFamily: 'Poppins_600SemiBold',
-        letterSpacing: -0.5,
-    },
-})
+        handleContainer: {
+            alignItems: 'center',
+            paddingTop: 12,
+            paddingBottom: 8,
+        },
+        handle: {
+            width: 40,
+            height: 5,
+            backgroundColor: colors.border,
+            borderRadius: 3,
+        },
+        scroll: {
+            flex: 1,
+        },
+        scrollContent: {
+            flexGrow: 1,
+            paddingHorizontal: 24,
+            paddingTop: 12,
+        },
+        iconContainer: {
+            alignItems: 'center',
+            marginBottom: 16,
+            marginTop: 12,
+        },
+        iconCircle: {
+            width: 130,
+            height: 130,
+            borderRadius: 65,
+            backgroundColor: colors.surface,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderWidth: 2,
+            borderColor: colors.nutrition,
+        },
+        title: {
+            fontSize: 24,
+            color: colors.text,
+            textAlign: 'center',
+            marginBottom: 4,
+            fontFamily: fonts.semibold,
+            letterSpacing: -0.5,
+        },
+        subtitle: {
+            fontSize: 16,
+            color: colors.labelMuted,
+            textAlign: 'center',
+            marginBottom: 20,
+            fontFamily: fonts.regular,
+            letterSpacing: 0.2,
+        },
+        inputContainer: {
+            marginBottom: 16,
+        },
+        input: {
+            backgroundColor: colors.surface,
+            borderRadius: 12,
+            paddingHorizontal: 16,
+            paddingVertical: 14,
+            fontSize: 15,
+            color: colors.text,
+            borderWidth: 2,
+            borderColor: colors.hairline,
+            fontFamily: fonts.regular,
+        },
+        inputFocused: {
+            borderColor: colors.nutrition,
+        },
+        updateButtonTouchable: {
+            borderRadius: 12,
+            overflow: 'hidden',
+            shadowColor: colors.nutrition,
+            shadowOffset: {
+                width: 0,
+                height: 4,
+            },
+            shadowOpacity: 0.4,
+            shadowRadius: 8,
+            elevation: 8,
+        },
+        updateButton: {
+            borderRadius: 12,
+            paddingVertical: 16,
+            paddingHorizontal: 20,
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        updateButtonText: {
+            fontSize: 17,
+            color: '#FFF',
+            fontFamily: fonts.semibold,
+            letterSpacing: -0.5,
+        },
+    })
+}

@@ -1,9 +1,10 @@
 import { useAuth } from '@/context/AuthContext'
+import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { useWorkout } from '@/context/WorkoutContext'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { Dumbbell } from 'lucide-react-native'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -11,6 +12,8 @@ export default function AddWorkoutModal() {
     const { handleAddWorkout, workouts } = useWorkout()
     const router = useRouter()
     const { userID } = useAuth()
+    const colors = useColors()
+    const styles = useMemo(() => makeStyles(colors), [colors])
     const [workoutName, setWorkoutName] = useState('')
     const [isFocused, setIsFocused] = useState(false)
     const insets = useSafeAreaInsets()
@@ -28,7 +31,7 @@ export default function AddWorkoutModal() {
                 {/* Icon Section */}
                 <View style={styles.iconContainer}>
                     <View style={styles.iconCircle}>
-                        <Dumbbell size={72} color="#2f80ed" strokeWidth={2} />
+                        <Dumbbell size={72} color={colors.workout} strokeWidth={2} />
                     </View>
                 </View>
 
@@ -41,7 +44,7 @@ export default function AddWorkoutModal() {
                     <TextInput
                         style={[styles.input, isFocused && styles.inputFocused]}
                         placeholder="Workout name"
-                        placeholderTextColor="#666"
+                        placeholderTextColor={colors.placeholder}
                         value={workoutName}
                         onChangeText={setWorkoutName}
                         onFocus={() => setIsFocused(true)}
@@ -67,7 +70,7 @@ export default function AddWorkoutModal() {
                     activeOpacity={0.8}
                     style={styles.addButtonTouchable}
                 >
-                    <LinearGradient colors={!workoutName.trim() ? ['#333', '#333'] : ['#1A7AD4', '#2f80ed', '#5BA3F5']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.addButton}>
+                    <LinearGradient colors={!workoutName.trim() ? [colors.disabled, colors.disabled] : colors.workoutGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.addButton}>
                         <Text style={styles.addButtonText}>Add Workout</Text>
                     </LinearGradient>
                 </TouchableOpacity>
@@ -76,102 +79,104 @@ export default function AddWorkoutModal() {
     )
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#121212',
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        overflow: 'hidden',
-    },
-    handleContainer: {
-        alignItems: 'center',
-        paddingTop: 12,
-        paddingBottom: 8,
-    },
-    handle: {
-        width: 40,
-        height: 5,
-        backgroundColor: '#333',
-        borderRadius: 3,
-    },
-    scroll: {
-        flex: 1,
-    },
-    scrollContent: {
-        flexGrow: 1,
-        paddingHorizontal: 24,
-        paddingTop: 12,
-    },
-    iconContainer: {
-        alignItems: 'center',
-        marginBottom: 16,
-    },
-    iconCircle: {
-        width: 144,
-        height: 144,
-        borderRadius: 72,
-        backgroundColor: '#1e1e1e',
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 2,
-        borderColor: '#2f80ed',
-    },
-    title: {
-        fontSize: 24,
-        color: '#FFF',
-        textAlign: 'center',
-        marginBottom: 6,
-        fontFamily: 'Poppins_600SemiBold',
-        letterSpacing: -0.5,
-    },
-    subtitle: {
-        fontSize: 16,
-        color: '#aaa',
-        textAlign: 'center',
-        marginBottom: 20,
-        fontFamily: 'Poppins_400Regular',
-        letterSpacing: 0.2,
-    },
-    inputContainer: {
-        marginBottom: 16,
-    },
-    input: {
-        backgroundColor: '#1e1e1e',
-        borderRadius: 12,
-        paddingHorizontal: 16,
-        paddingVertical: 14,
-        fontSize: 15,
-        color: '#FFF',
-        borderWidth: 2,
-        borderColor: '#1e1e1e',
-        fontFamily: 'Poppins_400Regular',
-    },
-    inputFocused: {
-        borderColor: '#2f80ed',
-    },
-    addButtonTouchable: {
-        borderRadius: 12,
-        overflow: 'hidden',
-        shadowColor: '#2f80ed',
-        shadowOffset: {
-            width: 0,
-            height: 4,
+function makeStyles(colors: Colors) {
+    return StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: colors.background,
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            overflow: 'hidden',
         },
-        shadowOpacity: 0.4,
-        shadowRadius: 8,
-        elevation: 8,
-    },
-    addButton: {
-        borderRadius: 12,
-        paddingVertical: 16,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    addButtonText: {
-        fontSize: 17,
-        color: '#FFF',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-})
+        handleContainer: {
+            alignItems: 'center',
+            paddingTop: 12,
+            paddingBottom: 8,
+        },
+        handle: {
+            width: 40,
+            height: 5,
+            backgroundColor: colors.border,
+            borderRadius: 3,
+        },
+        scroll: {
+            flex: 1,
+        },
+        scrollContent: {
+            flexGrow: 1,
+            paddingHorizontal: 24,
+            paddingTop: 12,
+        },
+        iconContainer: {
+            alignItems: 'center',
+            marginBottom: 16,
+        },
+        iconCircle: {
+            width: 144,
+            height: 144,
+            borderRadius: 72,
+            backgroundColor: colors.surface,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderWidth: 2,
+            borderColor: colors.workout,
+        },
+        title: {
+            fontSize: 24,
+            color: colors.text,
+            textAlign: 'center',
+            marginBottom: 6,
+            fontFamily: fonts.semibold,
+            letterSpacing: -0.5,
+        },
+        subtitle: {
+            fontSize: 16,
+            color: colors.labelMuted,
+            textAlign: 'center',
+            marginBottom: 20,
+            fontFamily: fonts.regular,
+            letterSpacing: 0.2,
+        },
+        inputContainer: {
+            marginBottom: 16,
+        },
+        input: {
+            backgroundColor: colors.surface,
+            borderRadius: 12,
+            paddingHorizontal: 16,
+            paddingVertical: 14,
+            fontSize: 15,
+            color: colors.text,
+            borderWidth: 2,
+            borderColor: colors.hairline,
+            fontFamily: fonts.regular,
+        },
+        inputFocused: {
+            borderColor: colors.workout,
+        },
+        addButtonTouchable: {
+            borderRadius: 12,
+            overflow: 'hidden',
+            shadowColor: colors.workout,
+            shadowOffset: {
+                width: 0,
+                height: 4,
+            },
+            shadowOpacity: 0.4,
+            shadowRadius: 8,
+            elevation: 8,
+        },
+        addButton: {
+            borderRadius: 12,
+            paddingVertical: 16,
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        addButtonText: {
+            fontSize: 17,
+            color: '#FFF',
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+    })
+}

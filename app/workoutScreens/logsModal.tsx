@@ -2,6 +2,7 @@ import LogDateModal from '@/components/WorkoutComponents/LogDateModal'
 import LogHistoryList from '@/components/WorkoutComponents/LogHistoryList'
 import { useAuth } from '@/context/AuthContext'
 import { useSettings } from '@/context/SettingsContext'
+import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { useWorkout } from '@/context/WorkoutContext'
 import { getDailyGoal, isGoalHitToday } from '@/context/WorkoutContext/functions/progressionFunctions'
 import { Log } from '@/context/WorkoutContext/types'
@@ -17,6 +18,8 @@ export default function LogsModal() {
     const { settings } = useSettings()
     const params = useLocalSearchParams<{ workoutId: string; exerciseId: string; exerciseName: string }>()
     const { userID } = useAuth()
+    const colors = useColors()
+    const styles = useMemo(() => makeStyles(colors), [colors])
 
     const weightUnit = settings.unitSystem === 'imperial' ? 'lbs' : 'kg'
     // Normalize params to strings
@@ -128,7 +131,7 @@ export default function LogsModal() {
                             <View>
                                 <View style={styles.exerciseTitleRow}>
                                     <Text style={styles.exerciseTitle}>{exerciseName}</Text>
-                                    <BicepsFlexed size={20} color="#2f80ed" strokeWidth={2} />
+                                    <BicepsFlexed size={20} color={colors.workout} strokeWidth={2} />
                                 </View>
 
                                 {/* Compact Input Section */}
@@ -138,18 +141,18 @@ export default function LogsModal() {
                                         {/* Weight Input */}
                                         <View style={styles.inputGroup}>
                                             <Text style={styles.inputLabel}>{weightLabel}</Text>
-                                            <TextInput style={[styles.input, focusedField === 'weight' && styles.inputFocused]} placeholder={weightPlaceholder} placeholderTextColor="#666" value={weight} onChangeText={setWeight} onFocus={() => setFocusedField('weight')} onBlur={() => setFocusedField(null)} keyboardType="numeric" />
+                                            <TextInput style={[styles.input, focusedField === 'weight' && styles.inputFocused]} placeholder={weightPlaceholder} placeholderTextColor={colors.placeholder} value={weight} onChangeText={setWeight} onFocus={() => setFocusedField('weight')} onBlur={() => setFocusedField(null)} keyboardType="numeric" />
                                         </View>
 
                                         {/* Reps Input */}
                                         <View style={styles.inputGroup}>
                                             <Text style={styles.inputLabel}>Reps</Text>
-                                            <TextInput style={[styles.input, focusedField === 'reps' && styles.inputFocused]} placeholder="0" placeholderTextColor="#666" value={reps} onChangeText={setReps} onFocus={() => setFocusedField('reps')} onBlur={() => setFocusedField(null)} keyboardType="numeric" />
+                                            <TextInput style={[styles.input, focusedField === 'reps' && styles.inputFocused]} placeholder="0" placeholderTextColor={colors.placeholder} value={reps} onChangeText={setReps} onFocus={() => setFocusedField('reps')} onBlur={() => setFocusedField(null)} keyboardType="numeric" />
                                         </View>
 
                                         {/* Change Date */}
                                         <TouchableOpacity onPress={() => setShowDateModal(true)} style={[styles.dateButtonTouchable, !isLogDateToday && styles.dateButtonNotToday]} activeOpacity={0.5} accessibilityLabel="Change log date" accessibilityRole="button">
-                                            <Calendar size={22} color="#2f80ed" strokeWidth={2.5} />
+                                            <Calendar size={22} color={colors.workout} strokeWidth={2.5} />
                                         </TouchableOpacity>
 
                                         {/* Add Button */}
@@ -157,10 +160,10 @@ export default function LogsModal() {
                                             <Animated.View style={[styles.addButton, { transform: [{ scale: addButtonScale }] }]}>
                                                 <LinearGradient
                                                     colors={
-                                                        showAddSuccess ? ['#22C55E', '#16A34A']
+                                                        showAddSuccess ? colors.nutritionGradient
                                                         : !isValid ?
-                                                            ['#1e1e1e', '#1e1e1e']
-                                                        :   ['#1A7AD4', '#2f80ed', '#5BA3F5']
+                                                            [colors.disabled, colors.disabled]
+                                                        :   colors.workoutGradient
                                                     }
                                                     start={{ x: 0, y: 0 }}
                                                     end={{ x: 1, y: 1 }}
@@ -186,7 +189,7 @@ export default function LogsModal() {
                                         <View style={styles.todayRow}>
                                             <Text style={styles.selectedDateHint}>Logging for {formatDateOrToday(selectedLogDate, true)}</Text>
                                             <TouchableOpacity onPress={() => setSelectedLogDate(new Date())} style={styles.todayButton} activeOpacity={0.5}>
-                                                <RotateCcw size={18} color="#2f80ed" strokeWidth={2.5} />
+                                                <RotateCcw size={18} color={colors.workout} strokeWidth={2.5} />
                                                 <Text style={styles.todayButtonText}>Today</Text>
                                             </TouchableOpacity>
                                         </View>
@@ -214,166 +217,168 @@ export default function LogsModal() {
     )
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#121212',
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        overflow: 'hidden',
-    },
-    innerContainer: {
-        flex: 1,
-    },
-    handleContainer: {
-        alignItems: 'center',
-        paddingTop: 12,
-        paddingBottom: 8,
-    },
-    handle: {
-        width: 40,
-        height: 5,
-        backgroundColor: '#333',
-        borderRadius: 3,
-    },
-    content: {
-        flex: 1,
-        paddingHorizontal: 24,
-        paddingTop: 12,
-        paddingBottom: 32,
-    },
-    exerciseTitleRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-        marginBottom: 16,
-    },
-    exerciseTitle: {
-        fontSize: 20,
-        color: '#FFF',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-        flexShrink: 1,
-    },
-    goalText: {
-        marginTop: 12,
-        fontSize: 13,
-        color: '#aaa',
-        textAlign: 'center',
-        fontFamily: 'Poppins_500Medium',
-        letterSpacing: -0.2,
-    },
-    goalLabel: {
-        color: '#2f80ed',
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    inputSection: {
-        marginBottom: 20,
-    },
-    inputsRow: {
-        flexDirection: 'row',
-        alignItems: 'flex-end',
-        gap: 8,
-    },
-    inputGroup: {
-        flex: 1,
-    },
-    inputLabel: {
-        fontSize: 12,
-        color: '#aaa',
-        marginBottom: 6,
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    input: {
-        backgroundColor: '#1e1e1e',
-        borderRadius: 12,
-        paddingHorizontal: 12,
-        paddingVertical: 12,
-        fontSize: 16,
-        color: '#FFF',
-        borderWidth: 2,
-        borderColor: '#1e1e1e',
-        textAlign: 'center',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    inputFocused: {
-        borderColor: '#2f80ed',
-        opacity: 1,
-    },
-    addButtonTouchable: {
-        width: 50,
-        height: 50,
-        borderRadius: 12,
-        overflow: 'hidden',
-        shadowColor: '#2f80ed',
-        shadowOffset: {
-            width: 0,
-            height: 2,
+function makeStyles(colors: Colors) {
+    return StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: colors.background,
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            overflow: 'hidden',
         },
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
-        elevation: 4,
-    },
-    addButton: {
-        width: '100%',
-        height: '100%',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    addButtonGradient: {
-        flex: 1,
-        width: '100%',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    addButtonText: {
-        fontSize: 24,
-        color: '#FFF',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_400Regular',
-    },
-    dateButtonTouchable: {
-        width: 50,
-        height: 50,
-        borderRadius: 12,
-        backgroundColor: '#1e1e1e',
-        borderWidth: 2,
-        borderColor: '#1e1e1e',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    dateButtonNotToday: {
-        borderColor: '#2f80ed',
-    },
-    todayRow: {
-        marginTop: 12,
-        gap: 8,
-    },
-    selectedDateHint: {
-        fontSize: 13,
-        color: '#aaa',
-        textAlign: 'center',
-        fontFamily: 'Poppins_500Medium',
-        letterSpacing: -0.2,
-    },
-    todayButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 6,
-        paddingVertical: 10,
-        paddingHorizontal: 12,
-        backgroundColor: '#1e1e1e',
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: '#2a2a2a',
-    },
-    todayButtonText: {
-        fontSize: 14,
-        color: '#2f80ed',
-        fontFamily: 'Poppins_600SemiBold',
-        letterSpacing: -0.5,
-    },
-})
+        innerContainer: {
+            flex: 1,
+        },
+        handleContainer: {
+            alignItems: 'center',
+            paddingTop: 12,
+            paddingBottom: 8,
+        },
+        handle: {
+            width: 40,
+            height: 5,
+            backgroundColor: colors.border,
+            borderRadius: 3,
+        },
+        content: {
+            flex: 1,
+            paddingHorizontal: 24,
+            paddingTop: 12,
+            paddingBottom: 32,
+        },
+        exerciseTitleRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 8,
+            marginBottom: 16,
+        },
+        exerciseTitle: {
+            fontSize: 20,
+            color: colors.text,
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+            flexShrink: 1,
+        },
+        goalText: {
+            marginTop: 12,
+            fontSize: 13,
+            color: colors.labelMuted,
+            textAlign: 'center',
+            fontFamily: fonts.medium,
+            letterSpacing: -0.2,
+        },
+        goalLabel: {
+            color: colors.workout,
+            fontFamily: fonts.semibold,
+        },
+        inputSection: {
+            marginBottom: 20,
+        },
+        inputsRow: {
+            flexDirection: 'row',
+            alignItems: 'flex-end',
+            gap: 8,
+        },
+        inputGroup: {
+            flex: 1,
+        },
+        inputLabel: {
+            fontSize: 12,
+            color: colors.labelMuted,
+            marginBottom: 6,
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+        input: {
+            backgroundColor: colors.surface,
+            borderRadius: 12,
+            paddingHorizontal: 12,
+            paddingVertical: 12,
+            fontSize: 16,
+            color: colors.text,
+            borderWidth: 2,
+            borderColor: colors.hairline,
+            textAlign: 'center',
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+        inputFocused: {
+            borderColor: colors.workout,
+            opacity: 1,
+        },
+        addButtonTouchable: {
+            width: 50,
+            height: 50,
+            borderRadius: 12,
+            overflow: 'hidden',
+            shadowColor: colors.workout,
+            shadowOffset: {
+                width: 0,
+                height: 2,
+            },
+            shadowOpacity: 0.3,
+            shadowRadius: 4,
+            elevation: 4,
+        },
+        addButton: {
+            width: '100%',
+            height: '100%',
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        addButtonGradient: {
+            flex: 1,
+            width: '100%',
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        addButtonText: {
+            fontSize: 24,
+            color: '#FFF',
+            letterSpacing: -0.5,
+            fontFamily: fonts.regular,
+        },
+        dateButtonTouchable: {
+            width: 50,
+            height: 50,
+            borderRadius: 12,
+            backgroundColor: colors.surface,
+            borderWidth: 2,
+            borderColor: colors.hairline,
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        dateButtonNotToday: {
+            borderColor: colors.workout,
+        },
+        todayRow: {
+            marginTop: 12,
+            gap: 8,
+        },
+        selectedDateHint: {
+            fontSize: 13,
+            color: colors.labelMuted,
+            textAlign: 'center',
+            fontFamily: fonts.medium,
+            letterSpacing: -0.2,
+        },
+        todayButton: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 6,
+            paddingVertical: 10,
+            paddingHorizontal: 12,
+            backgroundColor: colors.surface,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: colors.hairline,
+        },
+        todayButtonText: {
+            fontSize: 14,
+            color: colors.workout,
+            fontFamily: fonts.semibold,
+            letterSpacing: -0.5,
+        },
+    })
+}

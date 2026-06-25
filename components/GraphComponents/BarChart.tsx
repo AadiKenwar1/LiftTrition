@@ -64,7 +64,7 @@ export default function BarChart({ mode, data, goal, formatValue, showEndFlag = 
                 chartPressState={state}
                 domain={{ y: [0, topTick] }}
                 padding={{ left: 10, right: 10, top: 14, bottom: 10 }}
-                domainPadding={{ left: 24, right: 24, top: 30, bottom: 0 }}
+                domainPadding={{ left: 24, right: 24, top: 48, bottom: 0 }}
                 xAxis={{
                     font: showXLabels ? font : null,
                     tickCount: data.length,
@@ -92,7 +92,7 @@ export default function BarChart({ mode, data, goal, formatValue, showEndFlag = 
                     },
                 ]}
             >
-                {({ points, chartBounds, canvasSize, yScale }) => {
+                {({ points, chartBounds, yScale }) => {
                     const count = points.value.length || 1
                     const barWidth = Math.min(18, ((chartBounds.right - chartBounds.left) / count) * 0.55)
 
@@ -123,7 +123,7 @@ export default function BarChart({ mode, data, goal, formatValue, showEndFlag = 
 
                             {goal != null && <GoalLine y={yScale(goal)} left={chartBounds.left} right={chartBounds.right} color={chartColor} />}
 
-                            {showEndFlag && featuredBar?.y != null && featuredBar.yValue != null && <EndValueFlag x={featuredBar.x} y={featuredBar.y} value={fmt(featuredBar.yValue)} color={chartColor} textColor={flagTextColor} font={flagFont} canvasWidth={canvasSize.width} />}
+                            {showEndFlag && featuredBar?.y != null && featuredBar.yValue != null && <EndValueFlag x={featuredBar.x} y={featuredBar.y} value={fmt(featuredBar.yValue)} color={chartColor} textColor={flagTextColor} font={flagFont} left={chartBounds.left} right={chartBounds.right} top={chartBounds.top} />}
                         </>
                     )
                 }}

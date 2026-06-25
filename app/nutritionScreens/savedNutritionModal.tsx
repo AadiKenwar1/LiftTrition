@@ -4,6 +4,7 @@ import { useAuth } from '@/context/AuthContext'
 import { useNutrition } from '@/context/NutritionContext'
 import { getFilteredSavedNutritionEntries } from '@/context/NutritionContext/functions/crudFunctions'
 import { Ingredient, NutritionEntry } from '@/context/NutritionContext/types'
+import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { Bookmark, Check, X } from 'lucide-react-native'
@@ -34,6 +35,8 @@ export default function SavedNutritionModal() {
     const { savedNutritionEntries, handleUnsaveNutrition, handleAddNutrition, selectedDate } = useNutrition()
     const { userID } = useAuth()
     const router = useRouter()
+    const colors = useColors()
+    const styles = useMemo(() => makeStyles(colors), [colors])
 
     const [addedItems, setAddedItems] = useState<StagedSavedMeal[]>([])
     const [combineItems, setCombineItems] = useState(false)
@@ -152,7 +155,7 @@ export default function SavedNutritionModal() {
         <>
             <View style={styles.iconContainer}>
                 <View style={styles.iconCircle}>
-                    <Bookmark size={40} color="#22C922" strokeWidth={2.5} />
+                    <Bookmark size={40} color={colors.nutrition} strokeWidth={2.5} />
                 </View>
             </View>
 
@@ -160,7 +163,7 @@ export default function SavedNutritionModal() {
             <Text style={styles.subtitle}>Sorted by most recently saved</Text>
 
             {addedItems.length > 0 && (
-                <StagedSection label="Added" count={addedItems.length} color="#22C922" combineItems={combineItems} onCombineItemsChange={setCombineItems}>
+                <StagedSection label="Added" count={addedItems.length} color={colors.nutrition} combineItems={combineItems} onCombineItemsChange={setCombineItems}>
                     {addedItems.map((row) => {
                         const q = row.quantity
                         const s = row.savedItem
@@ -177,19 +180,19 @@ export default function SavedNutritionModal() {
                                         <View style={styles.macroPill}>
                                             <Text style={styles.macroPillText}>{Math.round(s.calories * q)} cal</Text>
                                         </View>
-                                        <View style={[styles.macroPill, styles.macroPillF]}>
-                                            <Text style={[styles.macroPillText, styles.macroPillTextF]}>{Math.round(s.fats * q * 10) / 10}g F</Text>
+                                        <View style={styles.macroPill}>
+                                            <Text style={styles.macroPillText}>{Math.round(s.fats * q * 10) / 10}g F</Text>
                                         </View>
-                                        <View style={[styles.macroPill, styles.macroPillC]}>
-                                            <Text style={[styles.macroPillText, styles.macroPillTextC]}>{Math.round(s.carbs * q * 10) / 10}g C</Text>
+                                        <View style={styles.macroPill}>
+                                            <Text style={styles.macroPillText}>{Math.round(s.carbs * q * 10) / 10}g C</Text>
                                         </View>
-                                        <View style={[styles.macroPill, styles.macroPillP]}>
-                                            <Text style={[styles.macroPillText, styles.macroPillTextP]}>{Math.round(s.protein * q * 10) / 10}g P</Text>
+                                        <View style={styles.macroPill}>
+                                            <Text style={styles.macroPillText}>{Math.round(s.protein * q * 10) / 10}g P</Text>
                                         </View>
                                     </View>
                                 </View>
                                 <TouchableOpacity style={styles.removeButton} onPress={() => handleRemoveStaged(row.lineId)} activeOpacity={0.5}>
-                                    <X size={14} color="#22C922" strokeWidth={3} />
+                                    <X size={14} color={colors.nutrition} strokeWidth={3} />
                                 </TouchableOpacity>
                             </View>
                         )
@@ -199,7 +202,7 @@ export default function SavedNutritionModal() {
 
             {savedNutritionEntries.length > 0 && (
                 <View style={styles.searchContainer}>
-                    <TextInput style={[styles.searchInput, isFocused && styles.searchInputFocused]} placeholder="Search saved meals..." placeholderTextColor="#666" value={searchQuery} onChangeText={setSearchQuery} onFocus={() => setIsFocused(true)} onBlur={() => setIsFocused(false)} autoCorrect={false} autoCapitalize="none" returnKeyType="search" />
+                    <TextInput style={[styles.searchInput, isFocused && styles.searchInputFocused]} placeholder="Search saved meals..." placeholderTextColor={colors.placeholder} value={searchQuery} onChangeText={setSearchQuery} onFocus={() => setIsFocused(true)} onBlur={() => setIsFocused(false)} autoCorrect={false} autoCapitalize="none" returnKeyType="search" />
                 </View>
             )}
         </>
@@ -237,14 +240,14 @@ export default function SavedNutritionModal() {
                         <View style={styles.quantityContent}>
                             <Text style={styles.quantityTitle}>How many servings?</Text>
                             <Text style={styles.quantitySubtitle}>{quantityInputItem?.name}</Text>
-                            <TextInput style={styles.quantityInput} placeholder="1" placeholderTextColor="#666" value={quantityValue} onChangeText={setQuantityValue} keyboardType="numeric" autoFocus />
+                            <TextInput style={styles.quantityInput} placeholder="1" placeholderTextColor={colors.placeholder} value={quantityValue} onChangeText={setQuantityValue} keyboardType="numeric" autoFocus />
                             <View style={styles.quantityButtons}>
                                 <TouchableOpacity style={[styles.quantityButton, styles.cancelButton]} onPress={cancelAddItem} activeOpacity={0.5}>
-                                    <X size={18} color="#FF453A" strokeWidth={2.5} />
+                                    <X size={18} color={colors.destructive} strokeWidth={2.5} />
                                     <Text style={[styles.quantityButtonText, styles.cancelButtonText]}>Cancel</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity style={[styles.quantityButton, styles.confirmButton]} onPress={confirmAddItem} activeOpacity={0.5}>
-                                    <Check size={18} color="#22C922" strokeWidth={2.5} />
+                                    <Check size={18} color={colors.nutrition} strokeWidth={2.5} />
                                     <Text style={[styles.quantityButtonText, styles.confirmButtonText]}>Add</Text>
                                 </TouchableOpacity>
                             </View>
@@ -271,7 +274,7 @@ export default function SavedNutritionModal() {
             {addedItems.length > 0 && (
                 <View style={styles.addAllContainer}>
                     <TouchableOpacity onPress={handleAddAll} activeOpacity={0.8} style={styles.addAllButtonTouchable}>
-                        <LinearGradient colors={['#3CB855', '#22C922', '#5CE073']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.addAllButton}>
+                        <LinearGradient colors={colors.nutritionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.addAllButton}>
                             <Text style={styles.addAllButtonText}>{combineItems && addedItems.length >= 2 ? 'Add 1 combined meal' : `Add ${addedItems.length} Item${addedItems.length > 1 ? 's' : ''}`}</Text>
                         </LinearGradient>
                     </TouchableOpacity>
@@ -281,283 +284,279 @@ export default function SavedNutritionModal() {
     )
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#121212',
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        overflow: 'hidden',
-    },
-    keyboardView: {
-        flex: 1,
-    },
-    handleContainer: {
-        alignItems: 'center',
-        paddingTop: 12,
-        paddingBottom: 8,
-    },
-    handle: {
-        width: 40,
-        height: 5,
-        backgroundColor: '#333',
-        borderRadius: 3,
-    },
-    body: {
-        flex: 1,
-    },
-    listContent: {
-        paddingHorizontal: 24,
-        paddingTop: 12,
-        paddingBottom: 24,
-    },
-    listContentEmpty: {
-        flexGrow: 1,
-    },
-    iconContainer: {
-        alignItems: 'center',
-        marginBottom: 16,
-        marginTop: 12,
-    },
-    iconCircle: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
-        backgroundColor: '#1e1e1e',
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 2,
-        borderColor: '#22C922',
-    },
-    title: {
-        fontSize: 24,
-        color: '#FFF',
-        textAlign: 'center',
-        marginBottom: 4,
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    subtitle: {
-        fontSize: 16,
-        color: '#aaa',
-        textAlign: 'center',
-        marginBottom: 20,
-        fontFamily: 'Poppins_400Regular',
-        letterSpacing: 0.2,
-    },
-    searchContainer: {
-        marginBottom: 8,
-        position: 'relative',
-    },
-    searchInput: {
-        backgroundColor: '#1e1e1e',
-        borderRadius: 12,
-        paddingHorizontal: 16,
-        paddingVertical: 14,
-        fontSize: 15,
-        color: '#FFF',
-        borderWidth: 2,
-        borderColor: '#1e1e1e',
-        fontFamily: 'Poppins_400Regular',
-    },
-    searchInputFocused: {
-        borderColor: '#22C922',
-    },
-    stagedRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: 'rgba(34, 201, 34, 0.06)',
-        borderRadius: 12,
-        paddingVertical: 10,
-        paddingHorizontal: 12,
-        marginTop: 6,
-        borderWidth: 1,
-        borderColor: 'rgba(34, 201, 34, 0.15)',
-    },
-    stagedInfo: {
-        flex: 1,
-        marginRight: 10,
-    },
-    stagedName: {
-        fontSize: 14,
-        color: '#FFF',
-        marginBottom: 6,
-        letterSpacing: -0.3,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    stagedQty: {
-        color: '#22C922',
-        fontFamily: 'Poppins_400Regular',
-    },
-    macroRow: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: 5,
-    },
-    macroPill: {
-        backgroundColor: 'rgba(255,255,255,0.07)',
-        borderRadius: 6,
-        paddingHorizontal: 7,
-        paddingVertical: 2,
-    },
-    macroPillText: {
-        fontSize: 11,
-        color: '#aaa',
-        fontFamily: 'Poppins_500Medium',
-    },
-    macroPillP: { backgroundColor: 'rgba(255, 107, 107, 0.15)' },
-    macroPillTextP: { color: '#FF6B6B' },
-    macroPillC: { backgroundColor: 'rgba(255, 217, 61, 0.15)' },
-    macroPillTextC: { color: '#FFD93D' },
-    macroPillF: { backgroundColor: 'rgba(34, 201, 34, 0.15)' },
-    macroPillTextF: { color: '#22C922' },
-    removeButton: {
-        width: 28,
-        height: 28,
-        borderRadius: 14,
-        backgroundColor: 'rgba(34, 201, 34, 0.12)',
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: 'rgba(34, 201, 34, 0.25)',
-    },
-    emptyState: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingHorizontal: 40,
-        paddingVertical: 60,
-    },
-    emptyText: {
-        fontSize: 18,
-        color: '#888',
-        marginBottom: 8,
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    emptySubtext: {
-        fontSize: 14,
-        color: '#aaa',
-        textAlign: 'center',
-        fontFamily: 'Poppins_400Regular',
-    },
-    noResultsText: {
-        fontSize: 15,
-        color: '#888',
-        textAlign: 'center',
-        lineHeight: 22,
-        fontFamily: 'Poppins_500Medium',
-    },
-    noResultsHint: {
-        color: '#666',
-        fontFamily: 'Poppins_400Regular',
-    },
-    addAllContainer: {
-        paddingHorizontal: 24,
-        paddingVertical: 16,
-        backgroundColor: '#121212',
-        borderTopWidth: 1,
-        borderTopColor: '#2a2a2a',
-    },
-    addAllButtonTouchable: {
-        borderRadius: 12,
-        overflow: 'hidden',
-        shadowColor: '#22C922',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.4,
-        shadowRadius: 8,
-        elevation: 8,
-        paddingBottom: 12,
-    },
-    addAllButton: {
-        borderRadius: 12,
-        paddingVertical: 16,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    addAllButtonText: {
-        fontSize: 17,
-        color: '#FFF',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    quantityModal: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.85)',
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingHorizontal: 24,
-        marginBottom: 50,
-    },
-    quantityContent: {
-        backgroundColor: '#1e1e1e',
-        borderRadius: 16,
-        padding: 24,
-        width: '100%',
-        maxWidth: 400,
-        borderWidth: 1,
-        borderColor: '#2a2a2a',
-    },
-    quantityTitle: {
-        fontSize: 20,
-        color: '#FFF',
-        textAlign: 'center',
-        marginBottom: 8,
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    quantitySubtitle: {
-        fontSize: 14,
-        color: '#aaa',
-        textAlign: 'center',
-        marginBottom: 20,
-        letterSpacing: 0.2,
-        fontFamily: 'Poppins_400Regular',
-    },
-    quantityInput: {
-        backgroundColor: '#121212',
-        borderRadius: 12,
-        paddingHorizontal: 16,
-        paddingVertical: 14,
-        fontSize: 18,
-        color: '#FFF',
-        borderWidth: 2,
-        borderColor: '#22C922',
-        textAlign: 'center',
-        marginBottom: 20,
-        fontFamily: 'Poppins_400Regular',
-    },
-    quantityButtons: {
-        flexDirection: 'row',
-        gap: 12,
-    },
-    quantityButton: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 6,
-        paddingVertical: 14,
-        borderRadius: 12,
-        borderWidth: 1.5,
-    },
-    cancelButton: {
-        backgroundColor: 'rgba(255, 69, 58, 0.12)',
-        borderColor: 'rgba(255, 69, 58, 0.25)',
-    },
-    confirmButton: {
-        backgroundColor: 'rgba(76, 217, 100, 0.12)',
-        borderColor: 'rgba(76, 217, 100, 0.25)',
-    },
-    quantityButtonText: {
-        fontSize: 15,
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    cancelButtonText: {
-        color: '#FF453A',
-    },
-    confirmButtonText: {
-        color: '#22C922',
-    },
-})
+function makeStyles(colors: Colors) {
+    return StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: colors.background,
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            overflow: 'hidden',
+        },
+        keyboardView: {
+            flex: 1,
+        },
+        handleContainer: {
+            alignItems: 'center',
+            paddingTop: 12,
+            paddingBottom: 8,
+        },
+        handle: {
+            width: 40,
+            height: 5,
+            backgroundColor: colors.border,
+            borderRadius: 3,
+        },
+        body: {
+            flex: 1,
+        },
+        listContent: {
+            paddingHorizontal: 24,
+            paddingTop: 12,
+            paddingBottom: 24,
+        },
+        listContentEmpty: {
+            flexGrow: 1,
+        },
+        iconContainer: {
+            alignItems: 'center',
+            marginBottom: 16,
+            marginTop: 12,
+        },
+        iconCircle: {
+            width: 80,
+            height: 80,
+            borderRadius: 40,
+            backgroundColor: colors.surface,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderWidth: 2,
+            borderColor: colors.nutrition,
+        },
+        title: {
+            fontSize: 24,
+            color: colors.text,
+            textAlign: 'center',
+            marginBottom: 4,
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+        subtitle: {
+            fontSize: 16,
+            color: colors.labelMuted,
+            textAlign: 'center',
+            marginBottom: 20,
+            fontFamily: fonts.regular,
+            letterSpacing: 0.2,
+        },
+        searchContainer: {
+            marginBottom: 8,
+            position: 'relative',
+        },
+        searchInput: {
+            backgroundColor: colors.surface,
+            borderRadius: 12,
+            paddingHorizontal: 16,
+            paddingVertical: 14,
+            fontSize: 15,
+            color: colors.text,
+            borderWidth: 2,
+            borderColor: colors.hairline,
+            fontFamily: fonts.regular,
+        },
+        searchInputFocused: {
+            borderColor: colors.nutrition,
+        },
+        stagedRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: colors.surface,
+            borderRadius: 12,
+            paddingVertical: 10,
+            paddingHorizontal: 12,
+            marginTop: 6,
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: colors.hairline,
+        },
+        stagedInfo: {
+            flex: 1,
+            marginRight: 10,
+        },
+        stagedName: {
+            fontSize: 14,
+            color: colors.text,
+            marginBottom: 6,
+            letterSpacing: -0.3,
+            fontFamily: fonts.semibold,
+        },
+        stagedQty: {
+            color: colors.nutrition,
+            fontFamily: fonts.regular,
+        },
+        macroRow: {
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            gap: 5,
+        },
+        macroPill: {
+            backgroundColor: colors.surfaceInset,
+            borderRadius: 6,
+            paddingHorizontal: 7,
+            paddingVertical: 2,
+        },
+        macroPillText: {
+            fontSize: 11,
+            color: colors.textMuted,
+            fontFamily: fonts.medium,
+        },
+        removeButton: {
+            width: 28,
+            height: 28,
+            borderRadius: 14,
+            backgroundColor: colors.nutrition + '22',
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderWidth: 1,
+            borderColor: colors.nutrition + '66',
+        },
+        emptyState: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingHorizontal: 40,
+            paddingVertical: 60,
+        },
+        emptyText: {
+            fontSize: 18,
+            color: colors.textMuted,
+            marginBottom: 8,
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+        emptySubtext: {
+            fontSize: 14,
+            color: colors.labelMuted,
+            textAlign: 'center',
+            fontFamily: fonts.regular,
+        },
+        noResultsText: {
+            fontSize: 15,
+            color: colors.textMuted,
+            textAlign: 'center',
+            lineHeight: 22,
+            fontFamily: fonts.medium,
+        },
+        noResultsHint: {
+            color: colors.labelMuted,
+            fontFamily: fonts.regular,
+        },
+        addAllContainer: {
+            paddingHorizontal: 24,
+            paddingVertical: 16,
+            backgroundColor: colors.background,
+            borderTopWidth: 1,
+            borderTopColor: colors.hairline,
+        },
+        addAllButtonTouchable: {
+            borderRadius: 12,
+            overflow: 'hidden',
+            shadowColor: colors.nutrition,
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.4,
+            shadowRadius: 8,
+            elevation: 8,
+            paddingBottom: 12,
+        },
+        addAllButton: {
+            borderRadius: 12,
+            paddingVertical: 16,
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        addAllButtonText: {
+            fontSize: 17,
+            color: '#FFF',
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+        quantityModal: {
+            flex: 1,
+            backgroundColor: 'rgba(0, 0, 0, 0.85)',
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingHorizontal: 24,
+            marginBottom: 50,
+        },
+        quantityContent: {
+            backgroundColor: colors.surface,
+            borderRadius: 16,
+            padding: 24,
+            width: '100%',
+            maxWidth: 400,
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: colors.hairline,
+        },
+        quantityTitle: {
+            fontSize: 20,
+            color: colors.text,
+            textAlign: 'center',
+            marginBottom: 8,
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+        quantitySubtitle: {
+            fontSize: 14,
+            color: colors.labelMuted,
+            textAlign: 'center',
+            marginBottom: 20,
+            letterSpacing: 0.2,
+            fontFamily: fonts.regular,
+        },
+        quantityInput: {
+            backgroundColor: colors.surfaceInset,
+            borderRadius: 12,
+            paddingHorizontal: 16,
+            paddingVertical: 14,
+            fontSize: 18,
+            color: colors.text,
+            borderWidth: 2,
+            borderColor: colors.nutrition,
+            textAlign: 'center',
+            marginBottom: 20,
+            fontFamily: fonts.regular,
+        },
+        quantityButtons: {
+            flexDirection: 'row',
+            gap: 12,
+        },
+        quantityButton: {
+            flex: 1,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 6,
+            paddingVertical: 14,
+            borderRadius: 12,
+            borderWidth: 1.5,
+        },
+        cancelButton: {
+            backgroundColor: colors.destructive + '1F',
+            borderColor: colors.destructive + '40',
+        },
+        confirmButton: {
+            backgroundColor: colors.nutrition + '1F',
+            borderColor: colors.nutrition + '40',
+        },
+        quantityButtonText: {
+            fontSize: 15,
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+        cancelButtonText: {
+            color: colors.destructive,
+        },
+        confirmButtonText: {
+            color: colors.nutrition,
+        },
+    })
+}

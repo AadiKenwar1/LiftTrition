@@ -5,7 +5,7 @@ import { AuthProvider, useAuth } from '@/context/AuthContext'
 import { BillingProvider, useBilling } from '@/context/BillingContext'
 import { NutritionProvider, useNutrition } from '@/context/NutritionContext'
 import { SettingsProvider, useSettings } from '@/context/SettingsContext'
-import { ThemeProvider, useColorScheme } from '@/context/ThemeContext'
+import { ThemeProvider, useColorScheme, useColors } from '@/context/ThemeContext'
 import { useWorkout, WorkoutProvider } from '@/context/WorkoutContext'
 import { Archivo_400Regular, Archivo_500Medium, Archivo_600SemiBold, Archivo_700Bold, Archivo_800ExtraBold } from '@expo-google-fonts/archivo'
 import { Poppins_100Thin, Poppins_100Thin_Italic, Poppins_200ExtraLight, Poppins_200ExtraLight_Italic, Poppins_300Light, Poppins_300Light_Italic, Poppins_400Regular, Poppins_400Regular_Italic, Poppins_500Medium, Poppins_500Medium_Italic, Poppins_600SemiBold, Poppins_600SemiBold_Italic, Poppins_700Bold, Poppins_700Bold_Italic, Poppins_800ExtraBold, Poppins_800ExtraBold_Italic, Poppins_900Black, Poppins_900Black_Italic } from '@expo-google-fonts/poppins'
@@ -107,9 +107,10 @@ export default Sentry.wrap(function RootLayout() {
 
 function HeaderBackButton() {
     const router = useRouter()
+    const colors = useColors()
     return (
         <Pressable onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color="#FFF" />
+            <Ionicons name="arrow-back" size={24} color={colors.text} />
         </Pressable>
     )
 }
@@ -120,6 +121,7 @@ function StackLayout() {
     const { loaded: nutritionLoaded } = useNutrition()
     const { loaded: workoutLoaded } = useWorkout()
     const { loaded: billingLoaded } = useBilling()
+    const colors = useColors()
     const allContextsLoaded = settingsLoaded && nutritionLoaded && workoutLoaded && billingLoaded
 
     if (!allContextsLoaded) {
@@ -136,10 +138,12 @@ function StackLayout() {
                     gestureEnabled: false,
                     headerLeft: ({ canGoBack }) => (canGoBack ? <HeaderBackButton /> : null),
                     headerShadowVisible: false,
+                    headerStyle: { backgroundColor: colors.background },
+                    headerTintColor: colors.text,
                     headerTitleStyle: {
                         fontFamily: 'Poppins_600SemiBold',
                         fontSize: 22,
-                        color: '#FFF',
+                        color: colors.text,
                     },
                 }}
             >
@@ -165,7 +169,7 @@ function StackLayout() {
                     <Stack.Screen name="modal" options={modalPresentation} />
                     <Stack.Screen name="workoutScreens/addWorkoutModal" options={{ ...modalPresentation, title: 'Add Workout', headerShown: false }} />
                     <Stack.Screen name="workoutScreens/archiveModal" options={{ ...modalPresentation, headerShown: false }} />
-                    <Stack.Screen name="workoutScreens/exerciseScreen" options={{ title: 'Exercises', headerShown: true, headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="workoutScreens/exerciseScreen" options={{ title: 'Exercises', headerShown: true, headerBackTitle: 'Back' }} />
                     <Stack.Screen name="workoutScreens/addExerciseModal" options={{ ...modalPresentation, headerShown: false }} />
                     <Stack.Screen name="workoutScreens/logsModal" options={{ ...modalPresentation, headerShown: false }} />
                     <Stack.Screen name="workoutScreens/notesModal" options={{ ...modalPresentation, headerShown: false }} />
@@ -180,16 +184,16 @@ function StackLayout() {
                     <Stack.Screen name="nutritionScreens/dateModal" options={{ ...modalPresentation, headerShown: false }} />
                     <Stack.Screen name="nutritionScreens/editManualEntry" options={{ ...modalPresentation, headerShown: false }} />
                     <Stack.Screen name="nutritionScreens/editPhotoEntry" options={{ ...modalPresentation, headerShown: false }} />
-                    <Stack.Screen name="settingsScreens/profile" options={{ headerShown: true, title: 'Profile', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
-                    <Stack.Screen name="settingsScreens/subscription" options={{ headerShown: true, title: 'Subscription', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
-                    <Stack.Screen name="settingsScreens/adjustTraining" options={{ headerShown: true, title: 'Adjust Training', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
-                    <Stack.Screen name="settingsScreens/adjustNutrition/adjustNutrition1" options={{ headerShown: true, title: 'Step 1 of 3', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
-                    <Stack.Screen name="settingsScreens/adjustNutrition/adjustNutrition2" options={{ headerShown: true, title: 'Step 2 of 3', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
-                    <Stack.Screen name="settingsScreens/adjustNutrition/adjustNutrition3" options={{ headerShown: true, title: 'Step 3 of 3', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
-                    <Stack.Screen name="settingsScreens/adjustMeasurements" options={{ headerShown: true, title: 'Adjust Measurements', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
-                    <Stack.Screen name="settingsScreens/termsAndPrivacy" options={{ headerShown: true, title: 'Terms & Privacy', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
-                    <Stack.Screen name="settingsScreens/support" options={{ headerShown: true, title: 'Support', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
-                    <Stack.Screen name="settingsScreens/howItWorks" options={{ headerShown: true, title: 'How It Works', headerTintColor: '#FFF', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="settingsScreens/profile" options={{ headerShown: true, title: 'Profile', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="settingsScreens/subscription" options={{ headerShown: true, title: 'Subscription', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="settingsScreens/adjustTraining" options={{ headerShown: true, title: 'Adjust Training', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="settingsScreens/adjustNutrition/adjustNutrition1" options={{ headerShown: true, title: 'Step 1 of 3', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="settingsScreens/adjustNutrition/adjustNutrition2" options={{ headerShown: true, title: 'Step 2 of 3', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="settingsScreens/adjustNutrition/adjustNutrition3" options={{ headerShown: true, title: 'Step 3 of 3', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="settingsScreens/adjustMeasurements" options={{ headerShown: true, title: 'Adjust Measurements', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="settingsScreens/termsAndPrivacy" options={{ headerShown: true, title: 'Terms & Privacy', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="settingsScreens/support" options={{ headerShown: true, title: 'Support', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="settingsScreens/howItWorks" options={{ headerShown: true, title: 'How It Works', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="settingsScreens/devStatsModal" options={{ ...modalPresentation, headerShown: false }} />
                 </Stack.Protected>
             </Stack>

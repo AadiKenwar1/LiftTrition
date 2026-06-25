@@ -76,7 +76,7 @@ export default function Graph1({ mode, data, selectedRange, chartNote, goal, for
                 chartPressState={state}
                 domain={yDomain ? { y: yDomain } : undefined}
                 padding={{ left: 10, right: 10, top: 14, bottom: 10 }}
-                domainPadding={{ left: 20, right: 20, top: 30, bottom: 10 }}
+                domainPadding={{ left: 20, right: 20, top: 48, bottom: 10 }}
                 xAxis={{
                     font: selectedRange === 7 ? font : null, // Only show labels when range is 7
                     labelRotate: data.length > 3 ? 45 : 0,
@@ -150,7 +150,7 @@ export default function Graph1({ mode, data, selectedRange, chartNote, goal, for
                     )
                 }}
             >
-                {({ points, chartBounds, canvasSize, yScale }) => {
+                {({ points, chartBounds, yScale }) => {
                     const lastPoint = [...points.value].reverse().find((p) => p.y != null)
                     return (
                         <>
@@ -174,7 +174,7 @@ export default function Graph1({ mode, data, selectedRange, chartNote, goal, for
                             )}
 
                             {/* End value flag */}
-                            {showEndFlag && lastPoint?.y != null && lastPoint.yValue != null && <EndValueFlag x={lastPoint.x} y={lastPoint.y} value={fmt(lastPoint.yValue)} color={chartColor} textColor={flagTextColor} font={flagFont} canvasWidth={canvasSize.width} />}
+                            {showEndFlag && lastPoint?.y != null && lastPoint.yValue != null && <EndValueFlag x={lastPoint.x} y={lastPoint.y} value={fmt(lastPoint.yValue)} color={chartColor} textColor={flagTextColor} font={flagFont} left={chartBounds.left} right={chartBounds.right} top={chartBounds.top} />}
 
                             {/* Press read-out: thin guideline + single dot (pill rendered as RN overlay) */}
                             {isActive && (

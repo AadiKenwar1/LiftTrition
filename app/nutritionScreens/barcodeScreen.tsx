@@ -1,12 +1,15 @@
+import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { CameraView, useCameraPermissions } from 'expo-camera'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { Barcode } from 'lucide-react-native'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 export default function BarcodeScreen() {
     const router = useRouter()
+    const colors = useColors()
+    const styles = useMemo(() => makeStyles(colors), [colors])
     const [permission, requestPermission] = useCameraPermissions()
     const [scannedData, setScannedData] = useState<string | null>(null)
     const [barcodeType, setBarcodeType] = useState<string | null>(null)
@@ -31,12 +34,12 @@ export default function BarcodeScreen() {
                 <View style={styles.permissionContentWrapper}>
                     <View style={styles.permissionContent}>
                         <View style={styles.iconCircle}>
-                            <Barcode size={48} color="#22C922" strokeWidth={2.5} />
+                            <Barcode size={48} color={colors.nutrition} strokeWidth={2.5} />
                         </View>
                         <Text style={styles.permissionTitle}>Camera Access Required</Text>
                         <Text style={styles.permissionMessage}>We need access to your camera to scan product barcodes for nutrition information.</Text>
                         <TouchableOpacity onPress={requestPermission} activeOpacity={0.8} style={styles.permissionButtonTouchable}>
-                            <LinearGradient colors={['#3CB855', '#22C922', '#5CE073']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.permissionButton}>
+                            <LinearGradient colors={colors.nutritionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.permissionButton}>
                                 <Text style={styles.permissionButtonText}>Grant Permission</Text>
                             </LinearGradient>
                         </TouchableOpacity>
@@ -74,7 +77,7 @@ export default function BarcodeScreen() {
                     {/* Result Content */}
                     <View style={styles.resultContent}>
                         <View style={styles.resultIconCircle}>
-                            <Barcode size={56} color="#22C922" strokeWidth={2.5} />
+                            <Barcode size={56} color={colors.nutrition} strokeWidth={2.5} />
                         </View>
 
                         <Text style={styles.resultTitle}>Barcode Scanned</Text>
@@ -92,7 +95,7 @@ export default function BarcodeScreen() {
                         </View>
 
                         <TouchableOpacity onPress={resetScan} activeOpacity={0.8} style={styles.scanAgainButtonTouchable}>
-                            <LinearGradient colors={['#3CB855', '#22C922', '#5CE073']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.scanAgainButton}>
+                            <LinearGradient colors={colors.nutritionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.scanAgainButton}>
                                 <Text style={styles.scanAgainButtonText}>Scan Again</Text>
                             </LinearGradient>
                         </TouchableOpacity>
@@ -139,7 +142,7 @@ export default function BarcodeScreen() {
                 {/* Info at bottom */}
                 <View style={styles.bottomInfo}>
                     <View style={styles.infoBox}>
-                        <Barcode size={20} color="#22C922" strokeWidth={2.5} />
+                        <Barcode size={20} color={colors.nutrition} strokeWidth={2.5} />
                         <Text style={styles.infoText}>Point at product barcode to scan</Text>
                     </View>
                 </View>
@@ -148,7 +151,8 @@ export default function BarcodeScreen() {
     )
 }
 
-const styles = StyleSheet.create({
+function makeStyles(colors: Colors) {
+    return StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#121212',
@@ -200,7 +204,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
-        borderColor: '#22C922',
+        borderColor: colors.nutrition,
         marginBottom: 24,
     },
     permissionTitle: {
@@ -209,7 +213,7 @@ const styles = StyleSheet.create({
         marginBottom: 6,
         textAlign: 'center',
         letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
+        fontFamily: fonts.semibold,
     },
     permissionMessage: {
         fontSize: 14,
@@ -217,19 +221,19 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         lineHeight: 22,
         marginBottom: 32,
-        fontFamily: 'Poppins_400Regular',
+        fontFamily: fonts.regular,
         letterSpacing: 0.2,
     },
     permissionText: {
         color: '#FFF',
         fontSize: 16,
-        fontFamily: 'Poppins_400Regular',
+        fontFamily: fonts.regular,
     },
     permissionButtonTouchable: {
         width: '100%',
         borderRadius: 12,
         overflow: 'hidden',
-        shadowColor: '#22C922',
+        shadowColor: colors.nutrition,
         shadowOffset: {
             width: 0,
             height: 4,
@@ -248,7 +252,7 @@ const styles = StyleSheet.create({
         fontSize: 17,
         color: '#FFF',
         letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
+        fontFamily: fonts.semibold,
     },
     cancelButton: {
         paddingVertical: 14,
@@ -258,7 +262,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#888',
         letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
+        fontFamily: fonts.semibold,
     },
     scannerContainer: {
         flex: 1,
@@ -275,7 +279,7 @@ const styles = StyleSheet.create({
         width: 280,
         height: 200,
         borderWidth: 2,
-        borderColor: 'rgba(76, 217, 100, 0.5)',
+        borderColor: colors.nutrition + '80',
         borderRadius: 12,
         position: 'relative',
         backgroundColor: 'transparent',
@@ -284,7 +288,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         width: 30,
         height: 30,
-        borderColor: '#22C922',
+        borderColor: colors.nutrition,
     },
     cornerTopLeft: {
         top: -2,
@@ -320,7 +324,7 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         height: 2,
-        backgroundColor: '#22C922',
+        backgroundColor: colors.nutrition,
         opacity: 0.7,
     },
     instructionsBox: {
@@ -334,7 +338,7 @@ const styles = StyleSheet.create({
         color: '#FFF',
         fontSize: 16,
         letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
+        fontFamily: fonts.semibold,
     },
     bottomInfo: {
         paddingBottom: Platform.OS === 'ios' ? 40 : 30,
@@ -353,7 +357,7 @@ const styles = StyleSheet.create({
     infoText: {
         color: '#FFF',
         fontSize: 14,
-        fontFamily: 'Poppins_500Medium',
+        fontFamily: fonts.medium,
     },
     resultContainer: {
         flex: 1,
@@ -373,7 +377,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 3,
-        borderColor: '#22C922',
+        borderColor: colors.nutrition,
         marginBottom: 32,
     },
     resultTitle: {
@@ -381,7 +385,7 @@ const styles = StyleSheet.create({
         color: '#FFF',
         marginBottom: 32,
         letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
+        fontFamily: fonts.semibold,
     },
     dataContainer: {
         width: '100%',
@@ -398,19 +402,19 @@ const styles = StyleSheet.create({
         marginBottom: 6,
         letterSpacing: -0.5,
         textTransform: 'uppercase',
-        fontFamily: 'Poppins_600SemiBold',
+        fontFamily: fonts.semibold,
     },
     dataValue: {
         fontSize: 16,
         color: '#FFF',
         letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
+        fontFamily: fonts.semibold,
     },
     scanAgainButtonTouchable: {
         width: '100%',
         borderRadius: 12,
         overflow: 'hidden',
-        shadowColor: '#22C922',
+        shadowColor: colors.nutrition,
         shadowOffset: {
             width: 0,
             height: 4,
@@ -429,6 +433,7 @@ const styles = StyleSheet.create({
         fontSize: 17,
         color: '#FFF',
         letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
+        fontFamily: fonts.semibold,
     },
-})
+    })
+}

@@ -35,16 +35,17 @@ export function PressDot({ xPosition, yPosition, color, ring }: { xPosition: Sha
     )
 }
 
-// Small filled pill labelling the most-recent value, anchored above its point and clamped in-canvas.
-export function EndValueFlag({ x, y, value, color, textColor, font, canvasWidth }: { x: number; y: number; value: string; color: string; textColor: string; font: SkFont; canvasWidth: number }) {
+// Small filled pill labelling the most-recent value, anchored above its point and clamped
+// inside the plot area (chartBounds) so it never spills into the clipped canvas margin.
+export function EndValueFlag({ x, y, value, color, textColor, font, left, right, top }: { x: number; y: number; value: string; color: string; textColor: string; font: SkFont; left: number; right: number; top: number }) {
     const padH = 7
     const padV = 4
     const { ascent, height } = textHeight(font)
     const textW = font.getTextWidth(value)
     const pillW = textW + padH * 2
     const pillH = height + padV * 2
-    const px = Math.max(4, Math.min(x - pillW / 2, canvasWidth - pillW - 4))
-    const py = Math.max(2, y - pillH - 10)
+    const px = Math.max(left, Math.min(x - pillW / 2, right - pillW))
+    const py = Math.max(top + 2, y - pillH - 10)
     const baseline = py + padV - ascent
     return (
         <Group>

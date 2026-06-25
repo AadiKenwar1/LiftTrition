@@ -8,27 +8,27 @@ const brand = {
 
 export const palettes = {
     light: {
-        // Surfaces — deeper cool-slate canvas so cards lift off it; cards softened off pure white
-        background: '#E8E9ED',
+        // Surfaces — deeper cool-slate canvas so white cards clearly lift off the page
+        background: '#DFE2E8',
         surface: '#FBFBFC',
-        surfaceInset: '#E8E9ED',
-        toggleTrack: '#DEDFE5',
-        // Lines — strengthened so card edges and dividers are actually visible
-        border: '#D7D8DF',
-        hairline: '#DADBE2',
-        divider: '#E4E5EA',
-        navBorder: '#D7D8DF',
+        surfaceInset: '#DFE2E8',
+        toggleTrack: '#ECEEF2',
+        // Lines — strengthened so card edges, dividers, and gridlines are actually visible
+        border: '#CBCED7',
+        hairline: '#CFD2DB',
+        divider: '#D8DAE2',
+        navBorder: '#CBCED7',
         // Text — near-black (cool) instead of pure #000 to cut glare
         text: '#16171A',
         textSecondary: '#3C3C43',
-        textMuted: '#888888',
+        textMuted: '#6A6A6E',
         textFaint: '#666666',
-        labelMuted: '#8E8F97',
-        tabInactive: '#A0A0A8',
-        placeholder: '#AEAEB2',
+        labelMuted: '#6C6D75',
+        tabInactive: '#86878F',
+        placeholder: '#8A8B92',
         disabled: '#D1D1D6',
         // Data-viz / controls
-        ringTrack: '#DBDCE2',
+        ringTrack: '#D0D3DC',
         chevron: '#B8B9C1',
         iconChipBg: 'rgba(47,128,237,0.10)',
         // Brand (nutritionInk = AA-contrast green for numerals on light bg)
@@ -38,16 +38,16 @@ export const palettes = {
         // Accents — same hue as dark, deepened for legibility on light surfaces
         workout: '#2570D8',
         nutrition: '#1A9E1A',
-        workoutGradient: ['#3A8BF0', '#2570D8'] as const,
-        nutritionGradient: ['#34D63A', '#1A9E1A'] as const,
+        workoutGradient: ['#2570D8', '#2570D8'] as const, //3A8BF0
+        nutritionGradient: ['#1A9E1A', '#1A9E1A'] as const, //34D63A
         ...brand,
     },
     dark: {
         // Surfaces
         background: '#0F1012',
         surface: '#1A1B1E',
-        surfaceInset: '#0F1012',
-        toggleTrack: '#16171A',
+        surfaceInset: '#141517',
+        toggleTrack: '#1A1B1E',
         // Lines
         border: '#2a2a2a',
         hairline: 'rgba(255,255,255,0.06)',

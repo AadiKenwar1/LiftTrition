@@ -1,12 +1,15 @@
+import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { useWorkout } from '@/context/WorkoutContext'
 import { useLocalSearchParams } from 'expo-router'
 import { FileText } from 'lucide-react-native'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 export default function NoteModal() {
     const { workouts, handleUpdateWorkoutNote } = useWorkout()
+    const colors = useColors()
+    const styles = useMemo(() => makeStyles(colors), [colors])
     const params = useLocalSearchParams<{ workoutId: string }>()
 
     // Normalize params
@@ -48,7 +51,7 @@ export default function NoteModal() {
                         {/* Icon Section */}
                         <View style={styles.iconContainer}>
                             <View style={styles.iconCircle}>
-                                <FileText size={32} color="#2f80ed" strokeWidth={2.5} />
+                                <FileText size={32} color={colors.workout} strokeWidth={2.5} />
                             </View>
                         </View>
 
@@ -61,7 +64,7 @@ export default function NoteModal() {
                             <TextInput
                                 style={[styles.input, isFocused && styles.inputFocused]}
                                 placeholder="Add a note..."
-                                placeholderTextColor="#666"
+                                placeholderTextColor={colors.placeholder}
                                 value={note}
                                 onChangeText={setNote}
                                 onFocus={() => setIsFocused(true)}
@@ -82,89 +85,91 @@ export default function NoteModal() {
     )
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#121212',
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        overflow: 'hidden',
-    },
-    innerContainer: {
-        flex: 1,
-    },
-    handleContainer: {
-        alignItems: 'center',
-        paddingTop: 12,
-        paddingBottom: 8,
-    },
-    handle: {
-        width: 40,
-        height: 5,
-        backgroundColor: '#333',
-        borderRadius: 3,
-    },
-    scroll: {
-        flex: 1,
-    },
-    scrollContent: {
-        flexGrow: 1,
-        paddingHorizontal: 24,
-        paddingTop: 12,
-    },
-    iconContainer: {
-        alignItems: 'center',
-        marginBottom: 16,
-    },
-    iconCircle: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
-        backgroundColor: '#1e1e1e',
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 2,
-        borderColor: '#2f80ed',
-    },
-    title: {
-        fontSize: 24,
-        color: '#FFF',
-        textAlign: 'center',
-        marginBottom: 4,
-        fontFamily: 'Poppins_600SemiBold',
-        letterSpacing: -0.5,
-    },
-    subtitle: {
-        fontSize: 16,
-        color: '#aaa',
-        textAlign: 'center',
-        marginBottom: 20,
-        fontFamily: 'Poppins_400Regular',
-        letterSpacing: 0.2,
-    },
-    inputContainer: {
-        marginBottom: 12,
-    },
-    input: {
-        backgroundColor: '#1e1e1e',
-        borderRadius: 12,
-        paddingHorizontal: 16,
-        paddingVertical: 14,
-        fontSize: 15,
-        color: '#FFF',
-        borderWidth: 2,
-        borderColor: '#1e1e1e',
-        minHeight: 150,
-        fontFamily: 'Poppins_400Regular',
-    },
-    inputFocused: {
-        borderColor: '#2f80ed',
-    },
-    autoSaveText: {
-        fontSize: 13,
-        color: '#aaa',
-        textAlign: 'center',
-        fontStyle: 'italic',
-        fontFamily: 'Poppins_400Regular',
-    },
-})
+function makeStyles(colors: Colors) {
+    return StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: colors.background,
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            overflow: 'hidden',
+        },
+        innerContainer: {
+            flex: 1,
+        },
+        handleContainer: {
+            alignItems: 'center',
+            paddingTop: 12,
+            paddingBottom: 8,
+        },
+        handle: {
+            width: 40,
+            height: 5,
+            backgroundColor: colors.border,
+            borderRadius: 3,
+        },
+        scroll: {
+            flex: 1,
+        },
+        scrollContent: {
+            flexGrow: 1,
+            paddingHorizontal: 24,
+            paddingTop: 12,
+        },
+        iconContainer: {
+            alignItems: 'center',
+            marginBottom: 16,
+        },
+        iconCircle: {
+            width: 80,
+            height: 80,
+            borderRadius: 40,
+            backgroundColor: colors.surface,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderWidth: 2,
+            borderColor: colors.workout,
+        },
+        title: {
+            fontSize: 24,
+            color: colors.text,
+            textAlign: 'center',
+            marginBottom: 4,
+            fontFamily: fonts.semibold,
+            letterSpacing: -0.5,
+        },
+        subtitle: {
+            fontSize: 16,
+            color: colors.labelMuted,
+            textAlign: 'center',
+            marginBottom: 20,
+            fontFamily: fonts.regular,
+            letterSpacing: 0.2,
+        },
+        inputContainer: {
+            marginBottom: 12,
+        },
+        input: {
+            backgroundColor: colors.surface,
+            borderRadius: 12,
+            paddingHorizontal: 16,
+            paddingVertical: 14,
+            fontSize: 15,
+            color: colors.text,
+            borderWidth: 2,
+            borderColor: colors.hairline,
+            minHeight: 150,
+            fontFamily: fonts.regular,
+        },
+        inputFocused: {
+            borderColor: colors.workout,
+        },
+        autoSaveText: {
+            fontSize: 13,
+            color: colors.labelMuted,
+            textAlign: 'center',
+            fontStyle: 'italic',
+            fontFamily: fonts.regular,
+        },
+    })
+}

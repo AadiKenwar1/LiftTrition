@@ -1,13 +1,16 @@
+import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { useWorkout } from '@/context/WorkoutContext'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { Pencil } from 'lucide-react-native'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Alert, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
 export default function RenameModal() {
     const { workouts, handleRenameWorkout } = useWorkout()
     const router = useRouter()
+    const colors = useColors()
+    const styles = useMemo(() => makeStyles(colors), [colors])
     const params = useLocalSearchParams<{ workoutId: string }>()
 
     // Normalize params
@@ -53,7 +56,7 @@ export default function RenameModal() {
                 {/* Icon Section */}
                 <View style={styles.iconContainer}>
                     <View style={styles.iconCircle}>
-                        <Pencil size={72} color="#2f80ed" strokeWidth={2.5} />
+                        <Pencil size={72} color={colors.workout} strokeWidth={2.5} />
                     </View>
                 </View>
 
@@ -66,7 +69,7 @@ export default function RenameModal() {
                     <TextInput
                         style={[styles.input, isFocused && styles.inputFocused]}
                         placeholder="Workout name"
-                        placeholderTextColor="#666"
+                        placeholderTextColor={colors.placeholder}
                         value={workoutName}
                         onChangeText={setWorkoutName}
                         onFocus={() => setIsFocused(true)}
@@ -78,7 +81,7 @@ export default function RenameModal() {
 
                 {/* Rename Button */}
                 <TouchableOpacity onPress={handleRename} disabled={!isValid} activeOpacity={0.8} style={styles.renameButtonTouchable}>
-                    <LinearGradient colors={!isValid ? ['#333', '#333'] : ['#1A7AD4', '#2f80ed', '#5BA3F5']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.renameButton}>
+                    <LinearGradient colors={!isValid ? [colors.disabled, colors.disabled] : colors.workoutGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.renameButton}>
                         <Text style={styles.renameButtonText}>Rename</Text>
                     </LinearGradient>
                 </TouchableOpacity>
@@ -87,100 +90,102 @@ export default function RenameModal() {
     )
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#121212',
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        overflow: 'hidden',
-    },
-    handleContainer: {
-        alignItems: 'center',
-        paddingTop: 12,
-        paddingBottom: 8,
-    },
-    handle: {
-        width: 40,
-        height: 5,
-        backgroundColor: '#333',
-        borderRadius: 3,
-    },
-    content: {
-        flex: 1,
-        paddingHorizontal: 24,
-        paddingTop: 12,
-        paddingBottom: 32,
-    },
-    iconContainer: {
-        alignItems: 'center',
-        marginBottom: 16,
-    },
-    iconCircle: {
-        width: 144,
-        height: 144,
-        borderRadius: 72,
-        backgroundColor: '#1e1e1e',
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 2,
-        borderColor: '#2f80ed',
-    },
-    title: {
-        fontSize: 24,
-        color: '#FFF',
-        textAlign: 'center',
-        marginBottom: 6,
-        fontFamily: 'Poppins_600SemiBold',
-        letterSpacing: -0.5,
-    },
-    subtitle: {
-        fontSize: 14,
-        color: '#aaa',
-        textAlign: 'center',
-        marginBottom: 20,
-        fontFamily: 'Poppins_400Regular',
-        letterSpacing: 0.2,
-    },
-    inputContainer: {
-        marginBottom: 16,
-    },
-    input: {
-        backgroundColor: '#1e1e1e',
-        borderRadius: 12,
-        paddingHorizontal: 16,
-        paddingVertical: 14,
-        fontSize: 15,
-        color: '#FFF',
-        borderWidth: 2,
-        borderColor: '#1e1e1e',
-        fontFamily: 'Poppins_400Regular',
-    },
-    inputFocused: {
-        borderColor: '#2f80ed',
-    },
-    renameButtonTouchable: {
-        borderRadius: 12,
-        overflow: 'hidden',
-        shadowColor: '#2f80ed',
-        shadowOffset: {
-            width: 0,
-            height: 4,
+function makeStyles(colors: Colors) {
+    return StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: colors.background,
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            overflow: 'hidden',
         },
-        shadowOpacity: 0.4,
-        shadowRadius: 8,
-        elevation: 8,
-    },
-    renameButton: {
-        borderRadius: 12,
-        paddingVertical: 16,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    renameButtonText: {
-        fontSize: 17,
-        color: '#FFF',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-})
+        handleContainer: {
+            alignItems: 'center',
+            paddingTop: 12,
+            paddingBottom: 8,
+        },
+        handle: {
+            width: 40,
+            height: 5,
+            backgroundColor: colors.border,
+            borderRadius: 3,
+        },
+        content: {
+            flex: 1,
+            paddingHorizontal: 24,
+            paddingTop: 12,
+            paddingBottom: 32,
+        },
+        iconContainer: {
+            alignItems: 'center',
+            marginBottom: 16,
+        },
+        iconCircle: {
+            width: 144,
+            height: 144,
+            borderRadius: 72,
+            backgroundColor: colors.surface,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderWidth: 2,
+            borderColor: colors.workout,
+        },
+        title: {
+            fontSize: 24,
+            color: colors.text,
+            textAlign: 'center',
+            marginBottom: 6,
+            fontFamily: fonts.semibold,
+            letterSpacing: -0.5,
+        },
+        subtitle: {
+            fontSize: 14,
+            color: colors.labelMuted,
+            textAlign: 'center',
+            marginBottom: 20,
+            fontFamily: fonts.regular,
+            letterSpacing: 0.2,
+        },
+        inputContainer: {
+            marginBottom: 16,
+        },
+        input: {
+            backgroundColor: colors.surface,
+            borderRadius: 12,
+            paddingHorizontal: 16,
+            paddingVertical: 14,
+            fontSize: 15,
+            color: colors.text,
+            borderWidth: 2,
+            borderColor: colors.hairline,
+            fontFamily: fonts.regular,
+        },
+        inputFocused: {
+            borderColor: colors.workout,
+        },
+        renameButtonTouchable: {
+            borderRadius: 12,
+            overflow: 'hidden',
+            shadowColor: colors.workout,
+            shadowOffset: {
+                width: 0,
+                height: 4,
+            },
+            shadowOpacity: 0.4,
+            shadowRadius: 8,
+            elevation: 8,
+        },
+        renameButton: {
+            borderRadius: 12,
+            paddingVertical: 16,
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        renameButtonText: {
+            fontSize: 17,
+            color: '#FFF',
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+    })
+}
