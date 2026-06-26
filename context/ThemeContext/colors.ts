@@ -21,9 +21,9 @@ export const palettes = {
         // Text — near-black (cool) instead of pure #000 to cut glare
         text: '#16171A',
         textSecondary: '#3C3C43',
-        textMuted: '#6A6A6E',
+        textMuted: '#5E5E62',
         textFaint: '#666666',
-        labelMuted: '#6C6D75',
+        labelMuted: '#5A5B64',
         tabInactive: '#86878F',
         placeholder: '#8A8B92',
         disabled: '#D1D1D6',
@@ -58,7 +58,7 @@ export const palettes = {
         textSecondary: '#9A9AA3',
         textMuted: '#888888',
         textFaint: '#666666',
-        labelMuted: '#6B6B73',
+        labelMuted: '#82838C',
         tabInactive: '#5C5C64',
         placeholder: '#555555',
         disabled: '#333333',
@@ -74,7 +74,8 @@ export const palettes = {
         workout: '#2F80ED',
         nutrition: '#22C922',
         workoutGradient: ['#3A8BF0', '#2F80ED'] as const,
-        nutritionGradient: ['#34D63A', '#22C922'] as const,
+        // Deepened from the bright accent so white CTA text clears contrast on dark; the vivid `nutrition` stays for icons/borders.
+        nutritionGradient: ['#1FA51F', '#178A17'] as const,
         ...brand,
     },
 } as const satisfies Record<ColorScheme, Colors>

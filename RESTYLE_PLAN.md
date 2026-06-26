@@ -47,6 +47,7 @@ The four screens match the Refined mockup in dark mode, are driven entirely by t
 - **Accents are per-theme** (no longer in the shared `brand` object). The bright values are dark-only; light uses the **same hue deepened** for legibility on white (the bright green ≈ 1.7:1 on white). Values: `workout` dark `#2F80ED` / light `#2570D8`; `nutrition` dark `#22C922` / light `#1A9E1A`; gradients land on the same deepened base on light. `nutritionInk` stays for tiny green text (AA). Everything reading `useColors().workout/nutrition` (graphs, FAB, toggle, accent bars, chevrons) updates automatically.
 - Add a radii/spacing constant set (`context/ThemeContext/tokens.ts`): `radius.card=10`, `radius.cardLg=12`, `radius.toggle=9`, `radius.macroCell=9`, `radius.iconButton=full`, `radius.chip=999`; screen padding 18, card padding 14–16, card gap 11.
 - `useColors()`, `useColorScheme()`, `useSetColorScheme()` already exist in `context/ThemeContext/index.tsx` — no API change.
+- **Contrast tweaks (a11y):** dark `nutritionGradient` deepened to `['#1FA51F','#178A17']` so white CTA text clears contrast (the bright accent gave ~2:1 white-on-green); `nutrition` accent itself is unchanged (icons/borders stay vivid). Muted text nudged to AA 4.5:1: `labelMuted` light `#6C6D75`→`#5A5B64`, dark `#6B6B73`→`#82838C`; `textMuted` light `#6A6A6E`→`#5E5E62`.
 
 ### 3. Theme-aware StyleSheet pattern
 For restyled files, adopt `const styles = useMemo(() => makeStyles(colors), [colors])` where `makeStyles(colors)` returns the StyleSheet. Keeps layout static, makes color react to the toggle.
