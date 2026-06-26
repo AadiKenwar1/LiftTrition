@@ -1,7 +1,7 @@
 import type { ColorScheme, Colors } from './types'
 
-// Accents (workout/nutrition + their gradients) are per-theme — see each palette below.
-// Bright values live on dark; light uses the same hue deepened for legibility on white.
+// Accents (workout/nutrition + their gradients) are deep enough to carry white text/icons at AA,
+// and identical in light + dark so CTAs/Fab/ModeSwitcher match the icon/border accent.
 const brand = {
     destructive: '#FF453A',
 } as const
@@ -31,14 +31,14 @@ export const palettes = {
         ringTrack: '#D0D3DC',
         chevron: '#B8B9C1',
         iconChipBg: 'rgba(47,128,237,0.10)',
-        // Brand (nutritionInk = AA-contrast green for numerals on light bg)
-        nutritionInk: '#1BA81B',
+        // Brand (nutritionInk = green for numerals; matches the unified accent below)
+        nutritionInk: '#168516',
         // Amber for "off-target" stat tone (AA-contrast on light bg)
         warning: '#C77700',
-        // Accents — same hue as dark, deepened for legibility on light surfaces
+        // Accents — unified with the gradient fills below (deep enough to carry white at AA); identical in light + dark
         workout: '#2570D8',
-        nutrition: '#1A9E1A',
-        // Deep, AA-safe fills so white CTA/icon text clears 4.5:1 in both modes; the vivid `workout`/`nutrition` accents above stay for icons/borders.
+        nutrition: '#168516',
+        // Gradient fills for CTAs/Fab/ModeSwitcher; top stop == accent so buttons match icons/borders.
         workoutGradient: ['#2570D8', '#2064C8'] as const,
         nutritionGradient: ['#168516', '#0F7A0F'] as const,
         ...brand,
@@ -67,14 +67,14 @@ export const palettes = {
         ringTrack: '#26272B',
         chevron: '#5C5C64',
         iconChipBg: 'rgba(47,128,237,0.16)',
-        // Brand (bright green reads fine on dark, so numerals use the base nutrition green)
-        nutritionInk: '#22C922',
+        // Brand (nutritionInk = green for numerals; matches the unified accent below)
+        nutritionInk: '#168516',
         // Amber for "off-target" stat tone
         warning: '#FFB020',
-        // Accents — vivid on dark surfaces
-        workout: '#2F80ED',
-        nutrition: '#22C922',
-        // Deep, AA-safe fills so white CTA/icon text clears 4.5:1; the vivid `workout`/`nutrition` accents above stay for icons/borders.
+        // Accents — unified with the gradient fills below (deep enough to carry white at AA); identical in light + dark
+        workout: '#2570D8',
+        nutrition: '#168516',
+        // Gradient fills for CTAs/Fab/ModeSwitcher; top stop == accent so buttons match icons/borders.
         workoutGradient: ['#2570D8', '#2064C8'] as const,
         nutritionGradient: ['#168516', '#0F7A0F'] as const,
         ...brand,
