@@ -8,6 +8,19 @@ import { CartesianChart, useChartPressState } from 'victory-native'
 import ChartReadoutPill from './ChartReadoutPill'
 import { BarRect, EndValueFlag, GoalLine } from './chartPrimitives'
 
+/** Builds a small "nice" 0-based y scale (rounded steps, ~3 ticks) so horizontal gridlines read cleanly. */
+function niceScale(maxValue: number, targetCount = 3): { ticks: number[]; top: number } {
+    const m = Math.max(1, Math.ceil(maxValue))
+    const rawStep = m / targetCount
+    const mag = Math.pow(10, Math.floor(Math.log10(rawStep)))
+    const norm = rawStep / mag
+    const step = Math.max(1, Math.round((norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 5 ? 5 : 10) * mag))
+    const top = Math.ceil(m / step) * step
+    const ticks: number[] = []
+    for (let v = 0; v <= top; v += step) ticks.push(v)
+    return { ticks, top }
+}
+
 interface BarChartProps {
     mode: boolean
     data: Array<{ day: string; value: number }>
@@ -37,9 +50,9 @@ export default function BarChart({ mode, data, goal, formatValue, showEndFlag = 
         return () => clearTimeout(id)
     }, [])
 
-    // Bars sit on a 0 baseline; domain top includes the goal so its line stays in view.
-    const maxValue = data.length > 0 ? Math.max(...data.map((d) => d.value), goal ?? 0) : 1
-    const topTick = Math.max(1, Math.ceil(maxValue))
+    // Bars sit on a 0 baseline; a "nice" rounded scale (including the goal) drives the horizontal gridlines.
+    const rawMax = data.length > 0 ? Math.max(...data.map((d) => d.value), goal ?? 0) : 1
+    const { ticks: yTicks, top: yTop } = niceScale(rawMax)
 
     // Value-based signature: remount the inner chart when the data changes so it repaints
     // (the persisted Skia canvas won't refresh on a data prop change alone). Scoped to the
@@ -62,9 +75,9 @@ export default function BarChart({ mode, data, goal, formatValue, showEndFlag = 
                 xKey="day"
                 yKeys={['value']}
                 chartPressState={state}
-                domain={{ y: [0, topTick] }}
+                domain={{ y: [0, yTop] }}
                 padding={{ left: 10, right: 10, top: 14, bottom: 10 }}
-                domainPadding={{ left: 24, right: 24, top: 48, bottom: 0 }}
+                domainPadding={{ left: 24, right: 24, top: 18, bottom: 0 }}
                 xAxis={{
                     font: showXLabels ? font : null,
                     tickCount: data.length,
@@ -78,17 +91,17 @@ export default function BarChart({ mode, data, goal, formatValue, showEndFlag = 
                         return `${value}`
                     },
                     lineColor: colors.ringTrack,
-                    lineWidth: 1, // vertical grid lines on
+                    lineWidth: 0, // no vertical gridlines (weekday labels kept)
                 }}
                 yAxis={[
                     {
                         font,
-                        tickValues: [0, topTick],
+                        tickValues: yTicks,
                         labelOffset: 8,
                         labelColor: colors.textSecondary,
-                        formatYLabel: (value) => `${value}`,
+                        formatYLabel: (value) => value.toLocaleString(),
                         lineColor: colors.ringTrack,
-                        lineWidth: 0, // horizontal grid lines off (vertical-only on the bar chart)
+                        lineWidth: 1, // horizontal gridlines (value scale)
                     },
                 ]}
             >
@@ -96,29 +109,19 @@ export default function BarChart({ mode, data, goal, formatValue, showEndFlag = 
                     const count = points.value.length || 1
                     const barWidth = Math.min(18, ((chartBounds.right - chartBounds.left) / count) * 0.55)
 
-                    // Most-recent bar that actually has data (featured bar on past weeks).
-                    let lastBarIndex = -1
-                    for (let i = points.value.length - 1; i >= 0; i--) {
-                        const v = points.value[i].yValue
-                        if (v != null && v > 0) {
-                            lastBarIndex = i
-                            break
-                        }
-                    }
-
-                    // Featured bar (full accent + end flag): today on the current week (only when logged),
-                    // otherwise the most recent logged day (past weeks).
-                    let featuredIndex = lastBarIndex
-                    if (highlightIndex != null && highlightIndex >= 0) {
-                        const todayVal = points.value[highlightIndex]?.yValue
-                        featuredIndex = todayVal != null && todayVal > 0 ? highlightIndex : -1
-                    }
+                    // Featured bar (full accent + end flag) = TODAY on the current week, and only when
+                    // logged. Past weeks have no "today", so nothing is featured (no flag, no bold bar).
+                    const isCurrentWeek = highlightIndex != null && highlightIndex >= 0
+                    const todayVal = isCurrentWeek ? points.value[highlightIndex]?.yValue : undefined
+                    const featuredIndex = isCurrentWeek && todayVal != null && todayVal > 0 ? highlightIndex : -1
                     const featuredBar = featuredIndex >= 0 ? points.value[featuredIndex] : undefined
+                    // Dim the other bars only when one bar is featured; otherwise the whole week reads full.
+                    const dimOthers = featuredIndex >= 0
 
                     return (
                         <>
                             {points.value.map((p, i) => (
-                                <BarRect key={`bar-${i}`} x={p.x} barWidth={barWidth} top={p.y ?? chartBounds.bottom} bottom={chartBounds.bottom} color={chartColor} isLast={i === featuredIndex} index={i} matchedIndex={state.matchedIndex} isActive={isActive} />
+                                <BarRect key={`bar-${i}`} x={p.x} barWidth={barWidth} top={p.y ?? chartBounds.bottom} bottom={chartBounds.bottom} color={chartColor} isLast={i === featuredIndex} dimOthers={dimOthers} index={i} matchedIndex={state.matchedIndex} isActive={isActive} />
                             ))}
 
                             {goal != null && <GoalLine y={yScale(goal)} left={chartBounds.left} right={chartBounds.right} color={chartColor} />}

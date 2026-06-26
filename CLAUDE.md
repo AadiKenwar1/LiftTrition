@@ -59,6 +59,7 @@ app/                    Expo Router screens (file = route)
   nutritionScreens/     Nutrition logging modals/screens
   workoutScreens/       Workout logging modals/screens
   settingsScreens/      Settings + subscription
+  devTest/              Dev-only test routes (__DEV__-guarded stubs; see Dev tooling)
 
 components/
   ExpoComponents/       Minor Expo wrappers
@@ -67,6 +68,7 @@ components/
   NeutralComponents/    Shared UI (CustomHeader, Fab, DatePicker, etc.)
   NutritionComponents/  Nutrition-specific UI
   WorkoutComponents/    Workout-specific UI
+  devTest/              Dev Hub + isolated test pages (dev-only; see Dev tooling)
 
 context/
   AuthContext/          Session, user ID, sign-in/out
@@ -138,6 +140,17 @@ The app is mid-migration to the "Refined" design system. **Reuse the centralized
 - **Migration recipe** (restyling a not-yet-migrated screen): import `useColors` + `fonts`/`radius` → `const styles = useMemo(() => makeStyles(colors), [colors])` → replace hardcoded hexes with tokens and `Poppins_XXX` with `fonts.X` → verify in dark **and** light.
 - **Standing rule:** if you add or change a shared UI token, primitive, or pattern, update `RESTYLE_PLAN.md` in the same commit so the design doc tracks the code.
 - **Full system + per-folder rollout plan:** `RESTYLE_PLAN.md`.
+
+---
+
+## Dev tooling
+
+**Dev Hub** — a dev-only harness for previewing components/charts in isolation, without logging real data. Reach it from **Settings → Developer → Dev Hub** (the row is `{__DEV__ && …}`-gated, so it's hidden in production).
+
+- **Routes:** `app/devTest/` holds thin `__DEV__`-guarded route stubs (`index`, `lineChart`, `barChart`) that `require()` the real screen and return `null` otherwise. Metro replaces `__DEV__` with `false` in production and strips the branch + its `require`, so the dev code never ships.
+- **Screens:** the hub + test pages live in `components/devTest/` (kept **outside `app/`** so Expo Router doesn't bundle them). Each test page renders a real component (`Graph1`, `BarChart`, …) with prebuilt scenario toggles (`DevControls`: `Field` + `Segmented`) and a Light/Dark switch, so every edge case (1 point, empty, goal far off, bar > goal, etc.) is viewable on a simulator.
+- **Zero production cost** depends on the `__DEV__`-guarded `require` pattern: never pull a `components/devTest/*` file into shipped code via a top-level `import`.
+- **Add a test:** drop `XTest.tsx` in `components/devTest/`, add a stub `app/devTest/x.tsx`, then register it in the `app/_layout.tsx` Stack and the `GROUPS` array in `DevHub.tsx`.
 
 ---
 

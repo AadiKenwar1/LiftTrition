@@ -64,7 +64,8 @@ export function GoalLine({ y, left, right, color }: { y: number; left: number; r
     )
 }
 
-// One bar (bar charts). Latest bar is full accent; earlier bars dim to 0.55; the pressed bar lifts to full.
+// One bar (bar charts). The featured bar (isLast) and the pressed bar are full accent; other bars dim to
+// 0.55 only when `dimOthers` is set (i.e. a bar is featured) — otherwise the whole week renders full.
 // Returns null for zero/negative height (rest days) — the hook still runs so hook count stays stable.
 export function BarRect({
     x,
@@ -73,6 +74,7 @@ export function BarRect({
     bottom,
     color,
     isLast,
+    dimOthers,
     index,
     matchedIndex,
     isActive,
@@ -83,13 +85,15 @@ export function BarRect({
     bottom: number
     color: string
     isLast: boolean
+    dimOthers: boolean
     index: number
     matchedIndex: SharedValue<number>
     isActive: boolean
 }) {
     const opacity = useDerivedValue(() => {
         if (isActive && matchedIndex.value === index) return 1
-        return isLast ? 1 : 0.55
+        if (isLast) return 1
+        return dimOthers ? 0.55 : 1
     })
     const height = bottom - top
     if (height <= 0) return null

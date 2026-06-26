@@ -195,6 +195,9 @@ function StackLayout() {
                     <Stack.Screen name="settingsScreens/support" options={{ headerShown: true, title: 'Support', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="settingsScreens/howItWorks" options={{ headerShown: true, title: 'How It Works', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="settingsScreens/devStatsModal" options={{ ...modalPresentation, headerShown: false }} />
+                    <Stack.Screen name="devTest/index" options={{ headerShown: true, title: 'Dev Hub', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="devTest/lineChart" options={{ headerShown: true, title: 'Line Chart', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="devTest/barChart" options={{ headerShown: true, title: 'Bar Chart', headerBackTitle: 'Back' }} />
                 </Stack.Protected>
             </Stack>
         </AppColumn>

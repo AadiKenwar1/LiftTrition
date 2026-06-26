@@ -5,7 +5,7 @@ import { powerSync } from '@/lib/powersync/system'
 import { getPendingUploadEstimate } from '@/lib/powersync/uploadQueueStats'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
-import { ChevronRight, CreditCard, Dumbbell, FileText, FlaskConical, HelpCircle, Moon, Scale, Sun, User, Utensils } from 'lucide-react-native'
+import { ChevronRight, CreditCard, Dumbbell, FileText, FlaskConical, HelpCircle, Moon, Scale, Sun, User, Utensils, Wrench } from 'lucide-react-native'
 import { useEffect, useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
@@ -195,6 +195,14 @@ export default function SettingsScreen() {
                     {renderSettingItem(settingsOptions[6], 6)}
                     {renderSettingItem(settingsOptions[7], 7)}
                 </View>
+
+                {/* Developer Section — dev builds only */}
+                {__DEV__ && (
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>Developer</Text>
+                        {renderSettingItem({ icon: Wrench, title: 'Dev Hub', subtitle: 'Chart & component test harness', onPress: () => router.push('/devTest' as never) }, 99)}
+                    </View>
+                )}
             </ScrollView>
         </View>
     )
