@@ -38,8 +38,9 @@ export const palettes = {
         // Accents — same hue as dark, deepened for legibility on light surfaces
         workout: '#2570D8',
         nutrition: '#1A9E1A',
-        workoutGradient: ['#2570D8', '#2570D8'] as const, //3A8BF0
-        nutritionGradient: ['#1A9E1A', '#1A9E1A'] as const, //34D63A
+        // Deep, AA-safe fills so white CTA/icon text clears 4.5:1 in both modes; the vivid `workout`/`nutrition` accents above stay for icons/borders.
+        workoutGradient: ['#2570D8', '#2064C8'] as const,
+        nutritionGradient: ['#168516', '#0F7A0F'] as const,
         ...brand,
     },
     dark: {
@@ -73,9 +74,9 @@ export const palettes = {
         // Accents — vivid on dark surfaces
         workout: '#2F80ED',
         nutrition: '#22C922',
-        // Deepened from the bright accent so white CTA text clears contrast on dark; the vivid `workout`/`nutrition` accents stay for icons/borders.
-        workoutGradient: ['#2E7BE0', '#2570D8'] as const,
-        nutritionGradient: ['#1FA51F', '#178A17'] as const,
+        // Deep, AA-safe fills so white CTA/icon text clears 4.5:1; the vivid `workout`/`nutrition` accents above stay for icons/borders.
+        workoutGradient: ['#2570D8', '#2064C8'] as const,
+        nutritionGradient: ['#168516', '#0F7A0F'] as const,
         ...brand,
     },
 } as const satisfies Record<ColorScheme, Colors>
