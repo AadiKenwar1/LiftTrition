@@ -17,6 +17,10 @@ const GROUPS: { title: string; items: { label: string; route: string }[] }[] = [
             { label: 'Bar Chart', route: '/devTest/barChart' },
         ],
     },
+    {
+        title: 'Nutrition AI',
+        items: [{ label: 'AI (NLP + Vision)', route: '/devTest/aiTest' }],
+    },
 ]
 
 export default function DevHub() {

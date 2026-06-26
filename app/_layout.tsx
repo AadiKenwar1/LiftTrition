@@ -177,8 +177,7 @@ function StackLayout() {
                     <Stack.Screen name="nutritionScreens/addNutritionModal" options={{ ...modalPresentation, headerShown: false }} />
                     <Stack.Screen name="nutritionScreens/savedNutritionModal" options={{ ...modalPresentation, headerShown: false }} />
                     <Stack.Screen name="nutritionScreens/foodDBModal" options={{ ...modalPresentation, headerShown: false }} />
-                    <Stack.Screen name="nutritionScreens/cameraScreen" options={{ ...modalPresentation, headerShown: false }} />
-                    <Stack.Screen name="nutritionScreens/barcodeScreen" options={{ ...modalPresentation, headerShown: false }} />
+                    <Stack.Screen name="nutritionScreens/cameraScreen" options={{ ...modalPresentation, headerShown: false, contentStyle: { backgroundColor: '#000' } }} />
                     <Stack.Screen name="nutritionScreens/analyzingModal" options={{ ...modalPresentation, headerShown: false }} />
                     <Stack.Screen name="nutritionScreens/updateBWModal" options={{ ...modalPresentation, headerShown: false }} />
                     <Stack.Screen name="nutritionScreens/dateModal" options={{ ...modalPresentation, headerShown: false }} />
@@ -198,6 +197,7 @@ function StackLayout() {
                     <Stack.Screen name="devTest/index" options={{ headerShown: true, title: 'Dev Hub', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/lineChart" options={{ headerShown: true, title: 'Line Chart', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/barChart" options={{ headerShown: true, title: 'Bar Chart', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="devTest/aiTest" options={{ headerShown: true, title: 'AI Test', headerBackTitle: 'Back' }} />
                 </Stack.Protected>
             </Stack>
         </AppColumn>

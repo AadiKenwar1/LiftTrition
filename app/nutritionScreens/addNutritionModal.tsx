@@ -12,8 +12,6 @@ import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView, S
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import uuid from 'react-native-uuid'
 
-type MacroField = 'calories' | 'protein' | 'carbs' | 'fats'
-
 export default function AddNutritionModal() {
     const { handleAddNutrition, selectedDate } = useNutrition()
     const router = useRouter()
@@ -29,10 +27,8 @@ export default function AddNutritionModal() {
     const [fats, setFats] = useState('')
     const [focusedField, setFocusedField] = useState<string | null>(null)
 
-    // AI generation state — only the tapped field shows a spinner
-    const [generatingField, setGeneratingField] = useState<MacroField | null>(null)
-    const [lastGeneratedFood, setLastGeneratedFood] = useState('')
-    const [cachedMacros, setCachedMacros] = useState<{ calories: number; protein: number; carbs: number; fats: number } | null>(null)
+    // AI generation state
+    const [generating, setGenerating] = useState(false)
     const insets = useSafeAreaInsets()
     const scrollBottomPad = Math.max(insets.bottom, 20) + 120
 
@@ -57,52 +53,25 @@ export default function AddNutritionModal() {
         router.back()
     }
 
-    //Generates macros for a given field
-    const handleGenerateMacros = async (field: MacroField) => {
+    // Generates all macros at once, filling only the fields the user hasn't already entered.
+    const handleGenerateAllMacros = async () => {
         if (!mealName.trim()) {
             Alert.alert('Missing Food Name', 'Please enter a food name before generating macros.')
             return
         }
-        const currentFoodName = mealName.trim()
-        // Field setter mapping
-        const macroSetters = { calories: setCalories, protein: setProtein, carbs: setCarbs, fats: setFats }
-        // Check if we have cached macros for this food
-        if (currentFoodName === lastGeneratedFood && cachedMacros) {
-            macroSetters[field](cachedMacros[field].toString())
-            return
-        }
-        setGeneratingField(field)
+        setGenerating(true)
         try {
-            const macros = await analyzeText(currentFoodName)
-            // Update only the requested field
-            macroSetters[field](macros[field].toString())
-            // Cache all results for future use
-            setLastGeneratedFood(currentFoodName)
-            setCachedMacros(macros)
+            const macros = await analyzeText(mealName.trim())
+            if (!calories.trim()) setCalories(macros.calories.toString())
+            if (!protein.trim()) setProtein(macros.protein.toString())
+            if (!carbs.trim()) setCarbs(macros.carbs.toString())
+            if (!fats.trim()) setFats(macros.fats.toString())
         } catch (error: unknown) {
             const message = (error instanceof Error ? error.message : null) ?? 'Unable to generate macros.'
-            Alert.alert('Generation Failed', `${message} Please check internet connection and try again.`, [{ text: 'OK' }])
+            Alert.alert('Generation Failed', message, [{ text: 'OK' }])
         } finally {
-            setGeneratingField(null)
+            setGenerating(false)
         }
-    }
-
-    const isGenerating = generatingField !== null
-
-    function renderAiButton(field: MacroField) {
-        const isLoading = generatingField === field
-        const isDimmed = hasPremium && isGenerating && !isLoading
-        const buttonStyle = !hasPremium || isDimmed ? styles.aiButtonUnavailable : styles.aiButton
-        const iconColor = !hasPremium || isDimmed ? colors.placeholder : colors.nutrition
-        return (
-            <TouchableOpacity style={buttonStyle} activeOpacity={0.75} onPress={() => (hasPremium ? handleGenerateMacros(field) : router.replace('/settingsScreens/subscription'))} disabled={isGenerating}>
-                <View style={styles.aiButtonContent}>
-                    {isLoading ?
-                        <ActivityIndicator size="small" color={colors.nutrition} />
-                    :   <Ionicons name="sparkles-outline" size={25} color={iconColor} />}
-                </View>
-            </TouchableOpacity>
-        )
     }
 
     return (
@@ -131,11 +100,22 @@ export default function AddNutritionModal() {
                 {/* Meal Name Input */}
                 <View style={styles.inputSection}>
                     <Text style={styles.sectionTitle} adjustsFontSizeToFit minimumFontScale={0.65} numberOfLines={2}>
-                        Meal Name
+                        Describe meal
                     </Text>
                     <View style={styles.inputContainer}>
                         <TextInput style={[styles.input, focusedField === 'mealName' && styles.inputFocused]} placeholder="e.g., Grilled Chicken Salad" placeholderTextColor={colors.placeholder} value={mealName} onChangeText={setMealName} onFocus={() => setFocusedField('mealName')} onBlur={() => setFocusedField(null)} />
                     </View>
+
+                    {/* Generate all macros with AI */}
+                    <TouchableOpacity style={[styles.generateButton, !hasPremium && styles.generateButtonUnavailable]} activeOpacity={0.8} disabled={generating} onPress={() => (hasPremium ? handleGenerateAllMacros() : router.replace('/settingsScreens/subscription'))}>
+                        {generating ?
+                            <ActivityIndicator size="small" color={colors.nutrition} />
+                        :   <View style={styles.generateButtonContent}>
+                                <Ionicons name="sparkles-outline" size={20} color={hasPremium ? colors.nutrition : colors.placeholder} />
+                                <Text style={[styles.generateButtonText, !hasPremium && styles.generateButtonTextUnavailable]}>{hasPremium ? 'Generate Macros with AI' : 'Generate Macros (Premium)'}</Text>
+                            </View>
+                        }
+                    </TouchableOpacity>
                 </View>
 
                 {/* Macros Section */}
@@ -155,7 +135,6 @@ export default function AddNutritionModal() {
                             </Text>
                         </View>
                         <TextInput style={[styles.macroInput, focusedField === 'calories' && styles.inputFocused]} placeholder="0" placeholderTextColor={colors.placeholder} value={calories} onChangeText={setCalories} onFocus={() => setFocusedField('calories')} onBlur={() => setFocusedField(null)} keyboardType="numeric" />
-                        {renderAiButton('calories')}
                     </View>
 
                     {/* Fats */}
@@ -169,7 +148,6 @@ export default function AddNutritionModal() {
                             </Text>
                         </View>
                         <TextInput style={[styles.macroInput, focusedField === 'fats' && styles.inputFocused]} placeholder="0" placeholderTextColor={colors.placeholder} value={fats} onChangeText={setFats} onFocus={() => setFocusedField('fats')} onBlur={() => setFocusedField(null)} keyboardType="numeric" />
-                        {renderAiButton('fats')}
                     </View>
 
                     {/* Carbs */}
@@ -183,7 +161,6 @@ export default function AddNutritionModal() {
                             </Text>
                         </View>
                         <TextInput style={[styles.macroInput, focusedField === 'carbs' && styles.inputFocused]} placeholder="0" placeholderTextColor={colors.placeholder} value={carbs} onChangeText={setCarbs} onFocus={() => setFocusedField('carbs')} onBlur={() => setFocusedField(null)} keyboardType="numeric" />
-                        {renderAiButton('carbs')}
                     </View>
 
                     {/* Protein */}
@@ -197,7 +174,6 @@ export default function AddNutritionModal() {
                             </Text>
                         </View>
                         <TextInput style={[styles.macroInput, focusedField === 'protein' && styles.inputFocused]} placeholder="0" placeholderTextColor={colors.placeholder} value={protein} onChangeText={setProtein} onFocus={() => setFocusedField('protein')} onBlur={() => setFocusedField(null)} keyboardType="numeric" />
-                        {renderAiButton('protein')}
                     </View>
                 </View>
 
@@ -345,27 +321,42 @@ function makeStyles(colors: Colors) {
             color: colors.textMuted,
             fontFamily: fonts.medium,
         },
-        aiButtonContent: {
-            width: 25,
-            height: 25,
+        inputHint: {
+            marginTop: 8,
+            fontSize: 12,
+            color: colors.placeholder,
+            letterSpacing: 0.1,
+            fontFamily: fonts.regular,
+        },
+        generateButton: {
+            marginTop: 14,
+            flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'center',
-        },
-        aiButton: {
-            paddingHorizontal: 9,
-            paddingVertical: 9,
+            minHeight: 48,
+            paddingHorizontal: 16,
             backgroundColor: colors.nutrition + '22',
-            borderRadius: 10,
+            borderRadius: 12,
             borderWidth: 1.5,
             borderColor: colors.nutrition + '66',
         },
-        aiButtonUnavailable: {
-            paddingHorizontal: 9,
-            paddingVertical: 9,
+        generateButtonUnavailable: {
             backgroundColor: colors.textMuted + '40',
-            borderRadius: 10,
-            borderWidth: 1.5,
             borderColor: colors.textMuted + '80',
+        },
+        generateButtonContent: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 8,
+        },
+        generateButtonText: {
+            fontSize: 15,
+            color: colors.nutrition,
+            letterSpacing: -0.3,
+            fontFamily: fonts.semibold,
+        },
+        generateButtonTextUnavailable: {
+            color: colors.placeholder,
         },
 
         addButtonTouchable: {

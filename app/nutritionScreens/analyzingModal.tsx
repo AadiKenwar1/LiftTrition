@@ -8,7 +8,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { ActivityIndicator, Alert, Animated, Image, StyleSheet, Text, View } from 'react-native'
 
 export default function AnalyzingModal() {
-    const { photoUri } = useLocalSearchParams<{ photoUri: string }>()
+    const { photoUri, mode } = useLocalSearchParams<{ photoUri: string; mode?: string }>()
     const { handleAnalyzeAndAddPhoto } = useNutrition()
     const { userID } = useAuth()
     const router = useRouter()
@@ -19,6 +19,7 @@ export default function AnalyzingModal() {
 
     // Normalize param (Expo Router can return string | string[] | undefined)
     const photoUriStr = typeof photoUri === 'string' ? photoUri : photoUri?.[0]
+    const modeStr: 'meal' | 'label' = (typeof mode === 'string' ? mode : mode?.[0]) === 'label' ? 'label' : 'meal'
 
     useEffect(() => {
         if (!photoUriStr) {
@@ -61,7 +62,7 @@ export default function AnalyzingModal() {
     async function analyzePhoto() {
         if (!photoUriStr) return
         try {
-            await handleAnalyzeAndAddPhoto(photoUriStr, userID)
+            await handleAnalyzeAndAddPhoto(photoUriStr, userID, modeStr)
             // Success! Dismiss all modals and return to home
             router.dismissAll()
         } catch (error: any) {
@@ -120,8 +121,8 @@ export default function AnalyzingModal() {
                 </Animated.View>
 
                 {/* Status Text */}
-                <Text style={styles.title}>Analyzing Your Meal</Text>
-                <Text style={styles.subtitle}>Our AI is identifying ingredients and calculating nutrition...</Text>
+                <Text style={styles.title}>{modeStr === 'label' ? 'Reading Nutrition Label' : 'Analyzing Your Meal'}</Text>
+                <Text style={styles.subtitle}>{modeStr === 'label' ? 'Our AI is reading the label values...' : 'Our AI is identifying ingredients and calculating nutrition...'}</Text>
 
                 {/* Progress Bar */}
                 <View style={styles.progressContainer}>
@@ -147,7 +148,7 @@ function makeStyles(colors: Colors) {
     return StyleSheet.create({
         container: {
             flex: 1,
-            backgroundColor: '#121212',
+            backgroundColor: colors.background,
             borderTopLeftRadius: 20,
             borderTopRightRadius: 20,
             overflow: 'hidden',
@@ -160,7 +161,7 @@ function makeStyles(colors: Colors) {
         handle: {
             width: 40,
             height: 5,
-            backgroundColor: '#333',
+            backgroundColor: colors.border,
             borderRadius: 3,
         },
         content: {
@@ -177,7 +178,7 @@ function makeStyles(colors: Colors) {
             overflow: 'hidden',
             marginBottom: 32,
             borderWidth: 2,
-            borderColor: '#1e1e1e',
+            borderColor: colors.hairline,
         },
         photo: {
             width: '100%',
@@ -196,7 +197,7 @@ function makeStyles(colors: Colors) {
             width: 80,
             height: 80,
             borderRadius: 40,
-            backgroundColor: '#1e1e1e',
+            backgroundColor: colors.surface,
             justifyContent: 'center',
             alignItems: 'center',
             borderWidth: 2,
@@ -204,7 +205,7 @@ function makeStyles(colors: Colors) {
         },
         title: {
             fontSize: 24,
-            color: '#FFF',
+            color: colors.text,
             textAlign: 'center',
             marginBottom: 6,
             fontFamily: fonts.semibold,
@@ -212,7 +213,7 @@ function makeStyles(colors: Colors) {
         },
         subtitle: {
             fontSize: 14,
-            color: '#aaa',
+            color: colors.labelMuted,
             textAlign: 'center',
             lineHeight: 22,
             marginBottom: 32,
@@ -227,11 +228,11 @@ function makeStyles(colors: Colors) {
         progressBarBackground: {
             width: '100%',
             height: 8,
-            backgroundColor: '#1e1e1e',
+            backgroundColor: colors.ringTrack,
             borderRadius: 4,
             overflow: 'hidden',
             borderWidth: 1,
-            borderColor: '#2a2a2a',
+            borderColor: colors.hairline,
         },
         progressBarFill: {
             height: '100%',
@@ -247,10 +248,10 @@ function makeStyles(colors: Colors) {
             gap: 8,
             paddingVertical: 12,
             paddingHorizontal: 20,
-            backgroundColor: '#1e1e1e',
+            backgroundColor: colors.surface,
             borderRadius: 12,
             borderWidth: 1,
-            borderColor: '#2a2a2a',
+            borderColor: colors.hairline,
         },
         tipDot: {
             width: 6,
@@ -260,7 +261,7 @@ function makeStyles(colors: Colors) {
         },
         tipText: {
             fontSize: 13,
-            color: '#888',
+            color: colors.labelMuted,
             fontFamily: fonts.medium,
         },
     })

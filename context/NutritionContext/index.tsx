@@ -2,6 +2,7 @@ import { useAuth } from '@/context/AuthContext';
 import { powerSync } from '@/lib/powersync/system';
 import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useState } from "react";
 import { loadNutritionData, upsertNutritionEntry, upsertSavedNutritionEntry } from './database/powersyncStore';
+import type { ScanMode } from '@/lib/openAI/mealImage';
 import { analyzeAndAddPhoto } from "./functions/aiFunctions";
 import { addNutrition, deleteNutrition, editNutrition, saveNutrition, unsaveNutrition } from "./functions/crudFunctions";
 import { getMacroDataForGraph, getMacroForWeek, getMacrosForDate, getNutritionStreakState } from "./functions/graphFunctions";
@@ -104,8 +105,8 @@ export const NutritionProvider = ({ children }: PropsWithChildren) => {
         await unsaveNutrition(id, setSavedNutritionEntries, userID);
     }
 
-    const handleAnalyzeAndAddPhoto = async (photoUri: string, userIDParam: string) => {
-        const entry = await analyzeAndAddPhoto(photoUri, userIDParam, setNutritionData, selectedDate);
+    const handleAnalyzeAndAddPhoto = async (photoUri: string, userIDParam: string, mode: ScanMode = 'meal') => {
+        const entry = await analyzeAndAddPhoto(photoUri, userIDParam, setNutritionData, selectedDate, mode);
         if (!userIDParam) return;
         try {
             await upsertNutritionEntry(entry);
