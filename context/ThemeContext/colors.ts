@@ -73,8 +73,8 @@ export const palettes = {
         // Accents — vivid on dark surfaces
         workout: '#2F80ED',
         nutrition: '#22C922',
-        workoutGradient: ['#3A8BF0', '#2F80ED'] as const,
-        // Deepened from the bright accent so white CTA text clears contrast on dark; the vivid `nutrition` stays for icons/borders.
+        // Deepened from the bright accent so white CTA text clears contrast on dark; the vivid `workout`/`nutrition` accents stay for icons/borders.
+        workoutGradient: ['#2E7BE0', '#2570D8'] as const,
         nutritionGradient: ['#1FA51F', '#178A17'] as const,
         ...brand,
     },
