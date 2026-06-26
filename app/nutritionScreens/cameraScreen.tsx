@@ -1,59 +1,12 @@
 import { fonts, useColors, type Colors } from '@/context/ThemeContext'
+import { processCameraCapture, processPickedImageUri, SCAN_FRAME, type ScanMode } from '@/lib/openAI/mealImage'
 import { CameraType, CameraView, useCameraPermissions } from 'expo-camera'
-import * as ImageManipulator from 'expo-image-manipulator'
 import * as ImagePicker from 'expo-image-picker'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
-import { Camera, FlipHorizontal, Images, Zap } from 'lucide-react-native'
+import { Camera, FlipHorizontal, Images, Package, Tag, Utensils, Zap } from 'lucide-react-native'
 import { useMemo, useRef, useState } from 'react'
-import { Alert, Dimensions, Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-
-const MEAL_IMAGE_MAX_WIDTH = 800
-const MEAL_IMAGE_COMPRESS = 0.8
-
-/** Resize and compress any meal image URI for AI analysis (library picks). */
-async function processPickedImageUri(uri: string): Promise<string> {
-    const result = await ImageManipulator.manipulateAsync(
-        uri,
-        [{ resize: { width: MEAL_IMAGE_MAX_WIDTH } }],
-        { compress: MEAL_IMAGE_COMPRESS, format: ImageManipulator.SaveFormat.JPEG },
-    )
-    return result.uri
-}
-
-/** Crop toward on-screen frame, then resize (camera capture). */
-async function processCameraCapture(photo: { uri: string; width: number; height: number }): Promise<string> {
-    const screenWidth = Dimensions.get('window').width
-    const screenHeight = Dimensions.get('window').height
-    const frameWidthOnScreen = Math.min(screenWidth * 0.7, 320)
-    const frameHeightOnScreen = frameWidthOnScreen * (4 / 3)
-
-    const scaleX = photo.width / screenWidth
-    const scaleY = photo.height / screenHeight
-    const scale = Math.max(scaleX, scaleY)
-
-    const cropWidth = frameWidthOnScreen * scale
-    const cropHeight = frameHeightOnScreen * scale
-    const cropX = (photo.width - cropWidth) / 2
-    const cropY = (photo.height - cropHeight) / 2
-
-    const croppedImage = await ImageManipulator.manipulateAsync(
-        photo.uri,
-        [
-            {
-                crop: {
-                    originX: Math.max(0, cropX),
-                    originY: Math.max(0, cropY),
-                    width: Math.min(cropWidth, photo.width),
-                    height: Math.min(cropHeight, photo.height),
-                },
-            },
-            { resize: { width: MEAL_IMAGE_MAX_WIDTH } },
-        ],
-        { compress: MEAL_IMAGE_COMPRESS, format: ImageManipulator.SaveFormat.JPEG },
-    )
-    return croppedImage.uri
-}
+import { Alert, Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 export default function CameraScreen() {
     const router = useRouter()
@@ -65,6 +18,8 @@ export default function CameraScreen() {
     const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null)
     const [flashEnabled, setFlashEnabled] = useState(false)
     const [pickingFromLibrary, setPickingFromLibrary] = useState(false)
+    const [scanKind, setScanKind] = useState<'meal' | 'item' | 'label'>('meal')
+    const scanMode: ScanMode = scanKind === 'label' ? 'label' : 'meal'
 
     if (!permission) {
         return (
@@ -118,7 +73,7 @@ export default function CameraScreen() {
                 base64: false,
             })
             if (photo) {
-                const uri = await processCameraCapture(photo)
+                const uri = await processCameraCapture(photo, scanMode)
                 setCapturedPhoto(uri)
             }
         } catch {
@@ -144,7 +99,7 @@ export default function CameraScreen() {
 
             if (result.canceled || !result.assets[0]?.uri) return
 
-            const uri = await processPickedImageUri(result.assets[0].uri)
+            const uri = await processPickedImageUri(result.assets[0].uri, scanMode)
             setCapturedPhoto(uri)
         } catch {
             Alert.alert('Error', 'Failed to load photo from library. Please try again.')
@@ -161,14 +116,14 @@ export default function CameraScreen() {
         if (capturedPhoto) {
             router.push({
                 pathname: '/nutritionScreens/analyzingModal',
-                params: { photoUri: capturedPhoto },
+                params: { photoUri: capturedPhoto, mode: scanMode },
             })
         }
     }
 
     if (capturedPhoto) {
         return (
-            <View style={styles.container}>
+            <View style={styles.cameraContainer}>
                 <View style={styles.handleContainerAbsolute}>
                     <View style={styles.handle} />
                 </View>
@@ -191,7 +146,7 @@ export default function CameraScreen() {
     }
 
     return (
-        <View style={styles.container}>
+        <View style={styles.cameraContainer}>
             <View style={styles.handleContainerAbsolute}>
                 <View style={styles.handle} />
             </View>
@@ -199,6 +154,20 @@ export default function CameraScreen() {
             <CameraView ref={cameraRef} style={styles.camera} facing={facing} enableTorch={flashEnabled}>
                 <View style={styles.topBar}>
                     <View style={styles.spacer} />
+                    <View style={styles.modeToggle}>
+                        <TouchableOpacity onPress={() => setScanKind('meal')} style={[styles.modeButton, scanKind === 'meal' && styles.modeButtonActive]} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel="Scan a meal">
+                            <Utensils size={14} color={scanKind === 'meal' ? '#FFF' : '#CCC'} strokeWidth={2.5} />
+                            <Text style={[styles.modeButtonText, scanKind === 'meal' && styles.modeButtonTextActive]}>Meal</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => setScanKind('item')} style={[styles.modeButton, scanKind === 'item' && styles.modeButtonActive]} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel="Scan a food or branded item">
+                            <Package size={14} color={scanKind === 'item' ? '#FFF' : '#CCC'} strokeWidth={2.5} />
+                            <Text style={[styles.modeButtonText, scanKind === 'item' && styles.modeButtonTextActive]}>Item</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => setScanKind('label')} style={[styles.modeButton, scanKind === 'label' && styles.modeButtonActive]} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel="Scan a nutrition label">
+                            <Tag size={14} color={scanKind === 'label' ? '#FFF' : '#CCC'} strokeWidth={2.5} />
+                            <Text style={[styles.modeButtonText, scanKind === 'label' && styles.modeButtonTextActive]}>Label</Text>
+                        </TouchableOpacity>
+                    </View>
                     <TouchableOpacity onPress={toggleFlash} style={[styles.flashButton, flashEnabled && styles.flashButtonActive]} activeOpacity={0.5}>
                         <Zap size={24} color={flashEnabled ? '#FFF' : '#AAA'} strokeWidth={2.5} fill={flashEnabled ? '#FFF' : 'transparent'} />
                     </TouchableOpacity>
@@ -211,6 +180,7 @@ export default function CameraScreen() {
                         <View style={[styles.corner, styles.cornerBottomLeft]} />
                         <View style={[styles.corner, styles.cornerBottomRight]} />
                     </View>
+                    <Text style={styles.frameHint}>{scanKind === 'label' ? 'Fit the nutrition label in frame' : scanKind === 'item' ? 'Center the food or branded item in frame' : 'Center your meal in frame'}</Text>
                 </View>
 
                 <View style={styles.controls}>
@@ -244,7 +214,14 @@ function makeStyles(colors: Colors) {
     return StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#121212',
+        backgroundColor: colors.background,
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        overflow: 'hidden',
+    },
+    cameraContainer: {
+        flex: 1,
+        backgroundColor: '#000',
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
         overflow: 'hidden',
@@ -253,7 +230,7 @@ function makeStyles(colors: Colors) {
         alignItems: 'center',
         paddingTop: 12,
         paddingBottom: 8,
-        backgroundColor: '#121212',
+        backgroundColor: colors.background,
     },
     handleContainerAbsolute: {
         position: 'absolute',
@@ -289,7 +266,7 @@ function makeStyles(colors: Colors) {
         width: 80,
         height: 80,
         borderRadius: 40,
-        backgroundColor: '#1e1e1e',
+        backgroundColor: colors.surface,
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
@@ -298,7 +275,7 @@ function makeStyles(colors: Colors) {
     },
     permissionTitle: {
         fontSize: 24,
-        color: '#FFF',
+        color: colors.text,
         marginBottom: 6,
         textAlign: 'center',
         letterSpacing: -0.5,
@@ -306,7 +283,7 @@ function makeStyles(colors: Colors) {
     },
     permissionMessage: {
         fontSize: 14,
-        color: '#888',
+        color: colors.labelMuted,
         textAlign: 'center',
         lineHeight: 22,
         marginBottom: 32,
@@ -314,7 +291,7 @@ function makeStyles(colors: Colors) {
         letterSpacing: 0.2,
     },
     permissionText: {
-        color: '#FFF',
+        color: colors.text,
         fontSize: 16,
         fontFamily: fonts.regular,
     },
@@ -349,7 +326,7 @@ function makeStyles(colors: Colors) {
     },
     cancelButtonText: {
         fontSize: 16,
-        color: '#888',
+        color: colors.labelMuted,
         letterSpacing: -0.5,
         fontFamily: fonts.semibold,
     },
@@ -363,6 +340,46 @@ function makeStyles(colors: Colors) {
     },
     spacer: {
         width: 44,
+    },
+    modeToggle: {
+        flexDirection: 'row',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        borderRadius: 22,
+        padding: 3,
+    },
+    modeButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 5,
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderRadius: 19,
+    },
+    modeButtonActive: {
+        backgroundColor: colors.nutrition,
+    },
+    modeButtonText: {
+        fontSize: 14,
+        color: '#CCC',
+        letterSpacing: -0.3,
+        fontFamily: fonts.semibold,
+    },
+    modeButtonTextActive: {
+        color: '#FFF',
+    },
+    frameHint: {
+        position: 'absolute',
+        top: -24,
+        left: 0,
+        right: 0,
+        textAlign: 'center',
+        fontSize: 13,
+        color: '#FFF',
+        letterSpacing: -0.2,
+        fontFamily: fonts.medium,
+        textShadowColor: 'rgba(0, 0, 0, 0.8)',
+        textShadowOffset: { width: 0, height: 1 },
+        textShadowRadius: 4,
     },
     flashButton: {
         width: 44,
@@ -381,9 +398,9 @@ function makeStyles(colors: Colors) {
         alignItems: 'center',
     },
     frame: {
-        width: '70%',
-        maxWidth: 320,
-        aspectRatio: 3 / 4,
+        width: `${SCAN_FRAME.widthPct * 100}%`,
+        maxWidth: SCAN_FRAME.maxWidth,
+        aspectRatio: SCAN_FRAME.aspectRatio,
         borderWidth: 2,
         borderColor: colors.nutrition + '80',
         borderRadius: 16,
