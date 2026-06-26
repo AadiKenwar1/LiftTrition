@@ -58,7 +58,7 @@ function computeStats(graphType: GraphType, data: Array<{ day: string; value: nu
             : dir === 'down' ? 'bad'
             : 'neutral'
         return [
-            { label: 'Estimated best', value: `${best} ${weightUnit}` },
+            { label: 'Estimated max', value: `${best} ${weightUnit}` },
             { label: 'Change', value: `${sign}${Math.round(change)} ${weightUnit}`, trend: { dir, tone } },
         ]
     }
@@ -188,7 +188,7 @@ function makeStyles(colors: Colors) {
         },
         cell: {
             flex: 1,
-            paddingVertical: 13,
+            paddingVertical: 10,
             paddingHorizontal: 16,
         },
         label: {
@@ -204,7 +204,7 @@ function makeStyles(colors: Colors) {
         },
         value: {
             fontFamily: fonts.extrabold,
-            fontSize: 19,
+            fontSize: 20,
             letterSpacing: -0.4,
             flexShrink: 1,
         },

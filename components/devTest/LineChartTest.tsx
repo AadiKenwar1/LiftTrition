@@ -1,6 +1,5 @@
 import Graph1 from '@/components/GraphComponents/Graph1'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
-import { getGraphChartNote } from '@/lib/utils/graphChartNote'
 import { useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 import { Field, Segmented } from './DevControls'
@@ -112,7 +111,6 @@ export default function LineChartTest() {
                         data={data}
                         selectedRange={range}
                         goal={goal}
-                        chartNote={getGraphChartNote(mode ? 'strength' : 'bodyweight', range)}
                         formatValue={(n) => `${Math.round(n)}`}
                     />
                 }

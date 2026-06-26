@@ -1,7 +1,7 @@
 import { FONT_FAMILY, useColorScheme, useColors } from '@/context/ThemeContext'
 import { Archivo_400Regular, Archivo_800ExtraBold } from '@expo-google-fonts/archivo'
 import { Poppins_400Regular, Poppins_800ExtraBold } from '@expo-google-fonts/poppins'
-import { Circle, Group, LinearGradient, Text, useFont, vec } from '@shopify/react-native-skia'
+import { Circle, Group, LinearGradient, useFont, vec } from '@shopify/react-native-skia'
 import { useEffect, useState } from 'react'
 import { ActivityIndicator, StyleSheet, View } from 'react-native'
 import { Area, CartesianChart, Line, useChartPressState } from 'victory-native'
@@ -12,13 +12,12 @@ interface Graph1Props {
     mode: boolean
     data: Array<{ day: string; value: number }>
     selectedRange: 7 | 14 | 21
-    chartNote?: { lines: string[] }
     goal?: number
     formatValue?: (value: number) => string
     showEndFlag?: boolean
 }
 
-export default function Graph1({ mode, data, selectedRange, chartNote, goal, formatValue, showEndFlag = true }: Graph1Props) {
+export default function Graph1({ mode, data, selectedRange, goal, formatValue, showEndFlag = true }: Graph1Props) {
     const colors = useColors()
     const isDark = useColorScheme() === 'dark'
     const font = useFont(FONT_FAMILY === 'archivo' ? Archivo_400Regular : Poppins_400Regular, 12)
@@ -134,21 +133,6 @@ export default function Graph1({ mode, data, selectedRange, chartNote, goal, for
                         lineWidth: 1,
                     },
                 ]}
-                renderOutside={({ canvasSize, chartBounds }) => {
-                    if (!chartNote) return null
-
-                    const lineHeight = 14
-                    const firstLineY = chartBounds.bottom + 16
-
-                    return (
-                        <>
-                            {chartNote.lines.map((line, index) => {
-                                const lineWidth = font.getTextWidth(line)
-                                return <Text key={index} x={(canvasSize.width - lineWidth) / 2} y={firstLineY + index * lineHeight} text={line} font={font} color={colors.labelMuted} style="fill" />
-                            })}
-                        </>
-                    )
-                }}
             >
                 {({ points, chartBounds, yScale }) => {
                     const lastPoint = [...points.value].reverse().find((p) => p.y != null)
