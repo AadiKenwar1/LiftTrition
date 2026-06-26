@@ -1,37 +1,34 @@
+import { radius, useColors, type Colors } from '@/context/ThemeContext'
 import { useSettings } from '@/context/SettingsContext'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Dumbbell, Nut } from 'lucide-react-native'
-import React from 'react'
+import React, { useMemo } from 'react'
 import { Pressable, StyleSheet, TouchableOpacity, View } from 'react-native'
 
 const ICON_SIZE = 25
 const ICON_STROKE = 2.0
 
-// Mode button colors
-const LIFT_GRADIENT = ['#1F6FD8', '#2F80ED', '#4A95F3'] as const
-const NUTRITION_GRADIENT = ['#179F17', '#22C922', '#3BE63B'] as const
-
 export default function CustomHeader() {
     const { mode, setMode } = useSettings()
+    const colors = useColors()
+    const styles = useMemo(() => makeStyles(colors), [colors])
 
     const renderModeButton = (isLift: boolean) => {
         const isActive = mode === isLift
-        const label = isLift ? 'LIFT' : 'NUTRITION'
-        const gradientColors = isLift ? LIFT_GRADIENT : NUTRITION_GRADIENT
+        const gradientColors = isLift ? colors.workoutGradient : colors.nutritionGradient
         const Icon = isLift ? Dumbbell : Nut
-        const iconColor = isActive ? '#FFFFFF' : '#aaa'
+        const iconColor = isActive ? '#FFFFFF' : colors.tabInactive
 
         const labelContent = (
             <View style={styles.modeLabelRow}>
                 <Icon size={ICON_SIZE} color={iconColor} strokeWidth={ICON_STROKE} style={isLift ? styles.dumbbellIcon : undefined} />
-                {/*<Text style={isActive ? styles.activeModeText : styles.modeButtonText}>{label}</Text>*/}
             </View>
         )
 
         if (isActive) {
             return (
                 <Pressable style={[styles.modeButton, styles.activeModeButton]} onPress={() => setMode(isLift)}>
-                    <LinearGradient colors={gradientColors} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={styles.gradientButton}>
+                    <LinearGradient colors={gradientColors} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.gradientButton}>
                         {labelContent}
                     </LinearGradient>
                 </Pressable>
@@ -55,81 +52,62 @@ export default function CustomHeader() {
     )
 }
 
-const styles = StyleSheet.create({
-    header: {
-        height: 100,
-        backgroundColor: '#121212',
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexDirection: 'row',
-        paddingHorizontal: 10,
-        paddingTop: 10,
-        marginBottom: 0,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
-        elevation: 4,
-        zIndex: 100,
-    },
-    modeSelectorContainer: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginTop: 30,
-        backgroundColor: '#1F1F1F',
-        borderRadius: 10,
-        gap: 8,
-        padding: 0,
-        shadowColor: '#121212',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 2,
-        elevation: 4,
-    },
-    modeButton: {
-        flex: 1,
-        borderRadius: 8,
-        overflow: 'hidden',
-        minHeight: 42,
-    },
-    activeModeButton: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
-        elevation: 4,
-    },
-    inactiveModeButton: {
-        backgroundColor: 'transparent',
-        paddingVertical: 12,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    gradientButton: {
-        paddingVertical: 12,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    modeLabelRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 6,
-    },
-    dumbbellIcon: {
-        transform: [{ rotate: '45deg' }],
-    },
-    modeButtonText: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: '#aaa',
-        letterSpacing: 0.3,
-    },
-    activeModeText: {
-        fontSize: 14,
-        color: '#FFFFFF',
-        fontWeight: '700',
-        letterSpacing: 0.3,
-    },
-})
+function makeStyles(colors: Colors) {
+    return StyleSheet.create({
+        header: {
+            height: 100,
+            backgroundColor: colors.background,
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'row',
+            paddingHorizontal: 10,
+            paddingTop: 10,
+            zIndex: 100,
+        },
+        modeSelectorContainer: {
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginTop: 30,
+            backgroundColor: colors.toggleTrack,
+            borderRadius: radius.toggle,
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: colors.hairline,
+            gap: 4,
+            padding: 4,
+        },
+        modeButton: {
+            flex: 1,
+            borderRadius: radius.toggleInner,
+            overflow: 'hidden',
+            minHeight: 42,
+        },
+        activeModeButton: {
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 3 },
+            shadowOpacity: 0.25,
+            shadowRadius: 9,
+            elevation: 4,
+        },
+        inactiveModeButton: {
+            backgroundColor: 'transparent',
+            paddingVertical: 12,
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        gradientButton: {
+            paddingVertical: 12,
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        modeLabelRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 6,
+        },
+        dumbbellIcon: {
+            transform: [{ rotate: '45deg' }],
+        },
+    })
+}

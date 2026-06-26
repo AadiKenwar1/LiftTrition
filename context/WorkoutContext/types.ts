@@ -1,4 +1,6 @@
 // Workout Context Types
+import type { WeekDayPoint } from '@/lib/utils/dateHelper'
+
 export interface Workout {
     id: string
     userID: string
@@ -85,7 +87,8 @@ export interface WorkoutContextInterface {
     getFatigueFeedback: (percentage: number) => string
     handleGetOneRepMaxData: (exerciseName: string) => Array<{ day: string; value: number }>
     handleGetSetsData: (onboardingCompletedAt?: Date) => Array<{ day: string; value: number }>
+    handleGetSetsForWeek: (weekStart: Date) => WeekDayPoint[]
     handleCreateUserExercise: (exerciseData: CreateExerciseData, userID: string) => void
     handleDeleteUserExercise: (exerciseName: string) => void
-    workoutDaysThisWeek: number
+    trainedDaysThisWeek: boolean[]
 }

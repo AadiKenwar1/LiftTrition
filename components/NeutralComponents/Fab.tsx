@@ -1,3 +1,4 @@
+import { useColors } from '@/context/ThemeContext'
 import { useSettings } from '@/context/SettingsContext'
 import { Entypo } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -12,6 +13,7 @@ interface FabProps {
 
 function FloatingActionMenu({ children }: FabProps) {
     const { mode } = useSettings()
+    const colors = useColors()
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const [buttonWidths, setButtonWidths] = useState<Record<number, number>>({})
     const [isInitialized, setIsInitialized] = useState<boolean>(false)
@@ -88,8 +90,8 @@ function FloatingActionMenu({ children }: FabProps) {
                 )
             })}
 
-            <Pressable style={styles.fab} onPress={toggleMenu}>
-                <LinearGradient colors={mode === true ? ['#1F6FD8', '#2F80ED', '#4A95F3'] : ['#1FB52E', '#22C933', '#39D94B']} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={styles.gradientFab}>
+            <Pressable style={[styles.fab, { shadowColor: mode ? colors.workout : colors.nutrition }]} onPress={toggleMenu}>
+                <LinearGradient colors={mode ? colors.workoutGradient : colors.nutritionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.gradientFab}>
                     <Entypo name={isOpen ? 'cross' : 'dots-three-vertical'} size={28} color="white" />
                 </LinearGradient>
             </Pressable>
@@ -109,9 +111,10 @@ const styles = StyleSheet.create({
         width: 80,
         height: 80,
         borderRadius: 40,
-        borderWidth: 0.3,
-        borderColor: 'grey',
-        overflow: 'hidden',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.45,
+        shadowRadius: 9,
+        elevation: 8,
     },
     gradientFab: {
         width: '100%',

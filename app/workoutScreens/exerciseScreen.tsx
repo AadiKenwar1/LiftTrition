@@ -2,6 +2,7 @@ import Fab from '@/components/NeutralComponents/Fab'
 import DraggableList, { DraggableListRenderParams } from '@/components/WorkoutComponents/DraggableList'
 import Log from '@/components/WorkoutComponents/Log'
 import { useAuth } from '@/context/AuthContext'
+import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { useWorkout } from '@/context/WorkoutContext'
 import { IMAGE_MAP } from '@/context/WorkoutContext/exerciseLibrary/dataV2/imageMap'
 import { Exercise } from '@/context/WorkoutContext/types'
@@ -15,6 +16,8 @@ export default function ExerciseScreen() {
     const navigation = useNavigation()
     const router = useRouter()
     const { userID } = useAuth()
+    const colors = useColors()
+    const styles = useMemo(() => makeStyles(colors), [colors])
 
     const params = useLocalSearchParams<{ workoutId: string }>()
     const workoutId = typeof params.workoutId === 'string' ? params.workoutId : params.workoutId?.[0] || ''
@@ -66,7 +69,7 @@ export default function ExerciseScreen() {
                 <Text style={styles.sectionSubtitle}>{'Tap to log '}</Text>
                 <Text style={[styles.sectionSubtitle, { fontSize: 18 }]}>·</Text>
                 <Text style={styles.sectionSubtitle}>{' Tap '}</Text>
-                <Pencil size={13} color="#aaa" strokeWidth={2} />
+                <Pencil size={13} color={colors.labelMuted} strokeWidth={2} />
                 <Text style={styles.sectionSubtitle}>{' to edit'}</Text>
             </View>
             <Text style={[styles.sectionSubtitle, { marginBottom: 14 }]}>{'Hold to rearrange'}</Text>
@@ -97,7 +100,7 @@ export default function ExerciseScreen() {
             {activeExercises.length === 0 ?
                 <View style={styles.emptyContainer}>
                     <View style={styles.emptyIconCircle}>
-                        <Dumbbell size={56} color="#2f80ed" strokeWidth={2} />
+                        <Dumbbell size={56} color={colors.workout} strokeWidth={2} />
                     </View>
                     <Text style={styles.emptyTitle}>No Exercises Yet</Text>
                     <Text style={styles.emptySubtitle}>Tap the ⋮ button to add your first exercise and start logging your sets</Text>
@@ -120,75 +123,72 @@ export default function ExerciseScreen() {
     )
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#121212',
-    },
-    workoutFabButtons: {
-        height: 60,
-        width: 60,
-        backgroundColor: '#2f80ed',
-        borderRadius: 40,
-        borderColor: 'black',
-        alignItems: 'center',
-        justifyContent: 'center',
-        elevation: 3,
-        shadowColor: 'black',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.2,
-        shadowRadius: 2,
-        borderWidth: 0.3,
-        zIndex: 10,
-    },
-    emptyContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingHorizontal: 40,
-        marginBottom: 120,
-    },
-    emptyIconCircle: {
-        width: 120,
-        height: 120,
-        borderRadius: 60,
-        backgroundColor: '#1e1e1e',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 24,
-        borderWidth: 3,
-        borderColor: '#2f80ed',
-        shadowColor: '#2f80ed',
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.1,
-        shadowRadius: 12,
-        elevation: 10,
-    },
-    emptyTitle: {
-        fontSize: 28,
-        color: '#FFF',
-        marginBottom: 12,
-        textAlign: 'center',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    emptySubtitle: {
-        fontSize: 16,
-        color: '#aaa',
-        textAlign: 'center',
-        lineHeight: 24,
-        letterSpacing: 0.2,
-        fontFamily: 'Poppins_400Regular',
-    },
-    hintRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    sectionSubtitle: {
-        fontSize: 14,
-        color: '#aaa',
-        letterSpacing: 0.2,
-        fontFamily: 'Poppins_400Regular',
-        marginBottom: 1,
-    },
-})
+function makeStyles(colors: Colors) {
+    return StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: colors.background,
+        },
+        workoutFabButtons: {
+            height: 60,
+            width: 60,
+            backgroundColor: colors.workout,
+            borderRadius: 40,
+            borderColor: 'black',
+            alignItems: 'center',
+            justifyContent: 'center',
+            elevation: 3,
+            shadowColor: 'black',
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.2,
+            shadowRadius: 2,
+            borderWidth: 0.0,
+            zIndex: 10,
+        },
+        emptyContainer: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingHorizontal: 40,
+            marginBottom: 120,
+        },
+        emptyIconCircle: {
+            width: 120,
+            height: 120,
+            borderRadius: 60,
+            backgroundColor: colors.surface,
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginBottom: 24,
+            borderWidth: 3,
+            borderColor: colors.workout,
+        },
+        emptyTitle: {
+            fontSize: 28,
+            color: colors.text,
+            marginBottom: 12,
+            textAlign: 'center',
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+        emptySubtitle: {
+            fontSize: 16,
+            color: colors.labelMuted,
+            textAlign: 'center',
+            lineHeight: 24,
+            letterSpacing: 0.2,
+            fontFamily: fonts.regular,
+        },
+        hintRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
+        sectionSubtitle: {
+            fontSize: 14,
+            color: colors.labelMuted,
+            letterSpacing: 0.2,
+            fontFamily: fonts.regular,
+            marginBottom: 1,
+        },
+    })
+}

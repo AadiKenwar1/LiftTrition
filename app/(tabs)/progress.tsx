@@ -1,39 +1,38 @@
 import ActivityBanner from '@/components/GraphComponents/ActivityBanner'
+import BarChart from '@/components/GraphComponents/BarChart'
 import Graph1 from '@/components/GraphComponents/Graph1'
 import GraphStats from '@/components/GraphComponents/GraphStats'
-import ProgressWheel from '@/components/GraphComponents/ProgressWheel'
 import RangeSelectionModal from '@/components/GraphComponents/RangeSelectionModal'
 import SelectionModal from '@/components/GraphComponents/SelectionModal'
 import ModeSwitcher from '@/components/NeutralComponents/ModeSwitcher'
 import { useNutrition } from '@/context/NutritionContext'
 import { useSettings } from '@/context/SettingsContext'
+import { fonts, radius, useColorScheme, useColors, type Colors } from '@/context/ThemeContext'
 import { useWorkout } from '@/context/WorkoutContext'
 
+import { addDays, formatDate, getWeekStart } from '@/lib/utils/dateHelper'
 import { downsampleData, downsampleDataPreserveEndpoints } from '@/lib/utils/downsample'
 import { getGraphChartNote } from '@/lib/utils/graphChartNote'
-import { useFonts } from 'expo-font'
-import { ChevronDown, Dumbbell, Scale } from 'lucide-react-native'
+import { ChevronDown, ChevronLeft, ChevronRight, Dumbbell, History, Scale } from 'lucide-react-native'
 import { useEffect, useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 export default function ProgressScreen() {
-    const [fontsLoaded] = useFonts({
-        'SpaceMono-Regular': require('@/assets/fonts/SpaceMono-Regular.ttf'),
-    })
-    const { mode, settings } = useSettings()
-    const { handleGetMacrosForDate, handleGetMacroDataForGraph, nutritionData, nutritionStreak } = useNutrition()
-    const { handleGetFatigueSummary, getFatigueFeedback, logs, handleGetOneRepMaxData, handleGetSetsData, lastExercise, setLastExercise, fullExerciseLibAsList, workoutDaysThisWeek } = useWorkout()
-    const { handleGetBodyWeightProgressData, bwProgress } = useSettings()
+    const { mode, settings, handleGetBodyWeightProgressData, bwProgress } = useSettings()
+    const { handleGetMacroForWeek, nutritionData, nutritionStreak } = useNutrition()
+    const { logs, handleGetOneRepMaxData, handleGetSetsForWeek, lastExercise, fullExerciseLibAsList, trainedDaysThisWeek } = useWorkout()
+    const colors = useColors()
+    const isDark = useColorScheme() === 'dark'
+    const styles = useMemo(() => makeStyles(colors, isDark), [colors, isDark])
 
-    // Local state for graph selections
-    const [selectedRange1, setSelectedRange1] = useState<7 | 14 | 21>(7)
-    const [selectedRange2, setSelectedRange2] = useState<7 | 14 | 21>(7)
+    // Local state for graph selections — topRange drives the line card; the bar card pages by week.
+    const [topRange, setTopRange] = useState<7 | 14 | 21>(7)
+    const [bottomWeekOffset, setBottomWeekOffset] = useState(0)
     const [selectedExercise, setSelectedExercise] = useState<string>(lastExercise || 'Barbell Bench Press')
     const [selectedMacro, setSelectedMacro] = useState<'calories' | 'protein' | 'carbs' | 'fats'>('calories')
 
     // Modal visibility state
-    const [rangeModalVisible1, setRangeModalVisible1] = useState(false)
-    const [rangeModalVisible2, setRangeModalVisible2] = useState(false)
+    const [topRangeModalVisible, setTopRangeModalVisible] = useState(false)
     const [selectionModalVisible, setSelectionModalVisible] = useState(false)
 
     // Set selected exercise to last exercise if it exists
@@ -43,7 +42,12 @@ export default function ProgressScreen() {
         }
     }, [lastExercise])
 
-    // Data for selection modal
+    // Reset the bar card to the current week when switching modes
+    useEffect(() => {
+        setBottomWeekOffset(0)
+    }, [mode])
+
+    // Data for selection modal — exercise picker (lift, top card) or macro picker (nutrition, bottom card)
     const macroList = useMemo(
         () => [
             { id: 'calories', title: 'Calories', subtitle: 'Total caloric intake' },
@@ -56,250 +60,142 @@ export default function ProgressScreen() {
 
     const selectionData = mode ? fullExerciseLibAsList : macroList
 
-    // Fatigue data for wheels
-    const fatigueData = useMemo(() => {
-        return handleGetFatigueSummary(settings.activityLevel, settings.bodyWeight, bwProgress)
-    }, [logs, settings.activityLevel, settings.bodyWeight, bwProgress, handleGetFatigueSummary])
-
-    //Macro data for wheels
-    const todayMacros = useMemo(() => {
-        return handleGetMacrosForDate(new Date())
-    }, [nutritionData, settings])
-
-    // Graph 1 — display (downsampled) + stats (raw daily slice)
-    const graph1RawData = useMemo(() => {
-        const rawData = mode === true ? handleGetOneRepMaxData(selectedExercise) : handleGetMacroDataForGraph(selectedMacro, settings.onboardingCompletedAt)
-        const startIndex = Math.max(0, rawData.length - selectedRange1)
+    // TOP card (line) — Strength (lift) / Body Weight (nutrition)
+    const topRawData = useMemo(() => {
+        const rawData = mode === true ? handleGetOneRepMaxData(selectedExercise) : handleGetBodyWeightProgressData(settings.onboardingCompletedAt)
+        const startIndex = Math.max(0, rawData.length - topRange)
         return rawData.slice(startIndex)
-    }, [mode, selectedExercise, selectedMacro, selectedRange1, logs, nutritionData, lastExercise, handleGetOneRepMaxData, handleGetMacroDataForGraph, settings.onboardingCompletedAt])
+    }, [mode, selectedExercise, topRange, logs, bwProgress, lastExercise, handleGetOneRepMaxData, handleGetBodyWeightProgressData, settings.onboardingCompletedAt])
 
-    const graph1Data = useMemo(() => {
+    const topData = useMemo(() => {
         if (mode) {
-            return downsampleDataPreserveEndpoints(graph1RawData, 7, 0, 'max')
+            return downsampleDataPreserveEndpoints(topRawData, 7, 0, 'max')
         }
-        const bucketSize = selectedRange1 / 7
-        return downsampleData(graph1RawData, bucketSize, 0, 'avg')
-    }, [graph1RawData, selectedRange1, mode])
+        const bucketSize = topRange / 7
+        return downsampleData(topRawData, bucketSize, 1, 'avg')
+    }, [topRawData, topRange, mode])
 
-    // Graph 2 — display (downsampled) + stats (raw daily slice)
-    const graph2RawData = useMemo(() => {
-        const rawData = mode === true ? handleGetSetsData(settings.onboardingCompletedAt) : handleGetBodyWeightProgressData(settings.onboardingCompletedAt)
-        const startIndex = Math.max(0, rawData.length - selectedRange2)
-        return rawData.slice(startIndex)
-    }, [mode, logs, bwProgress, selectedRange2, settings.onboardingCompletedAt, handleGetSetsData, handleGetBodyWeightProgressData])
+    // BOTTOM card (bars) — Sets (lift) / Calories+Macros (nutrition), one calendar week at a time
+    const weekStart = useMemo(() => addDays(getWeekStart(new Date()), bottomWeekOffset * 7), [bottomWeekOffset])
 
-    const graph2Data = useMemo(() => {
-        const bucketSize = selectedRange2 / 7
-        const precision = mode === false ? 1 : 0
-        const aggregation = mode ? 'sum' : 'avg'
-        return downsampleData(graph2RawData, bucketSize, precision, aggregation)
-    }, [graph2RawData, selectedRange2, mode])
+    const bottomData = useMemo(() => (mode ? handleGetSetsForWeek(weekStart) : handleGetMacroForWeek(selectedMacro, weekStart)), [mode, selectedMacro, weekStart, logs, nutritionData, handleGetSetsForWeek, handleGetMacroForWeek])
 
-    //Graph 1 and 2 signatures for keying so that the graph re-renders when the data changes
-    const graph1Sig = `${graph1Data.length}:${graph1Data.at(-1)?.day ?? ''}:${graph1Data.at(-1)?.value ?? ''}`
-    const graph2Sig = `${graph2Data.length}:${graph2Data.at(-1)?.day ?? ''}:${graph2Data.at(-1)?.value ?? ''}`
+    // Week navigation bounds + label
+    const minWeekStart = useMemo(() => (settings.onboardingCompletedAt ? getWeekStart(new Date(settings.onboardingCompletedAt)) : addDays(getWeekStart(new Date()), -52 * 7)), [settings.onboardingCompletedAt])
+    const canGoPrev = weekStart.getTime() > minWeekStart.getTime()
+    const canGoNext = bottomWeekOffset < 0
+    const weekLabel =
+        bottomWeekOffset === 0 ? 'This week'
+        : bottomWeekOffset === -1 ? 'Last week'
+        : `${formatDate(weekStart, false)} – ${formatDate(addDays(weekStart, 6), false)}`
 
-    //Calorie percentages for wheels
-    const caloriePercent = (todayMacros.totalCalories / settings.calorieGoal) * 100
-    const proteinPercent = (todayMacros.totalProtein / settings.proteinGoal) * 100
-    const carbsPercent = (todayMacros.totalCarbs / settings.carbsGoal) * 100
-    const fatsPercent = (todayMacros.totalFats / settings.fatsGoal) * 100
-    const caloriesLeft = settings.calorieGoal - todayMacros.totalCalories
+    // Signature for keying the line chart so it re-renders when data changes
+    const topSig = `${topData.length}:${topData.at(-1)?.day ?? ''}:${topData.at(-1)?.value ?? ''}`
+
+    const accent = mode ? colors.workout : colors.nutrition
+
+    // Goal + value formatting per card
+    const nutritionGoal =
+        selectedMacro === 'calories' ? settings.calorieGoal
+        : selectedMacro === 'protein' ? settings.proteinGoal
+        : selectedMacro === 'carbs' ? settings.carbsGoal
+        : settings.fatsGoal
+
+    const topGoal = mode ? undefined : settings.goalWeight
+    const topFormat = mode ? (n: number) => `${Math.round(n)}` : (n: number) => n.toFixed(1)
+
+    const bottomGoal = mode ? undefined : nutritionGoal
+    const bottomFormat = (n: number) => Math.round(n).toLocaleString()
+
+    // Card headers (title + simple subtitle, shown inside each card)
+    const topTitle = mode ? selectedExercise : 'Body Weight'
+    const topSubtitle = mode ? 'Estimated 1 rep max' : 'Daily'
+    const bottomTitle = mode ? 'Sets' : selectedMacro.charAt(0).toUpperCase() + selectedMacro.slice(1)
+    const bottomSubtitle = mode ? 'Total per day' : 'Daily intake'
 
     return (
         <>
             <ModeSwitcher />
-            <ScrollView contentContainerStyle={styles.container} style={{ flex: 1, backgroundColor: '#121212' }}>
-                <ActivityBanner mode={mode} workoutDaysThisWeek={workoutDaysThisWeek} nutritionStreak={nutritionStreak} />
+            <ScrollView contentContainerStyle={styles.container} style={styles.scroll}>
+                <ActivityBanner mode={mode} trainedDays={trainedDaysThisWeek} nutritionStreak={nutritionStreak} />
 
-                {/*Rectangular Card */}
-                <Text style={styles.mainTitle} numberOfLines={2} adjustsFontSizeToFit>
-                    {mode === true ? 'Todays Fatigue' : 'Todays Calories'}
-                </Text>
-                <View style={styles.rectangularCard}>
-                    <ProgressWheel percent={mode === true ? fatigueData.today : caloriePercent} />
-                    <View style={styles.textContainer}>
-                        {mode === false && (
-                            <Text style={styles.mainValue} numberOfLines={2} adjustsFontSizeToFit>
-                                {Math.round(todayMacros.totalCalories)}/{settings.calorieGoal}
-                            </Text>
-                        )}
-                        {mode === false && (
-                            <Text style={styles.mainSubtext} numberOfLines={5} adjustsFontSizeToFit>
-                                {caloriesLeft > 75 ?
-                                    `You have ${Math.round(caloriesLeft)} calories to go. Keep fueling! 🍽️`
-                                : caloriesLeft >= -75 ?
-                                    `You hit your calorie goal! Nice Job! 🎯`
-                                :   `You went over by ${Math.round(Math.abs(caloriesLeft))} calories. You got this tomorrow! 😤`}
-                            </Text>
-                        )}
-                        {mode === true && (
-                            <Text style={styles.mainSubtext} numberOfLines={5} adjustsFontSizeToFit>
-                                {getFatigueFeedback(fatigueData.today)}
-                            </Text>
-                        )}
-                    </View>
-                </View>
-
-                {/**Row of 3 cards */}
-                <View style={styles.threeCardsRow}>
-                    {/*1/3 Square Card*/}
-                    <View style={styles.oneThirdColumn}>
-                        <Text style={styles.oneThirdTopText} numberOfLines={2}>
-                            {mode === true ? `Last 3 Days` : `Todays Fats`}
-                        </Text>
-                        <View style={styles.oneThirdSquareCard}>
-                            <ProgressWheel percent={mode === true ? fatigueData.last3Days : fatsPercent} size={95} strokeWidth={9.5} fontSize={20} />
-                            {mode === false && (
-                                <Text style={styles.oneThirdBottomText}>
-                                    {Math.round(todayMacros.totalFats)}/{settings.fatsGoal}g
-                                </Text>
-                            )}
-                        </View>
-                    </View>
-
-                    {/*1/3 Square Card*/}
-                    <View style={styles.oneThirdColumn}>
-                        <Text style={styles.oneThirdTopText} numberOfLines={2}>
-                            {mode === true ? `Last 6 Days` : `Todays Carbs`}
-                        </Text>
-                        <View style={styles.oneThirdSquareCard}>
-                            <ProgressWheel percent={mode === true ? fatigueData.last6Days : carbsPercent} size={95} strokeWidth={9.5} fontSize={20} />
-                            {mode === false && (
-                                <Text style={styles.oneThirdBottomText}>
-                                    {Math.round(todayMacros.totalCarbs)}/{settings.carbsGoal}g
-                                </Text>
-                            )}
-                        </View>
-                    </View>
-
-                    {/*1/3 Square Card*/}
-                    <View style={styles.oneThirdColumn}>
-                        <Text style={styles.oneThirdTopText} numberOfLines={2}>
-                            {mode === true ? `Last 9 Days` : `Todays Protein`}
-                        </Text>
-                        <View style={styles.oneThirdSquareCard}>
-                            <ProgressWheel percent={mode === true ? fatigueData.last9Days : proteinPercent} size={95} strokeWidth={9.5} fontSize={20} />
-                            {mode === false && (
-                                <Text style={styles.oneThirdBottomText}>
-                                    {Math.round(todayMacros.totalProtein)}/{settings.proteinGoal}g
-                                </Text>
-                            )}
-                        </View>
-                    </View>
-                </View>
-
-                {/* Graph 1 Card */}
-                <Text style={styles.mainTitle}>{mode === true ? `Strength Graph` : `Nutrition Graph`}</Text>
+                {/* TOP card — line chart */}
                 <View style={styles.graphCard}>
-                    {graph1Data.length > 0 && (
-                        <Text style={styles.graphSubtext}>
+                    <View style={styles.cardHeader}>
+                        <View style={styles.headerLeft}>
                             {mode ?
-                                <>
-                                    Graph displays estimated one rep max for <Text style={[styles.graphSubtext, { fontFamily: 'Poppins_600SemiBold', color: '#2f80ed' }]}>{selectedExercise}</Text> each training day
-                                </>
-                            :   <>
-                                    Graph displays your <Text style={[styles.graphSubtext, { fontFamily: 'Poppins_600SemiBold', color: '#22C933' }]}>{selectedMacro.charAt(0).toUpperCase() + selectedMacro.slice(1)}</Text> intake by day
-                                </>
+                                <TouchableOpacity style={styles.titleRow} onPress={() => setSelectionModalVisible(true)} activeOpacity={0.6} hitSlop={8}>
+                                    <Text style={styles.cardTitle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6}>
+                                        {topTitle}
+                                    </Text>
+                                    <ChevronDown size={18} color={accent} strokeWidth={2.5} />
+                                </TouchableOpacity>
+                            :   <Text style={styles.cardTitle} numberOfLines={1}>
+                                    {topTitle}
+                                </Text>
                             }
-                        </Text>
-                    )}
+                            <Text style={styles.cardSubtitle}>{topSubtitle}</Text>
+                        </View>
+                        <TouchableOpacity style={[styles.rangeButton, { backgroundColor: accent + '1A', borderColor: accent + '40' }]} onPress={() => setTopRangeModalVisible(true)} activeOpacity={0.6} hitSlop={8} accessibilityRole="button" accessibilityLabel="Change time range">
+                            <History size={20} color={accent} strokeWidth={2} />
+                        </TouchableOpacity>
+                    </View>
                     <View style={styles.chartContainer}>
-                        {graph1Data.length > 0 ?
-                            <Graph1
-                                key={`graph1-${mode ? 'lift' : 'nutrition'}-${selectedRange1}-${mode ? selectedExercise : selectedMacro}-${graph1Sig}`}
-                                mode={mode}
-                                data={graph1Data}
-                                selectedRange={selectedRange1}
-                                chartNote={getGraphChartNote(mode ? 'strength' : 'macro', selectedRange1)}
-                            />
+                        {topData.length > 0 ?
+                            <Graph1 key={`top-${mode ? 'lift' : 'nutrition'}-${topRange}-${mode ? selectedExercise : 'bw'}-${topSig}`} mode={mode} data={topData} selectedRange={topRange} chartNote={getGraphChartNote(mode ? 'strength' : 'bodyweight', topRange)} goal={topGoal} formatValue={topFormat} />
                         :   <View style={styles.emptyGraphState}>
-                                <View style={[styles.emptyIconCircle, { backgroundColor: mode === true ? 'rgba(45, 156, 255, 0.1)' : 'rgba(52, 199, 89, 0.1)' }]}>
+                                <View style={[styles.emptyIconCircle, { backgroundColor: accent + '1A' }]}>
                                     {mode === true ?
-                                        <Dumbbell size={48} color="#2f80ed" strokeWidth={2} />
-                                    :   <Scale size={48} color="#22C933" strokeWidth={2} />}
+                                        <Dumbbell size={48} color={colors.workout} strokeWidth={2} />
+                                    :   <Scale size={48} color={colors.nutrition} strokeWidth={2} />}
                                 </View>
-                                <Text style={styles.emptyGraphText}>No data yet for this exercise</Text>
-                                <Text style={styles.emptyGraphSubtext}>Start logging workouts to see your progress</Text>
+                                <Text style={styles.emptyGraphText}>{mode === true ? 'No data yet for this exercise' : 'No weight data yet'}</Text>
+                                <Text style={styles.emptyGraphSubtext}>{mode === true ? 'Start logging workouts to see your progress' : 'Update your body weight to see progress'}</Text>
                             </View>
                         }
                     </View>
-                    <GraphStats graphType={mode ? 'orm' : selectedMacro} data={graph1Data} statsData={graph1RawData} unitSystem={settings.unitSystem} mode={mode} />
-                    {/* Button Row */}
-                    <View style={styles.buttonRow}>
-                        <TouchableOpacity style={[styles.graphButton, { backgroundColor: mode === true ? '#2f80ed' : '#22C933' }]} onPress={() => setRangeModalVisible1(true)}>
-                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20 }}>
-                                <Text style={styles.graphButtonText} numberOfLines={1} adjustsFontSizeToFit={true}>
-                                    Last {selectedRange1} {mode ? 'Lifts' : 'Days'}
-                                </Text>
-                                <ChevronDown size={20} color="#fff" strokeWidth={2} />
-                            </View>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={[styles.graphButton, { backgroundColor: mode === true ? '#2f80ed' : '#22C933' }]} onPress={() => setSelectionModalVisible(true)}>
-                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20 }}>
-                                <Text style={styles.graphButtonText} numberOfLines={1} adjustsFontSizeToFit={true}>
-                                    {mode ? selectedExercise : selectedMacro.charAt(0).toUpperCase() + selectedMacro.slice(1)}
-                                </Text>
-                                <ChevronDown size={20} color="#fff" strokeWidth={2} />
-                            </View>
-                        </TouchableOpacity>
-                    </View>
+                    <GraphStats graphType={mode ? 'orm' : 'bodyweight'} data={topData} statsData={topRawData} unitSystem={settings.unitSystem} mode={mode} goalWeight={settings.goalWeight} />
                 </View>
 
-                {/* Graph 2 Card */}
-                <Text style={styles.mainTitle}>{mode === true ? `Sets Graph` : `Body Weight Graph`}</Text>
+                {/* BOTTOM card — bar chart (one calendar week at a time) */}
                 <View style={styles.graphCard}>
-                    {graph2Data.length > 0 && (
-                        <Text style={styles.graphSubtext}>
-                            {mode ?
-                                <>
-                                    Graph displays <Text style={[styles.graphSubtext, { fontFamily: 'Poppins_600SemiBold', color: '#2f80ed' }]}>total sets</Text> by day
-                                </>
-                            :   <>
-                                    Graph displays <Text style={[styles.graphSubtext, { fontFamily: 'Poppins_600SemiBold', color: '#22C933' }]}>body weight</Text> by day
-                                </>
-                            }
-                        </Text>
-                    )}
-                    <View style={styles.chartContainer}>
-                        {graph2Data.length > 0 ?
-                            <Graph1
-                                key={`graph2-${mode ? 'lift' : 'nutrition'}-${selectedRange2}-${graph2Sig}`}
-                                mode={mode}
-                                data={graph2Data}
-                                selectedRange={selectedRange2}
-                                chartNote={getGraphChartNote(mode ? 'sets' : 'bodyweight', selectedRange2)}
-                            />
-                        :   <View style={styles.emptyGraphState}>
-                                <View style={[styles.emptyIconCircle, { backgroundColor: mode === true ? 'rgba(45, 156, 255, 0.1)' : 'rgba(52, 199, 89, 0.1)' }]}>
-                                    {mode === true ?
-                                        <Dumbbell size={48} color="#2f80ed" strokeWidth={2} />
-                                    :   <Scale size={48} color="#22C933" strokeWidth={2} />}
-                                </View>
-                                <Text style={styles.emptyGraphText}>{mode === true ? 'No set data yet' : 'No weight data yet'}</Text>
-                                <Text style={styles.emptyGraphSubtext}>{mode === true ? 'Start logging workouts to see your sets' : 'Update your body weight to see progress'}</Text>
-                            </View>
-                        }
-                    </View>
-                    <GraphStats graphType={mode ? 'sets' : 'bodyweight'} data={graph2Data} statsData={graph2RawData} unitSystem={settings.unitSystem} mode={mode} goalWeight={settings.goalWeight} />
-                    {/* Button Row */}
-                    <View style={styles.buttonRow}>
-                        <TouchableOpacity style={[styles.graphButton, { backgroundColor: mode === true ? '#2f80ed' : '#22C933' }]} onPress={() => setRangeModalVisible2(true)}>
-                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20 }}>
-                                <Text style={styles.graphButtonText} numberOfLines={1} adjustsFontSizeToFit={true}>
-                                    Last {selectedRange2} Days
+                    <View style={styles.cardHeader}>
+                        <View style={styles.headerLeft}>
+                            {!mode ?
+                                <TouchableOpacity style={styles.titleRow} onPress={() => setSelectionModalVisible(true)} activeOpacity={0.6} hitSlop={8}>
+                                    <Text style={styles.cardTitle} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6}>
+                                        {bottomTitle}
+                                    </Text>
+                                    <ChevronDown size={18} color={accent} strokeWidth={2.5} />
+                                </TouchableOpacity>
+                            :   <Text style={styles.cardTitle} numberOfLines={1}>
+                                    {bottomTitle}
                                 </Text>
-                                <ChevronDown size={20} color="#fff" strokeWidth={2} />
-                            </View>
+                            }
+                            <Text style={styles.cardSubtitle}>{bottomSubtitle}</Text>
+                        </View>
+                    </View>
+                    {/* Week stepper — label + paging arrows above the chart */}
+                    <View style={styles.weekStepper}>
+                        <TouchableOpacity onPress={() => setBottomWeekOffset((o) => o - 1)} disabled={!canGoPrev} hitSlop={12} style={styles.weekStepperArrow} activeOpacity={0.6} accessibilityRole="button" accessibilityLabel="Previous week">
+                            <ChevronLeft size={22} color={accent} strokeWidth={2.5} style={{ opacity: canGoPrev ? 1 : 0.25 }} />
+                        </TouchableOpacity>
+                        <Text style={styles.weekStepperLabel} numberOfLines={1}>
+                            {weekLabel}
+                        </Text>
+                        <TouchableOpacity onPress={() => setBottomWeekOffset((o) => Math.min(0, o + 1))} disabled={!canGoNext} hitSlop={12} style={styles.weekStepperArrow} activeOpacity={0.6} accessibilityRole="button" accessibilityLabel="Next week">
+                            <ChevronRight size={22} color={accent} strokeWidth={2.5} style={{ opacity: canGoNext ? 1 : 0.7 }} />
                         </TouchableOpacity>
                     </View>
+                    <View style={styles.chartContainer}>
+                        <BarChart key={`bottom-${mode ? 'lift' : 'nutrition'}-${mode ? 'sets' : selectedMacro}`} mode={mode} data={bottomData} goal={bottomGoal} formatValue={bottomFormat} showXLabels highlightIndex={bottomWeekOffset === 0 ? new Date().getDay() : -1} />
+                    </View>
+                    <GraphStats graphType={mode ? 'sets' : selectedMacro} data={bottomData} unitSystem={settings.unitSystem} mode={mode} goal={mode ? undefined : nutritionGoal} />
                 </View>
             </ScrollView>
 
             {/* Modals */}
-            <RangeSelectionModal visible={rangeModalVisible1} onClose={() => setRangeModalVisible1(false)} selectedRange={selectedRange1} onSelectRange={setSelectedRange1} mode={mode} rangeUnit={mode ? 'Lifts' : 'Days'} />
-
-            <RangeSelectionModal visible={rangeModalVisible2} onClose={() => setRangeModalVisible2(false)} selectedRange={selectedRange2} onSelectRange={setSelectedRange2} mode={mode} rangeUnit="Days" />
+            <RangeSelectionModal visible={topRangeModalVisible} onClose={() => setTopRangeModalVisible(false)} selectedRange={topRange} onSelectRange={setTopRange} mode={mode} rangeUnit={mode ? 'Lifts' : 'Days'} />
 
             <SelectionModal
                 visible={selectionModalVisible}
@@ -318,194 +214,124 @@ export default function ProgressScreen() {
     )
 }
 
-const styles = StyleSheet.create({
-    container: {
-        paddingTop: 10,
-        paddingBottom: 60,
-        paddingHorizontal: 15,
-        backgroundColor: '#121212',
-        width: '100%',
-    },
-    rectangularCard: {
-        width: '100%',
-        aspectRatio: 2.5,
-        backgroundColor: '#1e1e1e',
-        borderRadius: 15,
-        marginBottom: 10,
-        padding: 20,
-        alignSelf: 'stretch',
-        alignItems: 'center',
-        flexDirection: 'row',
-        gap: 10,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.4,
-        shadowRadius: 6,
-        elevation: 6,
-    },
-    textContainer: {
-        flexDirection: 'column',
-        justifyContent: 'center',
-        marginLeft: 10,
-        marginTop: -10,
-        gap: 5,
-        flex: 1,
-        paddingRight: 10,
-    },
-    threeCardsRow: {
-        flexDirection: 'row',
-        gap: 8,
-        width: '100%',
-        alignSelf: 'stretch',
-    },
-    oneThirdColumn: {
-        flex: 1,
-        minWidth: 0,
-        flexDirection: 'column',
-    },
-    oneThirdSquareCard: {
-        width: '100%',
-        aspectRatio: 0.71,
-        backgroundColor: '#1e1e1e',
-        borderRadius: 15,
-        marginBottom: 10,
-        alignItems: 'center',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 6,
-        elevation: 6,
-    },
-    oneThirdTopText: {
-        fontSize: 13,
-        marginBottom: 4,
-        fontWeight: '700',
-        color: '#fff',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_500Medium',
-    },
-    oneThirdBottomText: {
-        fontSize: 13,
-        fontWeight: '700',
-        marginTop: 10,
-        color: '#fff',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_500Medium',
-    },
-    mainTitle: {
-        fontSize: 22,
-        flexShrink: 1,
-        color: '#fff',
-        letterSpacing: -0.5,
-        marginBottom: 8,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    mainValue: {
-        fontSize: 20,
-        textAlign: 'center',
-        fontWeight: '700',
-        flexShrink: 1,
-        color: '#fff',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    mainSubtext: {
-        fontSize: 13,
-        textAlign: 'center',
-        fontWeight: '500',
-        flexShrink: 1,
-        color: '#aaa',
-        letterSpacing: 0.2,
-        fontFamily: 'Poppins_400Regular',
-    },
-    graphCard: {
-        width: '100%',
-        height: 540,
-        backgroundColor: '#1e1e1e',
-        borderRadius: 15,
-        marginBottom: 15,
-        padding: 15,
-        alignSelf: 'stretch',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.6,
-        shadowRadius: 6,
-        elevation: 6,
-    },
-    graphTitle: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: '#fff',
-        letterSpacing: -0.5,
-        textAlign: 'center',
-        paddingHorizontal: 8,
-        marginBottom: 8,
-    },
-    graphSubtext: {
-        fontFamily: 'Poppins_400Regular',
-        fontSize: 14,
-        fontWeight: '400',
-        color: '#aaa',
-        letterSpacing: -0.2,
-        textAlign: 'center',
-        paddingHorizontal: 8,
-        marginBottom: 16,
-        lineHeight: 18,
-    },
-    chartContainer: {
-        flex: 1,
-    },
-    emptyGraphState: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    emptyIconCircle: {
-        width: 100,
-        height: 100,
-        borderRadius: 50,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 20,
-    },
-    emptyGraphText: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#fff',
-        letterSpacing: -0.5,
-        marginBottom: 8,
-    },
-    emptyGraphSubtext: {
-        fontSize: 14,
-        fontWeight: '400',
-        color: '#888',
-        letterSpacing: 0.2,
-    },
-    buttonRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        gap: 12,
-        marginTop: 12,
-    },
-    graphButton: {
-        flex: 1,
-        flexDirection: 'row',
-        paddingVertical: 14,
-        borderRadius: 14,
-        alignItems: 'center',
-        justifyContent: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 4,
-    },
-    graphButtonText: {
-        fontSize: 14,
-        fontWeight: '700',
-        color: '#fff',
-        letterSpacing: -0.3,
-    },
-})
+function makeStyles(colors: Colors, isDark: boolean) {
+    return StyleSheet.create({
+        scroll: {
+            flex: 1,
+            backgroundColor: colors.background,
+        },
+        container: {
+            paddingTop: 10,
+            paddingBottom: 60,
+            paddingHorizontal: 15,
+            width: '100%',
+        },
+        bwContainer: {
+            marginBottom: 6,
+        },
+        cardHeader: {
+            flexDirection: 'row',
+            alignItems: 'flex-start',
+            justifyContent: 'space-between',
+            gap: 10,
+            marginBottom: 8,
+        },
+        headerLeft: {
+            flex: 1,
+            minWidth: 0,
+        },
+        rangeButton: {
+            width: 40,
+            height: 40,
+            borderRadius: radius.iconButton,
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderWidth: StyleSheet.hairlineWidth,
+        },
+        titleRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 6,
+            alignSelf: 'flex-start',
+            maxWidth: '100%',
+        },
+        cardTitle: {
+            fontSize: 20,
+            color: colors.text,
+            letterSpacing: -0.4,
+            fontFamily: fonts.extrabold,
+            flexShrink: 1,
+        },
+        cardSubtitle: {
+            fontSize: 13,
+            color: colors.textSecondary,
+            marginTop: 2,
+            fontFamily: fonts.medium,
+        },
+        graphCard: {
+            width: '100%',
+            height: 400,
+            backgroundColor: colors.surface,
+            borderRadius: radius.cardLg,
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: colors.hairline,
+            marginBottom: 15,
+            padding: 15,
+            alignSelf: 'stretch',
+            ...(isDark ?
+                {}
+            :   {
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.08,
+                    shadowRadius: 6,
+                    elevation: 3,
+                }),
+        },
+        chartContainer: {
+            flex: 1,
+        },
+        emptyGraphState: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        emptyIconCircle: {
+            width: 100,
+            height: 100,
+            borderRadius: 50,
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginBottom: 20,
+        },
+        emptyGraphText: {
+            fontSize: 16,
+            color: colors.text,
+            letterSpacing: -0.4,
+            marginBottom: 8,
+            fontFamily: fonts.bold,
+        },
+        emptyGraphSubtext: {
+            fontSize: 14,
+            color: colors.labelMuted,
+            fontFamily: fonts.regular,
+        },
+        weekStepper: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+            marginBottom: 10,
+        },
+        weekStepperArrow: {
+            padding: 4,
+        },
+        weekStepperLabel: {
+            textAlign: 'center',
+            fontSize: 14,
+            color: colors.text,
+            letterSpacing: -0.2,
+            fontFamily: fonts.semibold,
+        },
+    })
+}

@@ -1,4 +1,5 @@
-import React from 'react'
+import { fonts, useColors, type Colors } from '@/context/ThemeContext'
+import React, { useMemo } from 'react'
 import { StyleSheet, Switch, Text, View } from 'react-native'
 
 interface StagedSectionProps {
@@ -11,6 +12,8 @@ interface StagedSectionProps {
 }
 
 export default function StagedSection({ label, count, color, children, combineItems, onCombineItemsChange }: StagedSectionProps) {
+    const colors = useColors()
+    const styles = useMemo(() => makeStyles(colors), [colors])
     const showCombineToggle = count >= 2 && onCombineItemsChange != null
 
     return (
@@ -28,8 +31,8 @@ export default function StagedSection({ label, count, color, children, combineIt
                     <Switch
                         value={combineItems ?? false}
                         onValueChange={onCombineItemsChange}
-                        trackColor={{ false: '#333', true: `${color}88` }}
-                        thumbColor={combineItems ? color : '#888'}
+                        trackColor={{ false: colors.disabled, true: `${color}88` }}
+                        thumbColor={combineItems ? color : colors.textMuted}
                     />
                 </View>
             )}
@@ -38,57 +41,59 @@ export default function StagedSection({ label, count, color, children, combineIt
     )
 }
 
-const styles = StyleSheet.create({
-    container: {
-        borderRadius: 16,
-        borderWidth: 1,
-        paddingHorizontal: 14,
-        paddingTop: 12,
-        paddingBottom: 14,
-        marginBottom: 14,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 10,
-        gap: 6,
-    },
-    dot: {
-        width: 7,
-        height: 7,
-        borderRadius: 4,
-    },
-    title: {
-        fontSize: 12,
-        fontFamily: 'Poppins_600SemiBold',
-        letterSpacing: 0.5,
-        textTransform: 'uppercase',
-    },
-    badge: {
-        borderRadius: 10,
-        minWidth: 20,
-        height: 20,
-        paddingHorizontal: 6,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    badgeText: {
-        fontSize: 11,
-        color: '#fff',
-        fontFamily: 'Poppins_600SemiBold',
-        lineHeight: 14,
-    },
-    combineRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: 10,
-        paddingVertical: 4,
-    },
-    combineLabel: {
-        fontSize: 14,
-        color: '#ccc',
-        fontFamily: 'Poppins_500Medium',
-        letterSpacing: -0.2,
-    },
-})
+function makeStyles(colors: Colors) {
+    return StyleSheet.create({
+        container: {
+            borderRadius: 16,
+            borderWidth: 1,
+            paddingHorizontal: 14,
+            paddingTop: 12,
+            paddingBottom: 14,
+            marginBottom: 14,
+        },
+        header: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: 10,
+            gap: 6,
+        },
+        dot: {
+            width: 7,
+            height: 7,
+            borderRadius: 4,
+        },
+        title: {
+            fontSize: 12,
+            fontFamily: fonts.semibold,
+            letterSpacing: 0.5,
+            textTransform: 'uppercase',
+        },
+        badge: {
+            borderRadius: 10,
+            minWidth: 20,
+            height: 20,
+            paddingHorizontal: 6,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        badgeText: {
+            fontSize: 11,
+            color: '#fff',
+            fontFamily: fonts.semibold,
+            lineHeight: 14,
+        },
+        combineRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: 10,
+            paddingVertical: 4,
+        },
+        combineLabel: {
+            fontSize: 14,
+            color: colors.textSecondary,
+            fontFamily: fonts.medium,
+            letterSpacing: -0.2,
+        },
+    })
+}

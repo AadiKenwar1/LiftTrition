@@ -1,12 +1,13 @@
 import StagedSection from '@/components/NeutralComponents/StagedSection'
 import { useAuth } from '@/context/AuthContext'
 import { useNutrition } from '@/context/NutritionContext'
+import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { getFoodItem, getFoodSearchResults } from '@/lib/foodDB/foodDB'
 import { FoodItem, FoodSearchResult } from '@/lib/foodDB/types'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { Check, Database, Plus, X } from 'lucide-react-native'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import uuid from 'react-native-uuid'
 
@@ -18,6 +19,8 @@ export default function FoodDBModal() {
     const { handleAddNutrition, selectedDate } = useNutrition()
     const { userID } = useAuth()
     const router = useRouter()
+    const colors = useColors()
+    const styles = useMemo(() => makeStyles(colors), [colors])
 
     const [searchQuery, setSearchQuery] = useState('')
     const [addedItems, setAddedItems] = useState<FoodItemWithQuantity[]>([])
@@ -166,7 +169,7 @@ export default function FoodDBModal() {
             <Modal visible={isLoadingDetails} transparent animationType="fade">
                 <View style={styles.loadingModal}>
                     <View style={styles.loadingContent}>
-                        <ActivityIndicator size="large" color="#22C922" />
+                        <ActivityIndicator size="large" color={colors.nutrition} />
                         <Text style={styles.loadingText}>Loading food details...</Text>
                     </View>
                 </View>
@@ -178,14 +181,14 @@ export default function FoodDBModal() {
                     <View style={styles.quantityContent}>
                         <Text style={styles.quantityTitle}>How many servings?</Text>
                         <Text style={styles.quantitySubtitle}>{quantityInputItem?.name}</Text>
-                        <TextInput style={styles.quantityInput} placeholder="1" placeholderTextColor="#666" value={quantityValue} onChangeText={setQuantityValue} keyboardType="numeric" autoFocus />
+                        <TextInput style={styles.quantityInput} placeholder="1" placeholderTextColor={colors.placeholder} value={quantityValue} onChangeText={setQuantityValue} keyboardType="numeric" autoFocus />
                         <View style={styles.quantityButtons}>
                             <TouchableOpacity style={[styles.quantityButton, styles.cancelButton]} onPress={cancelAddItem} activeOpacity={0.5}>
-                                <X size={18} color="#FF453A" strokeWidth={2.5} />
+                                <X size={18} color={colors.destructive} strokeWidth={2.5} />
                                 <Text style={[styles.quantityButtonText, styles.cancelButtonText]}>Cancel</Text>
                             </TouchableOpacity>
                             <TouchableOpacity style={[styles.quantityButton, styles.confirmButton]} onPress={confirmAddItem} activeOpacity={0.5}>
-                                <Check size={18} color="#22C922" strokeWidth={2.5} />
+                                <Check size={18} color={colors.nutrition} strokeWidth={2.5} />
                                 <Text style={[styles.quantityButtonText, styles.confirmButtonText]}>Add</Text>
                             </TouchableOpacity>
                         </View>
@@ -198,7 +201,7 @@ export default function FoodDBModal() {
                     {/* Icon Section */}
                     <View style={styles.iconContainer}>
                         <View style={styles.iconCircle}>
-                            <Database size={40} color="#22C922" strokeWidth={2.5} />
+                            <Database size={40} color={colors.nutrition} strokeWidth={2.5} />
                         </View>
                     </View>
 
@@ -211,7 +214,7 @@ export default function FoodDBModal() {
                         <TextInput
                             style={[styles.searchInput, isFocused && styles.searchInputFocused]}
                             placeholder="Search foods..."
-                            placeholderTextColor="#666"
+                            placeholderTextColor={colors.placeholder}
                             value={searchQuery}
                             onChangeText={setSearchQuery}
                             onFocus={() => setIsFocused(true)}
@@ -219,7 +222,7 @@ export default function FoodDBModal() {
                         />
                         {isSearching && (
                             <View style={styles.searchLoader}>
-                                <ActivityIndicator size="small" color="#22C922" />
+                                <ActivityIndicator size="small" color={colors.nutrition} />
                             </View>
                         )}
                     </View>
@@ -229,7 +232,7 @@ export default function FoodDBModal() {
                         <StagedSection
                             label="Added"
                             count={addedItems.length}
-                            color="#22C922"
+                            color={colors.nutrition}
                             combineItems={combineItems}
                             onCombineItemsChange={setCombineItems}
                         >
@@ -245,19 +248,19 @@ export default function FoodDBModal() {
                                                 <View style={styles.macroPill}>
                                                     <Text style={styles.macroPillText}>{Math.round(item.calories * q)} cal</Text>
                                                 </View>
-                                                <View style={[styles.macroPill, styles.macroPillF]}>
-                                                    <Text style={[styles.macroPillText, styles.macroPillTextF]}>{Math.round(item.fats * q * 10) / 10}g F</Text>
+                                                <View style={styles.macroPill}>
+                                                    <Text style={styles.macroPillText}>{Math.round(item.fats * q * 10) / 10}g F</Text>
                                                 </View>
-                                                <View style={[styles.macroPill, styles.macroPillC]}>
-                                                    <Text style={[styles.macroPillText, styles.macroPillTextC]}>{Math.round(item.carbs * q * 10) / 10}g C</Text>
+                                                <View style={styles.macroPill}>
+                                                    <Text style={styles.macroPillText}>{Math.round(item.carbs * q * 10) / 10}g C</Text>
                                                 </View>
-                                                <View style={[styles.macroPill, styles.macroPillP]}>
-                                                    <Text style={[styles.macroPillText, styles.macroPillTextP]}>{Math.round(item.protein * q * 10) / 10}g P</Text>
+                                                <View style={styles.macroPill}>
+                                                    <Text style={styles.macroPillText}>{Math.round(item.protein * q * 10) / 10}g P</Text>
                                                 </View>
                                             </View>
                                         </View>
                                         <TouchableOpacity style={styles.removeButton} onPress={() => handleRemoveItem(item.id)} activeOpacity={0.5}>
-                                            <X size={14} color="#22C922" strokeWidth={3} />
+                                            <X size={14} color={colors.nutrition} strokeWidth={3} />
                                         </TouchableOpacity>
                                     </View>
                                 )
@@ -270,7 +273,7 @@ export default function FoodDBModal() {
                         <Text style={styles.sectionTitle}>{searchQuery ? `Results (${searchResults.length})` : 'Start searching for foods...'}</Text>
                         {isSearching ?
                             <View style={styles.emptyState}>
-                                <ActivityIndicator size="large" color="#22C922" />
+                                <ActivityIndicator size="large" color={colors.nutrition} />
                                 <Text style={styles.emptyText}>Searching...</Text>
                             </View>
                         : searchResults.length > 0 ?
@@ -286,8 +289,8 @@ export default function FoodDBModal() {
                                         </View>
                                         <TouchableOpacity style={[styles.addButton, (isAdded || isLoading) && styles.addButtonDisabled]} onPress={() => handleAddItem(item)} activeOpacity={0.5} disabled={!!isAdded || isLoading}>
                                             {isLoading ?
-                                                <ActivityIndicator size="small" color="#666" />
-                                            :   <Plus size={18} color={isAdded ? '#666' : '#22C922'} strokeWidth={2.5} />}
+                                                <ActivityIndicator size="small" color={colors.placeholder} />
+                                            :   <Plus size={18} color={isAdded ? colors.placeholder : colors.nutrition} strokeWidth={2.5} />}
                                         </TouchableOpacity>
                                     </View>
                                 )
@@ -311,7 +314,7 @@ export default function FoodDBModal() {
             {addedItems.length > 0 && (
                 <View style={styles.addAllContainer}>
                     <TouchableOpacity onPress={handleAddAll} activeOpacity={0.8} style={styles.addAllButtonTouchable}>
-                        <LinearGradient colors={['#3CB855', '#22C922', '#5CE073']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.addAllButton}>
+                        <LinearGradient colors={colors.nutritionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.addAllButton}>
                             <Text style={styles.addAllButtonText}>
                                 {combineItems && addedItems.length >= 2
                                     ? 'Add 1 combined meal'
@@ -325,353 +328,349 @@ export default function FoodDBModal() {
     )
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#121212',
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        overflow: 'hidden',
-    },
-    keyboardView: {
-        flex: 1,
-    },
-    handleContainer: {
-        alignItems: 'center',
-        paddingTop: 12,
-        paddingBottom: 8,
-    },
-    handle: {
-        width: 40,
-        height: 5,
-        backgroundColor: '#333',
-        borderRadius: 3,
-    },
-    scrollView: {
-        flex: 1,
-    },
-    content: {
-        paddingHorizontal: 24,
-        paddingTop: 12,
-        paddingBottom: 32,
-    },
-    iconContainer: {
-        alignItems: 'center',
-        marginBottom: 16,
-        marginTop: 12,
-    },
-    iconCircle: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
-        backgroundColor: '#1e1e1e',
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 2,
-        borderColor: '#22C922',
-    },
-    title: {
-        fontSize: 24,
-        color: '#FFF',
-        textAlign: 'center',
-        marginBottom: 4,
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    subtitle: {
-        fontSize: 16,
-        color: '#aaa',
-        textAlign: 'center',
-        marginBottom: 20,
-        fontFamily: 'Poppins_400Regular',
-        letterSpacing: 0.2,
-    },
-    searchContainer: {
-        marginBottom: 24,
-        position: 'relative',
-    },
-    searchInput: {
-        backgroundColor: '#1e1e1e',
-        borderRadius: 12,
-        paddingHorizontal: 16,
-        paddingVertical: 14,
-        paddingRight: 50,
-        fontSize: 15,
-        color: '#FFF',
-        borderWidth: 2,
-        borderColor: '#1e1e1e',
-        fontFamily: 'Poppins_400Regular',
-    },
-    searchInputFocused: {
-        borderColor: '#22C922',
-    },
-    searchLoader: {
-        position: 'absolute',
-        right: 16,
-        top: '50%',
-        transform: [{ translateY: -10 }],
-    },
-    section: {
-        marginBottom: 24,
-    },
-    sectionTitle: {
-        fontSize: 16,
-        color: '#FFF',
-        marginBottom: 12,
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    foodItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#1e1e1e',
-        borderRadius: 12,
-        padding: 14,
-        marginBottom: 8,
-        borderWidth: 2,
-        borderColor: '#1e1e1e',
-    },
-    foodInfo: {
-        flex: 1,
-        marginRight: 12,
-    },
-    foodName: {
-        fontSize: 15,
-        color: '#FFF',
-        marginBottom: 4,
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    foodMacros: {
-        fontSize: 12,
-        color: '#888',
-        letterSpacing: 0.2,
-        fontFamily: 'Poppins_400Regular',
-    },
-    stagedRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: 'rgba(34, 201, 34, 0.06)',
-        borderRadius: 12,
-        paddingVertical: 10,
-        paddingHorizontal: 12,
-        marginTop: 6,
-        borderWidth: 1,
-        borderColor: 'rgba(34, 201, 34, 0.15)',
-    },
-    stagedInfo: {
-        flex: 1,
-        marginRight: 10,
-    },
-    stagedName: {
-        fontSize: 14,
-        color: '#FFF',
-        marginBottom: 6,
-        letterSpacing: -0.3,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    stagedQty: {
-        color: '#22C922',
-        fontFamily: 'Poppins_400Regular',
-    },
-    macroRow: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: 5,
-    },
-    macroPill: {
-        backgroundColor: 'rgba(255,255,255,0.07)',
-        borderRadius: 6,
-        paddingHorizontal: 7,
-        paddingVertical: 2,
-    },
-    macroPillText: {
-        fontSize: 11,
-        color: '#aaa',
-        fontFamily: 'Poppins_500Medium',
-    },
-    macroPillP: { backgroundColor: 'rgba(255, 107, 107, 0.15)' },
-    macroPillTextP: { color: '#FF6B6B' },
-    macroPillC: { backgroundColor: 'rgba(255, 217, 61, 0.15)' },
-    macroPillTextC: { color: '#FFD93D' },
-    macroPillF: { backgroundColor: 'rgba(34, 201, 34, 0.15)' },
-    macroPillTextF: { color: '#22C922' },
-    addButton: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        backgroundColor: 'rgba(76, 217, 100, 0.12)',
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1.5,
-        borderColor: 'rgba(76, 217, 100, 0.25)',
-    },
-    addButtonDisabled: {
-        backgroundColor: 'rgba(102, 102, 102, 0.12)',
-        borderColor: 'rgba(102, 102, 102, 0.25)',
-    },
-    removeButton: {
-        width: 28,
-        height: 28,
-        borderRadius: 14,
-        backgroundColor: 'rgba(34, 201, 34, 0.12)',
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: 'rgba(34, 201, 34, 0.25)',
-    },
-    emptyState: {
-        paddingVertical: 40,
-        alignItems: 'center',
-        gap: 8,
-    },
-    emptyText: {
-        fontSize: 14,
-        color: '#aaa',
-    },
-    emptySubtext: {
-        fontSize: 12,
-        color: '#aaa',
-    },
-    brandName: {
-        fontSize: 12,
-        color: '#888',
-        marginTop: 2,
-        fontStyle: 'italic',
-    },
-    loadingDetailsText: {
-        fontSize: 11,
-        color: '#22C922',
-        marginTop: 4,
-        fontStyle: 'italic',
-    },
-    loadingModal: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.85)',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    loadingContent: {
-        alignItems: 'center',
-        gap: 12,
-    },
-    loadingText: {
-        color: '#FFF',
-        fontSize: 14,
-    },
-    quantityModal: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.85)',
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingHorizontal: 24,
-        marginBottom: 50,
-    },
-    quantityContent: {
-        backgroundColor: '#1e1e1e',
-        borderRadius: 16,
-        padding: 24,
-        width: '100%',
-        maxWidth: 400,
-        borderWidth: 1,
-        borderColor: '#2a2a2a',
-    },
-    quantityTitle: {
-        fontSize: 20,
-        color: '#FFF',
-        textAlign: 'center',
-        marginBottom: 8,
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    quantitySubtitle: {
-        fontSize: 14,
-        color: '#aaa',
-        textAlign: 'center',
-        marginBottom: 20,
-        letterSpacing: 0.2,
-        fontFamily: 'Poppins_400Regular',
-    },
-    quantityInput: {
-        backgroundColor: '#121212',
-        borderRadius: 12,
-        paddingHorizontal: 16,
-        paddingVertical: 14,
-        fontSize: 18,
-        color: '#FFF',
-        borderWidth: 2,
-        borderColor: '#22C922',
-        textAlign: 'center',
-        marginBottom: 20,
-        fontFamily: 'Poppins_400Regular',
-    },
-    quantityButtons: {
-        flexDirection: 'row',
-        gap: 12,
-    },
-    quantityButton: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 6,
-        paddingVertical: 14,
-        borderRadius: 12,
-        borderWidth: 1.5,
-    },
-    cancelButton: {
-        backgroundColor: 'rgba(255, 69, 58, 0.12)',
-        borderColor: 'rgba(255, 69, 58, 0.25)',
-    },
-    confirmButton: {
-        backgroundColor: 'rgba(76, 217, 100, 0.12)',
-        borderColor: 'rgba(76, 217, 100, 0.25)',
-    },
-    quantityButtonText: {
-        fontSize: 15,
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    cancelButtonText: {
-        color: '#FF453A',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    confirmButtonText: {
-        color: '#22C922',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    addAllContainer: {
-        paddingHorizontal: 24,
-        paddingVertical: 16,
-        backgroundColor: '#121212',
-        borderTopWidth: 1,
-        borderTopColor: '#2a2a2a',
-    },
-    addAllButtonTouchable: {
-        borderRadius: 12,
-        overflow: 'hidden',
-        shadowColor: '#22C922',
-        shadowOffset: {
-            width: 0,
-            height: 4,
+function makeStyles(colors: Colors) {
+    return StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: colors.background,
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            overflow: 'hidden',
         },
-        shadowOpacity: 0.4,
-        shadowRadius: 8,
-        elevation: 8,
-        paddingBottom: 20,
-    },
-    addAllButton: {
-        borderRadius: 12,
-        paddingVertical: 16,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    addAllButtonText: {
-        fontSize: 17,
-        color: '#FFF',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-})
+        keyboardView: {
+            flex: 1,
+        },
+        handleContainer: {
+            alignItems: 'center',
+            paddingTop: 12,
+            paddingBottom: 8,
+        },
+        handle: {
+            width: 40,
+            height: 5,
+            backgroundColor: colors.border,
+            borderRadius: 3,
+        },
+        scrollView: {
+            flex: 1,
+        },
+        content: {
+            paddingHorizontal: 24,
+            paddingTop: 12,
+            paddingBottom: 32,
+        },
+        iconContainer: {
+            alignItems: 'center',
+            marginBottom: 16,
+            marginTop: 12,
+        },
+        iconCircle: {
+            width: 80,
+            height: 80,
+            borderRadius: 40,
+            backgroundColor: colors.surface,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderWidth: 2,
+            borderColor: colors.nutrition,
+        },
+        title: {
+            fontSize: 24,
+            color: colors.text,
+            textAlign: 'center',
+            marginBottom: 4,
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+        subtitle: {
+            fontSize: 16,
+            color: colors.labelMuted,
+            textAlign: 'center',
+            marginBottom: 20,
+            fontFamily: fonts.regular,
+            letterSpacing: 0.2,
+        },
+        searchContainer: {
+            marginBottom: 24,
+            position: 'relative',
+        },
+        searchInput: {
+            backgroundColor: colors.surface,
+            borderRadius: 12,
+            paddingHorizontal: 16,
+            paddingVertical: 14,
+            paddingRight: 50,
+            fontSize: 15,
+            color: colors.text,
+            borderWidth: 2,
+            borderColor: colors.hairline,
+            fontFamily: fonts.regular,
+        },
+        searchInputFocused: {
+            borderColor: colors.nutrition,
+        },
+        searchLoader: {
+            position: 'absolute',
+            right: 16,
+            top: '50%',
+            transform: [{ translateY: -10 }],
+        },
+        section: {
+            marginBottom: 24,
+        },
+        sectionTitle: {
+            fontSize: 16,
+            color: colors.text,
+            marginBottom: 12,
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+        foodItem: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: colors.surface,
+            borderRadius: 12,
+            padding: 14,
+            marginBottom: 8,
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: colors.hairline,
+        },
+        foodInfo: {
+            flex: 1,
+            marginRight: 12,
+        },
+        foodName: {
+            fontSize: 15,
+            color: colors.text,
+            marginBottom: 4,
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+        foodMacros: {
+            fontSize: 12,
+            color: colors.textMuted,
+            letterSpacing: 0.2,
+            fontFamily: fonts.regular,
+        },
+        stagedRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: colors.surface,
+            borderRadius: 12,
+            paddingVertical: 10,
+            paddingHorizontal: 12,
+            marginTop: 6,
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: colors.hairline,
+        },
+        stagedInfo: {
+            flex: 1,
+            marginRight: 10,
+        },
+        stagedName: {
+            fontSize: 14,
+            color: colors.text,
+            marginBottom: 6,
+            letterSpacing: -0.3,
+            fontFamily: fonts.semibold,
+        },
+        stagedQty: {
+            color: colors.nutrition,
+            fontFamily: fonts.regular,
+        },
+        macroRow: {
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            gap: 5,
+        },
+        macroPill: {
+            backgroundColor: colors.surfaceInset,
+            borderRadius: 6,
+            paddingHorizontal: 7,
+            paddingVertical: 2,
+        },
+        macroPillText: {
+            fontSize: 11,
+            color: colors.textMuted,
+            fontFamily: fonts.medium,
+        },
+        addButton: {
+            width: 32,
+            height: 32,
+            borderRadius: 16,
+            backgroundColor: colors.nutrition + '22',
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderWidth: 1.5,
+            borderColor: colors.nutrition + '66',
+        },
+        addButtonDisabled: {
+            backgroundColor: colors.textMuted + '1F',
+            borderColor: colors.textMuted + '40',
+        },
+        removeButton: {
+            width: 28,
+            height: 28,
+            borderRadius: 14,
+            backgroundColor: colors.nutrition + '22',
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderWidth: 1,
+            borderColor: colors.nutrition + '66',
+        },
+        emptyState: {
+            paddingVertical: 40,
+            alignItems: 'center',
+            gap: 8,
+        },
+        emptyText: {
+            fontSize: 14,
+            color: colors.labelMuted,
+        },
+        emptySubtext: {
+            fontSize: 12,
+            color: colors.labelMuted,
+        },
+        brandName: {
+            fontSize: 12,
+            color: colors.textMuted,
+            marginTop: 2,
+            fontStyle: 'italic',
+        },
+        loadingDetailsText: {
+            fontSize: 11,
+            color: colors.nutrition,
+            marginTop: 4,
+            fontStyle: 'italic',
+        },
+        loadingModal: {
+            flex: 1,
+            backgroundColor: 'rgba(0, 0, 0, 0.85)',
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        loadingContent: {
+            alignItems: 'center',
+            gap: 12,
+        },
+        loadingText: {
+            color: '#FFF',
+            fontSize: 14,
+        },
+        quantityModal: {
+            flex: 1,
+            backgroundColor: 'rgba(0, 0, 0, 0.85)',
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingHorizontal: 24,
+            marginBottom: 50,
+        },
+        quantityContent: {
+            backgroundColor: colors.surface,
+            borderRadius: 16,
+            padding: 24,
+            width: '100%',
+            maxWidth: 400,
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: colors.hairline,
+        },
+        quantityTitle: {
+            fontSize: 20,
+            color: colors.text,
+            textAlign: 'center',
+            marginBottom: 8,
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+        quantitySubtitle: {
+            fontSize: 14,
+            color: colors.labelMuted,
+            textAlign: 'center',
+            marginBottom: 20,
+            letterSpacing: 0.2,
+            fontFamily: fonts.regular,
+        },
+        quantityInput: {
+            backgroundColor: colors.surfaceInset,
+            borderRadius: 12,
+            paddingHorizontal: 16,
+            paddingVertical: 14,
+            fontSize: 18,
+            color: colors.text,
+            borderWidth: 2,
+            borderColor: colors.nutrition,
+            textAlign: 'center',
+            marginBottom: 20,
+            fontFamily: fonts.regular,
+        },
+        quantityButtons: {
+            flexDirection: 'row',
+            gap: 12,
+        },
+        quantityButton: {
+            flex: 1,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 6,
+            paddingVertical: 14,
+            borderRadius: 12,
+            borderWidth: 1.5,
+        },
+        cancelButton: {
+            backgroundColor: colors.destructive + '1F',
+            borderColor: colors.destructive + '40',
+        },
+        confirmButton: {
+            backgroundColor: colors.nutrition + '1F',
+            borderColor: colors.nutrition + '40',
+        },
+        quantityButtonText: {
+            fontSize: 15,
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+        cancelButtonText: {
+            color: colors.destructive,
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+        confirmButtonText: {
+            color: colors.nutrition,
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+        addAllContainer: {
+            paddingHorizontal: 24,
+            paddingVertical: 16,
+            backgroundColor: colors.background,
+            borderTopWidth: 1,
+            borderTopColor: colors.hairline,
+        },
+        addAllButtonTouchable: {
+            borderRadius: 12,
+            overflow: 'hidden',
+            shadowColor: colors.nutrition,
+            shadowOffset: {
+                width: 0,
+                height: 4,
+            },
+            shadowOpacity: 0.4,
+            shadowRadius: 8,
+            elevation: 8,
+            paddingBottom: 20,
+        },
+        addAllButton: {
+            borderRadius: 12,
+            paddingVertical: 16,
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        addAllButtonText: {
+            fontSize: 17,
+            color: '#FFF',
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+    })
+}

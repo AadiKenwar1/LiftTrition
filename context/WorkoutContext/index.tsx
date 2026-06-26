@@ -23,8 +23,9 @@ import { calculateFatigueFactor, calculateFatiguePercentage, calculateFatigueSum
 import { getOneRepMaxData } from './functions/graphFunctions'
 import { deleteLog as deleteLogFromState } from './functions/logFunctions'
 import { validateLog } from './functions/validator'
-import { getSetsData } from './functions/volumeFunctions'
+import { getSetsData, getSetsForWeek } from './functions/volumeFunctions'
 import { deleteWorkout } from './functions/workoutFunctions'
+import { getWeekStart } from '@/lib/utils/dateHelper'
 import { CreateExerciseData, Exercise, ExerciseLib, ExerciseLibraryEntry, Log, Workout, WorkoutContextInterface } from './types'
 
 const WorkoutContext = createContext<WorkoutContextInterface | undefined>(undefined)
@@ -466,19 +467,17 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
         [logs]
     )
 
-    const workoutDaysThisWeek = useMemo(() => {
-        const now = new Date()
-        const day = now.getDay()
-        const monday = new Date(now)
-        monday.setDate(now.getDate() - (day === 0 ? 6 : day - 1))
-        monday.setHours(0, 0, 0, 0)
-        const uniqueDays = new Set(
-            logs
-                .filter(l => new Date(l.date) >= monday)
-                .map(l => new Date(l.date).toDateString())
-        )
-        return uniqueDays.size
-    }, [logs])
+    const handleGetSetsForWeek = useCallback(
+        (weekStart: Date) => getSetsForWeek(logs, weekStart),
+        [logs]
+    )
+
+    // Per-day training flags for the current (Sunday-start) week — same source as the Sets bar
+    // chart, so the activity banner's dots line up with the bars. Index 0 = Sunday … 6 = Saturday.
+    const trainedDaysThisWeek = useMemo(
+        () => getSetsForWeek(logs, getWeekStart(new Date())).map((d) => d.value > 0),
+        [logs],
+    )
 
     // ------------------------------------------------------------------
     // Effects
@@ -596,9 +595,10 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
                 getFatigueFeedback,
                 handleGetOneRepMaxData,
                 handleGetSetsData,
+                handleGetSetsForWeek,
                 handleCreateUserExercise,
                 handleDeleteUserExercise,
-                workoutDaysThisWeek,
+                trainedDaysThisWeek,
             }}
         >
             {children}

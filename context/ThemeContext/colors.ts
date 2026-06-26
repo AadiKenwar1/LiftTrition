@@ -1,34 +1,80 @@
 import type { ColorScheme, Colors } from './types'
 
+// Accents (workout/nutrition + their gradients) are per-theme — see each palette below.
+// Bright values live on dark; light uses the same hue deepened for legibility on white.
 const brand = {
-    workout: '#2f80ed',
-    nutrition: '#22C922',
     destructive: '#FF453A',
 } as const
 
 export const palettes = {
     light: {
-        background: '#F2F2F7',
-        surface: '#FFFFFF',
-        border: '#E5E5EA',
-        text: '#000000',
+        // Surfaces — deeper cool-slate canvas so white cards clearly lift off the page
+        background: '#DFE2E8',
+        surface: '#FBFBFC',
+        surfaceInset: '#DFE2E8',
+        toggleTrack: '#ECEEF2',
+        // Lines — strengthened so card edges, dividers, and gridlines are actually visible
+        border: '#CBCED7',
+        hairline: '#CFD2DB',
+        divider: '#D8DAE2',
+        navBorder: '#CBCED7',
+        // Text — near-black (cool) instead of pure #000 to cut glare
+        text: '#16171A',
         textSecondary: '#3C3C43',
-        textMuted: '#888888',
+        textMuted: '#6A6A6E',
         textFaint: '#666666',
-        placeholder: '#AEAEB2',
+        labelMuted: '#6C6D75',
+        tabInactive: '#86878F',
+        placeholder: '#8A8B92',
         disabled: '#D1D1D6',
+        // Data-viz / controls
+        ringTrack: '#D0D3DC',
+        chevron: '#B8B9C1',
+        iconChipBg: 'rgba(47,128,237,0.10)',
+        // Brand (nutritionInk = AA-contrast green for numerals on light bg)
+        nutritionInk: '#1BA81B',
+        // Amber for "off-target" stat tone (AA-contrast on light bg)
+        warning: '#C77700',
+        // Accents — same hue as dark, deepened for legibility on light surfaces
+        workout: '#2570D8',
+        nutrition: '#1A9E1A',
+        workoutGradient: ['#2570D8', '#2570D8'] as const, //3A8BF0
+        nutritionGradient: ['#1A9E1A', '#1A9E1A'] as const, //34D63A
         ...brand,
     },
     dark: {
-        background: '#121212',
-        surface: '#1e1e1e',
+        // Surfaces
+        background: '#0F1012',
+        surface: '#1A1B1E',
+        surfaceInset: '#141517',
+        toggleTrack: '#1A1B1E',
+        // Lines
         border: '#2a2a2a',
+        hairline: 'rgba(255,255,255,0.06)',
+        divider: 'rgba(255,255,255,0.05)',
+        navBorder: 'rgba(255,255,255,0.06)',
+        // Text
         text: '#FFFFFF',
-        textSecondary: '#AAAAAA',
+        textSecondary: '#9A9AA3',
         textMuted: '#888888',
         textFaint: '#666666',
+        labelMuted: '#6B6B73',
+        tabInactive: '#5C5C64',
         placeholder: '#555555',
         disabled: '#333333',
+        // Data-viz / controls
+        ringTrack: '#26272B',
+        chevron: '#5C5C64',
+        iconChipBg: 'rgba(47,128,237,0.16)',
+        // Brand (bright green reads fine on dark, so numerals use the base nutrition green)
+        nutritionInk: '#22C922',
+        // Amber for "off-target" stat tone
+        warning: '#FFB020',
+        // Accents — vivid on dark surfaces
+        workout: '#2F80ED',
+        nutrition: '#22C922',
+        workoutGradient: ['#3A8BF0', '#2F80ED'] as const,
+        nutritionGradient: ['#34D63A', '#22C922'] as const,
         ...brand,
     },
 } as const satisfies Record<ColorScheme, Colors>

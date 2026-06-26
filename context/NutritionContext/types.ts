@@ -1,3 +1,5 @@
+import type { WeekDayPoint } from '@/lib/utils/dateHelper'
+
 export interface Ingredient {
     name: string
     quantity: number
@@ -43,5 +45,6 @@ export interface NutritionContextInterface {
     handleAnalyzeAndAddPhoto: (photoUri: string, userID: string) => Promise<void>
     handleGetMacrosForDate: (date: Date) => { totalProtein: number; totalCarbs: number; totalFats: number; totalCalories: number }
     handleGetMacroDataForGraph: (macroType: 'calories' | 'protein' | 'carbs' | 'fats', onboardingCompletedAt?: Date) => Array<{ day: string; value: number }>
+    handleGetMacroForWeek: (macroType: 'calories' | 'protein' | 'carbs' | 'fats', weekStart: Date) => WeekDayPoint[]
     nutritionStreak: NutritionStreakState
 }

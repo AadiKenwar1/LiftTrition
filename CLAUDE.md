@@ -59,6 +59,7 @@ app/                    Expo Router screens (file = route)
   nutritionScreens/     Nutrition logging modals/screens
   workoutScreens/       Workout logging modals/screens
   settingsScreens/      Settings + subscription
+  devTest/              Dev-only test routes (__DEV__-guarded stubs; see Dev tooling)
 
 components/
   ExpoComponents/       Minor Expo wrappers
@@ -67,13 +68,14 @@ components/
   NeutralComponents/    Shared UI (CustomHeader, Fab, DatePicker, etc.)
   NutritionComponents/  Nutrition-specific UI
   WorkoutComponents/    Workout-specific UI
+  devTest/              Dev Hub + isolated test pages (dev-only; see Dev tooling)
 
 context/
   AuthContext/          Session, user ID, sign-in/out
   BillingContext/       RevenueCat subscriptions
   NutritionContext/     Nutrition entries + saved meals + AI
   SettingsContext/       User profile, goals, macro targets, body weight
-  ThemeContext/         Dark/light palette
+  ThemeContext/         Design tokens — palette + typography + radii (useColors / fonts / radius)
   WorkoutContext/       Workouts, exercises, logs, fatigue
 
 lib/
@@ -82,7 +84,6 @@ lib/
   openAI/               Vision + text calls (via Edge Function)
   foodDB/               FatSecret search (via Edge Function, in-memory cache)
   utils/                dateHelper, unitConversions, downsample
-  theme/                Theme utilities
 
 constants/Colors.ts     Base color definitions
 assets/                 Fonts, images, legal
@@ -116,7 +117,7 @@ assets/                 Fonts, images, legal
 - **No comments** unless non-obvious. Function names and types are self-documenting.
 - **Function components only.** No class components.
 - **Context hooks re-exported** from each context's `index.tsx` (e.g., `useWorkout()`, `useNutrition()`).
-- **Styling:** `StyleSheet.create()` per file. No CSS-in-JS library. Theme colors consumed via `useColors()`.
+- **Styling:** `StyleSheet.create()` for static files, or `makeStyles(colors)` + `useMemo` for theme-reactive files. No CSS-in-JS library. Pull colors/fonts/radii from `@/context/ThemeContext` — see **Theming & UI** below.
 - **Icons:** Prefer `lucide-react-native`; fallback to `@expo/vector-icons` (Ionicons, MaterialCommunityIcons).
 - **Dates:** Always use `getDateKey(date)` from `lib/utils/dateHelper` for YYYY-MM-DD keys. Use `en-CA` locale to ensure consistent ISO format.
 - **UUIDs:** `react-native-uuid` — never use `Math.random()` for IDs.
@@ -124,6 +125,32 @@ assets/                 Fonts, images, legal
 - **Persistence pattern:** Write to PowerSync via `powerSync.execute()` or `writeTransaction()`. Contexts use a `persistDirty` flag + `useEffect` for debounced saves.
 - **Unit system:** All values stored in the user's chosen unit system (imperial or metric). Convert at boundaries with `lib/utils/unitConversions`.
 - **Ordering:** Workouts/exercises use explicit `order` integer (0 = first/newest). Decremented on insert to bump others.
+
+---
+
+## Theming & UI
+
+The app is mid-migration to the "Refined" design system. **Reuse the centralized tokens and shared primitives — never hardcode colors, fonts, or one-off card styles.** (Source of truth is the code below, not pixel values written in docs.)
+
+- **Design tokens live in `context/ThemeContext/`** (single import path: `@/context/ThemeContext`):
+  - `useColors()` — scheme-aware palette (surfaces, hairlines, text, accents, gradients); reacts to the dark/light toggle.
+  - `fonts` / `type` — typography; the `FONT_FAMILY` constant flips Poppins↔Archivo app-wide.
+  - `radius` / `spacing` — scheme-independent layout tokens.
+- **Reuse shared primitives, don't re-roll them.** Cards, rings, and charts live in `components/GraphComponents/` (chart primitives, `ProgressWheel`) and the per-feature `*Components/` folders (`Log`, `Entry`, `DailyIntakeCard`, `ModeSwitcher`, `Fab`). If a pattern already exists, import it — divergence (e.g. two different card headers) comes from hand-rolling instead of reusing.
+- **Migration recipe** (restyling a not-yet-migrated screen): import `useColors` + `fonts`/`radius` → `const styles = useMemo(() => makeStyles(colors), [colors])` → replace hardcoded hexes with tokens and `Poppins_XXX` with `fonts.X` → verify in dark **and** light.
+- **Standing rule:** if you add or change a shared UI token, primitive, or pattern, update `RESTYLE_PLAN.md` in the same commit so the design doc tracks the code.
+- **Full system + per-folder rollout plan:** `RESTYLE_PLAN.md`.
+
+---
+
+## Dev tooling
+
+**Dev Hub** — a dev-only harness for previewing components/charts in isolation, without logging real data. Reach it from **Settings → Developer → Dev Hub** (the row is `{__DEV__ && …}`-gated, so it's hidden in production).
+
+- **Routes:** `app/devTest/` holds thin `__DEV__`-guarded route stubs (`index`, `lineChart`, `barChart`) that `require()` the real screen and return `null` otherwise. Metro replaces `__DEV__` with `false` in production and strips the branch + its `require`, so the dev code never ships.
+- **Screens:** the hub + test pages live in `components/devTest/` (kept **outside `app/`** so Expo Router doesn't bundle them). Each test page renders a real component (`Graph1`, `BarChart`, …) with prebuilt scenario toggles (`DevControls`: `Field` + `Segmented`) and a Light/Dark switch, so every edge case (1 point, empty, goal far off, bar > goal, etc.) is viewable on a simulator.
+- **Zero production cost** depends on the `__DEV__`-guarded `require` pattern: never pull a `components/devTest/*` file into shipped code via a top-level `import`.
+- **Add a test:** drop `XTest.tsx` in `components/devTest/`, add a stub `app/devTest/x.tsx`, then register it in the `app/_layout.tsx` Stack and the `GROUPS` array in `DevHub.tsx`.
 
 ---
 

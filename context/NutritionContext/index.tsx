@@ -4,7 +4,7 @@ import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useSt
 import { loadNutritionData, upsertNutritionEntry, upsertSavedNutritionEntry } from './database/powersyncStore';
 import { analyzeAndAddPhoto } from "./functions/aiFunctions";
 import { addNutrition, deleteNutrition, editNutrition, saveNutrition, unsaveNutrition } from "./functions/crudFunctions";
-import { getMacroDataForGraph, getMacrosForDate, getNutritionStreakState } from "./functions/graphFunctions";
+import { getMacroDataForGraph, getMacroForWeek, getMacrosForDate, getNutritionStreakState } from "./functions/graphFunctions";
 import { NutritionContextInterface, NutritionEntry } from "./types";
 import uuid from 'react-native-uuid';
 
@@ -117,6 +117,8 @@ export const NutritionProvider = ({ children }: PropsWithChildren) => {
     const handleGetMacrosForDate = (date: Date) => getMacrosForDate(nutritionData, date);
     const handleGetMacroDataForGraph = (macroType: 'calories' | 'protein' | 'carbs' | 'fats', onboardingCompletedAt?: Date) =>
         getMacroDataForGraph(macroType, nutritionData, onboardingCompletedAt);
+    const handleGetMacroForWeek = (macroType: 'calories' | 'protein' | 'carbs' | 'fats', weekStart: Date) =>
+        getMacroForWeek(macroType, nutritionData, weekStart);
 
     const nutritionStreak = useMemo(
         () => getNutritionStreakState(nutritionData),
@@ -139,6 +141,7 @@ export const NutritionProvider = ({ children }: PropsWithChildren) => {
                 handleAnalyzeAndAddPhoto,
                 handleGetMacrosForDate,
                 handleGetMacroDataForGraph,
+                handleGetMacroForWeek,
                 nutritionStreak,
             }}>
             {children}

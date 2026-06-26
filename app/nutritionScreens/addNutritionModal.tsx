@@ -2,11 +2,12 @@ import { useAuth } from '@/context/AuthContext'
 import { useBilling } from '@/context/BillingContext'
 import { useNutrition } from '@/context/NutritionContext'
 import { analyzeText } from '@/context/NutritionContext/functions/aiFunctions'
+import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { Utensils } from 'lucide-react-native'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import uuid from 'react-native-uuid'
@@ -18,6 +19,8 @@ export default function AddNutritionModal() {
     const router = useRouter()
     const { userID } = useAuth()
     const { hasPremium } = useBilling()
+    const colors = useColors()
+    const styles = useMemo(() => makeStyles(colors), [colors])
     //State for the input fields
     const [mealName, setMealName] = useState('')
     const [calories, setCalories] = useState('')
@@ -90,12 +93,12 @@ export default function AddNutritionModal() {
         const isLoading = generatingField === field
         const isDimmed = hasPremium && isGenerating && !isLoading
         const buttonStyle = !hasPremium || isDimmed ? styles.aiButtonUnavailable : styles.aiButton
-        const iconColor = !hasPremium || isDimmed ? '#666' : '#22C922'
+        const iconColor = !hasPremium || isDimmed ? colors.placeholder : colors.nutrition
         return (
             <TouchableOpacity style={buttonStyle} activeOpacity={0.75} onPress={() => (hasPremium ? handleGenerateMacros(field) : router.replace('/settingsScreens/subscription'))} disabled={isGenerating}>
                 <View style={styles.aiButtonContent}>
                     {isLoading ?
-                        <ActivityIndicator size="small" color="#22C922" />
+                        <ActivityIndicator size="small" color={colors.nutrition} />
                     :   <Ionicons name="sparkles-outline" size={25} color={iconColor} />}
                 </View>
             </TouchableOpacity>
@@ -113,7 +116,7 @@ export default function AddNutritionModal() {
                 {/* Icon Section */}
                 <View style={styles.iconContainer}>
                     <View style={styles.iconCircle}>
-                        <Utensils size={50} color="#22C922" strokeWidth={2.5} />
+                        <Utensils size={50} color={colors.nutrition} strokeWidth={2.5} />
                     </View>
                 </View>
 
@@ -131,7 +134,7 @@ export default function AddNutritionModal() {
                         Meal Name
                     </Text>
                     <View style={styles.inputContainer}>
-                        <TextInput style={[styles.input, focusedField === 'mealName' && styles.inputFocused]} placeholder="e.g., Grilled Chicken Salad" placeholderTextColor="#666" value={mealName} onChangeText={setMealName} onFocus={() => setFocusedField('mealName')} onBlur={() => setFocusedField(null)} />
+                        <TextInput style={[styles.input, focusedField === 'mealName' && styles.inputFocused]} placeholder="e.g., Grilled Chicken Salad" placeholderTextColor={colors.placeholder} value={mealName} onChangeText={setMealName} onFocus={() => setFocusedField('mealName')} onBlur={() => setFocusedField(null)} />
                     </View>
                 </View>
 
@@ -151,7 +154,7 @@ export default function AddNutritionModal() {
                                 (kcal)
                             </Text>
                         </View>
-                        <TextInput style={[styles.macroInput, focusedField === 'calories' && styles.inputFocused]} placeholder="0" placeholderTextColor="#666" value={calories} onChangeText={setCalories} onFocus={() => setFocusedField('calories')} onBlur={() => setFocusedField(null)} keyboardType="numeric" />
+                        <TextInput style={[styles.macroInput, focusedField === 'calories' && styles.inputFocused]} placeholder="0" placeholderTextColor={colors.placeholder} value={calories} onChangeText={setCalories} onFocus={() => setFocusedField('calories')} onBlur={() => setFocusedField(null)} keyboardType="numeric" />
                         {renderAiButton('calories')}
                     </View>
 
@@ -165,7 +168,7 @@ export default function AddNutritionModal() {
                                 (g)
                             </Text>
                         </View>
-                        <TextInput style={[styles.macroInput, focusedField === 'fats' && styles.inputFocused]} placeholder="0" placeholderTextColor="#666" value={fats} onChangeText={setFats} onFocus={() => setFocusedField('fats')} onBlur={() => setFocusedField(null)} keyboardType="numeric" />
+                        <TextInput style={[styles.macroInput, focusedField === 'fats' && styles.inputFocused]} placeholder="0" placeholderTextColor={colors.placeholder} value={fats} onChangeText={setFats} onFocus={() => setFocusedField('fats')} onBlur={() => setFocusedField(null)} keyboardType="numeric" />
                         {renderAiButton('fats')}
                     </View>
 
@@ -179,7 +182,7 @@ export default function AddNutritionModal() {
                                 (g)
                             </Text>
                         </View>
-                        <TextInput style={[styles.macroInput, focusedField === 'carbs' && styles.inputFocused]} placeholder="0" placeholderTextColor="#666" value={carbs} onChangeText={setCarbs} onFocus={() => setFocusedField('carbs')} onBlur={() => setFocusedField(null)} keyboardType="numeric" />
+                        <TextInput style={[styles.macroInput, focusedField === 'carbs' && styles.inputFocused]} placeholder="0" placeholderTextColor={colors.placeholder} value={carbs} onChangeText={setCarbs} onFocus={() => setFocusedField('carbs')} onBlur={() => setFocusedField(null)} keyboardType="numeric" />
                         {renderAiButton('carbs')}
                     </View>
 
@@ -193,14 +196,14 @@ export default function AddNutritionModal() {
                                 (g)
                             </Text>
                         </View>
-                        <TextInput style={[styles.macroInput, focusedField === 'protein' && styles.inputFocused]} placeholder="0" placeholderTextColor="#666" value={protein} onChangeText={setProtein} onFocus={() => setFocusedField('protein')} onBlur={() => setFocusedField(null)} keyboardType="numeric" />
+                        <TextInput style={[styles.macroInput, focusedField === 'protein' && styles.inputFocused]} placeholder="0" placeholderTextColor={colors.placeholder} value={protein} onChangeText={setProtein} onFocus={() => setFocusedField('protein')} onBlur={() => setFocusedField(null)} keyboardType="numeric" />
                         {renderAiButton('protein')}
                     </View>
                 </View>
 
                 {/* Add Button */}
                 <TouchableOpacity onPress={handleAddEntry} activeOpacity={0.8} style={styles.addButtonTouchable}>
-                    <LinearGradient colors={['#179F17', '#22C922', '#3BE63B']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.addButton}>
+                    <LinearGradient colors={colors.nutritionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.addButton}>
                         <Text style={styles.addButtonText} adjustsFontSizeToFit minimumFontScale={0.7} numberOfLines={1}>
                             Add Meal
                         </Text>
@@ -211,185 +214,187 @@ export default function AddNutritionModal() {
     )
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#121212',
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        overflow: 'hidden',
-    },
-    handleContainer: {
-        alignItems: 'center',
-        paddingTop: 12,
-        paddingBottom: 8,
-    },
-    handle: {
-        width: 40,
-        height: 5,
-        backgroundColor: '#333',
-        borderRadius: 3,
-    },
-    scrollView: {
-        flex: 1,
-    },
-    content: {
-        flexGrow: 1,
-        paddingHorizontal: 24,
-        paddingTop: 12,
-    },
-    iconContainer: {
-        alignItems: 'center',
-        marginBottom: 16,
-        marginTop: 12,
-    },
-    iconCircle: {
-        width: 100,
-        height: 100,
-        borderRadius: 50,
-        backgroundColor: '#1e1e1e',
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 2,
-        borderColor: '#22C922',
-    },
-    title: {
-        width: '100%',
-        fontSize: 24,
-        color: '#FFF',
-        textAlign: 'center',
-        marginBottom: 4,
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    subtitle: {
-        width: '100%',
-        fontSize: 16,
-        color: '#aaa',
-        textAlign: 'center',
-        marginBottom: 20,
-        fontFamily: 'Poppins_400Regular',
-        letterSpacing: 0.2,
-    },
-    inputSection: {
-        marginBottom: 20,
-    },
-    inputContainer: {
-        marginBottom: 0,
-    },
-    input: {
-        backgroundColor: '#1e1e1e',
-        borderRadius: 12,
-        paddingHorizontal: 16,
-        paddingVertical: 14,
-        fontSize: 15,
-        color: '#FFF',
-        borderWidth: 2,
-        borderColor: '#1e1e1e',
-        fontFamily: 'Poppins_400Regular',
-    },
-    inputFocused: {
-        borderColor: '#22C922',
-    },
-    macrosSection: {
-        marginBottom: 20,
-    },
-    sectionTitle: {
-        width: '100%',
-        fontSize: 16,
-        color: '#FFF',
-        marginBottom: 12,
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    macroInputRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 10,
-        marginBottom: 10,
-    },
-    macroLabelColumn: {
-        flexDirection: 'column',
-        justifyContent: 'center',
-        minWidth: 72,
-        maxWidth: 112,
-        flexShrink: 1,
-    },
-    macroLabel: {
-        width: '100%',
-        fontSize: 16,
-        color: '#AAA',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    macroInput: {
-        flex: 1,
-        minWidth: 0,
-        backgroundColor: '#1e1e1e',
-        borderRadius: 10,
-        paddingHorizontal: 14,
-        paddingVertical: 12,
-        fontSize: 15,
-        color: '#FFF',
-        borderWidth: 2,
-        borderColor: '#1e1e1e',
-        fontFamily: 'Poppins_400Regular',
-    },
-    macroUnit: {
-        width: '100%',
-        fontSize: 12,
-        color: '#888',
-        fontFamily: 'Poppins_500Medium',
-    },
-    aiButtonContent: {
-        width: 25,
-        height: 25,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    aiButton: {
-        paddingHorizontal: 9,
-        paddingVertical: 9,
-        backgroundColor: 'rgba(34, 201, 34, 0.12)',
-        borderRadius: 10,
-        borderWidth: 1.5,
-        borderColor: 'rgba(34, 201, 34, 0.25)',
-    },
-    aiButtonUnavailable: {
-        paddingHorizontal: 9,
-        paddingVertical: 9,
-        backgroundColor: 'rgba(136, 136, 136, 0.25)',
-        borderRadius: 10,
-        borderWidth: 1.5,
-        borderColor: 'rgba(136, 136, 136, 0.5)',
-    },
-
-    addButtonTouchable: {
-        borderRadius: 12,
-        overflow: 'hidden',
-        shadowColor: '#22C922',
-        shadowOffset: {
-            width: 0,
-            height: 4,
+function makeStyles(colors: Colors) {
+    return StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: colors.background,
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            overflow: 'hidden',
         },
-        shadowOpacity: 0.4,
-        shadowRadius: 8,
-        elevation: 8,
-        marginTop: 0,
-    },
-    addButton: {
-        borderRadius: 12,
-        paddingVertical: 16,
-        paddingHorizontal: 20,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    addButtonText: {
-        maxWidth: '100%',
-        fontSize: 17,
-        color: '#FFF',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-        textAlign: 'center',
-    },
-})
+        handleContainer: {
+            alignItems: 'center',
+            paddingTop: 12,
+            paddingBottom: 8,
+        },
+        handle: {
+            width: 40,
+            height: 5,
+            backgroundColor: colors.border,
+            borderRadius: 3,
+        },
+        scrollView: {
+            flex: 1,
+        },
+        content: {
+            flexGrow: 1,
+            paddingHorizontal: 24,
+            paddingTop: 12,
+        },
+        iconContainer: {
+            alignItems: 'center',
+            marginBottom: 16,
+            marginTop: 12,
+        },
+        iconCircle: {
+            width: 100,
+            height: 100,
+            borderRadius: 50,
+            backgroundColor: colors.surface,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderWidth: 2,
+            borderColor: colors.nutrition,
+        },
+        title: {
+            width: '100%',
+            fontSize: 24,
+            color: colors.text,
+            textAlign: 'center',
+            marginBottom: 4,
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+        subtitle: {
+            width: '100%',
+            fontSize: 16,
+            color: colors.labelMuted,
+            textAlign: 'center',
+            marginBottom: 20,
+            fontFamily: fonts.regular,
+            letterSpacing: 0.2,
+        },
+        inputSection: {
+            marginBottom: 20,
+        },
+        inputContainer: {
+            marginBottom: 0,
+        },
+        input: {
+            backgroundColor: colors.surface,
+            borderRadius: 12,
+            paddingHorizontal: 16,
+            paddingVertical: 14,
+            fontSize: 15,
+            color: colors.text,
+            borderWidth: 2,
+            borderColor: colors.hairline,
+            fontFamily: fonts.regular,
+        },
+        inputFocused: {
+            borderColor: colors.nutrition,
+        },
+        macrosSection: {
+            marginBottom: 20,
+        },
+        sectionTitle: {
+            width: '100%',
+            fontSize: 16,
+            color: colors.text,
+            marginBottom: 12,
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+        macroInputRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 10,
+            marginBottom: 10,
+        },
+        macroLabelColumn: {
+            flexDirection: 'column',
+            justifyContent: 'center',
+            minWidth: 72,
+            maxWidth: 112,
+            flexShrink: 1,
+        },
+        macroLabel: {
+            width: '100%',
+            fontSize: 16,
+            color: colors.labelMuted,
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+        macroInput: {
+            flex: 1,
+            minWidth: 0,
+            backgroundColor: colors.surface,
+            borderRadius: 10,
+            paddingHorizontal: 14,
+            paddingVertical: 12,
+            fontSize: 15,
+            color: colors.text,
+            borderWidth: 2,
+            borderColor: colors.hairline,
+            fontFamily: fonts.regular,
+        },
+        macroUnit: {
+            width: '100%',
+            fontSize: 12,
+            color: colors.textMuted,
+            fontFamily: fonts.medium,
+        },
+        aiButtonContent: {
+            width: 25,
+            height: 25,
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        aiButton: {
+            paddingHorizontal: 9,
+            paddingVertical: 9,
+            backgroundColor: colors.nutrition + '22',
+            borderRadius: 10,
+            borderWidth: 1.5,
+            borderColor: colors.nutrition + '66',
+        },
+        aiButtonUnavailable: {
+            paddingHorizontal: 9,
+            paddingVertical: 9,
+            backgroundColor: colors.textMuted + '40',
+            borderRadius: 10,
+            borderWidth: 1.5,
+            borderColor: colors.textMuted + '80',
+        },
+
+        addButtonTouchable: {
+            borderRadius: 12,
+            overflow: 'hidden',
+            shadowColor: colors.nutrition,
+            shadowOffset: {
+                width: 0,
+                height: 4,
+            },
+            shadowOpacity: 0.4,
+            shadowRadius: 8,
+            elevation: 8,
+            marginTop: 0,
+        },
+        addButton: {
+            borderRadius: 12,
+            paddingVertical: 16,
+            paddingHorizontal: 20,
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        addButtonText: {
+            maxWidth: '100%',
+            fontSize: 17,
+            color: '#FFF',
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+            textAlign: 'center',
+        },
+    })
+}

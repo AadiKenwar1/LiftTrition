@@ -1,4 +1,4 @@
-import { calculateStartDate, formatDateMinimal, getDateKey } from "@/lib/utils/dateHelper";
+import { addDays, calculateStartDate, formatDateMinimal, getDateKey, WEEKDAY_INITIALS, type WeekDayPoint } from "@/lib/utils/dateHelper";
 import { NutritionEntry, NutritionStreakState } from "../types";
 
 
@@ -75,6 +75,53 @@ export function getMacroDataForGraph(macroType: 'calories' | 'protein' | 'carbs'
         result.push({
             day: formatDateMinimal(dateKey),
             value: macroExtractor[macroType](macros),
+        });
+    }
+
+    return result;
+}
+
+/**
+ * Get macro/calorie data for a single calendar week (7 days from `weekStart`).
+ * Sums the chosen macro per calendar day; days with no logs are 0; days after today are flagged isFuture.
+ * Labels are weekday initials (S M T W Th F S).
+ */
+export function getMacroForWeek(macroType: 'calories' | 'protein' | 'carbs' | 'fats', nutritionData: NutritionEntry[], weekStart: Date): WeekDayPoint[] {
+    const start = new Date(weekStart);
+    start.setHours(0, 0, 0, 0);
+    const todayKey = getDateKey(new Date());
+
+    const macrosByDate = new Map<string, { protein: number; carbs: number; fats: number; calories: number }>();
+    for (const entry of nutritionData) {
+        const entryDate = new Date(entry.date);
+        entryDate.setHours(0, 0, 0, 0);
+        const dateKey = getDateKey(entryDate);
+        const existing = macrosByDate.get(dateKey) || { protein: 0, carbs: 0, fats: 0, calories: 0 };
+        macrosByDate.set(dateKey, {
+            protein: existing.protein + entry.protein,
+            carbs: existing.carbs + entry.carbs,
+            fats: existing.fats + entry.fats,
+            calories: existing.calories + entry.calories,
+        });
+    }
+
+    const macroExtractor = {
+        calories: (m: { calories: number }) => m.calories,
+        protein: (m: { protein: number }) => m.protein,
+        carbs: (m: { carbs: number }) => m.carbs,
+        fats: (m: { fats: number }) => m.fats,
+    };
+
+    const result: WeekDayPoint[] = [];
+    for (let i = 0; i < 7; i++) {
+        const date = addDays(start, i);
+        const dateKey = getDateKey(date);
+        const macros = macrosByDate.get(dateKey) || { protein: 0, carbs: 0, fats: 0, calories: 0 };
+        result.push({
+            day: WEEKDAY_INITIALS[date.getDay()],
+            value: macroExtractor[macroType](macros),
+            dateKey,
+            isFuture: dateKey > todayKey,
         });
     }
 

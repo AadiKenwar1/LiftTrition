@@ -1,10 +1,11 @@
+import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { CameraType, CameraView, useCameraPermissions } from 'expo-camera'
 import * as ImageManipulator from 'expo-image-manipulator'
 import * as ImagePicker from 'expo-image-picker'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { Camera, FlipHorizontal, Images, Zap } from 'lucide-react-native'
-import { useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Alert, Dimensions, Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 const MEAL_IMAGE_MAX_WIDTH = 800
@@ -56,6 +57,8 @@ async function processCameraCapture(photo: { uri: string; width: number; height:
 
 export default function CameraScreen() {
     const router = useRouter()
+    const colors = useColors()
+    const styles = useMemo(() => makeStyles(colors), [colors])
     const cameraRef = useRef<CameraView>(null)
     const [facing, setFacing] = useState<CameraType>('back')
     const [permission, requestPermission] = useCameraPermissions()
@@ -81,12 +84,12 @@ export default function CameraScreen() {
                 <View style={styles.permissionContentWrapper}>
                     <View style={styles.permissionContent}>
                         <View style={styles.iconCircle}>
-                            <Camera size={48} color="#22C922" strokeWidth={2.5} />
+                            <Camera size={48} color={colors.nutrition} strokeWidth={2.5} />
                         </View>
                         <Text style={styles.permissionTitle}>Camera Access Required</Text>
                         <Text style={styles.permissionMessage}>We need access to your camera to take photos of your meals for nutrition tracking with AI analysis.</Text>
                         <TouchableOpacity onPress={requestPermission} activeOpacity={0.8} style={styles.permissionButtonTouchable}>
-                            <LinearGradient colors={['#3CB855', '#22C922', '#5CE073']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.permissionButton}>
+                            <LinearGradient colors={colors.nutritionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.permissionButton}>
                                 <Text style={styles.permissionButtonText}>Grant Permission</Text>
                             </LinearGradient>
                         </TouchableOpacity>
@@ -178,7 +181,7 @@ export default function CameraScreen() {
                     </TouchableOpacity>
 
                     <TouchableOpacity onPress={usePhoto} activeOpacity={0.8} style={styles.usePhotoButtonTouchable}>
-                        <LinearGradient colors={['#3CB855', '#22C922', '#5CE073']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.usePhotoButton}>
+                        <LinearGradient colors={colors.nutritionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.usePhotoButton}>
                             <Text style={styles.usePhotoButtonText}>Use Photo</Text>
                         </LinearGradient>
                     </TouchableOpacity>
@@ -237,7 +240,8 @@ export default function CameraScreen() {
     )
 }
 
-const styles = StyleSheet.create({
+function makeStyles(colors: Colors) {
+    return StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#121212',
@@ -289,7 +293,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
-        borderColor: '#22C922',
+        borderColor: colors.nutrition,
         marginBottom: 24,
     },
     permissionTitle: {
@@ -298,7 +302,7 @@ const styles = StyleSheet.create({
         marginBottom: 6,
         textAlign: 'center',
         letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
+        fontFamily: fonts.semibold,
     },
     permissionMessage: {
         fontSize: 14,
@@ -306,19 +310,19 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         lineHeight: 22,
         marginBottom: 32,
-        fontFamily: 'Poppins_400Regular',
+        fontFamily: fonts.regular,
         letterSpacing: 0.2,
     },
     permissionText: {
         color: '#FFF',
         fontSize: 16,
-        fontFamily: 'Poppins_400Regular',
+        fontFamily: fonts.regular,
     },
     permissionButtonTouchable: {
         width: '100%',
         borderRadius: 12,
         overflow: 'hidden',
-        shadowColor: '#22C922',
+        shadowColor: colors.nutrition,
         shadowOffset: {
             width: 0,
             height: 4,
@@ -337,7 +341,7 @@ const styles = StyleSheet.create({
         fontSize: 17,
         color: '#FFF',
         letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
+        fontFamily: fonts.semibold,
     },
     cancelButton: {
         paddingVertical: 14,
@@ -347,7 +351,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#888',
         letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
+        fontFamily: fonts.semibold,
     },
     topBar: {
         flexDirection: 'row',
@@ -369,7 +373,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     flashButtonActive: {
-        backgroundColor: 'rgba(76, 217, 100, 0.3)',
+        backgroundColor: colors.nutrition + '4D',
     },
     frameContainer: {
         flex: 1,
@@ -381,7 +385,7 @@ const styles = StyleSheet.create({
         maxWidth: 320,
         aspectRatio: 3 / 4,
         borderWidth: 2,
-        borderColor: 'rgba(76, 217, 100, 0.5)',
+        borderColor: colors.nutrition + '80',
         borderRadius: 16,
         position: 'relative',
     },
@@ -389,7 +393,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         width: 30,
         height: 30,
-        borderColor: '#22C922',
+        borderColor: colors.nutrition,
     },
     cornerTopLeft: {
         top: -2,
@@ -486,13 +490,13 @@ const styles = StyleSheet.create({
         color: '#FFF',
         fontSize: 17,
         letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
+        fontFamily: fonts.semibold,
     },
     usePhotoButtonTouchable: {
         flex: 2,
         borderRadius: 12,
         overflow: 'hidden',
-        shadowColor: '#22C922',
+        shadowColor: colors.nutrition,
         shadowOffset: {
             width: 0,
             height: 4,
@@ -510,6 +514,7 @@ const styles = StyleSheet.create({
         fontSize: 17,
         color: '#FFF',
         letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
+        fontFamily: fonts.semibold,
     },
-})
+    })
+}

@@ -1,24 +1,46 @@
 import DraggableList, { DraggableListRenderParams } from '@/components/WorkoutComponents/DraggableList'
 import Log from '@/components/WorkoutComponents/Log'
 import { useAuth } from '@/context/AuthContext'
+import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { useWorkout } from '@/context/WorkoutContext'
 import { Workout } from '@/context/WorkoutContext/types'
 import { useRouter } from 'expo-router'
-import { Dumbbell, Pencil } from 'lucide-react-native'
+import { Dumbbell } from 'lucide-react-native'
+import { useMemo } from 'react'
 import { Alert, StyleSheet, Text, View } from 'react-native'
 
 export default function WorkoutScreen() {
     //Workout Context Functions
-    const { handleUpdateWorkoutOrder, handleArchiveWorkout, handleDeleteWorkout, handleDuplicateWorkout, workouts } = useWorkout()
+    const { handleUpdateWorkoutOrder, handleArchiveWorkout, handleDeleteWorkout, handleDuplicateWorkout, workouts, exercises } = useWorkout()
     //Router
     const router = useRouter()
     //Auth Context Functions
     const { userID } = useAuth()
+    const colors = useColors()
+    const styles = useMemo(() => makeStyles(colors), [colors])
     // Filter and sort for archived workouts (deleted items are already removed from array)
     const activeWorkouts = workouts.filter((w) => !w.archived).sort((a, b) => a.order - b.order)
 
+    // Active (non-archived) exercise count per workout — computed once, O(1) lookup per card
+    const activeExerciseCounts = useMemo(() => {
+        const counts = new Map<string, number>()
+        for (const exercise of exercises) {
+            if (!exercise.archived) counts.set(exercise.workoutID, (counts.get(exercise.workoutID) ?? 0) + 1)
+        }
+        return counts
+    }, [exercises])
+
     function renderItem({ item, drag }: DraggableListRenderParams<Workout>) {
-        return <Log text={item.name} subtitle={''} onPress={() => router.push({ pathname: '/workoutScreens/exerciseScreen', params: { workoutId: item.id } })} onMenuPress={drag} onEditPress={() => handleEdit(item)} />
+        const count = activeExerciseCounts.get(item.id) ?? 0
+        return (
+            <Log
+                text={item.name}
+                subtitle={`${count} ${count === 1 ? 'exercise' : 'exercises'}`}
+                onPress={() => router.push({ pathname: '/workoutScreens/exerciseScreen', params: { workoutId: item.id } })}
+                onMenuPress={drag}
+                onEditPress={() => handleEdit(item)}
+            />
+        )
     }
 
     function handleEdit(workout: Workout) {
@@ -56,14 +78,9 @@ export default function WorkoutScreen() {
         return (
             <>
                 <Text style={styles.sectionTitle}>Workouts</Text>
-                <View style={styles.hintRow}>
-                    <Text style={styles.sectionSubtitle}>{'Tap to open '}</Text>
-                    <Text style={[styles.sectionSubtitle, { fontSize: 18 }]}>·</Text>
-                    <Text style={styles.sectionSubtitle}>{' Tap '}</Text>
-                    <Pencil size={13} color="#aaa" strokeWidth={2} />
-                    <Text style={styles.sectionSubtitle}>{' to edit'}</Text>
-                </View>
-                <Text style={[styles.sectionSubtitle, { marginBottom: 14 }]}>{'Hold to rearrange'}</Text>
+                <Text style={styles.sectionSubtitle}>
+                    {activeWorkouts.length} {activeWorkouts.length === 1 ? 'routine' : 'routines'}
+                </Text>
             </>
         )
     }
@@ -75,7 +92,7 @@ export default function WorkoutScreen() {
                     // Empty State
                     <View style={styles.emptyContainer}>
                         <View style={styles.emptyIconCircle}>
-                            <Dumbbell size={56} color="#2f80ed" strokeWidth={2} />
+                            <Dumbbell size={56} color={colors.workout} strokeWidth={2} />
                         </View>
                         <Text style={styles.emptyTitle}>No Workouts Yet</Text>
                         <Text style={styles.emptySubtitle}>Tap the ⋮ button to create your first workout</Text>
@@ -87,70 +104,59 @@ export default function WorkoutScreen() {
     )
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#121212',
-        paddingTop: 0,
-    },
-    sectionTitle: {
-        fontSize: 22,
-        flexShrink: 1,
-        color: '#fff',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    hintRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    sectionSubtitle: {
-        fontSize: 14,
-        color: '#aaa',
-        letterSpacing: 0.2,
-        fontFamily: 'Poppins_400Regular',
-        marginBottom: 1,
-    },
-    emptyContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingHorizontal: 40,
-        marginBottom: 50,
-    },
-    emptyIconCircle: {
-        width: 120,
-        height: 120,
-        borderRadius: 60,
-        backgroundColor: '#1e1e1e',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 24,
-        borderWidth: 3,
-        borderColor: '#2f80ed',
-        shadowColor: '#2f80ed',
-        shadowOffset: {
-            width: 0,
-            height: 8,
+function makeStyles(colors: Colors) {
+    return StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: colors.background,
+            paddingTop: 0,
         },
-        shadowOpacity: 0.1,
-        shadowRadius: 12,
-        elevation: 10,
-    },
-    emptyTitle: {
-        fontSize: 28,
-        color: '#FFF',
-        marginBottom: 12,
-        textAlign: 'center',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    emptySubtitle: {
-        fontSize: 16,
-        color: '#aaa',
-        textAlign: 'center',
-        lineHeight: 24,
-        letterSpacing: 0.2,
-        fontFamily: 'Poppins_400Regular',
-    },
-})
+        sectionTitle: {
+            fontSize: 26,
+            flexShrink: 1,
+            color: colors.text,
+            letterSpacing: -0.5,
+            fontFamily: fonts.extrabold,
+        },
+        sectionSubtitle: {
+            fontSize: 13,
+            color: colors.labelMuted,
+            marginTop: 2,
+            marginBottom: 14,
+            fontFamily: fonts.medium,
+        },
+        emptyContainer: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingHorizontal: 40,
+            marginBottom: 50,
+        },
+        emptyIconCircle: {
+            width: 120,
+            height: 120,
+            borderRadius: 60,
+            backgroundColor: colors.surface,
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginBottom: 24,
+            borderWidth: 2,
+            borderColor: colors.workout,
+        },
+        emptyTitle: {
+            fontSize: 26,
+            color: colors.text,
+            marginBottom: 12,
+            textAlign: 'center',
+            letterSpacing: -0.5,
+            fontFamily: fonts.extrabold,
+        },
+        emptySubtitle: {
+            fontSize: 15,
+            color: colors.labelMuted,
+            textAlign: 'center',
+            lineHeight: 22,
+            fontFamily: fonts.regular,
+        },
+    })
+}

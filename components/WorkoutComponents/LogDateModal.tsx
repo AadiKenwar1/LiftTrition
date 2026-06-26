@@ -1,7 +1,8 @@
 import DatePicker from '@/components/NeutralComponents/DatePicker'
+import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { isDateAfterToday } from '@/lib/utils/dateHelper'
 import { LinearGradient } from 'expo-linear-gradient'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Modal, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
 
 type LogDateModalProps = {
@@ -13,6 +14,8 @@ type LogDateModalProps = {
 }
 
 export default function LogDateModal({ visible, selectedDate, onConfirm, onClose, onInvalidDate }: LogDateModalProps) {
+    const colors = useColors()
+    const styles = useMemo(() => makeStyles(colors), [colors])
     const [tempDate, setTempDate] = useState<Date>(selectedDate)
 
     useEffect(() => {
@@ -42,9 +45,9 @@ export default function LogDateModal({ visible, selectedDate, onConfirm, onClose
                 <View style={styles.content}>
                     <Text style={styles.title}>Change Date</Text>
                     <Text style={styles.subtitle}>Logs will be added to the selected date</Text>
-                    <DatePicker selectedDate={tempDate} onDateChange={setTempDate} color="#2f80ed" />
+                    <DatePicker selectedDate={tempDate} onDateChange={setTempDate} color={colors.workout} />
                     <TouchableOpacity onPress={handleDone} activeOpacity={0.8} style={styles.confirmTouchable}>
-                        <LinearGradient colors={['#1A7AD4', '#2f80ed']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.confirmButton}>
+                        <LinearGradient colors={colors.workoutGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.confirmButton}>
                             <Text style={styles.confirmText}>Done</Text>
                         </LinearGradient>
                     </TouchableOpacity>
@@ -54,59 +57,61 @@ export default function LogDateModal({ visible, selectedDate, onConfirm, onClose
     )
 }
 
-const styles = StyleSheet.create({
-    overlay: {
-        flex: 1,
-        backgroundColor: 'rgba(63, 63, 63, 0.85)',
-        justifyContent: 'flex-end',
-    },
-    backdrop: {
-        flex: 1,
-    },
-    content: {
-        backgroundColor: '#121212',
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        paddingHorizontal: 24,
-        paddingBottom: 48,
-        paddingTop: 16,
-        maxHeight: '70%',
-    },
-    title: {
-        fontSize: 24,
-        color: '#FFF',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-        marginBottom: 4,
-        textAlign: 'center',
-    },
-    subtitle: {
-        fontSize: 16,
-        color: '#aaa',
-        fontFamily: 'Poppins_400Regular',
-        marginBottom: 16,
-        textAlign: 'center',
-    },
-    confirmTouchable: {
-        borderRadius: 12,
-        overflow: 'hidden',
-        marginTop: 16,
-        shadowColor: '#2f80ed',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 8,
-    },
-    confirmButton: {
-        borderRadius: 12,
-        paddingVertical: 16,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    confirmText: {
-        fontSize: 17,
-        color: '#FFF',
-        fontFamily: 'Poppins_600SemiBold',
-        letterSpacing: -0.5,
-    },
-})
+function makeStyles(colors: Colors) {
+    return StyleSheet.create({
+        overlay: {
+            flex: 1,
+            backgroundColor: 'rgba(63, 63, 63, 0.85)',
+            justifyContent: 'flex-end',
+        },
+        backdrop: {
+            flex: 1,
+        },
+        content: {
+            backgroundColor: colors.background,
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            paddingHorizontal: 24,
+            paddingBottom: 48,
+            paddingTop: 16,
+            maxHeight: '70%',
+        },
+        title: {
+            fontSize: 24,
+            color: colors.text,
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+            marginBottom: 4,
+            textAlign: 'center',
+        },
+        subtitle: {
+            fontSize: 16,
+            color: colors.labelMuted,
+            fontFamily: fonts.regular,
+            marginBottom: 16,
+            textAlign: 'center',
+        },
+        confirmTouchable: {
+            borderRadius: 12,
+            overflow: 'hidden',
+            marginTop: 16,
+            shadowColor: colors.workout,
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 8,
+        },
+        confirmButton: {
+            borderRadius: 12,
+            paddingVertical: 16,
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        confirmText: {
+            fontSize: 17,
+            color: '#FFF',
+            fontFamily: fonts.semibold,
+            letterSpacing: -0.5,
+        },
+    })
+}

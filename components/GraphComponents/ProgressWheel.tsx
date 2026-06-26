@@ -1,7 +1,8 @@
+import { fonts, useColors } from '@/context/ThemeContext'
 import { useSettings } from '@/context/SettingsContext'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Animated, StyleSheet, Text, View } from 'react-native'
-import Svg, { Circle, Defs, LinearGradient, Stop } from 'react-native-svg'
+import Svg, { Circle, Defs, G, LinearGradient, Stop } from 'react-native-svg'
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle)
 
@@ -18,22 +19,26 @@ function lerpHex(c1: string, c2: string, t: number): string {
     return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`
 }
 
-// Internal constants - not exposed as props since they're never customized
 const ANIMATION_DURATION = 1000
-const BACKGROUND_COLOR = '#2a2a2a'
-const TEXT_COLOR = 'white'
 
 interface ProgressWheelProps {
     percent: number
     size?: number
     strokeWidth?: number
     fontSize?: number
+    /** Solid stroke color. When omitted, the mode-based gradient is used (legacy behavior). */
+    color?: string
+    /** Track color. Defaults to the theme's ringTrack token. */
+    trackColor?: string
+    /** Custom center content. When omitted, renders the rounded percentage. */
+    children?: React.ReactNode
 }
 
-export default function ProgressWheel({ percent = 0, size = 120, strokeWidth = 12, fontSize = 32 }: ProgressWheelProps) {
+export default function ProgressWheel({ percent = 0, size = 120, strokeWidth = 12, fontSize = 32, color, trackColor, children }: ProgressWheelProps) {
     const actualPercent = isNaN(percent) || !isFinite(percent) ? 0 : Math.max(0, percent)
     const wheelPercent = Math.min(actualPercent, 100)
     const { mode } = useSettings()
+    const colors = useColors()
 
     // Define gradient stops matching app theme
     const workoutStops = [
@@ -84,7 +89,7 @@ export default function ProgressWheel({ percent = 0, size = 120, strokeWidth = 1
     const radius = (size - strokeWidth) / 2
     const circumference = 2 * Math.PI * radius
 
-    // Marker position at current percentage (clockwise from right, 3 o'clock)
+    // Marker position at current percentage (clockwise from right, 3 o'clock — rotated to top by the <G> below)
     const angle = (wheelPercent / 100) * 2 * Math.PI
     const markerX = size / 2 + radius * Math.cos(angle)
     const markerY = size / 2 + radius * Math.sin(angle)
@@ -103,6 +108,10 @@ export default function ProgressWheel({ percent = 0, size = 120, strokeWidth = 1
         }
     }, [wheelPercent, mode])
 
+    const strokeColor = color ?? 'url(#grad)'
+    const track = trackColor ?? colors.ringTrack
+    const markerFill = color ?? markerColor
+
     const strokeDashoffset = animatedValue.interpolate({
         inputRange: [0, 100],
         outputRange: [circumference, 0],
@@ -120,16 +129,16 @@ export default function ProgressWheel({ percent = 0, size = 120, strokeWidth = 1
                     </LinearGradient>
                 </Defs>
 
-                <Circle stroke={'#888'} fill="none" cx={size / 2} cy={size / 2} r={radius} strokeWidth={strokeWidth} />
+                <Circle stroke={track} fill="none" cx={size / 2} cy={size / 2} r={radius} strokeWidth={strokeWidth} />
 
-                <AnimatedCircle stroke="url(#grad)" fill="none" cx={size / 2} cy={size / 2} r={radius} strokeWidth={strokeWidth} strokeDasharray={circumference} strokeDashoffset={strokeDashoffset} strokeLinecap="round" />
+                <G transform={`rotate(-90, ${size / 2}, ${size / 2})`}>
+                    <AnimatedCircle stroke={strokeColor} fill="none" cx={size / 2} cy={size / 2} r={radius} strokeWidth={strokeWidth} strokeDasharray={circumference} strokeDashoffset={strokeDashoffset} strokeLinecap="round" />
 
-                {wheelPercent === 0 && <Circle cx={markerX} cy={markerY} r={markerRadius} fill={markerColor} stroke="rgba(0,0,0,0.0)" strokeWidth={1} />}
+                    {wheelPercent === 0 && <Circle cx={markerX} cy={markerY} r={markerRadius} fill={markerFill} stroke="rgba(0,0,0,0.0)" strokeWidth={1} />}
+                </G>
             </Svg>
 
-            <View style={styles.percentContainer}>
-                <Text style={[styles.percentText, { color: TEXT_COLOR, fontSize }]}>{displayPercent}%</Text>
-            </View>
+            <View style={styles.percentContainer}>{children ?? <Text style={[styles.percentText, { color: colors.text, fontSize }]}>{displayPercent}%</Text>}</View>
         </View>
     )
 }
@@ -145,8 +154,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     percentText: {
-        fontWeight: '700',
         letterSpacing: -1,
-        fontFamily: 'Poppins_600SemiBold',
+        fontFamily: fonts.bold,
     },
 })

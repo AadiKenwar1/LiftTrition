@@ -1,8 +1,9 @@
+import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import type { Log } from '@/context/WorkoutContext/types'
 import { formatDateOrToday, getDateKey } from '@/lib/utils/dateHelper'
 import { Trash } from 'lucide-react-native'
 import type { RefObject } from 'react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Animated, FlatList, Keyboard, LayoutAnimation, Platform, Pressable, StyleSheet, Text, TouchableOpacity, UIManager, View } from 'react-native'
 
 type LogHistoryListProps = {
@@ -14,6 +15,8 @@ type LogHistoryListProps = {
 }
 
 export default function LogHistoryList({ logs, weightUnit, lastAddedLogId, onDeleteConfirmed, flatListRef }: LogHistoryListProps) {
+    const colors = useColors()
+    const styles = useMemo(() => makeStyles(colors), [colors])
     const [deletingLogId, setDeletingLogId] = useState<string | null>(null)
     const deleteOpacity = useRef(new Animated.Value(1)).current
     const deleteTranslateX = useRef(new Animated.Value(0)).current
@@ -72,7 +75,7 @@ export default function LogHistoryList({ logs, weightUnit, lastAddedLogId, onDel
                         </View>
 
                         <TouchableOpacity onPress={() => handleDelete(item.id)} style={styles.deleteButton} activeOpacity={0.6} disabled={isDeleting}>
-                            <Trash size={20} color="#FF453A" strokeWidth={2.5} />
+                            <Trash size={20} color={colors.destructive} strokeWidth={2.5} />
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -110,119 +113,112 @@ export default function LogHistoryList({ logs, weightUnit, lastAddedLogId, onDel
     )
 }
 
-const styles = StyleSheet.create({
-    logsSection: {
-        flex: 1,
-        paddingTop: 16,
-        borderTopWidth: 1,
-        borderTopColor: '#2a2a2a',
-    },
-    logsFlatList: {
-        flex: 1,
-    },
-    logsSectionTitle: {
-        fontSize: 18,
-        color: '#FFF',
-        marginBottom: 12,
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    logsList: {
-        paddingBottom: 20,
-    },
-    emptyText: {
-        fontSize: 14,
-        color: '#555',
-        fontFamily: 'Poppins_400Regular',
-        letterSpacing: 0.1,
-        marginTop: 4,
-    },
-    dateHeader: {
-        marginBottom: 8,
-        paddingBottom: 6,
-        borderBottomWidth: 1,
-        borderBottomColor: '#2a2a2a',
-    },
-    dateHeaderSpaced: {
-        marginTop: 8,
-    },
-    dateHeaderText: {
-        fontSize: 13,
-        color: '#888',
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    logItemWrapper: {
-        flexDirection: 'row',
-        marginBottom: 10,
-        borderRadius: 16,
-        overflow: 'hidden',
-        backgroundColor: '#1e1e1e',
-        borderWidth: 1,
-        borderColor: '#2a2a2a',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 6,
-        elevation: 6,
-    },
-    logItemWrapperHighlight: {
-        backgroundColor: '#1e3a2f',
-        borderColor: '#22C55E',
-        borderWidth: 2,
-    },
-    logAccentBar: {
-        width: 4,
-        backgroundColor: '#2f80ed',
-        shadowColor: '#2f80ed',
-        shadowOffset: { width: 2, height: 0 },
-        shadowOpacity: 0.5,
-        shadowRadius: 4,
-    },
-    logItem: {
-        flex: 1,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingVertical: 16,
-        paddingHorizontal: 16,
-    },
-    logContent: {
-        flex: 1,
-        marginRight: 12,
-    },
-    logInfo: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-        marginBottom: 4,
-    },
-    logWeight: {
-        fontSize: 17,
-        color: '#FFF',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    logSeparator: {
-        fontSize: 16,
-        color: '#aaa',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    logReps: {
-        fontSize: 17,
-        color: '#FFF',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    logDate: {
-        fontSize: 12,
-        color: '#666',
-        letterSpacing: 0.2,
-        fontFamily: 'Poppins_500Medium',
-    },
-    deleteButton: {
-        padding: 8,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-})
+function makeStyles(colors: Colors) {
+    return StyleSheet.create({
+        logsSection: {
+            flex: 1,
+            paddingTop: 16,
+            borderTopWidth: 1,
+            borderTopColor: colors.hairline,
+        },
+        logsFlatList: {
+            flex: 1,
+        },
+        logsSectionTitle: {
+            fontSize: 18,
+            color: colors.text,
+            marginBottom: 12,
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+        logsList: {
+            paddingBottom: 20,
+        },
+        emptyText: {
+            fontSize: 14,
+            color: colors.placeholder,
+            fontFamily: fonts.regular,
+            letterSpacing: 0.1,
+            marginTop: 4,
+        },
+        dateHeader: {
+            marginBottom: 8,
+            paddingBottom: 6,
+            borderBottomWidth: 1,
+            borderBottomColor: colors.hairline,
+        },
+        dateHeaderSpaced: {
+            marginTop: 8,
+        },
+        dateHeaderText: {
+            fontSize: 13,
+            color: colors.textMuted,
+            fontFamily: fonts.semibold,
+        },
+        logItemWrapper: {
+            flexDirection: 'row',
+            marginBottom: 10,
+            borderRadius: radius.card,
+            overflow: 'hidden',
+            backgroundColor: colors.surface,
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: colors.hairline,
+        },
+        logItemWrapperHighlight: {
+            backgroundColor: colors.nutrition + '1A',
+            borderColor: colors.nutrition,
+            borderWidth: 2,
+        },
+        logAccentBar: {
+            width: 4,
+            backgroundColor: colors.workout,
+        },
+        logItem: {
+            flex: 1,
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingVertical: 16,
+            paddingHorizontal: 16,
+        },
+        logContent: {
+            flex: 1,
+            marginRight: 12,
+        },
+        logInfo: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 8,
+            marginBottom: 4,
+        },
+        logWeight: {
+            fontSize: 17,
+            color: colors.text,
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+        logSeparator: {
+            fontSize: 16,
+            color: colors.labelMuted,
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+        logReps: {
+            fontSize: 17,
+            color: colors.text,
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+        logDate: {
+            fontSize: 12,
+            color: colors.placeholder,
+            letterSpacing: 0.2,
+            fontFamily: fonts.medium,
+        },
+        deleteButton: {
+            padding: 8,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+    })
+}
