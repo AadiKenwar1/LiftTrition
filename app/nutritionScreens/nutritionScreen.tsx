@@ -94,7 +94,18 @@ export default function NutritionScreen() {
     return (
         <FlatList
             data={todayEntries}
-            renderItem={({ item }) => <Entry name={item.name} calories={item.calories} protein={item.protein} carbs={item.carbs} fats={item.fats} onEditPress={() => handleEdit(item)} />}
+            renderItem={({ item }) => (
+                <Entry
+                    name={item.name}
+                    calories={item.calories}
+                    protein={item.protein}
+                    carbs={item.carbs}
+                    fats={item.fats}
+                    onEditPress={() => handleEdit(item)}
+                    showBreakdown={item.isPhoto}
+                    onBreakdownPress={() => router.push({ pathname: '/nutritionScreens/editPhotoEntry', params: { entry: JSON.stringify(item) } })}
+                />
+            )}
             keyExtractor={(item) => item.id}
             ListHeaderComponent={renderHeader}
             ListEmptyComponent={renderEmptyState}

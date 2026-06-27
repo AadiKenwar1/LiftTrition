@@ -1,11 +1,9 @@
 import type { ColorScheme, Colors } from './types'
 
-// Accents (workout/nutrition + their gradients) are per-theme — see each palette below.
-// Bright values live on dark; light uses the same hue deepened for legibility on white.
-const brand = {
-    destructive: '#FF453A',
-} as const
-
+// Accents (workout/nutrition + their gradients) are deep enough to carry white text/icons at AA,
+// and identical in light + dark so CTAs/Fab/ModeSwitcher match the icon/border accent.
+// `*Ink` tokens are the readable-text counterparts: the deep fill accents fail AA as small
+// text on a background, so links/labels use these per-theme inks instead.
 export const palettes = {
     light: {
         // Surfaces — deeper cool-slate canvas so white cards clearly lift off the page
@@ -21,9 +19,9 @@ export const palettes = {
         // Text — near-black (cool) instead of pure #000 to cut glare
         text: '#16171A',
         textSecondary: '#3C3C43',
-        textMuted: '#6A6A6E',
+        textMuted: '#5E5E62',
         textFaint: '#666666',
-        labelMuted: '#6C6D75',
+        labelMuted: '#5A5B64',
         tabInactive: '#86878F',
         placeholder: '#8A8B92',
         disabled: '#D1D1D6',
@@ -31,16 +29,24 @@ export const palettes = {
         ringTrack: '#D0D3DC',
         chevron: '#B8B9C1',
         iconChipBg: 'rgba(47,128,237,0.10)',
-        // Brand (nutritionInk = AA-contrast green for numerals on light bg)
-        nutritionInk: '#1BA81B',
+        // Brand (nutritionInk = green for numerals; matches the unified accent below)
+        nutritionInk: '#168516',
+        // AA-contrast blue for small accent text/links on light surfaces (deepened from the fill accent)
+        workoutInk: '#1A57B0',
         // Amber for "off-target" stat tone (AA-contrast on light bg)
         warning: '#C77700',
-        // Accents — same hue as dark, deepened for legibility on light surfaces
+        // Accents — unified with the gradient fills below (deep enough to carry white at AA); identical in light + dark
         workout: '#2570D8',
-        nutrition: '#1A9E1A',
-        workoutGradient: ['#2570D8', '#2570D8'] as const, //3A8BF0
-        nutritionGradient: ['#1A9E1A', '#1A9E1A'] as const, //34D63A
-        ...brand,
+        nutrition: '#168516',
+        // Measurement amber — deep amber, unified light+dark (carries WHITE CTA text at AA; ~4.9:1 glyph on light surface). Deep by necessity: white text can't sit on bright/yellow amber.
+        measurement: '#B45309',
+        // Gradient fills for CTAs/Fab/ModeSwitcher; top stop == accent so buttons match icons/borders.
+        workoutGradient: ['#2570D8', '#2064C8'] as const,
+        nutritionGradient: ['#168516', '#0F7A0F'] as const,
+        // Amber CTA fill (top stop == accent); white text clears AA on this deep amber
+        measurementGradient: ['#B45309', '#92400E'] as const,
+        // Destructive — deepened on light so red text/icons clear AA on light surfaces
+        destructive: '#C20012',
     },
     dark: {
         // Surfaces
@@ -58,7 +64,7 @@ export const palettes = {
         textSecondary: '#9A9AA3',
         textMuted: '#888888',
         textFaint: '#666666',
-        labelMuted: '#6B6B73',
+        labelMuted: '#82838C',
         tabInactive: '#5C5C64',
         placeholder: '#555555',
         disabled: '#333333',
@@ -66,16 +72,24 @@ export const palettes = {
         ringTrack: '#26272B',
         chevron: '#5C5C64',
         iconChipBg: 'rgba(47,128,237,0.16)',
-        // Brand (bright green reads fine on dark, so numerals use the base nutrition green)
-        nutritionInk: '#22C922',
+        // Brand (nutritionInk = green for numerals; matches the unified accent below)
+        nutritionInk: '#168516',
+        // AA-contrast blue for small accent text/links on the dark background (lightened from the fill accent)
+        workoutInk: '#4D9BFF',
         // Amber for "off-target" stat tone
         warning: '#FFB020',
-        // Accents — vivid on dark surfaces
-        workout: '#2F80ED',
+        // Accents — vivid on dark for icons/borders/glyphs; also the gradient top stops below.
+        workout: '#2f80ed',
         nutrition: '#22C922',
-        workoutGradient: ['#3A8BF0', '#2F80ED'] as const,
-        nutritionGradient: ['#34D63A', '#22C922'] as const,
-        ...brand,
+        // Measurement amber — deep amber, unified light+dark (carries WHITE CTA text at AA; ~3.7:1 glyph on dark surface). Deep by necessity: white text can't sit on bright/yellow amber.
+        measurement: '#B45309',
+        // Gradient fills for CTAs/Fab/ModeSwitcher; top stop == accent (matches icons), deepening gently toward the bottom.
+        workoutGradient: ['#2f80ed', '#2064C8'] as const,
+        nutritionGradient: ['#1A9E1A', '#22C922'] as const,
+        // Amber CTA fill; white text clears AA on this deep amber
+        measurementGradient: ['#B45309', '#92400E'] as const,
+        // Destructive — bright red reads fine on the dark background
+        destructive: '#FF453A',
     },
 } as const satisfies Record<ColorScheme, Colors>
 

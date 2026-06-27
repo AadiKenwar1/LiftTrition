@@ -1,14 +1,17 @@
 import { useSettings } from '@/context/SettingsContext'
+import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import Slider from '@react-native-community/slider'
+import { LinearGradient } from 'expo-linear-gradient'
 import { router, useLocalSearchParams } from 'expo-router'
 import { Gauge, Rabbit, Turtle } from 'lucide-react-native'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 export default function AdjustNutrition3Screen() {
     const { mode } = useSettings()
+    const colors = useColors()
+    const styles = useMemo(() => makeStyles(colors), [colors])
     const params = useLocalSearchParams<{ height: string; weight: string; unitSystem: string; goal: string; targetWeight: string }>()
-    const accent = '#22C922'
     const [goalPace, setGoalPace] = useState(0.5)
 
     const handleNext = () => {
@@ -38,8 +41,8 @@ export default function AdjustNutrition3Screen() {
         <View style={styles.container}>
             <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
                 {/* Icon */}
-                <View style={[styles.iconCircle, { borderColor: accent }]}>
-                    <Gauge size={72} color={accent} strokeWidth={2} />
+                <View style={styles.iconCircle}>
+                    <Gauge size={72} color={colors.nutrition} strokeWidth={2} />
                 </View>
 
                 {/* Title */}
@@ -58,9 +61,9 @@ export default function AdjustNutrition3Screen() {
 
                     {/* Slider with Icons */}
                     <View style={styles.sliderRow}>
-                        <Turtle size={24} color="#666" strokeWidth={2} />
-                        <Slider style={styles.slider} minimumValue={0.2} maximumValue={3.0} step={0.1} value={goalPace} onValueChange={setGoalPace} minimumTrackTintColor={accent} maximumTrackTintColor="#333" thumbTintColor={accent} />
-                        <Rabbit size={24} color="#666" strokeWidth={2} />
+                        <Turtle size={24} color={colors.textFaint} strokeWidth={2} />
+                        <Slider style={styles.slider} minimumValue={0.2} maximumValue={3.0} step={0.1} value={goalPace} onValueChange={setGoalPace} minimumTrackTintColor={colors.nutrition} maximumTrackTintColor={colors.ringTrack} thumbTintColor={colors.nutrition} />
+                        <Rabbit size={24} color={colors.textFaint} strokeWidth={2} />
                     </View>
 
                     {/* Min/Max Labels */}
@@ -71,116 +74,125 @@ export default function AdjustNutrition3Screen() {
                 </View>
 
                 {/* Next Button */}
-                <TouchableOpacity style={[styles.nextButton]} onPress={handleNext} activeOpacity={0.8}>
-                    <Text style={styles.nextButtonText}>Next</Text>
+                <TouchableOpacity style={styles.nextButton} onPress={handleNext} activeOpacity={0.8}>
+                    <LinearGradient colors={colors.nutritionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.nextButtonGradient}>
+                        <Text style={styles.nextButtonText}>Next</Text>
+                    </LinearGradient>
                 </TouchableOpacity>
             </ScrollView>
         </View>
     )
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#121212',
-    },
-    scroll: {
-        flex: 1,
-        width: '100%',
-    },
-    scrollContent: {
-        flexGrow: 1,
-        alignItems: 'center',
-        width: '100%',
-        paddingHorizontal: 25,
-        paddingTop: 36,
-        paddingBottom: 40,
-    },
-    iconCircle: {
-        width: 144,
-        height: 144,
-        borderRadius: 72,
-        backgroundColor: '#1e1e1e',
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 2,
-        marginBottom: 12,
-    },
-    titleText: {
-        fontSize: 28,
-        color: '#fff',
-        letterSpacing: -0.5,
-        marginBottom: 4,
-        textAlign: 'center',
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    subtitleText: {
-        fontSize: 16,
-        color: '#aaa',
-        textAlign: 'center',
-        letterSpacing: 0.2,
-        marginBottom: 24,
-        paddingHorizontal: 8,
-        fontFamily: 'Poppins_400Regular',
-    },
-    sliderContainer: {
-        width: '100%',
-        paddingHorizontal: 12,
-        marginBottom: 24,
-    },
-    valueDisplay: {
-        alignItems: 'center',
-        marginBottom: 24,
-    },
-    valueText: {
-        color: '#fff',
-        fontSize: 48,
-        marginBottom: 6,
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    valueLabelText: {
-        fontSize: 24,
-        color: '#aaa',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    sliderRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        width: '100%',
-        gap: 12,
-    },
-    slider: { flex: 1, height: 40 },
-    rangeLabels: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginTop: 8,
-        paddingHorizontal: 4,
-    },
-    rangeLabelText: {
-        fontSize: 14,
-        color: '#666',
-        letterSpacing: 0.2,
-        fontFamily: 'Poppins_500Medium',
-    },
-    nextButton: {
-        backgroundColor: '#22C922',
-        width: '100%',
-        height: 60,
-        borderRadius: 16,
-        justifyContent: 'center',
-        alignItems: 'center',
-        shadowColor: '#22C922',
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.2,
-        shadowRadius: 12,
-        elevation: 8,
-    },
-    nextButtonText: {
-        fontSize: 16,
-        color: '#fff',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-})
+function makeStyles(colors: Colors) {
+    return StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: colors.background,
+        },
+        scroll: {
+            flex: 1,
+            width: '100%',
+        },
+        scrollContent: {
+            flexGrow: 1,
+            alignItems: 'center',
+            width: '100%',
+            paddingHorizontal: 20,
+            paddingTop: 24,
+            paddingBottom: 40,
+        },
+        iconCircle: {
+            width: 144,
+            height: 144,
+            borderRadius: 72,
+            backgroundColor: colors.surface,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderWidth: 2,
+            borderColor: colors.nutrition,
+            marginBottom: 12,
+        },
+        titleText: {
+            fontSize: 28,
+            color: colors.text,
+            letterSpacing: -0.5,
+            marginBottom: 4,
+            textAlign: 'center',
+            fontFamily: fonts.semibold,
+        },
+        subtitleText: {
+            fontSize: 16,
+            color: colors.textSecondary,
+            textAlign: 'center',
+            letterSpacing: 0.2,
+            marginBottom: 24,
+            paddingHorizontal: 8,
+            fontFamily: fonts.regular,
+        },
+        sliderContainer: {
+            width: '100%',
+            paddingHorizontal: 12,
+            marginBottom: 24,
+        },
+        valueDisplay: {
+            alignItems: 'center',
+            marginBottom: 24,
+        },
+        valueText: {
+            color: colors.text,
+            fontSize: 48,
+            marginBottom: 6,
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+        valueLabelText: {
+            fontSize: 24,
+            color: colors.textSecondary,
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+        sliderRow: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            width: '100%',
+            gap: 12,
+        },
+        slider: { flex: 1, height: 40 },
+        rangeLabels: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            marginTop: 8,
+            paddingHorizontal: 4,
+        },
+        rangeLabelText: {
+            fontSize: 14,
+            color: colors.textFaint,
+            letterSpacing: 0.2,
+            fontFamily: fonts.medium,
+        },
+        nextButton: {
+            width: '100%',
+            height: 60,
+            borderRadius: radius.cardLg,
+            overflow: 'hidden',
+            shadowColor: colors.nutrition,
+            shadowOffset: { width: 0, height: 6 },
+            shadowOpacity: 0.2,
+            shadowRadius: 12,
+            elevation: 8,
+        },
+        nextButtonGradient: {
+            width: '100%',
+            height: '100%',
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        nextButtonText: {
+            fontSize: 16,
+            color: '#fff',
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+    })
+}

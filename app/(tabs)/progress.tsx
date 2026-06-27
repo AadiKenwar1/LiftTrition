@@ -2,7 +2,6 @@ import ActivityBanner from '@/components/GraphComponents/ActivityBanner'
 import BarChart from '@/components/GraphComponents/BarChart'
 import Graph1 from '@/components/GraphComponents/Graph1'
 import GraphStats from '@/components/GraphComponents/GraphStats'
-import RangeSelectionModal from '@/components/GraphComponents/RangeSelectionModal'
 import SelectionModal from '@/components/GraphComponents/SelectionModal'
 import ModeSwitcher from '@/components/NeutralComponents/ModeSwitcher'
 import { useNutrition } from '@/context/NutritionContext'
@@ -11,9 +10,7 @@ import { fonts, radius, useColorScheme, useColors, type Colors } from '@/context
 import { useWorkout } from '@/context/WorkoutContext'
 
 import { addDays, formatDate, getWeekStart } from '@/lib/utils/dateHelper'
-import { downsampleData, downsampleDataPreserveEndpoints } from '@/lib/utils/downsample'
-import { getGraphChartNote } from '@/lib/utils/graphChartNote'
-import { ChevronDown, ChevronLeft, ChevronRight, Dumbbell, History, Scale } from 'lucide-react-native'
+import { ChevronDown, ChevronLeft, ChevronRight, Dumbbell, Scale } from 'lucide-react-native'
 import { useEffect, useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
@@ -32,7 +29,6 @@ export default function ProgressScreen() {
     const [selectedMacro, setSelectedMacro] = useState<'calories' | 'protein' | 'carbs' | 'fats'>('calories')
 
     // Modal visibility state
-    const [topRangeModalVisible, setTopRangeModalVisible] = useState(false)
     const [selectionModalVisible, setSelectionModalVisible] = useState(false)
 
     // Set selected exercise to last exercise if it exists
@@ -67,14 +63,6 @@ export default function ProgressScreen() {
         return rawData.slice(startIndex)
     }, [mode, selectedExercise, topRange, logs, bwProgress, lastExercise, handleGetOneRepMaxData, handleGetBodyWeightProgressData, settings.onboardingCompletedAt])
 
-    const topData = useMemo(() => {
-        if (mode) {
-            return downsampleDataPreserveEndpoints(topRawData, 7, 0, 'max')
-        }
-        const bucketSize = topRange / 7
-        return downsampleData(topRawData, bucketSize, 1, 'avg')
-    }, [topRawData, topRange, mode])
-
     // BOTTOM card (bars) — Sets (lift) / Calories+Macros (nutrition), one calendar week at a time
     const weekStart = useMemo(() => addDays(getWeekStart(new Date()), bottomWeekOffset * 7), [bottomWeekOffset])
 
@@ -90,7 +78,7 @@ export default function ProgressScreen() {
         : `${formatDate(weekStart, false)} – ${formatDate(addDays(weekStart, 6), false)}`
 
     // Signature for keying the line chart so it re-renders when data changes
-    const topSig = `${topData.length}:${topData.at(-1)?.day ?? ''}:${topData.at(-1)?.value ?? ''}`
+    const topSig = `${topRawData.length}:${topRawData.at(-1)?.day ?? ''}:${topRawData.at(-1)?.value ?? ''}`
 
     const accent = mode ? colors.workout : colors.nutrition
 
@@ -136,13 +124,28 @@ export default function ProgressScreen() {
                             }
                             <Text style={styles.cardSubtitle}>{topSubtitle}</Text>
                         </View>
-                        <TouchableOpacity style={[styles.rangeButton, { backgroundColor: accent + '1A', borderColor: accent + '40' }]} onPress={() => setTopRangeModalVisible(true)} activeOpacity={0.6} hitSlop={8} accessibilityRole="button" accessibilityLabel="Change time range">
-                            <History size={20} color={accent} strokeWidth={2} />
-                        </TouchableOpacity>
+                    </View>
+                    {/* Range strip — segmented 7/14/21 above the chart (selected chip carries the unit) */}
+                    <View style={styles.rangeStrip}>
+                        {([7, 14, 21] as const).map((r) => {
+                            const selected = topRange === r
+                            return (
+                                <TouchableOpacity
+                                    key={r}
+                                    style={[styles.rangeChip, selected ? { backgroundColor: accent } : { backgroundColor: colors.surfaceInset, borderColor: colors.hairline, borderWidth: StyleSheet.hairlineWidth }]}
+                                    onPress={() => setTopRange(r)}
+                                    activeOpacity={0.7}
+                                    accessibilityRole="button"
+                                    accessibilityLabel={`Show last ${r} ${mode ? 'lifts' : 'days'}`}
+                                >
+                                    <Text style={[styles.rangeChipText, { color: selected ? '#fff' : colors.textSecondary }]}>{selected ? `${r} ${mode ? 'Lifts' : 'Days'}` : `${r}`}</Text>
+                                </TouchableOpacity>
+                            )
+                        })}
                     </View>
                     <View style={styles.chartContainer}>
-                        {topData.length > 0 ?
-                            <Graph1 key={`top-${mode ? 'lift' : 'nutrition'}-${topRange}-${mode ? selectedExercise : 'bw'}-${topSig}`} mode={mode} data={topData} selectedRange={topRange} chartNote={getGraphChartNote(mode ? 'strength' : 'bodyweight', topRange)} goal={topGoal} formatValue={topFormat} />
+                        {topRawData.length > 0 ?
+                            <Graph1 key={`top-${mode ? 'lift' : 'nutrition'}-${topRange}-${mode ? selectedExercise : 'bw'}-${topSig}`} mode={mode} data={topRawData} selectedRange={topRange} goal={topGoal} formatValue={topFormat} />
                         :   <View style={styles.emptyGraphState}>
                                 <View style={[styles.emptyIconCircle, { backgroundColor: accent + '1A' }]}>
                                     {mode === true ?
@@ -154,7 +157,7 @@ export default function ProgressScreen() {
                             </View>
                         }
                     </View>
-                    <GraphStats graphType={mode ? 'orm' : 'bodyweight'} data={topData} statsData={topRawData} unitSystem={settings.unitSystem} mode={mode} goalWeight={settings.goalWeight} />
+                    <GraphStats graphType={mode ? 'orm' : 'bodyweight'} data={topRawData} statsData={topRawData} unitSystem={settings.unitSystem} mode={mode} goalWeight={settings.goalWeight} />
                 </View>
 
                 {/* BOTTOM card — bar chart (one calendar week at a time) */}
@@ -195,8 +198,6 @@ export default function ProgressScreen() {
             </ScrollView>
 
             {/* Modals */}
-            <RangeSelectionModal visible={topRangeModalVisible} onClose={() => setTopRangeModalVisible(false)} selectedRange={topRange} onSelectRange={setTopRange} mode={mode} rangeUnit={mode ? 'Lifts' : 'Days'} />
-
             <SelectionModal
                 visible={selectionModalVisible}
                 onClose={() => setSelectionModalVisible(false)}
@@ -240,13 +241,23 @@ function makeStyles(colors: Colors, isDark: boolean) {
             flex: 1,
             minWidth: 0,
         },
-        rangeButton: {
-            width: 40,
-            height: 40,
-            borderRadius: radius.iconButton,
+        rangeStrip: {
+            flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'center',
-            borderWidth: StyleSheet.hairlineWidth,
+            gap: 8,
+            marginTop: 6,
+            marginBottom: 2,
+        },
+        rangeChip: {
+            paddingVertical: 7,
+            paddingHorizontal: 16,
+            borderRadius: radius.chip,
+        },
+        rangeChipText: {
+            fontSize: 13,
+            letterSpacing: -0.2,
+            fontFamily: fonts.semibold,
         },
         titleRow: {
             flexDirection: 'row',

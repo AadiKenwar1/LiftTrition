@@ -1,13 +1,16 @@
 import { useSettings } from '@/context/SettingsContext'
 import { validateHeightWeight, validateTargetWeight } from '@/context/SettingsContext/functions/validator'
+import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
+import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
 import { Target } from 'lucide-react-native'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Keyboard, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
 export default function AdjustNutrition2Screen() {
     const { settings } = useSettings()
-    const accent = '#22C922'
+    const colors = useColors()
+    const styles = useMemo(() => makeStyles(colors), [colors])
 
     const [goal, setGoal] = useState<'lose' | 'gain' | 'maintain' | null>(settings.goalType)
     const [targetWeight, setTargetWeight] = useState(settings.goalWeight.toString())
@@ -36,8 +39,8 @@ export default function AdjustNutrition2Screen() {
         <View style={styles.container}>
             <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" onScrollBeginDrag={Keyboard.dismiss}>
                 {/* Icon */}
-                <View style={[styles.iconCircle, { borderColor: accent }]}>
-                    <Target size={96} color={accent} strokeWidth={2} />
+                <View style={styles.iconCircle}>
+                    <Target size={96} color={colors.nutrition} strokeWidth={2} />
                 </View>
 
                 {/* Title */}
@@ -48,15 +51,15 @@ export default function AdjustNutrition2Screen() {
 
                 {/* Goal Options */}
                 <View style={styles.goalContainer}>
-                    <TouchableOpacity style={[styles.goalButton, goal === 'lose' && { borderColor: accent }]} onPress={() => setGoal('lose')} activeOpacity={0.5}>
+                    <TouchableOpacity style={[styles.goalButton, goal === 'lose' && styles.goalButtonSelected]} onPress={() => setGoal('lose')} activeOpacity={0.5}>
                         <Text style={[styles.goalText, goal === 'lose' && styles.goalTextSelected]}>Lose</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={[styles.goalButton, goal === 'maintain' && { borderColor: accent }]} onPress={() => setGoal('maintain')} activeOpacity={0.5}>
+                    <TouchableOpacity style={[styles.goalButton, goal === 'maintain' && styles.goalButtonSelected]} onPress={() => setGoal('maintain')} activeOpacity={0.5}>
                         <Text style={[styles.goalText, goal === 'maintain' && styles.goalTextSelected]}>Maintain</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={[styles.goalButton, goal === 'gain' && { borderColor: accent }]} onPress={() => setGoal('gain')} activeOpacity={0.5}>
+                    <TouchableOpacity style={[styles.goalButton, goal === 'gain' && styles.goalButtonSelected]} onPress={() => setGoal('gain')} activeOpacity={0.5}>
                         <Text style={[styles.goalText, goal === 'gain' && styles.goalTextSelected]}>Gain</Text>
                     </TouchableOpacity>
                 </View>
@@ -66,7 +69,7 @@ export default function AdjustNutrition2Screen() {
                     <View style={styles.inputGroup}>
                         <Text style={styles.inputLabel}>Target Weight</Text>
                         <View style={styles.inputWrapper}>
-                            <TextInput style={styles.input} placeholder="150" placeholderTextColor="#555" keyboardType="numeric" value={targetWeight} onChangeText={setTargetWeight} />
+                            <TextInput style={styles.input} placeholder="150" placeholderTextColor={colors.placeholder} keyboardType="numeric" value={targetWeight} onChangeText={setTargetWeight} />
                             <Text style={styles.unitText}>{settings.unitSystem === 'metric' ? 'kg' : 'lbs'}</Text>
                         </View>
                     </View>
@@ -79,152 +82,164 @@ export default function AdjustNutrition2Screen() {
                 )}
 
                 {/* Next Button */}
-                <TouchableOpacity style={[styles.nextButton]} onPress={handleNext} activeOpacity={0.8}>
-                    <Text style={styles.nextButtonText}>Next</Text>
+                <TouchableOpacity style={styles.nextButton} onPress={handleNext} activeOpacity={0.8}>
+                    <LinearGradient colors={colors.nutritionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.nextButtonGradient}>
+                        <Text style={styles.nextButtonText}>Next</Text>
+                    </LinearGradient>
                 </TouchableOpacity>
             </ScrollView>
         </View>
     )
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#121212',
-    },
-    scroll: {
-        flex: 1,
-        width: '100%',
-    },
-    scrollContent: {
-        flexGrow: 1,
-        alignItems: 'center',
-        width: '100%',
-        paddingHorizontal: 25,
-        paddingTop: 36,
-        paddingBottom: 40,
-    },
-    iconCircle: {
-        width: 144,
-        height: 144,
-        borderRadius: 72,
-        backgroundColor: '#1e1e1e',
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 2,
-        marginBottom: 12,
-    },
-    titleText: {
-        fontSize: 28,
-        color: '#fff',
-        letterSpacing: -0.5,
-        marginBottom: 4,
-        textAlign: 'center',
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    subtitleText: {
-        fontSize: 16,
-        color: '#aaa',
-        textAlign: 'center',
-        letterSpacing: 0.2,
-        marginBottom: 24,
-        paddingHorizontal: 8,
-        fontFamily: 'Poppins_400Regular',
-    },
-    goalContainer: {
-        flexDirection: 'row',
-        width: '100%',
-        gap: 10,
-        marginBottom: 24,
-    },
-    goalButton: {
-        flex: 1,
-        height: 60,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#1e1e1e',
-        borderRadius: 14,
-        borderWidth: 2,
-        borderColor: '#1e1e1e',
-    },
-    goalText: {
-        fontSize: 16,
-        color: '#aaa',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_500Medium',
-    },
-    goalTextSelected: { color: '#fff' },
-    inputGroup: {
-        width: '100%',
-        marginBottom: 24,
-    },
-    inputLabel: {
-        fontSize: 16,
-        color: '#aaa',
-        marginBottom: 8,
-        paddingLeft: 4,
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    inputWrapper: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#1e1e1e',
-        borderRadius: 14,
-        borderWidth: 1,
-        borderColor: '#1e1e1e',
-        paddingHorizontal: 16,
-        height: 60,
-        marginBottom: 8,
-    },
-    input: {
-        flex: 1,
-        fontSize: 16,
-        color: '#fff',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    unitText: {
-        fontSize: 16,
-        color: '#aaa',
-        marginLeft: 12,
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    maintainMessageContainer: {
-        width: '100%',
-        paddingVertical: 20,
-        paddingHorizontal: 20,
-        borderRadius: 14,
-        borderWidth: 1,
-        marginBottom: 24,
-        backgroundColor: '#1e1e1e',
-        borderColor: '#1e1e1e',
-    },
-    maintainMessageText: {
-        fontSize: 14,
-        color: '#aaa',
-        textAlign: 'center',
-        letterSpacing: 0.2,
-        fontFamily: 'Poppins_500Medium',
-    },
-    nextButton: {
-        width: '100%',
-        height: 60,
-        borderRadius: 16,
-        justifyContent: 'center',
-        backgroundColor: '#22C922',
-        shadowColor: '#22C922',
-        alignItems: 'center',
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.2,
-        shadowRadius: 12,
-        elevation: 8,
-    },
-    nextButtonText: {
-        fontSize: 16,
-        color: '#fff',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-})
+function makeStyles(colors: Colors) {
+    return StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: colors.background,
+        },
+        scroll: {
+            flex: 1,
+            width: '100%',
+        },
+        scrollContent: {
+            flexGrow: 1,
+            alignItems: 'center',
+            width: '100%',
+            paddingHorizontal: 20,
+            paddingTop: 24,
+            paddingBottom: 40,
+        },
+        iconCircle: {
+            width: 144,
+            height: 144,
+            borderRadius: 72,
+            backgroundColor: colors.surface,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderWidth: 2,
+            borderColor: colors.nutrition,
+            marginBottom: 12,
+        },
+        titleText: {
+            fontSize: 28,
+            color: colors.text,
+            letterSpacing: -0.5,
+            marginBottom: 4,
+            textAlign: 'center',
+            fontFamily: fonts.semibold,
+        },
+        subtitleText: {
+            fontSize: 16,
+            color: colors.textSecondary,
+            textAlign: 'center',
+            letterSpacing: 0.2,
+            marginBottom: 24,
+            paddingHorizontal: 8,
+            fontFamily: fonts.regular,
+        },
+        goalContainer: {
+            flexDirection: 'row',
+            width: '100%',
+            gap: 10,
+            marginBottom: 24,
+        },
+        goalButton: {
+            flex: 1,
+            height: 60,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: colors.surface,
+            borderRadius: radius.cardLg,
+            borderWidth: 2,
+            borderColor: colors.border,
+        },
+        goalButtonSelected: {
+            borderColor: colors.nutrition,
+        },
+        goalText: {
+            fontSize: 16,
+            color: colors.textSecondary,
+            letterSpacing: -0.5,
+            fontFamily: fonts.medium,
+        },
+        goalTextSelected: { color: colors.text },
+        inputGroup: {
+            width: '100%',
+            marginBottom: 24,
+        },
+        inputLabel: {
+            fontSize: 16,
+            color: colors.textSecondary,
+            marginBottom: 8,
+            paddingLeft: 4,
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+        inputWrapper: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: colors.surface,
+            borderRadius: radius.cardLg,
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: colors.hairline,
+            paddingHorizontal: 16,
+            height: 60,
+            marginBottom: 8,
+        },
+        input: {
+            flex: 1,
+            fontSize: 16,
+            color: colors.text,
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+        unitText: {
+            fontSize: 16,
+            color: colors.textSecondary,
+            marginLeft: 12,
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+        maintainMessageContainer: {
+            width: '100%',
+            paddingVertical: 20,
+            paddingHorizontal: 20,
+            borderRadius: radius.cardLg,
+            borderWidth: StyleSheet.hairlineWidth,
+            marginBottom: 24,
+            backgroundColor: colors.surface,
+            borderColor: colors.hairline,
+        },
+        maintainMessageText: {
+            fontSize: 14,
+            color: colors.textSecondary,
+            textAlign: 'center',
+            letterSpacing: 0.2,
+            fontFamily: fonts.medium,
+        },
+        nextButton: {
+            width: '100%',
+            height: 60,
+            borderRadius: radius.cardLg,
+            overflow: 'hidden',
+            shadowColor: colors.nutrition,
+            shadowOffset: { width: 0, height: 6 },
+            shadowOpacity: 0.2,
+            shadowRadius: 12,
+            elevation: 8,
+        },
+        nextButtonGradient: {
+            width: '100%',
+            height: '100%',
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        nextButtonText: {
+            fontSize: 16,
+            color: '#fff',
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+    })
+}

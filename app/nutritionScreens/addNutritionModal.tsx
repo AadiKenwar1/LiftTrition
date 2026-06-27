@@ -103,7 +103,7 @@ export default function AddNutritionModal() {
                         Describe meal
                     </Text>
                     <View style={styles.inputContainer}>
-                        <TextInput style={[styles.input, focusedField === 'mealName' && styles.inputFocused]} placeholder="e.g., Grilled Chicken Salad" placeholderTextColor={colors.placeholder} value={mealName} onChangeText={setMealName} onFocus={() => setFocusedField('mealName')} onBlur={() => setFocusedField(null)} />
+                        <TextInput style={[styles.input, focusedField === 'mealName' && styles.inputFocused]} placeholder="e.g., Grilled Chicken Salad" placeholderTextColor={colors.placeholder} value={mealName} onChangeText={setMealName} onFocus={() => setFocusedField('mealName')} onBlur={() => setFocusedField(null)} multiline numberOfLines={2} textAlignVertical="top" />
                     </View>
 
                     {/* Generate all macros with AI */}
@@ -263,6 +263,9 @@ function makeStyles(colors: Colors) {
             paddingHorizontal: 16,
             paddingVertical: 14,
             fontSize: 15,
+            lineHeight: 20,
+            minHeight: 68,
+            textAlignVertical: 'top',
             color: colors.text,
             borderWidth: 2,
             borderColor: colors.hairline,
@@ -320,13 +323,6 @@ function makeStyles(colors: Colors) {
             fontSize: 12,
             color: colors.textMuted,
             fontFamily: fonts.medium,
-        },
-        inputHint: {
-            marginTop: 8,
-            fontSize: 12,
-            color: colors.placeholder,
-            letterSpacing: 0.1,
-            fontFamily: fonts.regular,
         },
         generateButton: {
             marginTop: 14,

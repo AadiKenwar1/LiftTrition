@@ -22,13 +22,11 @@ interface StatChip {
     trend?: { dir: 'up' | 'down' | 'flat'; tone: Tone }
 }
 
-// Tone for "off-target" macros/calories: near goal = neutral, moderately off = amber, far off = red.
+// On-target calories/macros read as positive (green); anything off-target is neutral — never red/amber,
+// since being under goal (e.g. an intentional deficit) shouldn't look like a mistake.
 function targetTone(avg: number, goal?: number): Tone {
     if (goal == null || goal === 0) return 'neutral'
-    const off = Math.abs(avg - goal) / goal
-    if (off <= 0.1) return 'neutral'
-    if (off <= 0.2) return 'warn'
-    return 'bad'
+    return Math.abs(avg - goal) / goal <= 0.1 ? 'good' : 'neutral'
 }
 
 function computeStats(graphType: GraphType, data: Array<{ day: string; value: number }>, unitSystem: 'imperial' | 'metric', goalWeight?: number, statsData?: Array<{ day: string; value: number }>, goal?: number): StatChip[] {
@@ -58,7 +56,7 @@ function computeStats(graphType: GraphType, data: Array<{ day: string; value: nu
             : dir === 'down' ? 'bad'
             : 'neutral'
         return [
-            { label: 'Estimated best', value: `${best} ${weightUnit}` },
+            { label: 'Estimated max', value: `${best} ${weightUnit}` },
             { label: 'Change', value: `${sign}${Math.round(change)} ${weightUnit}`, trend: { dir, tone } },
         ]
     }
@@ -105,10 +103,11 @@ function computeStats(graphType: GraphType, data: Array<{ day: string; value: nu
             change > 0.5 ? 'up'
             : change < -0.5 ? 'down'
             : 'flat'
-        // Goal-aware: moving toward goalWeight is good, away is bad (works for cutting and bulking).
+        // Goal-aware: moving toward goalWeight reads as positive (green); moving away is neutral, not red —
+        // whether "down" is good depends on the user's goal, so we never flag body weight as bad.
         let tone: Tone = 'neutral'
         if (goalWeight != null && dir !== 'flat') {
-            tone = Math.abs(last - goalWeight) < Math.abs(first - goalWeight) ? 'good' : 'bad'
+            tone = Math.abs(last - goalWeight) < Math.abs(first - goalWeight) ? 'good' : 'neutral'
         }
         const toGoal = goalWeight != null ? Math.round((last - goalWeight) * 10) / 10 : null
         const toGoalValue =
@@ -188,7 +187,7 @@ function makeStyles(colors: Colors) {
         },
         cell: {
             flex: 1,
-            paddingVertical: 13,
+            paddingVertical: 10,
             paddingHorizontal: 16,
         },
         label: {
@@ -204,7 +203,7 @@ function makeStyles(colors: Colors) {
         },
         value: {
             fontFamily: fonts.extrabold,
-            fontSize: 19,
+            fontSize: 20,
             letterSpacing: -0.4,
             flexShrink: 1,
         },

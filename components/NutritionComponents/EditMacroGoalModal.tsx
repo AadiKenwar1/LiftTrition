@@ -1,5 +1,7 @@
+import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { validateMacro } from '@/context/SettingsContext/functions/validator'
-import { useLayoutEffect, useRef, useState } from 'react'
+import { LinearGradient } from 'expo-linear-gradient'
+import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Animated, Easing, Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
 export type MacroGoalKind = 'calories' | 'protein' | 'carbs' | 'fats'
@@ -22,12 +24,12 @@ type Props = {
     onSave: (value: number) => void
 }
 
-const ACCENT = '#22C922'
-
 const openEasing = Easing.out(Easing.cubic)
 const closeEasing = Easing.in(Easing.cubic)
 
-export default function EditMacroGoalModal({ visible, kind, initialValue, onDismiss, onSave, backgroundColor }: Props) {
+export default function EditMacroGoalModal({ visible, kind, initialValue, onDismiss, onSave }: Props) {
+    const colors = useColors()
+    const styles = useMemo(() => makeStyles(colors), [colors])
     const [draft, setDraft] = useState('')
     const backdropOpacity = useRef(new Animated.Value(0)).current
     const cardAnim = useRef(new Animated.Value(0)).current
@@ -123,14 +125,16 @@ export default function EditMacroGoalModal({ visible, kind, initialValue, onDism
                                 <Pressable style={styles.card} onPress={(e) => e.stopPropagation()}>
                                     <Text style={styles.cardTitle}>Edit {meta.title}</Text>
                                     <Text style={styles.hint}>Daily goal ({meta.unitSuffix.trim()})</Text>
-                                    <TextInput style={styles.input} value={draft} onChangeText={setDraft} keyboardType="decimal-pad" placeholder="0" placeholderTextColor="#555" selectTextOnFocus />
+                                    <TextInput style={styles.input} value={draft} onChangeText={setDraft} keyboardType="decimal-pad" placeholder="0" placeholderTextColor={colors.placeholder} selectTextOnFocus />
                                     <Text style={styles.consistencyNote}>Only this goal changes. Your other daily targets stay the same until you edit them.</Text>
                                     <View style={styles.actions}>
                                         <TouchableOpacity style={styles.cancelBtn} onPress={handleCancel} activeOpacity={0.8}>
                                             <Text style={styles.cancelText}>Cancel</Text>
                                         </TouchableOpacity>
-                                        <TouchableOpacity style={[styles.saveBtn, { backgroundColor: backgroundColor ? backgroundColor : '#D4F5D4' }]} onPress={handleSave} activeOpacity={0.8}>
-                                            <Text style={styles.saveText}>Save</Text>
+                                        <TouchableOpacity style={styles.saveBtn} onPress={handleSave} activeOpacity={0.8}>
+                                            <LinearGradient colors={colors.nutritionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.saveGradient}>
+                                                <Text style={styles.saveText}>Save</Text>
+                                            </LinearGradient>
                                         </TouchableOpacity>
                                     </View>
                                 </Pressable>
@@ -143,96 +147,103 @@ export default function EditMacroGoalModal({ visible, kind, initialValue, onDism
     )
 }
 
-const styles = StyleSheet.create({
-    keyboardRoot: {
-        flex: 1,
-    },
-    layerStack: {
-        flex: 1,
-    },
-    scrim: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(63, 63, 63, 0.85)',
-    },
-    cardSlot: {
-        ...StyleSheet.absoluteFillObject,
-        justifyContent: 'center',
-        paddingHorizontal: 28,
-    },
-    card: {
-        backgroundColor: '#121212',
-        borderRadius: 16,
-        padding: 22,
-        borderWidth: 1,
-        borderColor: '#2a2a2a',
-    },
-    cardTitle: {
-        fontSize: 20,
-        color: '#fff',
-        fontFamily: 'Poppins_600SemiBold',
-        marginBottom: 4,
-    },
-    hint: {
-        fontSize: 13,
-        color: '#aaa',
-        fontFamily: 'Poppins_400Regular',
-        marginBottom: 14,
-    },
-    input: {
-        backgroundColor: '#242424',
-        borderRadius: 12,
-        paddingHorizontal: 16,
-        paddingVertical: 14,
-        fontSize: 18,
-        color: '#fff',
-        fontFamily: 'Poppins_500Medium',
-        borderWidth: 2,
-        borderColor: '#333',
-    },
-    consistencyNote: {
-        fontSize: 12,
-        color: '#aaa',
-        lineHeight: 17,
-        fontFamily: 'Poppins_500Medium',
-        marginTop: 12,
-    },
-    actions: {
-        flexDirection: 'row',
-        gap: 12,
-        marginTop: 20,
-    },
-    cancelBtn: {
-        flex: 1,
-        height: 60,
-        borderRadius: 16,
-        backgroundColor: '#242424',
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 2,
-        borderColor: '#242424',
-    },
-    cancelText: {
-        fontSize: 16,
-        color: '#888',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    saveBtn: {
-        flex: 1,
-        height: 60,
-        borderRadius: 16,
-        justifyContent: 'center',
-        alignItems: 'center',
-        shadowColor: ACCENT,
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.2,
-        shadowRadius: 12,
-        elevation: 8,
-    },
-    saveText: {
-        fontSize: 16,
-        color: '#000',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-})
+function makeStyles(colors: Colors) {
+    return StyleSheet.create({
+        keyboardRoot: {
+            flex: 1,
+        },
+        layerStack: {
+            flex: 1,
+        },
+        scrim: {
+            ...StyleSheet.absoluteFillObject,
+            backgroundColor: 'rgba(63, 63, 63, 0.85)',
+        },
+        cardSlot: {
+            ...StyleSheet.absoluteFillObject,
+            justifyContent: 'center',
+            paddingHorizontal: 28,
+        },
+        card: {
+            backgroundColor: colors.surface,
+            borderRadius: radius.cardLg,
+            padding: 22,
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: colors.hairline,
+        },
+        cardTitle: {
+            fontSize: 20,
+            color: colors.text,
+            fontFamily: fonts.semibold,
+            marginBottom: 4,
+        },
+        hint: {
+            fontSize: 13,
+            color: colors.textSecondary,
+            fontFamily: fonts.regular,
+            marginBottom: 14,
+        },
+        input: {
+            backgroundColor: colors.surfaceInset,
+            borderRadius: radius.card,
+            paddingHorizontal: 16,
+            paddingVertical: 14,
+            fontSize: 18,
+            color: colors.text,
+            fontFamily: fonts.medium,
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: colors.hairline,
+        },
+        consistencyNote: {
+            fontSize: 12,
+            color: colors.textSecondary,
+            lineHeight: 17,
+            fontFamily: fonts.medium,
+            marginTop: 12,
+        },
+        actions: {
+            flexDirection: 'row',
+            gap: 12,
+            marginTop: 20,
+        },
+        cancelBtn: {
+            flex: 1,
+            height: 60,
+            borderRadius: radius.cardLg,
+            backgroundColor: colors.surfaceInset,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: colors.hairline,
+        },
+        cancelText: {
+            fontSize: 16,
+            color: colors.textMuted,
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+        saveBtn: {
+            flex: 1,
+            height: 60,
+            borderRadius: radius.cardLg,
+            overflow: 'hidden',
+            shadowColor: colors.nutrition,
+            shadowOffset: { width: 0, height: 6 },
+            shadowOpacity: 0.2,
+            shadowRadius: 12,
+            elevation: 8,
+        },
+        saveGradient: {
+            width: '100%',
+            height: '100%',
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        saveText: {
+            fontSize: 16,
+            color: '#FFF',
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+    })
+}

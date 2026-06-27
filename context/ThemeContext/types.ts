@@ -25,11 +25,14 @@ export type Colors = {
     // Brand
     workout: string
     nutrition: string
+    measurement: string
     nutritionInk: string
+    workoutInk: string
     destructive: string
     warning: string
     workoutGradient: readonly [string, string]
     nutritionGradient: readonly [string, string]
+    measurementGradient: readonly [string, string]
 }
 
 export type ColorScheme = 'light' | 'dark'

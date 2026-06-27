@@ -2,11 +2,13 @@ import EditMacroGoalModal, { type MacroGoalKind } from '@/components/NutritionCo
 import { useAuth } from '@/context/AuthContext'
 import { forceSignOut, isUploadFlushTimeoutError } from '@/context/AuthContext/functions/accountFunctions'
 import { useSettings } from '@/context/SettingsContext'
+import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { inchesToFeetInches } from '@/lib/utils/unitConversions'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
+import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { LogOut, Pencil, Trash2 } from 'lucide-react-native'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 export default function ProfileScreen() {
@@ -17,8 +19,9 @@ export default function ProfileScreen() {
 
     const { user, signOut, deleteAccount } = useAuth()
     const { settings, setSettings } = useSettings()
+    const colors = useColors()
+    const styles = useMemo(() => makeStyles(colors), [colors])
     const [editingKind, setEditingKind] = useState<MacroGoalKind | null>(null)
-    const accent = 'white'
 
     function macroValue(kind: MacroGoalKind): number {
         switch (kind) {
@@ -129,9 +132,9 @@ export default function ProfileScreen() {
             <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
                 {/* Profile Icon */}
                 <View style={styles.profileIconContainer}>
-                    <View style={[styles.profileIcon, { borderColor: accent }]}>
-                        <MaterialCommunityIcons name="account" size={48} color={accent} />
-                    </View>
+                    <LinearGradient colors={[colors.workoutGradient[0], colors.nutritionGradient[1]]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.profileIcon}>
+                        <MaterialCommunityIcons name="account" size={48} color="#fff" />
+                    </LinearGradient>
                 </View>
 
                 {/* Apple Account Information Section */}
@@ -199,7 +202,7 @@ export default function ProfileScreen() {
                                         })()
                                     :   `${settings.height} cm`}
                                 </Text>
-                                <Pencil size={14} color="#888" strokeWidth={2} />
+                                <Pencil size={14} color={colors.textMuted} strokeWidth={2} />
                             </View>
                         </TouchableOpacity>
 
@@ -211,7 +214,7 @@ export default function ProfileScreen() {
                                 <Text style={styles.infoValue}>
                                     {settings.bodyWeight} {settings.unitSystem === 'imperial' ? 'lbs' : 'kg'}
                                 </Text>
-                                <Pencil size={14} color="#888" strokeWidth={2} />
+                                <Pencil size={14} color={colors.textMuted} strokeWidth={2} />
                             </View>
                         </TouchableOpacity>
                     </View>
@@ -225,7 +228,7 @@ export default function ProfileScreen() {
                             <Text style={styles.infoLabel}>Activity Level</Text>
                             <View style={styles.editRow}>
                                 <Text style={styles.infoValue}>{formatActivityLevel(settings.activityLevel)}</Text>
-                                <Pencil size={14} color="#888" strokeWidth={2} />
+                                <Pencil size={14} color={colors.textMuted} strokeWidth={2} />
                             </View>
                         </TouchableOpacity>
 
@@ -235,7 +238,7 @@ export default function ProfileScreen() {
                             <Text style={styles.infoLabel}>Goal</Text>
                             <View style={styles.editRow}>
                                 <Text style={styles.infoValue}>{formatGoalType(settings.goalType)} Weight</Text>
-                                <Pencil size={14} color="#888" strokeWidth={2} />
+                                <Pencil size={14} color={colors.textMuted} strokeWidth={2} />
                             </View>
                         </TouchableOpacity>
 
@@ -278,7 +281,7 @@ export default function ProfileScreen() {
                                     <Text style={styles.infoLabel}>{label}</Text>
                                     <View style={styles.editRow}>
                                         <Text style={styles.infoValue}>{value}</Text>
-                                        <Pencil size={14} color="#888" strokeWidth={2} />
+                                        <Pencil size={14} color={colors.textMuted} strokeWidth={2} />
                                     </View>
                                 </TouchableOpacity>
                                 {i < arr.length - 1 && <View style={styles.divider} />}
@@ -290,44 +293,42 @@ export default function ProfileScreen() {
                 {/* Action Buttons */}
                 <View style={styles.actionSection}>
                     <TouchableOpacity style={[styles.signOutButton, signOutLoading && styles.buttonDisabled]} onPress={handleSignOut} activeOpacity={0.5} disabled={signOutLoading || deleteLoading}>
-                        <LogOut size={20} color="#fff" strokeWidth={2} />
+                        <LogOut size={20} color={colors.text} strokeWidth={2} />
                         <Text style={styles.signOutText}>{signOutLoading ? 'Signing out...' : 'Sign Out'}</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity style={[styles.deleteButton, deleteLoading && styles.buttonDisabled]} onPress={handleDeleteAccount} activeOpacity={0.5} disabled={signOutLoading || deleteLoading}>
-                        <Trash2 size={20} color="#FF6B6B" strokeWidth={2} />
+                        <Trash2 size={20} color={colors.destructive} strokeWidth={2} />
                         <Text style={styles.deleteText}>{deleteLoading ? 'Deleting account...' : 'Delete Account'}</Text>
                     </TouchableOpacity>
                 </View>
             </ScrollView>
-            <EditMacroGoalModal visible={editingKind != null} kind={editingKind} initialValue={editingKind != null ? macroValue(editingKind) : 0} onDismiss={() => setEditingKind(null)} onSave={handleSaveMacro} backgroundColor="#fff" />
+            <EditMacroGoalModal visible={editingKind != null} kind={editingKind} initialValue={editingKind != null ? macroValue(editingKind) : 0} onDismiss={() => setEditingKind(null)} onSave={handleSaveMacro} />
         </View>
     )
 }
 
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#121212' },
-    header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 60, paddingBottom: 20, backgroundColor: '#121212', borderBottomWidth: 1, borderBottomColor: '#2a2a2a' },
-    backButton: { width: 40, height: 40, justifyContent: 'center', alignItems: 'center' },
-    headerTitle: { fontSize: 20, color: '#fff', letterSpacing: -0.5, fontFamily: 'Poppins_600SemiBold' },
-    placeholder: { width: 40 },
-    scrollView: { flex: 1 },
-    scrollContent: { paddingHorizontal: 20, paddingBottom: 40 },
-    profileIconContainer: { alignItems: 'center', marginVertical: 24 },
-    profileIcon: { width: 100, height: 100, borderRadius: 50, backgroundColor: '#1e1e1e', justifyContent: 'center', alignItems: 'center', borderWidth: 2 },
-    section: { marginBottom: 24 },
-    sectionTitle: { fontSize: 18, color: '#fff', marginBottom: 12, paddingLeft: 4, letterSpacing: -0.5, fontFamily: 'Poppins_600SemiBold' },
-    card: { backgroundColor: '#1e1e1e', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#2a2a2a' },
-    infoRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12 },
-    editRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-    infoLabel: { fontSize: 15, color: '#aaa', letterSpacing: -0.5, fontFamily: 'Poppins_600SemiBold' },
-    infoValue: { fontSize: 15, color: '#fff', letterSpacing: -0.5, fontFamily: 'Poppins_600SemiBold' },
-    userIdText: { maxWidth: '60%', fontFamily: 'monospace' },
-    divider: { height: 1, backgroundColor: '#2a2a2a' },
-    actionSection: { marginTop: 16, gap: 12 },
-    buttonDisabled: { opacity: 0.6 },
-    signOutButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '100%', height: 56, backgroundColor: '#2a2a2a', borderRadius: 16, gap: 10, borderWidth: 1, borderColor: '#3a3a3a' },
-    signOutText: { fontSize: 17, color: '#fff', letterSpacing: -0.5, fontFamily: 'Poppins_600SemiBold' },
-    deleteButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '100%', height: 56, backgroundColor: 'rgba(255, 107, 107, 0.1)', borderRadius: 16, gap: 10, borderWidth: 1, borderColor: 'rgba(255, 107, 107, 0.3)' },
-    deleteText: { fontSize: 17, color: '#FF6B6B', letterSpacing: -0.5, fontFamily: 'Poppins_600SemiBold' },
-})
+function makeStyles(colors: Colors) {
+    return StyleSheet.create({
+        container: { flex: 1, backgroundColor: colors.background },
+        scrollView: { flex: 1 },
+        scrollContent: { paddingHorizontal: 20, paddingTop: 24, paddingBottom: 40 },
+        profileIconContainer: { alignItems: 'center', marginBottom: 24 },
+        profileIcon: { width: 100, height: 100, borderRadius: 50, justifyContent: 'center', alignItems: 'center' },
+        section: { marginBottom: 24 },
+        sectionTitle: { fontSize: 18, color: colors.text, marginBottom: 12, paddingLeft: 4, letterSpacing: -0.5, fontFamily: fonts.semibold },
+        card: { backgroundColor: colors.surface, borderRadius: radius.cardLg, padding: 16, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.hairline },
+        infoRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12 },
+        editRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+        infoLabel: { fontSize: 15, color: colors.textSecondary, letterSpacing: -0.5, fontFamily: fonts.semibold },
+        infoValue: { fontSize: 15, color: colors.text, letterSpacing: -0.5, fontFamily: fonts.semibold },
+        userIdText: { maxWidth: '60%', fontFamily: 'monospace' },
+        divider: { height: StyleSheet.hairlineWidth, backgroundColor: colors.divider },
+        actionSection: { marginTop: 0, gap: 12 },
+        buttonDisabled: { opacity: 0.6 },
+        signOutButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '100%', height: 56, backgroundColor: colors.surface, borderRadius: radius.cardLg, gap: 10, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.hairline },
+        signOutText: { fontSize: 17, color: colors.text, letterSpacing: -0.5, fontFamily: fonts.semibold },
+        deleteButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '100%', height: 56, backgroundColor: colors.destructive + '1A', borderRadius: radius.cardLg, gap: 10, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.destructive + '4D' },
+        deleteText: { fontSize: 17, color: colors.destructive, letterSpacing: -0.5, fontFamily: fonts.semibold },
+    })
+}

@@ -1,24 +1,30 @@
 import { FONT_FAMILY, useColorScheme, useColors } from '@/context/ThemeContext'
 import { Archivo_400Regular, Archivo_800ExtraBold } from '@expo-google-fonts/archivo'
 import { Poppins_400Regular, Poppins_800ExtraBold } from '@expo-google-fonts/poppins'
-import { Circle, Group, LinearGradient, Text, useFont, vec } from '@shopify/react-native-skia'
+import { Circle, Group, LinearGradient, useFont, vec } from '@shopify/react-native-skia'
 import { useEffect, useState } from 'react'
 import { ActivityIndicator, StyleSheet, View } from 'react-native'
 import { Area, CartesianChart, Line, useChartPressState } from 'victory-native'
 import ChartReadoutPill from './ChartReadoutPill'
 import { EndValueFlag, GoalLine, PressDot, PressGuideline } from './chartPrimitives'
 
+/** Rounds a raw step up to the nearest "nice" value (1/2/5 × 10ⁿ) for clean y-axis labels. */
+function niceStep(raw: number): number {
+    const mag = Math.pow(10, Math.floor(Math.log10(raw)))
+    const norm = raw / mag
+    return (norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 5 ? 5 : 10) * mag
+}
+
 interface Graph1Props {
     mode: boolean
     data: Array<{ day: string; value: number }>
     selectedRange: 7 | 14 | 21
-    chartNote?: { lines: string[] }
     goal?: number
     formatValue?: (value: number) => string
     showEndFlag?: boolean
 }
 
-export default function Graph1({ mode, data, selectedRange, chartNote, goal, formatValue, showEndFlag = true }: Graph1Props) {
+export default function Graph1({ mode, data, selectedRange, goal, formatValue, showEndFlag = true }: Graph1Props) {
     const colors = useColors()
     const isDark = useColorScheme() === 'dark'
     const font = useFont(FONT_FAMILY === 'archivo' ? Archivo_400Regular : Poppins_400Regular, 12)
@@ -39,10 +45,13 @@ export default function Graph1({ mode, data, selectedRange, chartNote, goal, for
         return () => clearTimeout(id)
     }, [])
 
-    // y-domain: include the goal (so its reference line shows) and widen a degenerate
-    // single-point / all-equal range so the gridlines render instead of collapsing.
-    const yDomain = (() => {
-        if (data.length === 0) return undefined
+    // Unified y-scale shared by the domain and the y-axis ticks so they stay aligned.
+    // Includes the goal (so its line shows) and adds one `step` of headroom above the data
+    // max, which gives the end-value flag room to sit above a peak last-point (e.g. a new PR)
+    // without needing a large empty band on top. Degenerate single-point/all-equal ranges keep
+    // a ±10 band so gridlines render and the dot sits mid-chart.
+    const yScaleInfo = (() => {
+        if (data.length === 0) return { domain: undefined as [number, number] | undefined, ticks: [0, 100, 200, 300] }
         const values = data.map((d) => d.value)
         let lo = Math.min(...values)
         let hi = Math.max(...values)
@@ -51,11 +60,25 @@ export default function Graph1({ mode, data, selectedRange, chartNote, goal, for
             hi = Math.max(hi, goal)
         }
         if (hi - lo < 1e-6) {
-            // Single point or all values equal — match the ±10 tick band so ~3 gridlines show
-            // and the dot sits mid-chart instead of the range collapsing to nothing.
-            return [Math.max(0, lo - 10), hi + 10] as [number, number]
+            const base = Math.max(0, lo - 10)
+            return { domain: [base, lo + 10] as [number, number], ticks: [base, lo, lo + 10] }
         }
-        return goal != null ? ([lo, hi] as [number, number]) : undefined
+        // Nice rounded ticks, capped at 4 labels, with one step of headroom above the data max
+        // (so the end-flag clears a peak last-point). Domain top = niceMax, no separate void band.
+        const maxTicks = 4
+        let step = niceStep((hi - lo) / (maxTicks - 1))
+        let niceMin = Math.floor(lo / step) * step
+        let niceMax = Math.ceil(hi / step) * step
+        if (niceMax - hi < step * 0.5) niceMax += step
+        while ((niceMax - niceMin) / step + 1 > maxTicks) {
+            step = niceStep(step * 1.5)
+            niceMin = Math.floor(lo / step) * step
+            niceMax = Math.ceil(hi / step) * step
+            if (niceMax - hi < step * 0.5) niceMax += step
+        }
+        const ticks: number[] = []
+        for (let v = niceMin; v <= niceMax + step * 1e-6; v += step) ticks.push(Math.round(v * 100) / 100)
+        return { domain: [niceMin, niceMax] as [number, number], ticks }
     })()
 
     // Show placeholder while fonts load, and for a minimum duration.
@@ -74,9 +97,9 @@ export default function Graph1({ mode, data, selectedRange, chartNote, goal, for
                 xKey="day"
                 yKeys={['value']}
                 chartPressState={state}
-                domain={yDomain ? { y: yDomain } : undefined}
-                padding={{ left: 10, right: 10, top: 14, bottom: 10 }}
-                domainPadding={{ left: 20, right: 20, top: 48, bottom: 10 }}
+                domain={yScaleInfo.domain ? { y: yScaleInfo.domain } : undefined}
+                padding={{ left: 10, right: 10, top: 6, bottom: 10 }}
+                domainPadding={{ left: 20, right: 20, top: 10, bottom: 10 }}
                 xAxis={{
                     font: selectedRange === 7 ? font : null, // Only show labels when range is 7
                     labelRotate: data.length > 3 ? 45 : 0,
@@ -94,39 +117,7 @@ export default function Graph1({ mode, data, selectedRange, chartNote, goal, for
                 yAxis={[
                     {
                         font,
-                        tickValues: (() => {
-                            if (data.length === 0) return [0, 100, 200, 300]
-
-                            const values = data.map((d) => d.value)
-                            const min = Math.floor(Math.min(...values))
-                            const max = Math.ceil(Math.max(...values))
-                            const range = max - min
-
-                            let ticks: number[]
-
-                            // All same value - show range around it
-                            if (range === 0) {
-                                ticks = [Math.max(0, min - 10), min, min + 10]
-                            }
-                            // Small range - show every integer (cap at 4 points)
-                            else if (range <= 3) {
-                                ticks = Array.from({ length: range + 1 }, (_, i) => min + i)
-                            }
-                            // Larger range - space by whole numbers (3 intervals -> max 4 points)
-                            else {
-                                const step = Math.max(1, Math.ceil(range / 3))
-                                ticks = []
-                                for (let i = min; i <= max; i += step) {
-                                    ticks.push(i)
-                                }
-                                if (ticks[ticks.length - 1] !== max) {
-                                    ticks.push(max)
-                                }
-                            }
-
-                            // Remove duplicates and sort (fixes React key warning)
-                            return Array.from(new Set(ticks)).sort((a, b) => a - b)
-                        })(),
+                        tickValues: yScaleInfo.ticks,
                         labelOffset: 8,
                         labelColor: colors.textSecondary,
                         formatYLabel: (value) => `${value}`,
@@ -134,21 +125,6 @@ export default function Graph1({ mode, data, selectedRange, chartNote, goal, for
                         lineWidth: 1,
                     },
                 ]}
-                renderOutside={({ canvasSize, chartBounds }) => {
-                    if (!chartNote) return null
-
-                    const lineHeight = 14
-                    const firstLineY = chartBounds.bottom + 16
-
-                    return (
-                        <>
-                            {chartNote.lines.map((line, index) => {
-                                const lineWidth = font.getTextWidth(line)
-                                return <Text key={index} x={(canvasSize.width - lineWidth) / 2} y={firstLineY + index * lineHeight} text={line} font={font} color={colors.labelMuted} style="fill" />
-                            })}
-                        </>
-                    )
-                }}
             >
                 {({ points, chartBounds, yScale }) => {
                     const lastPoint = [...points.value].reverse().find((p) => p.y != null)
