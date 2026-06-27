@@ -51,10 +51,8 @@ function computeStats(graphType: GraphType, data: Array<{ day: string; value: nu
             change > 0 ? 'up'
             : change < 0 ? 'down'
             : 'flat'
-        const tone: Tone =
-            dir === 'up' ? 'good'
-            : dir === 'down' ? 'bad'
-            : 'neutral'
+        // Up = positive (green); a decrease is shown neutral, not red — consistent with the other graphs.
+        const tone: Tone = dir === 'up' ? 'good' : 'neutral'
         return [
             { label: 'Estimated max', value: `${best} ${weightUnit}` },
             { label: 'Change', value: `${sign}${Math.round(change)} ${weightUnit}`, trend: { dir, tone } },
