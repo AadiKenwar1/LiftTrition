@@ -1,6 +1,8 @@
 import EditMacroGoalModal, { type MacroGoalKind } from '@/components/NutritionComponents/EditMacroGoalModal'
 import { useSettings } from '@/context/SettingsContext'
+import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import FontAwesome from '@expo/vector-icons/FontAwesome'
+import { LinearGradient } from 'expo-linear-gradient'
 import { router, useLocalSearchParams } from 'expo-router'
 import { Beef, Droplet, Flame, Pencil, Wheat } from 'lucide-react-native'
 import { useEffect, useMemo, useState } from 'react'
@@ -21,7 +23,8 @@ function macroInitialValue(kind: MacroGoalKind, m: { calorieGoal: number; protei
 
 export default function AdjustNutrition4Screen() {
     const { settings, setSettings, calculateMacros } = useSettings()
-    const accent = '#22C922'
+    const colors = useColors()
+    const styles = useMemo(() => makeStyles(colors), [colors])
     const [editingKind, setEditingKind] = useState<MacroGoalKind | null>(null)
     const params = useLocalSearchParams<{
         height: string
@@ -99,8 +102,8 @@ export default function AdjustNutrition4Screen() {
         <View style={styles.container}>
             <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
                 {/* Icon */}
-                <View style={[styles.iconCircle, { borderColor: accent }]}>
-                    <FontAwesome name="list-alt" size={72} color={accent} strokeWidth={2} />
+                <View style={styles.iconCircle}>
+                    <FontAwesome name="list-alt" size={72} color={colors.nutrition} />
                 </View>
 
                 {/* Title */}
@@ -115,7 +118,7 @@ export default function AdjustNutrition4Screen() {
                     <View style={styles.macrosRow}>
                         {/* Calories */}
                         <TouchableOpacity style={styles.macroCard} onPress={() => setEditingKind('calories')} activeOpacity={0.75}>
-                            <Pencil size={16} color="#888" strokeWidth={2} style={styles.pencilCorner} />
+                            <Pencil size={16} color={colors.textMuted} strokeWidth={2} style={styles.pencilCorner} />
                             <Flame size={18} color="#FF6B6B" strokeWidth={2} />
                             <Text style={styles.macroLabel}>Calories</Text>
                             <Text style={styles.macroValue}>{macroGoals.calorieGoal}</Text>
@@ -123,7 +126,7 @@ export default function AdjustNutrition4Screen() {
 
                         {/* Protein */}
                         <TouchableOpacity style={styles.macroCard} onPress={() => setEditingKind('protein')} activeOpacity={0.75}>
-                            <Pencil size={16} color="#888" strokeWidth={2} style={styles.pencilCorner} />
+                            <Pencil size={16} color={colors.textMuted} strokeWidth={2} style={styles.pencilCorner} />
                             <Beef size={18} color="red" strokeWidth={2} />
                             <Text style={styles.macroLabel}>Protein</Text>
                             <Text style={styles.macroValue}>{macroGoals.proteinGoal}g</Text>
@@ -134,7 +137,7 @@ export default function AdjustNutrition4Screen() {
                     <View style={styles.macrosRow}>
                         {/* Carbs */}
                         <TouchableOpacity style={styles.macroCard} onPress={() => setEditingKind('carbs')} activeOpacity={0.75}>
-                            <Pencil size={16} color="#888" strokeWidth={2} style={styles.pencilCorner} />
+                            <Pencil size={16} color={colors.textMuted} strokeWidth={2} style={styles.pencilCorner} />
                             <Wheat size={18} color="#FFD93D" strokeWidth={2} />
                             <Text style={styles.macroLabel}>Carbs</Text>
                             <Text style={styles.macroValue}>{macroGoals.carbsGoal}g</Text>
@@ -142,7 +145,7 @@ export default function AdjustNutrition4Screen() {
 
                         {/* Fats */}
                         <TouchableOpacity style={styles.macroCard} onPress={() => setEditingKind('fats')} activeOpacity={0.75}>
-                            <Pencil size={16} color="#888" strokeWidth={2} style={styles.pencilCorner} />
+                            <Pencil size={16} color={colors.textMuted} strokeWidth={2} style={styles.pencilCorner} />
                             <Droplet size={18} color="#22C922" strokeWidth={2} />
                             <Text style={styles.macroLabel}>Fats</Text>
                             <Text style={styles.macroValue}>{macroGoals.fatsGoal}g</Text>
@@ -159,8 +162,10 @@ export default function AdjustNutrition4Screen() {
                         <Text style={styles.cancelButtonText}>Cancel</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={[styles.saveButton]} onPress={handleSave} activeOpacity={0.8}>
-                        <Text style={styles.saveButtonText}>Save Changes</Text>
+                    <TouchableOpacity style={styles.saveButton} onPress={handleSave} activeOpacity={0.8}>
+                        <LinearGradient colors={colors.nutritionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.saveButtonGradient}>
+                            <Text style={styles.saveButtonText}>Save Changes</Text>
+                        </LinearGradient>
                     </TouchableOpacity>
                 </View>
             </ScrollView>
@@ -170,135 +175,142 @@ export default function AdjustNutrition4Screen() {
     )
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#121212',
-        paddingHorizontal: 25,
-        paddingTop: 0,
-        paddingBottom: 40,
-        alignItems: 'center',
-    },
-    scroll: {
-        flex: 1,
-        width: '100%',
-    },
-    scrollContent: {
-        alignItems: 'center',
-        width: '100%',
-        paddingBottom: 8,
-    },
-    iconCircle: {
-        width: 144,
-        height: 144,
-        borderRadius: 72,
-        backgroundColor: '#1e1e1e',
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 2,
-        marginBottom: 12,
-        marginTop: 24,
-    },
-    titleText: {
-        fontSize: 28,
-        color: '#fff',
-        letterSpacing: -0.5,
-        marginBottom: 4,
-        textAlign: 'center',
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    subtitleText: {
-        fontSize: 16,
-        color: '#aaa',
-        textAlign: 'center',
-        letterSpacing: 0.2,
-        marginBottom: 12,
-        paddingHorizontal: 8,
-        fontFamily: 'Poppins_400Regular',
-    },
-    macrosContainer: {
-        width: '100%',
-        gap: 10,
-        marginBottom: 8,
-    },
-    macrosRow: {
-        flexDirection: 'row',
-        width: '100%',
-        gap: 10,
-    },
-    macroCard: {
-        flex: 1,
-        backgroundColor: '#242424',
-        borderRadius: 14,
-        padding: 14,
-        alignItems: 'center',
-        borderWidth: 2,
-        borderColor: '#242424',
-        gap: 6,
-    },
-    pencilCorner: {
-        position: 'absolute',
-        top: 10,
-        right: 10,
-    },
-    macroLabel: {
-        fontSize: 13,
-        color: '#aaa',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    macroValue: {
-        fontSize: 24,
-        color: '#fff',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    noteText: {
-        fontSize: 12,
-        color: '#aaa',
-        textAlign: 'center',
-        marginBottom: 24,
-        letterSpacing: 0.2,
-        fontFamily: 'Poppins_500Medium',
-    },
-    buttonContainer: {
-        flexDirection: 'row',
-        width: '100%',
-        gap: 12,
-    },
-    cancelButton: {
-        flex: 1,
-        height: 60,
-        backgroundColor: '#242424',
-        borderRadius: 16,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 2,
-        borderColor: '#242424',
-    },
-    cancelButtonText: {
-        fontSize: 16,
-        color: '#aaa',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    saveButton: {
-        flex: 1,
-        height: 60,
-        backgroundColor: '#22C922',
-        borderRadius: 16,
-        justifyContent: 'center',
-        alignItems: 'center',
-        shadowColor: '#22C922',
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.2,
-        shadowRadius: 12,
-        elevation: 8,
-    },
-    saveButtonText: {
-        fontSize: 16,
-        color: '#fff',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-})
+function makeStyles(colors: Colors) {
+    return StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: colors.background,
+            paddingHorizontal: 20,
+            paddingTop: 0,
+            paddingBottom: 40,
+            alignItems: 'center',
+        },
+        scroll: {
+            flex: 1,
+            width: '100%',
+        },
+        scrollContent: {
+            alignItems: 'center',
+            width: '100%',
+            paddingTop: 24,
+            paddingBottom: 8,
+        },
+        iconCircle: {
+            width: 144,
+            height: 144,
+            borderRadius: 72,
+            backgroundColor: colors.surface,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderWidth: 2,
+            borderColor: colors.nutrition,
+            marginBottom: 12,
+        },
+        titleText: {
+            fontSize: 28,
+            color: colors.text,
+            letterSpacing: -0.5,
+            marginBottom: 4,
+            textAlign: 'center',
+            fontFamily: fonts.semibold,
+        },
+        subtitleText: {
+            fontSize: 16,
+            color: colors.textSecondary,
+            textAlign: 'center',
+            letterSpacing: 0.2,
+            marginBottom: 24,
+            paddingHorizontal: 8,
+            fontFamily: fonts.regular,
+        },
+        macrosContainer: {
+            width: '100%',
+            gap: 10,
+            marginBottom: 8,
+        },
+        macrosRow: {
+            flexDirection: 'row',
+            width: '100%',
+            gap: 10,
+        },
+        macroCard: {
+            flex: 1,
+            backgroundColor: colors.surface,
+            borderRadius: radius.cardLg,
+            padding: 14,
+            alignItems: 'center',
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: colors.hairline,
+            gap: 6,
+        },
+        pencilCorner: {
+            position: 'absolute',
+            top: 10,
+            right: 10,
+        },
+        macroLabel: {
+            fontSize: 13,
+            color: colors.textSecondary,
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+        macroValue: {
+            fontSize: 24,
+            color: colors.text,
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+        noteText: {
+            fontSize: 12,
+            color: colors.textSecondary,
+            textAlign: 'center',
+            marginBottom: 24,
+            letterSpacing: 0.2,
+            fontFamily: fonts.medium,
+        },
+        buttonContainer: {
+            flexDirection: 'row',
+            width: '100%',
+            gap: 12,
+        },
+        cancelButton: {
+            flex: 1,
+            height: 60,
+            backgroundColor: colors.surface,
+            borderRadius: radius.cardLg,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: colors.hairline,
+        },
+        cancelButtonText: {
+            fontSize: 16,
+            color: colors.textSecondary,
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+        saveButton: {
+            flex: 1,
+            height: 60,
+            borderRadius: radius.cardLg,
+            overflow: 'hidden',
+            shadowColor: colors.nutrition,
+            shadowOffset: { width: 0, height: 6 },
+            shadowOpacity: 0.2,
+            shadowRadius: 12,
+            elevation: 8,
+        },
+        saveButtonGradient: {
+            width: '100%',
+            height: '100%',
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        saveButtonText: {
+            fontSize: 16,
+            color: '#fff',
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+    })
+}

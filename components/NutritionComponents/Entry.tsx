@@ -1,5 +1,5 @@
 import { fonts, radius, useColorScheme, useColors, type Colors } from '@/context/ThemeContext'
-import { Pencil } from 'lucide-react-native'
+import { ChevronRight, Pencil, Sparkles } from 'lucide-react-native'
 import { useMemo } from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
@@ -10,9 +10,11 @@ interface EntryProps {
     carbs: number
     fats: number
     onEditPress?: () => void
+    showBreakdown?: boolean
+    onBreakdownPress?: () => void
 }
 
-export default function Entry({ name, calories, protein, carbs, fats, onEditPress }: EntryProps) {
+export default function Entry({ name, calories, protein, carbs, fats, onEditPress, showBreakdown, onBreakdownPress }: EntryProps) {
     const colors = useColors()
     const isDark = useColorScheme() === 'dark'
     const styles = useMemo(() => makeStyles(colors, isDark), [colors, isDark])
@@ -53,6 +55,14 @@ export default function Entry({ name, calories, protein, carbs, fats, onEditPres
                             <Text style={styles.macroLabel}>Protein</Text>
                         </View>
                     </View>
+
+                    {showBreakdown && (
+                        <TouchableOpacity style={styles.photoFooter} onPress={onBreakdownPress} activeOpacity={0.6}>
+                            <Sparkles size={14} color={colors.nutrition} strokeWidth={2.5} />
+                            <Text style={styles.photoFooterText}>Tap to see the breakdown</Text>
+                            <ChevronRight size={14} color={colors.nutrition} strokeWidth={2.5} />
+                        </TouchableOpacity>
+                    )}
                 </View>
             </View>
         </View>
@@ -158,6 +168,26 @@ function makeStyles(colors: Colors, isDark: boolean) {
             color: colors.labelMuted,
             marginTop: 1,
             fontFamily: fonts.medium,
+        },
+        photoFooter: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 6,
+            marginTop: 14,
+            marginHorizontal: -16,
+            marginBottom: -16,
+            paddingVertical: 11,
+            paddingHorizontal: 16,
+            borderTopWidth: StyleSheet.hairlineWidth,
+            borderTopColor: colors.hairline,
+            backgroundColor: colors.nutrition + '12',
+        },
+        photoFooterText: {
+            fontSize: 12.5,
+            color: colors.nutrition,
+            fontFamily: fonts.semibold,
+            letterSpacing: -0.2,
         },
     })
 }

@@ -48,6 +48,8 @@ The four screens match the Refined mockup in dark mode, are driven entirely by t
 - Add a radii/spacing constant set (`context/ThemeContext/tokens.ts`): `radius.card=10`, `radius.cardLg=12`, `radius.toggle=9`, `radius.macroCell=9`, `radius.iconButton=full`, `radius.chip=999`; screen padding 18, card padding 14–16, card gap 11.
 - `useColors()`, `useColorScheme()`, `useSetColorScheme()` already exist in `context/ThemeContext/index.tsx` — no API change.
 - **Contrast tweaks (a11y):** the green/blue **accents and their gradient fills are now one deep, AA-safe shade, unified across light + dark** — so white text/icons clear 4.5:1 everywhere and every CTA/Fab/ModeSwitcher matches the icon/border/numeral accent. Values: `nutrition` `#168516` + `nutritionGradient` `['#168516','#0F7A0F']` (white ~4.8–5.5:1); `workout` `#2570D8` + `workoutGradient` `['#2570D8','#2064C8']` (white ~4.8–5.6:1); `nutritionInk` `#168516`. This deliberately trades the prior neon-on-dark accent for consistency + AA (a bright green/blue cannot carry white at AA — the neon and white-text buttons are mutually exclusive). Side effect: the `StagedSection` count badge (white on the accent) now passes (~4.5:1). Muted text nudged to AA 4.5:1: `labelMuted` light `#6C6D75`→`#5A5B64`, dark `#6B6B73`→`#82838C`; `textMuted` light `#6A6A6E`→`#5E5E62`. Known minor: charts/`ProgressWheel` rings keep their own hardcoded gradient stops, so the Daily Intake ring may read slightly brighter than the accent.
+- **Readable-text accents (`*Ink`) + per-theme `destructive`:** the deep fill accents are tuned to carry *white text on the fill*, but as *small accent text on a background* they fall to ~3.5–3.9:1 (fail AA). So small accent links/labels use per-theme **ink** tokens instead: `nutritionInk` (green) and **new `workoutInk`** (blue — dark `#4D9BFF`, light `#1A57B0`; AA on the dark background and on light surfaces respectively). Likewise `destructive` is now **per-theme** (dark `#FF453A`, light **deepened `#C20012`**) so red text/icons on light tinted surfaces (Delete button, error blocks) clear AA. Use `workout`/`nutrition` for fills, borders, and large/icon glyphs; use `*Ink` for small colored text.
+- **`measurement` amber (Adjust Measurements accent):** **bright `#FBBF24`** with **white** CTA text — chosen by the user for the vivid look. ⚠️ Known tradeoff: white on bright amber is ~1.4:1 (well below AA) and the glyph is faint on the white light-mode surface. This is a deliberate aesthetic override, not an oversight — bright amber and readable white text are mutually exclusive. `measurementGradient` = `['#FBBF24','#F59E0B']`. (If revisited: deep `#B45309` + white text restores AA; or bright amber + dark text restores readability.)
 
 ### 3. Theme-aware StyleSheet pattern
 For restyled files, adopt `const styles = useMemo(() => makeStyles(colors), [colors])` where `makeStyles(colors)` returns the StyleSheet. Keeps layout static, makes color react to the toggle.
@@ -105,6 +107,21 @@ For restyled files, adopt `const styles = useMemo(() => makeStyles(colors), [col
 - **Add a profile card** at the top: 52px avatar with initials on a `workout→nutrition` gradient, name (`useAuth().user.user_metadata?.full_name`), email (`useAuth().user.email`), and a **PRO badge** when `useBilling().hasPremium` (green, tinted, pill).
 - **Add one "Appearance" row** that reads `useColorScheme()` and calls `useSetColorScheme()` to toggle Dark/Light, with the current value as the trailing label.
 - Keep all existing rows/sections and handlers. Restyle surfaces/icon tiles/text to tokens + fonts (soft-square icon tiles, `divider` separators, `chevron` token).
+
+### Settings sub-screens — component & layout conventions (learned during migration)
+Applies to `settingsScreens/` and is the default for the full-app rollout.
+- **Surface tiers by context:** elements sitting on the screen `background` use `surface` (raised); only use `surfaceInset` for things nested *inside* a `surface` card. (`surfaceInset` == `background` in light mode, so an on-background inset disappears.)
+- **Spacing = grouping (proximity), not uniformity.** Use a few steps from an 8/4 scale, chosen by relationship — never space everything equally:
+  - *Within a cluster/pair* (icon→title, title→subtitle, a pair of links, items in a row): **2–8**.
+  - *Within a group* (section title→card, row padding): **12**.
+  - *Between groups/sections*: **24** on scrollable list screens (profile, settings), **16** on compact no-scroll screens (subscription).
+  - *Distinct tier* (legal/fine print, destructive actions): separate further (**~24**) or anchor to the bottom — don't let it share a group's gap.
+  - Perceived gap = container `gap` + each item's own `paddingVertical`; size touch targets with **`hitSlop`** so 44px taps don't distort the visual rhythm.
+  - Horizontal screen inset: **20** (app standard).
+  - Header→content gap (settings sub-screens have a native Stack header): **`scrollContent.paddingTop: 24`** — one mechanism for every screen, never outer-container padding (creates a non-scrolling dead band) or per-icon margins.
+- **CTAs:** `TouchableOpacity` → `LinearGradient` (mode gradient) + white text, `overflow:'hidden'`, restrained colored shadow (see `LogDateModal`/`Fab`). `*Gradient` fills + white only — never white on the flat bright accent.
+- **Accent usage:** `workout`/`nutrition` for fills, borders, and large/icon glyphs (≥3:1); **`*Ink`** for small accent text/links (AA); `destructive` per-theme.
+- **Hero icons (settings sub-screens):** a `surface` circle — `backgroundColor: surface`, `borderWidth: 2` + `borderColor: accent` (accent ring), glyph in the full `accent`. (Tinted-disc, glow, and gradient-fill variants were tried and rejected; surface + ring is the chosen look.) Reserve gradient fills for avatars / FAB / CTAs.
 
 ---
 

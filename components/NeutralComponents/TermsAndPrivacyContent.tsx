@@ -1,22 +1,28 @@
+import { fonts, useColors, type Colors } from '@/context/ThemeContext';
 import { FileText } from 'lucide-react-native';
+import { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
+    const colors = useColors()
+    const styles = useMemo(() => makeStyles(colors), [colors])
     return (
-        <View style={contentStyles.section}>
-            <Text style={contentStyles.sectionTitle}>{title}</Text>
-            <Text style={contentStyles.sectionText}>{children}</Text>
+        <View style={styles.section}>
+            <Text style={styles.sectionTitle}>{title}</Text>
+            <Text style={styles.sectionText}>{children}</Text>
         </View>
     )
 }
 
 function BulletList({ items }: { items: string[] }) {
+    const colors = useColors()
+    const styles = useMemo(() => makeStyles(colors), [colors])
     return (
-        <View style={contentStyles.bulletList}>
+        <View style={styles.bulletList}>
             {items.map((item, i) => (
-                <View key={i} style={contentStyles.bulletRow}>
-                    <Text style={contentStyles.bullet}>•</Text>
-                    <Text style={contentStyles.bulletText}>{item}</Text>
+                <View key={i} style={styles.bulletRow}>
+                    <Text style={styles.bullet}>•</Text>
+                    <Text style={styles.bulletText}>{item}</Text>
                 </View>
             ))}
         </View>
@@ -24,14 +30,16 @@ function BulletList({ items }: { items: string[] }) {
 }
 
 export default function TermsAndPrivacyContent() {
+    const colors = useColors()
+    const styles = useMemo(() => makeStyles(colors), [colors])
     return (
-        <ScrollView style={contentStyles.container} contentContainerStyle={contentStyles.content} showsVerticalScrollIndicator={false}>
-            <View style={contentStyles.header}>
-                <View style={contentStyles.iconCircle}>
-                    <FileText size={40} color="#fff" strokeWidth={2} />
+        <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+            <View style={styles.header}>
+                <View style={styles.iconCircle}>
+                    <FileText size={40} color={colors.text} strokeWidth={2} />
                 </View>
-                <Text style={contentStyles.title}>Terms of Service & Privacy Policy</Text>
-                <Text style={contentStyles.lastUpdated}>Last updated: March 2025</Text>
+                <Text style={styles.title}>Terms of Service & Privacy Policy</Text>
+                <Text style={styles.lastUpdated}>Last updated: March 2025</Text>
             </View>
 
             <Section title="1. Acceptance of Terms">By downloading, accessing, or using Liftri ("the App"), you agree to be bound by these Terms of Service and our Privacy Policy. If you do not agree, please do not use the App.</Section>
@@ -88,89 +96,91 @@ export default function TermsAndPrivacyContent() {
 
             <Section title="12. Contact">For questions about these terms or your privacy, contact us through the Support option in Settings.</Section>
 
-            <View style={contentStyles.footer}>
-                <Text style={contentStyles.footerText}>© 2026 LiftTrition. All rights reserved.</Text>
+            <View style={styles.footer}>
+                <Text style={styles.footerText}>© 2026 LiftTrition. All rights reserved.</Text>
             </View>
         </ScrollView>
     )
 }
 
-const contentStyles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#121212' },
-    content: { paddingHorizontal: 20, paddingBottom: 40 },
-    header: {
-        alignItems: 'center',
-        marginBottom: 24,
-        paddingTop: 8,
-    },
-    iconCircle: {
-        width: 72,
-        height: 72,
-        borderRadius: 36,
-        backgroundColor: '#1e1e1e',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 12,
-        borderWidth: 2,
-        borderColor: '#fff',
-    },
-    title: {
-        fontSize: 22,
-        color: '#fff',
-        fontFamily: 'Poppins_600SemiBold',
-        textAlign: 'center',
-        marginBottom: 4,
-    },
-    lastUpdated: {
-        fontSize: 13,
-        color: '#666',
-        fontFamily: 'Poppins_400Regular',
-    },
-    section: {
-        marginBottom: 20,
-    },
-    sectionTitle: {
-        fontSize: 16,
-        fontFamily: 'Poppins_600SemiBold',
-        marginBottom: 8,
-        color: '#fff',
-    },
-    sectionText: {
-        fontSize: 14,
-        color: '#ccc',
-        lineHeight: 22,
-        fontFamily: 'Poppins_400Regular',
-    },
-    bulletList: {
-        marginBottom: 20,
-        marginLeft: 8,
-    },
-    bulletRow: {
-        flexDirection: 'row',
-        marginBottom: 4,
-    },
-    bullet: {
-        fontSize: 14,
-        marginRight: 8,
-        color: '#fff',
-    },
-    bulletText: {
-        flex: 1,
-        fontSize: 14,
-        color: '#ccc',
-        lineHeight: 22,
-        fontFamily: 'Poppins_400Regular',
-    },
-    footer: {
-        marginTop: 24,
-        paddingTop: 24,
-        borderTopWidth: 1,
-        borderTopColor: '#2a2a2a',
-    },
-    footerText: {
-        fontSize: 12,
-        color: '#666',
-        textAlign: 'center',
-        fontFamily: 'Poppins_400Regular',
-    },
-})
+function makeStyles(colors: Colors) {
+    return StyleSheet.create({
+        container: { flex: 1, backgroundColor: colors.background },
+        content: { paddingHorizontal: 20, paddingBottom: 40 },
+        header: {
+            alignItems: 'center',
+            marginBottom: 24,
+            paddingTop: 8,
+        },
+        iconCircle: {
+            width: 72,
+            height: 72,
+            borderRadius: 36,
+            backgroundColor: colors.surface,
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginBottom: 12,
+            borderWidth: 2,
+            borderColor: colors.text,
+        },
+        title: {
+            fontSize: 22,
+            color: colors.text,
+            fontFamily: fonts.semibold,
+            textAlign: 'center',
+            marginBottom: 4,
+        },
+        lastUpdated: {
+            fontSize: 13,
+            color: colors.textMuted,
+            fontFamily: fonts.regular,
+        },
+        section: {
+            marginBottom: 20,
+        },
+        sectionTitle: {
+            fontSize: 16,
+            fontFamily: fonts.semibold,
+            marginBottom: 8,
+            color: colors.text,
+        },
+        sectionText: {
+            fontSize: 14,
+            color: colors.textSecondary,
+            lineHeight: 22,
+            fontFamily: fonts.regular,
+        },
+        bulletList: {
+            marginBottom: 20,
+            marginLeft: 8,
+        },
+        bulletRow: {
+            flexDirection: 'row',
+            marginBottom: 4,
+        },
+        bullet: {
+            fontSize: 14,
+            marginRight: 8,
+            color: colors.text,
+        },
+        bulletText: {
+            flex: 1,
+            fontSize: 14,
+            color: colors.textSecondary,
+            lineHeight: 22,
+            fontFamily: fonts.regular,
+        },
+        footer: {
+            marginTop: 24,
+            paddingTop: 24,
+            borderTopWidth: StyleSheet.hairlineWidth,
+            borderTopColor: colors.hairline,
+        },
+        footerText: {
+            fontSize: 12,
+            color: colors.textMuted,
+            textAlign: 'center',
+            fontFamily: fonts.regular,
+        },
+    })
+}

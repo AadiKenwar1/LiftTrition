@@ -5,7 +5,7 @@ import { powerSync } from '@/lib/powersync/system'
 import { getPendingUploadEstimate } from '@/lib/powersync/uploadQueueStats'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
-import { ChevronRight, CreditCard, Dumbbell, FileText, FlaskConical, HelpCircle, Moon, Scale, Sun, User, Utensils, Wrench } from 'lucide-react-native'
+import { ChevronRight, CreditCard, Dumbbell, FileText, FlaskConical, HelpCircle, Moon, Scale, Sun, Utensils, Wrench } from 'lucide-react-native'
 import { useEffect, useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
@@ -54,16 +54,17 @@ export default function SettingsScreen() {
 
     const fullName = (user?.user_metadata?.full_name as string | undefined)?.trim()
     const email = user?.email ?? ''
-    const initials = (fullName ? fullName.split(/\s+/).map((w) => w[0]).slice(0, 2).join('') : email[0] || 'U').toUpperCase()
+    const initials = (
+        fullName ?
+            fullName
+                .split(/\s+/)
+                .map((w) => w[0])
+                .slice(0, 2)
+                .join('')
+        :   email[0] || 'U').toUpperCase()
     const isDark = colorScheme === 'dark'
 
     const settingsOptions: SettingsOption[] = [
-        {
-            icon: User,
-            title: 'Profile',
-            subtitle: 'Edit your personal information',
-            onPress: () => router.push('/settingsScreens/profile'),
-        },
         {
             icon: CreditCard,
             title: 'Subscription',
@@ -126,7 +127,11 @@ export default function SettingsScreen() {
 
     const renderAppearanceItem = () => (
         <TouchableOpacity style={styles.settingItem} onPress={() => setColorScheme(isDark ? 'light' : 'dark')} activeOpacity={0.5}>
-            <View style={styles.iconContainer}>{isDark ? <Moon size={22} color={colors.text} strokeWidth={2.5} /> : <Sun size={22} color={colors.text} strokeWidth={2.5} />}</View>
+            <View style={styles.iconContainer}>
+                {isDark ?
+                    <Moon size={22} color={colors.text} strokeWidth={2.5} />
+                :   <Sun size={22} color={colors.text} strokeWidth={2.5} />}
+            </View>
             <View style={styles.itemTextContainer}>
                 <Text style={styles.settingTitle}>Appearance</Text>
                 <Text style={styles.settingSubtitle}>Switch between dark and light mode</Text>
@@ -146,54 +151,55 @@ export default function SettingsScreen() {
                 </View>
 
                 {/* Profile card */}
-                <View style={styles.profileCard}>
-                    <LinearGradient colors={[colors.workout, colors.nutrition]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.avatar}>
-                        <Text style={styles.avatarText}>{initials}</Text>
-                    </LinearGradient>
-                    <View style={styles.profileText}>
-                        <Text style={styles.profileName} numberOfLines={1}>
-                            {fullName || 'Your Profile'}
-                        </Text>
-                        {!!email && (
-                            <Text style={styles.profileEmail} numberOfLines={1}>
-                                {email}
+                <TouchableOpacity onPress={() => router.push('/settingsScreens/profile')}>
+                    <View style={styles.profileCard}>
+                        <LinearGradient colors={[colors.workout, colors.nutrition]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.avatar}>
+                            <Text style={styles.avatarText}>{initials}</Text>
+                        </LinearGradient>
+                        <View style={styles.profileText}>
+                            <Text style={styles.profileName} numberOfLines={1}>
+                                {fullName || 'Your Profile'}
                             </Text>
+                            {!!email && (
+                                <Text style={styles.profileEmail} numberOfLines={1}>
+                                    {email}
+                                </Text>
+                            )}
+                        </View>
+                        {hasPremium && (
+                            <View style={styles.proBadge}>
+                                <Text style={styles.proBadgeText}>PRO</Text>
+                            </View>
                         )}
                     </View>
-                    {hasPremium && (
-                        <View style={styles.proBadge}>
-                            <Text style={styles.proBadgeText}>PRO</Text>
-                        </View>
-                    )}
-                </View>
+                </TouchableOpacity>
 
                 {/* Account Section */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Account</Text>
                     {renderSettingItem(settingsOptions[0], 0)}
-                    {renderSettingItem(settingsOptions[1], 1)}
                 </View>
 
                 {/* Goals Section */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Goal adjustments</Text>
+                    {renderSettingItem(settingsOptions[1], 1)}
                     {renderSettingItem(settingsOptions[2], 2)}
                     {renderSettingItem(settingsOptions[3], 3)}
-                    {renderSettingItem(settingsOptions[4], 4)}
                 </View>
 
                 {/* Customization Section */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Customization</Text>
                     {renderAppearanceItem()}
-                    {renderSettingItem(settingsOptions[5], 5)}
+                    {renderSettingItem(settingsOptions[4], 4)}
                 </View>
 
                 {/* Support Section */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Support</Text>
+                    {renderSettingItem(settingsOptions[5], 5)}
                     {renderSettingItem(settingsOptions[6], 6)}
-                    {renderSettingItem(settingsOptions[7], 7)}
                 </View>
 
                 {/* Developer Section — dev builds only */}

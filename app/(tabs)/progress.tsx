@@ -246,7 +246,8 @@ function makeStyles(colors: Colors, isDark: boolean) {
             alignItems: 'center',
             justifyContent: 'center',
             gap: 8,
-            marginBottom: 10,
+            marginTop: 6,
+            marginBottom: 2,
         },
         rangeChip: {
             paddingVertical: 7,

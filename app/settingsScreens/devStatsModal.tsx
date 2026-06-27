@@ -1,11 +1,12 @@
 import { useAuth } from '@/context/AuthContext'
+import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { getKickThrottleRemainingMs, getPowerSyncOrchestratorState, type PowerSyncOrchestratorState } from '@/lib/powersync/orchestrator'
 import { powerSync } from '@/lib/powersync/system'
 import { formatUploadQueueStatsRaw, getPendingUploadEstimate } from '@/lib/powersync/uploadQueueStats'
 import { getWatchdogStatus, subscribeWatchdogStatus, type WatchdogStatus } from '@/lib/powersync/watchdogStatus'
 import { supabase } from '@/lib/supabase/client'
 import { formatDateTime } from '@/lib/utils/dateHelper'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 
 type TokenServerCheck = 'idle' | 'checking' | 'valid' | 'invalid' | 'error'
@@ -39,6 +40,8 @@ function replicationFreshnessHint(connected: boolean, lastSyncedAt: Date | undef
 
 export default function DevStatsScreen() {
     const { session, loading: authLoading } = useAuth()
+    const colors = useColors()
+    const styles = useMemo(() => makeStyles(colors), [colors])
     const [lastSyncedAt, setLastSyncedAt] = useState<Date | undefined>(() => powerSync.currentStatus.lastSyncedAt)
     const [powerSyncConnected, setPowerSyncConnected] = useState(() => powerSync.currentStatus.connected)
     const [watchdog, setWatchdog] = useState<WatchdogStatus>(() => getWatchdogStatus())
@@ -264,66 +267,68 @@ export default function DevStatsScreen() {
     )
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#121212',
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        overflow: 'hidden',
-    },
-    handleContainer: {
-        alignItems: 'center',
-        paddingTop: 12,
-        paddingBottom: 8,
-    },
-    handle: {
-        width: 40,
-        height: 5,
-        backgroundColor: '#333',
-        borderRadius: 3,
-    },
-    content: {
-        paddingHorizontal: 20,
-        paddingTop: 12,
-        paddingBottom: 40,
-    },
-    title: {
-        fontSize: 22,
-        color: '#FFF',
-        letterSpacing: -0.2,
-        marginBottom: 12,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    line: {
-        fontSize: 13,
-        color: '#aaa',
-        letterSpacing: 0.2,
-        marginTop: 8,
-        fontFamily: 'Poppins_400Regular',
-    },
-    subtle: {
-        color: '#666',
-    },
-    ok: {
-        color: '#7a9e7a',
-    },
-    warn: {
-        color: '#c9a227',
-    },
-    sectionLabel: {
-        marginTop: 16,
-        fontSize: 11,
-        color: '#555',
-        letterSpacing: 0.8,
-        fontFamily: 'Poppins_600SemiBold',
-        textTransform: 'uppercase',
-    },
-    rawJson: {
-        marginTop: 8,
-        fontSize: 11,
-        lineHeight: 16,
-        color: '#777',
-        fontFamily: 'monospace',
-    },
-})
+function makeStyles(colors: Colors) {
+    return StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: colors.background,
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            overflow: 'hidden',
+        },
+        handleContainer: {
+            alignItems: 'center',
+            paddingTop: 12,
+            paddingBottom: 8,
+        },
+        handle: {
+            width: 40,
+            height: 5,
+            backgroundColor: colors.border,
+            borderRadius: 3,
+        },
+        content: {
+            paddingHorizontal: 20,
+            paddingTop: 12,
+            paddingBottom: 40,
+        },
+        title: {
+            fontSize: 22,
+            color: colors.text,
+            letterSpacing: -0.2,
+            marginBottom: 12,
+            fontFamily: fonts.semibold,
+        },
+        line: {
+            fontSize: 13,
+            color: colors.textSecondary,
+            letterSpacing: 0.2,
+            marginTop: 8,
+            fontFamily: fonts.regular,
+        },
+        subtle: {
+            color: colors.textFaint,
+        },
+        ok: {
+            color: colors.nutrition,
+        },
+        warn: {
+            color: colors.warning,
+        },
+        sectionLabel: {
+            marginTop: 16,
+            fontSize: 11,
+            color: colors.labelMuted,
+            letterSpacing: 0.8,
+            fontFamily: fonts.semibold,
+            textTransform: 'uppercase',
+        },
+        rawJson: {
+            marginTop: 8,
+            fontSize: 11,
+            lineHeight: 16,
+            color: colors.textMuted,
+            fontFamily: 'monospace',
+        },
+    })
+}
