@@ -54,10 +54,11 @@ export default function BarChart({ mode, data, goal, formatValue, showEndFlag = 
     const rawMax = data.length > 0 ? Math.max(...data.map((d) => d.value), goal ?? 0) : 1
     const { ticks: yTicks, top: yTop } = niceScale(rawMax)
 
-    // Value-based signature: remount the inner chart when the data changes so it repaints
-    // (the persisted Skia canvas won't refresh on a data prop change alone). Scoped to the
-    // chart, not the wrapper, so the loading spinner never re-triggers on week paging.
-    const chartKey = data.map((d) => `${d.day}:${d.value}`).join('|')
+    // Signature that remounts the inner chart when the data OR colors change so the persisted
+    // Skia canvas repaints (it won't refresh on a prop change alone — a theme switch changes the
+    // colors but not the data). Scoped to the chart, not the wrapper, so the loading spinner
+    // never re-triggers on week paging or a theme toggle.
+    const chartKey = `${chartColor}|${colors.textSecondary}|${colors.ringTrack}|` + data.map((d) => `${d.day}:${d.value}`).join('|')
 
     if (!font || !flagFont || !minDelayDone) {
         return (

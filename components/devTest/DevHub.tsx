@@ -21,6 +21,10 @@ const GROUPS: { title: string; items: { label: string; route: string }[] }[] = [
         title: 'Nutrition AI',
         items: [{ label: 'AI (NLP + Vision)', route: '/devTest/aiTest' }],
     },
+    {
+        title: 'Components',
+        items: [{ label: 'Activity Banner', route: '/devTest/activityBanner' }],
+    },
 ]
 
 export default function DevHub() {

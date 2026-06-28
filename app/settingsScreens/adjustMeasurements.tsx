@@ -1,6 +1,6 @@
 import { useSettings } from '@/context/SettingsContext'
 import { validateHeightWeight } from '@/context/SettingsContext/functions/validator'
-import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
+import { fonts, radius, useColors, useColorScheme, type Colors } from '@/context/ThemeContext'
 import { feetInchesToInches, inchesToFeetInches } from '@/lib/utils/unitConversions'
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -11,6 +11,7 @@ import { Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text,
 export default function AdjustMeasurementsScreen() {
     const { settings, setSettings, handleUpdateBw, calculateMacros } = useSettings()
     const colors = useColors()
+    const isDark = useColorScheme() === 'dark'
     const styles = useMemo(() => makeStyles(colors), [colors])
     const unitSystem = settings.unitSystem
 
@@ -95,7 +96,7 @@ export default function AdjustMeasurementsScreen() {
                     {/* Save Button */}
                     <TouchableOpacity style={styles.nextButton} onPress={handleSave} activeOpacity={0.8}>
                         <LinearGradient colors={colors.measurementGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.nextButtonGradient}>
-                            <Text style={styles.nextButtonText}>Save</Text>
+                            <Text style={[styles.nextButtonText, { color: isDark ? '#1A1B1E' : '#fff' }]}>Save</Text>
                         </LinearGradient>
                     </TouchableOpacity>
                 </ScrollView>
