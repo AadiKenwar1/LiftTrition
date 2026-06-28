@@ -199,7 +199,8 @@ function StackLayout() {
                     <Stack.Screen name="devTest/barChart" options={{ headerShown: true, title: 'Bar Chart', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/aiTest" options={{ headerShown: true, title: 'AI Test', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/activityBanner" options={{ headerShown: true, title: 'Activity Banner', headerBackTitle: 'Back' }} />
-                    <Stack.Screen name="devTest/onboarding" options={{ headerShown: false, gestureEnabled: true }} />
+                    <Stack.Screen name="devTest/onboardingPage" options={{ headerShown: true, title: 'Onboarding', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="devTest/onboardingPreview" options={{ headerShown: false, gestureEnabled: true }} />
                 </Stack.Protected>
             </Stack>
         </AppColumn>
