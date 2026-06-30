@@ -28,7 +28,10 @@ const GROUPS: { title: string; items: { label: string; route: string }[] }[] = [
     },
     {
         title: 'Onboarding',
-        items: ONBOARDING_PAGES.map((p, i) => ({ label: p.label, route: `/devTest/onboardingPage?page=${i}` })),
+        items: [
+            { label: '▶  Walk the V3 flow', route: '/devTest/onboardingFlow?version=v3' },
+            ...ONBOARDING_PAGES.map((p, i) => ({ label: p.label, route: `/devTest/onboardingPage?page=${i}` })),
+        ],
     },
 ]
 

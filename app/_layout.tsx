@@ -21,6 +21,7 @@ import React, { type PropsWithChildren, useEffect, useState } from 'react'
 import { Pressable, StyleSheet, View } from 'react-native'
 import 'react-native-gesture-handler'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import { KeyboardProvider } from 'react-native-keyboard-controller'
 import 'react-native-reanimated'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 
@@ -201,6 +202,7 @@ function StackLayout() {
                     <Stack.Screen name="devTest/activityBanner" options={{ headerShown: true, title: 'Activity Banner', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/onboardingPage" options={{ headerShown: true, title: 'Onboarding', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/onboardingPreview" options={{ headerShown: false, gestureEnabled: true }} />
+                    <Stack.Screen name="devTest/onboardingFlow" options={{ headerShown: false, gestureEnabled: true }} />
                 </Stack.Protected>
             </Stack>
         </AppColumn>
@@ -215,26 +217,28 @@ function NavigationTheme({ children }: PropsWithChildren) {
 function RootLayoutNav() {
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
-            <SafeAreaProvider>
-                <ThemeProvider>
-                    <NavigationTheme>
-                        <AuthProvider>
-                            <PowerSyncGuard>
-                                <SyncWatchdog />
-                                <SettingsProvider>
-                                    <BillingProvider>
-                                        <WorkoutProvider>
-                                            <NutritionProvider>
-                                                <StackLayout />
-                                            </NutritionProvider>
-                                        </WorkoutProvider>
-                                    </BillingProvider>
-                                </SettingsProvider>
-                            </PowerSyncGuard>
-                        </AuthProvider>
-                    </NavigationTheme>
-                </ThemeProvider>
-            </SafeAreaProvider>
+            <KeyboardProvider>
+                <SafeAreaProvider>
+                    <ThemeProvider>
+                        <NavigationTheme>
+                            <AuthProvider>
+                                <PowerSyncGuard>
+                                    <SyncWatchdog />
+                                    <SettingsProvider>
+                                        <BillingProvider>
+                                            <WorkoutProvider>
+                                                <NutritionProvider>
+                                                    <StackLayout />
+                                                </NutritionProvider>
+                                            </WorkoutProvider>
+                                        </BillingProvider>
+                                    </SettingsProvider>
+                                </PowerSyncGuard>
+                            </AuthProvider>
+                        </NavigationTheme>
+                    </ThemeProvider>
+                </SafeAreaProvider>
+            </KeyboardProvider>
         </GestureHandlerRootView>
     )
 }

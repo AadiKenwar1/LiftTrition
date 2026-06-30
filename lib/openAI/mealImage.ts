@@ -5,7 +5,7 @@
 import * as ImageManipulator from 'expo-image-manipulator'
 import { Dimensions } from 'react-native'
 
-export type ScanMode = 'meal' | 'label'
+export type ScanMode = 'meal' | 'item' | 'label'
 
 /**
  * Single source of truth for the capture frame. Drives BOTH the on-screen frame in
@@ -20,18 +20,18 @@ export function getFrameSize(screenWidth: number): { width: number; height: numb
     return { width, height: width / SCAN_FRAME.aspectRatio }
 }
 
-// Meal photos: cropped to the on-screen frame, downscaled for cheap/fast vision.
+// Meal photos: cropped to the on-screen frame, downscaled for cheap/fast vision (recognition task).
 const MEAL_IMAGE_MAX_WIDTH = 800
 const MEAL_IMAGE_COMPRESS = 0.8
 
-// Label photos: NOT cropped, kept high-res so small printed text stays legible for OCR.
-const LABEL_IMAGE_MAX_WIDTH = 1400
-const LABEL_IMAGE_COMPRESS = 0.9
+// Item & label photos: NOT cropped, kept high-res so printed product/label text stays legible (OCR task).
+const TEXT_IMAGE_MAX_WIDTH = 1400
+const TEXT_IMAGE_COMPRESS = 0.9
 
-/** Resize and compress an image URI (library picks). Label mode keeps it high-res. */
+/** Resize and compress an image URI (library picks). Item/label keep it high-res for text reading. */
 export async function processPickedImageUri(uri: string, mode: ScanMode = 'meal'): Promise<string> {
-    const width = mode === 'label' ? LABEL_IMAGE_MAX_WIDTH : MEAL_IMAGE_MAX_WIDTH
-    const compress = mode === 'label' ? LABEL_IMAGE_COMPRESS : MEAL_IMAGE_COMPRESS
+    const width = mode === 'meal' ? MEAL_IMAGE_MAX_WIDTH : TEXT_IMAGE_MAX_WIDTH
+    const compress = mode === 'meal' ? MEAL_IMAGE_COMPRESS : TEXT_IMAGE_COMPRESS
     const result = await ImageManipulator.manipulateAsync(
         uri,
         [{ resize: { width } }],
@@ -43,14 +43,14 @@ export async function processPickedImageUri(uri: string, mode: ScanMode = 'meal'
 /**
  * Camera capture.
  * - meal: crop toward the on-screen frame, then resize (keeps the plate, drops background).
- * - label: no crop, high-res resize (keep the whole label sharp enough to read).
+ * - item/label: no crop, high-res resize (keep the whole package/label sharp enough to read text).
  */
 export async function processCameraCapture(photo: { uri: string; width: number; height: number }, mode: ScanMode = 'meal'): Promise<string> {
-    if (mode === 'label') {
+    if (mode !== 'meal') {
         const result = await ImageManipulator.manipulateAsync(
             photo.uri,
-            [{ resize: { width: LABEL_IMAGE_MAX_WIDTH } }],
-            { compress: LABEL_IMAGE_COMPRESS, format: ImageManipulator.SaveFormat.JPEG },
+            [{ resize: { width: TEXT_IMAGE_MAX_WIDTH } }],
+            { compress: TEXT_IMAGE_COMPRESS, format: ImageManipulator.SaveFormat.JPEG },
         )
         return result.uri
     }

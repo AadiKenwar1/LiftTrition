@@ -1,6 +1,7 @@
 import { useAuth } from '@/context/AuthContext'
 import { useNutrition } from '@/context/NutritionContext'
 import { fonts, useColors, type Colors } from '@/context/ThemeContext'
+import type { ScanMode } from '@/lib/openAI/mealImage'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { Sparkles } from 'lucide-react-native'
@@ -19,7 +20,8 @@ export default function AnalyzingModal() {
 
     // Normalize param (Expo Router can return string | string[] | undefined)
     const photoUriStr = typeof photoUri === 'string' ? photoUri : photoUri?.[0]
-    const modeStr: 'meal' | 'label' = (typeof mode === 'string' ? mode : mode?.[0]) === 'label' ? 'label' : 'meal'
+    const rawMode = typeof mode === 'string' ? mode : mode?.[0]
+    const modeStr: ScanMode = rawMode === 'label' ? 'label' : rawMode === 'item' ? 'item' : 'meal'
 
     useEffect(() => {
         if (!photoUriStr) {
@@ -121,8 +123,8 @@ export default function AnalyzingModal() {
                 </Animated.View>
 
                 {/* Status Text */}
-                <Text style={styles.title}>{modeStr === 'label' ? 'Reading Nutrition Label' : 'Analyzing Your Meal'}</Text>
-                <Text style={styles.subtitle}>{modeStr === 'label' ? 'Our AI is reading the label values...' : 'Our AI is identifying ingredients and calculating nutrition...'}</Text>
+                <Text style={styles.title}>{modeStr === 'label' ? 'Reading Nutrition Label' : modeStr === 'item' ? 'Identifying Product' : 'Analyzing Your Meal'}</Text>
+                <Text style={styles.subtitle}>{modeStr === 'label' ? 'Our AI is reading the label values...' : modeStr === 'item' ? 'Our AI is identifying the product and its nutrition...' : 'Our AI is identifying ingredients and calculating nutrition...'}</Text>
 
                 {/* Progress Bar */}
                 <View style={styles.progressContainer}>

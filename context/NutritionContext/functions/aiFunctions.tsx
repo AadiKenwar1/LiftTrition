@@ -1,5 +1,5 @@
 import { getFoodItem, getFoodSearchResults } from '@/lib/foodDB/foodDB';
-import { askOpenAIText, askOpenAIVision, lookupBrandedMacros } from '@/lib/openAI/openAI';
+import { askOpenAIText, askOpenAIVision, type VisionProvider } from '@/lib/openAI/openAI';
 import type { ScanMode } from '@/lib/openAI/mealImage';
 import { File } from 'expo-file-system';
 import { Dispatch, SetStateAction } from 'react';
@@ -15,19 +15,15 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
   ]);
 }
 
-// Where a branded ingredient's macros ended up coming from (used by the dev test harness).
-export type EnrichmentSource = 'fatsecret' | 'web' | 'vision';
-export interface IngredientSource {
-  name: string;
-  brand: string;
-  source: EnrichmentSource;
-}
+// Where each ingredient's macros came from (sources[i] aligns 1:1 with ingredients[i]).
+export type EnrichmentSource = 'fatsecret' | 'vision';
 
 const MAX_BRANDED_ENRICH = 5;
 const ENRICH_TIMEOUT_MS = 15000;
 
-// Resolve one branded ingredient: FatSecret DB → web-search fallback → keep vision estimate.
-async function enrichBrandedIngredient(ing: Ingredient): Promise<{ ingredient: Ingredient; source: EnrichmentSource } | null> {
+// Resolve one branded ingredient via FatSecret (trusting its relevance ranking). On a miss or any
+// FatSecret error, return null so the caller keeps the vision call's own estimate.
+async function enrichBrandedIngredient(ing: Ingredient): Promise<Ingredient | null> {
   const brand = ing.brand?.trim();
   if (!brand) return null;
 
@@ -39,47 +35,38 @@ async function enrichBrandedIngredient(ing: Ingredient): Promise<{ ingredient: I
     if (best) {
       const item = await getFoodItem(best);
       if (item) {
-        return {
-          ingredient: { ...ing, name: item.name || ing.name, protein: item.protein, carbs: item.carbs, fats: item.fats, calories: item.calories },
-          source: 'fatsecret',
-        };
+        return { ...ing, name: item.name || ing.name, protein: item.protein, carbs: item.carbs, fats: item.fats, calories: item.calories };
       }
     }
   } catch {
-    // fall through to web fallback
-  }
-
-  const web = await lookupBrandedMacros(brand);
-  if (web) {
-    return {
-      ingredient: { ...ing, protein: web.protein, carbs: web.carbs, fats: web.fats, calories: web.calories },
-      source: 'web',
-    };
+    // FatSecret unavailable/error → keep the vision estimate (no web fallback).
   }
 
   return null;
 }
 
-// Enrich all branded ingredients (parallel, capped). Returns enriched list + per-branded source tags.
-export async function enrichBrandedIngredients(ingredients: Ingredient[]): Promise<{ ingredients: Ingredient[]; sources: IngredientSource[] }> {
-  const branded = ingredients.filter((i) => i.brand && i.brand.trim()).slice(0, MAX_BRANDED_ENRICH);
-  if (branded.length === 0) return { ingredients, sources: [] };
+// Enrich all branded ingredients (parallel, capped). Returns the enriched list plus a per-index
+// source array (sources[i] === 'fatsecret' when that ingredient was replaced by a DB match).
+export async function enrichBrandedIngredients(ingredients: Ingredient[]): Promise<{ ingredients: Ingredient[]; sources: EnrichmentSource[] }> {
+  const sources: EnrichmentSource[] = ingredients.map(() => 'vision');
+  const branded = ingredients
+    .map((ing, i) => ({ ing, i }))
+    .filter((x) => x.ing.brand && x.ing.brand.trim())
+    .slice(0, MAX_BRANDED_ENRICH);
+  if (branded.length === 0) return { ingredients, sources };
 
-  const resolved = await Promise.all(branded.map(enrichBrandedIngredient));
+  const resolved = await Promise.all(branded.map((x) => enrichBrandedIngredient(x.ing)));
 
-  const replacement = new Map<Ingredient, Ingredient>();
-  const sources: IngredientSource[] = [];
-  branded.forEach((ing, idx) => {
-    const r = resolved[idx];
+  const out = [...ingredients];
+  branded.forEach((x, k) => {
+    const r = resolved[k];
     if (r) {
-      replacement.set(ing, r.ingredient);
-      sources.push({ name: ing.name, brand: ing.brand!.trim(), source: r.source });
-    } else {
-      sources.push({ name: ing.name, brand: ing.brand!.trim(), source: 'vision' });
+      out[x.i] = r;
+      sources[x.i] = 'fatsecret';
     }
   });
 
-  return { ingredients: ingredients.map((i) => replacement.get(i) ?? i), sources };
+  return { ingredients: out, sources };
 }
 
 function sumIngredients(ingredients: Ingredient[]) {
@@ -117,20 +104,23 @@ export async function runPhotoAnalysis(
   photoUri: string,
   userID: string,
   mode: ScanMode = 'meal',
-): Promise<{ entry: NutritionEntry; sources: IngredientSource[] }> {
+  provider?: VisionProvider,
+): Promise<{ entry: NutritionEntry; sources: EnrichmentSource[]; rawIngredients: Ingredient[] }> {
   const file = new File(photoUri);
   const base64 = await file.base64();
-  const response = await withTimeout(askOpenAIVision(`data:image/jpeg;base64,${base64}`, mode), 30000);
+  const response = await withTimeout(askOpenAIVision(`data:image/jpeg;base64,${base64}`, mode, provider), 30000);
 
   const data = parseVisionResponse(response);
   let ingredients: Ingredient[] = Array.isArray(data.ingredients) ? data.ingredients : [];
   if (ingredients.length === 0) {
     throw new Error('No food detected in this photo. Try a clearer picture, or add your meal manually.');
   }
+  // Vision output before any DB enrichment (Path B; surfaced for the dev harness).
+  const rawIngredients: Ingredient[] = ingredients;
 
-  // Branded enrichment only applies to meal photos (labels already carry real values).
-  let sources: IngredientSource[] = [];
-  if (mode === 'meal') {
+  // Branded enrichment applies to meal AND item photos (labels already carry the printed values).
+  let sources: EnrichmentSource[] = ingredients.map(() => 'vision');
+  if (mode !== 'label') {
     try {
       const enriched = await withTimeout(enrichBrandedIngredients(ingredients), ENRICH_TIMEOUT_MS);
       ingredients = enriched.ingredients;
@@ -145,7 +135,8 @@ export async function runPhotoAnalysis(
   const entry: NutritionEntry = {
     id: uuid.v4() as string,
     userId: userID,
-    name: data.name || (mode === 'label' ? 'Label Entry' : 'Photo Entry'),
+    // Item entries are named after the product (brand), not the generic photo label.
+    name: (mode === 'item' && (ingredients[0]?.brand || ingredients[0]?.name)) || data.name || (mode === 'label' ? 'Label Entry' : 'Photo Entry'),
     date: new Date(),
     time: Date.now(),
     protein: totals.protein,
@@ -159,7 +150,7 @@ export async function runPhotoAnalysis(
     updatedAt: new Date(),
   };
 
-  return { entry, sources };
+  return { entry, sources, rawIngredients };
 }
 
 // Analyze Photo Function — returns the created NutritionEntry so callers can persist it.
