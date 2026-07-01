@@ -7,9 +7,10 @@ import V3Option from '../_shared/V3Option'
 import V4Screen from '../_shared/V4Screen'
 
 /**
- * Dev-only V4 eating-phase screen — NEUTRAL (color is reserved for the three hero beats). Cut / Maintain /
- * Bulk are single-select; target weight is hidden on Maintain and its unit follows the user's earlier
- * About You choice (via the flow's shared data). Inert.
+ * Dev-only V4 eating-phase screen — the SELECTED phase highlights nutrition-green (the calorie decision is
+ * the flow's core nutrition choice), mirroring Activity's blue selected state; screen chrome stays neutral.
+ * Cut / Maintain / Bulk are single-select; target weight is hidden on Maintain and its unit follows the
+ * user's earlier About You choice (via the flow's shared data). Inert.
  */
 const PHASES = [
     { id: 'cut', label: 'Cut', sub: 'Eat in a deficit to lose fat' },
@@ -37,7 +38,7 @@ export default function GoalV4() {
                 <V4Screen step={4} totalSteps={9} eyebrow="Step 5 of 9" title="How do you want to eat?" subtitle="This sets your daily calories. You can switch phases anytime." accent={accent} onBack={() => router.back()} onNext={() => {}}>
                     <View style={{ gap: 12 }}>
                         {PHASES.map((p, i) => (
-                            <V3Option key={p.id} index={i} label={p.label} sublabel={p.sub} accent={accent} selected={phase === p.id} onPress={() => { setPhase(p.id); flow?.setData('phase', p.id) }} />
+                            <V3Option key={p.id} index={i} label={p.label} sublabel={p.sub} accent={colors.nutrition} selected={phase === p.id} onPress={() => { setPhase(p.id); flow?.setData('phase', p.id) }} />
                         ))}
                     </View>
 

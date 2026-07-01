@@ -12,10 +12,11 @@ import { PAGES } from './registry'
  * steer the flow — e.g. choosing "Maintain" on the eating-phase step skips the pace ("how fast") step.
  *
  * Exclusions are version-aware: every version drops the redundant unmerged gender/heightWeight rows (About
- * You already merges them); v3 additionally drops intro/preboard. v4 keeps preboard but has no intro version
- * at all (Login already brands the opener, so the LIFTRI/"Get started" screen was redundant) — pages with no
- * matching version fall out of the step list naturally. The runner also computes a contiguous, skip-aware
- * "Step N of M" over the NUMBERED screens and hands it to the context so V4Screen can render honest progress.
+ * You already merges them); v3 additionally drops intro/preboard. v4 has NO intro or preboard versions at all
+ * (Login already brands the opener, and "Before we start" made no sense after two answered questions — its
+ * privacy line moved onto About You) — pages with no matching version fall out of the step list naturally.
+ * The runner also computes a contiguous, skip-aware "Step N of M" over the NUMBERED screens and hands it to
+ * the context so V4Screen can render honest progress.
  */
 const BASE_EXCLUDE = ['gender', 'heightWeight']
 const NUMBERED = new Set(['goalMotivation', 'obstacles', 'birthday', 'activity', 'goal', 'pace', 'resultsTimeline', 'macros', 'summary'])

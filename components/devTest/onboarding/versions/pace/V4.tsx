@@ -9,9 +9,10 @@ import { useOnboardingFlow } from '../_shared/flowContext'
 import V4Screen from '../_shared/V4Screen'
 
 /**
- * Dev-only V4 Pace — NEUTRAL (color is reserved for the three hero beats). Unit + range follow the user's
- * About You choice, and the label buckets are derived from the actual slider range so every label
- * (Slow→Very fast) is reachable — no dead "Extreme". Inert.
+ * Dev-only V4 Pace — the slider (track + thumb) is nutrition-green, continuing the green thread from the
+ * eating-phase choice; the rest of the screen stays neutral. Unit + range follow the user's About You
+ * choice, and the label buckets are derived from the actual slider range so every label (Slow→Very fast)
+ * is reachable — no dead "Extreme". Inert.
  */
 const RANGES = {
     metric: { min: 0.1, max: 1.5, step: 0.1, def: 0.5, unit: 'kg' },
@@ -41,7 +42,7 @@ export default function PaceV4() {
 
             <View style={styles.sliderRow}>
                 <Turtle size={24} color={colors.textMuted} strokeWidth={2} />
-                <Slider style={styles.slider} minimumValue={r.min} maximumValue={r.max} step={r.step} value={pace} onValueChange={setPace} minimumTrackTintColor={accent} maximumTrackTintColor={colors.ringTrack} thumbTintColor={accent} />
+                <Slider style={styles.slider} minimumValue={r.min} maximumValue={r.max} step={r.step} value={pace} onValueChange={setPace} minimumTrackTintColor={colors.nutrition} maximumTrackTintColor={colors.ringTrack} thumbTintColor={colors.nutrition} />
                 <Rabbit size={24} color={colors.textMuted} strokeWidth={2} />
             </View>
             <View style={styles.range}>

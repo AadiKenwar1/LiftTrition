@@ -42,9 +42,11 @@ import ResultsTimelineV3 from './versions/resultsTimeline/V3'
 import SecondChance from './versions/secondChance/Refined'
 import SecondChanceV3 from './versions/secondChance/V3'
 import SummaryV1 from './versions/summary/V1'
-// V4 · Neutral + hero color — V3's B&W spine with the flow fixes baked in (see KNOWN ISSUES below) and color
-// at exactly three deliberate beats: Activity's blue selected state, the green Projection chart, and the
-// green paywall/second-chance CTA. (An earlier per-domain icon-coloring pass read as scattered — reverted.)
+// V4 · Neutral + hero color — V3's B&W spine with the flow fixes baked in (see KNOWN ISSUES below). Color
+// rule: everything rests neutral; a SELECTED option reveals its domain color (goals/obstacles per-option
+// green or blue, Activity blue, eating phase green), and the only always-on color is the green Pace slider,
+// the green Projection chart, and the green paywall/second-chance CTA. No intro or preboard (Login opens;
+// About You carries the privacy line). (An earlier always-on per-icon coloring pass read as scattered — reverted.)
 import AboutYouV4 from './versions/birthday/AboutYouV4'
 import ActivityV4 from './versions/activity/V4'
 import GoalMotivationV4 from './versions/goalMotivation/V4'
@@ -55,7 +57,6 @@ import MacrosV4 from './versions/macros/V4'
 import ObstaclesV4 from './versions/obstacles/V4'
 import PaceV4 from './versions/pace/V4'
 import PaywallV4 from './versions/paywall/V4'
-import PreboardV4 from './versions/preboard/V4'
 import ResultsTimelineV4 from './versions/resultsTimeline/V4'
 import SecondChanceV4 from './versions/secondChance/V4'
 
@@ -113,7 +114,7 @@ export const PAGES: OnboardingPage[] = [
     { key: 'goalMotivation', label: 'Onboarding 1', screen: 'Goal & Motivation (new)', versions: [{ id: 'v1', label: 'Version 1', Component: GoalMotivation }, V3(GoalMotivationV3), V4(GoalMotivationV4)] },
     { key: 'obstacles', label: 'Onboarding 2', screen: 'Obstacles (new)', versions: [{ id: 'v1', label: 'Version 1', Component: Obstacles }, V3(ObstaclesV3), V4(ObstaclesV4)] },
     { key: 'intro', label: 'Onboarding 3', screen: 'Intro', versions: [{ id: 'v1', label: 'Version 1', Component: IntroV1 }, { id: 'refined', label: 'Refined', Component: IntroRefined }, V3(IntroV3)] },
-    { key: 'preboard', label: 'Onboarding 4', screen: 'Preboard', versions: [{ id: 'v1', label: 'Version 1', Component: PreboardV1 }, { id: 'refined', label: 'Refined', Component: PreboardRefined }, V3(PreboardV3), V4(PreboardV4)] },
+    { key: 'preboard', label: 'Onboarding 4', screen: 'Preboard', versions: [{ id: 'v1', label: 'Version 1', Component: PreboardV1 }, { id: 'refined', label: 'Refined', Component: PreboardRefined }, V3(PreboardV3)] },
     { key: 'birthday', label: 'Onboarding 5', screen: 'About You (body details)', versions: [{ id: 'v1', label: 'Version 1', Component: BirthdayV1 }, { id: 'aboutYou', label: 'About You (merged, restyled)', Component: AboutYou }, V3(AboutYouV3), V4(AboutYouV4)] },
     { key: 'gender', label: 'Onboarding 5a', screen: 'Gender (unmerged alt)', versions: [{ id: 'v1', label: 'Version 1', Component: GenderV1 }, { id: 'refined', label: 'Refined', Component: GenderRefined }, V3(GenderV3)] },
     { key: 'heightWeight', label: 'Onboarding 5b', screen: 'Height & Weight (unmerged alt)', versions: [{ id: 'v1', label: 'Version 1', Component: HeightWeightV1 }, { id: 'refined', label: 'Refined', Component: HeightWeightRefined }, V3(HeightWeightV3)] },

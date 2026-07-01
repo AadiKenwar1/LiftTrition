@@ -1,6 +1,7 @@
 import { cmToInches, feetInchesToInches, inchesToCm, inchesToFeetInches, kgToLbs, lbsToKg } from '@/lib/utils/unitConversions'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { useRouter } from 'expo-router'
+import { ShieldCheck } from 'lucide-react-native'
 import { useMemo, useState } from 'react'
 import { Keyboard, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from 'react-native'
 import CompactDatePicker from '../_shared/CompactDatePicker'
@@ -11,7 +12,8 @@ import V4Screen from '../_shared/V4Screen'
 /**
  * Dev-only V4 merged About You — sex + DOB + height/weight on one screen. NEUTRAL. It writes the chosen
  * unit system into the flow's shared `data` bag so downstream screens (Goal / Pace / Projection / Paywall)
- * show consistent units. Inert.
+ * show consistent units. Carries the privacy trust line (inherited from the removed Preboard screen) since
+ * this is where the sensitive questions live. Inert.
  */
 export default function AboutYouV4() {
     const colors = useColors()
@@ -96,6 +98,11 @@ export default function AboutYouV4() {
                         <TextInput style={styles.input} placeholder={unitSystem === 'imperial' ? '160' : '73'} placeholderTextColor={colors.placeholder} keyboardType="numeric" value={weight} onChangeText={setWeight} />
                         <Text style={styles.unit}>{unitSystem === 'imperial' ? 'lbs' : 'kg'}</Text>
                     </View>
+
+                    <View style={styles.trustRow}>
+                        <ShieldCheck size={15} color={colors.textMuted} strokeWidth={2.2} />
+                        <Text style={styles.trustText}>Your data is never sold or shared</Text>
+                    </View>
                 </V4Screen>
             </View>
         </TouchableWithoutFeedback>
@@ -114,5 +121,7 @@ function makeStyles(colors: Colors) {
         inputWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderRadius: radius.cardLg, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.hairline, paddingHorizontal: 16, height: 60 },
         input: { flex: 1, fontFamily: fonts.semibold, fontSize: 16, color: colors.text, letterSpacing: -0.5 },
         unit: { fontFamily: fonts.semibold, fontSize: 14, color: colors.textMuted, marginLeft: 12, letterSpacing: -0.5 },
+        trustRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 20 },
+        trustText: { fontFamily: fonts.medium, fontSize: 12, color: colors.textMuted, letterSpacing: 0.2 },
     })
 }
