@@ -186,9 +186,6 @@ function makeStyles(colors: Colors, isDark: boolean) {
         },
         accentBar: {
             width: 4,
-            shadowOffset: { width: 2, height: 0 },
-            shadowOpacity: 0.5,
-            shadowRadius: 4,
         },
         item: {
             flex: 1,
