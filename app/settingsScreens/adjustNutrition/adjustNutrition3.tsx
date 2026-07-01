@@ -146,7 +146,7 @@ export default function AdjustNutrition4Screen() {
                         {/* Fats */}
                         <TouchableOpacity style={styles.macroCard} onPress={() => setEditingKind('fats')} activeOpacity={0.75}>
                             <Pencil size={16} color={colors.textMuted} strokeWidth={2} style={styles.pencilCorner} />
-                            <Droplet size={18} color="#22C922" strokeWidth={2} />
+                            <Droplet size={18} color={colors.nutrition} strokeWidth={2} />
                             <Text style={styles.macroLabel}>Fats</Text>
                             <Text style={styles.macroValue}>{macroGoals.fatsGoal}g</Text>
                         </TouchableOpacity>
