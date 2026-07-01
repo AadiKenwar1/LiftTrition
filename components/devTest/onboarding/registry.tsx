@@ -50,6 +50,11 @@ import SummaryV1 from './versions/summary/V1'
 // and the green paywall CTA. No intro or preboard (Login opens; About You carries the privacy line), and no
 // second-chance step for now — it needs real gating + RevenueCat offering logic to be honest, so it's
 // deferred until that exists (V3/Refined designs remain below for reference).
+// Guardrails: Next is disabled until each step's required input exists (selection made / fields non-empty;
+// no preselected eating phase), and semantic checks reuse the production SettingsContext validators
+// (validateHeightWeight, validateTargetWeight — Alert-style) plus a 13+ age check on About You. About You
+// shares weight/unit and the phase screen shares target through flow.data, so Projection + Paywall show the
+// user's real numbers (mock fallbacks remain for standalone previews).
 // (An earlier always-on per-icon coloring pass read as scattered — reverted.)
 import AboutYouV4 from './versions/birthday/AboutYouV4'
 import ActivityV4 from './versions/activity/V4'

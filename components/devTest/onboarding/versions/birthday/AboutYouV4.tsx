@@ -1,19 +1,22 @@
+import { validateHeightWeight } from '@/context/SettingsContext/functions/validator'
 import { cmToInches, feetInchesToInches, inchesToCm, inchesToFeetInches, kgToLbs, lbsToKg } from '@/lib/utils/unitConversions'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { useRouter } from 'expo-router'
 import { ShieldCheck } from 'lucide-react-native'
 import { useMemo, useState } from 'react'
-import { Keyboard, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from 'react-native'
+import { Alert, Keyboard, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from 'react-native'
 import CompactDatePicker from '../_shared/CompactDatePicker'
 import { useOnboardingFlow } from '../_shared/flowContext'
 import PressableScale from '../_shared/PressableScale'
 import V4Screen from '../_shared/V4Screen'
 
 /**
- * Dev-only V4 merged About You — sex + DOB + height/weight on one screen. NEUTRAL. It writes the chosen
- * unit system into the flow's shared `data` bag so downstream screens (Goal / Pace / Projection / Paywall)
- * show consistent units. Carries the privacy trust line (inherited from the removed Preboard screen) since
- * this is where the sensitive questions live. Inert.
+ * Dev-only V4 merged About You — sex + DOB + height/weight on one screen. NEUTRAL. Guardrails: Next is
+ * disabled until sex + height + weight exist, then validateHeightWeight (the production SettingsContext
+ * validator, Alert-style) and a 13+ age check run on Next. On success it writes the unit system AND weight
+ * into the flow's shared `data` bag so downstream screens show consistent units and can validate the
+ * cut/bulk target against current weight. Carries the privacy trust line since this is where the sensitive
+ * questions live. Inert.
  */
 export default function AboutYouV4() {
     const colors = useColors()
@@ -50,10 +53,29 @@ export default function AboutYouV4() {
         flow?.setData('unit', next)
     }
 
+    const filled = sex != null && weight.trim() !== '' && (unitSystem === 'imperial' ? heightFt.trim() !== '' : height.trim() !== '')
+
+    function handleBeforeNext(): boolean {
+        const totalHeight = unitSystem === 'imperial' ? feetInchesToInches(Number(heightFt) || 0, Number(heightIn) || 0) : Number(height) || 0
+        const w = Number(weight) || 0
+        if (!validateHeightWeight(totalHeight, w, unitSystem)) return false
+        const now = new Date()
+        let age = now.getFullYear() - birthDate.getFullYear()
+        const m = now.getMonth() - birthDate.getMonth()
+        if (m < 0 || (m === 0 && now.getDate() < birthDate.getDate())) age--
+        if (age < 13) {
+            Alert.alert('Age Requirement', 'You must be at least 13 years old to use LIFTRI.', [{ text: 'OK' }])
+            return false
+        }
+        flow?.setData('unit', unitSystem)
+        flow?.setData('weight', String(w))
+        return true
+    }
+
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={{ flex: 1 }}>
-                <V4Screen step={2} totalSteps={9} eyebrow="Step 3 of 9" title="About you" subtitle="A few details so we can personalize your calorie and macro targets." accent={accent} onBack={() => router.back()} onNext={() => {}}>
+                <V4Screen step={2} totalSteps={9} eyebrow="Step 3 of 9" title="About you" subtitle="A few details so we can personalize your calorie and macro targets." accent={accent} nextDisabled={!filled} onBeforeNext={handleBeforeNext} onBack={() => router.back()} onNext={() => {}}>
                     <Text style={styles.label}>Biological sex</Text>
                     <View style={styles.row}>
                         {(['male', 'female'] as const).map((s) => (

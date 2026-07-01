@@ -27,7 +27,7 @@ export default function GoalMotivationV4() {
     const toggle = (id: string) => setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]))
 
     return (
-        <V4Screen step={0} totalSteps={9} eyebrow="Step 1 of 9" title="What are your goals?" subtitle="Pick all that apply — we'll build your whole plan around them." accent={colors.text} onBack={() => router.back()} onNext={() => {}}>
+        <V4Screen step={0} totalSteps={9} eyebrow="Step 1 of 9" title="What are your goals?" subtitle="Pick all that apply — we'll build your whole plan around them." accent={colors.text} nextDisabled={selected.length === 0} onBack={() => router.back()} onNext={() => {}}>
             <View style={{ gap: 12 }}>
                 {GOALS.map((g, i) => (
                     <V3Option key={g.id} index={i} icon={g.icon} label={g.label} accent={g.domain === 'workout' ? colors.workout : colors.nutrition} multiSelect selected={selected.includes(g.id)} onPress={() => toggle(g.id)} />

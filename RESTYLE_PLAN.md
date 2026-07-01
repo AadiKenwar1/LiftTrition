@@ -65,6 +65,14 @@ For restyled files, adopt `const styles = useMemo(() => makeStyles(colors), [col
 - **`app/(tabs)/_layout.tsx`** — theme- and mode-aware tab bar: active tint = current mode accent (blue lift / green nutrition; `text` on Settings), inactive = `tabInactive`, bar bg = `surface`/`background`, top border = `navBorder`. Read `mode` from `useSettings()`. Drop legacy `constants/Colors` + `ExpoComponents/useColorScheme`.
 - **`Fab.tsx`** — keep the expanding multi-action behavior; restyle trigger + child buttons to gradient (`workoutGradient`/`nutritionGradient`) with the restrained colored shadow. Token-drive colors.
 - **`ProgressWheel.tsx`** — add a `children` prop for custom center content (Daily Intake ring shows `1052 / 2200` not `%`); support solid stroke + `ringTrack` track. Keep `%` default for any remaining callers.
+- **`components/NeutralComponents/PressableScale.tsx`** — reanimated press-scale wrapper (0.96, transform-only). Production port of the V4-onboarding devTest primitive; drop-in for TouchableOpacity where tactile press is wanted.
+- **`components/NeutralComponents/OptionCard.tsx`** — V4-onboarding selectable card: neutral `surface` + 2px `border` that turns `accent` when selected (`accent + '10'` tint), optional leading icon tile, optional multi-select check, staggered `FadeInDown` entrance. First production consumer: the Adjust Nutrition flow; the future real-onboarding V4 should reuse it.
+- **`components/NutritionComponents/GoalProjectionChart.tsx`** — the V4 signature projection chart (react-native-svg, animated draw, reduced-motion aware). Variants: `lose` (green down-slope), `gain` (green up-slope), `maintain` (recomp: flat green weight line + rising blue strength line). Used by `adjustNutrition4`.
+
+### Settings adjust flows (restyled to V4, June 2026)
+`app/settingsScreens/adjustNutrition/` is now a 4-screen V4-styled flow: **1 goal** ("What's your goal?", Cut/Maintain/Bulk `OptionCard`s mapped to stored `lose/maintain/gain`, target-weight input, existing validators) → **2 pace** (unit-aware display, **storage stays lb/week** — `macroCalculation.tsx` assumes lbs, metric converts via `kgToLbs`) → **3 plan** (V4 macro grid, V4 macro colors `#FF9500/#FF5A5A/#EAB308/nutrition`, EditMacroGoalModal) → **4 projection** (`GoalProjectionChart` + stat cards, **save point**: Cancel + green-gradient Save Changes). Maintain skips pace (goalPace `'0'`). Headers renamed to `'Your Goal' / 'Pace' / 'Your Plan' / 'Projection'`.
+
+`app/settingsScreens/adjustTraining.tsx` matches V4's Activity step: "How active are you?" + five `OptionCard`s with the blue (`colors.workout`) selected state; saving still recalculates all four macro goals via `calculateMacros` (activity feeds TDEE + the fatigue daily budget) and commits in one `setSettings`. CTA stays the blue `workoutGradient` Save (final save = domain gradient).
 
 ---
 

@@ -23,7 +23,7 @@ export default function ActivityV4() {
     const [selected, setSelected] = useState<string | null>(null)
 
     return (
-        <V4Screen step={3} totalSteps={9} eyebrow="Step 4 of 9" title="How active are you?" subtitle="This sets your daily calorie burn so your targets are realistic." accent={colors.text} onBack={() => router.back()} onNext={() => {}}>
+        <V4Screen step={3} totalSteps={9} eyebrow="Step 4 of 9" title="How active are you?" subtitle="This sets your daily calorie burn so your targets are realistic." accent={colors.text} nextDisabled={selected == null} onBack={() => router.back()} onNext={() => {}}>
             <View style={{ gap: 10 }}>
                 {FREQUENCIES.map((f, i) => (
                     <V3Option key={f.id} index={i} label={f.label} sublabel={f.sub} accent={colors.workout} selected={selected === f.id} onPress={() => setSelected(f.id)} />

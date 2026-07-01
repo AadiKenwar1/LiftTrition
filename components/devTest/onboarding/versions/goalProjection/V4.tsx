@@ -26,10 +26,11 @@ export default function GoalProjectionV4() {
 
     const metric = flow?.data.unit === 'metric'
     const unit = metric ? 'kg' : 'lb'
-    const current = metric ? 75 : 165
+    // Real values from the flow's data bag when the user entered them; mock fallbacks for standalone previews.
+    const current = Number(flow?.data.weight) || (metric ? 75 : 165)
     const phase = flow?.data.phase === 'maintain' ? 'maintain' : flow?.data.phase === 'bulk' ? 'bulk' : 'cut'
     const maintain = phase === 'maintain'
-    const goal = phase === 'bulk' ? (metric ? 80 : 176) : metric ? 70 : 154
+    const goal = Number(flow?.data.target) || (phase === 'bulk' ? (metric ? 80 : 176) : metric ? 70 : 154)
     const pace = metric ? 0.5 : 1
     const weeks = maintain ? 12 : Math.max(1, Math.round(Math.abs(current - goal) / pace))
     const targetDate = useMemo(() => {

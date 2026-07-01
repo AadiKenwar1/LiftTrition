@@ -187,9 +187,10 @@ function StackLayout() {
                     <Stack.Screen name="settingsScreens/profile" options={{ headerShown: true, title: 'Profile', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="settingsScreens/subscription" options={{ headerShown: true, title: 'Subscription', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="settingsScreens/adjustTraining" options={{ headerShown: true, title: 'Adjust Training', headerBackTitle: 'Back' }} />
-                    <Stack.Screen name="settingsScreens/adjustNutrition/adjustNutrition1" options={{ headerShown: true, title: 'Step 1 of 3', headerBackTitle: 'Back' }} />
-                    <Stack.Screen name="settingsScreens/adjustNutrition/adjustNutrition2" options={{ headerShown: true, title: 'Step 2 of 3', headerBackTitle: 'Back' }} />
-                    <Stack.Screen name="settingsScreens/adjustNutrition/adjustNutrition3" options={{ headerShown: true, title: 'Step 3 of 3', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="settingsScreens/adjustNutrition/adjustNutrition1" options={{ headerShown: true, title: 'Your Goal', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="settingsScreens/adjustNutrition/adjustNutrition2" options={{ headerShown: true, title: 'Pace', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="settingsScreens/adjustNutrition/adjustNutrition3" options={{ headerShown: true, title: 'Your Plan', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="settingsScreens/adjustNutrition/adjustNutrition4" options={{ headerShown: true, title: 'Projection', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="settingsScreens/adjustMeasurements" options={{ headerShown: true, title: 'Adjust Measurements', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="settingsScreens/termsAndPrivacy" options={{ headerShown: true, title: 'Terms & Privacy', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="settingsScreens/support" options={{ headerShown: true, title: 'Support', headerBackTitle: 'Back' }} />

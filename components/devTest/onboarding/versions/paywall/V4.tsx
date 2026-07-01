@@ -38,7 +38,7 @@ export default function PaywallV4() {
     const [plan, setPlan] = useState<Plan>('annual')
 
     const metric = flow?.data.unit === 'metric'
-    const goalWeight = metric ? 70 : 154
+    const goalWeight = Number(flow?.data.target) || (metric ? 70 : 154)
     const unit = metric ? 'kg' : 'lb'
     const FEATURES = [
         { Icon: Database, label: 'Food DB' },

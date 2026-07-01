@@ -29,11 +29,15 @@ export interface V4ScreenProps {
     onBack?: () => void
     onNext?: () => void
     nextLabel?: string
+    /** Grays out + disables Next until the screen's required input exists (matches the renameModal/logsModal pattern). */
+    nextDisabled?: boolean
+    /** Semantic validation on Next (production validator pattern: Alert + return false to stay on the screen). */
+    onBeforeNext?: () => boolean
     /** Replace the standard footer entirely (e.g. paywall). Takes precedence over onBack/onNext. */
     footer?: ReactNode
 }
 
-export default function V4Screen({ step, totalSteps = 12, accent, eyebrow, title, subtitle, children, contentStyle, onBack, onNext, nextLabel = 'Next', footer }: V4ScreenProps) {
+export default function V4Screen({ step, totalSteps = 12, accent, eyebrow, title, subtitle, children, contentStyle, onBack, onNext, nextLabel = 'Next', nextDisabled = false, onBeforeNext, footer }: V4ScreenProps) {
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
     const topPad = useScreenTopPad()
@@ -41,7 +45,11 @@ export default function V4Screen({ step, totalSteps = 12, accent, eyebrow, title
 
     // In a flow walkthrough the footer drives the runner; standalone it uses the passed handlers.
     const handleBack = flow ? flow.goBack : onBack
-    const handleNext = flow ? flow.goNext : onNext
+    const advance = flow ? flow.goNext : onNext
+    const handleNext = () => {
+        if (onBeforeNext != null && !onBeforeNext()) return
+        advance?.()
+    }
     const showBack = flow ? flow.index > 0 : onBack != null
     const showStdFooter = footer == null && (flow != null || onNext != null)
 
@@ -70,7 +78,7 @@ export default function V4Screen({ step, totalSteps = 12, accent, eyebrow, title
                             <Text style={styles.backText}>Back</Text>
                         </TouchableOpacity>
                     )}
-                    <TouchableOpacity style={styles.nextButton} onPress={handleNext} activeOpacity={0.85}>
+                    <TouchableOpacity style={[styles.nextButton, nextDisabled && { backgroundColor: colors.disabled }]} onPress={handleNext} disabled={nextDisabled} activeOpacity={0.85}>
                         <Text style={styles.nextText}>{nextLabel}</Text>
                     </TouchableOpacity>
                 </View>

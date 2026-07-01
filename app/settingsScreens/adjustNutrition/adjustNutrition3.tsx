@@ -1,12 +1,12 @@
 import EditMacroGoalModal, { type MacroGoalKind } from '@/components/NutritionComponents/EditMacroGoalModal'
+import PressableScale from '@/components/NeutralComponents/PressableScale'
 import { useSettings } from '@/context/SettingsContext'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
-import FontAwesome from '@expo/vector-icons/FontAwesome'
-import { LinearGradient } from 'expo-linear-gradient'
 import { router, useLocalSearchParams } from 'expo-router'
 import { Beef, Droplet, Flame, Pencil, Wheat } from 'lucide-react-native'
 import { useEffect, useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import Animated, { FadeInDown } from 'react-native-reanimated'
 
 function macroInitialValue(kind: MacroGoalKind, m: { calorieGoal: number; proteinGoal: number; carbsGoal: number; fatsGoal: number }) {
     switch (kind) {
@@ -21,8 +21,8 @@ function macroInitialValue(kind: MacroGoalKind, m: { calorieGoal: number; protei
     }
 }
 
-export default function AdjustNutrition4Screen() {
-    const { settings, setSettings, calculateMacros } = useSettings()
+export default function AdjustNutrition3Screen() {
+    const { settings, calculateMacros } = useSettings()
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
     const [editingKind, setEditingKind] = useState<MacroGoalKind | null>(null)
@@ -35,9 +35,7 @@ export default function AdjustNutrition4Screen() {
         goalPace?: string
     }>()
 
-    // Calculate macros based on the collected parameters
     const calculatedMacros = useMemo(() => {
-        // Build a temporary settings object with the new values
         const tempSettings = {
             ...settings,
             height: Number(params.height),
@@ -47,8 +45,6 @@ export default function AdjustNutrition4Screen() {
             goalWeight: Number(params.targetWeight),
             goalPace: params.goalPace ? Number(params.goalPace) : 0,
         }
-
-        // Calculate macros with the temporary settings
         return calculateMacros(tempSettings, params.unitSystem === 'imperial')
     }, [params, settings, calculateMacros])
 
@@ -76,99 +72,57 @@ export default function AdjustNutrition4Screen() {
         else setMacroGoals((prev) => ({ ...prev, fatsGoal: value }))
     }
 
-    const handleSave = () => {
-        // Save the new settings with updated macros
-        setSettings({
-            ...settings,
-            height: Number(params.height),
-            bodyWeight: Number(params.weight),
-            unitSystem: params.unitSystem as 'imperial' | 'metric',
-            goalType: params.goal as 'lose' | 'gain' | 'maintain',
-            goalWeight: Number(params.targetWeight),
-            goalPace: params.goalPace ? Number(params.goalPace) : 0,
-            calorieGoal: macroGoals.calorieGoal,
-            proteinGoal: macroGoals.proteinGoal,
-            carbsGoal: macroGoals.carbsGoal,
-            fatsGoal: macroGoals.fatsGoal,
+    const handleNext = () => {
+        router.push({
+            pathname: '/settingsScreens/adjustNutrition/adjustNutrition4',
+            params: {
+                height: params.height,
+                weight: params.weight,
+                unitSystem: params.unitSystem,
+                goal: params.goal,
+                targetWeight: params.targetWeight,
+                goalPace: params.goalPace ?? '0',
+                calorieGoal: macroGoals.calorieGoal.toString(),
+                proteinGoal: macroGoals.proteinGoal.toString(),
+                carbsGoal: macroGoals.carbsGoal.toString(),
+                fatsGoal: macroGoals.fatsGoal.toString(),
+            },
         })
-        router.push('/(tabs)/settings')
     }
 
-    const handleCancel = () => {
-        router.push('/(tabs)/settings')
-    }
+    const CARDS = [
+        { kind: 'calories' as const, Icon: Flame, color: '#FF9500', label: 'Calories', value: `${macroGoals.calorieGoal}` },
+        { kind: 'protein' as const, Icon: Beef, color: '#FF5A5A', label: 'Protein', value: `${macroGoals.proteinGoal}g` },
+        { kind: 'carbs' as const, Icon: Wheat, color: '#EAB308', label: 'Carbs', value: `${macroGoals.carbsGoal}g` },
+        { kind: 'fats' as const, Icon: Droplet, color: colors.nutrition, label: 'Fats', value: `${macroGoals.fatsGoal}g` },
+    ]
 
     return (
         <View style={styles.container}>
             <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-                {/* Icon */}
-                <View style={styles.iconCircle}>
-                    <FontAwesome name="list-alt" size={72} color={colors.nutrition} />
+                <Text style={styles.titleText}>Your plan is ready</Text>
+                <Text style={styles.subtitleText}>Here are your daily targets — tap any to fine-tune it.</Text>
+
+                <View style={styles.grid}>
+                    {CARDS.map(({ kind, Icon, color, label, value }, i) => (
+                        <Animated.View key={kind} entering={FadeInDown.delay(i * 50).duration(280)} style={styles.cell}>
+                            <PressableScale style={styles.card} onPress={() => setEditingKind(kind)}>
+                                <Pencil size={15} color={colors.chevron} strokeWidth={2} style={styles.pencil} />
+                                <Icon size={18} color={color} strokeWidth={2.2} />
+                                <Text style={[styles.cardLabel, { color }]}>{label}</Text>
+                                <Text style={styles.cardValue}>{value}</Text>
+                            </PressableScale>
+                        </Animated.View>
+                    ))}
                 </View>
-
-                {/* Title */}
-                <Text style={styles.titleText}>Your Updated Plan</Text>
-
-                {/* Subtitle */}
-                <Text style={styles.subtitleText}>Here are your new daily nutrition goals</Text>
-
-                {/* Macros Display */}
-                <View style={styles.macrosContainer}>
-                    {/* First Row */}
-                    <View style={styles.macrosRow}>
-                        {/* Calories */}
-                        <TouchableOpacity style={styles.macroCard} onPress={() => setEditingKind('calories')} activeOpacity={0.75}>
-                            <Pencil size={16} color={colors.textMuted} strokeWidth={2} style={styles.pencilCorner} />
-                            <Flame size={18} color="#FF6B6B" strokeWidth={2} />
-                            <Text style={styles.macroLabel}>Calories</Text>
-                            <Text style={styles.macroValue}>{macroGoals.calorieGoal}</Text>
-                        </TouchableOpacity>
-
-                        {/* Protein */}
-                        <TouchableOpacity style={styles.macroCard} onPress={() => setEditingKind('protein')} activeOpacity={0.75}>
-                            <Pencil size={16} color={colors.textMuted} strokeWidth={2} style={styles.pencilCorner} />
-                            <Beef size={18} color="red" strokeWidth={2} />
-                            <Text style={styles.macroLabel}>Protein</Text>
-                            <Text style={styles.macroValue}>{macroGoals.proteinGoal}g</Text>
-                        </TouchableOpacity>
-                    </View>
-
-                    {/* Second Row */}
-                    <View style={styles.macrosRow}>
-                        {/* Carbs */}
-                        <TouchableOpacity style={styles.macroCard} onPress={() => setEditingKind('carbs')} activeOpacity={0.75}>
-                            <Pencil size={16} color={colors.textMuted} strokeWidth={2} style={styles.pencilCorner} />
-                            <Wheat size={18} color="#FFD93D" strokeWidth={2} />
-                            <Text style={styles.macroLabel}>Carbs</Text>
-                            <Text style={styles.macroValue}>{macroGoals.carbsGoal}g</Text>
-                        </TouchableOpacity>
-
-                        {/* Fats */}
-                        <TouchableOpacity style={styles.macroCard} onPress={() => setEditingKind('fats')} activeOpacity={0.75}>
-                            <Pencil size={16} color={colors.textMuted} strokeWidth={2} style={styles.pencilCorner} />
-                            <Droplet size={18} color={colors.nutrition} strokeWidth={2} />
-                            <Text style={styles.macroLabel}>Fats</Text>
-                            <Text style={styles.macroValue}>{macroGoals.fatsGoal}g</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-
-                {/* Note */}
-                <Text style={styles.noteText}>Updating body weight will automatically update nutrition goals.</Text>
-
-                {/* Button Container */}
-                <View style={styles.buttonContainer}>
-                    <TouchableOpacity style={styles.cancelButton} onPress={handleCancel} activeOpacity={0.5}>
-                        <Text style={styles.cancelButtonText}>Cancel</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity style={styles.saveButton} onPress={handleSave} activeOpacity={0.8}>
-                        <LinearGradient colors={colors.nutritionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.saveButtonGradient}>
-                            <Text style={styles.saveButtonText}>Save Changes</Text>
-                        </LinearGradient>
-                    </TouchableOpacity>
-                </View>
+                <Text style={styles.note}>Updating body weight will automatically update nutrition goals.</Text>
             </ScrollView>
+
+            <View style={styles.footer}>
+                <TouchableOpacity style={styles.nextButton} onPress={handleNext} activeOpacity={0.85}>
+                    <Text style={styles.nextText}>Next</Text>
+                </TouchableOpacity>
+            </View>
 
             <EditMacroGoalModal visible={editingKind != null} kind={editingKind} initialValue={editingKind != null ? macroInitialValue(editingKind, macroGoals) : 0} onDismiss={() => setEditingKind(null)} onSave={handleSaveMacro} />
         </View>
@@ -177,140 +131,20 @@ export default function AdjustNutrition4Screen() {
 
 function makeStyles(colors: Colors) {
     return StyleSheet.create({
-        container: {
-            flex: 1,
-            backgroundColor: colors.background,
-            paddingHorizontal: 20,
-            paddingTop: 0,
-            paddingBottom: 40,
-            alignItems: 'center',
-        },
-        scroll: {
-            flex: 1,
-            width: '100%',
-        },
-        scrollContent: {
-            alignItems: 'center',
-            width: '100%',
-            paddingTop: 24,
-            paddingBottom: 8,
-        },
-        iconCircle: {
-            width: 144,
-            height: 144,
-            borderRadius: 72,
-            backgroundColor: colors.surface,
-            justifyContent: 'center',
-            alignItems: 'center',
-            borderWidth: 2,
-            borderColor: colors.nutrition,
-            marginBottom: 12,
-        },
-        titleText: {
-            fontSize: 28,
-            color: colors.text,
-            letterSpacing: -0.5,
-            marginBottom: 4,
-            textAlign: 'center',
-            fontFamily: fonts.semibold,
-        },
-        subtitleText: {
-            fontSize: 16,
-            color: colors.textSecondary,
-            textAlign: 'center',
-            letterSpacing: 0.2,
-            marginBottom: 24,
-            paddingHorizontal: 8,
-            fontFamily: fonts.regular,
-        },
-        macrosContainer: {
-            width: '100%',
-            gap: 10,
-            marginBottom: 8,
-        },
-        macrosRow: {
-            flexDirection: 'row',
-            width: '100%',
-            gap: 10,
-        },
-        macroCard: {
-            flex: 1,
-            backgroundColor: colors.surface,
-            borderRadius: radius.cardLg,
-            padding: 14,
-            alignItems: 'center',
-            borderWidth: StyleSheet.hairlineWidth,
-            borderColor: colors.hairline,
-            gap: 6,
-        },
-        pencilCorner: {
-            position: 'absolute',
-            top: 10,
-            right: 10,
-        },
-        macroLabel: {
-            fontSize: 13,
-            color: colors.textSecondary,
-            letterSpacing: -0.5,
-            fontFamily: fonts.semibold,
-        },
-        macroValue: {
-            fontSize: 24,
-            color: colors.text,
-            letterSpacing: -0.5,
-            fontFamily: fonts.semibold,
-        },
-        noteText: {
-            fontSize: 12,
-            color: colors.textSecondary,
-            textAlign: 'center',
-            marginBottom: 24,
-            letterSpacing: 0.2,
-            fontFamily: fonts.medium,
-        },
-        buttonContainer: {
-            flexDirection: 'row',
-            width: '100%',
-            gap: 12,
-        },
-        cancelButton: {
-            flex: 1,
-            height: 60,
-            backgroundColor: colors.surface,
-            borderRadius: radius.cardLg,
-            justifyContent: 'center',
-            alignItems: 'center',
-            borderWidth: StyleSheet.hairlineWidth,
-            borderColor: colors.hairline,
-        },
-        cancelButtonText: {
-            fontSize: 16,
-            color: colors.textSecondary,
-            letterSpacing: -0.5,
-            fontFamily: fonts.semibold,
-        },
-        saveButton: {
-            flex: 1,
-            height: 60,
-            borderRadius: radius.cardLg,
-            overflow: 'hidden',
-            shadowColor: colors.nutrition,
-            shadowOffset: { width: 0, height: 6 },
-            shadowOpacity: 0.2,
-            shadowRadius: 12,
-            elevation: 8,
-        },
-        saveButtonGradient: {
-            width: '100%',
-            height: '100%',
-            justifyContent: 'center',
-            alignItems: 'center',
-        },
-        saveButtonText: {
-            fontSize: 16,
-            color: '#fff',
-            letterSpacing: -0.5,
-            fontFamily: fonts.semibold,
-        },
+        container: { flex: 1, backgroundColor: colors.background, paddingHorizontal: 24, paddingBottom: 40 },
+        scroll: { flex: 1 },
+        scrollContent: { paddingTop: 24, paddingBottom: 16 },
+        titleText: { fontFamily: fonts.extrabold, fontSize: 30, color: colors.text, letterSpacing: -0.8, lineHeight: 36, marginBottom: 8 },
+        subtitleText: { fontFamily: fonts.regular, fontSize: 15, color: colors.textSecondary, lineHeight: 22, letterSpacing: 0.1, marginBottom: 26 },
+        grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+        cell: { width: '47.5%' },
+        card: { backgroundColor: colors.surface, borderRadius: radius.cardLg, padding: 16, gap: 6, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.hairline },
+        pencil: { position: 'absolute', top: 12, right: 12 },
+        cardLabel: { fontFamily: fonts.semibold, fontSize: 13, letterSpacing: -0.2, marginTop: 2 },
+        cardValue: { fontFamily: fonts.extrabold, fontSize: 26, color: colors.text, letterSpacing: -0.5 },
+        note: { fontFamily: fonts.medium, fontSize: 12, color: colors.textMuted, textAlign: 'center', letterSpacing: 0.2, marginTop: 18 },
+        footer: { paddingTop: 12 },
+        nextButton: { width: '100%', height: 58, borderRadius: radius.cardLg, backgroundColor: colors.text, justifyContent: 'center', alignItems: 'center' },
+        nextText: { fontFamily: fonts.semibold, fontSize: 17, color: colors.background, letterSpacing: -0.3 },
     })
 }
