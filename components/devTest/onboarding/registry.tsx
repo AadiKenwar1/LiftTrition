@@ -44,9 +44,13 @@ import SecondChanceV3 from './versions/secondChance/V3'
 import SummaryV1 from './versions/summary/V1'
 // V4 · Neutral + hero color — V3's B&W spine with the flow fixes baked in (see KNOWN ISSUES below). Color
 // rule: everything rests neutral; a SELECTED option reveals its domain color (goals/obstacles per-option
-// green or blue, Activity blue, eating phase green), and the only always-on color is the green Pace slider,
-// the green Projection chart, and the green paywall/second-chance CTA. No intro or preboard (Login opens;
-// About You carries the privacy line). (An earlier always-on per-icon coloring pass read as scattered — reverted.)
+// green or blue, Activity blue, eating phase green); always-on color is limited to the green Pace slider,
+// the conventional macro colors on the Macros tiles (orange/red/yellow/green), the phase-aware Projection
+// chart (green weight line down/up for cut/bulk; flat green + rising blue strength line for maintain/recomp),
+// and the green paywall CTA. No intro or preboard (Login opens; About You carries the privacy line), and no
+// second-chance step for now — it needs real gating + RevenueCat offering logic to be honest, so it's
+// deferred until that exists (V3/Refined designs remain below for reference).
+// (An earlier always-on per-icon coloring pass read as scattered — reverted.)
 import AboutYouV4 from './versions/birthday/AboutYouV4'
 import ActivityV4 from './versions/activity/V4'
 import GoalMotivationV4 from './versions/goalMotivation/V4'
@@ -58,7 +62,6 @@ import ObstaclesV4 from './versions/obstacles/V4'
 import PaceV4 from './versions/pace/V4'
 import PaywallV4 from './versions/paywall/V4'
 import ResultsTimelineV4 from './versions/resultsTimeline/V4'
-import SecondChanceV4 from './versions/secondChance/V4'
 
 /**
  * Dev-only registry — the single list that drives the Dev Hub "Onboarding" section, each step's
@@ -125,5 +128,5 @@ export const PAGES: OnboardingPage[] = [
     { key: 'macros', label: 'Onboarding 10', screen: 'Macros', versions: [{ id: 'v1', label: 'Version 1', Component: MacrosV1 }, { id: 'refined', label: 'Refined', Component: MacrosRefined }, V3(MacrosV3), V4(MacrosV4)] },
     { key: 'summary', label: 'Onboarding 11', screen: 'Goal Projection', versions: [{ id: 'v1', label: 'Version 1', Component: SummaryV1 }, { id: 'projection', label: 'Goal Projection (signature)', Component: GoalProjectionRefined }, V3(GoalProjectionV3), V4(GoalProjectionV4)] },
     { key: 'paywall', label: 'Onboarding 12', screen: 'Paywall', versions: [{ id: 'v1', label: 'Version 1', Component: PaywallV1 }, { id: 'refined', label: 'Refined · 7-day trial', Component: PaywallRefined }, { id: 'refined14', label: 'Refined · 14-day trial', Component: PaywallRefined14 }, V3(PaywallV3), V4(PaywallV4)] },
-    { key: 'secondChance', label: 'Onboarding 13', screen: 'Second-chance offer (new)', versions: [{ id: 'v1', label: 'Version 1', Component: SecondChance }, V3(SecondChanceV3), V4(SecondChanceV4)] },
+    { key: 'secondChance', label: 'Onboarding 13', screen: 'Second-chance offer (new)', versions: [{ id: 'v1', label: 'Version 1', Component: SecondChance }, V3(SecondChanceV3)] },
 ]

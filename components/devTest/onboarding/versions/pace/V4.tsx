@@ -16,7 +16,7 @@ import V4Screen from '../_shared/V4Screen'
  */
 const RANGES = {
     metric: { min: 0.1, max: 1.5, step: 0.1, def: 0.5, unit: 'kg' },
-    imperial: { min: 0.5, max: 3, step: 0.5, def: 1, unit: 'lb' },
+    imperial: { min: 0.1, max: 3, step: 0.1, def: 1, unit: 'lb' },
 } as const
 
 const paceLabel = (v: number, max: number) => {

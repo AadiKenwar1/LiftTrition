@@ -9,8 +9,9 @@ import PressableScale from '../_shared/PressableScale'
 import V4Screen from '../_shared/V4Screen'
 
 /**
- * Dev-only V4 Macros / personalized plan — NEUTRAL (color is reserved for the three hero beats; the green
- * payoff moment is the Projection chart right after this). Editable cells via EditMacroGoalModal. Inert.
+ * Dev-only V4 Macros / personalized plan — each tile's icon + label wears its conventional macro color
+ * (calories orange, protein red, carbs yellow-gold, fats green via the nutrition token); values stay
+ * neutral high-contrast text. Editable cells via EditMacroGoalModal. Inert.
  */
 export default function MacrosV4() {
     const colors = useColors()
@@ -30,22 +31,22 @@ export default function MacrosV4() {
     }
 
     const CARDS = [
-        { kind: 'calories' as const, Icon: Flame, label: 'Calories', value: `${macros.calorieGoal}` },
-        { kind: 'protein' as const, Icon: Beef, label: 'Protein', value: `${macros.proteinGoal}g` },
-        { kind: 'carbs' as const, Icon: Wheat, label: 'Carbs', value: `${macros.carbsGoal}g` },
-        { kind: 'fats' as const, Icon: Droplet, label: 'Fats', value: `${macros.fatsGoal}g` },
+        { kind: 'calories' as const, Icon: Flame, color: '#FF9500', label: 'Calories', value: `${macros.calorieGoal}` },
+        { kind: 'protein' as const, Icon: Beef, color: '#FF5A5A', label: 'Protein', value: `${macros.proteinGoal}g` },
+        { kind: 'carbs' as const, Icon: Wheat, color: '#EAB308', label: 'Carbs', value: `${macros.carbsGoal}g` },
+        { kind: 'fats' as const, Icon: Droplet, color: colors.nutrition, label: 'Fats', value: `${macros.fatsGoal}g` },
     ]
 
     return (
         <View style={{ flex: 1 }}>
             <V4Screen step={7} totalSteps={9} eyebrow="Step 8 of 9" title="Your plan is ready" subtitle="Here are your daily targets — tap any to fine-tune it." accent={accent} onBack={() => router.back()} onNext={() => {}}>
                 <View style={styles.grid}>
-                    {CARDS.map(({ kind, Icon, label, value }, i) => (
+                    {CARDS.map(({ kind, Icon, color, label, value }, i) => (
                         <Animated.View key={kind} entering={FadeInDown.delay(i * 50).duration(280)} style={styles.cell}>
                             <PressableScale style={styles.card} onPress={() => setEditingKind(kind)}>
                                 <Pencil size={15} color={colors.chevron} strokeWidth={2} style={styles.pencil} />
-                                <Icon size={18} color={colors.textMuted} strokeWidth={2.2} />
-                                <Text style={styles.cardLabel}>{label}</Text>
+                                <Icon size={18} color={color} strokeWidth={2.2} />
+                                <Text style={[styles.cardLabel, { color }]}>{label}</Text>
                                 <Text style={styles.cardValue}>{value}</Text>
                             </PressableScale>
                         </Animated.View>
