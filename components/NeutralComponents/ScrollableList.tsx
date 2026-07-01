@@ -1,4 +1,4 @@
-import { fonts, useColors, type Colors } from '@/context/ThemeContext'
+import { fonts, radius, useColorScheme, useColors, type Colors } from '@/context/ThemeContext'
 import { useSettings } from '@/context/SettingsContext'
 import { IMAGE_MAP } from '@/context/WorkoutContext/exerciseLibrary/dataV2/imageMap'
 import { Image } from 'expo-image'
@@ -37,7 +37,8 @@ export default function ScrollableList({
 }: ScrollableListProps) {
     const { mode } = useSettings()
     const colors = useColors()
-    const styles = useMemo(() => makeStyles(colors), [colors])
+    const isDark = useColorScheme() === 'dark'
+    const styles = useMemo(() => makeStyles(colors, isDark), [colors, isDark])
     const [searchQuery, setSearchQuery] = useState('')
     const accent = mode ? colors.workout : colors.nutrition
 
@@ -57,7 +58,7 @@ export default function ScrollableList({
         const imageSource = filename ? IMAGE_MAP[filename] : undefined
 
         return (
-            <ItemWrapper onPress={onPress ? () => onPress(item) : undefined} activeOpacity={0.5}>
+            <ItemWrapper style={styles.itemOuter} onPress={onPress ? () => onPress(item) : undefined} activeOpacity={0.5}>
                 <View style={[styles.itemWrapper, isSelected && styles.itemWrapperSelected]}>
                     <View style={[styles.accentBar, { backgroundColor: accent }]} />
                     <View style={styles.item}>
@@ -101,7 +102,7 @@ export default function ScrollableList({
                 </View>
                 <TextInput style={styles.searchInput} placeholder={searchPlaceholder} placeholderTextColor={colors.placeholder} value={searchQuery} onChangeText={setSearchQuery} autoCapitalize="none" autoCorrect={false} />
                 {searchQuery.length > 0 && (
-                    <TouchableOpacity style={styles.clearButton} onPress={() => setSearchQuery('')} activeOpacity={0.5}>
+                    <TouchableOpacity style={styles.clearButton} onPress={() => setSearchQuery('')} activeOpacity={0.5} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
                         <Text style={styles.clearText}>✕</Text>
                     </TouchableOpacity>
                 )}
@@ -123,7 +124,7 @@ export default function ScrollableList({
     )
 }
 
-function makeStyles(colors: Colors) {
+function makeStyles(colors: Colors, isDark: boolean) {
     return StyleSheet.create({
         container: {
             flex: 1,
@@ -163,19 +164,21 @@ function makeStyles(colors: Colors) {
             paddingHorizontal: 0,
             paddingVertical: 0,
         },
+        itemOuter: isDark ? { marginVertical: 6 } : {
+            marginVertical: 6,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.08,
+            shadowRadius: 6,
+            elevation: 3,
+        },
         itemWrapper: {
             flexDirection: 'row',
-            marginVertical: 6,
-            borderRadius: 16,
+            borderRadius: radius.card,
             overflow: 'hidden',
             backgroundColor: colors.surface,
             borderWidth: StyleSheet.hairlineWidth,
             borderColor: colors.hairline,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 6,
-            elevation: 6,
         },
         itemWrapperSelected: {
             backgroundColor: colors.iconChipBg,

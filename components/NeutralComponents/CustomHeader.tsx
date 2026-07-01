@@ -18,7 +18,7 @@ export default function CustomHeader({ title, showBack }: CustomHeaderProps) {
         <View style={styles.container}>
             <View style={styles.headerContent}>
                 {showBack && (
-                    <TouchableOpacity style={styles.backButton} onPress={() => router.back()} activeOpacity={0.5}>
+                    <TouchableOpacity style={styles.backButton} onPress={() => router.back()} activeOpacity={0.5} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
                         <ArrowLeft size={24} color={colors.text} strokeWidth={2.5} />
                     </TouchableOpacity>
                 )}

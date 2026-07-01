@@ -56,7 +56,7 @@ function makeStyles(colors: Colors) {
         container: {
             flex: 1,
             backgroundColor: colors.background,
-            paddingHorizontal: 25,
+            paddingHorizontal: 24,
         },
         handleContainer: {
             alignItems: 'center',

@@ -1,4 +1,4 @@
-import { fonts, useColors, type Colors } from '@/context/ThemeContext'
+import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { Picker } from '@react-native-picker/picker'
 import { Calendar } from 'lucide-react-native'
 import { useEffect, useMemo, useState } from 'react'
@@ -129,7 +129,7 @@ function makeStyles(colors: Colors) {
             gap: 12,
             paddingVertical: 12,
             paddingHorizontal: 20,
-            borderRadius: 16,
+            borderRadius: radius.cardLg,
             borderWidth: StyleSheet.hairlineWidth,
             borderColor: colors.border,
         },
@@ -160,7 +160,7 @@ function makeStyles(colors: Colors) {
         },
         pickerWrapper: {
             backgroundColor: colors.surface,
-            borderRadius: 14,
+            borderRadius: radius.card,
             borderWidth: StyleSheet.hairlineWidth,
             borderColor: colors.hairline,
             overflow: 'hidden',

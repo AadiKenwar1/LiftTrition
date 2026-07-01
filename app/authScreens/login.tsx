@@ -2,7 +2,7 @@ import TermsAndPrivacyModal from '@/components/NeutralComponents/TermsAndPrivacy
 import { useAuth } from '@/context/AuthContext'
 import { useSettings } from '@/context/SettingsContext'
 import { Settings } from '@/context/SettingsContext/types'
-import { fonts, useColors, type Colors } from '@/context/ThemeContext'
+import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { AntDesign } from '@expo/vector-icons'
 import { Image } from 'expo-image'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -131,7 +131,7 @@ function makeStyles(colors: Colors) {
             width: '100%',
             height: 56,
             backgroundColor: 'white',
-            borderRadius: 16,
+            borderRadius: radius.cardLg,
             gap: 7,
             shadowColor: '#000',
             shadowOffset: { width: 0, height: 4 },
