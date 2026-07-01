@@ -18,8 +18,8 @@ export default function CameraScreen() {
     const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null)
     const [flashEnabled, setFlashEnabled] = useState(false)
     const [pickingFromLibrary, setPickingFromLibrary] = useState(false)
-    const [scanKind, setScanKind] = useState<'meal' | 'item' | 'label'>('meal')
-    const scanMode: ScanMode = scanKind === 'label' ? 'label' : 'meal'
+    const [scanKind, setScanKind] = useState<ScanMode>('meal')
+    const scanMode: ScanMode = scanKind
 
     if (!permission) {
         return (

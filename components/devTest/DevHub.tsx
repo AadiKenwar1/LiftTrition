@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router'
 import { ChevronRight } from 'lucide-react-native'
 import { useMemo } from 'react'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { PAGES as ONBOARDING_PAGES } from './onboarding/registry'
 
 /**
  * Dev-only hub: a menu of buttons that open isolated test pages for charts / popups / components.
@@ -20,6 +21,18 @@ const GROUPS: { title: string; items: { label: string; route: string }[] }[] = [
     {
         title: 'Nutrition AI',
         items: [{ label: 'AI (NLP + Vision)', route: '/devTest/aiTest' }],
+    },
+    {
+        title: 'Components',
+        items: [{ label: 'Activity Banner', route: '/devTest/activityBanner' }],
+    },
+    {
+        title: 'Onboarding',
+        items: [
+            { label: '▶  Walk the V4 flow', route: '/devTest/onboardingFlow?version=v4' },
+            { label: '▶  Walk the V3 flow', route: '/devTest/onboardingFlow?version=v3' },
+            ...ONBOARDING_PAGES.map((p, i) => ({ label: p.label, route: `/devTest/onboardingPage?page=${i}` })),
+        ],
     },
 ]
 

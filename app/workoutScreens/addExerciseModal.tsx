@@ -200,7 +200,7 @@ export default function AddExerciseModal() {
                         <View style={styles.imageGlowRing}>
                             <View style={styles.imageCircle}>
                                 {imageSource
-                                    ? <Image source={imageSource} style={styles.exerciseImage} contentFit="contain" transition={150} />
+                                    ? <Image source={imageSource} style={styles.exerciseImage} contentFit="contain" transition={50} />
                                     : <Dumbbell size={22} color={colors.text} strokeWidth={1.8} />
                                 }
                             </View>

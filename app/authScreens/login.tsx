@@ -2,11 +2,12 @@ import TermsAndPrivacyModal from '@/components/NeutralComponents/TermsAndPrivacy
 import { useAuth } from '@/context/AuthContext'
 import { useSettings } from '@/context/SettingsContext'
 import { Settings } from '@/context/SettingsContext/types'
+import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { AntDesign } from '@expo/vector-icons'
 import { Image } from 'expo-image'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -16,6 +17,8 @@ export default function LoginScreen() {
     const { settings, setSettings } = useSettings()
     const router = useRouter()
     const insets = useSafeAreaInsets()
+    const colors = useColors()
+    const styles = useMemo(() => makeStyles(colors), [colors])
 
     function handleResetOnboarding() {
         const updatedSettings: Settings = {
@@ -65,165 +68,102 @@ export default function LoginScreen() {
     )
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#121212',
-    },
-    scroll: {
-        flex: 1,
-    },
-    scrollContent: {
-        flexGrow: 1,
-        width: '100%',
-        paddingHorizontal: 25,
-        paddingTop: 60,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    topGradient: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        height: 220,
-    },
-    brandingContainer: {
-        width: '100%',
-        alignItems: 'center',
-    },
-    logoContainer: {
-        width: 200,
-        height: 200,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 10,
-    },
-    appName: {
-        width: '100%',
-        fontSize: 60,
-        fontWeight: '800',
-        color: '#fff',
-        letterSpacing: -0,
-        marginBottom: 0,
-        textAlign: 'center',
-        fontFamily: 'Poppins_800ExtraBold',
-    },
-    tagline: {
-        fontSize: 20,
-        fontWeight: '500',
-        color: '#888',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_500Medium',
-        marginBottom: 24,
-        textAlign: 'center',
-    },
-    subtagline: {
-        fontSize: 16,
-        color: '#888',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_400Regular',
-        marginBottom: 12,
-        textAlign: 'center',
-    },
-    buttonContainer: {
-        width: '100%',
-        gap: 12,
-    },
-    appleButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: '100%',
-        height: 56,
-        backgroundColor: 'white',
-        borderRadius: 16,
-        gap: 7,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 6,
-        borderWidth: 1,
-        borderColor: '#242424',
-    },
-    appleButtonDisabled: {
-        opacity: 0.6,
-    },
-    sentryTestButton: {
-        width: '100%',
-        height: 44,
-        backgroundColor: 'transparent',
-        borderRadius: 12,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: '#333',
-        marginTop: 8,
-    },
-    sentryTestText: {
-        fontSize: 14,
-        fontWeight: '600',
-        color: '#666',
-        letterSpacing: -0.3,
-    },
-    appleButtonText: {
-        fontSize: 20,
-        fontWeight: '600',
-        color: '#000',
-        letterSpacing: -0.3,
-    },
-    googleButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: '100%',
-        height: 56,
-        backgroundColor: '#fff',
-        borderRadius: 16,
-        gap: 12,
-        shadowColor: '#fff',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.2,
-        shadowRadius: 8,
-        elevation: 6,
-    },
-    googleButtonText: {
-        fontSize: 17,
-        fontWeight: '600',
-        color: '#1e1e1e',
-        letterSpacing: -0.3,
-    },
-    resetButton: {
-        width: '100%',
-        height: 48,
-        backgroundColor: 'transparent',
-        borderRadius: 12,
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: '#333',
-        marginTop: 8,
-    },
-    resetText: {
-        fontSize: 15,
-        fontWeight: '600',
-        color: '#666',
-        letterSpacing: -0.3,
-    },
-    termsText: {
-        width: '100%',
-        marginTop: 28,
-        fontSize: 12,
-        fontWeight: '400',
-        color: '#666',
-        textAlign: 'center',
-        lineHeight: 18,
-        paddingHorizontal: 8,
-    },
-    termsLink: {
-        color: '#2f80ed',
-        fontFamily: 'Poppins_600SemiBold',
-        textDecorationLine: 'underline',
-    },
-})
+function makeStyles(colors: Colors) {
+    return StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: colors.background,
+        },
+        scroll: {
+            flex: 1,
+        },
+        scrollContent: {
+            flexGrow: 1,
+            width: '100%',
+            paddingHorizontal: 25,
+            paddingTop: 60,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        topGradient: {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 220,
+        },
+        brandingContainer: {
+            width: '100%',
+            alignItems: 'center',
+        },
+        logoContainer: {
+            width: 200,
+            height: 200,
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginBottom: 10,
+        },
+        appName: {
+            width: '100%',
+            fontSize: 60,
+            color: colors.text,
+            letterSpacing: -0,
+            marginBottom: 0,
+            textAlign: 'center',
+            fontFamily: fonts.extrabold,
+        },
+        tagline: {
+            fontSize: 20,
+            color: colors.textMuted,
+            letterSpacing: -0.5,
+            fontFamily: fonts.medium,
+            marginBottom: 24,
+            textAlign: 'center',
+        },
+        buttonContainer: {
+            width: '100%',
+            gap: 12,
+        },
+        appleButton: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '100%',
+            height: 56,
+            backgroundColor: 'white',
+            borderRadius: radius.cardLg,
+            gap: 7,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 6,
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: colors.hairline,
+        },
+        appleButtonDisabled: {
+            opacity: 0.6,
+        },
+        appleButtonText: {
+            fontSize: 20,
+            color: '#000',
+            letterSpacing: -0.3,
+            fontFamily: fonts.semibold,
+        },
+        termsText: {
+            width: '100%',
+            marginTop: 28,
+            fontSize: 12,
+            color: colors.textMuted,
+            textAlign: 'center',
+            lineHeight: 18,
+            paddingHorizontal: 8,
+            fontFamily: fonts.regular,
+        },
+        termsLink: {
+            color: colors.workoutInk,
+            fontFamily: fonts.semibold,
+            textDecorationLine: 'underline',
+        },
+    })
+}

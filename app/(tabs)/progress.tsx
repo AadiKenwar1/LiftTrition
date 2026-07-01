@@ -10,7 +10,7 @@ import { fonts, radius, useColorScheme, useColors, type Colors } from '@/context
 import { useWorkout } from '@/context/WorkoutContext'
 
 import { addDays, formatDate, getWeekStart } from '@/lib/utils/dateHelper'
-import { ChevronDown, ChevronLeft, ChevronRight, Dumbbell, Scale } from 'lucide-react-native'
+import { ChevronDown, ChevronLeft, ChevronRight, Dumbbell, Scale, Utensils } from 'lucide-react-native'
 import { useEffect, useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
@@ -67,6 +67,7 @@ export default function ProgressScreen() {
     const weekStart = useMemo(() => addDays(getWeekStart(new Date()), bottomWeekOffset * 7), [bottomWeekOffset])
 
     const bottomData = useMemo(() => (mode ? handleGetSetsForWeek(weekStart) : handleGetMacroForWeek(selectedMacro, weekStart)), [mode, selectedMacro, weekStart, logs, nutritionData, handleGetSetsForWeek, handleGetMacroForWeek])
+    const bottomHasData = bottomData.some((d) => d.value > 0)
 
     // Week navigation bounds + label
     const minWeekStart = useMemo(() => (settings.onboardingCompletedAt ? getWeekStart(new Date(settings.onboardingCompletedAt)) : addDays(getWeekStart(new Date()), -52 * 7)), [settings.onboardingCompletedAt])
@@ -100,6 +101,16 @@ export default function ProgressScreen() {
     const topSubtitle = mode ? 'Estimated 1 rep max' : 'Daily'
     const bottomTitle = mode ? 'Sets' : selectedMacro.charAt(0).toUpperCase() + selectedMacro.slice(1)
     const bottomSubtitle = mode ? 'Total per day' : 'Daily intake'
+
+    const renderEmptyState = (Icon: React.ComponentType<any>, title: string, subtitle: string) => (
+        <View style={styles.emptyGraphState}>
+            <View style={[styles.emptyIconCircle, { backgroundColor: accent + '1A' }]}>
+                <Icon size={48} color={accent} strokeWidth={2} />
+            </View>
+            <Text style={styles.emptyGraphText}>{title}</Text>
+            <Text style={styles.emptyGraphSubtext}>{subtitle}</Text>
+        </View>
+    )
 
     return (
         <>
@@ -146,16 +157,7 @@ export default function ProgressScreen() {
                     <View style={styles.chartContainer}>
                         {topRawData.length > 0 ?
                             <Graph1 key={`top-${mode ? 'lift' : 'nutrition'}-${topRange}-${mode ? selectedExercise : 'bw'}-${topSig}`} mode={mode} data={topRawData} selectedRange={topRange} goal={topGoal} formatValue={topFormat} />
-                        :   <View style={styles.emptyGraphState}>
-                                <View style={[styles.emptyIconCircle, { backgroundColor: accent + '1A' }]}>
-                                    {mode === true ?
-                                        <Dumbbell size={48} color={colors.workout} strokeWidth={2} />
-                                    :   <Scale size={48} color={colors.nutrition} strokeWidth={2} />}
-                                </View>
-                                <Text style={styles.emptyGraphText}>{mode === true ? 'No data yet for this exercise' : 'No weight data yet'}</Text>
-                                <Text style={styles.emptyGraphSubtext}>{mode === true ? 'Start logging workouts to see your progress' : 'Update your body weight to see progress'}</Text>
-                            </View>
-                        }
+                        :   renderEmptyState(mode ? Dumbbell : Scale, mode ? 'No data yet for this exercise' : 'No weight data yet', mode ? 'Start logging workouts to see your progress' : 'Update your body weight to see progress')}
                     </View>
                     <GraphStats graphType={mode ? 'orm' : 'bodyweight'} data={topRawData} statsData={topRawData} unitSystem={settings.unitSystem} mode={mode} goalWeight={settings.goalWeight} />
                 </View>
@@ -191,9 +193,11 @@ export default function ProgressScreen() {
                         </TouchableOpacity>
                     </View>
                     <View style={styles.chartContainer}>
-                        <BarChart key={`bottom-${mode ? 'lift' : 'nutrition'}-${mode ? 'sets' : selectedMacro}`} mode={mode} data={bottomData} goal={bottomGoal} formatValue={bottomFormat} showXLabels highlightIndex={bottomWeekOffset === 0 ? new Date().getDay() : -1} />
+                        {bottomHasData ?
+                            <BarChart key={`bottom-${mode ? 'lift' : 'nutrition'}-${mode ? 'sets' : selectedMacro}`} mode={mode} data={bottomData} goal={bottomGoal} formatValue={bottomFormat} showXLabels highlightIndex={bottomWeekOffset === 0 ? new Date().getDay() : -1} />
+                        :   renderEmptyState(mode ? Dumbbell : Utensils, mode ? 'No training this week' : 'Nothing logged this week', mode ? 'Log a workout to see your sets' : `Log meals to see your ${bottomTitle.toLowerCase()}`)}
                     </View>
-                    <GraphStats graphType={mode ? 'sets' : selectedMacro} data={bottomData} unitSystem={settings.unitSystem} mode={mode} goal={mode ? undefined : nutritionGoal} />
+                    {bottomHasData && <GraphStats graphType={mode ? 'sets' : selectedMacro} data={bottomData} unitSystem={settings.unitSystem} mode={mode} goal={mode ? undefined : nutritionGoal} />}
                 </View>
             </ScrollView>
 

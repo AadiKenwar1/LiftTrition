@@ -1,7 +1,7 @@
-import { useSettings } from '@/context/SettingsContext'
+import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { Picker } from '@react-native-picker/picker'
 import { Calendar } from 'lucide-react-native'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 
 interface DatePickerProps {
@@ -11,12 +11,11 @@ interface DatePickerProps {
 }
 
 export default function DatePicker({ selectedDate, onDateChange, color }: DatePickerProps) {
-    const { mode } = useSettings()
+    const colors = useColors()
+    const styles = useMemo(() => makeStyles(colors), [colors])
     const [selectedMonth, setSelectedMonth] = useState(selectedDate.getMonth())
     const [selectedDay, setSelectedDay] = useState(selectedDate.getDate())
     const [selectedYear, setSelectedYear] = useState(selectedDate.getFullYear())
-
-    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 
     const monthAbbreviations = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
@@ -70,7 +69,7 @@ export default function DatePicker({ selectedDate, onDateChange, color }: DatePi
     return (
         <View style={styles.container}>
             {/* Header with Date Display */}
-            <View style={[styles.header, { backgroundColor: color || '#121212' }]}>
+            <View style={[styles.header, { backgroundColor: color || colors.background }]}>
                 <Calendar size={28} color="white" strokeWidth={2.5} />
                 <Text style={styles.dateDisplay}>{formatSelectedDate()}</Text>
             </View>
@@ -117,63 +116,66 @@ export default function DatePicker({ selectedDate, onDateChange, color }: DatePi
     )
 }
 
-const styles = StyleSheet.create({
-    container: {
-        paddingTop: 8,
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: 16,
-        gap: 12,
-        paddingVertical: 12,
-        paddingHorizontal: 20,
-        borderRadius: 16,
-        borderWidth: 1,
-        borderColor: '#2a2a2a',
-    },
-    dateDisplay: {
-        fontSize: 20,
-        color: '#fff',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    pickerContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        gap: 12,
-    },
-    monthColumn: {
-        flex: 1.0,
-    },
-    pickerColumn: {
-        flex: 1.0,
-    },
-    pickerLabel: {
-        fontSize: 16,
-        color: '#666',
-        letterSpacing: -0.5,
-        marginBottom: 12,
-        textAlign: 'center',
-        fontFamily: 'Poppins_600SemiBold',
-    },
-    pickerWrapper: {
-        backgroundColor: '#1e1e1e',
-        borderRadius: 14,
-        borderWidth: 0.5,
-        overflow: 'hidden',
-        height: 200,
-    },
-    picker: {
-        width: '100%',
-        height: 200,
-        backgroundColor: 'transparent',
-    },
-    pickerItem: {
-        fontSize: 14,
-        color: '#FFF',
-        letterSpacing: -0.5,
-        fontFamily: 'Poppins_600SemiBold',
-    },
-})
+function makeStyles(colors: Colors) {
+    return StyleSheet.create({
+        container: {
+            paddingTop: 8,
+        },
+        header: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: 16,
+            gap: 12,
+            paddingVertical: 12,
+            paddingHorizontal: 20,
+            borderRadius: radius.cardLg,
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: colors.border,
+        },
+        dateDisplay: {
+            fontSize: 20,
+            color: '#FFFFFF',
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+        pickerContainer: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            gap: 12,
+        },
+        monthColumn: {
+            flex: 1.0,
+        },
+        pickerColumn: {
+            flex: 1.0,
+        },
+        pickerLabel: {
+            fontSize: 16,
+            color: colors.labelMuted,
+            letterSpacing: -0.5,
+            marginBottom: 12,
+            textAlign: 'center',
+            fontFamily: fonts.semibold,
+        },
+        pickerWrapper: {
+            backgroundColor: colors.surface,
+            borderRadius: radius.card,
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: colors.hairline,
+            overflow: 'hidden',
+            height: 200,
+        },
+        picker: {
+            width: '100%',
+            height: 200,
+            backgroundColor: 'transparent',
+        },
+        pickerItem: {
+            fontSize: 14,
+            color: colors.text,
+            letterSpacing: -0.5,
+            fontFamily: fonts.semibold,
+        },
+    })
+}

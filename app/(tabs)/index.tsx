@@ -88,7 +88,7 @@ function makeStyles(colors: Colors) {
         workoutFabButtons: {
             height: 60,
             width: 60,
-            backgroundColor: colors.workout,
+            backgroundColor: colors.workoutGradient[0],
             borderRadius: 40,
             borderColor: 'black',
             alignItems: 'center',
@@ -120,7 +120,7 @@ function makeStyles(colors: Colors) {
         nutritionFabButtons: {
             height: 60,
             width: 60,
-            backgroundColor: colors.nutrition,
+            backgroundColor: colors.nutritionGradient[0],
             borderRadius: 40,
             borderColor: 'black',
             alignItems: 'center',

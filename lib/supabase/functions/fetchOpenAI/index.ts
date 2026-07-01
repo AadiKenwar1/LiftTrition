@@ -60,13 +60,104 @@ Rules:
 Respond ONLY with JSON:
 {"name":string,"ingredients":[{"name":string,"brand":string|null,"quantity":number,"protein":number,"carbs":number,"fats":number,"calories":number}]}`
 
-const LOOKUP_PROMPT = (name: string) =>
-    `Find the official nutrition facts for this branded food product: ${name}
+const ITEM_PROMPT = `You are identifying a packaged/branded food product in the image for a food-logging app (not medical advice).
 
-Search the web for the manufacturer's published nutrition information and use the values for ONE standard serving as listed on the product. Protein, carbs, and fats in grams; calories in kcal. If you cannot find reliable data, return 0 for every field.
+Read the product identity EXACTLY as printed on the packaging. Transcribe the brand, the product line, and the specific variety/flavor/size as written — do NOT paraphrase, guess, or substitute a similar product.
 
-Respond ONLY with JSON in this exact format:
-{"calories":number,"protein":number,"carbs":number,"fats":number}`
+For each distinct product visible:
+- name = a short generic food name (for example "bread", "crackers", "energy drink")
+- brand = the full product identity as printed, in the form "<Brand> <Product line> <Variety>". If the brand/variety is not clearly legible, set brand to null (do NOT guess a brand).
+- quantity = number of distinct packages/units visible (else 1)
+- protein, carbs, fats (grams) and calories (kcal) = a best-effort estimate for ONE serving of the product (these may be replaced with database values later)
+
+If no packaged/branded product is clearly visible, respond with "ingredients": [] and a short "name" like "No product visible".
+
+Respond ONLY with JSON:
+{"name":string,"ingredients":[{"name":string,"brand":string|null,"quantity":number,"protein":number,"carbs":number,"fats":number,"calories":number}]}`
+
+// Each call helper returns either the model's raw JSON text, or a normalized error to relay verbatim.
+type CallResult = { content: string } | { error: { status: number; body: Record<string, unknown> } }
+
+function toResponse(result: CallResult): Response {
+    if ('content' in result) return new Response(result.content, { headers: { 'Content-Type': 'application/json' } })
+    return new Response(JSON.stringify(result.error.body), { status: result.error.status })
+}
+
+const OPENAI_VISION_MODEL = () => Deno.env.get('OPENAI_VISION_MODEL') ?? 'gpt-5.4-mini'
+
+// --- OpenAI (Chat Completions) ---
+async function callOpenAI(messages: unknown, model: string, label: string): Promise<CallResult> {
+    const apiKey = Deno.env.get('OPENAI_API_KEY')
+    if (!apiKey) return { error: { status: 500, body: { error: 'OpenAI not configured' } } }
+
+    const res = await fetch(CHAT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+        body: JSON.stringify({ model, response_format: { type: 'json_object' }, messages }),
+    })
+    if (!res.ok) return { error: { status: 502, body: { error: `OpenAI: ${res.status}` } } }
+
+    const data = await res.json()
+    console.log('[ai] openai', label, JSON.stringify(data?.usage))
+    const message = data?.choices?.[0]?.message
+    if (message?.refusal) return { error: { status: 422, body: { error: 'refused', message: message.refusal } } }
+    const content = message?.content as string | null | undefined
+    if (!content) {
+        console.error('[fetchOpenAI] openai missing content', JSON.stringify(data))
+        return { error: { status: 502, body: { error: 'Invalid response' } } }
+    }
+    return { content }
+}
+
+function callOpenAIVision(prompt: string, base64DataUrl: string, mode: string): Promise<CallResult> {
+    return callOpenAI(
+        [
+            {
+                role: 'user',
+                content: [
+                    { type: 'text', text: prompt },
+                    // Meal = recognition (cheap auto detail); item/label = text reading (high detail).
+                    { type: 'image_url', image_url: { url: base64DataUrl, detail: mode === 'meal' ? 'auto' : 'high' } },
+                ],
+            },
+        ],
+        OPENAI_VISION_MODEL(),
+        `vision:${mode}`,
+    )
+}
+
+// --- Gemini (generateContent) ---
+async function callGeminiVision(prompt: string, base64DataUrl: string, mode: string): Promise<CallResult> {
+    const apiKey = Deno.env.get('GEMINI_API_KEY')
+    if (!apiKey) return { error: { status: 500, body: { error: 'Gemini not configured' } } }
+    const model = Deno.env.get('GEMINI_MODEL') ?? 'gemini-2.5-flash'
+    // Gemini wants RAW base64 (no "data:image/jpeg;base64," prefix) + an explicit mime type.
+    const rawBase64 = base64DataUrl.replace(/^data:image\/\w+;base64,/, '')
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`
+
+    const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: 'image/jpeg', data: rawBase64 } }] }],
+            generationConfig: { responseMimeType: 'application/json' },
+        }),
+    })
+    if (!res.ok) return { error: { status: 502, body: { error: `Gemini: ${res.status}` } } }
+
+    const data = await res.json()
+    console.log('[ai] gemini', `vision:${mode}`, JSON.stringify(data?.usageMetadata))
+    if (data?.promptFeedback?.blockReason) {
+        return { error: { status: 422, body: { error: 'refused', message: data.promptFeedback.blockReason } } }
+    }
+    const candidate = data?.candidates?.[0]
+    const content = candidate?.content?.parts?.[0]?.text as string | null | undefined
+    if (!content || (candidate?.finishReason && candidate.finishReason !== 'STOP')) {
+        console.error('[fetchOpenAI] gemini missing/blocked content', JSON.stringify(data))
+        return { error: { status: 502, body: { error: 'Invalid response' } } }
+    }
+    return { content }
+}
 
 serve(async (req: Request) => {
     const auth = req.headers.get('Authorization')
@@ -78,78 +169,38 @@ serve(async (req: Request) => {
     } = await supabase.auth.getUser(auth.replace('Bearer ', ''))
     if (!user) return new Response(null, { status: 401 })
 
-    let body: { type: string; foodName?: string; productName?: string; base64Image?: string; mode?: 'meal' | 'label' }
+    let body: { type: string; foodName?: string; base64Image?: string; mode?: 'meal' | 'item' | 'label'; provider?: 'openai' | 'gemini' }
     try {
         body = await req.json()
     } catch {
         return new Response(null, { status: 400 })
     }
 
-    const apiKey = Deno.env.get('OPENAI_API_KEY')
-    if (!apiKey) return new Response('Server config error', { status: 500 })
-
-    const isVision = body.type === 'vision' && body.base64Image
-    const isLabel = isVision && body.mode === 'label'
-
-    const payload =
-        isVision ?
-            {
-                model: 'gpt-4o',
-                temperature: 0.2,
-                response_format: { type: 'json_object' },
-                messages: [
-                    {
-                        role: 'user',
-                        content: [
-                            { type: 'text', text: isLabel ? LABEL_PROMPT : VISION_PROMPT },
-                            { type: 'image_url', image_url: { url: body.base64Image, detail: isLabel ? 'high' : 'auto' } },
-                        ],
-                    },
-                ],
-            }
-        : body.type === 'text' && body.foodName ?
-            {
-                model: 'gpt-4o',
-                temperature: 0.1,
-                response_format: { type: 'json_object' },
-                messages: [
-                    { role: 'system', content: TEXT_SYSTEM },
-                    { role: 'user', content: TEXT_USER(body.foodName) },
-                ],
-            }
-        : body.type === 'lookup' && body.productName ?
-            {
-                // Search-enabled model: browses the web. Does NOT support temperature/response_format.
-                model: 'gpt-4o-search-preview',
-                web_search_options: {},
-                messages: [{ role: 'user', content: LOOKUP_PROMPT(body.productName) }],
-            }
-        :   null
-
-    if (!payload) return new Response(null, { status: 400 })
-
-    const res = await fetch(CHAT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-        body: JSON.stringify(payload),
-    })
-
-    if (!res.ok) {
-        return new Response(JSON.stringify({ error: `OpenAI: ${res.status}` }), { status: 502 })
+    // Vision: pick provider (per-request override → VISION_PROVIDER env → openai default).
+    if (body.type === 'vision' && body.base64Image) {
+        const mode = body.mode === 'label' ? 'label' : body.mode === 'item' ? 'item' : 'meal'
+        const prompt = mode === 'label' ? LABEL_PROMPT : mode === 'item' ? ITEM_PROMPT : VISION_PROMPT
+        const provider =
+            body.provider === 'gemini' || body.provider === 'openai' ? body.provider : (Deno.env.get('VISION_PROVIDER') ?? 'openai')
+        const result =
+            provider === 'gemini'
+                ? await callGeminiVision(prompt, body.base64Image, mode)
+                : await callOpenAIVision(prompt, body.base64Image, mode)
+        return toResponse(result)
     }
 
-    const data = await res.json()
-    const message = data?.choices?.[0]?.message
-    const refusal = message?.refusal as string | undefined
-    const content = message?.content as string | null | undefined
-
-    if (refusal) {
-        return new Response(JSON.stringify({ error: 'refused', message: refusal }), { status: 422 })
+    // Text (NLP): OpenAI only for now.
+    if (body.type === 'text' && body.foodName) {
+        const result = await callOpenAI(
+            [
+                { role: 'system', content: TEXT_SYSTEM },
+                { role: 'user', content: TEXT_USER(body.foodName) },
+            ],
+            OPENAI_VISION_MODEL(),
+            'text',
+        )
+        return toResponse(result)
     }
-    if (!content) {
-        console.error('[fetchOpenAI] Missing message.content', JSON.stringify(data))
-        return new Response(JSON.stringify({ error: 'Invalid response' }), { status: 502 })
-    }
 
-    return new Response(content, { headers: { 'Content-Type': 'application/json' } })
+    return new Response(null, { status: 400 })
 })

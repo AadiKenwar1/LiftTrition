@@ -32,6 +32,9 @@ export default function Graph1({ mode, data, selectedRange, goal, formatValue, s
     const { state, isActive } = useChartPressState({ x: '', y: { value: 0 } })
 
     const chartColor = mode === true ? colors.workout : colors.nutrition
+    // Remount the inner chart when data OR colors change so the persisted Skia canvas repaints
+    // (victory-native won't refresh on a prop change alone — a theme switch changes colors, not data).
+    const chartKey = `${chartColor}|${colors.textSecondary}|${colors.ringTrack}|` + data.map((d) => `${d.day}:${d.value}`).join('|')
     const flagTextColor = '#ffffff'
     const fmt = formatValue ?? ((n: number) => Math.round(n).toLocaleString())
     const [minDelayDone, setMinDelayDone] = useState(false)
@@ -93,6 +96,7 @@ export default function Graph1({ mode, data, selectedRange, goal, formatValue, s
     return (
         <View style={styles.wrapper} onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}>
             <CartesianChart
+                key={chartKey}
                 data={data}
                 xKey="day"
                 yKeys={['value']}

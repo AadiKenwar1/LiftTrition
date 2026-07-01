@@ -50,7 +50,7 @@ export default function ArchiveModal() {
                         <View style={styles.imageGlowRing}>
                             <View style={styles.imageCircle}>
                                 {imgSource
-                                    ? <Image source={imgSource} style={styles.exerciseImage} contentFit="contain" cachePolicy="memory" transition={300} />
+                                    ? <Image source={imgSource} style={styles.exerciseImage} contentFit="contain" cachePolicy="memory" transition={50} />
                                     : <Dumbbell size={25} color={colors.text} strokeWidth={1.8} />}
                             </View>
                         </View>

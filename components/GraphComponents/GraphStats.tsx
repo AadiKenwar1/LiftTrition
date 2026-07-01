@@ -4,7 +4,7 @@ import { useMemo } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 
 type GraphType = 'orm' | 'sets' | 'calories' | 'protein' | 'carbs' | 'fats' | 'bodyweight'
-type Tone = 'good' | 'bad' | 'warn' | 'neutral'
+type Tone = 'good' | 'neutral'
 
 interface GraphStatsProps {
     graphType: GraphType
@@ -137,9 +137,7 @@ export default function GraphStats({ graphType, data, statsData, unitSystem, goa
 
     const toneColor = (tone: Tone): string => {
         if (tone === 'good') return colors.nutrition
-        if (tone === 'bad') return colors.destructive
-        if (tone === 'warn') return colors.warning
-        return colors.textSecondary
+        return colors.text
     }
 
     return (

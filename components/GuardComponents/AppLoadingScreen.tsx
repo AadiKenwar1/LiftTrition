@@ -1,5 +1,6 @@
+import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { Image } from 'expo-image'
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { Animated, Easing, StyleSheet, Text, View } from 'react-native'
 
 type Props = {
@@ -7,6 +8,8 @@ type Props = {
 }
 
 export function AppLoadingScreen({ message = 'Loading your profile...' }: Props) {
+    const colors = useColors()
+    const styles = useMemo(() => makeStyles(colors), [colors])
     const rotation = useRef(new Animated.Value(0)).current
 
     useEffect(() => {
@@ -37,33 +40,35 @@ export function AppLoadingScreen({ message = 'Loading your profile...' }: Props)
     )
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#121212',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    logoCircle: {
-        width: 100,
-        height: 100,
-        borderRadius: 50,
-        backgroundColor: '#1e1e1e',
-        borderWidth: 2,
-        borderColor: '#3a3a3a',
-        justifyContent: 'center',
-        alignItems: 'center',
-        overflow: 'hidden',
-        marginBottom: 24,
-    },
-    logo: {
-        width: '75%',
-        height: '75%',
-    },
-    message: {
-        color: '#888',
-        fontSize: 15,
-        fontFamily: 'Poppins_400Regular',
-        letterSpacing: 0.1,
-    },
-})
+function makeStyles(colors: Colors) {
+    return StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: colors.background,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        logoCircle: {
+            width: 100,
+            height: 100,
+            borderRadius: 50,
+            backgroundColor: colors.surface,
+            borderWidth: 2,
+            borderColor: colors.border,
+            justifyContent: 'center',
+            alignItems: 'center',
+            overflow: 'hidden',
+            marginBottom: 24,
+        },
+        logo: {
+            width: '75%',
+            height: '75%',
+        },
+        message: {
+            color: colors.textMuted,
+            fontSize: 15,
+            fontFamily: fonts.regular,
+            letterSpacing: 0.1,
+        },
+    })
+}
