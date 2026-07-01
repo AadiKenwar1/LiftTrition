@@ -11,6 +11,15 @@ export interface OnboardingFlow {
     goBack: () => void
     index: number
     total: number
+    /**
+     * 1-based position of the current screen among the NUMBERED steps (screens with a progress bar), or null
+     * when the current screen isn't numbered (login, intro, preboard, paywall, …). Skip-aware, so it stays
+     * contiguous. The runner computes it; V4Screen reads it to drive both the "Step N of M" eyebrow and the
+     * progress dots. V3Screen ignores it (keeps its hardcoded numbering as the preserved baseline).
+     */
+    stepNumber?: number | null
+    /** Total NUMBERED steps in the current (skip-adjusted) flow. */
+    stepTotal?: number
     /** Lightweight shared state so a screen's choice can affect the flow (e.g. skip pace when maintaining). */
     data: Record<string, string>
     setData: (key: string, value: string) => void

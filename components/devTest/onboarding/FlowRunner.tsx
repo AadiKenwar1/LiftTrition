@@ -8,11 +8,17 @@ import { PAGES } from './registry'
 /**
  * Dev-only walkthrough that plays a whole version's flow end-to-end. Reached via
  * `/devTest/onboardingFlow?version=<id>` (defaults to v3). Builds the ordered step list from the registry
- * (one screen per flow step), skipping the unmerged-alt rows since About You already covers them, then
- * renders one screen at a time. A small shared `data` bag lets a screen's choice steer the flow — e.g.
- * choosing "Maintain" on the eating-phase step skips the pace ("how fast") step, which is meaningless then.
+ * (one screen per flow step) and renders one at a time. A small shared `data` bag lets a screen's choice
+ * steer the flow — e.g. choosing "Maintain" on the eating-phase step skips the pace ("how fast") step.
+ *
+ * Exclusions are version-aware: every version drops the redundant unmerged gender/heightWeight rows (About
+ * You already merges them); v3 additionally drops intro/preboard. v4 keeps preboard but has no intro version
+ * at all (Login already brands the opener, so the LIFTRI/"Get started" screen was redundant) — pages with no
+ * matching version fall out of the step list naturally. The runner also computes a contiguous, skip-aware
+ * "Step N of M" over the NUMBERED screens and hands it to the context so V4Screen can render honest progress.
  */
-const EXCLUDE = new Set(['gender', 'heightWeight', 'intro', 'preboard'])
+const BASE_EXCLUDE = ['gender', 'heightWeight']
+const NUMBERED = new Set(['goalMotivation', 'obstacles', 'birthday', 'activity', 'goal', 'pace', 'resultsTimeline', 'macros', 'summary'])
 
 export default function FlowRunner() {
     const colors = useColors()
@@ -20,16 +26,15 @@ export default function FlowRunner() {
     const { version } = useLocalSearchParams<{ version?: string }>()
     const versionId = version ?? 'v3'
 
-    const steps = useMemo(
-        () =>
-            PAGES.filter((p) => !EXCLUDE.has(p.key))
-                .map((p) => {
-                    const v = p.versions.find((x) => x.id === versionId)
-                    return v ? { key: p.key, Component: v.Component } : null
-                })
-                .filter((s): s is { key: string; Component: ComponentType } => s != null),
-        [versionId],
-    )
+    const steps = useMemo(() => {
+        const exclude = new Set(versionId === 'v4' ? BASE_EXCLUDE : [...BASE_EXCLUDE, 'intro', 'preboard'])
+        return PAGES.filter((p) => !exclude.has(p.key))
+            .map((p) => {
+                const v = p.versions.find((x) => x.id === versionId)
+                return v ? { key: p.key, Component: v.Component } : null
+            })
+            .filter((s): s is { key: string; Component: ComponentType } => s != null)
+    }, [versionId])
 
     const [index, setIndex] = useState(0)
     const [data, setData] = useState<Record<string, string>>({})
@@ -42,9 +47,17 @@ export default function FlowRunner() {
         return i
     }
 
+    // Contiguous "Step N of M" over the numbered screens actually shown (skip-adjusted).
+    const currentKey = steps[index]?.key
+    const visibleNumbered = steps.filter((s) => NUMBERED.has(s.key) && !skip(s.key))
+    const stepTotal = visibleNumbered.length
+    const stepNumber = currentKey != null && NUMBERED.has(currentKey) && !skip(currentKey) ? visibleNumbered.findIndex((s) => s.key === currentKey) + 1 : null
+
     const flow: OnboardingFlow = {
         index,
         total: steps.length,
+        stepNumber,
+        stepTotal,
         data,
         setData: (k, v) => setData((s) => ({ ...s, [k]: v })),
         goNext: () => {

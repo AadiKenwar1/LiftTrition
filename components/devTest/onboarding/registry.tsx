@@ -42,6 +42,22 @@ import ResultsTimelineV3 from './versions/resultsTimeline/V3'
 import SecondChance from './versions/secondChance/Refined'
 import SecondChanceV3 from './versions/secondChance/V3'
 import SummaryV1 from './versions/summary/V1'
+// V4 · Neutral + hero color — V3's B&W spine with the flow fixes baked in (see KNOWN ISSUES below) and color
+// at exactly three deliberate beats: Activity's blue selected state, the green Projection chart, and the
+// green paywall/second-chance CTA. (An earlier per-domain icon-coloring pass read as scattered — reverted.)
+import AboutYouV4 from './versions/birthday/AboutYouV4'
+import ActivityV4 from './versions/activity/V4'
+import GoalMotivationV4 from './versions/goalMotivation/V4'
+import GoalProjectionV4 from './versions/goalProjection/V4'
+import GoalV4 from './versions/goal/V4'
+import LoginV4 from './versions/login/V4'
+import MacrosV4 from './versions/macros/V4'
+import ObstaclesV4 from './versions/obstacles/V4'
+import PaceV4 from './versions/pace/V4'
+import PaywallV4 from './versions/paywall/V4'
+import PreboardV4 from './versions/preboard/V4'
+import ResultsTimelineV4 from './versions/resultsTimeline/V4'
+import SecondChanceV4 from './versions/secondChance/V4'
 
 /**
  * Dev-only registry — the single list that drives the Dev Hub "Onboarding" section, each step's
@@ -71,22 +87,42 @@ export interface OnboardingPage {
 }
 
 const V3 = (Component: ComponentType): OnboardingVersion => ({ id: 'v3', label: 'V3 · Black & white', Component })
+const V4 = (Component: ComponentType): OnboardingVersion => ({ id: 'v4', label: 'V4 · Neutral + hero color', Component })
+
+/**
+ * KNOWN ISSUES — V3 flow polish (from review 2026-07-01). V4 (id 'v4' / "Walk the V4 flow") fixes ALL of
+ * these; V3 is kept untouched as the "before" baseline for comparison. Details for reference:
+ *  1. Progress numbering skips. Obstacles is "Step 2 of 12", the next flow screen (About You) is "Step 5" —
+ *     steps 3–4 are intro/preboard, which are EXCLUDEd from FlowRunner and carry no `step` prop. V3Screen
+ *     draws StepProgress from the hardcoded `step` prop, not flow.index/flow.total, so in the walkthrough the
+ *     dots jump 2→5 and the 12th dot never fills. Fix: drive step/total from the flow when one is present.
+ *  2. Semantic accent unimplemented. Most screens set `accent = colors.text` despite "green/blue accent"
+ *     header comments. Only Activity diverges (options use colors.workout), so its selected state is the lone
+ *     blue in the flow. Either wire the blue/green accents (see color plan) or drop the stale comments.
+ *  3. Units drift. About You defaults to imperial, but Goal/Pace/GoalProjection/Paywall hardcode 'kg'. Unit
+ *     isn't propagated through flowContext.data the way `phase` is.
+ *  4. Pace labels unreachable. getPaceLabel returns Fast/Very fast/Extreme at ≥1.5–2.5, but the slider maxes
+ *     at 1.5 — only Very slow/Slow/Moderate can ever show.
+ *  5. Paywall CTA is inert. The primary "Start trial" button does nothing; only "Maybe later" advances, so the
+ *     accepted-purchase path can't be walked.
+ *  6. Goal Projection shows the progress bar but breaks the "Step N of 12" eyebrow (uses "Your projection").
+ */
 
 export const PAGES: OnboardingPage[] = [
-    { key: 'login', label: 'Login (V3 opener)', screen: 'Login · sign in', versions: [V3(LoginV3)] },
-    { key: 'goalMotivation', label: 'Onboarding 1', screen: 'Goal & Motivation (new)', versions: [{ id: 'v1', label: 'Version 1', Component: GoalMotivation }, V3(GoalMotivationV3)] },
-    { key: 'obstacles', label: 'Onboarding 2', screen: 'Obstacles (new)', versions: [{ id: 'v1', label: 'Version 1', Component: Obstacles }, V3(ObstaclesV3)] },
+    { key: 'login', label: 'Login (opener)', screen: 'Login · sign in', versions: [V3(LoginV3), V4(LoginV4)] },
+    { key: 'goalMotivation', label: 'Onboarding 1', screen: 'Goal & Motivation (new)', versions: [{ id: 'v1', label: 'Version 1', Component: GoalMotivation }, V3(GoalMotivationV3), V4(GoalMotivationV4)] },
+    { key: 'obstacles', label: 'Onboarding 2', screen: 'Obstacles (new)', versions: [{ id: 'v1', label: 'Version 1', Component: Obstacles }, V3(ObstaclesV3), V4(ObstaclesV4)] },
     { key: 'intro', label: 'Onboarding 3', screen: 'Intro', versions: [{ id: 'v1', label: 'Version 1', Component: IntroV1 }, { id: 'refined', label: 'Refined', Component: IntroRefined }, V3(IntroV3)] },
-    { key: 'preboard', label: 'Onboarding 4', screen: 'Preboard', versions: [{ id: 'v1', label: 'Version 1', Component: PreboardV1 }, { id: 'refined', label: 'Refined', Component: PreboardRefined }, V3(PreboardV3)] },
-    { key: 'birthday', label: 'Onboarding 5', screen: 'About You (body details)', versions: [{ id: 'v1', label: 'Version 1', Component: BirthdayV1 }, { id: 'aboutYou', label: 'About You (merged, restyled)', Component: AboutYou }, V3(AboutYouV3)] },
+    { key: 'preboard', label: 'Onboarding 4', screen: 'Preboard', versions: [{ id: 'v1', label: 'Version 1', Component: PreboardV1 }, { id: 'refined', label: 'Refined', Component: PreboardRefined }, V3(PreboardV3), V4(PreboardV4)] },
+    { key: 'birthday', label: 'Onboarding 5', screen: 'About You (body details)', versions: [{ id: 'v1', label: 'Version 1', Component: BirthdayV1 }, { id: 'aboutYou', label: 'About You (merged, restyled)', Component: AboutYou }, V3(AboutYouV3), V4(AboutYouV4)] },
     { key: 'gender', label: 'Onboarding 5a', screen: 'Gender (unmerged alt)', versions: [{ id: 'v1', label: 'Version 1', Component: GenderV1 }, { id: 'refined', label: 'Refined', Component: GenderRefined }, V3(GenderV3)] },
     { key: 'heightWeight', label: 'Onboarding 5b', screen: 'Height & Weight (unmerged alt)', versions: [{ id: 'v1', label: 'Version 1', Component: HeightWeightV1 }, { id: 'refined', label: 'Refined', Component: HeightWeightRefined }, V3(HeightWeightV3)] },
-    { key: 'activity', label: 'Onboarding 6', screen: 'Activity', versions: [{ id: 'v1', label: 'Version 1', Component: ActivityV1 }, { id: 'refined', label: 'Refined', Component: ActivityRefined }, V3(ActivityV3)] },
-    { key: 'goal', label: 'Onboarding 7', screen: 'Body-Weight Goal', versions: [{ id: 'v1', label: 'Version 1', Component: GoalV1 }, { id: 'refined', label: 'Refined', Component: GoalRefined }, V3(GoalV3)] },
-    { key: 'pace', label: 'Onboarding 8', screen: 'Pace', versions: [{ id: 'v1', label: 'Version 1', Component: PaceV1 }, { id: 'refined', label: 'Refined', Component: PaceRefined }, V3(PaceV3)] },
-    { key: 'resultsTimeline', label: 'Onboarding 9', screen: 'Results Timeline (new)', versions: [{ id: 'v1', label: 'Version 1', Component: ResultsTimeline }, V3(ResultsTimelineV3)] },
-    { key: 'macros', label: 'Onboarding 10', screen: 'Macros', versions: [{ id: 'v1', label: 'Version 1', Component: MacrosV1 }, { id: 'refined', label: 'Refined', Component: MacrosRefined }, V3(MacrosV3)] },
-    { key: 'summary', label: 'Onboarding 11', screen: 'Goal Projection', versions: [{ id: 'v1', label: 'Version 1', Component: SummaryV1 }, { id: 'projection', label: 'Goal Projection (signature)', Component: GoalProjectionRefined }, V3(GoalProjectionV3)] },
-    { key: 'paywall', label: 'Onboarding 12', screen: 'Paywall', versions: [{ id: 'v1', label: 'Version 1', Component: PaywallV1 }, { id: 'refined', label: 'Refined · 7-day trial', Component: PaywallRefined }, { id: 'refined14', label: 'Refined · 14-day trial', Component: PaywallRefined14 }, V3(PaywallV3)] },
-    { key: 'secondChance', label: 'Onboarding 13', screen: 'Second-chance offer (new)', versions: [{ id: 'v1', label: 'Version 1', Component: SecondChance }, V3(SecondChanceV3)] },
+    { key: 'activity', label: 'Onboarding 6', screen: 'Activity', versions: [{ id: 'v1', label: 'Version 1', Component: ActivityV1 }, { id: 'refined', label: 'Refined', Component: ActivityRefined }, V3(ActivityV3), V4(ActivityV4)] },
+    { key: 'goal', label: 'Onboarding 7', screen: 'Body-Weight Goal', versions: [{ id: 'v1', label: 'Version 1', Component: GoalV1 }, { id: 'refined', label: 'Refined', Component: GoalRefined }, V3(GoalV3), V4(GoalV4)] },
+    { key: 'pace', label: 'Onboarding 8', screen: 'Pace', versions: [{ id: 'v1', label: 'Version 1', Component: PaceV1 }, { id: 'refined', label: 'Refined', Component: PaceRefined }, V3(PaceV3), V4(PaceV4)] },
+    { key: 'resultsTimeline', label: 'Onboarding 9', screen: 'Results Timeline (new)', versions: [{ id: 'v1', label: 'Version 1', Component: ResultsTimeline }, V3(ResultsTimelineV3), V4(ResultsTimelineV4)] },
+    { key: 'macros', label: 'Onboarding 10', screen: 'Macros', versions: [{ id: 'v1', label: 'Version 1', Component: MacrosV1 }, { id: 'refined', label: 'Refined', Component: MacrosRefined }, V3(MacrosV3), V4(MacrosV4)] },
+    { key: 'summary', label: 'Onboarding 11', screen: 'Goal Projection', versions: [{ id: 'v1', label: 'Version 1', Component: SummaryV1 }, { id: 'projection', label: 'Goal Projection (signature)', Component: GoalProjectionRefined }, V3(GoalProjectionV3), V4(GoalProjectionV4)] },
+    { key: 'paywall', label: 'Onboarding 12', screen: 'Paywall', versions: [{ id: 'v1', label: 'Version 1', Component: PaywallV1 }, { id: 'refined', label: 'Refined · 7-day trial', Component: PaywallRefined }, { id: 'refined14', label: 'Refined · 14-day trial', Component: PaywallRefined14 }, V3(PaywallV3), V4(PaywallV4)] },
+    { key: 'secondChance', label: 'Onboarding 13', screen: 'Second-chance offer (new)', versions: [{ id: 'v1', label: 'Version 1', Component: SecondChance }, V3(SecondChanceV3), V4(SecondChanceV4)] },
 ]
