@@ -10,7 +10,8 @@ import { fonts, radius, useColorScheme, useColors, type Colors } from '@/context
 import { useWorkout } from '@/context/WorkoutContext'
 
 import { addDays, formatDate, getWeekStart } from '@/lib/utils/dateHelper'
-import { ChevronDown, ChevronLeft, ChevronRight, Dumbbell, Scale, Utensils } from 'lucide-react-native'
+import { useRouter } from 'expo-router'
+import { ChevronDown, ChevronLeft, ChevronRight, Dumbbell, Pencil, Scale, Utensils } from 'lucide-react-native'
 import { useEffect, useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
@@ -18,6 +19,7 @@ export default function ProgressScreen() {
     const { mode, settings, handleGetBodyWeightProgressData, bwProgress } = useSettings()
     const { handleGetMacroForWeek, nutritionData, nutritionStreak } = useNutrition()
     const { logs, handleGetOneRepMaxData, handleGetSetsForWeek, lastExercise, fullExerciseLibAsList, trainedDaysThisWeek } = useWorkout()
+    const router = useRouter()
     const colors = useColors()
     const isDark = useColorScheme() === 'dark'
     const styles = useMemo(() => makeStyles(colors, isDark), [colors, isDark])
@@ -102,15 +104,22 @@ export default function ProgressScreen() {
     const bottomTitle = mode ? 'Sets' : selectedMacro.charAt(0).toUpperCase() + selectedMacro.slice(1)
     const bottomSubtitle = mode ? 'Total per day' : 'Daily intake'
 
-    const renderEmptyState = (Icon: React.ComponentType<any>, title: string, subtitle: string) => (
-        <View style={styles.emptyGraphState}>
-            <View style={[styles.emptyIconCircle, { backgroundColor: accent + '1A' }]}>
-                <Icon size={48} color={accent} strokeWidth={2} />
+    const renderEmptyState = (Icon: React.ComponentType<any>, title: string, subtitle: string, onPress?: () => void) => {
+        const content = (
+            <View style={styles.emptyGraphState}>
+                <View style={[styles.emptyIconCircle, { backgroundColor: accent + '1A' }]}>
+                    <Icon size={48} color={accent} strokeWidth={2} />
+                </View>
+                <Text style={styles.emptyGraphText}>{title}</Text>
+                <Text style={styles.emptyGraphSubtext}>{subtitle}</Text>
             </View>
-            <Text style={styles.emptyGraphText}>{title}</Text>
-            <Text style={styles.emptyGraphSubtext}>{subtitle}</Text>
-        </View>
-    )
+        )
+        return onPress ?
+            <TouchableOpacity onPress={onPress} activeOpacity={0.7} accessibilityRole="button">
+                {content}
+            </TouchableOpacity>
+        :   content
+    }
 
     return (
         <>
@@ -135,6 +144,19 @@ export default function ProgressScreen() {
                             }
                             <Text style={styles.cardSubtitle}>{topSubtitle}</Text>
                         </View>
+                        {!mode && (
+                            <TouchableOpacity
+                                style={styles.updateBtn}
+                                onPress={() => router.push('/nutritionScreens/updateBWModal')}
+                                activeOpacity={0.7}
+                                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                                accessibilityRole="button"
+                                accessibilityLabel="Update body weight"
+                            >
+                                <Pencil size={14} color={colors.nutrition} strokeWidth={2.5} />
+                                <Text style={styles.updateBtnText}>Update</Text>
+                            </TouchableOpacity>
+                        )}
                     </View>
                     {/* Range strip — segmented 7/14/21 above the chart (selected chip carries the unit) */}
                     <View style={styles.rangeStrip}>
@@ -157,7 +179,7 @@ export default function ProgressScreen() {
                     <View style={styles.chartContainer}>
                         {topRawData.length > 0 ?
                             <Graph1 key={`top-${mode ? 'lift' : 'nutrition'}-${topRange}-${mode ? selectedExercise : 'bw'}-${topSig}`} mode={mode} data={topRawData} selectedRange={topRange} goal={topGoal} formatValue={topFormat} />
-                        :   renderEmptyState(mode ? Dumbbell : Scale, mode ? 'No data yet for this exercise' : 'No weight data yet', mode ? 'Start logging workouts to see your progress' : 'Update your body weight to see progress')}
+                        :   renderEmptyState(mode ? Dumbbell : Scale, mode ? 'No data yet for this exercise' : 'No weight data yet', mode ? 'Start logging workouts to see your progress' : 'Update your body weight to see progress', mode ? undefined : () => router.push('/nutritionScreens/updateBWModal'))}
                     </View>
                     <GraphStats graphType={mode ? 'orm' : 'bodyweight'} data={topRawData} statsData={topRawData} unitSystem={settings.unitSystem} mode={mode} goalWeight={settings.goalWeight} />
                 </View>
@@ -282,6 +304,21 @@ function makeStyles(colors: Colors, isDark: boolean) {
             color: colors.textSecondary,
             marginTop: 2,
             fontFamily: fonts.medium,
+        },
+        updateBtn: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 5,
+            backgroundColor: colors.nutrition + '22',
+            borderRadius: radius.chip,
+            paddingHorizontal: 11,
+            paddingVertical: 6,
+        },
+        updateBtnText: {
+            fontSize: 13,
+            color: colors.nutrition,
+            fontFamily: fonts.semibold,
+            letterSpacing: -0.2,
         },
         graphCard: {
             width: '100%',

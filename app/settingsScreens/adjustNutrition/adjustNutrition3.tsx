@@ -1,5 +1,6 @@
 import EditMacroGoalModal, { type MacroGoalKind } from '@/components/NutritionComponents/EditMacroGoalModal'
 import PressableScale from '@/components/NeutralComponents/PressableScale'
+import StepProgress from '@/components/NeutralComponents/StepProgress'
 import { useSettings } from '@/context/SettingsContext'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { router, useLocalSearchParams } from 'expo-router'
@@ -7,6 +8,7 @@ import { Beef, Droplet, Flame, Pencil, Wheat } from 'lucide-react-native'
 import { useEffect, useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import Animated, { FadeInDown } from 'react-native-reanimated'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 function macroInitialValue(kind: MacroGoalKind, m: { calorieGoal: number; proteinGoal: number; carbsGoal: number; fatsGoal: number }) {
     switch (kind) {
@@ -25,6 +27,8 @@ export default function AdjustNutrition3Screen() {
     const { settings, calculateMacros } = useSettings()
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
+    const insets = useSafeAreaInsets()
+    const topPad = Math.max(insets.top, 12) + 16
     const [editingKind, setEditingKind] = useState<MacroGoalKind | null>(null)
     const params = useLocalSearchParams<{
         height: string
@@ -99,7 +103,8 @@ export default function AdjustNutrition3Screen() {
 
     return (
         <View style={styles.container}>
-            <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+            <ScrollView style={styles.scroll} contentContainerStyle={[styles.scrollContent, { paddingTop: topPad }]} showsVerticalScrollIndicator={false}>
+                <StepProgress current={params.goal === 'maintain' ? 1 : 2} total={params.goal === 'maintain' ? 3 : 4} accent={colors.text} />
                 <Text style={styles.titleText}>Your plan is ready</Text>
                 <Text style={styles.subtitleText}>Here are your daily targets — tap any to fine-tune it.</Text>
 
@@ -119,6 +124,9 @@ export default function AdjustNutrition3Screen() {
             </ScrollView>
 
             <View style={styles.footer}>
+                <TouchableOpacity style={styles.backButton} onPress={() => router.back()} activeOpacity={0.8}>
+                    <Text style={styles.backText}>Back</Text>
+                </TouchableOpacity>
                 <TouchableOpacity style={styles.nextButton} onPress={handleNext} activeOpacity={0.85}>
                     <Text style={styles.nextText}>Next</Text>
                 </TouchableOpacity>
@@ -133,7 +141,7 @@ function makeStyles(colors: Colors) {
     return StyleSheet.create({
         container: { flex: 1, backgroundColor: colors.background, paddingHorizontal: 24, paddingBottom: 40 },
         scroll: { flex: 1 },
-        scrollContent: { paddingTop: 24, paddingBottom: 16 },
+        scrollContent: { paddingBottom: 16 },
         titleText: { fontFamily: fonts.extrabold, fontSize: 30, color: colors.text, letterSpacing: -0.8, lineHeight: 36, marginBottom: 8 },
         subtitleText: { fontFamily: fonts.regular, fontSize: 15, color: colors.textSecondary, lineHeight: 22, letterSpacing: 0.1, marginBottom: 26 },
         grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
@@ -143,8 +151,10 @@ function makeStyles(colors: Colors) {
         cardLabel: { fontFamily: fonts.semibold, fontSize: 13, letterSpacing: -0.2, marginTop: 2 },
         cardValue: { fontFamily: fonts.extrabold, fontSize: 26, color: colors.text, letterSpacing: -0.5 },
         note: { fontFamily: fonts.medium, fontSize: 12, color: colors.textMuted, textAlign: 'center', letterSpacing: 0.2, marginTop: 18 },
-        footer: { paddingTop: 12 },
-        nextButton: { width: '100%', height: 58, borderRadius: radius.cardLg, backgroundColor: colors.text, justifyContent: 'center', alignItems: 'center' },
+        footer: { flexDirection: 'row', gap: 12, paddingTop: 12 },
+        backButton: { flex: 1, height: 58, borderRadius: radius.cardLg, backgroundColor: colors.surface, justifyContent: 'center', alignItems: 'center', borderWidth: StyleSheet.hairlineWidth, borderColor: colors.hairline },
+        backText: { fontFamily: fonts.semibold, fontSize: 17, color: colors.textSecondary, letterSpacing: -0.3 },
+        nextButton: { flex: 1, height: 58, borderRadius: radius.cardLg, backgroundColor: colors.text, justifyContent: 'center', alignItems: 'center' },
         nextText: { fontFamily: fonts.semibold, fontSize: 17, color: colors.background, letterSpacing: -0.3 },
     })
 }

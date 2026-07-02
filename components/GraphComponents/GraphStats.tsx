@@ -107,7 +107,8 @@ function computeStats(graphType: GraphType, data: Array<{ day: string; value: nu
         if (goalWeight != null && dir !== 'flat') {
             tone = Math.abs(last - goalWeight) < Math.abs(first - goalWeight) ? 'good' : 'neutral'
         }
-        const toGoal = goalWeight != null ? Math.round((last - goalWeight) * 10) / 10 : null
+        // Sign = required change to reach goal (need to lose = negative, need to gain = positive), not position vs. goal.
+        const toGoal = goalWeight != null ? Math.round((goalWeight - last) * 10) / 10 : null
         const toGoalValue =
             toGoal === null ? 'N/A'
             : toGoal === 0 ? `0 ${weightUnit} 🎉`
