@@ -152,17 +152,16 @@ function StackLayout() {
                     <Stack.Screen name="authScreens/login" options={{ headerShown: false }} />
                 </Stack.Protected>
                 <Stack.Protected guard={!settings.onboardingComplete}>
-                    <Stack.Screen name="onboardingScreens/introduction" options={{ headerShown: false }} />
-                    <Stack.Screen name="onboardingScreens/preboard" options={{ headerShown: false }} />
-                    <Stack.Screen name="onboardingScreens/onboarding2" options={{ headerShown: false }} />
-                    <Stack.Screen name="onboardingScreens/onboarding3" options={{ headerShown: false }} />
-                    <Stack.Screen name="onboardingScreens/onboarding4" options={{ headerShown: false }} />
-                    <Stack.Screen name="onboardingScreens/onboarding5" options={{ headerShown: false }} />
-                    <Stack.Screen name="onboardingScreens/onboarding6" options={{ headerShown: false }} />
-                    <Stack.Screen name="onboardingScreens/onboarding7" options={{ headerShown: false }} />
-                    <Stack.Screen name="onboardingScreens/onboarding8" options={{ headerShown: false }} />
-                    <Stack.Screen name="onboardingScreens/onboarding9" options={{ headerShown: false }} />
-                    <Stack.Screen name="onboardingScreens/onboarding10" options={{ headerShown: false }} />
+                    <Stack.Screen name="onboardingScreens/goals" options={{ headerShown: false }} />
+                    <Stack.Screen name="onboardingScreens/obstacles" options={{ headerShown: false }} />
+                    <Stack.Screen name="onboardingScreens/aboutYou" options={{ headerShown: false }} />
+                    <Stack.Screen name="onboardingScreens/activity" options={{ headerShown: false }} />
+                    <Stack.Screen name="onboardingScreens/goal" options={{ headerShown: false }} />
+                    <Stack.Screen name="onboardingScreens/pace" options={{ headerShown: false }} />
+                    <Stack.Screen name="onboardingScreens/timeline" options={{ headerShown: false }} />
+                    <Stack.Screen name="onboardingScreens/plan" options={{ headerShown: false }} />
+                    <Stack.Screen name="onboardingScreens/projection" options={{ headerShown: false }} />
+                    <Stack.Screen name="onboardingScreens/paywall" options={{ headerShown: false }} />
                 </Stack.Protected>
 
                 <Stack.Protected guard={!!session && allContextsLoaded && settings.onboardingComplete}>
@@ -185,7 +184,7 @@ function StackLayout() {
                     <Stack.Screen name="nutritionScreens/editManualEntry" options={{ ...modalPresentation, headerShown: false }} />
                     <Stack.Screen name="nutritionScreens/editPhotoEntry" options={{ ...modalPresentation, headerShown: false }} />
                     <Stack.Screen name="settingsScreens/profile" options={{ headerShown: true, title: 'Profile', headerBackTitle: 'Back' }} />
-                    <Stack.Screen name="settingsScreens/subscription" options={{ headerShown: true, title: 'Subscription', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="settingsScreens/subscription" options={{ headerShown: true, title: '', headerBackTitle: 'Back', headerShadowVisible: false }} />
                     <Stack.Screen name="settingsScreens/adjustTraining" options={{ headerShown: true, title: '', headerBackTitle: 'Back', headerShadowVisible: false }} />
                     <Stack.Screen name="settingsScreens/adjustNutrition/adjustNutrition1" options={{ headerShown: true, title: '', headerBackTitle: 'Back', headerShadowVisible: false }} />
                     <Stack.Screen name="settingsScreens/adjustNutrition/adjustNutrition2" options={{ headerShown: true, title: '', headerBackTitle: 'Back', headerShadowVisible: false }} />

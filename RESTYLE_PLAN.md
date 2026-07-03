@@ -80,6 +80,8 @@ Both flows use a MINIMAL native header (`headerShown: true, title: '', headerSha
 
 **Settings CTA rule:** in-app settings commit buttons (adjust flows' Save, `EditHeightModal` Save) use the NEUTRAL V4 button (`colors.text` bg / `colors.background` text) — the colored "go" gradients are reserved for onboarding-conversion moments (paywall) and the `updateBWModal` sheet, since existing users don't need the persuasion color.
 
+`app/settingsScreens/subscription.tsx` mirrors the V4 onboarding paywall (`app/onboardingScreens/paywall.tsx`): minimal header, blue funnel (blue `workoutGradient` CTA + blue selected price card + blue "Best value"), neutral feature chips, ★★★★★ 5.0 + trust lines, prices from `useBilling` (`priceInfo`/`annualPriceInfo`). It is a purchase CTA (onboarding-conversion analog), so it keeps the blue gradient — the neutral-CTA rule above is for *commit/save* buttons, not the subscribe button. Settings-specific bits kept: `beforeRemove` purchase guard, Manage-subscription link, success Alerts, and the `hasPremium` "Subscription Active" state (no onboarding plan card / footer). The two paywalls are intentionally kept as separate files.
+
 ---
 
 ## Screen work
