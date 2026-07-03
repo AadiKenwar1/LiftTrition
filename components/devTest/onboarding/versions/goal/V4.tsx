@@ -1,3 +1,4 @@
+import { validateTargetWeight } from '@/context/SettingsContext/functions/validator'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { useRouter } from 'expo-router'
 import { useMemo, useState } from 'react'
@@ -9,8 +10,10 @@ import V4Screen from '../_shared/V4Screen'
 /**
  * Dev-only V4 eating-phase screen — the SELECTED phase highlights nutrition-green (the calorie decision is
  * the flow's core nutrition choice), mirroring Activity's blue selected state; screen chrome stays neutral.
- * Cut / Maintain / Bulk are single-select; target weight is hidden on Maintain and its unit follows the
- * user's earlier About You choice (via the flow's shared data). Inert.
+ * Guardrails: NO preselected phase (the user commits explicitly, and flow.data.phase can't silently disagree
+ * with the UI), Next is disabled until a phase exists (+ a target on Cut/Bulk), and validateTargetWeight
+ * (the production SettingsContext validator) checks the target's direction against the current weight
+ * shared by About You. Target weight is hidden on Maintain; unit follows the About You choice. Inert.
  */
 const PHASES = [
     { id: 'cut', label: 'Cut', sub: 'Eat in a deficit to lose fat' },
@@ -25,24 +28,34 @@ export default function GoalV4() {
     const router = useRouter()
     const flow = useOnboardingFlow()
     const accent = colors.text
-    const [phase, setPhase] = useState<Phase>('cut')
+    const [phase, setPhase] = useState<Phase | null>(null)
     const [target, setTarget] = useState('')
 
     const metric = flow?.data.unit === 'metric'
     const unit = metric ? 'kg' : 'lb'
+    const unitSystem = metric ? ('metric' as const) : ('imperial' as const)
     const placeholder = phase === 'cut' ? (metric ? '68' : '150') : metric ? '80' : '176'
+
+    function handleBeforeNext(): boolean {
+        if (phase == null) return false
+        if (phase === 'maintain') return true
+        const goal = phase === 'cut' ? 'lose' : 'gain'
+        const ok = validateTargetWeight(Number(target) || 0, Number(flow?.data.weight) || 0, goal, unitSystem)
+        if (ok) flow?.setData('target', String(Number(target) || 0))
+        return ok
+    }
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <View style={{ flex: 1 }}>
-                <V4Screen step={4} totalSteps={9} eyebrow="Step 5 of 9" title="How do you want to eat?" subtitle="This sets your daily calories. You can switch phases anytime." accent={accent} onBack={() => router.back()} onNext={() => {}}>
+                <V4Screen step={4} totalSteps={9} eyebrow="Step 5 of 9" title="How do you want to eat?" subtitle="This sets your daily calories. You can switch phases anytime." accent={accent} nextDisabled={phase == null || (phase !== 'maintain' && target.trim() === '')} onBeforeNext={handleBeforeNext} onBack={() => router.back()} onNext={() => {}}>
                     <View style={{ gap: 12 }}>
                         {PHASES.map((p, i) => (
                             <V3Option key={p.id} index={i} label={p.label} sublabel={p.sub} accent={colors.nutrition} selected={phase === p.id} onPress={() => { setPhase(p.id); flow?.setData('phase', p.id) }} />
                         ))}
                     </View>
 
-                    {phase !== 'maintain' && (
+                    {phase != null && phase !== 'maintain' && (
                         <>
                             <Text style={styles.label}>Target weight</Text>
                             <View style={styles.inputWrapper}>

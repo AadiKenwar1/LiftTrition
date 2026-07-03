@@ -1,3 +1,4 @@
+import EditHeightModal from '@/components/NeutralComponents/EditHeightModal'
 import EditMacroGoalModal, { type MacroGoalKind } from '@/components/NutritionComponents/EditMacroGoalModal'
 import { useAuth } from '@/context/AuthContext'
 import { forceSignOut, isUploadFlushTimeoutError } from '@/context/AuthContext/functions/accountFunctions'
@@ -18,10 +19,11 @@ export default function ProfileScreen() {
     const SHOW_APPLE_ACCOUNT = false
 
     const { user, signOut, deleteAccount } = useAuth()
-    const { settings, setSettings } = useSettings()
+    const { settings, setSettings, calculateMacros } = useSettings()
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
     const [editingKind, setEditingKind] = useState<MacroGoalKind | null>(null)
+    const [editingHeight, setEditingHeight] = useState(false)
 
     function macroValue(kind: MacroGoalKind): number {
         switch (kind) {
@@ -42,6 +44,18 @@ export default function ProfileScreen() {
         else if (editingKind === 'protein') setSettings({ ...settings, proteinGoal: value })
         else if (editingKind === 'carbs') setSettings({ ...settings, carbsGoal: value })
         else setSettings({ ...settings, fatsGoal: value })
+    }
+
+    function handleSaveHeight(totalHeight: number) {
+        const updatedSettings = { ...settings, height: totalHeight }
+        const macros = calculateMacros(updatedSettings, settings.unitSystem === 'imperial')
+        setSettings({
+            ...updatedSettings,
+            calorieGoal: macros.calResult,
+            proteinGoal: macros.proteinGrams,
+            carbsGoal: macros.carbGrams,
+            fatsGoal: macros.fatGrams,
+        })
     }
 
     const router = useRouter()
@@ -191,7 +205,7 @@ export default function ProfileScreen() {
 
                         <View style={styles.divider} />
 
-                        <TouchableOpacity style={styles.infoRow} onPress={() => router.push('/settingsScreens/adjustMeasurements')} activeOpacity={0.7}>
+                        <TouchableOpacity style={styles.infoRow} onPress={() => setEditingHeight(true)} activeOpacity={0.7}>
                             <Text style={styles.infoLabel}>Height</Text>
                             <View style={styles.editRow}>
                                 <Text style={styles.infoValue}>
@@ -208,7 +222,7 @@ export default function ProfileScreen() {
 
                         <View style={styles.divider} />
 
-                        <TouchableOpacity style={styles.infoRow} onPress={() => router.push('/settingsScreens/adjustMeasurements')} activeOpacity={0.7}>
+                        <TouchableOpacity style={styles.infoRow} onPress={() => router.push('/nutritionScreens/updateBWModal')} activeOpacity={0.7}>
                             <Text style={styles.infoLabel}>Weight</Text>
                             <View style={styles.editRow}>
                                 <Text style={styles.infoValue}>
@@ -246,21 +260,27 @@ export default function ProfileScreen() {
                             <>
                                 <View style={styles.divider} />
 
-                                <View style={styles.infoRow}>
+                                <TouchableOpacity style={styles.infoRow} onPress={() => router.push('/settingsScreens/adjustNutrition/adjustNutrition1')} activeOpacity={0.7}>
                                     <Text style={styles.infoLabel}>Target Weight</Text>
-                                    <Text style={styles.infoValue}>
-                                        {settings.goalWeight} {settings.unitSystem === 'imperial' ? 'lbs' : 'kg'}
-                                    </Text>
-                                </View>
+                                    <View style={styles.editRow}>
+                                        <Text style={styles.infoValue}>
+                                            {settings.goalWeight} {settings.unitSystem === 'imperial' ? 'lbs' : 'kg'}
+                                        </Text>
+                                        <Pencil size={14} color={colors.textMuted} strokeWidth={2} />
+                                    </View>
+                                </TouchableOpacity>
 
                                 <View style={styles.divider} />
 
-                                <View style={styles.infoRow}>
+                                <TouchableOpacity style={styles.infoRow} onPress={() => router.push('/settingsScreens/adjustNutrition/adjustNutrition1')} activeOpacity={0.7}>
                                     <Text style={styles.infoLabel}>Goal Pace</Text>
-                                    <Text style={styles.infoValue}>
-                                        {settings.goalPace.toFixed(1)} {settings.unitSystem === 'imperial' ? 'lbs' : 'kg'}/week
-                                    </Text>
-                                </View>
+                                    <View style={styles.editRow}>
+                                        <Text style={styles.infoValue}>
+                                            {settings.goalPace.toFixed(1)} {settings.unitSystem === 'imperial' ? 'lbs' : 'kg'}/week
+                                        </Text>
+                                        <Pencil size={14} color={colors.textMuted} strokeWidth={2} />
+                                    </View>
+                                </TouchableOpacity>
                             </>
                         )}
                     </View>
@@ -304,6 +324,7 @@ export default function ProfileScreen() {
                 </View>
             </ScrollView>
             <EditMacroGoalModal visible={editingKind != null} kind={editingKind} initialValue={editingKind != null ? macroValue(editingKind) : 0} onDismiss={() => setEditingKind(null)} onSave={handleSaveMacro} />
+            <EditHeightModal visible={editingHeight} unitSystem={settings.unitSystem as 'imperial' | 'metric'} initialHeight={settings.height} currentWeight={settings.bodyWeight} onDismiss={() => setEditingHeight(false)} onSave={handleSaveHeight} />
         </View>
     )
 }

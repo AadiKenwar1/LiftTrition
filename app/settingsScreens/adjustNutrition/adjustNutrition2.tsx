@@ -1,18 +1,40 @@
+import StepProgress from '@/components/NeutralComponents/StepProgress'
 import { useSettings } from '@/context/SettingsContext'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
+import { kgToLbs, lbsToKg } from '@/lib/utils/unitConversions'
 import Slider from '@react-native-community/slider'
-import { LinearGradient } from 'expo-linear-gradient'
 import { router, useLocalSearchParams } from 'expo-router'
-import { Gauge, Rabbit, Turtle } from 'lucide-react-native'
+import { Rabbit, Turtle } from 'lucide-react-native'
 import { useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import Animated, { FadeInDown } from 'react-native-reanimated'
 
-export default function AdjustNutrition3Screen() {
-    const { mode } = useSettings()
+/**
+ * Pace is DISPLAYED in the user's unit system but STORED in lb/week — macroCalculation.tsx assumes lbs
+ * ((goalPace * 3500) / 7), so metric values are converted with kgToLbs before leaving this screen.
+ */
+const RANGES = {
+    metric: { min: 0.1, max: 1.5, def: 0.5, unit: 'kg' },
+    imperial: { min: 0.1, max: 3, def: 1, unit: 'lb' },
+} as const
+
+const paceLabel = (v: number, max: number) => {
+    const f = v / max
+    return f < 0.33 ? 'Slow' : f < 0.66 ? 'Moderate' : f < 0.9 ? 'Fast' : 'Very fast'
+}
+
+export default function AdjustNutrition2Screen() {
+    const { settings } = useSettings()
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
     const params = useLocalSearchParams<{ height: string; weight: string; unitSystem: string; goal: string; targetWeight: string }>()
-    const [goalPace, setGoalPace] = useState(0.5)
+
+    const metric = params.unitSystem === 'metric'
+    const r = metric ? RANGES.metric : RANGES.imperial
+    const [goalPace, setGoalPace] = useState<number>(() => {
+        const displayPace = metric ? lbsToKg(settings.goalPace) : settings.goalPace
+        return displayPace >= r.min && displayPace <= r.max ? displayPace : r.def
+    })
 
     const handleNext = () => {
         router.push({
@@ -23,176 +45,59 @@ export default function AdjustNutrition3Screen() {
                 unitSystem: params.unitSystem,
                 goal: params.goal,
                 targetWeight: params.targetWeight,
-                goalPace: goalPace.toString(),
+                goalPace: (metric ? kgToLbs(goalPace) : goalPace).toString(),
             },
         })
-    }
-
-    const getPaceLabel = (value: number) => {
-        if (value < 0.5) return 'Very Slow'
-        if (value < 1.0) return 'Slow'
-        if (value < 1.5) return 'Moderate'
-        if (value < 2.0) return 'Fast'
-        if (value < 2.5) return 'Very Fast'
-        return 'Extreme'
     }
 
     return (
         <View style={styles.container}>
             <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-                {/* Icon */}
-                <View style={styles.iconCircle}>
-                    <Gauge size={72} color={colors.nutrition} strokeWidth={2} />
+                <StepProgress current={1} total={4} accent={colors.text} />
+                <Text style={styles.titleText}>How fast do you want to get there?</Text>
+                <Text style={styles.subtitleText}>A faster pace means a bigger daily calorie change. You can adjust this later.</Text>
+
+                <Animated.View entering={FadeInDown.duration(320)} style={styles.valueBlock}>
+                    <Text style={styles.value}>{goalPace.toFixed(1)}</Text>
+                    <Text style={styles.valueLabel}>{r.unit} / week · {paceLabel(goalPace, r.max)}</Text>
+                </Animated.View>
+
+                <View style={styles.sliderRow}>
+                    <Turtle size={24} color={colors.textMuted} strokeWidth={2} />
+                    <Slider style={styles.slider} minimumValue={r.min} maximumValue={r.max} step={0.1} value={goalPace} onValueChange={setGoalPace} minimumTrackTintColor={colors.nutrition} maximumTrackTintColor={colors.ringTrack} thumbTintColor={colors.nutrition} />
+                    <Rabbit size={24} color={colors.textMuted} strokeWidth={2} />
                 </View>
-
-                {/* Title */}
-                <Text style={styles.titleText}>Goal Pace?</Text>
-
-                {/* Subtitle */}
-                <Text style={styles.subtitleText}>How fast do you want to reach your bodyweight goal? {'\n'}(Pounds per week)</Text>
-
-                {/* Slider Container */}
-                <View style={styles.sliderContainer}>
-                    {/* Current Value Display */}
-                    <View style={styles.valueDisplay}>
-                        <Text style={[styles.valueText]}>{goalPace.toFixed(1)}</Text>
-                        <Text style={styles.valueLabelText}>{getPaceLabel(goalPace)}</Text>
-                    </View>
-
-                    {/* Slider with Icons */}
-                    <View style={styles.sliderRow}>
-                        <Turtle size={24} color={colors.textFaint} strokeWidth={2} />
-                        <Slider style={styles.slider} minimumValue={0.2} maximumValue={3.0} step={0.1} value={goalPace} onValueChange={setGoalPace} minimumTrackTintColor={colors.nutrition} maximumTrackTintColor={colors.ringTrack} thumbTintColor={colors.nutrition} />
-                        <Rabbit size={24} color={colors.textFaint} strokeWidth={2} />
-                    </View>
-
-                    {/* Min/Max Labels */}
-                    <View style={styles.rangeLabels}>
-                        <Text style={styles.rangeLabelText}>0.2</Text>
-                        <Text style={styles.rangeLabelText}>3.0</Text>
-                    </View>
+                <View style={styles.range}>
+                    <Text style={styles.rangeText}>{r.min} {r.unit}</Text>
+                    <Text style={styles.rangeText}>{r.max} {r.unit}</Text>
                 </View>
-
-                {/* Next Button */}
-                <TouchableOpacity style={styles.nextButton} onPress={handleNext} activeOpacity={0.8}>
-                    <LinearGradient colors={colors.nutritionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.nextButtonGradient}>
-                        <Text style={styles.nextButtonText}>Next</Text>
-                    </LinearGradient>
-                </TouchableOpacity>
             </ScrollView>
+
+            <View style={styles.footer}>
+                <TouchableOpacity style={styles.nextButton} onPress={handleNext} activeOpacity={0.85}>
+                    <Text style={styles.nextText}>Next</Text>
+                </TouchableOpacity>
+            </View>
         </View>
     )
 }
 
 function makeStyles(colors: Colors) {
     return StyleSheet.create({
-        container: {
-            flex: 1,
-            backgroundColor: colors.background,
-        },
-        scroll: {
-            flex: 1,
-            width: '100%',
-        },
-        scrollContent: {
-            flexGrow: 1,
-            alignItems: 'center',
-            width: '100%',
-            paddingHorizontal: 20,
-            paddingTop: 24,
-            paddingBottom: 40,
-        },
-        iconCircle: {
-            width: 144,
-            height: 144,
-            borderRadius: 72,
-            backgroundColor: colors.surface,
-            justifyContent: 'center',
-            alignItems: 'center',
-            borderWidth: 2,
-            borderColor: colors.nutrition,
-            marginBottom: 12,
-        },
-        titleText: {
-            fontSize: 28,
-            color: colors.text,
-            letterSpacing: -0.5,
-            marginBottom: 4,
-            textAlign: 'center',
-            fontFamily: fonts.semibold,
-        },
-        subtitleText: {
-            fontSize: 16,
-            color: colors.textSecondary,
-            textAlign: 'center',
-            letterSpacing: 0.2,
-            marginBottom: 24,
-            paddingHorizontal: 8,
-            fontFamily: fonts.regular,
-        },
-        sliderContainer: {
-            width: '100%',
-            paddingHorizontal: 12,
-            marginBottom: 24,
-        },
-        valueDisplay: {
-            alignItems: 'center',
-            marginBottom: 24,
-        },
-        valueText: {
-            color: colors.text,
-            fontSize: 48,
-            marginBottom: 6,
-            letterSpacing: -0.5,
-            fontFamily: fonts.semibold,
-        },
-        valueLabelText: {
-            fontSize: 24,
-            color: colors.textSecondary,
-            letterSpacing: -0.5,
-            fontFamily: fonts.semibold,
-        },
-        sliderRow: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            width: '100%',
-            gap: 12,
-        },
+        container: { flex: 1, backgroundColor: colors.background, paddingHorizontal: 24, paddingBottom: 40 },
+        scroll: { flex: 1 },
+        scrollContent: { paddingTop: 16, paddingBottom: 16 },
+        titleText: { fontFamily: fonts.extrabold, fontSize: 30, color: colors.text, letterSpacing: -0.8, lineHeight: 36, marginBottom: 8 },
+        subtitleText: { fontFamily: fonts.regular, fontSize: 15, color: colors.textSecondary, lineHeight: 22, letterSpacing: 0.1, marginBottom: 26 },
+        valueBlock: { alignItems: 'center', marginTop: 8, marginBottom: 28 },
+        value: { fontFamily: fonts.extrabold, fontSize: 64, color: colors.text, letterSpacing: -2 },
+        valueLabel: { fontFamily: fonts.semibold, fontSize: 17, color: colors.textSecondary, letterSpacing: -0.3, marginTop: 2 },
+        sliderRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
         slider: { flex: 1, height: 40 },
-        rangeLabels: {
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            marginTop: 8,
-            paddingHorizontal: 4,
-        },
-        rangeLabelText: {
-            fontSize: 14,
-            color: colors.textFaint,
-            letterSpacing: 0.2,
-            fontFamily: fonts.medium,
-        },
-        nextButton: {
-            width: '100%',
-            height: 60,
-            borderRadius: radius.cardLg,
-            overflow: 'hidden',
-            shadowColor: colors.nutrition,
-            shadowOffset: { width: 0, height: 6 },
-            shadowOpacity: 0.2,
-            shadowRadius: 12,
-            elevation: 8,
-        },
-        nextButtonGradient: {
-            width: '100%',
-            height: '100%',
-            justifyContent: 'center',
-            alignItems: 'center',
-        },
-        nextButtonText: {
-            fontSize: 16,
-            color: '#fff',
-            letterSpacing: -0.5,
-            fontFamily: fonts.semibold,
-        },
+        range: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 4, marginTop: 4 },
+        rangeText: { fontFamily: fonts.medium, fontSize: 13, color: colors.textMuted, letterSpacing: 0.2 },
+        footer: { paddingTop: 12 },
+        nextButton: { width: '100%', height: 58, borderRadius: radius.cardLg, backgroundColor: colors.text, justifyContent: 'center', alignItems: 'center' },
+        nextText: { fontFamily: fonts.semibold, fontSize: 17, color: colors.background, letterSpacing: -0.3 },
     })
 }

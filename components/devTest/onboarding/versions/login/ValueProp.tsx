@@ -1,26 +1,23 @@
 import { fonts, radius, useColorScheme, useColors, useSetColorScheme, type Colors } from '@/context/ThemeContext'
 import Ionicons from '@expo/vector-icons/Ionicons'
-import { Image } from 'expo-image'
-import { Moon, Star, Sun } from 'lucide-react-native'
+import { Dumbbell, Moon, Sparkles, Star, Sun } from 'lucide-react-native'
 import { useMemo } from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { useOnboardingFlow } from '../_shared/flowContext'
 import { useScreenTopPad } from '../_shared/useScreenTopPad'
 
 /**
- * Dev-only V3 (black & white) Login — the real opener and brand moment (the app gates Apple Sign-In before
- * onboarding, so this is the first thing a new user sees). Carries the logo (scheme-aware), value prop, a
- * ★rating, the Apple button, and the sun/moon theme toggle. In the flow, the Apple button advances. Inert
- * otherwise. NOTE: the rating is a PLACEHOLDER, and the Apple button is a mock of expo-apple-authentication.
+ * Dev-only login variant — VALUE-led. The name is a small eyebrow; the hero is the promise, with two
+ * domain chips (blue training / green nutrition) making the dual-mode identity concrete without an icon.
+ * Apple button mocks sign-in; rating is a PLACEHOLDER.
  */
-export default function LoginV3() {
+export default function LoginValueProp() {
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
     const topPad = useScreenTopPad(12)
     const flow = useOnboardingFlow()
     const scheme = useColorScheme()
     const setScheme = useSetColorScheme()
-    const logo = scheme === 'light' ? require('@/assets/images/LogoWhite.png') : require('@/assets/images/LogoBlack.png')
 
     return (
         <View style={styles.container}>
@@ -31,14 +28,26 @@ export default function LoginV3() {
             </View>
 
             <View style={styles.hero}>
-                <Image source={logo} style={styles.logo} contentFit="contain" priority="high" />
-                <Text style={styles.appName}>LIFTRI</Text>
-                <Text style={styles.tagline}>Training and nutrition that finally work together.</Text>
+                <Text style={styles.eyebrow}>PLATZE</Text>
+                <Text style={styles.headline}>Train and eat with one plan.</Text>
+                <Text style={styles.sub}>Progressive workouts and AI nutrition tracking, finally in sync.</Text>
+
+                <View style={styles.chipRow}>
+                    <View style={styles.chip}>
+                        <Dumbbell size={16} color={colors.workout} strokeWidth={2.4} />
+                        <Text style={styles.chipText}>Training</Text>
+                    </View>
+                    <View style={styles.chip}>
+                        <Sparkles size={16} color={colors.nutrition} strokeWidth={2.4} />
+                        <Text style={styles.chipText}>Nutrition</Text>
+                    </View>
+                </View>
+
                 <View style={styles.ratingRow}>
                     {Array.from({ length: 5 }).map((_, i) => (
                         <Star key={i} size={14} color="#FFD93D" fill="#FFD93D" strokeWidth={0} />
                     ))}
-                    <Text style={styles.ratingText}>4.8 · loved by thousands</Text>
+                    <Text style={styles.ratingText}>5.0</Text>
                 </View>
             </View>
 
@@ -58,10 +67,13 @@ function makeStyles(colors: Colors) {
         container: { flex: 1, backgroundColor: colors.background, paddingHorizontal: 24, paddingBottom: 40 },
         topBar: { flexDirection: 'row', justifyContent: 'flex-end' },
         toggle: { width: 42, height: 42, borderRadius: radius.iconButton, backgroundColor: colors.surface, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.hairline, justifyContent: 'center', alignItems: 'center' },
-        hero: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-        logo: { width: 104, height: 104, marginBottom: 14 },
-        appName: { fontFamily: fonts.extrabold, fontSize: 44, color: colors.text, letterSpacing: -1.6, textAlign: 'center' },
-        tagline: { fontFamily: fonts.regular, fontSize: 16, color: colors.textSecondary, textAlign: 'center', lineHeight: 23, marginTop: 6, marginBottom: 16, paddingHorizontal: 16 },
+        hero: { flex: 1, justifyContent: 'center' },
+        eyebrow: { fontFamily: fonts.extrabold, fontSize: 15, color: colors.textMuted, letterSpacing: 2, marginBottom: 16 },
+        headline: { fontFamily: fonts.extrabold, fontSize: 40, color: colors.text, letterSpacing: -1.2, lineHeight: 44 },
+        sub: { fontFamily: fonts.regular, fontSize: 16, color: colors.textSecondary, lineHeight: 23, marginTop: 12, marginBottom: 22 },
+        chipRow: { flexDirection: 'row', gap: 10, marginBottom: 22 },
+        chip: { flexDirection: 'row', alignItems: 'center', gap: 7, paddingHorizontal: 14, height: 40, borderRadius: radius.chip, backgroundColor: colors.surface, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.hairline },
+        chipText: { fontFamily: fonts.semibold, fontSize: 14, color: colors.text, letterSpacing: -0.2 },
         ratingRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
         ratingText: { fontFamily: fonts.semibold, fontSize: 13, color: colors.textSecondary, marginLeft: 6 },
         footer: { gap: 14 },

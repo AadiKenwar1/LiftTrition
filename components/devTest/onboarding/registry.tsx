@@ -50,6 +50,11 @@ import SummaryV1 from './versions/summary/V1'
 // and the green paywall CTA. No intro or preboard (Login opens; About You carries the privacy line), and no
 // second-chance step for now — it needs real gating + RevenueCat offering logic to be honest, so it's
 // deferred until that exists (V3/Refined designs remain below for reference).
+// Guardrails: Next is disabled until each step's required input exists (selection made / fields non-empty;
+// no preselected eating phase), and semantic checks reuse the production SettingsContext validators
+// (validateHeightWeight, validateTargetWeight — Alert-style) plus a 13+ age check on About You. About You
+// shares weight/unit and the phase screen shares target through flow.data, so Projection + Paywall show the
+// user's real numbers (mock fallbacks remain for standalone previews).
 // (An earlier always-on per-icon coloring pass read as scattered — reverted.)
 import AboutYouV4 from './versions/birthday/AboutYouV4'
 import ActivityV4 from './versions/activity/V4'
@@ -57,6 +62,9 @@ import GoalMotivationV4 from './versions/goalMotivation/V4'
 import GoalProjectionV4 from './versions/goalProjection/V4'
 import GoalV4 from './versions/goal/V4'
 import LoginV4 from './versions/login/V4'
+import LoginWordmark from './versions/login/Wordmark'
+import LoginMonogram from './versions/login/Monogram'
+import LoginValueProp from './versions/login/ValueProp'
 import MacrosV4 from './versions/macros/V4'
 import ObstaclesV4 from './versions/obstacles/V4'
 import PaceV4 from './versions/pace/V4'
@@ -113,7 +121,7 @@ const V4 = (Component: ComponentType): OnboardingVersion => ({ id: 'v4', label: 
  */
 
 export const PAGES: OnboardingPage[] = [
-    { key: 'login', label: 'Login (opener)', screen: 'Login · sign in', versions: [V3(LoginV3), V4(LoginV4)] },
+    { key: 'login', label: 'Login (opener)', screen: 'Login · sign in', versions: [V3(LoginV3), V4(LoginV4), { id: 'wordmark', label: 'Wordmark', Component: LoginWordmark }, { id: 'monogram', label: 'Monogram tile', Component: LoginMonogram }, { id: 'valueprop', label: 'Value-led', Component: LoginValueProp }] },
     { key: 'goalMotivation', label: 'Onboarding 1', screen: 'Goal & Motivation (new)', versions: [{ id: 'v1', label: 'Version 1', Component: GoalMotivation }, V3(GoalMotivationV3), V4(GoalMotivationV4)] },
     { key: 'obstacles', label: 'Onboarding 2', screen: 'Obstacles (new)', versions: [{ id: 'v1', label: 'Version 1', Component: Obstacles }, V3(ObstaclesV3), V4(ObstaclesV4)] },
     { key: 'intro', label: 'Onboarding 3', screen: 'Intro', versions: [{ id: 'v1', label: 'Version 1', Component: IntroV1 }, { id: 'refined', label: 'Refined', Component: IntroRefined }, V3(IntroV3)] },

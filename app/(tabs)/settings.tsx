@@ -5,7 +5,7 @@ import { powerSync } from '@/lib/powersync/system'
 import { getPendingUploadEstimate } from '@/lib/powersync/uploadQueueStats'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
-import { ChevronRight, CreditCard, Dumbbell, FileText, FlaskConical, HelpCircle, Moon, Scale, Sun, Utensils, Wrench } from 'lucide-react-native'
+import { ChevronRight, CreditCard, Dumbbell, FileText, FlaskConical, HelpCircle, Moon, Sun, Utensils, Wrench } from 'lucide-react-native'
 import { useEffect, useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
@@ -64,13 +64,17 @@ export default function SettingsScreen() {
         :   email[0] || 'U').toUpperCase()
     const isDark = colorScheme === 'dark'
 
-    const settingsOptions: SettingsOption[] = [
+    // Grouped per section (rendered by map) — never reference rows by array index; a removed row used to
+    // shift every section and crash on the out-of-range read.
+    const accountOptions: SettingsOption[] = [
         {
             icon: CreditCard,
             title: 'Subscription',
             subtitle: 'Manage your subscription plan',
             onPress: () => router.push('/settingsScreens/subscription'),
         },
+    ]
+    const goalOptions: SettingsOption[] = [
         {
             icon: Utensils,
             title: 'Adjust Nutrition',
@@ -78,23 +82,21 @@ export default function SettingsScreen() {
             onPress: () => router.push('/settingsScreens/adjustNutrition/adjustNutrition1'),
         },
         {
-            icon: Scale,
-            title: 'Adjust Measurements',
-            subtitle: 'Customize your measurements',
-            onPress: () => router.push('/settingsScreens/adjustMeasurements'),
-        },
-        {
             icon: Dumbbell,
             title: 'Adjust Training',
             subtitle: 'Personalize your workout plan',
             onPress: () => router.push('/settingsScreens/adjustTraining'),
         },
+    ]
+    const customizationOptions: SettingsOption[] = [
         {
             icon: FileText,
             title: 'Terms and Privacy',
             subtitle: 'Read the terms of service and privacy policy',
             onPress: () => router.push('/settingsScreens/termsAndPrivacy'),
         },
+    ]
+    const supportOptions: SettingsOption[] = [
         {
             icon: FlaskConical,
             title: 'How It Works',
@@ -109,10 +111,10 @@ export default function SettingsScreen() {
         },
     ]
 
-    const renderSettingItem = (option: SettingsOption, index: number) => {
+    const renderSettingItem = (option: SettingsOption) => {
         const Icon = option.icon
         return (
-            <TouchableOpacity key={index} style={styles.settingItem} onPress={option.onPress} activeOpacity={0.5}>
+            <TouchableOpacity key={option.title} style={styles.settingItem} onPress={option.onPress} activeOpacity={0.5}>
                 <View style={styles.iconContainer}>
                     <Icon size={22} color={colors.text} strokeWidth={2.5} />
                 </View>
@@ -176,37 +178,34 @@ export default function SettingsScreen() {
 
                 {/* Account Section */}
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Account</Text>
-                    {renderSettingItem(settingsOptions[0], 0)}
+                    <Text style={styles.sectionTitle}>Billing</Text>
+                    {accountOptions.map(renderSettingItem)}
                 </View>
 
                 {/* Goals Section */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Goal adjustments</Text>
-                    {renderSettingItem(settingsOptions[1], 1)}
-                    {renderSettingItem(settingsOptions[2], 2)}
-                    {renderSettingItem(settingsOptions[3], 3)}
+                    {goalOptions.map(renderSettingItem)}
                 </View>
 
                 {/* Customization Section */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Customization</Text>
                     {renderAppearanceItem()}
-                    {renderSettingItem(settingsOptions[4], 4)}
+                    {customizationOptions.map(renderSettingItem)}
                 </View>
 
                 {/* Support Section */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Support</Text>
-                    {renderSettingItem(settingsOptions[5], 5)}
-                    {renderSettingItem(settingsOptions[6], 6)}
+                    {supportOptions.map(renderSettingItem)}
                 </View>
 
                 {/* Developer Section — dev builds only */}
                 {__DEV__ && (
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>Developer</Text>
-                        {renderSettingItem({ icon: Wrench, title: 'Dev Hub', subtitle: 'Chart & component test harness', onPress: () => router.push('/devTest' as never) }, 99)}
+                        {renderSettingItem({ icon: Wrench, title: 'Dev Hub', subtitle: 'Chart & component test harness', onPress: () => router.push('/devTest' as never) })}
                     </View>
                 )}
             </ScrollView>

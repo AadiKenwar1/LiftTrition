@@ -49,11 +49,11 @@ export function computeBwUpdate(
 }
 
 /**
- * Get body weight progress data for graph (last 30 days or since onboarding completion)
+ * Get body weight progress data for graph (since onboarding completion, capped at the last 365 days)
  * Fills gaps with 0s for days without weight entries
  */
 export function getBodyWeightProgressData(bwProgress: Record<string, number>, onboardingCompletedAt?: Date): Array<{ day: string; value: number }> {
-    const maxDays = 30;
+    const maxDays = 365;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
