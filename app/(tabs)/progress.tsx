@@ -15,6 +15,15 @@ import { ChevronDown, ChevronLeft, ChevronRight, Dumbbell, Pencil, Scale, Utensi
 import { useEffect, useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
+// Top-card ranges — lift slices the last N logged lifts; nutrition slices the last N days (dense daily data).
+const LIFT_RANGES = [7, 14, 21] as const
+const NUTRITION_RANGES = [
+    { label: '1M', days: 30, spoken: '1 month' },
+    { label: '3M', days: 90, spoken: '3 months' },
+    { label: '6M', days: 180, spoken: '6 months' },
+    { label: '1Y', days: 365, spoken: '1 year' },
+] as const
+
 export default function ProgressScreen() {
     const { mode, settings, handleGetBodyWeightProgressData, bwProgress } = useSettings()
     const { handleGetMacroForWeek, nutritionData, nutritionStreak } = useNutrition()
@@ -24,8 +33,10 @@ export default function ProgressScreen() {
     const isDark = useColorScheme() === 'dark'
     const styles = useMemo(() => makeStyles(colors, isDark), [colors, isDark])
 
-    // Local state for graph selections — topRange drives the line card; the bar card pages by week.
-    const [topRange, setTopRange] = useState<7 | 14 | 21>(7)
+    // Local state for graph selections — each mode remembers its own top-card range; the bar card pages by week.
+    const [liftRange, setLiftRange] = useState<number>(7)
+    const [bwRange, setBwRange] = useState<number>(90)
+    const topRange = mode ? liftRange : bwRange
     const [bottomWeekOffset, setBottomWeekOffset] = useState(0)
     const [selectedExercise, setSelectedExercise] = useState<string>(lastExercise || 'Barbell Bench Press')
     const [selectedMacro, setSelectedMacro] = useState<'calories' | 'protein' | 'carbs' | 'fats'>('calories')
@@ -100,7 +111,11 @@ export default function ProgressScreen() {
 
     // Card headers (title + simple subtitle, shown inside each card)
     const topTitle = mode ? selectedExercise : 'Body Weight'
-    const topSubtitle = mode ? 'Estimated 1 rep max' : 'Daily'
+    const weightUnit = settings.unitSystem === 'imperial' ? 'lb' : 'kg'
+    const topSubtitle =
+        mode ? 'Estimated 1 rep max'
+        : settings.goalWeight > 0 ? `Goal ${parseFloat(settings.goalWeight.toFixed(1))} ${weightUnit}`
+        : 'Daily'
     const bottomTitle = mode ? 'Sets' : selectedMacro.charAt(0).toUpperCase() + selectedMacro.slice(1)
     const bottomSubtitle = mode ? 'Total per day' : 'Daily intake'
 
@@ -158,20 +173,24 @@ export default function ProgressScreen() {
                             </TouchableOpacity>
                         )}
                     </View>
-                    {/* Range strip — segmented 7/14/21 above the chart (selected chip carries the unit) */}
+                    {/* Range strip — 7/14/21 lifts (lift) or 1M/3M/6M/1Y (nutrition) above the chart */}
                     <View style={styles.rangeStrip}>
-                        {([7, 14, 21] as const).map((r) => {
-                            const selected = topRange === r
+                        {(mode ?
+                            LIFT_RANGES.map((r) => ({ key: `${r}`, days: r as number, chip: `${r}`, selectedChip: `${r} Lifts`, a11y: `Show last ${r} lifts` }))
+                        :   NUTRITION_RANGES.map((r) => ({ key: r.label, days: r.days as number, chip: r.label, selectedChip: r.label, a11y: `Show last ${r.spoken}` }))
+                        ).map(({ key, days, chip, selectedChip, a11y }) => {
+                            const selected = topRange === days
                             return (
                                 <TouchableOpacity
-                                    key={r}
+                                    key={key}
                                     style={[styles.rangeChip, selected ? { backgroundColor: accent } : { backgroundColor: colors.surfaceInset, borderColor: colors.hairline, borderWidth: StyleSheet.hairlineWidth }]}
-                                    onPress={() => setTopRange(r)}
+                                    onPress={() => (mode ? setLiftRange(days) : setBwRange(days))}
                                     activeOpacity={0.7}
+                                    hitSlop={{ top: 8, bottom: 8 }}
                                     accessibilityRole="button"
-                                    accessibilityLabel={`Show last ${r} ${mode ? 'lifts' : 'days'}`}
+                                    accessibilityLabel={a11y}
                                 >
-                                    <Text style={[styles.rangeChipText, { color: selected ? '#fff' : colors.textSecondary }]}>{selected ? `${r} ${mode ? 'Lifts' : 'Days'}` : `${r}`}</Text>
+                                    <Text style={[styles.rangeChipText, { color: selected ? '#fff' : colors.textSecondary }]}>{selected ? selectedChip : chip}</Text>
                                 </TouchableOpacity>
                             )
                         })}

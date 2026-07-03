@@ -178,7 +178,7 @@ export default function SettingsScreen() {
 
                 {/* Account Section */}
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Account</Text>
+                    <Text style={styles.sectionTitle}>Billing</Text>
                     {accountOptions.map(renderSettingItem)}
                 </View>
 

@@ -147,25 +147,28 @@ describe('Body Weight Functions', () => {
                 });
             });
 
-            describe('Onboarding more than 30 days ago', () => {
-                test('should show last 30 days when onboarding was more than 30 days ago', () => {
+            describe('Onboarding more than 30 days ago (within a year)', () => {
+                test('should start from onboarding date when within the last 365 days', () => {
                     const onboardingDate = daysAgo(45); // 45 days ago
                     const bwProgress: Record<string, number> = {
                         [getDateKey(daysAgo(35))]: 180.0,
                         [getDateKey(daysAgo(10))]: 182.0
                     };
-                    
+
                     const result = getBodyWeightProgressData(bwProgress, onboardingDate);
-                    
-                    // Should have 31 days (30 days ago through today, inclusive)
-                    expect(result.length).toBe(31);
-                    // Should not include the entry from 35 days ago
+
+                    // Should have 46 days (45 days ago through today, inclusive)
+                    expect(result.length).toBe(46);
+                    // No entry on the onboarding day itself
                     expect(result[0].value).toBe(0);
+                    // The entry from 35 days ago is inside the window
+                    const day35AgoEntry = result.find(entry => entry.value === 180.0);
+                    expect(day35AgoEntry).toBeDefined();
                 });
             });
 
             describe('Onboarding exactly 30 days ago', () => {
-                test('should show last 30 days when onboarding was exactly 30 days ago', () => {
+                test('should start from onboarding date when exactly 30 days ago', () => {
                     const onboardingDate = daysAgo(30);
                     const bwProgress: Record<string, number> = {
                         [getDateKey(daysAgo(25))]: 180.0
@@ -195,18 +198,18 @@ describe('Body Weight Functions', () => {
                     expect(result[0].value).toBe(180.0); // Earliest entry
                 });
 
-                test('should show last 30 days when earliest entry is more than 30 days ago', () => {
+                test('should start from earliest entry when within the last 365 days', () => {
                     const bwProgress: Record<string, number> = {
                         [getDateKey(daysAgo(40))]: 180.0,
                         [getDateKey(daysAgo(10))]: 182.0
                     };
-                    
+
                     const result = getBodyWeightProgressData(bwProgress);
-                    
-                    // Should have 31 days (30 days ago through today, inclusive)
-                    expect(result.length).toBe(31);
-                    // Should not include the entry from 40 days ago, starts with 0 until first entry
-                    expect(result[0].value).toBe(0);
+
+                    // Should have 41 days (40 days ago through today, inclusive)
+                    expect(result.length).toBe(41);
+                    // First point is the earliest weigh-in itself
+                    expect(result[0].value).toBe(180.0);
                     // Should find the entry from 10 days ago and carry it forward
                     const day10AgoEntry = result.find(entry => entry.value === 182.0);
                     expect(day10AgoEntry).toBeDefined();
@@ -238,18 +241,33 @@ describe('Body Weight Functions', () => {
                     [getDateKey(oldDate)]: 180.0,
                     [getDateKey(daysAgo(1))]: 182.0
                 };
-                
+
                 const result = getBodyWeightProgressData(bwProgress);
-                
-                // Should show last 30 days (31 days inclusive), not include 100 days ago
-                expect(result.length).toBe(31);
-                // Old entry not included, starts with 0 until first entry in range
-                expect(result[0].value).toBe(0);
+
+                // Window starts at the earliest entry (100 days ago, within 365)
+                expect(result.length).toBe(101);
+                expect(result[0].value).toBe(180.0);
                 // Should find yesterday's entry and carry it forward to today
                 const yesterdayEntry = result.find(entry => entry.value === 182.0);
                 expect(yesterdayEntry).toBeDefined();
                 // Today should carry forward yesterday's weight
                 expect(result[result.length - 1].value).toBe(182.0);
+            });
+
+            test('should clamp to the last 365 days when entries are older than a year', () => {
+                const bwProgress: Record<string, number> = {
+                    [getDateKey(daysAgo(400))]: 175.0,
+                    [getDateKey(daysAgo(10))]: 182.0
+                };
+
+                const result = getBodyWeightProgressData(bwProgress);
+
+                // Window is capped at 365 days back (366 entries inclusive of today)
+                expect(result.length).toBe(366);
+                // The 400-day-old entry is outside the window
+                expect(result[0].value).toBe(0);
+                const recentEntry = result.find(entry => entry.value === 182.0);
+                expect(recentEntry).toBeDefined();
             });
 
             test('should handle weight values at boundaries', () => {

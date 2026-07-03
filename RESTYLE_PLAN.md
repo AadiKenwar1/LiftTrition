@@ -72,7 +72,7 @@ For restyled files, adopt `const styles = useMemo(() => makeStyles(colors), [col
 - **`components/NutritionComponents/GoalProjectionChart.tsx`** — the V4 signature projection chart (react-native-svg, animated draw, reduced-motion aware). Variants: `lose` (green down-slope), `gain` (green up-slope), `maintain` (recomp: flat green weight line + rising blue strength line). Used by `adjustNutrition4`.
 
 ### Settings adjust flows (restyled to V4, June 2026)
-Both flows are headerless (`headerShown: false`, safe-area top pad `max(insets.top, 12) + 16`) with the V4 footer (neutral Back + primary CTA, 50/50) and `StepProgress` dots.
+Both flows use a MINIMAL native header (`headerShown: true, title: '', headerShadowVisible: false`) — just the back chevron on the screen's own background, so the back affordance matches every other settings screen while the V4 look survives (no duplicate title). Footer is a single full-width neutral CTA (no in-screen Back), and `StepProgress` dots carry the flow position.
 
 `app/settingsScreens/adjustNutrition/` is a 4-screen V4-styled flow: **1 goal** ("What's your goal?", Cut/Maintain/Bulk `OptionCard`s mapped to stored `lose/maintain/gain`, target-weight input, existing validators) → **2 pace** (unit-aware display, **storage stays lb/week** — `macroCalculation.tsx` assumes lbs, metric converts via `kgToLbs`) → **3 plan** (V4 macro grid, V4 macro colors `#FF9500/#FF5A5A/#EAB308/nutrition`, EditMacroGoalModal) → **4 projection** (`GoalProjectionChart` + stat cards, **save point**: Back + neutral Save Changes). Maintain skips pace (goalPace `'0'`); dots show 3 on that path, 4 otherwise.
 

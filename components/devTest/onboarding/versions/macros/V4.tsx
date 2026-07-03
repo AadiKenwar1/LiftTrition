@@ -46,7 +46,7 @@ export default function MacrosV4() {
                             <PressableScale style={styles.card} onPress={() => setEditingKind(kind)}>
                                 <Pencil size={15} color={colors.chevron} strokeWidth={2} style={styles.pencil} />
                                 <Icon size={18} color={color} strokeWidth={2.2} />
-                                <Text style={[styles.cardLabel, { color }]}>{label}</Text>
+                                <Text style={styles.cardLabel}>{label}</Text>
                                 <Text style={styles.cardValue}>{value}</Text>
                             </PressableScale>
                         </Animated.View>
@@ -66,7 +66,7 @@ function makeStyles(colors: Colors) {
         cell: { width: '47.5%' },
         card: { backgroundColor: colors.surface, borderRadius: radius.cardLg, padding: 16, gap: 6, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.hairline },
         pencil: { position: 'absolute', top: 12, right: 12 },
-        cardLabel: { fontFamily: fonts.semibold, fontSize: 13, color: colors.textSecondary, letterSpacing: -0.2, marginTop: 2 },
+        cardLabel: { fontFamily: fonts.semibold, fontSize: 13, color: colors.text, letterSpacing: -0.2, marginTop: 2 },
         cardValue: { fontFamily: fonts.extrabold, fontSize: 26, color: colors.text, letterSpacing: -0.5 },
         note: { fontFamily: fonts.medium, fontSize: 12, color: colors.textMuted, textAlign: 'center', letterSpacing: 0.2, marginTop: 18 },
     })

@@ -186,11 +186,11 @@ function StackLayout() {
                     <Stack.Screen name="nutritionScreens/editPhotoEntry" options={{ ...modalPresentation, headerShown: false }} />
                     <Stack.Screen name="settingsScreens/profile" options={{ headerShown: true, title: 'Profile', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="settingsScreens/subscription" options={{ headerShown: true, title: 'Subscription', headerBackTitle: 'Back' }} />
-                    <Stack.Screen name="settingsScreens/adjustTraining" options={{ headerShown: false }} />
-                    <Stack.Screen name="settingsScreens/adjustNutrition/adjustNutrition1" options={{ headerShown: false }} />
-                    <Stack.Screen name="settingsScreens/adjustNutrition/adjustNutrition2" options={{ headerShown: false }} />
-                    <Stack.Screen name="settingsScreens/adjustNutrition/adjustNutrition3" options={{ headerShown: false }} />
-                    <Stack.Screen name="settingsScreens/adjustNutrition/adjustNutrition4" options={{ headerShown: false }} />
+                    <Stack.Screen name="settingsScreens/adjustTraining" options={{ headerShown: true, title: '', headerBackTitle: 'Back', headerShadowVisible: false }} />
+                    <Stack.Screen name="settingsScreens/adjustNutrition/adjustNutrition1" options={{ headerShown: true, title: '', headerBackTitle: 'Back', headerShadowVisible: false }} />
+                    <Stack.Screen name="settingsScreens/adjustNutrition/adjustNutrition2" options={{ headerShown: true, title: '', headerBackTitle: 'Back', headerShadowVisible: false }} />
+                    <Stack.Screen name="settingsScreens/adjustNutrition/adjustNutrition3" options={{ headerShown: true, title: '', headerBackTitle: 'Back', headerShadowVisible: false }} />
+                    <Stack.Screen name="settingsScreens/adjustNutrition/adjustNutrition4" options={{ headerShown: true, title: '', headerBackTitle: 'Back', headerShadowVisible: false }} />
                     <Stack.Screen name="settingsScreens/termsAndPrivacy" options={{ headerShown: true, title: 'Terms & Privacy', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="settingsScreens/support" options={{ headerShown: true, title: 'Support', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="settingsScreens/howItWorks" options={{ headerShown: true, title: 'How It Works', headerBackTitle: 'Back' }} />

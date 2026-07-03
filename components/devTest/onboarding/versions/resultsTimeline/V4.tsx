@@ -5,7 +5,11 @@ import { StyleSheet, Text, View } from 'react-native'
 import Animated, { FadeInDown } from 'react-native-reanimated'
 import V4Screen from '../_shared/V4Screen'
 
-/** Dev-only V4 Results Timeline — NEUTRAL (color is reserved for the three hero beats). Numbered step. Inert. */
+/**
+ * Dev-only V4 Results Timeline — mostly neutral, with the ONE highlighted milestone (Week 2, "you're here")
+ * in workout-blue: its node, card, week label, and badge. Same restraint as Activity (only the focal element
+ * is colored) — this is the flow's blue beat in the otherwise green-heavy back half. Numbered step. Inert.
+ */
 const MILESTONES = [
     { week: 'Week 1', title: 'Energy up, habits forming', highlight: false },
     { week: 'Week 2', title: 'First visible changes', highlight: true },
@@ -18,6 +22,7 @@ export default function ResultsTimelineV4() {
     const styles = useMemo(() => makeStyles(colors), [colors])
     const router = useRouter()
     const accent = colors.text
+    const hi = colors.workout // blue focal color for the highlighted "you're here" milestone
 
     return (
         <V4Screen step={6} totalSteps={9} eyebrow="Step 7 of 9" title="You'll see results fast" subtitle="Stick with your plan and here's what to expect — most people notice changes by week 2." accent={accent} onBack={() => router.back()} onNext={() => {}} nextLabel="Continue">
@@ -25,13 +30,13 @@ export default function ResultsTimelineV4() {
                 {MILESTONES.map((m, i) => (
                     <Animated.View key={m.week} entering={FadeInDown.delay(i * 70).duration(300)} style={styles.row}>
                         <View style={styles.rail}>
-                            <View style={[styles.node, { borderColor: accent }, m.highlight && { backgroundColor: accent }]} />
+                            <View style={[styles.node, { borderColor: m.highlight ? hi : accent }, m.highlight && { backgroundColor: hi }]} />
                             {i < MILESTONES.length - 1 && <View style={[styles.line, { backgroundColor: colors.hairline }]} />}
                         </View>
-                        <View style={[styles.card, m.highlight && { borderColor: accent, backgroundColor: accent + '10' }]}>
-                            <Text style={[styles.week, { color: accent }]}>{m.week}</Text>
+                        <View style={[styles.card, m.highlight && { borderColor: hi, backgroundColor: hi + '10' }]}>
+                            <Text style={[styles.week, { color: m.highlight ? hi : accent }]}>{m.week}</Text>
                             <Text style={styles.cardTitle}>{m.title}</Text>
-                            {m.highlight && <Text style={styles.badge}>You're here in 14 days</Text>}
+                            {m.highlight && <Text style={[styles.badge, { color: hi }]}>You're here in 14 days</Text>}
                         </View>
                     </Animated.View>
                 ))}

@@ -1,11 +1,35 @@
 import Graph1 from '@/components/GraphComponents/Graph1'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
+import { formatDateMinimal, getDateKey } from '@/lib/utils/dateHelper'
 import { useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 import { Field, Segmented } from './DevControls'
 
-type DataKey = 'normal' | 'one' | 'two' | 'flat' | 'big' | 'empty'
+type DataKey = 'normal' | 'one' | 'two' | 'flat' | 'big' | 'empty' | 'daily' | 'short'
 type GoalKey = 'off' | 'in' | 'below' | 'above'
+
+/**
+ * Mirrors getBodyWeightProgressData output: one point per day ending today (real M/D day keys),
+ * "weigh-ins" every ~3 days with the value carried forward between — the honest steppy shape.
+ * Deterministic (sinusoid + slow cut drift) so scenarios look the same on every reload.
+ */
+function genDailyBodyWeight(days: number): { day: string; value: number }[] {
+    const out: { day: string; value: number }[] = []
+    const today = new Date()
+    let logged = 190
+    for (let i = days - 1; i >= 0; i--) {
+        const d = new Date(today)
+        d.setDate(d.getDate() - i)
+        const age = days - 1 - i
+        if (age % 3 === 0) {
+            const drift = -0.04 * age
+            const wiggle = Math.sin(age / 9) * 1.6 + Math.sin(age / 2.7) * 0.5
+            logged = Math.round((190 + drift + wiggle) * 10) / 10
+        }
+        out.push({ day: formatDateMinimal(getDateKey(d)), value: logged })
+    }
+    return out
+}
 
 const DATASETS: Record<DataKey, { day: string; value: number }[]> = {
     normal: [
@@ -41,6 +65,10 @@ const DATASETS: Record<DataKey, { day: string; value: number }[]> = {
         { day: '6/18', value: 378 },
     ],
     empty: [],
+    // Dense daily series (production shape) — slice by the Range control like progress.tsx does.
+    daily: genDailyBodyWeight(365),
+    // New account: 12 days of history — 3M+ ranges fall back to M/D ticks (no month boundaries yet).
+    short: genDailyBodyWeight(12),
 }
 
 function goalFor(data: { value: number }[], key: GoalKey): number | undefined {
@@ -60,9 +88,11 @@ export default function LineChartTest() {
     const [dataKey, setDataKey] = useState<DataKey>('normal')
     const [goalKey, setGoalKey] = useState<GoalKey>('off')
     const [mode, setMode] = useState(true)
-    const [range, setRange] = useState<7 | 14 | 21>(7)
+    const [range, setRange] = useState<number>(7)
 
-    const data = DATASETS[dataKey]
+    // Slice exactly like progress.tsx: the chart receives the last `range` points.
+    const full = DATASETS[dataKey]
+    const data = full.slice(Math.max(0, full.length - range))
     const goal = goalFor(data, goalKey)
 
     return (
@@ -78,6 +108,8 @@ export default function LineChartTest() {
                         { label: 'Flat', value: 'flat' },
                         { label: 'Big #s', value: 'big' },
                         { label: 'Empty', value: 'empty' },
+                        { label: 'BW daily (1Y)', value: 'daily' },
+                        { label: 'New user (12d)', value: 'short' },
                     ]}
                 />
             </Field>
@@ -97,7 +129,19 @@ export default function LineChartTest() {
                 <Segmented value={mode ? 'lift' : 'nutrition'} onChange={(v) => setMode(v === 'lift')} options={[{ label: 'Lift', value: 'lift' }, { label: 'Nutrition', value: 'nutrition' }]} />
             </Field>
             <Field label="Range">
-                <Segmented value={range} onChange={setRange} options={[{ label: '7', value: 7 }, { label: '14', value: 14 }, { label: '21', value: 21 }]} />
+                <Segmented
+                    value={range}
+                    onChange={setRange}
+                    options={[
+                        { label: '7', value: 7 },
+                        { label: '14', value: 14 },
+                        { label: '21', value: 21 },
+                        { label: '1M', value: 30 },
+                        { label: '3M', value: 90 },
+                        { label: '6M', value: 180 },
+                        { label: '1Y', value: 365 },
+                    ]}
+                />
             </Field>
 
             <View style={styles.chartCard}>

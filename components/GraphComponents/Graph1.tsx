@@ -2,7 +2,7 @@ import { FONT_FAMILY, useColorScheme, useColors } from '@/context/ThemeContext'
 import { Archivo_400Regular, Archivo_800ExtraBold } from '@expo-google-fonts/archivo'
 import { Poppins_400Regular, Poppins_800ExtraBold } from '@expo-google-fonts/poppins'
 import { Circle, Group, LinearGradient, useFont, vec } from '@shopify/react-native-skia'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ActivityIndicator, StyleSheet, View } from 'react-native'
 import { Area, CartesianChart, Line, useChartPressState } from 'victory-native'
 import ChartReadoutPill from './ChartReadoutPill'
@@ -15,10 +15,12 @@ function niceStep(raw: number): number {
     return (norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 5 ? 5 : 10) * mag
 }
 
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] as const
+
 interface Graph1Props {
     mode: boolean
     data: Array<{ day: string; value: number }>
-    selectedRange: 7 | 14 | 21
+    selectedRange: number
     goal?: number
     formatValue?: (value: number) => string
     showEndFlag?: boolean
@@ -47,6 +49,22 @@ export default function Graph1({ mode, data, selectedRange, goal, formatValue, s
         const id = setTimeout(() => setMinDelayDone(true), 200)
         return () => clearTimeout(id)
     }, [])
+
+    // Calendar-aligned x ticks for long ranges (3M+): indices of the "M/1" points (data is dense
+    // daily), thinned to ≤6 (a year's 12 boundaries → every other month). undefined → default ticks.
+    const monthTickValues = useMemo(() => {
+        if (selectedRange < 90) return undefined
+        const boundaries: number[] = []
+        let prevMonth = ''
+        data.forEach((d, i) => {
+            const m = d.day.split('/')[0]
+            if (i > 0 && m !== prevMonth) boundaries.push(i)
+            prevMonth = m
+        })
+        if (boundaries.length === 0) return undefined
+        const step = Math.ceil(boundaries.length / 6)
+        return boundaries.filter((_, k) => k % step === 0)
+    }, [data, selectedRange])
 
     // Unified y-scale shared by the domain and the y-axis ticks so they stay aligned.
     // Includes the goal (so its line shows) and adds one `step` of headroom above the data
@@ -105,13 +123,23 @@ export default function Graph1({ mode, data, selectedRange, goal, formatValue, s
                 padding={{ left: 10, right: 10, top: 6, bottom: 10 }}
                 domainPadding={{ left: 20, right: 20, top: 10, bottom: 10 }}
                 xAxis={{
-                    font: selectedRange === 7 ? font : null, // Only show labels when range is 7
-                    labelRotate: data.length > 3 ? 45 : 0,
+                    // Labels: lift shows them only at 7 (14/21 stay label-less); nutrition day-ranges (30+) always label.
+                    font: selectedRange === 7 || selectedRange >= 30 ? font : null,
+                    // 3M/6M/1Y tick exactly on month starts; 1M gets ~4 evenly spaced M/D ticks; lift keeps defaults.
+                    ...(monthTickValues ? { tickValues: [...monthTickValues] }
+                    : selectedRange >= 30 ? { tickCount: 4 }
+                    : {}),
+                    labelRotate: selectedRange >= 30 ? 0 : data.length > 3 ? 45 : 0,
                     labelOffset: 0,
                     labelColor: colors.textSecondary,
                     formatXLabel: (value) => {
                         if (value === undefined || value === null || value === 'undefined') {
                             return ''
+                        }
+                        // Month-boundary ticks always sit on an "M/1" point — label it with its month name.
+                        if (monthTickValues) {
+                            const m = parseInt(`${value}`.split('/')[0], 10)
+                            return MONTHS[m - 1] ?? `${value}`
                         }
                         return `${value}`
                     },

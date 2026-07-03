@@ -9,13 +9,14 @@ import PressableScale from '../_shared/PressableScale'
 import { useScreenTopPad } from '../_shared/useScreenTopPad'
 
 /**
- * Dev-only V4 Paywall — hero beat 3 of 3: the green (nutritionGradient) CTA is the ONLY saturated element,
+ * Dev-only V4 Paywall — hero beat 3 of 3: the blue (workoutGradient) CTA + selected-plan border form the
+ * one blue funnel (selected plan → button); feature chips stay neutral. Blue here matches the app's single
+ * canonical buy screen and rebalances the flow's green-heavy back half. The CTA is the ONLY saturated element,
  * reading as "go / positive"; everything else (chips, price cards, Back / Maybe later) is neutral. The
  * primary CTA now ADVANCES the flow (was inert in V3). Unit follows the About You choice.
  * NOTE: rating + testimonials are PLACEHOLDERS.
  */
 type Plan = 'monthly' | 'annual'
-const GOAL_LABEL = 'Lose Weight'
 const CALORIES = 2200
 const TRIAL = 14
 const targetDate = (() => {
@@ -23,11 +24,6 @@ const targetDate = (() => {
     d.setDate(d.getDate() + 70)
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 })()
-const TESTIMONIALS = [
-    { quote: 'Down 18 lbs in 3 months — the macro targets made it simple.', name: 'Jordan M.' },
-    { quote: 'The AI food scan saves me so much time. First strength PR last week.', name: 'Priya R.' },
-]
-
 export default function PaywallV4() {
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
@@ -42,8 +38,8 @@ export default function PaywallV4() {
     const unit = metric ? 'kg' : 'lb'
     const FEATURES = [
         { Icon: Database, label: 'Food DB' },
-        { Icon: Sparkles, label: 'AI Scan' },
         { Icon: BarChart3, label: 'Charts' },
+        { Icon: Sparkles, label: 'AI Scan' },
         { Icon: Zap, label: '& More' },
     ]
 
@@ -51,13 +47,15 @@ export default function PaywallV4() {
         <View style={styles.container}>
             <ScrollView style={styles.scroll} contentContainerStyle={[styles.content, { paddingTop: topPad }]} showsVerticalScrollIndicator={false}>
                 <Text style={[styles.eyebrow, { color: colors.textMuted }]}>Your plan</Text>
-                <Text style={styles.title}>Your {GOAL_LABEL} plan is ready</Text>
-                <Text style={styles.subtitle}>Unlock it to start today and stay on track to your goal.</Text>
+                <Text style={styles.title}>It's ready.</Text>
+                <Text style={styles.subtitle}>Your daily targets, workouts, and food tracking — tailored to your goal.</Text>
 
                 <View style={styles.planCard}>
                     <View style={styles.planRow}>
                         <Text style={styles.planLabel}>Goal</Text>
-                        <Text style={styles.planValue}>{goalWeight} {unit} by {targetDate}</Text>
+                        <Text style={styles.planValue}>
+                            {goalWeight} {unit} by {targetDate}
+                        </Text>
                     </View>
                     <View style={styles.divider} />
                     <View style={styles.planRow}>
@@ -70,41 +68,39 @@ export default function PaywallV4() {
                     {FEATURES.map(({ Icon, label }) => (
                         <View key={label} style={styles.feature}>
                             <Icon size={18} color={accent} strokeWidth={2.2} />
-                            <Text style={styles.featureText} numberOfLines={1}>{label}</Text>
+                            <Text style={styles.featureText} numberOfLines={1}>
+                                {label}
+                            </Text>
                         </View>
                     ))}
                 </View>
 
                 <View style={styles.pricingRow}>
                     {(['monthly', 'annual'] as const).map((p) => (
-                        <PressableScale key={p} style={[styles.priceCard, plan === p && { borderColor: accent }]} onPress={() => setPlan(p)}>
+                        <PressableScale key={p} style={[styles.priceCard, plan === p && { borderColor: colors.workout }]} onPress={() => setPlan(p)}>
                             <Text style={styles.priceName}>{p === 'monthly' ? 'Monthly' : 'Annual'}</Text>
                             <Text style={[styles.priceAmount, { color: accent }]}>{p === 'monthly' ? '$6.99' : '$39.99'}</Text>
                             <Text style={styles.priceNote}>{TRIAL} day free trial</Text>
-                            {p === 'annual' && <Text style={[styles.badge, { color: accent }]}>Best value</Text>}
+                            {p === 'annual' && <Text style={[styles.badge, { color: colors.workout }]}>Best value</Text>}
                         </PressableScale>
                     ))}
                 </View>
 
                 <TouchableOpacity style={styles.cta} onPress={() => flow?.goNext()} activeOpacity={0.85}>
-                    <LinearGradient colors={colors.nutritionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.ctaGradient}>
+                    <LinearGradient colors={colors.workoutGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.ctaGradient}>
                         <Text style={styles.ctaText}>Start {TRIAL}-Day Free Trial</Text>
                     </LinearGradient>
                 </TouchableOpacity>
 
                 <View style={styles.ratingRow}>
                     <Text style={styles.stars}>★★★★★</Text>
-                    <Text style={styles.ratingText}>4.8 · 12,000+ ratings</Text>
+                    <Text style={styles.ratingText}>5.0 on the App Store</Text>
                 </View>
 
-                {TESTIMONIALS.map((t) => (
-                    <View key={t.name} style={styles.testimonial}>
-                        <Text style={styles.testimonialStars}>★★★★★</Text>
-                        <Text style={styles.testimonialQuote}>“{t.quote}”</Text>
-                        <Text style={styles.testimonialName}>— {t.name}</Text>
-                    </View>
-                ))}
-                <Text style={styles.placeholderNote}>Sample reviews — replace with real App Store reviews before shipping.</Text>
+                <View style={styles.trust}>
+                    <Text style={styles.trustLine}>Cancel anytime · billed securely through Apple</Text>
+                    <Text style={styles.trustLine}>Your data is never sold or shared</Text>
+                </View>
 
                 <TouchableOpacity onPress={() => {}} activeOpacity={0.5} style={styles.restore}>
                     <Text style={styles.restoreText}>Restore Purchases</Text>
@@ -151,11 +147,8 @@ function makeStyles(colors: Colors) {
         ratingRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 12 },
         stars: { fontSize: 15, color: '#FFD93D', letterSpacing: 1 },
         ratingText: { fontFamily: fonts.semibold, fontSize: 14, color: colors.text },
-        testimonial: { backgroundColor: colors.surface, borderRadius: radius.cardLg, padding: 14, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.hairline, marginBottom: 10, gap: 6 },
-        testimonialStars: { fontSize: 12, color: '#FFD93D', letterSpacing: 1 },
-        testimonialQuote: { fontFamily: fonts.regular, fontSize: 14, color: colors.text, lineHeight: 20 },
-        testimonialName: { fontFamily: fonts.semibold, fontSize: 12, color: colors.textMuted },
-        placeholderNote: { fontFamily: fonts.regular, fontSize: 11, color: colors.textMuted, textAlign: 'center', fontStyle: 'italic', marginTop: 2, marginBottom: 14 },
+        trust: { alignItems: 'center', gap: 4, marginBottom: 16 },
+        trustLine: { fontFamily: fonts.medium, fontSize: 12, color: colors.textMuted, textAlign: 'center', letterSpacing: 0.2 },
         restore: { alignSelf: 'center', paddingVertical: 2 },
         restoreText: { fontFamily: fonts.semibold, fontSize: 15, color: colors.text, letterSpacing: -0.3 },
         footer: { flexDirection: 'row', gap: 12, paddingTop: 12 },

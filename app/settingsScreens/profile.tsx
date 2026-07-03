@@ -1,5 +1,5 @@
-import EditMacroGoalModal, { type MacroGoalKind } from '@/components/NutritionComponents/EditMacroGoalModal'
 import EditHeightModal from '@/components/NeutralComponents/EditHeightModal'
+import EditMacroGoalModal, { type MacroGoalKind } from '@/components/NutritionComponents/EditMacroGoalModal'
 import { useAuth } from '@/context/AuthContext'
 import { forceSignOut, isUploadFlushTimeoutError } from '@/context/AuthContext/functions/accountFunctions'
 import { useSettings } from '@/context/SettingsContext'
@@ -260,21 +260,27 @@ export default function ProfileScreen() {
                             <>
                                 <View style={styles.divider} />
 
-                                <View style={styles.infoRow}>
+                                <TouchableOpacity style={styles.infoRow} onPress={() => router.push('/settingsScreens/adjustNutrition/adjustNutrition1')} activeOpacity={0.7}>
                                     <Text style={styles.infoLabel}>Target Weight</Text>
-                                    <Text style={styles.infoValue}>
-                                        {settings.goalWeight} {settings.unitSystem === 'imperial' ? 'lbs' : 'kg'}
-                                    </Text>
-                                </View>
+                                    <View style={styles.editRow}>
+                                        <Text style={styles.infoValue}>
+                                            {settings.goalWeight} {settings.unitSystem === 'imperial' ? 'lbs' : 'kg'}
+                                        </Text>
+                                        <Pencil size={14} color={colors.textMuted} strokeWidth={2} />
+                                    </View>
+                                </TouchableOpacity>
 
                                 <View style={styles.divider} />
 
-                                <View style={styles.infoRow}>
+                                <TouchableOpacity style={styles.infoRow} onPress={() => router.push('/settingsScreens/adjustNutrition/adjustNutrition1')} activeOpacity={0.7}>
                                     <Text style={styles.infoLabel}>Goal Pace</Text>
-                                    <Text style={styles.infoValue}>
-                                        {settings.goalPace.toFixed(1)} {settings.unitSystem === 'imperial' ? 'lbs' : 'kg'}/week
-                                    </Text>
-                                </View>
+                                    <View style={styles.editRow}>
+                                        <Text style={styles.infoValue}>
+                                            {settings.goalPace.toFixed(1)} {settings.unitSystem === 'imperial' ? 'lbs' : 'kg'}/week
+                                        </Text>
+                                        <Pencil size={14} color={colors.textMuted} strokeWidth={2} />
+                                    </View>
+                                </TouchableOpacity>
                             </>
                         )}
                     </View>
