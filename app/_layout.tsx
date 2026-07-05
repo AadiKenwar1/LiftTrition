@@ -1,4 +1,5 @@
 import { AppLoadingScreen } from '@/components/GuardComponents/AppLoadingScreen'
+import { AppAssets } from '@/constants/assets'
 import { PowerSyncGuard } from '@/components/GuardComponents/PowerSyncGuard'
 import { SyncWatchdog } from '@/components/GuardComponents/SyncWatchdog'
 import { AuthProvider, useAuth } from '@/context/AuthContext'
@@ -93,7 +94,7 @@ export default Sentry.wrap(function RootLayout() {
     }, [error])
 
     useEffect(() => {
-        Promise.all([Asset.loadAsync(require('@/assets/images/LiftTritionAppIconV2.png')), Asset.loadAsync(require('@/assets/images/LTpng.png'))]).then(() => setLogoLoaded(true))
+        Promise.all([Asset.loadAsync(AppAssets.logoLight), Asset.loadAsync(AppAssets.logoDark)]).then(() => setLogoLoaded(true))
     }, [])
 
     useEffect(() => {

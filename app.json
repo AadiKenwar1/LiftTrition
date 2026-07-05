@@ -1,10 +1,10 @@
 {
     "expo": {
-        "name": "LIFTRI",
+        "name": "PLATES",
         "slug": "App",
         "version": "1.0.4",
         "orientation": "portrait",
-        "icon": "./assets/images/AppIcon.png",
+        "icon": "./assets/images/PlatesAppIcon.png",
         "scheme": "app",
         "userInterfaceStyle": "automatic",
         "newArchEnabled": true,

@@ -1,4 +1,5 @@
 import TermsAndPrivacyModal from '@/components/NeutralComponents/TermsAndPrivacyModal'
+import { logoForScheme } from '@/constants/assets'
 import { useAuth } from '@/context/AuthContext'
 import { fonts, radius, useColorScheme, useColors, useSetColorScheme, type Colors } from '@/context/ThemeContext'
 import Ionicons from '@expo/vector-icons/Ionicons'
@@ -21,7 +22,7 @@ export default function LoginScreen() {
     const styles = useMemo(() => makeStyles(colors), [colors])
     const insets = useSafeAreaInsets()
     const [termsVisible, setTermsVisible] = useState(false)
-    const logo = scheme === 'light' ? require('@/assets/images/LogoWhite.png') : require('@/assets/images/LogoBlack.png')
+    const logo = logoForScheme(scheme)
 
     return (
         <View style={styles.container}>
