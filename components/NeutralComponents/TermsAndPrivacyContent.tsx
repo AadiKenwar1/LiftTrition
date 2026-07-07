@@ -42,57 +42,29 @@ export default function TermsAndPrivacyContent() {
                 <Text style={styles.lastUpdated}>Last updated: March 2025</Text>
             </View>
 
-            <Section title="1. Acceptance of Terms">By downloading, accessing, or using Liftri ("the App"), you agree to be bound by these Terms of Service and our Privacy Policy. If you do not agree, please do not use the App.</Section>
+            <Section title="1. Acceptance of Terms">By downloading, accessing, or using PLATES ("the App"), you agree to be bound by these Terms of Service and our Privacy Policy. If you do not agree, please do not use the App.</Section>
 
-            <Section title="2. Eligibility and Minimum Age">
-                You must be at least 13 years old to use the App. If you are under 18, you should have your parent or guardian review these terms and help you create an account. By using the App, you represent that you meet these requirements.
-            </Section>
+            <Section title="2. Eligibility and Minimum Age">You must be at least 13 years old to use the App. If you are under 18, you should have your parent or guardian review these terms and help you create an account. By using the App, you represent that you meet these requirements.</Section>
 
-            <Section title="3. Description of Service">Liftri is a fitness and nutrition tracking app that helps you:</Section>
-            <BulletList
-                items={['Log and track workouts', 'Track nutrition and calories', 'Monitor body weight progress', 'Set and adjust nutrition goals based on your profile', 'Use AI to analyze food (premium)', 'Access a food database (premium)']}
-            />
+            <Section title="3. Description of Service">PLATES is a fitness and nutrition tracking app that helps you:</Section>
+            <BulletList items={['Log and track workouts', 'Track nutrition and calories', 'Monitor body weight progress', 'Set and adjust nutrition goals based on your profile', 'Use AI to analyze food (premium)', 'Access a food database (premium)']} />
 
             <Section title="4. Account and Data">To use the App, you create an account via Apple Sign In. We collect and store:</Section>
-            <BulletList
-                items={[
-                    'Personal information: age, biological sex, height, weight, birth date',
-                    'Fitness data: workout logs, nutrition entries, body weight history',
-                    'Settings: activity level, goals, macro targets',
-                    'Account credentials (managed by Apple)',
-                ]}
-            />
+            <BulletList items={['Personal information: age, biological sex, height, weight, birth date', 'Fitness data: workout logs, nutrition entries, body weight history', 'Settings: activity level, goals, macro targets', 'Account credentials (managed by Apple)']} />
 
-            <Section title="5. How We Use Your Data">
-                Your data is used to provide the App's features, including personalized nutrition calculations, workout tracking, and progress visualization. We use secure cloud storage (Supabase) and sync your data across devices. We do not sell
-                your personal data to third parties.
-            </Section>
+            <Section title="5. How We Use Your Data">Your data is used to provide the App's features, including personalized nutrition calculations, workout tracking, and progress visualization. We use secure cloud storage (Supabase) and sync your data across devices. We do not sell your personal data to third parties.</Section>
 
-            <Section title="6. AI and Third-Party Services">
-                Premium features may use OpenAI for food analysis. Food data may be sourced from third-party databases. Data sent to these services is used only to fulfill the requested feature. Please refer to OpenAI's and other providers' privacy
-                policies for additional details.
-            </Section>
+            <Section title="6. AI and Third-Party Services">Premium features may use OpenAI for food analysis. Food data may be sourced from third-party databases. Data sent to these services is used only to fulfill the requested feature. Please refer to OpenAI's and other providers' privacy policies for additional details.</Section>
 
-            <Section title="7. Subscriptions">
-                Liftri offers optional premium subscriptions (e.g., AI features, food database access). Subscriptions are processed through RevenueCat and Apple. You can manage or cancel your subscription in your device settings.
-            </Section>
+            <Section title="7. Subscriptions">PLATES offers optional premium subscriptions (e.g., AI features, food database access). Subscriptions are processed through RevenueCat and Apple. You can manage or cancel your subscription in your device settings.</Section>
 
             <Section title="8. Data Security">We use industry-standard security practices. Your data is stored in encrypted form and transmitted over secure connections. You are responsible for keeping your account credentials secure.</Section>
 
-            <Section title="9. Account Deletion">
-                You may delete your account at any time from Profile in Settings. Deleting your account permanently removes all your data from our systems, including workout logs, nutrition entries, and profile information. This action cannot be
-                undone.
-            </Section>
+            <Section title="9. Account Deletion">You may delete your account at any time from Profile in Settings. Deleting your account permanently removes all your data from our systems, including workout logs, nutrition entries, and profile information. This action cannot be undone.</Section>
 
-            <Section title="10. Disclaimer">
-                Liftri provides fitness and nutrition information for general guidance only. It is not a substitute for professional medical, nutritional, or fitness advice. Always consult a healthcare provider before making significant changes
-                to your diet or exercise routine.
-            </Section>
+            <Section title="10. Disclaimer">PLATES provides fitness and nutrition information for general guidance only. It is not a substitute for professional medical, nutritional, or fitness advice. Always consult a healthcare provider before making significant changes to your diet or exercise routine.</Section>
 
-            <Section title="11. Changes to This Policy">
-                These Terms and Privacy Policy may change from time to time. We will update the "Last updated" date when we do. Your continued use of the App after any changes means you accept the updated terms. If you do not agree to the changes,
-                you should stop using the App and delete your account.
-            </Section>
+            <Section title="11. Changes to This Policy">These Terms and Privacy Policy may change from time to time. We will update the "Last updated" date when we do. Your continued use of the App after any changes means you accept the updated terms. If you do not agree to the changes, you should stop using the App and delete your account.</Section>
 
             <Section title="12. Contact">For questions about these terms or your privacy, contact us through the Support option in Settings.</Section>
 

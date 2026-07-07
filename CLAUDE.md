@@ -1,25 +1,27 @@
-# LIFTRI — Claude Code Orientation
+# PLATES — Claude Code Orientation
 
 ## What This Is
-LIFTRI (LiftTrition) is a React Native / Expo app — a dual-mode fitness tracker for workout logging (with progressive overload algorithms) and nutrition tracking (with AI photo analysis). It targets iOS first (Apple Sign-In only), with Android support.
+
+PLATES (LiftTrition) is a React Native / Expo app — a dual-mode fitness tracker for workout logging (with progressive overload algorithms) and nutrition tracking (with AI photo analysis). It targets iOS first (Apple Sign-In only), with Android support.
 
 ---
 
 ## Tech Stack
-| Layer | Library | Version |
-|---|---|---|
-| Framework | Expo SDK | ~54 |
-| Language | TypeScript (strict) | ~5.9 |
-| Routing | Expo Router (file-based) | ~6 |
-| Local DB / Sync | PowerSync + SQLite | ^1.30 |
-| Backend | Supabase (Postgres + Auth + Edge Functions) | ^2.95 |
-| Auth | Supabase + Apple Sign-In (`expo-apple-authentication`) | — |
-| In-App Purchases | RevenueCat (`react-native-purchases`) | ^9 |
-| Charts | victory-native | ^41 |
-| Icons | lucide-react-native + @expo/vector-icons | — |
-| Animation | react-native-reanimated | ~4 |
-| Error Tracking | Sentry | ^8 |
-| Testing | Jest + jest-expo | ~29/~54 |
+
+| Layer            | Library                                                | Version |
+| ---------------- | ------------------------------------------------------ | ------- |
+| Framework        | Expo SDK                                               | ~54     |
+| Language         | TypeScript (strict)                                    | ~5.9    |
+| Routing          | Expo Router (file-based)                               | ~6      |
+| Local DB / Sync  | PowerSync + SQLite                                     | ^1.30   |
+| Backend          | Supabase (Postgres + Auth + Edge Functions)            | ^2.95   |
+| Auth             | Supabase + Apple Sign-In (`expo-apple-authentication`) | —       |
+| In-App Purchases | RevenueCat (`react-native-purchases`)                  | ^9      |
+| Charts           | victory-native                                         | ^41     |
+| Icons            | lucide-react-native + @expo/vector-icons               | —       |
+| Animation        | react-native-reanimated                                | ~4      |
+| Error Tracking   | Sentry                                                 | ^8      |
+| Testing          | Jest + jest-expo                                       | ~29/~54 |
 
 ---
 
@@ -55,7 +57,7 @@ eas build --platform ios --profile production
 app/                    Expo Router screens (file = route)
   (tabs)/               Main tab navigator (index, progress, settings)
   authScreens/          Login (Apple Sign-In only)
-  onboardingScreens/    10-step onboarding flow
+  onboardingScreens/    Onboarding flow (goals → obstacles → aboutYou → activity → goal → pace → timeline → plan → projection → paywall; pace is skipped when goalType is "maintain")
   nutritionScreens/     Nutrition logging modals/screens
   workoutScreens/       Workout logging modals/screens
   settingsScreens/      Settings + subscription
@@ -97,17 +99,20 @@ assets/                 Fonts, images, legal
 `GestureHandlerRootView → SafeAreaProvider → ThemeProvider → NavigationThemeProvider → AuthProvider → PowerSyncGuard → SyncWatchdog → SettingsProvider → BillingProvider → WorkoutProvider → NutritionProvider → StackLayout`
 
 **Route guard logic** (in `app/_layout.tsx`):
+
 1. No session → `authScreens/login`
-2. Session + no onboarding → `onboardingScreens/introduction`
+2. Session + no onboarding → `onboardingScreens/goals` (entry screen; `paywall` sets `onboardingComplete` + `onboardingCompletedAt` and `router.replace('/(tabs)')`)
 3. Session + onboarded + all contexts loaded → `(tabs)`
 
 **Offline-first data flow:**
+
 - All user data lives in a local SQLite DB managed by PowerSync.
 - PowerSync syncs bidirectionally with Supabase Postgres in the background.
 - App reads from local DB (fast, works offline); Connector uploads writes back to Supabase.
 - Sign-out is gated by `flushUploadsOrThrow` (Gate C) to avoid data loss.
 
 **AI / external calls:**
+
 - OpenAI vision and food DB (FatSecret) calls go through Supabase Edge Functions — no API keys in the client.
 
 ---
@@ -133,9 +138,9 @@ assets/                 Fonts, images, legal
 The app is mid-migration to the "Refined" design system. **Reuse the centralized tokens and shared primitives — never hardcode colors, fonts, or one-off card styles.** (Source of truth is the code below, not pixel values written in docs.)
 
 - **Design tokens live in `context/ThemeContext/`** (single import path: `@/context/ThemeContext`):
-  - `useColors()` — scheme-aware palette (surfaces, hairlines, text, accents, gradients); reacts to the dark/light toggle.
-  - `fonts` / `type` — typography; the `FONT_FAMILY` constant flips Poppins↔Archivo app-wide.
-  - `radius` / `spacing` — scheme-independent layout tokens.
+    - `useColors()` — scheme-aware palette (surfaces, hairlines, text, accents, gradients); reacts to the dark/light toggle.
+    - `fonts` / `type` — typography; the `FONT_FAMILY` constant flips Poppins↔Archivo app-wide.
+    - `radius` / `spacing` — scheme-independent layout tokens.
 - **Reuse shared primitives, don't re-roll them.** Cards, rings, and charts live in `components/GraphComponents/` (chart primitives, `ProgressWheel`) and the per-feature `*Components/` folders (`Log`, `Entry`, `DailyIntakeCard`, `ModeSwitcher`, `Fab`). If a pattern already exists, import it — divergence (e.g. two different card headers) comes from hand-rolling instead of reusing.
 - **Migration recipe** (restyling a not-yet-migrated screen): import `useColors` + `fonts`/`radius` → `const styles = useMemo(() => makeStyles(colors), [colors])` → replace hardcoded hexes with tokens and `Poppins_XXX` with `fonts.X` → verify in dark **and** light.
 - **Standing rule:** if you add or change a shared UI token, primitive, or pattern, update `RESTYLE_PLAN.md` in the same commit so the design doc tracks the code.

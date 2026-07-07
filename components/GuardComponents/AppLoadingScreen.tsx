@@ -1,5 +1,4 @@
-import { logoForScheme } from '@/constants/assets'
-import { fonts, useColorScheme, useColors, type Colors } from '@/context/ThemeContext'
+import { fonts, useColors, useLogo, type Colors } from '@/context/ThemeContext'
 import { Image } from 'expo-image'
 import { useEffect, useMemo, useRef } from 'react'
 import { Animated, Easing, StyleSheet, Text, View } from 'react-native'
@@ -10,7 +9,7 @@ type Props = {
 
 export function AppLoadingScreen({ message = 'Loading your profile...' }: Props) {
     const colors = useColors()
-    const scheme = useColorScheme()
+    const logo = useLogo()
     const styles = useMemo(() => makeStyles(colors), [colors])
     const rotation = useRef(new Animated.Value(0)).current
 
@@ -31,7 +30,7 @@ export function AppLoadingScreen({ message = 'Loading your profile...' }: Props)
         <View style={styles.container}>
             <Animated.View style={[styles.logoCircle, { transform: [{ rotate: spin }] }]}>
                 <Image
-                    source={logoForScheme(scheme)}
+                    source={logo}
                     style={styles.logo}
                     contentFit="contain"
                     priority="high"

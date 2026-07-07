@@ -179,7 +179,7 @@ export default function LogsModal() {
 
                                     {dailyGoal && (
                                         <Text style={styles.goalText}>
-                                            <Text style={styles.goalLabel}>LIFTRI suggested goal: </Text>
+                                            <Text style={styles.goalLabel}>PLATES suggested goal: </Text>
                                             {dailyGoal.weight} {weightUnit} × {dailyGoal.reps}
                                             {goalHitToday ? ' 🎉' : ''}
                                         </Text>

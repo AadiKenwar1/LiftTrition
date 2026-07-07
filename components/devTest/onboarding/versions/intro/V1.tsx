@@ -32,7 +32,7 @@ export default function IntroV1() {
                     <Image source={require('@/assets/images/AppIconPng.png')} style={styles.logoImage} contentFit="contain" priority="high" />
                 </View>
 
-                <Text style={styles.appName}>LIFTRI</Text>
+                <Text style={styles.appName}>PLATES</Text>
                 <Text style={styles.tagline}>Training, Nutrition, and Progress. Built together.</Text>
 
                 <View style={styles.grid}>

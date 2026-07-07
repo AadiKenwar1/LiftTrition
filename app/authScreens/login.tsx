@@ -1,7 +1,6 @@
 import TermsAndPrivacyModal from '@/components/NeutralComponents/TermsAndPrivacyModal'
-import { logoForScheme } from '@/constants/assets'
 import { useAuth } from '@/context/AuthContext'
-import { fonts, radius, useColorScheme, useColors, useSetColorScheme, type Colors } from '@/context/ThemeContext'
+import { fonts, logoForScheme, radius, useColorScheme, useColors, useSetColorScheme, type Colors } from '@/context/ThemeContext'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { Image } from 'expo-image'
 import { Moon, Star, Sun } from 'lucide-react-native'

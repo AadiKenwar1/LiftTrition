@@ -8,11 +8,6 @@
         "scheme": "app",
         "userInterfaceStyle": "automatic",
         "newArchEnabled": true,
-        "splash": {
-            "image": "./assets/images/AppIconPng.png",
-            "resizeMode": "contain",
-            "backgroundColor": "#121212"
-        },
         "ios": {
             "supportsTablet": false,
             "bundleIdentifier": "com.LiftTrition.App",
@@ -41,9 +36,18 @@
             "@journeyapps/react-native-quick-sqlite",
             "expo-font",
             [
+                "expo-splash-screen",
+                {
+                    "image": "./assets/images/LogoBlack.png",
+                    "imageWidth": 200,
+                    "resizeMode": "contain",
+                    "backgroundColor": "#121212"
+                }
+            ],
+            [
                 "expo-image-picker",
                 {
-                    "photosPermission": "Allow Liftri to access your photos to log meals from your library.",
+                    "photosPermission": "Allow PLATES to access your photos to log meals from your library.",
                     "microphonePermission": false
                 }
             ],

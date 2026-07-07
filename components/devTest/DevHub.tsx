@@ -24,7 +24,17 @@ const GROUPS: { title: string; items: { label: string; route: string }[] }[] = [
     },
     {
         title: 'Components',
-        items: [{ label: 'Activity Banner', route: '/devTest/activityBanner' }],
+        items: [
+            { label: 'Activity Banner', route: '/devTest/activityBanner' },
+            { label: 'App Loading Screen', route: '/devTest/loadingScreen' },
+        ],
+    },
+    {
+        title: 'Mockups (App Store)',
+        items: [
+            { label: 'Progress — Workout', route: '/devTest/mockup?scene=progress&mode=lift' },
+            { label: 'Progress — Nutrition', route: '/devTest/mockup?scene=progress&mode=nutrition' },
+        ],
     },
     {
         title: 'Onboarding',

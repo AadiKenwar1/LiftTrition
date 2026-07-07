@@ -1,4 +1,4 @@
-# LIFTRI — Architecture Reference
+# PLATES — Architecture Reference
 
 > Deep-dive reference document. For the quick session orientation, see CLAUDE.md.
 
@@ -841,7 +841,7 @@ eas build --platform android --profile production  # Google Play
 
 **`app.json` key config:**
 
-- App name: **LIFTRI**, slug: **App**, version: **1.0.4**
+- App name: **PLATES**, slug: **App**, version: **1.0.4**
 - iOS: `com.LiftTrition.App`, Sign In with Apple entitlement
 - Android: edge-to-edge, adaptive icon
 - Sentry DSN configured in app.json (not in env)

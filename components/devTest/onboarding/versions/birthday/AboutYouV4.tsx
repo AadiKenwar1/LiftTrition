@@ -1,6 +1,6 @@
 import { validateHeightWeight } from '@/context/SettingsContext/functions/validator'
-import { cmToInches, feetInchesToInches, inchesToCm, inchesToFeetInches, kgToLbs, lbsToKg } from '@/lib/utils/unitConversions'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
+import { cmToInches, feetInchesToInches, inchesToCm, inchesToFeetInches, kgToLbs, lbsToKg } from '@/lib/utils/unitConversions'
 import { useRouter } from 'expo-router'
 import { ShieldCheck } from 'lucide-react-native'
 import { useMemo, useState } from 'react'
@@ -64,7 +64,7 @@ export default function AboutYouV4() {
         const m = now.getMonth() - birthDate.getMonth()
         if (m < 0 || (m === 0 && now.getDate() < birthDate.getDate())) age--
         if (age < 13) {
-            Alert.alert('Age Requirement', 'You must be at least 13 years old to use LIFTRI.', [{ text: 'OK' }])
+            Alert.alert('Age Requirement', 'You must be at least 13 years old to use PLATES.', [{ text: 'OK' }])
             return false
         }
         flow?.setData('unit', unitSystem)

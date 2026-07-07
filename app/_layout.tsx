@@ -1,12 +1,11 @@
 import { AppLoadingScreen } from '@/components/GuardComponents/AppLoadingScreen'
-import { AppAssets } from '@/constants/assets'
 import { PowerSyncGuard } from '@/components/GuardComponents/PowerSyncGuard'
 import { SyncWatchdog } from '@/components/GuardComponents/SyncWatchdog'
 import { AuthProvider, useAuth } from '@/context/AuthContext'
 import { BillingProvider, useBilling } from '@/context/BillingContext'
 import { NutritionProvider, useNutrition } from '@/context/NutritionContext'
 import { SettingsProvider, useSettings } from '@/context/SettingsContext'
-import { ThemeProvider, useColorScheme, useColors } from '@/context/ThemeContext'
+import { brandAssets, ThemeProvider, useColorScheme, useColors } from '@/context/ThemeContext'
 import { useWorkout, WorkoutProvider } from '@/context/WorkoutContext'
 import { Archivo_400Regular, Archivo_500Medium, Archivo_600SemiBold, Archivo_700Bold, Archivo_800ExtraBold } from '@expo-google-fonts/archivo'
 import { Poppins_100Thin, Poppins_100Thin_Italic, Poppins_200ExtraLight, Poppins_200ExtraLight_Italic, Poppins_300Light, Poppins_300Light_Italic, Poppins_400Regular, Poppins_400Regular_Italic, Poppins_500Medium, Poppins_500Medium_Italic, Poppins_600SemiBold, Poppins_600SemiBold_Italic, Poppins_700Bold, Poppins_700Bold_Italic, Poppins_800ExtraBold, Poppins_800ExtraBold_Italic, Poppins_900Black, Poppins_900Black_Italic } from '@expo-google-fonts/poppins'
@@ -47,7 +46,7 @@ function AppColumn({ children }: PropsWithChildren) {
 
 export { ErrorBoundary } from 'expo-router'
 
-// Ensure that reloading on `/modal` keeps a back button present.
+// Anchor the stack's initial route so deep-links/reloads keep a back button present.
 export const unstable_settings = { initialRouteName: '(tabs)' }
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -94,7 +93,7 @@ export default Sentry.wrap(function RootLayout() {
     }, [error])
 
     useEffect(() => {
-        Promise.all([Asset.loadAsync(AppAssets.logoLight), Asset.loadAsync(AppAssets.logoDark)]).then(() => setLogoLoaded(true))
+        Promise.all([Asset.loadAsync(brandAssets.logoLight), Asset.loadAsync(brandAssets.logoDark)]).then(() => setLogoLoaded(true))
     }, [])
 
     useEffect(() => {
@@ -167,7 +166,6 @@ function StackLayout() {
 
                 <Stack.Protected guard={!!session && allContextsLoaded && settings.onboardingComplete}>
                     <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                    <Stack.Screen name="modal" options={modalPresentation} />
                     <Stack.Screen name="workoutScreens/addWorkoutModal" options={{ ...modalPresentation, title: 'Add Workout', headerShown: false }} />
                     <Stack.Screen name="workoutScreens/archiveModal" options={{ ...modalPresentation, headerShown: false }} />
                     <Stack.Screen name="workoutScreens/exerciseScreen" options={{ title: 'Exercises', headerShown: true, headerBackTitle: 'Back' }} />
@@ -203,6 +201,8 @@ function StackLayout() {
                     <Stack.Screen name="devTest/onboardingPage" options={{ headerShown: true, title: 'Onboarding', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/onboardingPreview" options={{ headerShown: false, gestureEnabled: true }} />
                     <Stack.Screen name="devTest/onboardingFlow" options={{ headerShown: false, gestureEnabled: true }} />
+                    <Stack.Screen name="devTest/loadingScreen" options={{ headerShown: false, gestureEnabled: true }} />
+                    <Stack.Screen name="devTest/mockup" options={{ headerShown: false, gestureEnabled: true }} />
                 </Stack.Protected>
             </Stack>
         </AppColumn>

@@ -50,7 +50,7 @@ export default function HowItWorksScreen() {
             <View style={styles.headerIconCircle}>
                 <FlaskConical size={38} color={colors.text} strokeWidth={2} />
             </View>
-            <Text style={styles.headerTitle}>How LIFTRI Works</Text>
+            <Text style={styles.headerTitle}>How PLATES Works</Text>
             <Text style={styles.headerSubtitle}>Short overview of how we calculate your nutrition targets, fatigue score, and strength chart.</Text>
 
             {SECTIONS.map((section) => {
