@@ -126,7 +126,7 @@ assets/                 Fonts, images, legal
 - **Icons:** Prefer `lucide-react-native`; fallback to `@expo/vector-icons` (Ionicons, MaterialCommunityIcons).
 - **Dates:** Always use `getDateKey(date)` from `lib/utils/dateHelper` for YYYY-MM-DD keys. Use `en-CA` locale to ensure consistent ISO format.
 - **UUIDs:** `react-native-uuid` — never use `Math.random()` for IDs.
-- **Graph data:** All graph functions return `{ day: string, value: number }[]`. Downsampling via `downsampleDataPreserveEndpoints`.
+- **Graph data:** All graph functions return `{ day: string, value: number }[]`. Charts pre-slice data by range in `progress.tsx`; `downsampleDataPreserveEndpoints` (`lib/utils/downsample`) is available for long series but is not currently in the live render path.
 - **Persistence pattern:** Write to PowerSync via `powerSync.execute()` or `writeTransaction()`. Contexts use a `persistDirty` flag + `useEffect` for debounced saves.
 - **Unit system:** All values stored in the user's chosen unit system (imperial or metric). Convert at boundaries with `lib/utils/unitConversions`.
 - **Ordering:** Workouts/exercises use explicit `order` integer (0 = first/newest). Decremented on insert to bump others.
