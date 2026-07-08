@@ -13,4 +13,5 @@ export interface BillingContextInterface {
     annualPackage: PurchasesPackage | null
     priceInfo: { price: string; period: string } | null
     annualPriceInfo: { price: string; period: string } | null
+    annualSavingsPercent: number | null
 }

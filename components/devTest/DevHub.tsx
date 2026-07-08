@@ -27,6 +27,7 @@ const GROUPS: { title: string; items: { label: string; route: string }[] }[] = [
         items: [
             { label: 'Activity Banner', route: '/devTest/activityBanner' },
             { label: 'App Loading Screen', route: '/devTest/loadingScreen' },
+            { label: 'Spinner Lab', route: '/devTest/spinnerLab' },
         ],
     },
     {

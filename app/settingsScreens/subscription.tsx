@@ -31,7 +31,7 @@ export default function SubscriptionScreen() {
     const [termsVisible, setTermsVisible] = useState(false)
     const [plan, setPlan] = useState<Plan>('annual')
     const [purchasing, setPurchasing] = useState(false)
-    const { loading, hasPremium, monthlyPackage, annualPackage, priceInfo, annualPriceInfo, purchasePackage, restorePurchases, error } = useBilling()
+    const { loading, hasPremium, monthlyPackage, annualPackage, priceInfo, annualPriceInfo, annualSavingsPercent, purchasePackage, restorePurchases, error } = useBilling()
 
     // Block leaving (header back, swipe, hardware back) while a purchase is in progress.
     useEffect(() => {
@@ -116,7 +116,7 @@ export default function SubscriptionScreen() {
                         <Text style={styles.priceName}>Annual</Text>
                         <Text style={[styles.priceAmount, { color: accent }]}>{annualPriceInfo?.price ?? '$39.99'}</Text>
                         <Text style={styles.priceNote}>{TRIAL} day free trial</Text>
-                        <Text style={[styles.badge, { color: colors.workout }]}>Best value</Text>
+                        <Text style={[styles.badge, { color: colors.workout }]}>{`Save ${annualSavingsPercent ?? 52}%`}</Text>
                     </PressableScale>
                 </View>
 

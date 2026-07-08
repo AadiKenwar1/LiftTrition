@@ -202,6 +202,7 @@ function StackLayout() {
                     <Stack.Screen name="devTest/onboardingPreview" options={{ headerShown: false, gestureEnabled: true }} />
                     <Stack.Screen name="devTest/onboardingFlow" options={{ headerShown: false, gestureEnabled: true }} />
                     <Stack.Screen name="devTest/loadingScreen" options={{ headerShown: false, gestureEnabled: true }} />
+                    <Stack.Screen name="devTest/spinnerLab" options={{ headerShown: false, gestureEnabled: true }} />
                     <Stack.Screen name="devTest/mockup" options={{ headerShown: false, gestureEnabled: true }} />
                 </Stack.Protected>
             </Stack>
