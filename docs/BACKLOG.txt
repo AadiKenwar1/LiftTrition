@@ -5,56 +5,43 @@ Delete lines as they get done.
 
 BILLING
 -------
-- Cache last-known hasPremium in AsyncStorage (per-user key), hydrate at
-  startup, overwrite when RevenueCat responds. Then remove billingLoaded from
-  the allContextsLoaded gate in app/_layout.tsx. Rationale: the gate holds the
-  whole app on RevenueCat (15s worst case), and when RevenueCat fails fast the
-  gate opens with the wrong state anyway - so it only prevents flicker on the
-  happy path. Caching keeps flicker prevention without the startup cost.
-  (Offline behavior of the RevenueCat listener is unverified - test on device
-  whether cached entitlements arrive without network before assuming lockout.)
+- Cache last-known hasPremium in AsyncStorage and hydrate it at startup, then
+  remove billingLoaded from the startup gate in app/_layout.tsx. Kills the 15s
+  worst-case launch without losing flicker prevention.
 
 APP STORE POLISH
 ----------------
-- Add expo-camera plugin to app.json with a purpose-specific cameraPermission
-  string. Builds currently get the generic auto-applied default ("Allow PLATES
-  to access your camera"), which works fine but is weaker under guideline
-  5.1.1 than a purpose-specific one. Low priority.
+- Add expo-camera plugin to app.json with a purpose-specific permission
+  string (current default wording is generic). Low priority.
 
-DATA INTEGRITY (CODE_REVIEW section 5)
---------------------------------------
-- Fail-closed getPendingUploadEstimate plus a shape-pinning test. An unknown
-  SDK stats shape currently reads as 0 pending and lets sign-out wipe unsynced
-  data. Smallest fix, highest stakes on this list: return null on unknown
-  shapes (flushUploadsOrThrow already treats null as not-empty).
-- Connector silent PATCH drop (Connector.ts line 194): insert the settings row
-  instead of bare return. Reachable scenario is narrow (remote row missing, or
-  RLS silently blocking the lookup, while a local edit exists), but when it
-  hits, the loss is silent. Cheap insurance.
-- Offline first-launch timeout: contexts await waitForFirstSync() bare with no
-  timeout anywhere; a fresh install with no connectivity can spin forever.
-  Race against a timeout and add a retry state. Verify on device first.
-- PowerSync watch queries (or a foreground refresh). Fresh sign-in does pull
-  remote data (loads run after first sync), but changes that sync down
-  mid-session are invisible until app restart. Matters once multi-device is
-  a story.
+DATA INTEGRITY
+--------------
+- getPendingUploadEstimate: return null on unknown SDK shapes instead of 0,
+  plus a test. Today an unknown shape lets sign-out wipe unsynced data.
+- Connector.ts line 194: insert the settings row instead of silently dropping
+  the PATCH.
+- Add a timeout + retry state around waitForFirstSync() so a fresh offline
+  install can't spin forever. Verify on device first.
+- Adopt PowerSync watch queries; mid-session remote changes are currently
+  invisible until restart. Matters once multi-device is a story.
 
-PERFORMANCE (CODE_REVIEW section 4)
------------------------------------
-- Memoize provider value for Auth/Settings/Workout/Nutrition; useCallback the
-  NutritionContext and Settings handlers. The providers are nested, so any
-  outer provider state change (e.g. every RevenueCat customerInfo update)
-  re-runs the inner providers and hands every consumer a fresh value object.
-- React.memo the list rows (Log, Entry, ScrollableList row); memoize
-  filteredData/renderItem in the 1,318-item exercise pickers; hoist per-render
-  filter/sort (workoutScreen, exerciseScreen, nutritionScreen, logsModal,
-  DailyIntakeCard). The exercise picker re-filters and re-sorts all 1,318
-  items on every keystroke today.
+PERFORMANCE
+-----------
+- Memoize provider values for Auth/Settings/Workout/Nutrition and useCallback
+  the Nutrition/Settings handlers.
+- React.memo list rows (Log, Entry, ScrollableList) and memoize the exercise
+  picker's filter/renderItem - it re-sorts all 1,318 items per keystroke.
+
+THEMING
+-------
+- Empty-state icon circles use colors.surface, which reads as a white badge
+  in light mode. Add per-accent chip tokens (like iconChipBg) and extract an
+  EmptyStateIcon primitive - the pattern is copy-pasted in ~10 files.
 
 SECURITY
 --------
-- SecureStore-backed Supabase session storage (with AsyncStorage fallback).
-  Refresh token is plaintext today. Requires a dev-client/EAS rebuild.
+- Move the Supabase session to expo-secure-store (AsyncStorage fallback);
+  refresh token is plaintext today. Needs a dev-client rebuild.
 
 CLEANUP
 -------
@@ -62,14 +49,12 @@ CLEANUP
   react-native-draggable-flatlist, react-native-inner-shadow, expo-web-browser.
 - Delete orphan settingsScreens/adjustMeasurements.tsx and empty dirs
   (lib/theme/, settingsScreens/createExercise/, exerciseLibrary/data/).
-- Rename settings.mode -> domainMode (dedicated migration - persisted column).
+- Rename settings.mode -> domainMode (persisted column - needs a migration).
 - Consolidate icons onto lucide-react-native (~15 files still on
   @expo/vector-icons).
-- Fix pre-existing failures: ~31 tsc errors (stale Sentry option,
-  devStatsModal effect return, BillingContext line 100 listener type, exclude
-  lib/supabase/functions from tsconfig) and 6 failing jest suites (including
-  the 0-byte openAI.test.ts).
-- Decide RESTYLE_PLAN.md retirement once the restyle is declared done (then
-  strip its two CLAUDE.md references).
-- Move embedded workoutScreen.tsx / nutritionScreen.tsx out of app/ route
-  folders into components/.
+- Fix pre-existing failures: ~31 tsc errors and 6 failing jest suites
+  (details in CODE_REVIEW.md section 2).
+- Retire RESTYLE_PLAN.md once the restyle is done (strip its two CLAUDE.md
+  references).
+- Move embedded workoutScreen.tsx / nutritionScreen.tsx out of app/ into
+  components/.
