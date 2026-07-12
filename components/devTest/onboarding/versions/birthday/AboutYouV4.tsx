@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router'
 import { ShieldCheck } from 'lucide-react-native'
 import { useMemo, useState } from 'react'
 import { Alert, Keyboard, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from 'react-native'
-import CompactDatePicker from '../_shared/CompactDatePicker'
+import CalendarDatePopup from '../_shared/CalendarDatePopup'
 import { useOnboardingFlow } from '../_shared/flowContext'
 import PressableScale from '../_shared/PressableScale'
 import V4Screen from '../_shared/V4Screen'
@@ -88,7 +88,7 @@ export default function AboutYouV4() {
 
                     <Text style={styles.label}>Date of birth</Text>
                     <View style={{ marginBottom: 20 }}>
-                        <CompactDatePicker selectedDate={birthDate} onDateChange={setBirthDate} accent={accent} />
+                        <CalendarDatePopup selectedDate={birthDate} onDateChange={setBirthDate} accent={accent} />
                     </View>
 
                     <Text style={styles.label}>Height & weight</Text>

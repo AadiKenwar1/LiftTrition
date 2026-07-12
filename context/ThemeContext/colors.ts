@@ -11,7 +11,9 @@ export const palettes = {
         // Surfaces — deeper cool-slate canvas so white cards clearly lift off the page
         background: '#DFE2E8',
         surface: '#FBFBFC',
-        surfaceInset: '#DFE2E8',
+        // Middle tier between background and surface (mirrors dark) so insets read both
+        // nested inside white cards AND as quiet grouping panels on the background.
+        surfaceInset: '#E9EBF0',
         toggleTrack: '#ECEEF2',
         // Lines — strengthened so card edges, dividers, and gridlines are actually visible
         border: '#CBCED7',

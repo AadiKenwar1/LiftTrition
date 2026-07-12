@@ -1,0 +1,247 @@
+PLATES — Performance Audit
+Date: 2026-07-11
+Method: 12 parallel read-only agents, each scoped to one slice of the codebase
+(workout screens, workout logic, nutrition screens, nutrition logic, settings
+screens, settings/billing logic, onboarding, auth/startup, progress/charts,
+home/shared UI, PowerSync data layer, cross-context architecture).
+
+TLDR: The app's performance problem is mostly one architectural flaw repeated
+four times — unmemoized context provider values — amplified by a slow date
+helper sitting in every hot loop. Fixing roughly five things would transform
+how the app feels.
+
+================================================================================
+TIER 1 — SYSTEMIC ROOT CAUSES (fix first; everything else benefits)
+================================================================================
+
+1. Four of six context providers pass unmemoized values — AuthContext is the
+   cascade root.
+   Every provider gets `children` as a stable element, so the ONLY re-render
+   path is context value identity — and four providers mint a new value object
+   every render:
+
+   - context/AuthContext/index.tsx:60 — worst offender by position: all four
+     data providers consume useAuth(), and Supabase fires TOKEN_REFRESHED
+     hourly and on every app foreground. One token refresh currently
+     re-renders essentially every context consumer in the app.
+   - context/NutritionContext/index.tsx:129 — value AND all ~9 handlers
+     rebuilt per render (no useCallback anywhere); this concretely kills the
+     useMemos in progress.tsx and DailyIntakeCard that list those handlers as
+     dependencies.
+   - context/WorkoutContext/index.tsx:566 — handlers are properly
+     useCallback'd but the value object isn't memoized, so none of that
+     stability reaches consumers. ~30 fields, 7 independent state slices; a
+     single set-log write re-renders every workout screen and the progress
+     charts.
+   - context/SettingsContext/index.tsx:159 — widest fan-out (~30 consumer
+     files), plus handleGetBodyWeightProgressData (line 82) has no
+     useCallback, making the progress screen's body-weight memo dead on
+     arrival (a ~365-iteration series rebuild runs on renders that shouldn't
+     need it).
+
+   BillingContext and ThemeContext are already done correctly — they are the
+   in-repo reference pattern to copy.
+   Beyond memoizing: split Workout and Nutrition into stable ACTIONS + churning
+   STATE slices (e.g. logs separate from workouts; selectedDate separate from
+   nutritionData).
+
+2. getDateKey uses toLocaleDateString("en-CA") in every hot loop.
+   lib/utils/dateHelper.ts:25 — flagged independently by three agents. Intl
+   formatting is among the slowest date ops on Hermes, and it is called once
+   PER log/entry inside fatigue, volume, progression, graph, and daily-filter
+   scans. Replace the body with a manual `${y}-${MM}-${DD}` build from
+   getFullYear/getMonth/getDate (same output, no Intl) — a one-line change
+   that speeds up every data computation in the app.
+
+3. Full-history SELECT * loads at startup.
+   - context/WorkoutContext/database/powersyncStore.ts:82 — entire logs table
+   - NutritionContext powersyncStore — all nutrition entries + all ingredients
+   - SettingsContext powersyncStore:49 — all weight_progress rows
+   Everything is pulled into memory in full, then every feature does
+   O(all-history) scans — even though fatigue needs 30 days, graphs need 21
+   dates, and the home screen needs one day. Cost grows unbounded with user
+   tenure. Fix: window the queries (e.g. last ~180 days, lazy-load older) and
+   select only needed columns.
+
+================================================================================
+TIER 2 — HIGH-IMPACT, LOCALIZED
+================================================================================
+
+4. Charts remount the Skia canvas on every data change.
+   components/GraphComponents/Graph1.tsx:39 and BarChart.tsx:61 build a `key`
+   string from EVERY data point each render and put it on <CartesianChart> —
+   so any change unmounts/rebuilds the whole canvas and re-triggers a
+   deliberate 200ms spinner. Range switches that should be cheap prop updates
+   blank the chart instead. Separately, body-weight mode gap-fills to one
+   point per day (365 dense points on 1Y) and downsampleDataPreserveEndpoints
+   (lib/utils/downsample.ts) is wired into ZERO live paths.
+   Fix: key on theme colors only, useMemo yScaleInfo, downsample ranges >= 90
+   days, gate the 200ms spinner to first mount only. Also: chart scrubbing
+   fires a React setState per touched data point (ChartReadoutPill.tsx:33) —
+   throttle or keep on UI thread.
+
+5. Cold start is three stacked serial waits.
+   a) ~24 font faces block first paint (app/_layout.tsx:62) — 18 Poppins +
+      5 Archivo + FontAwesome, when the first screens use ~4 weights.
+   b) PowerSyncGuard waits for FULL SERVER SYNC instead of local-DB-ready
+      (components/GuardComponents/PowerSyncGuard.tsx:24) — the provider tree
+      doesn't even mount until a network round trip completes, defeating
+      offline-first.
+   c) A second allContextsLoaded gate (app/_layout.tsx:126) that also waits on
+      RevenueCat network calls; each context redundantly awaits
+      waitForFirstSync() again; powerSync.connect() doesn't start until
+      getSession() finishes; Sentry.init runs at module import
+      (app/_layout.tsx:55); PowerSyncDatabase instantiated at module top-level
+      (lib/powersync/system.ts:4).
+   Fix: trim fonts to first-screen weights (lazy-load the rest), render from
+   local DB immediately, drop billingLoaded from the first-paint gate, start
+   connect in parallel with auth, defer Sentry init to after first paint.
+
+6. Settings tab polls the DB every second, forever.
+   app/(tabs)/settings.tsx:29 — getUploadQueueStats() on a 1s setInterval with
+   no focus gating; tab screens stay mounted, so it fires in the background
+   for the whole session. Fix: gate on useIsFocused + back off to 3-5s or
+   subscribe to a status event. (devStatsModal.tsx:117-152 has the same
+   pattern x3 timers incl. a 15s network getUser() poll — dev-only.)
+
+7. Sync uploads are one HTTP round trip per row, serially.
+   lib/powersync/Connector.ts:66 — after offline use, N queued writes = N
+   stacked network latencies. Settings/weight_progress writes add an
+   existence-check SELECT (sometimes + getSession) per row, doubling/tripling
+   cost (Connector.ts:100-221). Fix: group ops by table+type and batch
+   (.upsert(rows), .delete().in('id', ids)); replace check-then-write with
+   .upsert(..., { onConflict: 'user_id' / 'user_id,date' }).
+
+8. Paywall shows a spinner for up to 15 seconds.
+   app/onboardingScreens/paywall.tsx:88 gates the ENTIRE screen on RevenueCat
+   (15s timeout) despite hardcoded price fallbacks already in the code. Paint
+   immediately; shimmer only the price cards. This is also a conversion issue
+   — it's the last screen of the funnel.
+
+9. Home mode switch remounts an entire screen tree.
+   app/(tabs)/index.tsx:23 — `mode ? <WorkoutScreen/> : <NutritionScreen/>`
+   destroys a full FlatList tree (virtualization state included) on every
+   toggle and mounts the other cold. Fix: keep both mounted, toggle
+   visibility.
+
+================================================================================
+TIER 3 — WORTHWHILE CLEANUPS
+================================================================================
+
+Lists & rows (same recipe everywhere: React.memo the row + useCallback the
+handlers):
+- components/WorkoutComponents/Log.tsx:19 — not memoized; renderItem +
+  onPress/onEditPress recreated per render in workoutScreen.tsx:33 and
+  exerciseScreen.tsx:79.
+- components/NutritionComponents/Entry.tsx:17 and SavedEntry — same pattern
+  (nutritionScreen.tsx:97, savedNutritionModal.tsx:264).
+- components/NeutralComponents/ScrollableList.tsx:45 — re-filters + re-sorts
+  the full exercise library per keystroke, inline renderItem.
+- app/nutritionScreens/foodDBModal.tsx:199-281 — results via .map() in a
+  ScrollView (no virtualization) + O(results x added) .find per row.
+
+Un-memoized render-body derivations:
+- nutritionScreen.tsx:19 — todayEntries filter+sort over full history per
+  render.
+- workoutScreen.tsx:22 activeWorkouts; exerciseScreen.tsx:28 activeExercises
+  (poisons downstream image-map memo); archiveModal.tsx:21-40 (image map
+  iterates ALL exercises).
+- editPhotoEntry.tsx:40 and editManualEntry.tsx:25 — JSON.parse(entryParam) +
+  totals recomputed on every keystroke.
+- DailyIntakeCard.tsx:42 — full-history reduce per render (also blocked by
+  Tier 1 #1 handler instability).
+
+Algorithms:
+- context/WorkoutContext/functions/fatigueFunctions.tsx:35 — bwOnDate
+  re-sorts body-weight keys once PER LOG; both fatigue entry points rebuild
+  the same rolling 30-day 1RM map independently (lines 74-99, 114, 209).
+  Pre-sort once, share buildRefByName.
+- graphFunctions.tsx:8 — exerciseIDs.includes inside per-log filter; use a
+  Set.
+
+Data layer:
+- lib/powersync/AppSchema.ts — single-column indexes where queries filter
+  pairs: add composite [user_id,date] on logs/nutrition_entries/
+  weight_progress, [exercise_id,date] on logs, [user_id,order] on
+  workouts/exercises, and a user_id index on settings (has none).
+- lib/powersync/FlushUploads.ts:48 — sign-out flush busy-polls every 500ms
+  (always pays >= 1 extra tick); switch to status-event subscription with
+  timeout fallback.
+- NutritionContext powersyncStore:182 — every edit deletes + re-inserts ALL
+  ingredient rows; diff instead.
+- lib/foodDB/foodDB.ts:37 — no in-flight request dedup, unbounded cache; store
+  the in-flight Promise, add LRU cap.
+- lib/supabase/functions/deleteAccount — 6 sequential deletes; Promise.all.
+- fetchFoodDB Edge Function — no Cache-Control on deterministic responses.
+
+AI / camera:
+- aiFunctions.tsx:103 + analyzingModal.tsx:64 — photo analysis has NO
+  cancellation: backing out still runs base64 encode, vision call, enrichment,
+  and PERSISTS the entry. Thread an AbortController + mount guard.
+- cameraScreen.tsx:154 — CameraView stays mounted/active behind
+  analyzingModal; gate on useIsFocused.
+- aiFunctions.tsx:110 — base64 encode of the full JPEG on the JS thread.
+
+Misc:
+- SettingsContext persist effect (index.tsx:130) has no debounce — slider
+  drags queue write-transaction bursts on the single settings row; add
+  300-500ms trailing debounce.
+- ProgressWheel.tsx:80 — number label animated via ~60 setStates/sec listener;
+  use reanimated shared value / ReText. (Not currently on the progress tab.)
+- onboardingScreens/pace.tsx:50 — slider commits React state per 0.1-step drag
+  tick, re-rendering the whole scaffold; commit on onSlidingComplete.
+- GoalProjectionChart.tsx:32 — strokeDashoffset SVG animation redraws the path
+  every frame during the nav transition; start after
+  InteractionManager.runAfterInteractions.
+- DatePicker.tsx:22 — ~126-element year array + 126 Picker.Items rebuilt per
+  interaction; useMemo.
+- analyzingModal.tsx:18 — new Animated.Value(0) allocated per render (useRef);
+  30s width animation on JS thread (useNativeDriver:false).
+- Fab.tsx:25 — init effect keyed on a children array rebuilt every render in
+  (tabs)/index.tsx:27; memoize the children array.
+- addExerciseModal.tsx:115 — whole listHeader (chips + search) rebuilt per
+  keystroke; extract + memoize, debounce the Fuse search input.
+- adjustNutrition3.tsx:39 — useMemo keyed on useLocalSearchParams() object
+  (new ref every render); depend on primitive fields.
+- BillingContext index.tsx:133 — value memo depends on raw customerInfo, so
+  every RevenueCat ping churns identity; expose hasPremium/packages only.
+- context/WorkoutContext/exerciseLibrary/dataV2/imageMap.ts — ~1300 eager
+  require() entries built at first import (registration cost only; low).
+
+================================================================================
+VERIFIED CLEAN (audited, no action needed)
+================================================================================
+- ThemeContext / useColors() — referentially stable, correctly memoized; all
+  makeStyles(colors)+useMemo patterns app-wide are keyed correctly.
+- BillingContext memoization, listener cleanup, non-blocking billing load.
+- Tabs are lazy by default; inactive tabs don't re-render on switch.
+- Route guards are declarative (Stack.Protected) — no redundant navigation.
+- SyncWatchdog writes to an external pub/sub store — its 30s tick re-renders
+  nothing; correct design.
+- Reanimated usage throughout — native driver / UI thread (Fab, PressableScale,
+  drag lists, loading screens, FadeInDown).
+- Images downscaled natively (ImageManipulator, base64:false) before AI upload;
+  meal 800px / label 1400px.
+- foodDB search debounce (500ms, correct cleanup); FatSecret token cached with
+  1h refresh buffer.
+- Onboarding: no per-keystroke/per-selection context writes anywhere; macro
+  calc properly memoized; CompactDatePicker uses the native picker.
+- Store write batching: order updates / duplicates / deletes already use
+  writeTransaction correctly.
+- logsModal progression math fully memoized; orchestrator reconnection
+  throttled (10min gap) — no reconnection storms.
+- lib/utils unitConversions / downsample / dateDeserialization — no hot-loop
+  pathologies.
+
+================================================================================
+SUGGESTED ORDER OF ATTACK
+================================================================================
+1. Memoize AuthContext value, then Workout/Nutrition/Settings values + the two
+   unstable handlers (handleGetBodyWeightProgressData, all Nutrition handlers).
+   Highest leverage, lowest risk.
+2. Rewrite getDateKey without Intl (one line, same output).
+3. Fix the chart key/remount + wire in downsampling for >= 90-day ranges.
+4. Focus-gate the settings-tab poll; unblock the paywall render. (Both tiny.)
+5. Larger refactors: startup gates (render from local DB, trim fonts,
+   parallelize auth/connect), query windowing, Connector batching,
+   state/actions context splits.

@@ -2,6 +2,30 @@ PLATES BACKLOG
 Deferred work from the July 2026 code review (details in CODE_REVIEW.md).
 Delete lines as they get done.
 
+NOTIFICATIONS
+-------------
+-Add nutrition notifications at common meal times
+-Add workout notifications if havent worked out much in a week
+-Add workout notifcations ever morning to remind to log workout
+
+CLAUDE SKILLS
+-------------
+- "Visual prototype" skill: any time we want to try something out visually,
+  default to building it as a Dev Hub component first (per CLAUDE.md's Dev
+  tooling section) instead of editing production screens directly.
+- "Concise docs" skill: any time something gets documented (backlog entries,
+  READMEs, code comments, plans), keep it short, plain, and readable to a
+  human - no padding, no restating the obvious.
+
+DATE PICKING
+------------
+- Swap the wheel DatePicker for the calendar grid (CalendarMonthGrid, proven
+  in the Dev Hub) in dateModal.tsx and LogDateModal.tsx only. Leave
+  onboarding's birthday picker (native wheels) alone - wheels beat a calendar
+  for far-past dates.
+- Unify dateModal.tsx and LogDateModal.tsx into one component - they're
+  already near-duplicates, differing only in host shape (pushed route vs.
+  inline Modal).
 
 BILLING
 -------

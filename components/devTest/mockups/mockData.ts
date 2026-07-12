@@ -55,3 +55,26 @@ export const NUTRITION_STREAK: NutritionStreakState = {
     streakIncludingToday: 12,
     streakThroughYesterday: 11,
 }
+
+export const MOCK_WORKOUTS: { name: string; exercises: number }[] = [
+    { name: 'Push Day', exercises: 6 },
+    { name: 'Pull Day', exercises: 5 },
+    { name: 'Leg Day', exercises: 7 },
+    { name: 'Core & Arms', exercises: 4 },
+]
+
+export const MOCK_MEALS: { name: string; calories: number; protein: number; carbs: number; fats: number; isPhoto: boolean }[] = [
+    { name: 'Chicken Burrito Bowl', calories: 685, protein: 42, carbs: 68, fats: 22, isPhoto: true },
+    { name: 'Greek Yogurt & Berries', calories: 210, protein: 18, carbs: 24, fats: 5, isPhoto: false },
+    { name: 'Protein Shake', calories: 180, protein: 30, carbs: 8, fats: 3, isPhoto: false },
+]
+
+export const MOCK_INTAKE = {
+    calories: 1482,
+    protein: 118,
+    carbs: 152,
+    fats: 48,
+    proteinGoal: 165,
+    carbsGoal: 220,
+    fatsGoal: 73,
+}

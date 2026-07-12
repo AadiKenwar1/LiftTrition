@@ -7,7 +7,7 @@ import type { ColorScheme, Colors, ThemeContextValue } from './types'
 export { brandAssets, logoForScheme } from './assets'
 export { defaultColorScheme, getColors, isColorScheme, palettes } from './colors'
 export { FONT_FAMILY, fonts, type } from './typography'
-export { radius, spacing } from './tokens'
+export { motion, radius, spacing } from './tokens'
 export type { ColorScheme, Colors, ThemeContextValue } from './types'
 
 const STORAGE_KEY = 'colorScheme'

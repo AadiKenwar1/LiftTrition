@@ -1,5 +1,6 @@
 import { useLocalSearchParams } from 'expo-router'
 import type { ComponentType } from 'react'
+import DualModeScene from './scenes/DualModeScene'
 import ProgressScene from './scenes/ProgressScene'
 
 /**
@@ -8,6 +9,7 @@ import ProgressScene from './scenes/ProgressScene'
  */
 const SCENES: Record<string, ComponentType<{ initialLift: boolean }>> = {
     progress: ProgressScene,
+    dualMode: DualModeScene,
 }
 
 export default function MockupHost() {
