@@ -6,6 +6,7 @@ import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { useWorkout } from '@/context/WorkoutContext'
 import { getDailyGoal, isGoalHitToday } from '@/context/WorkoutContext/functions/progressionFunctions'
 import { Log } from '@/context/WorkoutContext/types'
+import { useToday } from '@/lib/hooks/useToday'
 import { addDays, formatDate, getDateKey, isDateAfterToday, sortByDateDesc } from '@/lib/utils/dateHelper'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useLocalSearchParams } from 'expo-router'
@@ -18,6 +19,7 @@ export default function LogsModal() {
     const { settings } = useSettings()
     const params = useLocalSearchParams<{ workoutId: string; exerciseId: string; exerciseName: string }>()
     const { userID } = useAuth()
+    const todayKey = useToday()
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
 
@@ -109,7 +111,7 @@ export default function LogsModal() {
         setTimeout(() => setShowAddSuccess(false), 500)
     }
 
-    const isLogDateToday = getDateKey(new Date()) === getDateKey(selectedLogDate)
+    const isLogDateToday = todayKey === getDateKey(selectedLogDate)
 
     const progressionOptions = useMemo(() => ({ weightUnit: weightUnit as 'lbs' | 'kg', isCompound }), [weightUnit, isCompound])
 

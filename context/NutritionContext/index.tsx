@@ -1,5 +1,6 @@
 import { useAuth } from '@/context/AuthContext';
 import { powerSync } from '@/lib/powersync/system';
+import { useToday } from '@/lib/hooks/useToday';
 import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { loadNutritionData, upsertNutritionEntry, upsertSavedNutritionEntry } from './database/powersyncStore';
 import type { ScanMode } from '@/lib/openAI/mealImage';
@@ -22,10 +23,15 @@ const NutritionContext = createContext<NutritionContextInterface | undefined>(un
 
 export const NutritionProvider = ({ children }: PropsWithChildren) => {
     const { userID } = useAuth();
+    const todayKey = useToday();
     const [nutritionData, setNutritionData] = useState<NutritionEntry[]>([]);
     const [savedNutritionEntries, setSavedNutritionEntries] = useState<NutritionEntry[]>([]);
     const [loaded, setLoaded] = useState(false);
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+
+    useEffect(() => {
+        setSelectedDate(new Date())
+    }, [todayKey])
 
     // Load from PowerSync whenever the user changes
     useEffect(() => {
@@ -123,7 +129,7 @@ export const NutritionProvider = ({ children }: PropsWithChildren) => {
 
     const nutritionStreak = useMemo(
         () => getNutritionStreakState(nutritionData),
-        [nutritionData],
+        [nutritionData, todayKey],
     );
 
     const value = useMemo(
