@@ -8,7 +8,7 @@ import { useNutrition } from '@/context/NutritionContext'
 import { useSettings } from '@/context/SettingsContext'
 import { fonts, radius, useColorScheme, useColors, type Colors } from '@/context/ThemeContext'
 import { useWorkout } from '@/context/WorkoutContext'
-
+import { useToday } from '@/lib/hooks/useToday'
 import { addDays, formatDate, getWeekStart } from '@/lib/utils/dateHelper'
 import { useRouter } from 'expo-router'
 import { ChevronDown, ChevronLeft, ChevronRight, Dumbbell, Pencil, Scale, Utensils } from 'lucide-react-native'
@@ -28,6 +28,7 @@ export default function ProgressScreen() {
     const { mode, settings, handleGetBodyWeightProgressData, bwProgress } = useSettings()
     const { handleGetMacroForWeek, nutritionData, nutritionStreak } = useNutrition()
     const { logs, handleGetOneRepMaxData, handleGetSetsForWeek, lastExercise, fullExerciseLibAsList, trainedDaysThisWeek } = useWorkout()
+    const todayKey = useToday()
     const router = useRouter()
     const colors = useColors()
     const isDark = useColorScheme() === 'dark'
@@ -77,7 +78,7 @@ export default function ProgressScreen() {
     }, [mode, selectedExercise, topRange, logs, bwProgress, lastExercise, handleGetOneRepMaxData, handleGetBodyWeightProgressData, settings.onboardingCompletedAt])
 
     // BOTTOM card (bars) — Sets (lift) / Calories+Macros (nutrition), one calendar week at a time
-    const weekStart = useMemo(() => addDays(getWeekStart(new Date()), bottomWeekOffset * 7), [bottomWeekOffset])
+    const weekStart = useMemo(() => addDays(getWeekStart(new Date()), bottomWeekOffset * 7), [bottomWeekOffset, todayKey])
 
     const bottomData = useMemo(() => (mode ? handleGetSetsForWeek(weekStart) : handleGetMacroForWeek(selectedMacro, weekStart)), [mode, selectedMacro, weekStart, logs, nutritionData, handleGetSetsForWeek, handleGetMacroForWeek])
     const bottomHasData = bottomData.some((d) => d.value > 0)

@@ -6,7 +6,9 @@ import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { useWorkout } from '@/context/WorkoutContext'
 import { getDailyGoal, isGoalHitToday } from '@/context/WorkoutContext/functions/progressionFunctions'
 import { Log } from '@/context/WorkoutContext/types'
+import { useToday } from '@/lib/hooks/useToday'
 import { addDays, formatDate, getDateKey, isDateAfterToday, sortByDateDesc } from '@/lib/utils/dateHelper'
+import { parseNumericInput } from '@/lib/utils/number'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useLocalSearchParams } from 'expo-router'
 import { BicepsFlexed, Calendar, Check, RotateCcw } from 'lucide-react-native'
@@ -18,6 +20,7 @@ export default function LogsModal() {
     const { settings } = useSettings()
     const params = useLocalSearchParams<{ workoutId: string; exerciseId: string; exerciseName: string }>()
     const { userID } = useAuth()
+    const todayKey = useToday()
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
 
@@ -90,8 +93,8 @@ export default function LogsModal() {
         Alert.alert('Invalid Date', "You can't log workouts for future dates. Please select today or an earlier date.")
     }
 
-    const weightVal = Number(weight)
-    const repsVal = Number(reps)
+    const weightVal = parseNumericInput(weight) ?? NaN
+    const repsVal = parseNumericInput(reps) ?? NaN
     const isValid = weight.trim() !== '' && reps.trim() !== '' && Number.isFinite(weightVal) && weightVal >= 0 && Number.isInteger(repsVal) && repsVal > 0
 
     // Validates the date, adds the log, and shows success feedback (scale animation + checkmark).
@@ -109,7 +112,7 @@ export default function LogsModal() {
         setTimeout(() => setShowAddSuccess(false), 500)
     }
 
-    const isLogDateToday = getDateKey(new Date()) === getDateKey(selectedLogDate)
+    const isLogDateToday = todayKey === getDateKey(selectedLogDate)
 
     const progressionOptions = useMemo(() => ({ weightUnit: weightUnit as 'lbs' | 'kg', isCompound }), [weightUnit, isCompound])
 

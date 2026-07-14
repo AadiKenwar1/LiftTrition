@@ -1,6 +1,7 @@
 import { useNutrition } from '@/context/NutritionContext'
 import { NutritionEntry } from '@/context/NutritionContext/types'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
+import { parseNumericInput } from '@/lib/utils/number'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useMemo, useState } from 'react'
@@ -38,14 +39,22 @@ export default function EditManualEntry() {
     const [carbs, setCarbs] = useState(parsedEntry.carbs.toString())
     const [fats, setFats] = useState(parsedEntry.fats.toString())
 
+    // Empty (cleared) fields mean 0; a typed value must parse, else the CTA stays disabled
+    const parsedProtein = protein.trim() ? parseNumericInput(protein) : 0
+    const parsedCarbs = carbs.trim() ? parseNumericInput(carbs) : 0
+    const parsedFats = fats.trim() ? parseNumericInput(fats) : 0
+    const parsedCalories = calories.trim() ? parseNumericInput(calories) : 0
+    const macrosValid = parsedProtein !== null && parsedCarbs !== null && parsedFats !== null && parsedCalories !== null
+
     function handleSave() {
+        if (parsedProtein === null || parsedCarbs === null || parsedFats === null || parsedCalories === null) return
         const updatedEntry: NutritionEntry = {
             ...parsedEntry,
             name: name.trim() || parsedEntry.name,
-            protein: parseFloat(protein) || 0,
-            carbs: parseFloat(carbs) || 0,
-            fats: parseFloat(fats) || 0,
-            calories: parseFloat(calories) || 0,
+            protein: parsedProtein,
+            carbs: parsedCarbs,
+            fats: parsedFats,
+            calories: parsedCalories,
         }
         handleEditNutrition(parsedEntry.id, updatedEntry)
         router.back()
@@ -118,7 +127,7 @@ export default function EditManualEntry() {
             </ScrollView>
 
             <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
-                <TouchableOpacity activeOpacity={0.8} onPress={handleSave} style={styles.ctaTouchable}>
+                <TouchableOpacity activeOpacity={0.8} disabled={!macrosValid} onPress={handleSave} style={[styles.ctaTouchable, !macrosValid && styles.ctaDisabled]}>
                     <LinearGradient colors={colors.nutritionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
                         <Text style={styles.ctaText}>Save changes</Text>
                     </LinearGradient>
@@ -272,6 +281,9 @@ function makeStyles(colors: Colors) {
             shadowOpacity: 0.35,
             shadowRadius: 8,
             elevation: 6,
+        },
+        ctaDisabled: {
+            opacity: 0.4,
         },
         cta: {
             borderRadius: radius.cardLg,

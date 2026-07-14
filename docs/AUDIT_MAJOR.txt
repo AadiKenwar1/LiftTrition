@@ -83,10 +83,16 @@ F5. Dates: one serialize/deserialize pair + a live "today" —
 F6. Errors stop pretending to be success
     a) useAsyncLoad (lib/hooks/, new): wraps a context's load with
        status 'loading' | 'ready' | 'error' + retry(). An error is a
-       distinct state — never defaults-presented-as-truth.
-    b) LoadErrorScreen (components/GuardComponents/, new): full-screen
-       "Couldn't load your data" + Retry, styled like
-       AppLoadingScreen.
+       distinct state — never defaults-presented-as-truth. Also ignores
+       a stale run whose deps changed mid-flight (cancelled flag +
+       isStale() passed to the loader): Settings/Nutrition/Workout
+       share one copy-pasted load effect with NO such guard today, so
+       an in-flight load for the old user can clobber the new one —
+       retires that skeleton and the race across all three at once.
+    b) AppLoadingScreen error variant (no new component): when a load
+       has failed, the existing loading screen fades in "Having
+       trouble loading your data — Tap to retry" wired to the
+       retryLoad(s); reverts to the plain spinner while retrying.
     c) reportPersistFailure(scope, error, { reload }) (lib/powersync/
        persistErrors.ts, new): Sentry capture + a throttled user
        alert + rollback-by-reload (re-run the owning context's load
@@ -98,7 +104,7 @@ F6. Errors stop pretending to be success
 CRITICAL (data loss, security, broken core flows)
 -------------------------------------------------
 
-1. Deleting your account can strand you half-signed-in
+*1. Deleting your account can strand you half-signed-in
    The app erases the account on the server FIRST, then tries to upload
    any unsaved changes. Those uploads can never succeed for an account
    that no longer exists, so the 60s wait always fails, local cleanup
@@ -133,7 +139,7 @@ CRITICAL (data loss, security, broken core flows)
    changes: delete → no 60s flush wait → lands on login, relaunch
    stays signed out, no orphan local data.
 
-2. Anyone who ever contacted support can never delete their account
+*2. Anyone who ever contacted support can never delete their account
    The server delete function forgets the support_requests table. The
    database refuses to remove a user who still has rows there, so
    deletion fails forever. Worse, the six deletes that ran first are not
@@ -168,7 +174,7 @@ CRITICAL (data loss, security, broken core flows)
    request → delete → auth user and all rows gone in one shot; make
    deleteUser fail → nothing was deleted (atomicity).
 
-3. One decimal calorie value can jam syncing forever
+*3. One decimal calorie value can jam syncing forever
    The database column for calories only accepts whole numbers, but the
    food-search and manual-entry screens save unrounded values (a
    FatSecret item like 130.5 cal x 3 servings is enough). The phone
@@ -261,7 +267,7 @@ CRITICAL (data loss, security, broken core flows)
    premium JWT → works; exceed the daily cap → 429; free user
    deep-linking to the camera lands on the paywall.
 
-5. One mis-tap in the archive screen permanently deletes a workout
+*5. One mis-tap in the archive screen permanently deletes a workout
    The trash icon there deletes the workout AND all its logged history
    instantly - no "are you sure?", no undo - and it sits right next to
    the restore button. Everywhere else in the app deletion asks first.
@@ -311,23 +317,24 @@ MAJOR (wrong behavior, bad UX)
       'error' + retry(). The catch block stops writing defaults —
       error is its own state, prior data stays untouched. Contexts
       expose loaded (status==='ready'), loadFailed, retryLoad.
-   2) Route guard in app/_layout.tsx (StackLayout, which already
-      reads the contexts' loaded flags): if any context reports
-      loadFailed → render LoadErrorScreen (F6b) with a Retry button
-      wired to the retryLoad(s). Never route to onboarding from an
-      error state.
+   2) Route guard in app/_layout.tsx (StackLayout): an errored
+      context never reaches 'ready', so the existing
+      !allContextsLoaded branch already keeps AppLoadingScreen up
+      with the Stack unmounted — pass loadFailed + retryLoad into it
+      to surface the F6b retry affordance. With the Stack unmounted,
+      onboarding is unreachable from an error state by construction.
    3) Persistence stays naturally safe: the persist effects key on
       loaded/hasLoadedUserData, and an errored context never reaches
       'ready' — so re-onboarding-over-real-data becomes impossible,
       not just unlikely. Give PowerSyncGuard's catch (28-31) the
       same error-state treatment.
    Files: lib/hooks/useAsyncLoad.ts (new),
-   components/GuardComponents/LoadErrorScreen.tsx (new), Settings/
-   Nutrition/Workout context index.tsx, PowerSyncGuard.tsx,
+   components/GuardComponents/AppLoadingScreen.tsx (error variant),
+   Settings/Nutrition/Workout context index.tsx, PowerSyncGuard.tsx,
    app/_layout.tsx.
-   Verify: make loadSettingsAndBw throw once → error screen with
-   Retry (NOT onboarding); Retry succeeds → tabs with real data;
-   fresh account still onboards normally.
+   Verify: make loadSettingsAndBw throw once → loading screen shows
+   "tap to retry" (NOT onboarding); Retry succeeds → tabs with real
+   data; fresh account still onboards normally.
 
 7. Food logged the next morning lands on yesterday
    The selected date is set once when the app starts and never rolls
@@ -351,13 +358,33 @@ MAJOR (wrong behavior, bad UX)
       deliberately picked a past date keeps it within the same day;
       crossing midnight snaps selection to the new day, which is the
       only behavior that keeps "log breakfast" correct.
-   3) useToday is the reusable primitive for every other
-      frozen-"today" consumer (streak chip, "Today" labels, charts) —
-      adopt opportunistically as those files get touched.
-   Files: lib/hooks/useToday.ts (new), NutritionContext/index.tsx.
+   3) Same fix, same family (audited 2026-07-13 — the full list of
+      frozen-"today" consumers, not opportunistic):
+      a) nutritionStreak memo (NutritionContext/index.tsx ~124) is
+         keyed on [nutritionData] only — a streak is relative to
+         today, so it goes stale at midnight if no data changes.
+         Add todayKey to the deps: [nutritionData, todayKey].
+      b) progress.tsx ~80: weekStart memo captures
+         getWeekStart(new Date()) keyed only on bottomWeekOffset —
+         "this week" is silently last week after a suspended
+         Sun→Mon crossing. Add todayKey to the deps. Same file
+         ~238: the highlightIndex new Date().getDay() goes fresh
+         once the memo recomputes.
+      c) nutritionScreen.tsx ~28 and logsModal.tsx ~112 compute
+         isToday from getDateKey(new Date()) at render time — they
+         self-heal once (a)/step 2 trigger re-renders, but switch
+         them to useToday so they are correct by construction.
+      (Checked and fine as-is: graphFunctions, volumeFunctions,
+      bodyWeightFunctions compute today at call time inside
+      per-render/per-action functions; devTest calendar components
+      are dev-only.)
+   Files: lib/hooks/useToday.ts (new), NutritionContext/index.tsx,
+   app/(tabs)/progress.tsx, app/nutritionScreens/nutritionScreen.tsx,
+   app/workoutScreens/logsModal.tsx.
    Verify: evening session → background the app → advance the device
    day → foreground: date chip says "Today", breakfast lands on the
-   new day, streak intact.
+   new day, streak recomputes; cross a week boundary → "this week"
+   bar chart shows the new week with today highlighted.
 
 8. Weighing in secretly rewrites your goals
    Every body-weight update re-decides lose/maintain/gain by comparing
@@ -474,7 +501,7 @@ MAJOR (wrong behavior, bad UX)
    shows 2× per-ingredient totals (not 4×); saving from that screen
    persists the same numbers the day view shows.
 
-10. Typing "80,5" (or a stray ".") corrupts weight and macro goals
+*10. Typing "80,5" (or a stray ".") corrupts weight and macro goals
     Number parsing lets NaN through every check in the body-weight modal
     and manual meal entry. On iPhones set to a comma-decimal region
     (most of Europe), the keypad only offers a comma - so their FIRST

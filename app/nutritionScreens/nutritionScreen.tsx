@@ -3,6 +3,7 @@ import Entry from '@/components/NutritionComponents/Entry'
 import { useNutrition } from '@/context/NutritionContext'
 import { NutritionEntry } from '@/context/NutritionContext/types'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
+import { useToday } from '@/lib/hooks/useToday'
 import { formatDate, formatDateShort, getDateKey } from '@/lib/utils/dateHelper'
 import { useRouter } from 'expo-router'
 import { Calendar, Utensils } from 'lucide-react-native'
@@ -11,6 +12,7 @@ import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react
 
 export default function NutritionScreen() {
     const { nutritionData, selectedDate, handleSaveNutrition, handleDeleteNutrition } = useNutrition()
+    const todayKey = useToday()
     const router = useRouter()
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
@@ -25,7 +27,7 @@ export default function NutritionScreen() {
         .sort((a, b) => b.time - a.time)
 
     // Check if selected date is today
-    const isToday = getDateKey(new Date()) === selectedDateKey
+    const isToday = todayKey === selectedDateKey
     const showYearInTitle = selectedDate.getFullYear() !== new Date().getFullYear()
 
     function handleEdit(nutritionEntry: NutritionEntry) {

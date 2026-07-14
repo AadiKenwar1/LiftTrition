@@ -3,6 +3,7 @@ import { useBilling } from '@/context/BillingContext'
 import { useNutrition } from '@/context/NutritionContext'
 import { analyzeText } from '@/context/NutritionContext/functions/aiFunctions'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
+import { parseNumericInput } from '@/lib/utils/number'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { Lock, Sparkles } from 'lucide-react-native'
@@ -31,17 +32,25 @@ export default function AddNutritionModal() {
 
     const hasContent = mealName.trim().length > 0 || [calories, protein, carbs, fats].some((v) => v.trim().length > 0)
 
+    // Empty optional fields mean 0; a typed value must parse, else the CTA stays disabled
+    const parsedProtein = protein.trim() ? parseNumericInput(protein) : 0
+    const parsedCarbs = carbs.trim() ? parseNumericInput(carbs) : 0
+    const parsedFats = fats.trim() ? parseNumericInput(fats) : 0
+    const parsedCalories = calories.trim() ? parseNumericInput(calories) : 0
+    const macrosValid = parsedProtein !== null && parsedCarbs !== null && parsedFats !== null && parsedCalories !== null
+
     const handleAddEntry = () => {
+        if (parsedProtein === null || parsedCarbs === null || parsedFats === null || parsedCalories === null) return
         const newEntry = {
             id: uuid.v4() as string,
             userId: userID,
             name: mealName.trim() || 'Unnamed Entry',
             date: new Date(selectedDate),
             time: Date.now(),
-            protein: protein.trim() ? parseFloat(protein) : 0,
-            carbs: carbs.trim() ? parseFloat(carbs) : 0,
-            fats: fats.trim() ? parseFloat(fats) : 0,
-            calories: calories.trim() ? parseFloat(calories) : 0,
+            protein: parsedProtein,
+            carbs: parsedCarbs,
+            fats: parsedFats,
+            calories: parsedCalories,
             isPhoto: false,
             ingredients: [],
             createdAt: new Date(),
@@ -166,7 +175,7 @@ export default function AddNutritionModal() {
             </ScrollView>
 
             <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
-                <TouchableOpacity activeOpacity={0.8} disabled={!hasContent} onPress={handleAddEntry} style={[styles.ctaTouchable, !hasContent && styles.ctaDisabled]}>
+                <TouchableOpacity activeOpacity={0.8} disabled={!hasContent || !macrosValid} onPress={handleAddEntry} style={[styles.ctaTouchable, (!hasContent || !macrosValid) && styles.ctaDisabled]}>
                     <LinearGradient colors={colors.nutritionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
                         <Text style={styles.ctaText}>Add meal</Text>
                     </LinearGradient>

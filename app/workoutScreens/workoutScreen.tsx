@@ -4,6 +4,7 @@ import { useAuth } from '@/context/AuthContext'
 import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { useWorkout } from '@/context/WorkoutContext'
 import { Workout } from '@/context/WorkoutContext/types'
+import { confirmDelete } from '@/lib/utils/confirmDelete'
 import { useRouter } from 'expo-router'
 import { Dumbbell } from 'lucide-react-native'
 import { useMemo } from 'react'
@@ -36,7 +37,7 @@ export default function WorkoutScreen() {
     }
 
     function handleEdit(workout: Workout) {
-        Alert.alert(`Options for Workout: ${workout.name}`, `Warning: Deleting a workout will delete all logs within the workout. To preserve logs archiving is recommended.`, [
+        Alert.alert(`${workout.name}`, ``, [
             {
                 text: 'Rename',
                 style: 'default',
@@ -57,7 +58,7 @@ export default function WorkoutScreen() {
             {
                 text: 'Delete',
                 style: 'destructive',
-                onPress: () => handleDeleteWorkout(workout.id),
+                onPress: () => confirmDelete({ title: `Delete ${workout.name}?`, message: 'Deleting a workout will delete all logs within the workout. This cannot be undone.', onConfirm: () => handleDeleteWorkout(workout.id) }),
             },
             {
                 text: 'Cancel',
