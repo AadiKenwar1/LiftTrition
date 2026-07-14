@@ -1,5 +1,14 @@
 import { supabase } from '@/lib/supabase/client';
 import { AbstractPowerSyncDatabase, PowerSyncBackendConnector, UpdateType } from '@powersync/react-native';
+import * as Sentry from '@sentry/react-native';
+
+// Postgres SQLSTATE classes 22 (data exception) and 23 (integrity constraint violation) are
+// permanent rejections - retrying the same op will never succeed, so these are dead-lettered
+// instead of blocking the rest of the upload queue forever.
+function isNonRetryableUploadError(error: unknown): boolean {
+  const code = (error as { code?: unknown })?.code;
+  return typeof code === 'string' && /^2[23]/.test(code);
+}
 
 export class Connector implements PowerSyncBackendConnector {
   /**
@@ -84,6 +93,10 @@ export class Connector implements PowerSyncBackendConnector {
             break;
         }
       } catch (error) {
+        if (isNonRetryableUploadError(error)) {
+          Sentry.captureException(error, { extra: { table: op.table, opType: op.op, opId: op.id } });
+          continue;
+        }
         throw error;
       }
     }
