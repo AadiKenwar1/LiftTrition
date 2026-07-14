@@ -26,13 +26,15 @@ export default function LoginV3() {
         <View style={styles.container}>
             <View style={[styles.topBar, { paddingTop: topPad }]}>
                 <TouchableOpacity style={styles.toggle} onPress={() => setScheme(scheme === 'dark' ? 'light' : 'dark')} activeOpacity={0.7}>
-                    {scheme === 'dark' ? <Sun size={20} color={colors.text} strokeWidth={2.2} /> : <Moon size={20} color={colors.text} strokeWidth={2.2} />}
+                    {scheme === 'dark' ?
+                        <Sun size={20} color={colors.text} strokeWidth={2.2} />
+                    :   <Moon size={20} color={colors.text} strokeWidth={2.2} />}
                 </TouchableOpacity>
             </View>
 
             <View style={styles.hero}>
                 <Image source={logo} style={styles.logo} contentFit="contain" priority="high" />
-                <Text style={styles.appName}>LIFTRI</Text>
+                <Text style={styles.appName}>PLATES</Text>
                 <Text style={styles.tagline}>Training and nutrition that finally work together.</Text>
                 <View style={styles.ratingRow}>
                     {Array.from({ length: 5 }).map((_, i) => (

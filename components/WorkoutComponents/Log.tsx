@@ -1,4 +1,4 @@
-import { fonts, radius, useColorScheme, useColors, type Colors } from '@/context/ThemeContext'
+import { fonts, motion, radius, useColorScheme, useColors, type Colors } from '@/context/ThemeContext'
 import { Image } from 'expo-image'
 import { Dumbbell, Pencil } from 'lucide-react-native'
 import { useMemo } from 'react'
@@ -31,7 +31,7 @@ export default function Log({ text, subtitle, imgSource, showImageFallback = fal
                             <View style={styles.imageGlowRing}>
                                 <View style={styles.imageCircle}>
                                     {imgSource ?
-                                        <Image source={imgSource} style={styles.exerciseImage} contentFit="contain" cachePolicy="memory" transition={50} />
+                                        <Image source={imgSource} style={styles.exerciseImage} contentFit="contain" cachePolicy="memory" transition={motion.imageFade} />
                                     :   <Dumbbell size={25} color={colors.text} strokeWidth={1.8} />}
                                 </View>
                             </View>
@@ -112,9 +112,9 @@ function makeStyles(colors: Colors, isDark: boolean) {
             borderColor: colors.workout,
         },
         imageCircle: {
-            width: 48,
-            height: 48,
-            borderRadius: 24,
+            width: 50,
+            height: 50,
+            borderRadius: 25,
             backgroundColor: colors.surfaceInset,
             justifyContent: 'center',
             alignItems: 'center',

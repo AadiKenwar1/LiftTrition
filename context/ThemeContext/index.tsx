@@ -1,11 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type PropsWithChildren } from 'react'
+import { logoForScheme } from './assets'
 import { defaultColorScheme, getColors, isColorScheme } from './colors'
 import type { ColorScheme, Colors, ThemeContextValue } from './types'
 
+export { brandAssets, logoForScheme } from './assets'
 export { defaultColorScheme, getColors, isColorScheme, palettes } from './colors'
 export { FONT_FAMILY, fonts, type } from './typography'
-export { radius, spacing } from './tokens'
+export { motion, radius, spacing } from './tokens'
 export type { ColorScheme, Colors, ThemeContextValue } from './types'
 
 const STORAGE_KEY = 'colorScheme'
@@ -58,6 +60,11 @@ export function useColorScheme(): ColorScheme {
 // Get colors for the current theme
 export function useColors(): Colors {
     return useThemeContext().colors
+}
+
+// Scheme-aware brand logo for the current theme
+export function useLogo() {
+    return logoForScheme(useThemeContext().colorScheme)
 }
 
 // Set color scheme

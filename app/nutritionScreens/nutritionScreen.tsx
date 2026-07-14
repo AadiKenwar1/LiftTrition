@@ -58,7 +58,7 @@ export default function NutritionScreen() {
         ])
     }
 
-    const renderHeader = () => (
+    const listHeader = (
         <>
             {/* Screen title — mirrors the "Workouts" title on the lift screen for a seamless mode switch */}
             <View style={styles.titleBlock}>
@@ -81,7 +81,7 @@ export default function NutritionScreen() {
         </>
     )
 
-    const renderEmptyState = () => (
+    const listEmpty = (
         <View style={styles.emptyState}>
             <View style={styles.emptyIconCircle}>
                 <Utensils size={56} color={colors.nutrition} strokeWidth={2} />
@@ -94,21 +94,10 @@ export default function NutritionScreen() {
     return (
         <FlatList
             data={todayEntries}
-            renderItem={({ item }) => (
-                <Entry
-                    name={item.name}
-                    calories={item.calories}
-                    protein={item.protein}
-                    carbs={item.carbs}
-                    fats={item.fats}
-                    onEditPress={() => handleEdit(item)}
-                    showBreakdown={item.isPhoto}
-                    onBreakdownPress={() => router.push({ pathname: '/nutritionScreens/editPhotoEntry', params: { entry: JSON.stringify(item) } })}
-                />
-            )}
+            renderItem={({ item }) => <Entry name={item.name} calories={item.calories} protein={item.protein} carbs={item.carbs} fats={item.fats} onEditPress={() => handleEdit(item)} showBreakdown={item.isPhoto} onBreakdownPress={() => router.push({ pathname: '/nutritionScreens/editPhotoEntry', params: { entry: JSON.stringify(item) } })} />}
             keyExtractor={(item) => item.id}
-            ListHeaderComponent={renderHeader}
-            ListEmptyComponent={renderEmptyState}
+            ListHeaderComponent={listHeader}
+            ListEmptyComponent={listEmpty}
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
             style={styles.container}

@@ -1,6 +1,6 @@
 import TermsAndPrivacyModal from '@/components/NeutralComponents/TermsAndPrivacyModal'
 import { useAuth } from '@/context/AuthContext'
-import { fonts, radius, useColorScheme, useColors, useSetColorScheme, type Colors } from '@/context/ThemeContext'
+import { fonts, logoForScheme, radius, useColorScheme, useColors, useSetColorScheme, type Colors } from '@/context/ThemeContext'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { Image } from 'expo-image'
 import { Moon, Star, Sun } from 'lucide-react-native'
@@ -21,7 +21,7 @@ export default function LoginScreen() {
     const styles = useMemo(() => makeStyles(colors), [colors])
     const insets = useSafeAreaInsets()
     const [termsVisible, setTermsVisible] = useState(false)
-    const logo = scheme === 'light' ? require('@/assets/images/LogoWhite.png') : require('@/assets/images/LogoBlack.png')
+    const logo = logoForScheme(scheme)
 
     return (
         <View style={styles.container}>

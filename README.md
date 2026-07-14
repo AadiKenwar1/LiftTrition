@@ -1,4 +1,4 @@
-# LIFTRI (LiftTrition)
+# PLATES (LiftTrition)
 
 Project description: AI powered tracking + progress visualizations for both weightlifting and nutrition in one interface.
 

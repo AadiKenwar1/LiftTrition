@@ -19,7 +19,10 @@ export async function deleteAccount(): Promise<void> {
         throw new Error(err?.error || 'Failed to delete account. Please try again.')
     }
 
-    await signOut()
+    // Server confirmed: account and data are gone, so pending uploads are meaningless.
+    // No Gate C flush — clear local state unconditionally.
+    await clearLocalSession()
+    await clearStorage()
 }
 
 export async function signOut() {
@@ -39,10 +42,35 @@ export async function signOut() {
  * Intended to be called only after explicit user confirmation.
  */
 export async function forceSignOut() {
-    const { error } = await supabase.auth.signOut()
-    if (error) throw error
-    await disconnectAndClearPowerSync()
-    await AsyncStorage.clear()
+    await clearLocalSession()
+    await clearStorage()
+}
+
+/**
+ * End the session on this device and wipe the local PowerSync replica.
+ * Each step is guarded so a failure in one never strands the next.
+ */
+export async function clearLocalSession() {
+    try {
+        const { error } = await supabase.auth.signOut({ scope: 'local' })
+        if (error) console.warn('clearLocalSession: auth signOut failed', error)
+    } catch (e) {
+        console.warn('clearLocalSession: auth signOut threw', e)
+    }
+
+    try {
+        await disconnectAndClearPowerSync()
+    } catch (e) {
+        console.warn('clearLocalSession: PowerSync clear failed', e)
+    }
+}
+
+async function clearStorage() {
+    try {
+        await AsyncStorage.clear()
+    } catch (e) {
+        console.warn('clearStorage: AsyncStorage clear failed', e)
+    }
 }
 
 export function isUploadFlushTimeoutError(e: unknown): e is UploadFlushTimeoutError {

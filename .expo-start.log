@@ -1,6 +1,0 @@
-env: load .env.local .env
-env: export EXPO_PUBLIC_SUPABASE_URL EXPO_PUBLIC_SUPABASE_ANON_KEY EXPO_PUBLIC_POWERSYNC_URL EXPO_PUBLIC_REVENUECAT_API_KEY_IOS EXPO_PUBLIC_REVENUECAT_API_KEY_ANDROID EXPO_PUBLIC_SENTRY_DSN SENTRY_AUTH_TOKEN
-Starting project at C:\Users\aadik\Downloads\App
-Starting Metro Bundler
-Waiting on http://localhost:8081
-Logs for your project will appear below.

@@ -6,7 +6,7 @@ import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { useWorkout } from '@/context/WorkoutContext'
 import { getDailyGoal, isGoalHitToday } from '@/context/WorkoutContext/functions/progressionFunctions'
 import { Log } from '@/context/WorkoutContext/types'
-import { formatDateOrToday, getDateKey, isDateAfterToday, sortByDateDesc } from '@/lib/utils/dateHelper'
+import { addDays, formatDate, getDateKey, isDateAfterToday, sortByDateDesc } from '@/lib/utils/dateHelper'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useLocalSearchParams } from 'expo-router'
 import { BicepsFlexed, Calendar, Check, RotateCcw } from 'lucide-react-native'
@@ -48,24 +48,35 @@ export default function LogsModal() {
     const flatListRef = useRef<FlatList<Log> | null>(null)
     const clearHighlightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+    // Filter and sort logs (most recent date first, then most recent time within same calendar day)
+    const exerciseLogs = useMemo(
+        () =>
+            logs
+                .filter((log) => log.exerciseID === exerciseId)
+                .sort((a, b) => {
+                    const dateKeyA = getDateKey(a.date)
+                    const dateKeyB = getDateKey(b.date)
+                    if (dateKeyA !== dateKeyB) return sortByDateDesc(a.date, b.date)
+                    if (b.time !== a.time) return b.time - a.time
+                    return b.id.localeCompare(a.id)
+                }),
+        [logs, exerciseId],
+    )
+
     // Find the newly added log, highlight it, scroll to it, and clear the highlight after 500ms (matches add button).
     useEffect(() => {
-        if (!pendingAddRef.current || logs.length === 0) return
+        if (!pendingAddRef.current || exerciseLogs.length === 0) return
         const { weight, reps, dateKey } = pendingAddRef.current
-        const matching = logs.filter((log) => log.exerciseID === exerciseId && log.weight === weight && log.reps === reps && getDateKey(log.date) === dateKey).sort((a, b) => (b.time !== a.time ? b.time - a.time : b.id.localeCompare(a.id)))
-        if (matching.length > 0) {
-            const added = matching[0]
-            const newLogId = added.id
-            setLastAddedLogId(newLogId)
+        const added = exerciseLogs.find((log) => log.weight === weight && log.reps === reps && getDateKey(log.date) === dateKey)
+        if (added) {
+            setLastAddedLogId(added.id)
             pendingAddRef.current = null
-            const idx = exerciseLogs.findIndex((l) => l.id === newLogId)
-            if (idx >= 0) {
-                setTimeout(() => flatListRef.current?.scrollToIndex({ index: idx, animated: true }), 100)
-            }
+            const idx = exerciseLogs.indexOf(added)
+            setTimeout(() => flatListRef.current?.scrollToIndex({ index: idx, animated: true }), 100)
             if (clearHighlightTimeoutRef.current) clearTimeout(clearHighlightTimeoutRef.current)
             clearHighlightTimeoutRef.current = setTimeout(() => setLastAddedLogId(null), 500)
         }
-    }, [logs, exerciseId])
+    }, [exerciseLogs])
 
     // Clear the highlight timeout on unmount to prevent memory leaks.
     useEffect(() => {
@@ -79,43 +90,36 @@ export default function LogsModal() {
         Alert.alert('Invalid Date', "You can't log workouts for future dates. Please select today or an earlier date.")
     }
 
+    const weightVal = Number(weight)
+    const repsVal = Number(reps)
+    const isValid = weight.trim() !== '' && reps.trim() !== '' && Number.isFinite(weightVal) && weightVal >= 0 && Number.isInteger(repsVal) && repsVal > 0
+
     // Validates the date, adds the log, and shows success feedback (scale animation + checkmark).
     const handleAdd = () => {
-        if (weight.trim() && reps.trim()) {
-            if (isDateAfterToday(selectedLogDate)) {
-                showInvalidDateAlert()
-                return
-            }
-            const weightVal = parseFloat(weight)
-            const repsVal = parseInt(reps)
-            pendingAddRef.current = { weight: weightVal, reps: repsVal, dateKey: getDateKey(selectedLogDate) }
-            handleAddLog(workoutId, exerciseId, userID, weightVal, repsVal, 0, selectedLogDate)
-            setLastExercise(params.exerciseName)
-            setShowAddSuccess(true)
-            Animated.sequence([Animated.timing(addButtonScale, { toValue: 1.2, duration: 100, useNativeDriver: true }), Animated.timing(addButtonScale, { toValue: 1, duration: 200, useNativeDriver: true })]).start()
-            setTimeout(() => setShowAddSuccess(false), 500)
+        if (!isValid) return
+        if (isDateAfterToday(selectedLogDate)) {
+            showInvalidDateAlert()
+            return
         }
+        pendingAddRef.current = { weight: weightVal, reps: repsVal, dateKey: getDateKey(selectedLogDate) }
+        handleAddLog(workoutId, exerciseId, userID, weightVal, repsVal, 0, selectedLogDate)
+        setLastExercise(params.exerciseName)
+        setShowAddSuccess(true)
+        Animated.sequence([Animated.timing(addButtonScale, { toValue: 1.2, duration: 100, useNativeDriver: true }), Animated.timing(addButtonScale, { toValue: 1, duration: 200, useNativeDriver: true })]).start()
+        setTimeout(() => setShowAddSuccess(false), 500)
     }
 
-    const isValid = weight.trim() && reps.trim()
     const isLogDateToday = getDateKey(new Date()) === getDateKey(selectedLogDate)
-
-    // Filter and sort logs (most recent date first, then most recent time within same calendar day)
-    const exerciseLogs = logs
-        .filter((log) => log.exerciseID === exerciseId)
-        .sort((a, b) => {
-            const dateKeyA = getDateKey(a.date)
-            const dateKeyB = getDateKey(b.date)
-            if (dateKeyA !== dateKeyB) return sortByDateDesc(a.date, b.date)
-            if (b.time !== a.time) return b.time - a.time
-            return b.id.localeCompare(a.id)
-        })
 
     const progressionOptions = useMemo(() => ({ weightUnit: weightUnit as 'lbs' | 'kg', isCompound }), [weightUnit, isCompound])
 
     const dailyGoal = useMemo(() => getDailyGoal(logs, exerciseId, selectedLogDate, progressionOptions), [logs, exerciseId, selectedLogDate, progressionOptions])
 
     const goalHitToday = useMemo(() => (dailyGoal ? isGoalHitToday(logs, exerciseId, selectedLogDate, dailyGoal) : false), [logs, exerciseId, selectedLogDate, dailyGoal])
+
+    const hasLogsOnSelectedDate = useMemo(() => exerciseLogs.some((log) => getDateKey(log.date) === getDateKey(selectedLogDate)), [exerciseLogs, selectedLogDate])
+
+    const nextGoal = useMemo(() => (goalHitToday || (!dailyGoal && hasLogsOnSelectedDate) ? getDailyGoal(logs, exerciseId, addDays(selectedLogDate, 1), progressionOptions) : null), [goalHitToday, dailyGoal, hasLogsOnSelectedDate, logs, exerciseId, selectedLogDate, progressionOptions])
 
     return (
         <>
@@ -151,9 +155,22 @@ export default function LogsModal() {
                                         </View>
 
                                         {/* Change Date */}
-                                        <TouchableOpacity onPress={() => setShowDateModal(true)} style={[styles.dateButtonTouchable, !isLogDateToday && styles.dateButtonNotToday]} activeOpacity={0.5} accessibilityLabel="Change log date" accessibilityRole="button">
-                                            <Calendar size={22} color={colors.workout} strokeWidth={2.5} />
+                                        <TouchableOpacity onPress={() => setShowDateModal(true)} style={styles.dateButtonTouchable} activeOpacity={0.5} accessibilityLabel={isLogDateToday ? 'Change log date' : `Change log date, currently ${formatDate(selectedLogDate, false)}`} accessibilityRole="button">
+                                            {isLogDateToday ?
+                                                <Calendar size={22} color={colors.workout} strokeWidth={2.5} />
+                                            :   <>
+                                                    <Text style={styles.dateButtonMonth}>{selectedLogDate.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()}</Text>
+                                                    <Text style={styles.dateButtonDay}>{selectedLogDate.getDate()}</Text>
+                                                </>
+                                            }
                                         </TouchableOpacity>
+
+                                        {/* Revert to Today */}
+                                        {!isLogDateToday && (
+                                            <TouchableOpacity onPress={() => setSelectedLogDate(new Date())} style={styles.dateButtonTouchable} activeOpacity={0.5} accessibilityLabel="Revert to today" accessibilityRole="button">
+                                                <RotateCcw size={22} color={colors.workout} strokeWidth={2.5} />
+                                            </TouchableOpacity>
+                                        )}
 
                                         {/* Add Button */}
                                         <TouchableOpacity onPress={handleAdd} disabled={!isValid} activeOpacity={0.8} style={styles.addButtonTouchable}>
@@ -177,23 +194,28 @@ export default function LogsModal() {
                                         </TouchableOpacity>
                                     </View>
 
-                                    {dailyGoal && (
+                                    {dailyGoal ?
+                                        goalHitToday && nextGoal ?
+                                            <>
+                                                <View style={styles.goalHitRow}>
+                                                    <Check size={14} color={colors.nutritionInk} strokeWidth={2.5} />
+                                                    <Text style={styles.goalHitText}>Goal hit!</Text>
+                                                </View>
+                                                <Text style={styles.goalHitNext}>
+                                                    <Text style={styles.goalLabel}>Next session: </Text>
+                                                    {nextGoal.weight} {weightUnit} × {nextGoal.reps}
+                                                </Text>
+                                            </>
+                                        :   <Text style={styles.goalText}>
+                                                <Text style={styles.goalLabel}>PLATES suggested set: </Text>
+                                                {dailyGoal.weight} {weightUnit} × {dailyGoal.reps}
+                                            </Text>
+                                    : nextGoal ?
                                         <Text style={styles.goalText}>
-                                            <Text style={styles.goalLabel}>LIFTRI suggested goal: </Text>
-                                            {dailyGoal.weight} {weightUnit} × {dailyGoal.reps}
-                                            {goalHitToday ? ' 🎉' : ''}
+                                            <Text style={styles.goalLabel}>Next session: </Text>
+                                            {nextGoal.weight} {weightUnit} × {nextGoal.reps}
                                         </Text>
-                                    )}
-
-                                    {!isLogDateToday && (
-                                        <View style={styles.todayRow}>
-                                            <Text style={styles.selectedDateHint}>Logging for {formatDateOrToday(selectedLogDate, true)}</Text>
-                                            <TouchableOpacity onPress={() => setSelectedLogDate(new Date())} style={styles.todayButton} activeOpacity={0.5}>
-                                                <RotateCcw size={18} color={colors.workout} strokeWidth={2.5} />
-                                                <Text style={styles.todayButtonText}>Today</Text>
-                                            </TouchableOpacity>
-                                        </View>
-                                    )}
+                                    :   <Text style={styles.emptyGoalText}>Log a set to see your next progression goal</Text>}
                                 </View>
                             </View>
                         </TouchableWithoutFeedback>
@@ -270,6 +292,35 @@ function makeStyles(colors: Colors) {
         goalLabel: {
             color: colors.workout,
             fontFamily: fonts.semibold,
+        },
+        emptyGoalText: {
+            marginTop: 12,
+            fontSize: 13,
+            color: colors.textMuted,
+            textAlign: 'center',
+            fontFamily: fonts.medium,
+            letterSpacing: -0.2,
+        },
+        goalHitRow: {
+            marginTop: 12,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 5,
+        },
+        goalHitText: {
+            fontSize: 13,
+            color: colors.nutritionInk,
+            fontFamily: fonts.semibold,
+            letterSpacing: -0.2,
+        },
+        goalHitNext: {
+            marginTop: 3,
+            fontSize: 13,
+            color: colors.labelMuted,
+            textAlign: 'center',
+            fontFamily: fonts.medium,
+            letterSpacing: -0.2,
         },
         inputSection: {
             marginBottom: 20,
@@ -348,37 +399,18 @@ function makeStyles(colors: Colors) {
             alignItems: 'center',
             justifyContent: 'center',
         },
-        dateButtonNotToday: {
-            borderColor: colors.workout,
+        dateButtonMonth: {
+            fontSize: 9,
+            color: colors.workout,
+            fontFamily: fonts.semibold,
+            letterSpacing: 0.5,
         },
-        todayRow: {
-            marginTop: 12,
-            gap: 8,
-        },
-        selectedDateHint: {
-            fontSize: 13,
-            color: colors.labelMuted,
-            textAlign: 'center',
-            fontFamily: fonts.medium,
-            letterSpacing: -0.2,
-        },
-        todayButton: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 6,
-            paddingVertical: 10,
-            paddingHorizontal: 12,
-            backgroundColor: colors.surface,
-            borderRadius: 12,
-            borderWidth: 1,
-            borderColor: colors.hairline,
-        },
-        todayButtonText: {
-            fontSize: 14,
+        dateButtonDay: {
+            fontSize: 16,
             color: colors.workout,
             fontFamily: fonts.semibold,
             letterSpacing: -0.5,
+            marginTop: -2,
         },
     })
 }

@@ -1,4 +1,5 @@
 import PressableScale from '@/components/NeutralComponents/PressableScale'
+import TermsAndPrivacyModal from '@/components/NeutralComponents/TermsAndPrivacyModal'
 import { useBilling } from '@/context/BillingContext'
 import { useSettings } from '@/context/SettingsContext'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
@@ -31,10 +32,11 @@ export default function OnboardingPaywall() {
     const insets = useSafeAreaInsets()
     const topPad = Math.max(insets.top, 12) + 16
     const { settings, setSettings } = useSettings()
-    const { loading, hasPremium, monthlyPackage, annualPackage, priceInfo, annualPriceInfo, purchasePackage, restorePurchases, error } = useBilling()
+    const { loading, hasPremium, monthlyPackage, annualPackage, priceInfo, annualPriceInfo, annualSavingsPercent, purchasePackage, restorePurchases, error } = useBilling()
     const accent = colors.text
     const [plan, setPlan] = useState<Plan>('annual')
     const [purchasing, setPurchasing] = useState(false)
+    const [termsVisible, setTermsVisible] = useState(false)
 
     const metric = settings.unitSystem === 'metric'
     const unit = metric ? 'kg' : 'lb'
@@ -130,7 +132,7 @@ export default function OnboardingPaywall() {
                         <Text style={styles.priceName}>Annual</Text>
                         <Text style={[styles.priceAmount, { color: accent }]}>{annualPriceInfo?.price ?? '$39.99'}</Text>
                         <Text style={styles.priceNote}>{TRIAL} day free trial</Text>
-                        <Text style={[styles.badge, { color: colors.workout }]}>Best value</Text>
+                        <Text style={[styles.badge, { color: colors.workout }]}>{`Save ${annualSavingsPercent ?? 52}%`}</Text>
                     </PressableScale>
                 </View>
 
@@ -157,6 +159,14 @@ export default function OnboardingPaywall() {
                 <TouchableOpacity onPress={handleRestore} disabled={purchasing} activeOpacity={0.5} style={[styles.restore, purchasing && styles.footerDisabled]}>
                     <Text style={styles.restoreText}>Restore Purchases</Text>
                 </TouchableOpacity>
+
+                <Text style={styles.legal}>
+                    By subscribing, you agree to our{' '}
+                    <Text style={styles.legalLink} onPress={() => setTermsVisible(true)}>
+                        Terms & Privacy Policy
+                    </Text>
+                    .
+                </Text>
             </ScrollView>
 
             <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 8) }]}>
@@ -167,6 +177,8 @@ export default function OnboardingPaywall() {
                     <Text style={styles.laterText}>Maybe later</Text>
                 </TouchableOpacity>
             </View>
+
+            <TermsAndPrivacyModal visible={termsVisible} onClose={() => setTermsVisible(false)} />
         </View>
     )
 }
@@ -205,6 +217,8 @@ function makeStyles(colors: Colors) {
         trustLine: { fontFamily: fonts.medium, fontSize: 12, color: colors.textMuted, textAlign: 'center', letterSpacing: 0.2 },
         restore: { alignSelf: 'center', paddingVertical: 2 },
         restoreText: { fontFamily: fonts.semibold, fontSize: 15, color: colors.text, letterSpacing: -0.3 },
+        legal: { fontFamily: fonts.regular, fontSize: 11, color: colors.textMuted, textAlign: 'center', lineHeight: 16, paddingHorizontal: 8, marginTop: 14 },
+        legalLink: { color: colors.workoutInk, fontFamily: fonts.semibold, textDecorationLine: 'underline' },
         footer: { flexDirection: 'row', gap: 12, paddingTop: 12 },
         footerDisabled: { opacity: 0.5 },
         backButton: { flex: 1, height: 58, borderRadius: radius.cardLg, backgroundColor: colors.surface, justifyContent: 'center', alignItems: 'center', borderWidth: StyleSheet.hairlineWidth, borderColor: colors.hairline },

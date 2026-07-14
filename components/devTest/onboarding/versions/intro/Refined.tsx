@@ -32,7 +32,7 @@ export default function IntroRefined() {
                     <Image source={require('@/assets/images/AppIconPng.png')} style={styles.logoImage} contentFit="contain" priority="high" />
                 </View>
 
-                <Text style={styles.appName}>LIFTRI</Text>
+                <Text style={styles.appName}>PLATES</Text>
                 <Text style={styles.tagline}>Hit your goals with training and nutrition that finally work together.</Text>
 
                 {/* Social proof (cro) — placeholder rating */}

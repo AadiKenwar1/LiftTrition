@@ -1,0 +1,166 @@
+PLATES AUDIT — MINOR ISSUES
+From the 2026-07-12 multi-agent audit. Confirmed-in-code issues only
+(technical detail + line numbers in AUDIT_REPORT.md; unverified
+"suspected" items live only there). Delete entries as they get fixed.
+
+DATA & LOGIC
+------------
+
+1. Force-quitting during onboarding loses every answer
+   Nothing persists until the final paywall screen - except the day-1
+   body weight, which aboutYou saves immediately (leaving an orphan row
+   if onboarding is abandoned).
+   Where: SettingsContext persist gate + aboutYou.tsx
+
+2. Workout notes save on every keystroke
+   Each character = one DB write + one queued upload. A long note
+   creates hundreds of sync ops and slows the sign-out flush.
+   Where: notesModal.tsx | Fix: debounce or save on close.
+
+3. Archived list order drifts between sessions
+   Adding/duplicating a workout bumps ALL rows in memory but only
+   active rows in SQL; a later rename/note bakes the drift in.
+   Where: WorkoutContext/index.tsx vs database/powersyncStore.ts
+   Fix: filter the in-memory bump to !archived.
+
+4. Metric users see their pace mislabeled
+   Profile prints the stored lb number with "kg/week" - pick 0.5 kg/wk,
+   see "1.1 kg/week". Every other screen converts correctly.
+   Where: profile.tsx | Fix: lbsToKg before display.
+
+5. Strength chart is a flat 0 for bodyweight exercises
+   1RM uses raw logged weight, so added-weight-0 pull-ups plot as 0.
+   The fatigue math already adds body weight - the chart doesn't.
+   Where: WorkoutContext graphFunctions + oneRepMaxFunctions
+
+6. Daylight-saving can hide day one of the body-weight chart
+   Day counting divides milliseconds and floors; a spring-forward
+   inside the window drops the first day - which holds the onboarding
+   weigh-in, so the line starts at 0.
+   Where: bodyWeightFunctions.tsx (+3 same-pattern spots)
+   Fix: count by date keys or round instead of floor.
+
+7. Macro targets can disagree with the calorie target
+   The 1200/1500 calorie floor is applied after the macro split, so a
+   small/older user's macros add up to ~900 cal against a 1200 goal.
+   Where: macroCalculation.tsx | Fix: split from the clamped value.
+
+8. Rejected AI meals still get written to the database
+   The photo path ignores the validator result that the manual path
+   respects - an invalid entry hides from the UI, then reappears after
+   restart.
+   Where: NutritionContext/index.tsx (photo handler)
+
+9. Ingredient brand names silently vanish
+   The AI returns a brand and the app type carries it, but there's no
+   database column - gone after every restart.
+   Where: NutritionContext/types.ts vs AppSchema.ts
+
+10. Default progress exercise doesn't exist
+    The chart falls back to "Barbell Bench Press"; the library's real
+    name is "Bench Press" - fresh users (and everyone after sign-out
+    wipes lastExercise) get a permanently empty strength card.
+    Where: progress.tsx:41
+
+11. Four different "default pace" values
+    goalPace defaults to 0 in one file, 0.5 in three others; which one
+    a user gets depends on which code path hydrated them.
+    Where: SettingsContext (powersyncStore vs index vs onboarding)
+    Fix: one exported DEFAULT_SETTINGS constant.
+
+12. Tests certify code the app doesn't run
+    Workout CRUD tests target functions/workoutFunctions.tsx, but the
+    provider re-implements those handlers inline with different
+    behavior - green tests, untested app.
+    Where: WorkoutContext/index.tsx vs __tests__/workoutFunctions.test.ts
+
+UI & POLISH
+-----------
+
+13. Login button's "Signing in..." state can never appear
+    It's wired to the startup-restore flag, not the actual Apple
+    sign-in call - no feedback, re-tappable mid-sign-in.
+    Where: login.tsx | Fix: local signingIn state.
+
+14. Deleting two sets quickly un-deletes the first
+    One shared delete animation; starting the second cancels the
+    first's completion callback and the row pops back.
+    Where: LogHistoryList.tsx | Fix: commit delete immediately.
+
+15. Food search results can flash backwards / alert-spam offline
+    Older responses aren't cancelled and can overwrite newer results
+    or kill the spinner early; offline, every typing pause fires
+    another failure alert.
+    Where: foodDBModal.tsx search effect | Fix: request-id/abort guard.
+
+16. "lb" vs "lbs" flip-flops between adjacent screens
+    Type your weight under "lbs", see your goal in "lb"; log tab says
+    "lbs", progress tab "lb". (~11 files)
+    Fix: one weight-unit label helper.
+
+17. "kcal" vs "cal" vs "calories"
+    Three labels for the same number across entry cards, saved meals,
+    pickers, and profile. Fix: pick one.
+
+18. Clearing a meal's name behaves two ways
+    Add saves it as "Unnamed Entry"; edit silently restores the old
+    name. Where: addNutritionModal vs editManualEntry.
+
+19. "22.400000000000006 lb to goal"
+    Raw float subtraction shown unrounded on the macro summary screen.
+    Where: adjustNutrition4.tsx | Fix: round to 1 decimal.
+
+20. The "next week" arrow looks tappable when it isn't
+    Disabled opacity is 0.7 (prev arrow uses 0.25) - reads as enabled,
+    does nothing on the current week.
+    Where: progress.tsx week stepper.
+
+21. Screen-header font ignores the app-wide font switch
+    Native stack headers hardcode Poppins, so the FONT_FAMILY
+    Poppins<->Archivo flip misses every header.
+    Where: app/_layout.tsx headerTitleStyle | Fix: fonts token.
+
+22. ProgressWheel has its own private copy of the brand gradients
+    Hardcoded hexes duplicate workout/nutritionGradient - the current
+    colorHue retune won't reach the rings or their markers.
+    Where: ProgressWheel.tsx | Fix: read theme tokens.
+
+23. Macro colors duplicated as raw hex in two screens
+    Same three literals in plan.tsx and adjustNutrition3.tsx.
+    Fix: hoist into ThemeContext per RESTYLE_PLAN rule.
+
+24. Inconsistent delete confirmations
+    Unsaving a meal asks; deleting a logged set doesn't (the prop is
+    even named onDeleteConfirmed); the archive screen's delete asks
+    nothing (that one is major issue #5).
+    Fix: one rule - confirm iff irreversible.
+
+PLUMBING
+--------
+
+25. Same math copy-pasted in 2-3 places, waiting to drift
+    Ingredient totals (aiFunctions vs editPhotoEntry), weeks-to-goal
+    (x3 files), age calculation (x3 files), DatePicker's "no future
+    dates" re-implemented at every call site. Consistent today; one
+    edit away from not.
+    Fix: shared lib/utils helpers.
+
+26. lastExercise can be erased right after sign-in
+    The persist effect fires (and removes the key) before the async
+    load finishes. Currently masked because sign-out wipes storage
+    anyway (major issue #19); becomes live once that's fixed.
+    Where: WorkoutContext/index.tsx. Note: docs say the key is
+    lastExercise_id; code uses lastExercise:id.
+
+27. Five env vars, none pinned for builds
+    EXPO_PUBLIC_ POWERSYNC_URL / SENTRY_DSN / REVENUECAT keys / SUPABASE
+    pair are all consumed (one with a non-null !), but eas.json declares
+    none and docs list only two - a missing var fails only at runtime.
+    Fix: declare per profile in eas.json or assert at startup.
+
+28. In-memory caches survive switching accounts
+    Food-search caches (unbounded) and the sync kick-throttle timestamp
+    carry across sign-out/sign-in. No data leak found - just memory
+    growth and a throttled first kick.
+    Where: lib/foodDB/foodDB.ts, orchestrator.ts
+    Fix: resetModuleCaches() called from sign-out.

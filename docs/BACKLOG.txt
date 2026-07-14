@@ -1,0 +1,99 @@
+PLATES BACKLOG
+Deferred work from the July 2026 code review (details in CODE_REVIEW.md).
+Delete lines as they get done.
+
+NOTIFICATIONS
+-------------
+-Add nutrition notifications at common meal times
+-Add workout notifications if havent worked out much in a week
+-Add workout notifcations ever morning to remind to log workout
+
+CLAUDE SKILLS
+-------------
+- "Visual prototype" skill: any time we want to try something out visually,
+  default to building it as a Dev Hub component first (per CLAUDE.md's Dev
+  tooling section) instead of editing production screens directly.
+- "Concise docs" skill: any time something gets documented (backlog entries,
+  READMEs, code comments, plans), keep it short, plain, and readable to a
+  human - no padding, no restating the obvious.
+
+DATE PICKING
+------------
+- Swap the wheel DatePicker for the calendar grid (CalendarMonthGrid, proven
+  in the Dev Hub) in dateModal.tsx and LogDateModal.tsx only. Leave
+  onboarding's birthday picker (native wheels) alone - wheels beat a calendar
+  for far-past dates.
+- Unify dateModal.tsx and LogDateModal.tsx into one component - they're
+  already near-duplicates, differing only in host shape (pushed route vs.
+  inline Modal).
+
+BILLING
+-------
+- Cache last-known hasPremium in AsyncStorage and hydrate it at startup, then
+  remove billingLoaded from the startup gate in app/_layout.tsx. Kills the 15s
+  worst-case launch without losing flicker prevention.
+
+APP STORE POLISH
+----------------
+- Add expo-camera plugin to app.json with a purpose-specific permission
+  string (current default wording is generic). Low priority.
+
+BUGS
+----
+- Saved meals list isn't newest-first after a sync round trip. The UI sort and
+  SQL ORDER BY are correct; the suspect is created_at coming back from
+  Postgres in a format Hermes' new Date() can't parse (space instead of T),
+  so getTime() is NaN and the sort silently no-ops. Confirm by logging
+  row.created_at after a fresh sync; fix = tolerant date parser at the
+  row-conversion boundary (rowToSavedNutritionEntry and siblings in
+  NutritionContext/database/powersyncStore.ts).
+
+DATA INTEGRITY
+--------------
+- getPendingUploadEstimate: return null on unknown SDK shapes instead of 0,
+  plus a test. Today an unknown shape lets sign-out wipe unsynced data.
+- Connector.ts line 194: insert the settings row instead of silently dropping
+  the PATCH.
+- Add a timeout + retry state around waitForFirstSync() so a fresh offline
+  install can't spin forever. Verify on device first.
+- Adopt PowerSync watch queries; mid-session remote changes are currently
+  invisible until restart. Matters once multi-device is a story.
+
+PERFORMANCE
+-----------
+- Memoize provider values for Auth/Settings/Workout and useCallback the
+  Settings handlers. (Nutrition done 2026-07-12 - see docs/RENDER_FIXES.txt.)
+- Speed up "Generate macros" (stacked serial costs, only one is the AI):
+  give the fetchOpenAI text path its own small/fast model instead of
+  inheriting OPENAI_VISION_MODEL (biggest win); replace the in-function
+  auth.getUser network hop with local JWT verification; cache identical
+  queries. Cold start + region RTT is the irreducible remainder.
+- React.memo list rows (Log, Entry, ScrollableList) and memoize the exercise
+  picker's filter/renderItem - it re-sorts all 1,318 items per keystroke.
+
+THEMING
+-------
+- Empty-state icon circles use colors.surface, which reads as a white badge
+  in light mode. Add per-accent chip tokens (like iconChipBg) and extract an
+  EmptyStateIcon primitive - the pattern is copy-pasted in ~10 files.
+
+SECURITY
+--------
+- Move the Supabase session to expo-secure-store (AsyncStorage fallback);
+  refresh token is plaintext today. Needs a dev-client rebuild.
+
+CLEANUP
+-------
+- Remove unused deps: jsonwebtoken, base-64 + @types/base-64,
+  react-native-draggable-flatlist, react-native-inner-shadow, expo-web-browser.
+- Delete orphan settingsScreens/adjustMeasurements.tsx and empty dirs
+  (lib/theme/, settingsScreens/createExercise/, exerciseLibrary/data/).
+- Rename settings.mode -> domainMode (persisted column - needs a migration).
+- Consolidate icons onto lucide-react-native (~15 files still on
+  @expo/vector-icons).
+- Fix pre-existing failures: ~31 tsc errors and 6 failing jest suites
+  (details in CODE_REVIEW.md section 2).
+- Retire RESTYLE_PLAN.md once the restyle is done (strip its two CLAUDE.md
+  references).
+- Move embedded workoutScreen.tsx / nutritionScreen.tsx out of app/ into
+  components/.

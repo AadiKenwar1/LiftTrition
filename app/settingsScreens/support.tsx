@@ -80,15 +80,10 @@ export default function SupportScreen() {
                         <View style={styles.typeToggleContainer}>
                             <TouchableOpacity style={[styles.typeButton, subjectType === 'support' && styles.typeButtonActive]} onPress={() => setSubjectType('support')} activeOpacity={0.5} disabled={loading}>
                                 <Text style={[styles.typeButtonText, subjectType === 'support' && styles.typeButtonTextActive]} adjustsFontSizeToFit minimumFontScale={0.65} numberOfLines={2}>
-                                    Liftri Support
+                                    PLATES Support
                                 </Text>
                             </TouchableOpacity>
-                            <TouchableOpacity
-                                style={[styles.typeButton, subjectType === 'feature_request' && styles.typeButtonActive]}
-                                onPress={() => setSubjectType('feature_request')}
-                                activeOpacity={0.5}
-                                disabled={loading}
-                            >
+                            <TouchableOpacity style={[styles.typeButton, subjectType === 'feature_request' && styles.typeButtonActive]} onPress={() => setSubjectType('feature_request')} activeOpacity={0.5} disabled={loading}>
                                 <Text style={[styles.typeButtonText, subjectType === 'feature_request' && styles.typeButtonTextActive]} adjustsFontSizeToFit minimumFontScale={0.65} numberOfLines={2}>
                                     Request a Feature
                                 </Text>
@@ -100,31 +95,14 @@ export default function SupportScreen() {
                                 <Text style={styles.inputLabel} adjustsFontSizeToFit minimumFontScale={0.75} numberOfLines={1}>
                                     Subject
                                 </Text>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder={subjectType === 'support' ? 'e.g. Billing question, Bug report' : 'e.g. Add dark mode, Export data'}
-                                    placeholderTextColor={colors.placeholder}
-                                    value={subject}
-                                    onChangeText={setSubject}
-                                    editable={!loading}
-                                />
+                                <TextInput style={styles.input} placeholder={subjectType === 'support' ? 'e.g. Billing question, Bug report' : 'e.g. Add dark mode, Export data'} placeholderTextColor={colors.placeholder} value={subject} onChangeText={setSubject} editable={!loading} />
                             </View>
 
                             <View style={styles.inputGroup}>
                                 <Text style={styles.inputLabel} adjustsFontSizeToFit minimumFontScale={0.75} numberOfLines={1}>
                                     Message
                                 </Text>
-                                <TextInput
-                                    style={[styles.input, styles.messageInput]}
-                                    placeholder={subjectType === 'support' ? 'Describe your issue or question...' : 'Describe the feature you would like to see...'}
-                                    placeholderTextColor={colors.placeholder}
-                                    value={message}
-                                    onChangeText={setMessage}
-                                    multiline
-                                    numberOfLines={5}
-                                    textAlignVertical="top"
-                                    editable={!loading}
-                                />
+                                <TextInput style={[styles.input, styles.messageInput]} placeholder={subjectType === 'support' ? 'Describe your issue or question...' : 'Describe the feature you would like to see...'} placeholderTextColor={colors.placeholder} value={message} onChangeText={setMessage} multiline numberOfLines={5} textAlignVertical="top" editable={!loading} />
                             </View>
                         </View>
 

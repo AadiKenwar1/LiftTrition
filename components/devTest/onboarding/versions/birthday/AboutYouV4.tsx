@@ -1,11 +1,11 @@
 import { validateHeightWeight } from '@/context/SettingsContext/functions/validator'
-import { cmToInches, feetInchesToInches, inchesToCm, inchesToFeetInches, kgToLbs, lbsToKg } from '@/lib/utils/unitConversions'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
+import { cmToInches, feetInchesToInches, inchesToCm, inchesToFeetInches, kgToLbs, lbsToKg } from '@/lib/utils/unitConversions'
 import { useRouter } from 'expo-router'
 import { ShieldCheck } from 'lucide-react-native'
 import { useMemo, useState } from 'react'
 import { Alert, Keyboard, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from 'react-native'
-import CompactDatePicker from '../_shared/CompactDatePicker'
+import CalendarDatePopup from '../_shared/CalendarDatePopup'
 import { useOnboardingFlow } from '../_shared/flowContext'
 import PressableScale from '../_shared/PressableScale'
 import V4Screen from '../_shared/V4Screen'
@@ -64,7 +64,7 @@ export default function AboutYouV4() {
         const m = now.getMonth() - birthDate.getMonth()
         if (m < 0 || (m === 0 && now.getDate() < birthDate.getDate())) age--
         if (age < 13) {
-            Alert.alert('Age Requirement', 'You must be at least 13 years old to use LIFTRI.', [{ text: 'OK' }])
+            Alert.alert('Age Requirement', 'You must be at least 13 years old to use PLATES.', [{ text: 'OK' }])
             return false
         }
         flow?.setData('unit', unitSystem)
@@ -88,7 +88,7 @@ export default function AboutYouV4() {
 
                     <Text style={styles.label}>Date of birth</Text>
                     <View style={{ marginBottom: 20 }}>
-                        <CompactDatePicker selectedDate={birthDate} onDateChange={setBirthDate} accent={accent} />
+                        <CalendarDatePopup selectedDate={birthDate} onDateChange={setBirthDate} accent={accent} />
                     </View>
 
                     <Text style={styles.label}>Height & weight</Text>

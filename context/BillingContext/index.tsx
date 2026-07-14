@@ -2,7 +2,7 @@ import { useAuth } from '@/context/AuthContext'
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { Platform } from 'react-native'
 import Purchases, { CustomerInfo, LOG_LEVEL, PurchasesPackage } from 'react-native-purchases'
-import { getAnnualPackage, getMonthlyPackage, getPackagePriceInfo, purchasePackage, restorePurchases } from './functions/billingFunctions'
+import { getAnnualPackage, getAnnualSavingsPercent, getMonthlyPackage, getPackagePriceInfo, purchasePackage, restorePurchases } from './functions/billingFunctions'
 import { BillingContextInterface } from './types'
 
 const BillingContext = createContext<BillingContextInterface | undefined>(undefined)
@@ -30,7 +30,7 @@ export function BillingProvider({ children }: { children: React.ReactNode }) {
 
         if (!apiKey || apiKey === 'NULL') return
 
-        Purchases.setLogLevel(LOG_LEVEL.VERBOSE)
+        Purchases.setLogLevel(__DEV__ ? LOG_LEVEL.VERBOSE : LOG_LEVEL.ERROR)
         Purchases.configure({ apiKey })
     }, [])
 
@@ -128,6 +128,7 @@ export function BillingProvider({ children }: { children: React.ReactNode }) {
     const annualPackage = useMemo(() => getAnnualPackage(offerings), [offerings])
     const priceInfo = useMemo(() => getPackagePriceInfo(monthlyPackage), [monthlyPackage])
     const annualPriceInfo = useMemo(() => getPackagePriceInfo(annualPackage), [annualPackage])
+    const annualSavingsPercent = useMemo(() => getAnnualSavingsPercent(monthlyPackage, annualPackage), [monthlyPackage, annualPackage])
 
     const value = useMemo(
         () => ({
@@ -143,8 +144,9 @@ export function BillingProvider({ children }: { children: React.ReactNode }) {
             annualPackage,
             priceInfo,
             annualPriceInfo,
+            annualSavingsPercent,
         }),
-        [offerings, customerInfo, loading, loaded, error, handlePurchasePackage, handleRestorePurchases, hasPremium, monthlyPackage, annualPackage, priceInfo, annualPriceInfo],
+        [offerings, customerInfo, loading, loaded, error, handlePurchasePackage, handleRestorePurchases, hasPremium, monthlyPackage, annualPackage, priceInfo, annualPriceInfo, annualSavingsPercent],
     )
 
     return <BillingContext.Provider value={value}>{children}</BillingContext.Provider>

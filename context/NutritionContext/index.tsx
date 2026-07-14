@@ -1,6 +1,6 @@
 import { useAuth } from '@/context/AuthContext';
 import { powerSync } from '@/lib/powersync/system';
-import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { loadNutritionData, upsertNutritionEntry, upsertSavedNutritionEntry } from './database/powersyncStore';
 import type { ScanMode } from '@/lib/openAI/mealImage';
 import { analyzeAndAddPhoto } from "./functions/aiFunctions";
@@ -58,7 +58,7 @@ export const NutritionProvider = ({ children }: PropsWithChildren) => {
     // Each handler updates React state immediately, then writes only the affected
     // row(s) to PowerSync — same pattern as deleteNutrition / unsaveNutrition.
 
-    const handleAddNutrition = async (nutritionEntry: NutritionEntry) => {
+    const handleAddNutrition = useCallback(async (nutritionEntry: NutritionEntry) => {
         const added = addNutrition(nutritionEntry, setNutritionData);
         if (!added || !userID) return;
         try {
@@ -66,13 +66,13 @@ export const NutritionProvider = ({ children }: PropsWithChildren) => {
         } catch (e) {
             console.warn('[NutritionContext] Failed to persist nutrition entry to PowerSync', e);
         }
-    }
+    }, [userID])
 
-    const handleDeleteNutrition = async (id: string) => {
+    const handleDeleteNutrition = useCallback(async (id: string) => {
         await deleteNutrition(id, setNutritionData, userID);
-    }
+    }, [userID])
 
-    const handleEditNutrition = async (id: string, nutritionEntry: NutritionEntry) => {
+    const handleEditNutrition = useCallback(async (id: string, nutritionEntry: NutritionEntry) => {
         const edited = editNutrition(id, nutritionEntry, setNutritionData);
         if (!edited || !userID) return;
         try {
@@ -80,9 +80,9 @@ export const NutritionProvider = ({ children }: PropsWithChildren) => {
         } catch (e) {
             console.warn('[NutritionContext] Failed to persist nutrition edit to PowerSync', e);
         }
-    }
+    }, [userID])
 
-    const handleSaveNutrition = async (logEntry: NutritionEntry) => {
+    const handleSaveNutrition = useCallback(async (logEntry: NutritionEntry) => {
         const now = new Date()
         const savedEntry: NutritionEntry = {
             ...logEntry,
@@ -99,13 +99,13 @@ export const NutritionProvider = ({ children }: PropsWithChildren) => {
         } catch (e) {
             console.warn('[NutritionContext] Failed to persist saved nutrition entry to PowerSync', e);
         }
-    }
+    }, [userID, savedNutritionEntries])
 
-    const handleUnsaveNutrition = async (id: string) => {
+    const handleUnsaveNutrition = useCallback(async (id: string) => {
         await unsaveNutrition(id, setSavedNutritionEntries, userID);
-    }
+    }, [userID])
 
-    const handleAnalyzeAndAddPhoto = async (photoUri: string, userIDParam: string, mode: ScanMode = 'meal') => {
+    const handleAnalyzeAndAddPhoto = useCallback(async (photoUri: string, userIDParam: string, mode: ScanMode = 'meal') => {
         const entry = await analyzeAndAddPhoto(photoUri, userIDParam, setNutritionData, selectedDate, mode);
         if (!userIDParam) return;
         try {
@@ -113,38 +113,42 @@ export const NutritionProvider = ({ children }: PropsWithChildren) => {
         } catch (e) {
             console.warn('[NutritionContext] Failed to persist photo entry to PowerSync', e);
         }
-    }
+    }, [selectedDate])
 
-    const handleGetMacrosForDate = (date: Date) => getMacrosForDate(nutritionData, date);
-    const handleGetMacroDataForGraph = (macroType: 'calories' | 'protein' | 'carbs' | 'fats', onboardingCompletedAt?: Date) =>
-        getMacroDataForGraph(macroType, nutritionData, onboardingCompletedAt);
-    const handleGetMacroForWeek = (macroType: 'calories' | 'protein' | 'carbs' | 'fats', weekStart: Date) =>
-        getMacroForWeek(macroType, nutritionData, weekStart);
+    const handleGetMacrosForDate = useCallback((date: Date) => getMacrosForDate(nutritionData, date), [nutritionData]);
+    const handleGetMacroDataForGraph = useCallback((macroType: 'calories' | 'protein' | 'carbs' | 'fats', onboardingCompletedAt?: Date) =>
+        getMacroDataForGraph(macroType, nutritionData, onboardingCompletedAt), [nutritionData]);
+    const handleGetMacroForWeek = useCallback((macroType: 'calories' | 'protein' | 'carbs' | 'fats', weekStart: Date) =>
+        getMacroForWeek(macroType, nutritionData, weekStart), [nutritionData]);
 
     const nutritionStreak = useMemo(
         () => getNutritionStreakState(nutritionData),
         [nutritionData],
     );
 
+    const value = useMemo(
+        () => ({
+            nutritionData,
+            savedNutritionEntries,
+            selectedDate,
+            loaded,
+            setSelectedDate,
+            handleAddNutrition,
+            handleDeleteNutrition,
+            handleEditNutrition,
+            handleSaveNutrition,
+            handleUnsaveNutrition,
+            handleAnalyzeAndAddPhoto,
+            handleGetMacrosForDate,
+            handleGetMacroDataForGraph,
+            handleGetMacroForWeek,
+            nutritionStreak,
+        }),
+        [nutritionData, savedNutritionEntries, selectedDate, loaded, handleAddNutrition, handleDeleteNutrition, handleEditNutrition, handleSaveNutrition, handleUnsaveNutrition, handleAnalyzeAndAddPhoto, handleGetMacrosForDate, handleGetMacroDataForGraph, handleGetMacroForWeek, nutritionStreak],
+    );
+
     return (
-        <NutritionContext.Provider
-            value={{
-                nutritionData,
-                savedNutritionEntries,
-                selectedDate,
-                loaded,
-                setSelectedDate,
-                handleAddNutrition,
-                handleDeleteNutrition,
-                handleEditNutrition,
-                handleSaveNutrition,
-                handleUnsaveNutrition,
-                handleAnalyzeAndAddPhoto,
-                handleGetMacrosForDate,
-                handleGetMacroDataForGraph,
-                handleGetMacroForWeek,
-                nutritionStreak,
-            }}>
+        <NutritionContext.Provider value={value}>
             {children}
         </NutritionContext.Provider>
     );

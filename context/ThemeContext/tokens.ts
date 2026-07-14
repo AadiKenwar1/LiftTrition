@@ -24,3 +24,7 @@ export const spacing = {
     cardGap: 11,
     sectionGap: 18,
 } as const
+
+export const motion = {
+    imageFade: 200,
+} as const

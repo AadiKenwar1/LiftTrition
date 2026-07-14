@@ -88,14 +88,6 @@ export default function SettingsScreen() {
             onPress: () => router.push('/settingsScreens/adjustTraining'),
         },
     ]
-    const customizationOptions: SettingsOption[] = [
-        {
-            icon: FileText,
-            title: 'Terms and Privacy',
-            subtitle: 'Read the terms of service and privacy policy',
-            onPress: () => router.push('/settingsScreens/termsAndPrivacy'),
-        },
-    ]
     const supportOptions: SettingsOption[] = [
         {
             icon: FlaskConical,
@@ -108,6 +100,12 @@ export default function SettingsScreen() {
             title: 'Support and Feature Requests',
             subtitle: 'Get help and request features',
             onPress: () => router.push('/settingsScreens/support'),
+        },
+        {
+            icon: FileText,
+            title: 'Terms and Privacy',
+            subtitle: 'Read the terms of service and privacy policy',
+            onPress: () => router.push('/settingsScreens/termsAndPrivacy'),
         },
     ]
 
@@ -127,29 +125,25 @@ export default function SettingsScreen() {
         )
     }
 
-    const renderAppearanceItem = () => (
-        <TouchableOpacity style={styles.settingItem} onPress={() => setColorScheme(isDark ? 'light' : 'dark')} activeOpacity={0.5}>
-            <View style={styles.iconContainer}>
-                {isDark ?
-                    <Moon size={22} color={colors.text} strokeWidth={2.5} />
-                :   <Sun size={22} color={colors.text} strokeWidth={2.5} />}
-            </View>
-            <View style={styles.itemTextContainer}>
-                <Text style={styles.settingTitle}>Appearance</Text>
-                <Text style={styles.settingSubtitle}>Switch between dark and light mode</Text>
-            </View>
-            <Text style={styles.trailingValue}>{isDark ? 'Dark' : 'Light'}</Text>
-        </TouchableOpacity>
-    )
-
     return (
         <View style={styles.outerContainer}>
             <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
                 <View style={styles.header}>
-                    <TouchableOpacity onPress={() => router.push('/settingsScreens/devStatsModal')} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel="Open developer stats">
-                        <Text style={styles.title}>Settings</Text>
+                    <View style={styles.headerText}>
+                        <TouchableOpacity onPress={() => router.push('/settingsScreens/devStatsModal')} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel="Open developer stats">
+                            <Text style={styles.title}>Settings</Text>
+                        </TouchableOpacity>
+                        <Text style={styles.lastUpdated}>{syncStatusLine}</Text>
+                    </View>
+                    <TouchableOpacity
+                        style={styles.themeToggle}
+                        onPress={() => setColorScheme(isDark ? 'light' : 'dark')}
+                        activeOpacity={0.7}
+                        accessibilityRole="button"
+                        accessibilityLabel={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+                    >
+                        {isDark ? <Sun size={20} color={colors.text} strokeWidth={2.2} /> : <Moon size={20} color={colors.text} strokeWidth={2.2} />}
                     </TouchableOpacity>
-                    <Text style={styles.lastUpdated}>{syncStatusLine}</Text>
                 </View>
 
                 {/* Profile card */}
@@ -188,13 +182,6 @@ export default function SettingsScreen() {
                     {goalOptions.map(renderSettingItem)}
                 </View>
 
-                {/* Customization Section */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Customization</Text>
-                    {renderAppearanceItem()}
-                    {customizationOptions.map(renderSettingItem)}
-                </View>
-
                 {/* Support Section */}
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Support</Text>
@@ -226,9 +213,26 @@ function makeStyles(colors: Colors) {
             paddingBottom: 40,
         },
         header: {
+            flexDirection: 'row',
+            alignItems: 'flex-start',
+            justifyContent: 'space-between',
             paddingTop: 60,
             paddingBottom: 18,
             paddingHorizontal: 20,
+        },
+        headerText: {
+            flex: 1,
+            marginRight: 12,
+        },
+        themeToggle: {
+            width: 42,
+            height: 42,
+            borderRadius: radius.iconButton,
+            backgroundColor: colors.surface,
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: colors.hairline,
+            justifyContent: 'center',
+            alignItems: 'center',
         },
         title: {
             fontSize: 26,
@@ -344,12 +348,6 @@ function makeStyles(colors: Colors) {
             color: colors.labelMuted,
             lineHeight: 17,
             fontFamily: fonts.regular,
-        },
-        trailingValue: {
-            fontSize: 14,
-            color: colors.textSecondary,
-            marginLeft: 8,
-            fontFamily: fonts.medium,
         },
     })
 }

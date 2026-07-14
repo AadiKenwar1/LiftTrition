@@ -22,7 +22,13 @@ jest.mock('@/lib/supabase/client', () => ({
     },
 }))
 
+// Mock Sentry
+jest.mock('@sentry/react-native', () => ({
+    captureException: jest.fn(),
+}))
+
 // Import types after mocking
+import * as Sentry from '@sentry/react-native'
 import { AbstractPowerSyncDatabase, UpdateType } from '@powersync/react-native'
 
 // Mock PowerSync database
@@ -204,14 +210,167 @@ describe('Connector', () => {
             expect(mockTransaction.complete).toHaveBeenCalledTimes(1)
         })
 
-        it('should throw error and not complete transaction on Supabase error', async () => {
+        it('should skip op and complete transaction on non-retryable Postgres error (23505 unique violation)', async () => {
             const mockTransaction = {
                 crud: [
                     {
-                        op: UpdateType.PUT,
+                        op: UpdateType.DELETE,
+                        table: 'workouts',
+                        id: 'test-id-1',
+                        opData: {},
+                    },
+                ],
+                complete: jest.fn().mockResolvedValue(undefined),
+            }
+
+            ;(mockDatabase.getNextCrudTransaction as jest.Mock).mockResolvedValue(mockTransaction)
+
+            const mockError = { message: 'Database error', code: '23505' }
+            const mockEq = jest.fn().mockReturnValue({ error: mockError })
+            ;(supabase.from as jest.Mock).mockReturnValue({ delete: jest.fn().mockReturnValue({ eq: mockEq }) })
+
+            await connector.uploadData(mockDatabase)
+
+            expect(Sentry.captureException).toHaveBeenCalledTimes(1)
+            expect(Sentry.captureException).toHaveBeenCalledWith(
+                mockError,
+                {
+                    tags: { area: 'powersync-dead-letter' },
+                    extra: { table: 'workouts', opType: UpdateType.DELETE, opId: 'test-id-1' },
+                }
+            )
+            expect(mockTransaction.complete).toHaveBeenCalledTimes(1)
+        })
+
+        it('should skip op and complete transaction on non-retryable Postgres error (22P02 invalid text representation)', async () => {
+            const mockTransaction = {
+                crud: [
+                    {
+                        op: UpdateType.DELETE,
+                        table: 'workouts',
+                        id: 'test-id-1',
+                        opData: {},
+                    },
+                ],
+                complete: jest.fn().mockResolvedValue(undefined),
+            }
+
+            ;(mockDatabase.getNextCrudTransaction as jest.Mock).mockResolvedValue(mockTransaction)
+
+            const mockError = { message: 'invalid input syntax for type integer', code: '22P02' }
+            const mockEq = jest.fn().mockReturnValue({ error: mockError })
+            ;(supabase.from as jest.Mock).mockReturnValue({ delete: jest.fn().mockReturnValue({ eq: mockEq }) })
+
+            await connector.uploadData(mockDatabase)
+
+            expect(Sentry.captureException).toHaveBeenCalledTimes(1)
+            expect(Sentry.captureException).toHaveBeenCalledWith(
+                mockError,
+                {
+                    tags: { area: 'powersync-dead-letter' },
+                    extra: { table: 'workouts', opType: UpdateType.DELETE, opId: 'test-id-1' },
+                }
+            )
+            expect(mockTransaction.complete).toHaveBeenCalledTimes(1)
+        })
+
+        it('should skip a non-retryable op but still upload subsequent ops in the same transaction', async () => {
+            const mockTransaction = {
+                crud: [
+                    {
+                        op: UpdateType.DELETE,
+                        table: 'workouts',
+                        id: 'test-id-1',
+                        opData: {},
+                    },
+                    {
+                        op: UpdateType.DELETE,
+                        table: 'exercises',
+                        id: 'test-id-2',
+                        opData: {},
+                    },
+                ],
+                complete: jest.fn().mockResolvedValue(undefined),
+            }
+
+            ;(mockDatabase.getNextCrudTransaction as jest.Mock).mockResolvedValue(mockTransaction)
+
+            const mockError = { message: 'Database error', code: '23505' }
+            const mockEqOp1 = jest.fn().mockReturnValue({ error: mockError })
+            const mockEqOp2 = jest.fn().mockReturnValue({ error: null })
+            ;(supabase.from as jest.Mock).mockImplementation((table: string) => {
+                if (table === 'workouts') {
+                    return { delete: jest.fn().mockReturnValue({ eq: mockEqOp1 }) }
+                }
+                return { delete: jest.fn().mockReturnValue({ eq: mockEqOp2 }) }
+            })
+
+            await connector.uploadData(mockDatabase)
+
+            expect(mockEqOp1).toHaveBeenCalledWith('id', 'test-id-1')
+            expect(mockEqOp2).toHaveBeenCalledWith('id', 'test-id-2')
+            expect(Sentry.captureException).toHaveBeenCalledTimes(1)
+            expect(mockTransaction.complete).toHaveBeenCalledTimes(1)
+        })
+
+        it('should rethrow and not complete transaction when error has no Postgres error code', async () => {
+            const mockTransaction = {
+                crud: [
+                    {
+                        op: UpdateType.DELETE,
+                        table: 'workouts',
+                        id: 'test-id-1',
+                        opData: {},
+                    },
+                ],
+                complete: jest.fn(),
+            }
+
+            ;(mockDatabase.getNextCrudTransaction as jest.Mock).mockResolvedValue(mockTransaction)
+
+            const networkError = new TypeError('Network request failed')
+            const mockEq = jest.fn().mockImplementation(() => {
+                throw networkError
+            })
+            ;(supabase.from as jest.Mock).mockReturnValue({ delete: jest.fn().mockReturnValue({ eq: mockEq }) })
+
+            await expect(connector.uploadData(mockDatabase)).rejects.toBe(networkError)
+            expect(mockTransaction.complete).not.toHaveBeenCalled()
+            expect(Sentry.captureException).not.toHaveBeenCalled()
+        })
+
+        it('should rethrow and not complete transaction on retryable Postgres error (PGRST301 JWT expired)', async () => {
+            const mockTransaction = {
+                crud: [
+                    {
+                        op: UpdateType.DELETE,
+                        table: 'workouts',
+                        id: 'test-id-1',
+                        opData: {},
+                    },
+                ],
+                complete: jest.fn(),
+            }
+
+            ;(mockDatabase.getNextCrudTransaction as jest.Mock).mockResolvedValue(mockTransaction)
+
+            const mockError = { message: 'JWT expired', code: 'PGRST301' }
+            const mockEq = jest.fn().mockReturnValue({ error: mockError })
+            ;(supabase.from as jest.Mock).mockReturnValue({ delete: jest.fn().mockReturnValue({ eq: mockEq }) })
+
+            await expect(connector.uploadData(mockDatabase)).rejects.toEqual(mockError)
+            expect(mockTransaction.complete).not.toHaveBeenCalled()
+            expect(Sentry.captureException).not.toHaveBeenCalled()
+        })
+
+        it('should rethrow and not complete transaction on 23505 for the settings table (check-then-insert race self-heals on retry)', async () => {
+            const mockTransaction = {
+                crud: [
+                    {
+                        op: UpdateType.DELETE,
                         table: 'settings',
                         id: 'test-id-1',
-                        opData: { user_id: 'user-1' },
+                        opData: {},
                     },
                 ],
                 complete: jest.fn(),
@@ -220,11 +379,36 @@ describe('Connector', () => {
             ;(mockDatabase.getNextCrudTransaction as jest.Mock).mockResolvedValue(mockTransaction)
 
             const mockError = { message: 'Database error', code: '23505' }
-            const mockInsert = jest.fn().mockReturnValue({ error: mockError })
-            ;(supabase.from as jest.Mock).mockReturnValue({ insert: mockInsert })
+            const mockEq = jest.fn().mockReturnValue({ error: mockError })
+            ;(supabase.from as jest.Mock).mockReturnValue({ delete: jest.fn().mockReturnValue({ eq: mockEq }) })
 
             await expect(connector.uploadData(mockDatabase)).rejects.toEqual(mockError)
             expect(mockTransaction.complete).not.toHaveBeenCalled()
+            expect(Sentry.captureException).not.toHaveBeenCalled()
+        })
+
+        it('should rethrow and not complete transaction on 23505 for the weight_progress table (check-then-insert race self-heals on retry)', async () => {
+            const mockTransaction = {
+                crud: [
+                    {
+                        op: UpdateType.DELETE,
+                        table: 'weight_progress',
+                        id: 'test-id-1',
+                        opData: {},
+                    },
+                ],
+                complete: jest.fn(),
+            }
+
+            ;(mockDatabase.getNextCrudTransaction as jest.Mock).mockResolvedValue(mockTransaction)
+
+            const mockError = { message: 'Database error', code: '23505' }
+            const mockEq = jest.fn().mockReturnValue({ error: mockError })
+            ;(supabase.from as jest.Mock).mockReturnValue({ delete: jest.fn().mockReturnValue({ eq: mockEq }) })
+
+            await expect(connector.uploadData(mockDatabase)).rejects.toEqual(mockError)
+            expect(mockTransaction.complete).not.toHaveBeenCalled()
+            expect(Sentry.captureException).not.toHaveBeenCalled()
         })
     })
 })

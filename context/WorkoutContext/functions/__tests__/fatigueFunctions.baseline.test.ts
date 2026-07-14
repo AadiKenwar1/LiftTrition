@@ -2,8 +2,10 @@
  * V2 Fatigue Baseline Test
  *
  * Captures numeric fatigue outputs from the V2 exercise library.
- * Results are written to fatigueBaseline_v2.txt at the project root
- * so they can be diffed against fatigueBaseline_v1.txt.
+ * When run with UPDATE_FATIGUE_BASELINE=1, results are written to
+ * baselines/fatigueBaseline_v2.txt (next to this file) so they can be
+ * diffed against baselines/fatigueBaseline_v1.txt via git diff.
+ * A plain jest run performs the assertions without touching the file.
  *
  * Three tiers:
  *   T1 — 14 single-exercise fatigue-factor values
@@ -157,9 +159,11 @@ describe('V1 Fatigue Baseline', () => {
 
     afterAll(() => {
         jest.useRealTimers()
-        const filePath = path.resolve(__dirname, '../../../../fatigueBaseline_v2.txt')
-        fs.writeFileSync(filePath, output.join('\n') + '\n', 'utf-8')
-        console.log(`\nBaseline written → ${filePath}`)
+        if (process.env.UPDATE_FATIGUE_BASELINE) {
+            const filePath = path.resolve(__dirname, 'baselines/fatigueBaseline_v2.txt')
+            fs.writeFileSync(filePath, output.join('\n') + '\n', 'utf-8')
+            console.log(`\nBaseline written → ${filePath}`)
+        }
     })
 
     // ──────────────────────────────────────────────────────────

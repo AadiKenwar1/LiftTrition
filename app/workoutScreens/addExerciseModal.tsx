@@ -1,7 +1,7 @@
 import { ScrollableListItem } from '@/components/NeutralComponents/ScrollableList'
 import StagedSection from '@/components/NeutralComponents/StagedSection'
 import { useAuth } from '@/context/AuthContext'
-import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
+import { fonts, motion, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { useWorkout } from '@/context/WorkoutContext'
 import { EQUIPMENT_TYPES, MUSCLE_GROUPS } from '@/context/WorkoutContext/exerciseLibrary/constants'
 import { IMAGE_MAP } from '@/context/WorkoutContext/exerciseLibrary/dataV2/imageMap'
@@ -200,7 +200,7 @@ export default function AddExerciseModal() {
                         <View style={styles.imageGlowRing}>
                             <View style={styles.imageCircle}>
                                 {imageSource
-                                    ? <Image source={imageSource} style={styles.exerciseImage} contentFit="contain" transition={50} />
+                                    ? <Image source={imageSource} style={styles.exerciseImage} contentFit="contain" transition={motion.imageFade} />
                                     : <Dumbbell size={22} color={colors.text} strokeWidth={1.8} />
                                 }
                             </View>
@@ -556,9 +556,9 @@ function makeStyles(colors: Colors) {
             borderColor: colors.workout,
         },
         imageCircle: {
-            width: 56,
-            height: 56,
-            borderRadius: 28,
+            width: 58,
+            height: 58,
+            borderRadius: 29,
             backgroundColor: colors.surfaceInset,
             justifyContent: 'center',
             alignItems: 'center',

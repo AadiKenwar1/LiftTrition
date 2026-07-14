@@ -23,6 +23,15 @@ export function getAnnualPackage(offerings: any): PurchasesPackage | null {
     ) || null;
 }
 
+// Percent saved by paying annually vs 12 monthly payments - returns null if either price is unavailable
+export function getAnnualSavingsPercent(monthly: PurchasesPackage | null, annual: PurchasesPackage | null): number | null {
+    const m = monthly?.product?.price;
+    const a = annual?.product?.price;
+    if (!m || !a || m <= 0 || a <= 0) return null;
+    const pct = Math.round((1 - a / (m * 12)) * 100);
+    return pct > 0 && pct < 100 ? pct : null;
+}
+
 // Get price info from package - returns null if no package
 export function getPackagePriceInfo(pkg: PurchasesPackage | null): { price: string; period: string } | null {
     if (!pkg) return null;

@@ -1,5 +1,26 @@
 import { supabase } from '@/lib/supabase/client';
 import { AbstractPowerSyncDatabase, PowerSyncBackendConnector, UpdateType } from '@powersync/react-native';
+import * as Sentry from '@sentry/react-native';
+
+// settings and weight_progress use check-then-insert (select existing -> update, else insert).
+// Two devices racing can both pass the check; the loser gets a 23505 unique violation that
+// heals itself if retried (the retry takes the "existing -> update" branch). So on these two
+// tables 23505 must stay retryable, unlike everywhere else it's dead-lettered.
+const SELF_HEALING_CONFLICT_TABLES = new Set(['settings', 'weight_progress']);
+
+// Postgres SQLSTATE classes 22 (data exception) and 23 (integrity constraint violation) are
+// permanent rejections - retrying the same op will never succeed, so these are dead-lettered
+// instead of blocking the rest of the upload queue forever.
+function isNonRetryableUploadError(error: unknown, table: string): boolean {
+  const code = (error as { code?: unknown })?.code;
+  if (typeof code !== 'string' || !/^2[23]/.test(code)) {
+    return false;
+  }
+  if (code === '23505' && SELF_HEALING_CONFLICT_TABLES.has(table)) {
+    return false;
+  }
+  return true;
+}
 
 export class Connector implements PowerSyncBackendConnector {
   /**
@@ -84,6 +105,13 @@ export class Connector implements PowerSyncBackendConnector {
             break;
         }
       } catch (error) {
+        if (isNonRetryableUploadError(error, op.table)) {
+          Sentry.captureException(error, {
+            tags: { area: 'powersync-dead-letter' },
+            extra: { table: op.table, opType: op.op, opId: op.id }
+          });
+          continue;
+        }
         throw error;
       }
     }

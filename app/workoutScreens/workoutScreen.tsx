@@ -32,15 +32,7 @@ export default function WorkoutScreen() {
 
     function renderItem({ item, drag }: DraggableListRenderParams<Workout>) {
         const count = activeExerciseCounts.get(item.id) ?? 0
-        return (
-            <Log
-                text={item.name}
-                subtitle={`${count} ${count === 1 ? 'exercise' : 'exercises'}`}
-                onPress={() => router.push({ pathname: '/workoutScreens/exerciseScreen', params: { workoutId: item.id } })}
-                onMenuPress={drag}
-                onEditPress={() => handleEdit(item)}
-            />
-        )
+        return <Log text={item.name} subtitle={`${count} ${count === 1 ? 'exercise' : 'exercises'}`} onPress={() => router.push({ pathname: '/workoutScreens/exerciseScreen', params: { workoutId: item.id } })} onMenuPress={drag} onEditPress={() => handleEdit(item)} />
     }
 
     function handleEdit(workout: Workout) {
@@ -74,16 +66,11 @@ export default function WorkoutScreen() {
         ])
     }
 
-    const renderHeader = () => {
-        return (
-            <>
-                <Text style={styles.sectionTitle}>Workouts</Text>
-                <Text style={styles.sectionSubtitle}>
-                    {activeWorkouts.length} {activeWorkouts.length === 1 ? 'routine' : 'routines'}
-                </Text>
-            </>
-        )
-    }
+    const listHeader = (
+        <>
+            <Text style={styles.sectionTitle}>Workouts</Text>
+        </>
+    )
 
     return (
         <View style={styles.container}>
@@ -98,7 +85,7 @@ export default function WorkoutScreen() {
                         <Text style={styles.emptySubtitle}>Tap the ⋮ button to create your first workout</Text>
                     </View>
                     // Draggable List
-                :   <DraggableList data={activeWorkouts} renderItem={renderItem} keyExtractor={(item) => item.id} onDragEnd={handleUpdateWorkoutOrder} ListHeaderComponent={renderHeader} contentContainerStyle={{ paddingTop: 16 }} />
+                :   <DraggableList data={activeWorkouts} renderItem={renderItem} keyExtractor={(item) => item.id} onDragEnd={handleUpdateWorkoutOrder} ListHeaderComponent={listHeader} contentContainerStyle={{ paddingTop: 16 }} />
             }
         </View>
     )
@@ -117,6 +104,7 @@ function makeStyles(colors: Colors) {
             color: colors.text,
             letterSpacing: -0.5,
             fontFamily: fonts.extrabold,
+            marginBottom: 14,
         },
         sectionSubtitle: {
             fontSize: 13,

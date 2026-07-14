@@ -25,7 +25,7 @@ function roundWeight(weight: number): number {
     return Math.round(weight * 100) / 100
 }
 
-function applyProgression(weight: number, reps: number, options: ProgressionOptions): DailyGoal {
+export function applyProgression(weight: number, reps: number, options: ProgressionOptions): DailyGoal {
     if (reps < REP_CAP) {
         return { weight, reps: reps + 1 }
     }

@@ -24,7 +24,23 @@ const GROUPS: { title: string; items: { label: string; route: string }[] }[] = [
     },
     {
         title: 'Components',
-        items: [{ label: 'Activity Banner', route: '/devTest/activityBanner' }],
+        items: [
+            { label: 'Activity Banner', route: '/devTest/activityBanner' },
+            { label: 'App Loading Screen', route: '/devTest/loadingScreen' },
+            { label: 'Spinner Lab', route: '/devTest/spinnerLab' },
+            { label: 'Suggest Set', route: '/devTest/suggestSet' },
+            { label: 'Calendar', route: '/devTest/calendar' },
+            { label: 'Add Nutrition Modal', route: '/devTest/addNutrition' },
+            { label: 'Color Hue Review', route: '/devTest/colorHue' },
+        ],
+    },
+    {
+        title: 'Mockups (App Store)',
+        items: [
+            { label: 'Dual Mode — Frame 1', route: '/devTest/mockup?scene=dualMode' },
+            { label: 'Progress — Workout', route: '/devTest/mockup?scene=progress&mode=lift' },
+            { label: 'Progress — Nutrition', route: '/devTest/mockup?scene=progress&mode=nutrition' },
+        ],
     },
     {
         title: 'Onboarding',

@@ -26,7 +26,7 @@ export default function IntroV3() {
         <View style={styles.container}>
             <ScrollView style={styles.scroll} contentContainerStyle={[styles.content, { paddingTop: topPad }]} showsVerticalScrollIndicator={false}>
                 <Image source={logo} style={styles.logo} contentFit="contain" priority="high" />
-                <Text style={styles.appName}>LIFTRI</Text>
+                <Text style={styles.appName}>PLATES</Text>
                 <Text style={styles.tagline}>Training and nutrition that finally work together.</Text>
 
                 <View style={styles.ratingRow}>

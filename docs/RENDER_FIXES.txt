@@ -1,0 +1,160 @@
+PLATES — Render Fixes: DailyIntakeCard re-animation flash + NutritionContext memoization
+Date: 2026-07-12
+Origin: user-reported bug — "whenever we save a food in the nutrition screen the
+daily intake card rerenders" (the calorie ring visibly refilled from 0 over ~1s).
+
+================================================================================
+THE BUG — TWO STACKED CAUSES
+================================================================================
+
+Cause 1 (the trigger): unmemoized context value.
+NutritionProvider built its context `value` as an inline object literal with all
+~9 handlers recreated per render. Any provider state change (including saving a
+food -> setSavedNutritionEntries, which doesn't affect daily intake at all)
+minted a new value object, re-rendering EVERY useNutrition() consumer.
+This was already flagged as PERFORMANCE.txt Tier 1 #1 (Nutrition slice).
+
+Cause 2 (why it was VISIBLE — the actual flash): header remount, not re-render.
+nutritionScreen.tsx passed `ListHeaderComponent={renderHeader}` where
+renderHeader was a function recreated on every render. React identifies a
+component by its function reference — a new reference each render means a NEW
+component type, so React UNMOUNTED and REMOUNTED the entire list header on
+every screen render. That destroyed and rebuilt DailyIntakeCard ->
+ProgressWheel, whose Animated.Value starts at 0 and whose mount effect animates
+the ring from 0 to the current percent over 1000ms. That fill-from-zero was
+the flash.
+
+Key distinction: a plain re-render would have been invisible — ProgressWheel's
+animation effect keys on [actualPercent, wheelPercent] and skips when the
+percent is unchanged. Only the remount resets the Animated.Value. So Cause 1
+alone was harmless-looking; Cause 2 made it visible.
+
+================================================================================
+FIX 1 — STABLE LIST HEADER/EMPTY ELEMENTS (kills the flash)
+================================================================================
+
+Rule: never pass a per-render inline function as ListHeaderComponent /
+ListEmptyComponent. Pass an ELEMENT (JSX const) or a component defined at
+module level. Elements are reconciled by their stable type (Fragment/View)
+instead of remounted, while still closing over fresh values each render.
+In-repo reference pattern: addExerciseModal.tsx `listHeader`.
+
+Changed (function -> element, prop updated):
+- app/nutritionScreens/nutritionScreen.tsx
+    renderHeader     -> const listHeader   (contains DailyIntakeCard — the fix)
+    renderEmptyState -> const listEmpty
+- app/workoutScreens/workoutScreen.tsx
+    renderHeader -> const listHeader   (latent same bug; static text so it was
+    invisible — fixed preventively)
+- app/workoutScreens/exerciseScreen.tsx
+    renderHeader -> const listHeader   (same, preventive)
+
+Note: DraggableList's ListHeaderComponent prop already accepts
+React.ComponentType | React.ReactElement, so no interface change was needed.
+DailyIntakeCard and ProgressWheel themselves were NOT modified.
+
+================================================================================
+FIX 2 — MEMOIZE THE NUTRITIONCONTEXT VALUE
+================================================================================
+
+context/NutritionContext/index.tsx:
+- All 9 handlers wrapped in useCallback. Non-obvious dependencies:
+    handleSaveNutrition      -> [userID, savedNutritionEntries]
+                                (reads savedNutritionEntries for the
+                                duplicate-name "(2)" suffix in savedMealName)
+    handleAnalyzeAndAddPhoto -> [selectedDate]
+    handleGetMacrosForDate / handleGetMacroDataForGraph /
+    handleGetMacroForWeek    -> [nutritionData]
+    add/edit/delete/unsave   -> [userID]
+    (setSelectedDate is a stable setState reference — no wrapper needed.)
+- Provider `value` wrapped in useMemo keyed on all states + handlers +
+  nutritionStreak.
+
+What this does: stops re-broadcasts when the provider re-renders without a
+state change (e.g. parent re-render), and gives handlers stable identities so
+consumer useMemos that list them as deps (progress.tsx, DailyIntakeCard) can
+actually hold.
+
+What this does NOT do: React context has no partial subscription — consumers
+still re-render whenever any piece of context state genuinely changes. Saving
+a food still re-renders DailyIntakeCard; it's just invisible now because Fix 1
+stopped the remount. Full isolation would need context splitting (stable
+ACTIONS vs churning STATE) or a selector store — see PERFORMANCE.txt Tier 1 #1.
+
+Status vs PERFORMANCE.txt Tier 1 #1: Nutrition slice DONE.
+Still open: AuthContext (cascade root), WorkoutContext value,
+SettingsContext value + handleGetBodyWeightProgressData.
+
+================================================================================
+VERIFICATION
+================================================================================
+- npx tsc --noEmit — clean for all four touched files (pre-existing Sentry/
+  Deno/test errors unrelated).
+- Simulator checklist:
+    * Long-press a meal -> Save: ring must NOT re-animate (the reported bug).
+    * Add / delete an entry: ring animates smoothly from its PREVIOUS value to
+      the new one (correct), not from 0.
+    * Change date via the date chip: header updates; ring animates only because
+      the day's totals differ.
+    * Empty day renders the empty state (now an element).
+    * Workout tab + exercise screen: headers render, drag-to-reorder works.
+
+================================================================================
+FUTURE DIRECTION — MIGRATE STATE TO ZUSTAND (recommended, incrementally)
+================================================================================
+
+Verdict: yes, eventually — but as an incremental migration triggered by need,
+not a rewrite project. Rationale:
+
+Why it fits this app:
+- The recurring pain (context fan-out re-renders, unstable handler identities,
+  useCallback/useMemo ceremony) is exactly what Zustand eliminates. Selectors
+  give partial subscription — `useNutritionStore(s => s.nutritionData)`
+  re-renders only when that slice changes; saving a food would no longer touch
+  DailyIntakeCard at all. Store actions are stable by construction (defined
+  once at store creation), so the entire class of dependency-array bugs
+  (e.g. handleSaveNutrition's savedNutritionEntries dep) disappears.
+- No providers: removes 4 layers of the provider stack and the root-layout
+  re-render coupling (StackLayout currently re-renders on every nutrition
+  change just to read `loaded`).
+- Tiny (~1kb), no breaking-change churn, adopts one store at a time alongside
+  the remaining contexts. React 18 useSyncExternalStore under the hood.
+
+Why not now:
+- The visible bug is fixed; the remaining wins are invisible until profiled.
+- Migration cost is real: 5 contexts, ~40 consumer files, and the PowerSync
+  write paths (persistDirty debounce effects, flush-on-signout Gate C) must be
+  re-verified per store. Not worth batching with feature work.
+
+When to actually do it (decision triggers):
+- Finishing PERFORMANCE.txt Tier 1 #1 (Auth/Workout/Settings memoization) and
+  churn still shows in profiling, OR
+- The next time a context needs SPLITTING anyway (actions vs state slices) —
+  at that point a Zustand store is the same effort as the split with a better
+  end state.
+
+Migration order (worst fan-out first):
+1. WorkoutContext (~30 fields, 7 state slices; a set-log write re-renders all
+   workout screens + progress charts)
+2. SettingsContext (~30 consumer files)
+3. NutritionContext (now memoized, lowest urgency)
+Keep as-is: ThemeContext + BillingContext (already correct — reference
+pattern), AuthContext (session lifecycle fits a provider; just memoize it).
+
+Longer-term data-layer note: this app's true source of truth is PowerSync's
+SQLite. The contexts are a hand-rolled in-memory cache of it (see
+PERFORMANCE.txt Tier 1 #3 full-history loads). The idiomatic endgame is
+@powersync/react reactive queries (useQuery) for DATA (components subscribe
+to windowed SQL directly) with Zustand covering UI/session state only
+(selectedDate, mode, staged items). Evaluate that split before migrating
+NutritionContext — it may make part of the store unnecessary.
+
+================================================================================
+RELATED, NOT FIXED
+================================================================================
+- foodDB modal scroll/jump glitch (reported same session): investigation
+  deferred at owner's request. foodDBModal.tsx still uses the legacy
+  KeyboardAvoidingView-wrapping-the-whole-sheet architecture that the
+  add/edit nutrition modals migrated away from (they now use the ScrollView's
+  native automaticallyAdjustKeyboardInsets with a pinned footer) — start there
+  when picking it back up.

@@ -1,4 +1,4 @@
-import { fonts, radius, useColorScheme, useColors, type Colors } from '@/context/ThemeContext'
+import { fonts, motion, radius, useColorScheme, useColors, type Colors } from '@/context/ThemeContext'
 import { useSettings } from '@/context/SettingsContext'
 import { IMAGE_MAP } from '@/context/WorkoutContext/exerciseLibrary/dataV2/imageMap'
 import { Image } from 'expo-image'
@@ -82,7 +82,7 @@ export default function ScrollableList({
                             >
                                 <View style={styles.imageCircle}>
                                     {imageSource ?
-                                        <Image source={imageSource} style={styles.exerciseImage} contentFit="contain" />
+                                        <Image source={imageSource} style={styles.exerciseImage} contentFit="contain" transition={motion.imageFade} />
                                     :   <Dumbbell size={25} color={colors.text} strokeWidth={1.8} />}
                                 </View>
                             </View>

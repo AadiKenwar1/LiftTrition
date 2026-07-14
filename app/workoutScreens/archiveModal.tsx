@@ -1,4 +1,4 @@
-import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
+import { fonts, motion, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { useWorkout } from '@/context/WorkoutContext'
 import { IMAGE_MAP } from '@/context/WorkoutContext/exerciseLibrary/dataV2/imageMap'
 import { Exercise, Workout } from '@/context/WorkoutContext/types'
@@ -50,7 +50,7 @@ export default function ArchiveModal() {
                         <View style={styles.imageGlowRing}>
                             <View style={styles.imageCircle}>
                                 {imgSource
-                                    ? <Image source={imgSource} style={styles.exerciseImage} contentFit="contain" cachePolicy="memory" transition={50} />
+                                    ? <Image source={imgSource} style={styles.exerciseImage} contentFit="contain" cachePolicy="memory" transition={motion.imageFade} />
                                     : <Dumbbell size={25} color={colors.text} strokeWidth={1.8} />}
                             </View>
                         </View>
@@ -197,9 +197,9 @@ function makeStyles(colors: Colors) {
             borderColor: colors.workout,
         },
         imageCircle: {
-            width: 48,
-            height: 48,
-            borderRadius: 24,
+            width: 50,
+            height: 50,
+            borderRadius: 25,
             backgroundColor: colors.surfaceInset,
             justifyContent: 'center',
             alignItems: 'center',
