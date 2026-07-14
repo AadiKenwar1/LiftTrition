@@ -1,8 +1,9 @@
 import PressableScale from '@/components/NeutralComponents/PressableScale'
 import TermsAndPrivacyModal from '@/components/NeutralComponents/TermsAndPrivacyModal'
-import { useBilling } from '@/context/BillingContext'
+import { hasActiveEntitlement, useBilling } from '@/context/BillingContext'
 import { useSettings } from '@/context/SettingsContext'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
+import { useSubmitOnce } from '@/lib/hooks/useSubmitOnce'
 import { lbsToKg } from '@/lib/utils/unitConversions'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
@@ -32,7 +33,8 @@ export default function OnboardingPaywall() {
     const insets = useSafeAreaInsets()
     const topPad = Math.max(insets.top, 12) + 16
     const { settings, completeOnboarding } = useSettings()
-    const { loading, hasPremium, monthlyPackage, annualPackage, priceInfo, annualPriceInfo, annualSavingsPercent, purchasePackage, restorePurchases, error } = useBilling()
+    const { loading, hasPremium, monthlyPackage, annualPackage, priceInfo, annualPriceInfo, annualSavingsPercent, purchasePackage, restorePurchases, restoring, error } = useBilling()
+    const [guardRestore] = useSubmitOnce()
     const accent = colors.text
     const [plan, setPlan] = useState<Plan>('annual')
     const [purchasing, setPurchasing] = useState(false)
@@ -82,14 +84,21 @@ export default function OnboardingPaywall() {
         }
     }
 
-    const handleRestore = async () => {
-        try {
-            await restorePurchases()
-            await finishOnboarding()
-        } catch (err: any) {
-            Alert.alert('Error', err.message || 'Failed to restore purchases. Please try again.')
-        }
-    }
+    const handleRestore = guardRestore(
+        async () => {
+            try {
+                const info = await restorePurchases()
+                if (hasActiveEntitlement(info)) {
+                    await finishOnboarding()
+                } else {
+                    Alert.alert('No Purchases Found', 'No purchases found for this Apple ID.')
+                }
+            } catch (err: any) {
+                Alert.alert('Error', err.message || 'Failed to restore purchases. Please try again.')
+            }
+        },
+        { retryable: true },
+    )
 
     if (loading) {
         return (
@@ -144,7 +153,7 @@ export default function OnboardingPaywall() {
 
                 {error && <Text style={styles.errorText}>{error.message}</Text>}
 
-                <TouchableOpacity style={styles.cta} onPress={handleSubscribe} activeOpacity={0.85} disabled={!selectedPackage || purchasing || hasPremium}>
+                <TouchableOpacity style={styles.cta} onPress={handleSubscribe} activeOpacity={0.85} disabled={!selectedPackage || purchasing || restoring || hasPremium}>
                     <LinearGradient colors={colors.workoutGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.ctaGradient}>
                         {purchasing ?
                             <ActivityIndicator size="small" color="#fff" />
@@ -162,7 +171,7 @@ export default function OnboardingPaywall() {
                     <Text style={styles.trustLine}>Your data is never sold or shared</Text>
                 </View>
 
-                <TouchableOpacity onPress={handleRestore} disabled={purchasing} activeOpacity={0.5} style={[styles.restore, purchasing && styles.footerDisabled]}>
+                <TouchableOpacity onPress={handleRestore} disabled={purchasing || restoring} activeOpacity={0.5} style={[styles.restore, (purchasing || restoring) && styles.footerDisabled]}>
                     <Text style={styles.restoreText}>Restore Purchases</Text>
                 </TouchableOpacity>
 
@@ -176,10 +185,10 @@ export default function OnboardingPaywall() {
             </ScrollView>
 
             <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 8) }]}>
-                <TouchableOpacity style={[styles.backButton, purchasing && styles.footerDisabled]} onPress={() => router.back()} disabled={purchasing} activeOpacity={0.8}>
+                <TouchableOpacity style={[styles.backButton, (purchasing || restoring) && styles.footerDisabled]} onPress={() => router.back()} disabled={purchasing || restoring} activeOpacity={0.8}>
                     <Text style={styles.backText}>Back</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.laterButton, purchasing && styles.footerDisabled]} onPress={finishOnboarding} disabled={purchasing} activeOpacity={0.8}>
+                <TouchableOpacity style={[styles.laterButton, (purchasing || restoring) && styles.footerDisabled]} onPress={finishOnboarding} disabled={purchasing || restoring} activeOpacity={0.8}>
                     <Text style={styles.laterText}>Maybe later</Text>
                 </TouchableOpacity>
             </View>

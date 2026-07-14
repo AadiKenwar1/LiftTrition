@@ -1,9 +1,12 @@
 import { useAuth } from '@/context/AuthContext'
+import { useForceFreeMode } from '@/lib/devtools/forceFreeMode'
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { Platform } from 'react-native'
 import Purchases, { CustomerInfo, LOG_LEVEL, PurchasesPackage } from 'react-native-purchases'
-import { getAnnualPackage, getAnnualSavingsPercent, getMonthlyPackage, getPackagePriceInfo, purchasePackage, restorePurchases } from './functions/billingFunctions'
+import { getAnnualPackage, getAnnualSavingsPercent, getMonthlyPackage, getPackagePriceInfo, hasActiveEntitlement, purchasePackage, restorePurchases } from './functions/billingFunctions'
 import { BillingContextInterface } from './types'
+
+export { ENTITLEMENT_ID, hasActiveEntitlement } from './functions/billingFunctions'
 
 const BillingContext = createContext<BillingContextInterface | undefined>(undefined)
 
@@ -17,6 +20,7 @@ export function BillingProvider({ children }: { children: React.ReactNode }) {
     const [billingLoading, setBillingLoading] = useState(true)
     const [loaded, setLoaded] = useState(false)
     const [error, setError] = useState<Error | null>(null)
+    const [restoring, setRestoring] = useState(false)
     const previousUserIdRef = useRef<string | null>(null)
 
     const loading = authLoading || billingLoading
@@ -116,12 +120,16 @@ export function BillingProvider({ children }: { children: React.ReactNode }) {
     }, [])
 
     const handleRestorePurchases = useCallback(async () => {
-        return restorePurchases(setCustomerInfo, setError)
+        setRestoring(true)
+        try {
+            return await restorePurchases(setCustomerInfo, setError)
+        } finally {
+            setRestoring(false)
+        }
     }, [])
 
-    const hasPremium = useMemo(() => {
-        return Boolean(customerInfo?.entitlements?.active?.['LiftTrition Pro'])
-    }, [customerInfo])
+    const forceFree = useForceFreeMode()
+    const hasPremium = useMemo(() => (__DEV__ && forceFree ? false : hasActiveEntitlement(customerInfo)), [customerInfo, forceFree])
 
     // Helper values
     const monthlyPackage = useMemo(() => getMonthlyPackage(offerings), [offerings])
@@ -136,6 +144,7 @@ export function BillingProvider({ children }: { children: React.ReactNode }) {
             customerInfo,
             loading,
             loaded,
+            restoring,
             error,
             purchasePackage: handlePurchasePackage,
             restorePurchases: handleRestorePurchases,
@@ -146,7 +155,7 @@ export function BillingProvider({ children }: { children: React.ReactNode }) {
             annualPriceInfo,
             annualSavingsPercent,
         }),
-        [offerings, customerInfo, loading, loaded, error, handlePurchasePackage, handleRestorePurchases, hasPremium, monthlyPackage, annualPackage, priceInfo, annualPriceInfo, annualSavingsPercent],
+        [offerings, customerInfo, loading, loaded, restoring, error, handlePurchasePackage, handleRestorePurchases, hasPremium, monthlyPackage, annualPackage, priceInfo, annualPriceInfo, annualSavingsPercent],
     )
 
     return <BillingContext.Provider value={value}>{children}</BillingContext.Provider>

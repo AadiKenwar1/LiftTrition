@@ -1,10 +1,11 @@
 import ScanBackdrop from '@/components/NutritionComponents/ScanBackdrop'
 import ScanPromptCard from '@/components/NutritionComponents/ScanPromptCard'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
+import { openAppSettings } from '@/lib/utils/permissions'
 import { useRouter } from 'expo-router'
 import { Camera, Settings, Sparkles } from 'lucide-react-native'
 import { useMemo, useState } from 'react'
-import { Alert, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { Field, Segmented } from './DevControls'
 
 type ScanState = 'upgrade' | 'grant' | 'settings' | 'loading' | 'live'
@@ -26,7 +27,7 @@ export default function ScanScreenTest() {
     const showLibraryDeniedAlert = () =>
         Alert.alert('Photo Library Access', 'Enable photo access in Settings to choose a meal photo.', [
             { text: 'Cancel', style: 'cancel' },
-            { text: 'Open Settings', onPress: () => Linking.openSettings() },
+            { text: 'Open Settings', onPress: () => openAppSettings() },
         ])
 
     return (
@@ -86,7 +87,7 @@ export default function ScanScreenTest() {
                                 title="Camera Access Denied"
                                 message="Camera access is turned off for this app. Enable Camera in Settings to scan your meals."
                                 ctaLabel="Open Settings"
-                                onPress={() => Linking.openSettings()}
+                                onPress={() => openAppSettings()}
                                 onGoBack={() => stub('router.back()')}
                             />
                         )}

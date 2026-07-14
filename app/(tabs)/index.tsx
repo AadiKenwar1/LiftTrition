@@ -59,7 +59,7 @@ export default function LogScreen() {
                         </TouchableOpacity>,
 
                         //Camera Button
-                        <TouchableOpacity activeOpacity={0.75} key="camera" style={[hasPremium ? styles.nutritionFabButtons : styles.nutritionUnavailableFabButtons]} onPress={() => (hasPremium ? router.push('/nutritionScreens/cameraScreen') : router.push('/settingsScreens/subscription'))}>
+                        <TouchableOpacity activeOpacity={0.75} key="camera" style={[styles.nutritionFabButtons]} onPress={() => router.push('/nutritionScreens/cameraScreen')}>
                             <Ionicons name="camera" size={35} color="#FFFFFF" shadowColor="white" shadowRadius={0} shadowOpacity={0} />
                         </TouchableOpacity>,
 

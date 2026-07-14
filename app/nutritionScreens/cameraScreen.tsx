@@ -1,11 +1,15 @@
+import ScanBackdrop from '@/components/NutritionComponents/ScanBackdrop'
+import ScanPromptCard from '@/components/NutritionComponents/ScanPromptCard'
+import { useBilling } from '@/context/BillingContext'
 import { fonts, useColors, type Colors } from '@/context/ThemeContext'
-import { processCameraCapture, processPickedImageUri, SCAN_FRAME, type ScanMode } from '@/lib/openAI/mealImage'
 import { useSubmitOnce } from '@/lib/hooks/useSubmitOnce'
+import { processCameraCapture, processPickedImageUri, SCAN_FRAME, type ScanMode } from '@/lib/openAI/mealImage'
+import { nextPermissionAction, openAppSettings } from '@/lib/utils/permissions'
 import { CameraType, CameraView, useCameraPermissions } from 'expo-camera'
 import * as ImagePicker from 'expo-image-picker'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
-import { Camera, FlipHorizontal, Images, Package, Tag, Utensils, Zap } from 'lucide-react-native'
+import { Camera, FlipHorizontal, Images, Package, Settings, Sparkles, Tag, Utensils, Zap } from 'lucide-react-native'
 import { useMemo, useRef, useState } from 'react'
 import { Alert, Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
@@ -16,6 +20,7 @@ export default function CameraScreen() {
     const cameraRef = useRef<CameraView>(null)
     const [facing, setFacing] = useState<CameraType>('back')
     const [permission, requestPermission] = useCameraPermissions()
+    const { hasPremium } = useBilling()
     const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null)
     const [flashEnabled, setFlashEnabled] = useState(false)
     const [pickingFromLibrary, setPickingFromLibrary] = useState(false)
@@ -27,38 +32,56 @@ export default function CameraScreen() {
     const [scanKind, setScanKind] = useState<ScanMode>('meal')
     const scanMode: ScanMode = scanKind
 
+    if (!hasPremium) {
+        return (
+            <View style={styles.cameraContainer}>
+                <View style={styles.handleContainerAbsolute}>
+                    <View style={styles.handle} />
+                </View>
+                <ScanBackdrop />
+                <ScanPromptCard
+                    icon={Sparkles}
+                    title="Scan Meals with AI"
+                    message="Snap a photo of any meal, item, or nutrition label and let AI log the macros for you. Upgrade to unlock scanning."
+                    ctaLabel="Upgrade to Scan"
+                    onPress={() => router.replace('/settingsScreens/subscription')}
+                    onGoBack={() => router.back()}
+                />
+            </View>
+        )
+    }
+
     if (!permission) {
         return (
-            <View style={styles.container}>
-                <Text style={styles.permissionText}>Loading camera...</Text>
+            <View style={styles.cameraContainer}>
+                <View style={styles.handleContainerAbsolute}>
+                    <View style={styles.handle} />
+                </View>
+                <ScanBackdrop />
             </View>
         )
     }
 
     if (!permission.granted) {
+        const needsSettings = nextPermissionAction(permission) === 'settings'
         return (
-            <View style={styles.container}>
-                <View style={styles.handleContainer}>
+            <View style={styles.cameraContainer}>
+                <View style={styles.handleContainerAbsolute}>
                     <View style={styles.handle} />
                 </View>
-
-                <View style={styles.permissionContentWrapper}>
-                    <View style={styles.permissionContent}>
-                        <View style={styles.iconCircle}>
-                            <Camera size={48} color={colors.nutrition} strokeWidth={2.5} />
-                        </View>
-                        <Text style={styles.permissionTitle}>Camera Access Required</Text>
-                        <Text style={styles.permissionMessage}>We need access to your camera to take photos of your meals for nutrition tracking with AI analysis.</Text>
-                        <TouchableOpacity onPress={requestPermission} activeOpacity={0.8} style={styles.permissionButtonTouchable}>
-                            <LinearGradient colors={colors.nutritionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.permissionButton}>
-                                <Text style={styles.permissionButtonText}>Grant Permission</Text>
-                            </LinearGradient>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => router.back()} style={styles.cancelButton} activeOpacity={0.5}>
-                            <Text style={styles.cancelButtonText}>Go Back</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
+                <ScanBackdrop />
+                <ScanPromptCard
+                    icon={needsSettings ? Settings : Camera}
+                    title={needsSettings ? 'Camera Access Denied' : 'Camera Access Required'}
+                    message={
+                        needsSettings ?
+                            'Camera access is turned off for this app. Enable Camera in Settings to scan your meals.'
+                        :   'We need access to your camera to take photos of your meals for nutrition tracking with AI analysis.'
+                    }
+                    ctaLabel={needsSettings ? 'Open Settings' : 'Grant Permission'}
+                    onPress={needsSettings ? openAppSettings : requestPermission}
+                    onGoBack={() => router.back()}
+                />
             </View>
         )
     }
@@ -93,7 +116,14 @@ export default function CameraScreen() {
         try {
             const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync()
             if (!permissionResult.granted) {
-                Alert.alert('Permission Required', 'Please allow access to your photo library to choose a meal photo.')
+                if (nextPermissionAction(permissionResult) === 'settings') {
+                    Alert.alert('Photo Library Access', 'Enable photo access in Settings to choose a meal photo.', [
+                        { text: 'Cancel', style: 'cancel' },
+                        { text: 'Open Settings', onPress: openAppSettings },
+                    ])
+                } else {
+                    Alert.alert('Permission Required', 'Please allow access to your photo library to choose a meal photo.')
+                }
                 return
             }
 
@@ -218,25 +248,12 @@ export default function CameraScreen() {
 
 function makeStyles(colors: Colors) {
     return StyleSheet.create({
-        container: {
-            flex: 1,
-            backgroundColor: colors.background,
-            borderTopLeftRadius: 20,
-            borderTopRightRadius: 20,
-            overflow: 'hidden',
-        },
         cameraContainer: {
             flex: 1,
             backgroundColor: '#000',
             borderTopLeftRadius: 20,
             borderTopRightRadius: 20,
             overflow: 'hidden',
-        },
-        handleContainer: {
-            alignItems: 'center',
-            paddingTop: 12,
-            paddingBottom: 8,
-            backgroundColor: colors.background,
         },
         handleContainerAbsolute: {
             position: 'absolute',
@@ -257,84 +274,6 @@ function makeStyles(colors: Colors) {
         },
         camera: {
             flex: 1,
-        },
-        permissionContentWrapper: {
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            paddingHorizontal: 24,
-        },
-        permissionContent: {
-            alignItems: 'center',
-            width: '100%',
-        },
-        iconCircle: {
-            width: 80,
-            height: 80,
-            borderRadius: 40,
-            backgroundColor: colors.surface,
-            justifyContent: 'center',
-            alignItems: 'center',
-            borderWidth: 2,
-            borderColor: colors.nutrition,
-            marginBottom: 24,
-        },
-        permissionTitle: {
-            fontSize: 24,
-            color: colors.text,
-            marginBottom: 6,
-            textAlign: 'center',
-            letterSpacing: -0.5,
-            fontFamily: fonts.semibold,
-        },
-        permissionMessage: {
-            fontSize: 14,
-            color: colors.labelMuted,
-            textAlign: 'center',
-            lineHeight: 22,
-            marginBottom: 32,
-            fontFamily: fonts.regular,
-            letterSpacing: 0.2,
-        },
-        permissionText: {
-            color: colors.text,
-            fontSize: 16,
-            fontFamily: fonts.regular,
-        },
-        permissionButtonTouchable: {
-            width: '100%',
-            borderRadius: 12,
-            overflow: 'hidden',
-            shadowColor: colors.nutrition,
-            shadowOffset: {
-                width: 0,
-                height: 4,
-            },
-            shadowOpacity: 0.4,
-            shadowRadius: 8,
-            elevation: 8,
-            marginBottom: 12,
-        },
-        permissionButton: {
-            paddingVertical: 16,
-            alignItems: 'center',
-            justifyContent: 'center',
-        },
-        permissionButtonText: {
-            fontSize: 17,
-            color: '#FFF',
-            letterSpacing: -0.5,
-            fontFamily: fonts.semibold,
-        },
-        cancelButton: {
-            paddingVertical: 14,
-            paddingHorizontal: 24,
-        },
-        cancelButtonText: {
-            fontSize: 16,
-            color: colors.labelMuted,
-            letterSpacing: -0.5,
-            fontFamily: fonts.semibold,
         },
         topBar: {
             flexDirection: 'row',

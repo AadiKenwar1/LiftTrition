@@ -1,6 +1,14 @@
 import { Dispatch, SetStateAction } from 'react';
 import Purchases, { CustomerInfo, PurchasesPackage } from 'react-native-purchases';
 
+export const ENTITLEMENT_ID = 'LiftTrition Pro'
+
+// Restore resolves successfully even with nothing to restore — entitlement
+// presence on the returned info is the only truthful "restored" signal.
+export function hasActiveEntitlement(info: CustomerInfo | null): boolean {
+    return Boolean(info?.entitlements?.active?.[ENTITLEMENT_ID])
+}
+
 // Get monthly package from offerings
 export function getMonthlyPackage(offerings: any): PurchasesPackage | null {
     if (!offerings?.current?.availablePackages) return null;

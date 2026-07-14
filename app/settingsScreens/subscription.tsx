@@ -1,7 +1,8 @@
 import PressableScale from '@/components/NeutralComponents/PressableScale'
 import TermsAndPrivacyModal from '@/components/NeutralComponents/TermsAndPrivacyModal'
-import { useBilling } from '@/context/BillingContext'
+import { hasActiveEntitlement, useBilling } from '@/context/BillingContext'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
+import { useSubmitOnce } from '@/lib/hooks/useSubmitOnce'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useNavigation } from 'expo-router'
 import { BarChart3, Database, Sparkles, Zap } from 'lucide-react-native'
@@ -31,16 +32,17 @@ export default function SubscriptionScreen() {
     const [termsVisible, setTermsVisible] = useState(false)
     const [plan, setPlan] = useState<Plan>('annual')
     const [purchasing, setPurchasing] = useState(false)
-    const { loading, hasPremium, monthlyPackage, annualPackage, priceInfo, annualPriceInfo, annualSavingsPercent, purchasePackage, restorePurchases, error } = useBilling()
+    const { loading, hasPremium, monthlyPackage, annualPackage, priceInfo, annualPriceInfo, annualSavingsPercent, purchasePackage, restorePurchases, restoring, error } = useBilling()
+    const [guardRestore] = useSubmitOnce()
 
-    // Block leaving (header back, swipe, hardware back) while a purchase is in progress.
+    // Block leaving (header back, swipe, hardware back) while a purchase or restore is in progress.
     useEffect(() => {
         const unsubscribe = navigation.addListener('beforeRemove', (e: any) => {
-            if (!purchasing) return
+            if (!purchasing && !restoring) return
             e.preventDefault()
         })
         return unsubscribe
-    }, [navigation, purchasing])
+    }, [navigation, purchasing, restoring])
 
     const selectedPackage = plan === 'monthly' ? monthlyPackage : annualPackage
 
@@ -64,14 +66,21 @@ export default function SubscriptionScreen() {
         }
     }
 
-    const handleRestore = async () => {
-        try {
-            await restorePurchases()
-            Alert.alert('Success', 'Purchases restored successfully!')
-        } catch (err: any) {
-            Alert.alert('Error', err.message || 'Failed to restore purchases. Please try again.')
-        }
-    }
+    const handleRestore = guardRestore(
+        async () => {
+            try {
+                const info = await restorePurchases()
+                if (hasActiveEntitlement(info)) {
+                    Alert.alert('Success', 'Purchases restored successfully!')
+                } else {
+                    Alert.alert('No Purchases Found', 'No purchases found for this Apple ID.')
+                }
+            } catch (err: any) {
+                Alert.alert('Error', err.message || 'Failed to restore purchases. Please try again.')
+            }
+        },
+        { retryable: true },
+    )
 
     const handleManage = () => {
         const url = Platform.select({
@@ -122,7 +131,7 @@ export default function SubscriptionScreen() {
 
                 {error && <Text style={styles.errorText}>{error.message}</Text>}
 
-                <TouchableOpacity style={styles.cta} onPress={handleSubscribe} activeOpacity={0.85} disabled={!selectedPackage || purchasing || hasPremium}>
+                <TouchableOpacity style={styles.cta} onPress={handleSubscribe} activeOpacity={0.85} disabled={!selectedPackage || purchasing || restoring || hasPremium}>
                     <LinearGradient colors={colors.workoutGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.ctaGradient}>
                         {purchasing ?
                             <ActivityIndicator size="small" color="#fff" />
@@ -141,10 +150,10 @@ export default function SubscriptionScreen() {
                 </View>
 
                 <View style={styles.links}>
-                    <TouchableOpacity onPress={handleRestore} disabled={purchasing} activeOpacity={0.5} style={purchasing && { opacity: 0.5 }}>
+                    <TouchableOpacity onPress={handleRestore} disabled={purchasing || restoring} activeOpacity={0.5} style={(purchasing || restoring) && { opacity: 0.5 }}>
                         <Text style={styles.linkText}>Restore Purchases</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={handleManage} disabled={purchasing} activeOpacity={0.5} style={purchasing && { opacity: 0.5 }}>
+                    <TouchableOpacity onPress={handleManage} disabled={purchasing || restoring} activeOpacity={0.5} style={(purchasing || restoring) && { opacity: 0.5 }}>
                         <Text style={[styles.linkText, { color: colors.textSecondary }]}>Manage subscription</Text>
                     </TouchableOpacity>
                 </View>

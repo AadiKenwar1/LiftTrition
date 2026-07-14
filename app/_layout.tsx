@@ -216,6 +216,8 @@ function StackLayout() {
                     <Stack.Screen name="devTest/spinnerLab" options={{ headerShown: false, gestureEnabled: true }} />
                     <Stack.Screen name="devTest/calendar" options={{ headerShown: false, gestureEnabled: true }} />
                     <Stack.Screen name="devTest/mockup" options={{ headerShown: false, gestureEnabled: true }} />
+                    <Stack.Screen name="devTest/goalReached" options={{ headerShown: true, title: 'Goal Reached — UI', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="devTest/goalReachedSim" options={{ headerShown: true, title: 'Goal Reached — Logic', headerBackTitle: 'Back' }} />
                 </Stack.Protected>
             </Stack>
         </AppColumn>

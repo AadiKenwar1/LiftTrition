@@ -5,6 +5,7 @@ export interface BillingContextInterface {
     customerInfo: CustomerInfo | null
     loading: boolean
     loaded: boolean
+    restoring: boolean
     error: Error | null
     purchasePackage: (pkg: PurchasesPackage) => Promise<CustomerInfo>
     restorePurchases: () => Promise<CustomerInfo>

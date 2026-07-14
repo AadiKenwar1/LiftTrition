@@ -66,9 +66,14 @@ Inputs: `hasPremium` (`useBilling`) and `permission` (`useCameraPermissions`).
 `pickFromLibrary`'s denial `Alert` gains an "Open Settings" action via the same
 helper.
 
-Reactivity: a free user who upgrades on the subscription sheet and returns lands
-on a still-mounted camera screen that reads `hasPremium` from context, so it
-re-renders into the permission/live path automatically.
+Navigation: the upgrade CTA uses `router.replace('/settingsScreens/subscription')`,
+not `push` — the subscription screen is a card-presentation route, and pushing a
+card from inside the camera modal presents it as a second, undismissable modal
+(no back chevron in its own presentation context, and swipe is globally
+disabled). `replace` swaps the modal for the card in the root stack, arriving
+with a working back button — the same pattern addNutritionModal uses for its
+locked AI feature. After upgrading, the user backs out to tabs and reopens the
+camera FAB, which now renders the permission/live path.
 
 ### Units
 

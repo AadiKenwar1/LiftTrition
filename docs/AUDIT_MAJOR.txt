@@ -2,7 +2,7 @@ PLATES AUDIT — MAJOR ISSUES
 From the 2026-07-12 multi-agent audit. Confirmed-in-code issues only
 (technical detail + line numbers in AUDIT_REPORT.md). Entries are moved
 to COMPLETED_ISSUES.txt as they get fixed, so issue numbers here are
-non-contiguous by design (11 migrated 2026-07-14).
+non-contiguous by design (16 migrated 2026-07-14).
 
 Each issue now carries a PLAN block: an implementation plan written
 from scratch against the current code, aimed at root causes rather
@@ -105,41 +105,6 @@ F6. Errors stop pretending to be success
 CRITICAL (data loss, security, broken core flows)
 -------------------------------------------------
 
-*2. Anyone who ever contacted support can never delete their account
-   The server delete function forgets the support_requests table. The
-   database refuses to remove a user who still has rows there, so
-   deletion fails forever. Worse, the six deletes that ran first are not
-   error-checked, so the user's data is wiped even though the account
-   survives.
-   Where: lib/supabase/functions/deleteAccount/index.ts
-   Fix: also delete support_requests, check every delete's error, do it
-   all in one transaction.
-
-   PLAN
-   Root cause: deletion is a hand-maintained list of table deletes in
-   application code. Any new user-owned table (support_requests today,
-   whatever comes next tomorrow) silently breaks it, and per-table
-   error checking is busywork that was (predictably) skipped.
-   Steps:
-   1) Push ownership into the schema: migration that re-declares every
-      top-level user_id foreign key as ON DELETE CASCADE — workouts,
-      user_exercises, nutrition_entries, saved_nutrition_entries,
-      weight_progress, settings, support_requests. (Child tables
-      already cascade from their parents.) Version it as
-      lib/supabase/migrations/user_cascade.sql.
-   2) Shrink the edge function to: authenticate →
-      auth.admin.deleteUser(userId) → check the ONE error → respond.
-      Postgres deletes all user rows atomically in the same
-      transaction as the auth user — nothing partial, nothing to
-      forget, no per-table error handling to maintain.
-   3) Rule going forward (one line in the migration header): any new
-      table referencing auth.users must declare ON DELETE CASCADE —
-      deletion coverage is then automatic forever.
-   Files: new migration, lib/supabase/functions/deleteAccount/index.ts.
-   Verify: seed a user with data in every table incl. a support
-   request → delete → auth user and all rows gone in one shot; make
-   deleteUser fail → nothing was deleted (atomicity).
-
 4. The paid AI and food-search features are free on the server
    The two server functions only check that you're signed in - never
    that you're subscribed, and there's no rate limit. Any free account's
@@ -171,42 +136,15 @@ CRITICAL (data loss, security, broken core flows)
       analytics.
    3) Defense in depth on the client: cameraScreen and foodDBModal
       check hasPremium on mount and redirect to the paywall (closes
-      the deep-link bypass past the FAB gate). Export the
-      entitlement id as a constant from BillingContext (shared with
-      issue 20) instead of the current string literal.
+      the deep-link bypass past the FAB gate). Reuse ENTITLEMENT_ID,
+      already exported from BillingContext by issue 20's fix, instead
+      of a string literal.
    Files: _shared/entitlement.ts (new), fetchOpenAI/index.ts,
    fetchFoodDB/index.ts, api_usage migration, cameraScreen.tsx,
    foodDBModal.tsx, context/BillingContext.
    Verify: curl the endpoint with a free account's JWT → 403; with a
    premium JWT → works; exceed the daily cap → 429; free user
    deep-linking to the camera lands on the paywall.
-
-*5. One mis-tap in the archive screen permanently deletes a workout
-   The trash icon there deletes the workout AND all its logged history
-   instantly - no "are you sure?", no undo - and it sits right next to
-   the restore button. Everywhere else in the app deletion asks first.
-   Where: app/workoutScreens/archiveModal.tsx
-   Fix: use the same confirmation alert as the main screens.
-
-   PLAN
-   Root cause: there is no shared "confirm a destructive action"
-   primitive — every screen hand-rolls its Alert, so a screen that
-   forgets simply has no confirmation (the audit's minor list shows
-   the policy already drifting site by site).
-   Steps:
-   1) Add confirmDelete({ title, message, onConfirm }) in
-      lib/utils/confirmDelete.ts — the standard two-button
-      Cancel / Delete(destructive) Alert, ~10 lines.
-   2) archiveModal trash buttons call it with the same warning copy
-      the main screen uses ("Deleting a workout will delete all logs
-      within the workout…"), for both workouts and exercises.
-   3) Adopt the helper at the other delete sites (workoutScreen /
-      exerciseScreen option alerts, saved-meal unsave) as they get
-      touched — from now on destructive-confirm UX has one owner,
-      so it cannot diverge again.
-   Files: lib/utils/confirmDelete.ts (new), archiveModal.tsx.
-   Verify: tap trash on an archived workout → confirmation names the
-   log loss; Cancel keeps everything; Delete removes it.
 
 MAJOR (wrong behavior, bad UX)
 ------------------------------
@@ -272,10 +210,12 @@ MAJOR (wrong behavior, bad UX)
       safest state (holding at goal) instead of an unwanted surplus
       or deficit.
    5) Persistent banner instead of a missable alert: while goalType
-      is lose/gain and weight is at/past goalWeight, the nutrition
-      screen shows "Goal reached — set your next goal" (reuse the
-      ActivityBanner pattern) linking to the wizard. Pure derived
-      render-time state — cannot be lost or forgotten.
+      is lose/gain and weight is at/past goalWeight, the progress
+      screen (nutrition mode only, directly beneath ActivityBanner —
+      weigh-ins happen on that screen) shows "Goal reached — set
+      your next goal" (reuse the ActivityBanner pattern) linking to
+      the wizard. Pure derived render-time state — cannot be lost or
+      forgotten.
    6) Height/activity edits follow the same one rule: auto-recalc
       numbers for non-customized users (consistent with weigh-ins),
       never touch goalType; customized users get an explicit
@@ -287,40 +227,16 @@ MAJOR (wrong behavior, bad UX)
    database/powersyncStore.ts, settings migration
    (macros_customized), lib/powersync/AppSchema.ts,
    updateBWModal.tsx, profile.tsx, adjustTraining.tsx,
-   EditMacroGoalModal.tsx, goal-reached banner component (new).
+   EditMacroGoalModal.tsx, (tabs)/progress.tsx (banner host),
+   goal-reached banner component (new — previewed with the prompt
+   + logic in Dev Hub; see components/NutritionComponents/
+   GoalReached* and devTest/goalReachedLogic.ts).
    Verify: maintain user logs +0.5 lb → goalType/pace untouched, no
    kcal seesaw; lose user's calorie target tracks weight down across
    weigh-ins; hand-edit protein → later weigh-ins keep it; crossing
    goal → congrats prompt once + banner; ignoring everything and
    passing goal by 2+ lb → announced auto-switch to maintenance;
    automation never starts a surplus or deficit on its own.
-
-11. Half a serving becomes a full serving
-    The servings box uses parseInt, so "0.5" turns into 1 - double what
-    the user actually ate, with no warning. (The photo editor supports
-    decimals, so the flows disagree.)
-    Where: foodDBModal.tsx + savedNutritionModal.tsx (confirmAddItem)
-    Fix: parseFloat + validate > 0.
-
-    PLAN
-    Root cause: same class as issue 10 — servings are parsed with a
-    different, integer-only grammar in these two modals while the
-    photo editor accepts decimals. One concept, two grammars.
-    Steps:
-    1) Both confirmAddItem handlers parse with parseNumericInput
-       (F1) and accept only parsed > 0 — "0.5" is a valid half
-       serving; 0, negative, or unparseable input leaves the Add
-       button disabled (no silent fallback to 1).
-    2) Set the quantity TextInputs to keyboardType="decimal-pad" so
-       the keypad offers the separator.
-    3) Totals stay clean automatically: entry math already
-       multiplies by quantity, and the issue-3 boundary sanitizes
-       the final calories (column now REAL), so fractional servings
-       can't reintroduce the sync wedge.
-    Files: foodDBModal.tsx, savedNutritionModal.tsx.
-    Verify: log 0.5 servings from food search → half the macros are
-    recorded; typing "0" or garbage can't confirm; whole numbers
-    behave exactly as before.
 
 13. Swiping away the "Analyzing..." screen doesn't cancel anything
     The AI call keeps running. Up to 30s later it adds the meal anyway
@@ -358,38 +274,6 @@ MAJOR (wrong behavior, bad UX)
     to home exactly once; simulate failure → alert appears on the
     analyzing screen itself; no path produces two entries or two
     paid calls.
-
-14. Nearly every "Add" button can be double-tapped
-    Add meal, Add All (food DB + saved meals), Add Exercises, Add
-    Workout, and Use Photo all stay live during the closing animation -
-    a quick double-tap creates duplicates, and Use Photo runs TWO paid
-    AI analyses. (Purchase buttons and set-logging are guarded
-    correctly.)
-    Where: the listed modals' submit handlers
-    Fix: set a submitted flag / disable the button on first press.
-
-    PLAN
-    Root cause: there is no shared single-flight primitive, so every
-    CTA re-implements (or forgets) the in-flight flag, and the modal
-    close animation leaves buttons live for a frame or two. The two
-    guarded flows (purchases, logsModal) prove the pattern — it just
-    isn't reusable.
-    Steps:
-    1) Build useSubmitOnce (F2): a synchronous ref-based guard (state
-       updates are a frame too late for a real double-tap) plus a
-       `submitting` boolean for the disabled style.
-    2) Wrap the offenders: addNutritionModal "Add meal", foodDBModal
-       "Add All", savedNutritionModal "Add All", addExerciseModal
-       "Add N Exercises", addWorkoutModal create, cameraScreen
-       "Use Photo" AND the shutter (takePicture has the same gap).
-       Handlers that end in router.back()/push never reset (the
-       screen is leaving); retryable ones reset in finally.
-    3) House rule going forward: any CTA whose handler awaits or
-       navigates uses useSubmitOnce — one import, no bespoke flags.
-    Files: lib/hooks/useSubmitOnce.ts (new), the six screens above.
-    Verify: machine-gun-tap every listed CTA → exactly one entry /
-    workout / analysis; buttons visibly disable during the closing
-    animation; Use Photo can never bill twice.
 
 15. Denying camera access once bricks the AI scan feature
     After an iOS "Don't Allow", the Grant Permission button silently
@@ -518,40 +402,4 @@ MAJOR (wrong behavior, bad UX)
     (or re-create before a delete syncs) → second upload updates the
     existing row; upload queue drains; Connector unit tests cover
     all three registered tables.
-
-20. "Restore Purchases" says it worked even when there's nothing
-    For a user who never subscribed, restore still pops "Purchases
-    restored successfully!" while everything stays locked. It also has
-    no busy state, so it can be double-fired or run during a purchase.
-    Where: subscription.tsx + paywall.tsx (handleRestore)
-    Fix: check what actually came back; add a restoring flag.
-
-    PLAN
-    Root cause: the screens treat "the restore call resolved" as
-    "something was restored" — RevenueCat resolves successfully with
-    zero entitlements — and the restore outcome/in-flight state
-    isn't modeled anywhere, so each screen improvised (one lies,
-    one completes onboarding unconditionally).
-    Steps:
-    1) BillingContext owns the outcome: restorePurchases returns the
-       fresh CustomerInfo; add a `restoring` state alongside the
-       existing customerInfo update; export ENTITLEMENT_ID
-       ('LiftTrition Pro'), deduping the literal hasPremium uses
-       (shared with issue 4's server check).
-    2) Both screens branch on truth: restored =
-       !!info.entitlements.active[ENTITLEMENT_ID]. subscription.tsx:
-       success alert only when restored, else "No purchases found
-       for this Apple ID." paywall.tsx: completeOnboarding only when
-       restored — otherwise the alert, and the user still has
-       subscribe / Maybe later.
-    3) In-flight correctness: `restoring` (with F2's guard on the
-       tap) disables Restore AND the purchase CTAs (mutual
-       exclusion) and joins subscription.tsx's beforeRemove
-       condition so the screen can't be left mid-restore.
-    Files: BillingContext/index.tsx + functions/billingFunctions.ts,
-    subscription.tsx, paywall.tsx.
-    Verify: never-subscribed account → Restore → "No purchases
-    found", features stay locked, onboarding NOT completed;
-    subscribed account → restore unlocks; double-tap fires once;
-    purchase and restore can't run concurrently.
 
