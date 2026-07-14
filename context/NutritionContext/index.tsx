@@ -30,8 +30,8 @@ export const NutritionProvider = ({ children }: PropsWithChildren) => {
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
     useEffect(() => {
-        setSelectedDate(new Date())
-    }, [todayKey])
+        setSelectedDate(new Date());
+    }, [todayKey]);
 
     // Load from PowerSync whenever the user changes
     useEffect(() => {
