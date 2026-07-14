@@ -1,6 +1,7 @@
 import type { NutritionEntryIngredientRecord, NutritionEntryRecord, SavedNutritionEntryIngredientRecord, SavedNutritionEntryRecord } from '@/lib/powersync/AppSchema'
 import { powerSync } from '@/lib/powersync/system'
 import { throwIfLoadFailureArmed } from '@/lib/devtools/forceLoadFailure'
+import { throwIfSaveFailureArmed } from '@/lib/devtools/forceSaveFailure'
 import { getDateKey, parseDateKey } from '@/lib/utils/dateHelper'
 import { sanitizeInt, sanitizeMacro } from '@/lib/utils/number'
 import { NutritionEntry } from '../types'
@@ -152,6 +153,7 @@ export async function loadNutritionData(userId: string): Promise<{
  * Scoped to one entry — no other rows are touched.
  */
 export async function upsertNutritionEntry(entry: NutritionEntry): Promise<void> {
+    if (__DEV__) await throwIfSaveFailureArmed('nutrition')
     const row = nutritionEntryToRow(entry)
 
     await powerSync.writeTransaction(async (tx) => {
@@ -193,6 +195,7 @@ export async function upsertNutritionEntry(entry: NutritionEntry): Promise<void>
  * Scoped to one saved entry — no other rows are touched.
  */
 export async function upsertSavedNutritionEntry(entry: NutritionEntry): Promise<void> {
+    if (__DEV__) await throwIfSaveFailureArmed('nutrition')
     const row = savedNutritionEntryToRow(entry)
 
     await powerSync.writeTransaction(async (tx) => {

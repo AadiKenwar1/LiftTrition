@@ -1,6 +1,7 @@
 import { useAuth } from '@/context/AuthContext'
 import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { useWorkout } from '@/context/WorkoutContext'
+import { useSubmitOnce } from '@/lib/hooks/useSubmitOnce'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { Dumbbell } from 'lucide-react-native'
@@ -16,9 +17,25 @@ export default function AddWorkoutModal() {
     const styles = useMemo(() => makeStyles(colors), [colors])
     const [workoutName, setWorkoutName] = useState('')
     const [isFocused, setIsFocused] = useState(false)
+    const [guardSubmit, submitting] = useSubmitOnce()
     const insets = useSafeAreaInsets()
 
     const scrollBottomPad = Math.max(insets.bottom, 20) + 140
+
+    const handleCreateWorkout = () => {
+        const trimmed = workoutName.trim()
+        const alreadyExists = workouts.some((w) => !w.archived && w.name.trim().toLowerCase() === trimmed.toLowerCase())
+        if (alreadyExists) {
+            // Stays on screen — don't consume the submit guard, so the user can fix the name and retry.
+            Alert.alert('Workout Name Taken', `A workout named '${trimmed}' already exists. Please choose a different name.`)
+            return
+        }
+        // Guard only the commit path (it navigates away): a double-tap during the close animation is ignored.
+        guardSubmit(() => {
+            handleAddWorkout(trimmed, userID)
+            router.back()
+        })()
+    }
 
     return (
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container} keyboardVerticalOffset={Platform.OS === 'ios' ? 8 : 0}>
@@ -56,17 +73,8 @@ export default function AddWorkoutModal() {
 
                 {/* Add Button */}
                 <TouchableOpacity
-                    onPress={() => {
-                        const trimmed = workoutName.trim()
-                        const alreadyExists = workouts.some((w) => !w.archived && w.name.trim().toLowerCase() === trimmed.toLowerCase())
-                        if (alreadyExists) {
-                            Alert.alert('Workout Name Taken', `A workout named '${trimmed}' already exists. Please choose a different name.`)
-                            return
-                        }
-                        handleAddWorkout(trimmed, userID)
-                        router.back()
-                    }}
-                    disabled={!workoutName.trim()}
+                    onPress={handleCreateWorkout}
+                    disabled={!workoutName.trim() || submitting}
                     activeOpacity={0.8}
                     style={styles.addButtonTouchable}
                 >

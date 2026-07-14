@@ -1,7 +1,7 @@
 import { flushUploadsOrThrow, UploadFlushTimeoutError } from '@/lib/powersync/FlushUploads'
 import { disconnectAndClearPowerSync } from '@/lib/powersync/orchestrator'
 import { supabase } from '@/lib/supabase/client'
-import AsyncStorage from '@react-native-async-storage/async-storage'
+import { clearUserStorage } from '@/lib/utils/userStorage'
 
 export async function deleteAccount(): Promise<void> {
     const { data: { session } } = await supabase.auth.getSession()
@@ -22,35 +22,38 @@ export async function deleteAccount(): Promise<void> {
     // Server confirmed: account and data are gone, so pending uploads are meaningless.
     // No Gate C flush — clear local state unconditionally.
     await clearLocalSession()
-    await clearStorage()
+    await clearUserStorage(session.user.id)
 }
 
-export async function signOut() {
+export async function signOut(): Promise<void> {
     // Require a connected PowerSync client, then wait for all pending uploads to drain (Gate C)
     // before signing out and clearing local data.
     await flushUploadsOrThrow({ timeoutMs: 60_000 })
+
+    const userID = await currentUserID()
 
     const { error } = await supabase.auth.signOut()
     if (error) throw error
 
     await disconnectAndClearPowerSync()
-    await AsyncStorage.clear()
+    if (userID) await clearUserStorage(userID)
 }
 
 /**
  * Force sign out immediately (skips upload flush). This can lose unsynced local data.
  * Intended to be called only after explicit user confirmation.
  */
-export async function forceSignOut() {
+export async function forceSignOut(): Promise<void> {
+    const userID = await currentUserID()
     await clearLocalSession()
-    await clearStorage()
+    if (userID) await clearUserStorage(userID)
 }
 
 /**
  * End the session on this device and wipe the local PowerSync replica.
  * Each step is guarded so a failure in one never strands the next.
  */
-export async function clearLocalSession() {
+export async function clearLocalSession(): Promise<void> {
     try {
         const { error } = await supabase.auth.signOut({ scope: 'local' })
         if (error) console.warn('clearLocalSession: auth signOut failed', error)
@@ -65,11 +68,18 @@ export async function clearLocalSession() {
     }
 }
 
-async function clearStorage() {
+/**
+ * The signed-in user's id, captured before auth teardown so scoped storage
+ * (see clearUserStorage) can be erased. Returns undefined when no session is
+ * available (e.g. a force sign-out of an already-broken session).
+ */
+async function currentUserID(): Promise<string | undefined> {
     try {
-        await AsyncStorage.clear()
+        const { data: { session } } = await supabase.auth.getSession()
+        return session?.user?.id
     } catch (e) {
-        console.warn('clearStorage: AsyncStorage clear failed', e)
+        console.warn('currentUserID: getSession failed', e)
+        return undefined
     }
 }
 

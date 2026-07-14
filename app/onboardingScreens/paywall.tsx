@@ -31,7 +31,7 @@ export default function OnboardingPaywall() {
     const styles = useMemo(() => makeStyles(colors), [colors])
     const insets = useSafeAreaInsets()
     const topPad = Math.max(insets.top, 12) + 16
-    const { settings, setSettings } = useSettings()
+    const { settings, completeOnboarding } = useSettings()
     const { loading, hasPremium, monthlyPackage, annualPackage, priceInfo, annualPriceInfo, annualSavingsPercent, purchasePackage, restorePurchases, error } = useBilling()
     const accent = colors.text
     const [plan, setPlan] = useState<Plan>('annual')
@@ -51,8 +51,14 @@ export default function OnboardingPaywall() {
 
     const selectedPackage = plan === 'monthly' ? monthlyPackage : annualPackage
 
-    const completeOnboarding = () => {
-        setSettings({ ...settings, onboardingComplete: true, onboardingCompletedAt: new Date() })
+    // Only navigate once the onboarding commit has actually landed on disk —
+    // otherwise a silent save failure sends the user right back into onboarding.
+    const finishOnboarding = async () => {
+        const saved = await completeOnboarding()
+        if (!saved) {
+            Alert.alert("Couldn't finish setup", 'We couldn’t save your profile. Please check your connection and try again.')
+            return
+        }
         router.replace('/(tabs)')
     }
 
@@ -64,7 +70,7 @@ export default function OnboardingPaywall() {
         setPurchasing(true)
         try {
             await purchasePackage(selectedPackage)
-            completeOnboarding()
+            await finishOnboarding()
         } catch (err: any) {
             if (err.userCancelled) {
                 setPurchasing(false)
@@ -79,7 +85,7 @@ export default function OnboardingPaywall() {
     const handleRestore = async () => {
         try {
             await restorePurchases()
-            completeOnboarding()
+            await finishOnboarding()
         } catch (err: any) {
             Alert.alert('Error', err.message || 'Failed to restore purchases. Please try again.')
         }
@@ -173,7 +179,7 @@ export default function OnboardingPaywall() {
                 <TouchableOpacity style={[styles.backButton, purchasing && styles.footerDisabled]} onPress={() => router.back()} disabled={purchasing} activeOpacity={0.8}>
                     <Text style={styles.backText}>Back</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.laterButton, purchasing && styles.footerDisabled]} onPress={completeOnboarding} disabled={purchasing} activeOpacity={0.8}>
+                <TouchableOpacity style={[styles.laterButton, purchasing && styles.footerDisabled]} onPress={finishOnboarding} disabled={purchasing} activeOpacity={0.8}>
                     <Text style={styles.laterText}>Maybe later</Text>
                 </TouchableOpacity>
             </View>

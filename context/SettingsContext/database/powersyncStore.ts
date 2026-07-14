@@ -1,6 +1,7 @@
 import type { SettingsRecord, WeightProgressRecord } from '@/lib/powersync/AppSchema'
 import { powerSync } from '@/lib/powersync/system'
 import { throwIfLoadFailureArmed } from '@/lib/devtools/forceLoadFailure'
+import { throwIfSaveFailureArmed } from '@/lib/devtools/forceSaveFailure'
 import { getDateKey, parseDateKey } from '@/lib/utils/dateHelper'
 import { Settings } from '../types'
 
@@ -60,6 +61,7 @@ export async function loadSettingsAndBw(userId: string): Promise<{ settings: Set
  * Always exactly 1 DB op (UPDATE or INSERT).
  */
 export async function upsertSettings(userId: string, settings: Settings): Promise<void> {
+    if (__DEV__) await throwIfSaveFailureArmed('settings')
     const row = settingsToRow(settings, userId)
     await powerSync.writeTransaction(async (tx) => {
         const existing = (await tx.getAll('SELECT id FROM settings WHERE user_id = ?', [userId])) as SettingsRecord[]
@@ -112,6 +114,7 @@ export async function upsertSettings(userId: string, settings: Settings): Promis
  * Always exactly 1 DB op (UPDATE or INSERT).
  */
 export async function upsertWeightForDate(userId: string, dateKey: string, weight: number): Promise<void> {
+    if (__DEV__) await throwIfSaveFailureArmed('settings')
     await powerSync.writeTransaction(async (tx) => {
         const existing = (await tx.getAll('SELECT id FROM weight_progress WHERE user_id = ? AND date = ?', [userId, dateKey])) as WeightProgressRecord[]
         if (existing.length > 0) {

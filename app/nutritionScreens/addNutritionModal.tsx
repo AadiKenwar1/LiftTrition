@@ -4,6 +4,7 @@ import { useNutrition } from '@/context/NutritionContext'
 import { analyzeText } from '@/context/NutritionContext/functions/aiFunctions'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { parseNumericInput } from '@/lib/utils/number'
+import { useSubmitOnce } from '@/lib/hooks/useSubmitOnce'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { Lock, Sparkles } from 'lucide-react-native'
@@ -29,6 +30,7 @@ export default function AddNutritionModal() {
     const [focusedField, setFocusedField] = useState<string | null>(null)
     const [generating, setGenerating] = useState(false)
     const [aiFilled, setAiFilled] = useState(false)
+    const [guardSubmit, submitting] = useSubmitOnce()
 
     const hasContent = mealName.trim().length > 0 || [calories, protein, carbs, fats].some((v) => v.trim().length > 0)
 
@@ -175,7 +177,7 @@ export default function AddNutritionModal() {
             </ScrollView>
 
             <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
-                <TouchableOpacity activeOpacity={0.8} disabled={!hasContent || !macrosValid} onPress={handleAddEntry} style={[styles.ctaTouchable, (!hasContent || !macrosValid) && styles.ctaDisabled]}>
+                <TouchableOpacity activeOpacity={0.8} disabled={!hasContent || !macrosValid || submitting} onPress={guardSubmit(handleAddEntry)} style={[styles.ctaTouchable, (!hasContent || !macrosValid) && styles.ctaDisabled]}>
                     <LinearGradient colors={colors.nutritionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
                         <Text style={styles.ctaText}>Add meal</Text>
                     </LinearGradient>

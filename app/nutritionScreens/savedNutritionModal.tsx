@@ -8,6 +8,7 @@ import { Ingredient, NutritionEntry } from '@/context/NutritionContext/types'
 import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { confirmDelete } from '@/lib/utils/confirmDelete'
 import { parseNumericInput } from '@/lib/utils/number'
+import { useSubmitOnce } from '@/lib/hooks/useSubmitOnce'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { Bookmark, Check, X } from 'lucide-react-native'
@@ -28,6 +29,7 @@ export default function SavedNutritionModal() {
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
 
+    const [guardSubmit, submitting] = useSubmitOnce()
     const [addedItems, setAddedItems] = useState<StagedSavedMeal[]>([])
     const [combineItems, setCombineItems] = useState(false)
     const [quantityInputItem, setQuantityInputItem] = useState<NutritionEntry | null>(null)
@@ -262,7 +264,7 @@ export default function SavedNutritionModal() {
 
             {addedItems.length > 0 && (
                 <View style={styles.addAllContainer}>
-                    <TouchableOpacity onPress={handleAddAll} activeOpacity={0.8} style={styles.addAllButtonTouchable}>
+                    <TouchableOpacity onPress={guardSubmit(handleAddAll)} disabled={submitting} activeOpacity={0.8} style={styles.addAllButtonTouchable}>
                         <LinearGradient colors={colors.nutritionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.addAllButton}>
                             <Text style={styles.addAllButtonText}>{combineItems && addedItems.length >= 2 ? 'Add 1 combined meal' : `Add ${addedItems.length} Item${addedItems.length > 1 ? 's' : ''}`}</Text>
                         </LinearGradient>

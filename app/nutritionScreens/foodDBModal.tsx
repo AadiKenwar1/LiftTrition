@@ -5,6 +5,7 @@ import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { getFoodItem, getFoodSearchResults } from '@/lib/foodDB/foodDB'
 import { FoodItem, FoodSearchResult } from '@/lib/foodDB/types'
 import { parseNumericInput } from '@/lib/utils/number'
+import { useSubmitOnce } from '@/lib/hooks/useSubmitOnce'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { Check, Database, Plus, X } from 'lucide-react-native'
@@ -23,6 +24,7 @@ export default function FoodDBModal() {
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
 
+    const [guardSubmit, submitting] = useSubmitOnce()
     const [searchQuery, setSearchQuery] = useState('')
     const [addedItems, setAddedItems] = useState<FoodItemWithQuantity[]>([])
     const [combineItems, setCombineItems] = useState(false)
@@ -316,7 +318,7 @@ export default function FoodDBModal() {
             {/* Add All Button - Fixed at bottom */}
             {addedItems.length > 0 && (
                 <View style={styles.addAllContainer}>
-                    <TouchableOpacity onPress={handleAddAll} activeOpacity={0.8} style={styles.addAllButtonTouchable}>
+                    <TouchableOpacity onPress={guardSubmit(handleAddAll)} disabled={submitting} activeOpacity={0.8} style={styles.addAllButtonTouchable}>
                         <LinearGradient colors={colors.nutritionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.addAllButton}>
                             <Text style={styles.addAllButtonText}>
                                 {combineItems && addedItems.length >= 2

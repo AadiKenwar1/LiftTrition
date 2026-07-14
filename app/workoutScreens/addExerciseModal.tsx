@@ -6,6 +6,7 @@ import { useWorkout } from '@/context/WorkoutContext'
 import { EQUIPMENT_TYPES, MUSCLE_GROUPS } from '@/context/WorkoutContext/exerciseLibrary/constants'
 import { IMAGE_MAP } from '@/context/WorkoutContext/exerciseLibrary/dataV2/imageMap'
 import { CreateExerciseData } from '@/context/WorkoutContext/types'
+import { useSubmitOnce } from '@/lib/hooks/useSubmitOnce'
 import { Image } from 'expo-image'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import Fuse from 'fuse.js'
@@ -20,6 +21,8 @@ export default function AddExerciseModal() {
     const router = useRouter()
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
+
+    const [guardSubmit, submitting] = useSubmitOnce()
 
     // Add exercise state
     const [selectedItems, setSelectedItems] = useState<ScrollableListItem[]>([])
@@ -236,7 +239,7 @@ export default function AddExerciseModal() {
 
             {selectedItems.length > 0 && (
                 <View style={styles.addAllContainer}>
-                    <TouchableOpacity onPress={handleAddAll} activeOpacity={0.8} style={styles.addAllButton}>
+                    <TouchableOpacity onPress={guardSubmit(handleAddAll)} disabled={submitting} activeOpacity={0.8} style={styles.addAllButton}>
                         <Text style={styles.addAllButtonText}>
                             Add {selectedItems.length} Exercise{selectedItems.length > 1 ? 's' : ''}
                         </Text>

@@ -2,8 +2,9 @@ import { useAuth } from '@/context/AuthContext'
 import { convertExerciseLibraryToList, exerciseLib } from '@/context/WorkoutContext/exerciseLibrary'
 import { powerSync } from '@/lib/powersync/system'
 import { useAsyncLoad } from '@/lib/hooks/useAsyncLoad'
+import { lastExerciseKey } from '@/lib/utils/userStorage'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import uuid from 'react-native-uuid'
 import {
     insertDuplicateWorkout,
@@ -26,6 +27,7 @@ import { deleteLog as deleteLogFromState } from './functions/logFunctions'
 import { validateLog } from './functions/validator'
 import { getSetsData, getSetsForWeek } from './functions/volumeFunctions'
 import { deleteWorkout } from './functions/workoutFunctions'
+import { reportPersistFailure } from '@/lib/powersync/persistErrors'
 import { getWeekStart } from '@/lib/utils/dateHelper'
 import { CreateExerciseData, Exercise, ExerciseLib, ExerciseLibraryEntry, Log, Workout, WorkoutContextInterface } from './types'
 
@@ -40,6 +42,26 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
     const [lastExercise, setLastExercise] = useState<string>('')
 
     const { userID } = useAuth()
+
+    // Silent rollback: re-read disk into state WITHOUT touching load status, so a
+    // failed write reverts in place instead of flipping loaded→false (which makes
+    // the app-wide gate unmount the navigator back to the home tab). userID is read
+    // through a ref so this stays referentially stable across every handler.
+    const userIDRef = useRef(userID)
+    userIDRef.current = userID
+    const reloadFromDisk = useCallback(async () => {
+        const uid = userIDRef.current
+        if (!uid) return
+        try {
+            const { workouts, exercises, logs, userExercises } = await loadWorkoutData(uid)
+            setWorkoutsState(workouts)
+            setExercisesState(exercises)
+            setLogsState(logs)
+            setUserExercisesState(userExercises)
+        } catch {
+            // Best-effort rollback; the original failure was already reported.
+        }
+    }, [])
 
     // ------------------------------------------------------------------
     // Workout handlers
@@ -64,7 +86,7 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
         try {
             await insertWorkoutWithOrderBump(newWorkout)
         } catch (e) {
-            console.warn('[WorkoutContext] Failed to insert workout', e)
+            reportPersistFailure('workout', e, { reload: reloadFromDisk })
         }
     }, [])
 
@@ -111,7 +133,7 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
         try {
             await insertDuplicateWorkout(newWorkout, newExercises)
         } catch (e) {
-            console.warn('[WorkoutContext] Failed to duplicate workout', e)
+            reportPersistFailure('workout', e, { reload: reloadFromDisk })
         }
     }, [userID, workouts, exercises])
 
@@ -125,7 +147,7 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
                     await tx.execute('DELETE FROM workouts WHERE id = ?', [id])
                 })
             } catch (e) {
-                console.warn('[WorkoutContext] Failed to delete workout from PowerSync', e)
+                reportPersistFailure('workout', e, { reload: reloadFromDisk })
             }
         }
     }, [userID])
@@ -152,7 +174,7 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
                         )
                     })
                 } catch (e) {
-                    console.warn('[WorkoutContext] Failed to unarchive workout', e)
+                    reportPersistFailure('workout', e, { reload: reloadFromDisk })
                 }
             }
         } else {
@@ -175,7 +197,7 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
                         )
                     })
                 } catch (e) {
-                    console.warn('[WorkoutContext] Failed to archive workout', e)
+                    reportPersistFailure('workout', e, { reload: reloadFromDisk })
                 }
             }
         }
@@ -193,7 +215,7 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
             try {
                 await upsertWorkout(updated)
             } catch (e) {
-                console.warn('[WorkoutContext] Failed to rename workout', e)
+                reportPersistFailure('workout', e, { reload: reloadFromDisk })
             }
         }
     }, [])
@@ -210,7 +232,7 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
             try {
                 await upsertWorkout(updated)
             } catch (e) {
-                console.warn('[WorkoutContext] Failed to update workout note', e)
+                reportPersistFailure('workout', e, { reload: reloadFromDisk })
             }
         }
     }, [])
@@ -225,7 +247,7 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
         try {
             await updateWorkoutOrders(withOrder)
         } catch (e) {
-            console.warn('[WorkoutContext] Failed to update workout order', e)
+            reportPersistFailure('workout', e, { reload: reloadFromDisk })
         }
     }, [])
 
@@ -253,7 +275,7 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
         try {
             await insertExerciseWithOrderBump(newExercise)
         } catch (e) {
-            console.warn('[WorkoutContext] Failed to insert exercise', e)
+            reportPersistFailure('workout', e, { reload: reloadFromDisk })
         }
     }, [])
 
@@ -278,7 +300,7 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
         try {
             await insertExercisesWithOrderBump(newExercises)
         } catch (e) {
-            console.warn('[WorkoutContext] Failed to insert exercises', e)
+            reportPersistFailure('workout', e, { reload: reloadFromDisk })
         }
     }, [])
 
@@ -291,7 +313,7 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
                     await tx.execute('DELETE FROM exercises WHERE id = ?', [id])
                 })
             } catch (e) {
-                console.warn('[WorkoutContext] Failed to delete exercise from PowerSync', e)
+                reportPersistFailure('workout', e, { reload: reloadFromDisk })
             }
         }
     }, [userID])
@@ -318,7 +340,7 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
                         )
                     })
                 } catch (e) {
-                    console.warn('[WorkoutContext] Failed to unarchive exercise', e)
+                    reportPersistFailure('workout', e, { reload: reloadFromDisk })
                 }
             }
         } else {
@@ -341,7 +363,7 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
                         )
                     })
                 } catch (e) {
-                    console.warn('[WorkoutContext] Failed to archive exercise', e)
+                    reportPersistFailure('workout', e, { reload: reloadFromDisk })
                 }
             }
         }
@@ -358,7 +380,7 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
         try {
             await updateExerciseOrders(withOrder)
         } catch (e) {
-            console.warn('[WorkoutContext] Failed to update exercise order', e)
+            reportPersistFailure('workout', e, { reload: reloadFromDisk })
         }
     }, [])
 
@@ -394,7 +416,7 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
         try {
             await insertLog(newLog)
         } catch (e) {
-            console.warn('[WorkoutContext] Failed to insert log', e)
+            reportPersistFailure('workout', e, { reload: reloadFromDisk })
         }
     }, [])
 
@@ -404,7 +426,7 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
             try {
                 await powerSync.execute('DELETE FROM logs WHERE id = ?', [id])
             } catch (e) {
-                console.warn('[WorkoutContext] Failed to delete log from PowerSync', e)
+                reportPersistFailure('workout', e, { reload: reloadFromDisk })
             }
         }
     }, [userID])
@@ -421,7 +443,7 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
         try {
             await upsertUserExercise(userIDParam, name, newEntry)
         } catch (e) {
-            console.warn('[WorkoutContext] Failed to upsert user exercise', e)
+            reportPersistFailure('workout', e, { reload: reloadFromDisk })
         }
     }, [])
 
@@ -431,7 +453,7 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
             try {
                 await powerSync.execute('DELETE FROM user_exercises WHERE user_id = ? AND name = ?', [userID, exerciseName])
             } catch (e) {
-                console.warn('[WorkoutContext] Failed to delete user exercise from PowerSync', e)
+                reportPersistFailure('workout', e, { reload: reloadFromDisk })
             }
         }
     }, [userID])
@@ -501,7 +523,7 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
                 return
             }
             try {
-                const stored = await AsyncStorage.getItem(`lastExercise:${userID}`)
+                const stored = await AsyncStorage.getItem(lastExerciseKey(userID))
                 setLastExercise(stored ?? '')
             } catch (e) {
                 console.warn('[WorkoutContext] Failed to load lastExercise from AsyncStorage', e)
@@ -540,9 +562,9 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
             if (!userID) return
             try {
                 if (lastExercise) {
-                    await AsyncStorage.setItem(`lastExercise:${userID}`, lastExercise)
+                    await AsyncStorage.setItem(lastExerciseKey(userID), lastExercise)
                 } else {
-                    await AsyncStorage.removeItem(`lastExercise:${userID}`)
+                    await AsyncStorage.removeItem(lastExerciseKey(userID))
                 }
             } catch (e) {
                 console.warn('[WorkoutContext] Failed to persist lastExercise to AsyncStorage', e)

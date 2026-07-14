@@ -179,4 +179,3 @@ The app is mid-migration to the "Refined" design system. **Reuse the centralized
 
 9. **`getDateKey` must use `en-CA` locale.** This guarantees YYYY-MM-DD output regardless of device locale. Using `toISOString()` instead will give UTC midnight, which can be the wrong day in negative-offset timezones.
 
-10. **`lastExercise` is per-user in AsyncStorage** (`lastExercise_${userID}`). It is NOT in PowerSync — it doesn't sync across devices and is intentionally ephemeral per device.

@@ -1,5 +1,6 @@
 import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { processCameraCapture, processPickedImageUri, SCAN_FRAME, type ScanMode } from '@/lib/openAI/mealImage'
+import { useSubmitOnce } from '@/lib/hooks/useSubmitOnce'
 import { CameraType, CameraView, useCameraPermissions } from 'expo-camera'
 import * as ImagePicker from 'expo-image-picker'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -18,6 +19,11 @@ export default function CameraScreen() {
     const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null)
     const [flashEnabled, setFlashEnabled] = useState(false)
     const [pickingFromLibrary, setPickingFromLibrary] = useState(false)
+    // Two single-flight guards: the shutter re-enables after each shot; "Use Photo"
+    // stays disabled after firing (it navigates to a paid AI analysis — never twice)
+    // and is re-armed on retake.
+    const [guardShutter, capturing] = useSubmitOnce()
+    const [guardUsePhoto, usingPhoto, resetUsePhoto] = useSubmitOnce()
     const [scanKind, setScanKind] = useState<ScanMode>('meal')
     const scanMode: ScanMode = scanKind
 
@@ -110,6 +116,7 @@ export default function CameraScreen() {
 
     function retakePhoto() {
         setCapturedPhoto(null)
+        resetUsePhoto() // allow the next captured photo to be submitted
     }
 
     function usePhoto() {
@@ -135,7 +142,7 @@ export default function CameraScreen() {
                         <Text style={styles.retakeButtonText}>Retake</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity onPress={usePhoto} activeOpacity={0.8} style={styles.usePhotoButtonTouchable}>
+                    <TouchableOpacity onPress={guardUsePhoto(usePhoto)} disabled={usingPhoto} activeOpacity={0.8} style={styles.usePhotoButtonTouchable}>
                         <LinearGradient colors={colors.nutritionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.usePhotoButton}>
                             <Text style={styles.usePhotoButtonText}>Use Photo</Text>
                         </LinearGradient>
@@ -195,7 +202,7 @@ export default function CameraScreen() {
                             <Images size={26} color="#FFF" strokeWidth={2.5} />
                         </TouchableOpacity>
 
-                        <TouchableOpacity onPress={takePicture} style={styles.captureButton} activeOpacity={0.8} accessibilityLabel="Take photo" accessibilityRole="button">
+                        <TouchableOpacity onPress={guardShutter(takePicture, { retryable: true })} disabled={capturing} style={styles.captureButton} activeOpacity={0.8} accessibilityLabel="Take photo" accessibilityRole="button">
                             <View style={styles.captureButtonInner} />
                         </TouchableOpacity>
 

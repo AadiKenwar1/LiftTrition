@@ -4,6 +4,7 @@ import { useToday } from '@/lib/hooks/useToday';
 import { useAsyncLoad } from '@/lib/hooks/useAsyncLoad';
 import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { loadNutritionData, upsertNutritionEntry, upsertSavedNutritionEntry } from './database/powersyncStore';
+import { reportPersistFailure } from '@/lib/powersync/persistErrors';
 import type { ScanMode } from '@/lib/openAI/mealImage';
 import { analyzeAndAddPhoto } from "./functions/aiFunctions";
 import { addNutrition, deleteNutrition, editNutrition, saveNutrition, unsaveNutrition } from "./functions/crudFunctions";
@@ -52,6 +53,20 @@ export const NutritionProvider = ({ children }: PropsWithChildren) => {
     const loaded = loadStatus === 'ready';
     const loadFailed = loadStatus === 'error';
 
+    // Silent rollback: re-read disk into state WITHOUT touching load status. A
+    // failed write reverts in place — unlike retryLoad, which flips loaded→false
+    // and makes the app-wide gate unmount the navigator back to the home tab.
+    const reloadFromDisk = useCallback(async () => {
+        if (!userID) return;
+        try {
+            const { nutritionData, savedNutritionEntries } = await loadNutritionData(userID);
+            setNutritionData(nutritionData);
+            setSavedNutritionEntries(savedNutritionEntries);
+        } catch {
+            // Best-effort rollback; the original failure was already reported.
+        }
+    }, [userID]);
+
     // Each handler updates React state immediately, then writes only the affected
     // row(s) to PowerSync — same pattern as deleteNutrition / unsaveNutrition.
 
@@ -61,13 +76,17 @@ export const NutritionProvider = ({ children }: PropsWithChildren) => {
         try {
             await upsertNutritionEntry(nutritionEntry);
         } catch (e) {
-            console.warn('[NutritionContext] Failed to persist nutrition entry to PowerSync', e);
+            reportPersistFailure('nutrition', e, { reload: reloadFromDisk });
         }
-    }, [userID])
+    }, [userID, reloadFromDisk])
 
     const handleDeleteNutrition = useCallback(async (id: string) => {
-        await deleteNutrition(id, setNutritionData, userID);
-    }, [userID])
+        try {
+            await deleteNutrition(id, setNutritionData, userID);
+        } catch (e) {
+            reportPersistFailure('nutrition', e, { reload: reloadFromDisk });
+        }
+    }, [userID, reloadFromDisk])
 
     const handleEditNutrition = useCallback(async (id: string, nutritionEntry: NutritionEntry) => {
         const edited = editNutrition(id, nutritionEntry, setNutritionData);
@@ -75,9 +94,9 @@ export const NutritionProvider = ({ children }: PropsWithChildren) => {
         try {
             await upsertNutritionEntry({ ...nutritionEntry, updatedAt: new Date() });
         } catch (e) {
-            console.warn('[NutritionContext] Failed to persist nutrition edit to PowerSync', e);
+            reportPersistFailure('nutrition', e, { reload: reloadFromDisk });
         }
-    }, [userID])
+    }, [userID, reloadFromDisk])
 
     const handleSaveNutrition = useCallback(async (logEntry: NutritionEntry) => {
         const now = new Date()
@@ -94,13 +113,17 @@ export const NutritionProvider = ({ children }: PropsWithChildren) => {
         try {
             await upsertSavedNutritionEntry(savedEntry);
         } catch (e) {
-            console.warn('[NutritionContext] Failed to persist saved nutrition entry to PowerSync', e);
+            reportPersistFailure('nutrition', e, { reload: reloadFromDisk });
         }
-    }, [userID, savedNutritionEntries])
+    }, [userID, savedNutritionEntries, reloadFromDisk])
 
     const handleUnsaveNutrition = useCallback(async (id: string) => {
-        await unsaveNutrition(id, setSavedNutritionEntries, userID);
-    }, [userID])
+        try {
+            await unsaveNutrition(id, setSavedNutritionEntries, userID);
+        } catch (e) {
+            reportPersistFailure('nutrition', e, { reload: reloadFromDisk });
+        }
+    }, [userID, reloadFromDisk])
 
     const handleAnalyzeAndAddPhoto = useCallback(async (photoUri: string, userIDParam: string, mode: ScanMode = 'meal') => {
         const entry = await analyzeAndAddPhoto(photoUri, userIDParam, setNutritionData, selectedDate, mode);
@@ -108,9 +131,9 @@ export const NutritionProvider = ({ children }: PropsWithChildren) => {
         try {
             await upsertNutritionEntry(entry);
         } catch (e) {
-            console.warn('[NutritionContext] Failed to persist photo entry to PowerSync', e);
+            reportPersistFailure('nutrition', e, { reload: reloadFromDisk });
         }
-    }, [selectedDate])
+    }, [selectedDate, reloadFromDisk])
 
     const handleGetMacrosForDate = useCallback((date: Date) => getMacrosForDate(nutritionData, date), [nutritionData]);
     const handleGetMacroDataForGraph = useCallback((macroType: 'calories' | 'protein' | 'carbs' | 'fats', onboardingCompletedAt?: Date) =>

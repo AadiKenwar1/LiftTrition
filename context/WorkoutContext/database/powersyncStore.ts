@@ -6,6 +6,7 @@ import type {
 } from '@/lib/powersync/AppSchema';
 import { powerSync } from '@/lib/powersync/system';
 import { throwIfLoadFailureArmed } from '@/lib/devtools/forceLoadFailure';
+import { throwIfSaveFailureArmed } from '@/lib/devtools/forceSaveFailure';
 import { getDateKey, parseDateKey } from '@/lib/utils/dateHelper';
 import { Exercise, ExerciseLib, ExerciseLibraryEntry, Log, Workout } from '../types';
 
@@ -114,6 +115,7 @@ export async function loadWorkoutData(userId: string): Promise<{
  * Both ops are in one transaction so order is never partially updated.
  */
 export async function insertWorkoutWithOrderBump(workout: Workout): Promise<void> {
+    if (__DEV__) await throwIfSaveFailureArmed('workout')
     await powerSync.writeTransaction(async (tx) => {
         await tx.execute(
             'UPDATE workouts SET "order" = "order" + 1, updated_at = datetime(\'now\') WHERE user_id = ? AND archived = 0',
@@ -195,6 +197,7 @@ export async function insertDuplicateWorkout(workout: Workout, exercises: Exerci
  * Insert a new exercise and bump order on sibling exercises in the same workout.
  */
 export async function insertExerciseWithOrderBump(exercise: Exercise): Promise<void> {
+    if (__DEV__) await throwIfSaveFailureArmed('workout')
     await powerSync.writeTransaction(async (tx) => {
         await tx.execute(
             'UPDATE exercises SET "order" = "order" + 1, updated_at = datetime(\'now\') WHERE workout_id = ? AND archived = 0',
@@ -272,6 +275,7 @@ export async function updateExerciseOrders(exercises: Exercise[]): Promise<void>
  * Insert a single log row.
  */
 export async function insertLog(log: Log): Promise<void> {
+    if (__DEV__) await throwIfSaveFailureArmed('workout');
     const localDate = new Date(log.date);
     localDate.setHours(0, 0, 0, 0);
 

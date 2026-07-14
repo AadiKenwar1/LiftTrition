@@ -13,14 +13,12 @@ export async function deleteNutrition(id: string, setNutritionData: Dispatch<Set
     setNutritionData((prev) => prev.filter((item) => item.id !== id))
 
     if (userID) {
-        try {
-            await powerSync.writeTransaction(async (tx) => {
-                await tx.execute('DELETE FROM nutrition_entry_ingredients WHERE nutrition_entry_id = ?', [id])
-                await tx.execute('DELETE FROM nutrition_entries WHERE id = ?', [id])
-            })
-        } catch (e) {
-            console.warn('[NutritionContext] Failed to delete nutrition entry from PowerSync', e)
-        }
+        // Let a failed delete propagate — the owning context reports it and rolls
+        // the optimistic removal back by reloading from disk.
+        await powerSync.writeTransaction(async (tx) => {
+            await tx.execute('DELETE FROM nutrition_entry_ingredients WHERE nutrition_entry_id = ?', [id])
+            await tx.execute('DELETE FROM nutrition_entries WHERE id = ?', [id])
+        })
     }
 }
 
@@ -51,13 +49,11 @@ export async function unsaveNutrition(id: string, setSavedNutritionEntries: Disp
     setSavedNutritionEntries((prev) => prev.filter((item) => item.id !== id))
 
     if (userID) {
-        try {
-            await powerSync.writeTransaction(async (tx) => {
-                await tx.execute('DELETE FROM saved_nutrition_entry_ingredients WHERE saved_nutrition_entry_id = ?', [id])
-                await tx.execute('DELETE FROM saved_nutrition_entries WHERE id = ?', [id])
-            })
-        } catch (e) {
-            console.warn('[NutritionContext] Failed to delete saved nutrition entry from PowerSync', e)
-        }
+        // Let a failed delete propagate — the owning context reports it and rolls
+        // the optimistic removal back by reloading from disk.
+        await powerSync.writeTransaction(async (tx) => {
+            await tx.execute('DELETE FROM saved_nutrition_entry_ingredients WHERE saved_nutrition_entry_id = ?', [id])
+            await tx.execute('DELETE FROM saved_nutrition_entries WHERE id = ?', [id])
+        })
     }
 }

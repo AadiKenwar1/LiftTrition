@@ -130,9 +130,7 @@ export default function SettingsScreen() {
             <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
                 <View style={styles.header}>
                     <View style={styles.headerText}>
-                        <TouchableOpacity onPress={() => router.push('/settingsScreens/devStatsModal')} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel="Open developer stats">
-                            <Text style={styles.title}>Settings</Text>
-                        </TouchableOpacity>
+                        <Text style={styles.title}>Settings</Text>
                         <Text style={styles.lastUpdated}>{syncStatusLine}</Text>
                     </View>
                     <TouchableOpacity
@@ -193,6 +191,7 @@ export default function SettingsScreen() {
                     <View style={styles.section}>
                         <Text style={styles.sectionTitle}>Developer</Text>
                         {renderSettingItem({ icon: Wrench, title: 'Dev Hub', subtitle: 'Chart & component test harness', onPress: () => router.push('/devTest' as never) })}
+                        {renderSettingItem({ icon: FlaskConical, title: 'Dev Stats', subtitle: 'Live sync, auth & upload-queue diagnostics', onPress: () => router.push('/settingsScreens/devStatsModal') })}
                     </View>
                 )}
             </ScrollView>

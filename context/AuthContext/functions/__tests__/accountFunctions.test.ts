@@ -1,8 +1,8 @@
-import AsyncStorage from '@react-native-async-storage/async-storage'
 import { flushUploadsOrThrow } from '@/lib/powersync/FlushUploads'
 import { disconnectAndClearPowerSync } from '@/lib/powersync/orchestrator'
 import { supabase } from '@/lib/supabase/client'
-import { deleteAccount, forceSignOut } from '../accountFunctions'
+import { clearUserStorage } from '@/lib/utils/userStorage'
+import { deleteAccount, forceSignOut, signOut } from '../accountFunctions'
 
 jest.mock('@/lib/supabase/client', () => ({
     supabase: {
@@ -20,14 +20,10 @@ jest.mock('@/lib/powersync/orchestrator', () => ({
 jest.mock('@/lib/powersync/FlushUploads', () => ({
     flushUploadsOrThrow: jest.fn(),
     UploadFlushTimeoutError: class UploadFlushTimeoutError extends Error {},
-    UploadFlushNotConnectedError: class UploadFlushNotConnectedError extends Error {},
 }))
 
-jest.mock('@react-native-async-storage/async-storage', () => ({
-    __esModule: true,
-    default: {
-        clear: jest.fn(),
-    },
+jest.mock('@/lib/utils/userStorage', () => ({
+    clearUserStorage: jest.fn(),
 }))
 
 const mockFetch = jest.fn()
@@ -41,11 +37,12 @@ beforeEach(() => {
 
     process.env.EXPO_PUBLIC_SUPABASE_URL = 'https://test.supabase.co'
     ;(supabase.auth.getSession as jest.Mock).mockResolvedValue({
-        data: { session: { access_token: 'token-123' } },
+        data: { session: { access_token: 'token-123', user: { id: 'user-123' } } },
     })
     ;(supabase.auth.signOut as jest.Mock).mockResolvedValue({ error: null })
     ;(disconnectAndClearPowerSync as jest.Mock).mockResolvedValue(undefined)
-    ;(AsyncStorage.clear as jest.Mock).mockResolvedValue(undefined)
+    ;(clearUserStorage as jest.Mock).mockResolvedValue(undefined)
+    ;(flushUploadsOrThrow as jest.Mock).mockResolvedValue(undefined)
     mockFetch.mockResolvedValue({ ok: true, json: async () => ({ success: true }) })
 })
 
@@ -61,7 +58,7 @@ describe('deleteAccount', () => {
 
         expect(mockFetch).not.toHaveBeenCalled()
         expect(disconnectAndClearPowerSync).not.toHaveBeenCalled()
-        expect(AsyncStorage.clear).not.toHaveBeenCalled()
+        expect(clearUserStorage).not.toHaveBeenCalled()
     })
 
     it('aborts with nothing torn down when the edge function fails', async () => {
@@ -71,7 +68,7 @@ describe('deleteAccount', () => {
 
         expect(supabase.auth.signOut).not.toHaveBeenCalled()
         expect(disconnectAndClearPowerSync).not.toHaveBeenCalled()
-        expect(AsyncStorage.clear).not.toHaveBeenCalled()
+        expect(clearUserStorage).not.toHaveBeenCalled()
     })
 
     it('never waits on the upload flush', async () => {
@@ -80,11 +77,11 @@ describe('deleteAccount', () => {
         expect(flushUploadsOrThrow).not.toHaveBeenCalled()
     })
 
-    it('clears PowerSync and storage after the server confirms', async () => {
+    it("clears PowerSync and the departing user's storage after the server confirms", async () => {
         await deleteAccount()
 
         expect(disconnectAndClearPowerSync).toHaveBeenCalledTimes(1)
-        expect(AsyncStorage.clear).toHaveBeenCalledTimes(1)
+        expect(clearUserStorage).toHaveBeenCalledWith('user-123')
     })
 
     it('completes teardown even when the auth sign-out reports an error', async () => {
@@ -93,7 +90,7 @@ describe('deleteAccount', () => {
         await expect(deleteAccount()).resolves.toBeUndefined()
 
         expect(disconnectAndClearPowerSync).toHaveBeenCalledTimes(1)
-        expect(AsyncStorage.clear).toHaveBeenCalledTimes(1)
+        expect(clearUserStorage).toHaveBeenCalledWith('user-123')
     })
 
     it('completes teardown even when the PowerSync clear fails', async () => {
@@ -101,7 +98,7 @@ describe('deleteAccount', () => {
 
         await expect(deleteAccount()).resolves.toBeUndefined()
 
-        expect(AsyncStorage.clear).toHaveBeenCalledTimes(1)
+        expect(clearUserStorage).toHaveBeenCalledWith('user-123')
     })
 
     it('calls the edge function before any local teardown', async () => {
@@ -113,13 +110,42 @@ describe('deleteAccount', () => {
     })
 })
 
+describe('signOut', () => {
+    it("drains uploads, signs out, then clears the departing user's storage", async () => {
+        await signOut()
+
+        expect(flushUploadsOrThrow).toHaveBeenCalledTimes(1)
+        expect(supabase.auth.signOut).toHaveBeenCalledTimes(1)
+        expect(disconnectAndClearPowerSync).toHaveBeenCalledTimes(1)
+        expect(clearUserStorage).toHaveBeenCalledWith('user-123')
+    })
+
+    it('throws and skips teardown when the upload flush cannot drain', async () => {
+        ;(flushUploadsOrThrow as jest.Mock).mockRejectedValue(new Error('flush timed out'))
+
+        await expect(signOut()).rejects.toThrow('flush timed out')
+
+        expect(supabase.auth.signOut).not.toHaveBeenCalled()
+        expect(clearUserStorage).not.toHaveBeenCalled()
+    })
+
+    it('throws and skips the storage clear when the auth sign-out errors', async () => {
+        ;(supabase.auth.signOut as jest.Mock).mockResolvedValue({ error: new Error('revoke failed') })
+
+        await expect(signOut()).rejects.toThrow('revoke failed')
+
+        expect(disconnectAndClearPowerSync).not.toHaveBeenCalled()
+        expect(clearUserStorage).not.toHaveBeenCalled()
+    })
+})
+
 describe('forceSignOut', () => {
-    it('completes local cleanup even when the auth sign-out rejects', async () => {
+    it("completes local cleanup and clears the user's storage even when the auth sign-out rejects", async () => {
         ;(supabase.auth.signOut as jest.Mock).mockRejectedValue(new Error('network dead'))
 
         await expect(forceSignOut()).resolves.toBeUndefined()
 
         expect(disconnectAndClearPowerSync).toHaveBeenCalledTimes(1)
-        expect(AsyncStorage.clear).toHaveBeenCalledTimes(1)
+        expect(clearUserStorage).toHaveBeenCalledWith('user-123')
     })
 })

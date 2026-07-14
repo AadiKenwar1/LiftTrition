@@ -47,4 +47,5 @@ export interface SettingsContextInterface {
     loaded: boolean;
     loadFailed: boolean;
     retryLoad: () => void;
+    completeOnboarding: () => Promise<boolean>;
 }
