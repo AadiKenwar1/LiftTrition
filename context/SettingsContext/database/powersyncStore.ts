@@ -1,22 +1,16 @@
 import type { SettingsRecord, WeightProgressRecord } from '@/lib/powersync/AppSchema'
 import { powerSync } from '@/lib/powersync/system'
+import { getDateKey, parseDateKey } from '@/lib/utils/dateHelper'
 import { Settings } from '../types'
 
 const defaultSettings: Settings = { onboardingComplete: false, onboardingCompletedAt: undefined, birthDate: new Date(), gender: 'male', height: 175, bodyWeight: 170, activityLevel: 'moderate', unitSystem: 'imperial', goalType: 'maintain', goalWeight: 190, goalPace: 0, calorieGoal: 2000, proteinGoal: 130, carbsGoal: 200, fatsGoal: 54 }
 
 // Map DB row -> Settings
-function rowToSettings(row: SettingsRecord): Settings {
+export function rowToSettings(row: SettingsRecord): Settings {
     return {
         onboardingComplete: !!row.onboarding_complete,
-        onboardingCompletedAt:
-            row.onboarding_completed_at ?
-                (() => {
-                    // Parse "YYYY-MM-DD" as local date, not UTC
-                    const [year, month, day] = row.onboarding_completed_at.split('-').map(Number)
-                    return new Date(year, month - 1, day)
-                })()
-            :   undefined,
-        birthDate: row.birth_date ? new Date(row.birth_date) : new Date(),
+        onboardingCompletedAt: row.onboarding_completed_at ? parseDateKey(row.onboarding_completed_at) : undefined,
+        birthDate: row.birth_date ? parseDateKey(row.birth_date) : new Date(),
         gender: (row.gender || 'male') as Settings['gender'],
         height: row.height ?? 175,
         bodyWeight: row.body_weight ?? 170,
@@ -33,8 +27,8 @@ function rowToSettings(row: SettingsRecord): Settings {
 }
 
 // Map Settings -> DB row
-function settingsToRow(s: Settings, userId: string) {
-    return { user_id: userId, birth_date: s.birthDate.toISOString().slice(0, 10), gender: s.gender, height: s.height, body_weight: s.bodyWeight, unit_system: s.unitSystem, activity_level: s.activityLevel, goal_type: s.goalType, goal_weight: s.goalWeight, goal_pace: s.goalPace, calorie_goal: s.calorieGoal, protein_goal: s.proteinGoal, carbs_goal: s.carbsGoal, fats_goal: s.fatsGoal, onboarding_complete: s.onboardingComplete ? 1 : 0, onboarding_completed_at: s.onboardingCompletedAt ? s.onboardingCompletedAt.toISOString().slice(0, 10) : null }
+export function settingsToRow(s: Settings, userId: string) {
+    return { user_id: userId, birth_date: getDateKey(s.birthDate), gender: s.gender, height: s.height, body_weight: s.bodyWeight, unit_system: s.unitSystem, activity_level: s.activityLevel, goal_type: s.goalType, goal_weight: s.goalWeight, goal_pace: s.goalPace, calorie_goal: s.calorieGoal, protein_goal: s.proteinGoal, carbs_goal: s.carbsGoal, fats_goal: s.fatsGoal, onboarding_complete: s.onboardingComplete ? 1 : 0, onboarding_completed_at: s.onboardingCompletedAt ? getDateKey(s.onboardingCompletedAt) : null }
 }
 
 // Load settings and body weight progress from PowerSync
