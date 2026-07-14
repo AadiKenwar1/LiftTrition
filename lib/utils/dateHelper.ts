@@ -27,6 +27,19 @@ export function getDateKey(date: Date): string {
 }
 
 /**
+ * Parse a YYYY-MM-DD date key back into a Date at local midnight.
+ * This is the local-midnight inverse of getDateKey — use this instead of
+ * `new Date(key)`, which parses as UTC and can land on the wrong calendar day.
+ *
+ * @param key - Date string in YYYY-MM-DD format (e.g., "2024-02-03")
+ * @returns Date object at 00:00 local time on the given calendar date
+ */
+export function parseDateKey(key: string): Date {
+    const [year, month, day] = key.split('-').map(Number)
+    return new Date(year, month - 1, day)
+}
+
+/**
  * Format date and time for display (e.g., "Mar 5, 2:30 PM")
  *
  * @param date - Date object to format
