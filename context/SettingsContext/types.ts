@@ -45,4 +45,6 @@ export interface SettingsContextInterface {
         carbGrams: number;
     };
     loaded: boolean;
+    loadFailed: boolean;
+    retryLoad: () => void;
 }

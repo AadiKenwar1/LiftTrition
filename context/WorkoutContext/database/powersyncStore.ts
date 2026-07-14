@@ -5,7 +5,8 @@ import type {
     WorkoutRecord
 } from '@/lib/powersync/AppSchema';
 import { powerSync } from '@/lib/powersync/system';
-import { getDateKey } from '@/lib/utils/dateHelper';
+import { throwIfLoadFailureArmed } from '@/lib/devtools/forceLoadFailure';
+import { getDateKey, parseDateKey } from '@/lib/utils/dateHelper';
 import { Exercise, ExerciseLib, ExerciseLibraryEntry, Log, Workout } from '../types';
 
 // Map DB row -> Workout
@@ -39,13 +40,7 @@ function rowToExercise(row: ExerciseRecord): Exercise {
 
 // Map DB row -> Log
 function rowToLog(row: LogRecord): Log {
-    let parsedDate: Date;
-    if (row.date) {
-        const [year, month, day] = row.date.split('-').map(Number);
-        parsedDate = new Date(year, month - 1, day);
-    } else {
-        parsedDate = new Date();
-    }
+    const parsedDate = row.date ? parseDateKey(row.date) : new Date();
 
     return {
         id: row.id!,
@@ -69,6 +64,8 @@ export async function loadWorkoutData(userId: string): Promise<{
     logs: Log[];
     userExercises: ExerciseLib;
 }> {
+    if (__DEV__) await throwIfLoadFailureArmed('workout');
+
     const workoutRows = await powerSync.getAll(
         'SELECT * FROM workouts WHERE user_id = ? ORDER BY "order" ASC',
         [userId]

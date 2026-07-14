@@ -1,6 +1,7 @@
 import { useAuth } from '@/context/AuthContext';
 import { powerSync } from '@/lib/powersync/system';
 import { useToday } from '@/lib/hooks/useToday';
+import { useAsyncLoad } from '@/lib/hooks/useAsyncLoad';
 import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { loadNutritionData, upsertNutritionEntry, upsertSavedNutritionEntry } from './database/powersyncStore';
 import type { ScanMode } from '@/lib/openAI/mealImage';
@@ -26,40 +27,30 @@ export const NutritionProvider = ({ children }: PropsWithChildren) => {
     const todayKey = useToday();
     const [nutritionData, setNutritionData] = useState<NutritionEntry[]>([]);
     const [savedNutritionEntries, setSavedNutritionEntries] = useState<NutritionEntry[]>([]);
-    const [loaded, setLoaded] = useState(false);
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
     useEffect(() => {
         setSelectedDate(new Date());
     }, [todayKey]);
 
-    // Load from PowerSync whenever the user changes
-    useEffect(() => {
+    // Load from PowerSync whenever the user changes (shared status hook).
+    // On failure the loader writes nothing, so prior state is preserved and
+    // status becomes 'error' instead of masquerading as a fresh user.
+    const { status: loadStatus, retry: retryLoad } = useAsyncLoad(async (isStale) => {
         if (!userID) {
             setNutritionData([]);
             setSavedNutritionEntries([]);
-            setLoaded(true);
             return;
         }
-
-        setLoaded(false);
-
-        const loadData = async () => {
-            try {
-                await powerSync.waitForFirstSync();
-                const { nutritionData, savedNutritionEntries } = await loadNutritionData(userID);
-                setNutritionData(nutritionData);
-                setSavedNutritionEntries(savedNutritionEntries);
-                setLoaded(true);
-            } catch (error) {
-                console.warn('[NutritionContext] Failed to load nutrition data from PowerSync', error);
-                setNutritionData([]);
-                setSavedNutritionEntries([]);
-                setLoaded(true);
-            }
-        }
-        loadData();
+        await powerSync.waitForFirstSync();
+        const { nutritionData, savedNutritionEntries } = await loadNutritionData(userID);
+        if (isStale()) return;
+        setNutritionData(nutritionData);
+        setSavedNutritionEntries(savedNutritionEntries);
     }, [userID]);
+
+    const loaded = loadStatus === 'ready';
+    const loadFailed = loadStatus === 'error';
 
     // Each handler updates React state immediately, then writes only the affected
     // row(s) to PowerSync — same pattern as deleteNutrition / unsaveNutrition.
@@ -149,8 +140,10 @@ export const NutritionProvider = ({ children }: PropsWithChildren) => {
             handleGetMacroDataForGraph,
             handleGetMacroForWeek,
             nutritionStreak,
+            loadFailed,
+            retryLoad,
         }),
-        [nutritionData, savedNutritionEntries, selectedDate, loaded, handleAddNutrition, handleDeleteNutrition, handleEditNutrition, handleSaveNutrition, handleUnsaveNutrition, handleAnalyzeAndAddPhoto, handleGetMacrosForDate, handleGetMacroDataForGraph, handleGetMacroForWeek, nutritionStreak],
+        [nutritionData, savedNutritionEntries, selectedDate, loaded, loadFailed, retryLoad, handleAddNutrition, handleDeleteNutrition, handleEditNutrition, handleSaveNutrition, handleUnsaveNutrition, handleAnalyzeAndAddPhoto, handleGetMacrosForDate, handleGetMacroDataForGraph, handleGetMacroForWeek, nutritionStreak],
     );
 
     return (

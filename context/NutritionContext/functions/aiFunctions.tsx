@@ -6,6 +6,7 @@ import { Dispatch, SetStateAction } from 'react';
 import uuid from 'react-native-uuid';
 import { Ingredient, NutritionEntry } from '../types';
 import { addNutrition } from './crudFunctions';
+import { sumIngredients } from './ingredients';
 
 // Timeout helper
 function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
@@ -67,26 +68,6 @@ export async function enrichBrandedIngredients(ingredients: Ingredient[]): Promi
   });
 
   return { ingredients: out, sources };
-}
-
-function sumIngredients(ingredients: Ingredient[]) {
-  let totalProtein = 0;
-  let totalCarbs = 0;
-  let totalFats = 0;
-  let totalCalories = 0;
-  for (const ingredient of ingredients) {
-    const quantity = ingredient.quantity || 1;
-    totalProtein += (ingredient.protein || 0) * quantity;
-    totalCarbs += (ingredient.carbs || 0) * quantity;
-    totalFats += (ingredient.fats || 0) * quantity;
-    totalCalories += (ingredient.calories || 0) * quantity;
-  }
-  return {
-    protein: Math.round(totalProtein * 10) / 10,
-    carbs: Math.round(totalCarbs * 10) / 10,
-    fats: Math.round(totalFats * 10) / 10,
-    calories: Math.round(totalCalories),
-  };
 }
 
 // Strip code fences and parse the JSON vision response.

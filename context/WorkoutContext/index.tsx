@@ -1,6 +1,7 @@
 import { useAuth } from '@/context/AuthContext'
 import { convertExerciseLibraryToList, exerciseLib } from '@/context/WorkoutContext/exerciseLibrary'
 import { powerSync } from '@/lib/powersync/system'
+import { useAsyncLoad } from '@/lib/hooks/useAsyncLoad'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import uuid from 'react-native-uuid'
@@ -37,7 +38,6 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
     const [userExercises, setUserExercisesState] = useState<ExerciseLib>({})
     const [fullExerciseLib, setFullExerciseLib] = useState<ExerciseLib>(exerciseLib)
     const [lastExercise, setLastExercise] = useState<string>('')
-    const [loaded, setLoaded] = useState(false)
 
     const { userID } = useAuth()
 
@@ -511,40 +511,28 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
         loadLastExercise()
     }, [userID])
 
-    // Load from PowerSync when user changes
-    useEffect(() => {
+    // Load from PowerSync when user changes (shared status hook). On failure the
+    // loader writes nothing, so prior state is preserved and status becomes
+    // 'error' instead of masquerading as a fresh user.
+    const { status: loadStatus, retry: retryLoad } = useAsyncLoad(async (isStale) => {
         if (!userID) {
             setWorkoutsState([])
             setExercisesState([])
             setLogsState([])
             setUserExercisesState({})
-            setLoaded(true)
             return
         }
-
-        setLoaded(false)
-
-        const loadData = async () => {
-            try {
-                await powerSync.waitForFirstSync()
-                const { workouts: w, exercises: e, logs: l, userExercises: u } = await loadWorkoutData(userID)
-                setWorkoutsState(w)
-                setExercisesState(e)
-                setLogsState(l)
-                setUserExercisesState(u)
-                setLoaded(true)
-            } catch (e) {
-                console.warn('[WorkoutContext] Failed to load workout data from PowerSync', e)
-                setWorkoutsState([])
-                setExercisesState([])
-                setLogsState([])
-                setUserExercisesState({})
-                setLoaded(true)
-            }
-        }
-
-        loadData()
+        await powerSync.waitForFirstSync()
+        const { workouts: w, exercises: e, logs: l, userExercises: u } = await loadWorkoutData(userID)
+        if (isStale()) return
+        setWorkoutsState(w)
+        setExercisesState(e)
+        setLogsState(l)
+        setUserExercisesState(u)
     }, [userID])
+
+    const loaded = loadStatus === 'ready'
+    const loadFailed = loadStatus === 'error'
 
     // Persist lastExercise per-user in AsyncStorage
     useEffect(() => {
@@ -574,6 +562,8 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
                 lastExercise,
                 userExercises,
                 loaded,
+                loadFailed,
+                retryLoad,
                 setUserExercises,
                 setLastExercise,
                 handleAddWorkout,

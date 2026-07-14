@@ -1,5 +1,6 @@
 import { useAuth } from '@/context/AuthContext'
 import { powerSync } from '@/lib/powersync/system'
+import { useAsyncLoad } from '@/lib/hooks/useAsyncLoad'
 import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useRef, useState, type SetStateAction } from 'react'
 import { loadSettingsAndBw, upsertSettings, upsertWeightForDate } from './database/powersyncStore'
 import { computeBwUpdate, getBodyWeightProgressData } from './functions/bodyWeightFunctions'
@@ -30,7 +31,6 @@ const SettingsContext = createContext<SettingsContextInterface | undefined>(unde
 export const SettingsProvider = ({ children }: PropsWithChildren) => {
     const [settings, setSettingsState] = useState<Settings>(defaultSettings)
     const [bwProgress, setBwProgressState] = useState<Record<string, number>>({})
-    const [loaded, setLoaded] = useState(false)
     const [hasLoadedUserData, setHasLoadedUserData] = useState(false)
     const [mode, setMode] = useState<boolean>(true)
     const [persistDirty, setPersistDirty] = useState(false)
@@ -81,42 +81,27 @@ export const SettingsProvider = ({ children }: PropsWithChildren) => {
 
     const handleGetBodyWeightProgressData = (onboardingCompletedAt?: Date) => getBodyWeightProgressData(bwProgress, onboardingCompletedAt)
 
-    // Load from PowerSync
-    useEffect(() => {
-        // No user: reset to defaults and mark as loaded
+    // Load from PowerSync via the shared status hook. On failure the loader
+    // writes nothing, so prior state is preserved and status becomes 'error'
+    // (never blank-defaults-presented-as-a-fresh-user).
+    const { status: loadStatus, retry: retryLoad } = useAsyncLoad(async (isStale) => {
+        setHasLoadedUserData(false)
+        setPersistDirty(false)
         if (!userID) {
             setSettingsState(defaultSettings)
             setBwProgressState({})
-            setLoaded(true)
-            setHasLoadedUserData(false)
-            setPersistDirty(false)
             return
         }
-
-        // User present: start in loading state and load from PowerSync
-        setLoaded(false)
-        setHasLoadedUserData(false)
-        setPersistDirty(false)
-
-        const loadData = async () => {
-            try {
-                await powerSync.waitForFirstSync()
-                const { settings, bwProgress, hasData } = await loadSettingsAndBw(userID)
-                setSettingsState(settings)
-                setBwProgressState(bwProgress)
-                setHasLoadedUserData(hasData)
-                setLoaded(true)
-            } catch (e) {
-                console.warn('[SettingsContext] Failed to load settings from PowerSync', e)
-                setSettingsState(defaultSettings)
-                setBwProgressState({})
-                setHasLoadedUserData(false)
-                setLoaded(true)
-            }
-        }
-
-        loadData()
+        await powerSync.waitForFirstSync()
+        const { settings, bwProgress, hasData } = await loadSettingsAndBw(userID)
+        if (isStale()) return
+        setSettingsState(settings)
+        setBwProgressState(bwProgress)
+        setHasLoadedUserData(hasData)
     }, [userID])
+
+    const loaded = loadStatus === 'ready'
+    const loadFailed = loadStatus === 'error'
 
     // Set hasLoadedUserData to true when user completes onboarding (so new users can save)
     useEffect(() => {
@@ -168,6 +153,8 @@ export const SettingsProvider = ({ children }: PropsWithChildren) => {
                 handleGetBodyWeightProgressData,
                 calculateMacros,
                 loaded,
+                loadFailed,
+                retryLoad,
             }}
         >
             {children}

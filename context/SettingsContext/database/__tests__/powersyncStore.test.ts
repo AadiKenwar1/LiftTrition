@@ -3,6 +3,7 @@ jest.mock('@/lib/powersync/system', () => ({ powerSync: { getAll: jest.fn(), wri
 import { settingsToRow, rowToSettings } from '../powersyncStore'
 import { Settings } from '../../types'
 import type { SettingsRecord } from '@/lib/powersync/AppSchema'
+import { getDateKey } from '@/lib/utils/dateHelper'
 
 function makeSettings(overrides: Partial<Settings> = {}): Settings {
     return {
@@ -77,5 +78,19 @@ describe('settingsToRow / rowToSettings round-trip', () => {
         expect(settings.birthDate.getFullYear()).toBe(1990)
         expect(settings.birthDate.getMonth()).toBe(5)
         expect(settings.birthDate.getDate()).toBe(22)
+    })
+
+    it('settingsToRow pins onboarding_completed_at to the canonical local date key in any zone', () => {
+        const d = new Date(2026, 6, 13, 21, 0)
+        const settings = makeSettings({ onboardingCompletedAt: d })
+        const row = settingsToRow(settings, 'user-1')
+        expect(row.onboarding_completed_at).toBe(getDateKey(d))
+    })
+
+    it('settingsToRow pins birth_date to the canonical local date key in any zone', () => {
+        const d = new Date(1990, 5, 22, 21, 0)
+        const settings = makeSettings({ birthDate: d })
+        const row = settingsToRow(settings, 'user-1')
+        expect(row.birth_date).toBe(getDateKey(d))
     })
 })

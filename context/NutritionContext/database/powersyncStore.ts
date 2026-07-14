@@ -1,19 +1,13 @@
 import type { NutritionEntryIngredientRecord, NutritionEntryRecord, SavedNutritionEntryIngredientRecord, SavedNutritionEntryRecord } from '@/lib/powersync/AppSchema'
 import { powerSync } from '@/lib/powersync/system'
-import { getDateKey } from '@/lib/utils/dateHelper'
+import { throwIfLoadFailureArmed } from '@/lib/devtools/forceLoadFailure'
+import { getDateKey, parseDateKey } from '@/lib/utils/dateHelper'
 import { sanitizeInt, sanitizeMacro } from '@/lib/utils/number'
 import { NutritionEntry } from '../types'
 
 // Map DB row -> NutritionEntry
 function rowToNutritionEntry(row: NutritionEntryRecord, ingredients: NutritionEntryIngredientRecord[]): NutritionEntry {
-    // Parse "YYYY-MM-DD" as local date to avoid UTC conversion issues
-    let parsedDate: Date
-    if (row.date) {
-        const [year, month, day] = row.date.split('-').map(Number)
-        parsedDate = new Date(year, month - 1, day)
-    } else {
-        parsedDate = new Date()
-    }
+    const parsedDate = row.date ? parseDateKey(row.date) : new Date()
 
     return {
         id: row.id!,
@@ -110,6 +104,8 @@ export async function loadNutritionData(userId: string): Promise<{
     savedNutritionEntries: NutritionEntry[]
     hasData: boolean
 }> {
+    if (__DEV__) await throwIfLoadFailureArmed('nutrition')
+
     const entryRows = (await powerSync.getAll('SELECT * FROM nutrition_entries WHERE user_id = ? ORDER BY date DESC, time DESC', [userId])) as NutritionEntryRecord[]
 
     const entryIds = entryRows.map((row) => row.id).filter((id): id is string => !!id)

@@ -1,3 +1,6 @@
+// react-test-renderer ships no bundled types (@types/react-test-renderer not
+// installed); suppress the missing-declaration error (test-only runtime dep).
+// @ts-ignore
 import { act, create } from 'react-test-renderer'
 import { useAsyncLoad, type LoadStatus } from '../useAsyncLoad'
 

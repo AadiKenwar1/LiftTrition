@@ -1,33 +1,51 @@
 import { useNutrition } from '@/context/NutritionContext'
+import { sumIngredients } from '@/context/NutritionContext/functions/ingredients'
 import { Ingredient, NutritionEntry } from '@/context/NutritionContext/types'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
+import { parseNumericInput } from '@/lib/utils/number'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import { Camera, Plus, Trash2 } from 'lucide-react-native'
+import { Minus, Plus, Trash2 } from 'lucide-react-native'
 import { useMemo, useState } from 'react'
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import uuid from 'react-native-uuid'
 
-const INGREDIENT_MACROS: (keyof Ingredient)[] = ['calories', 'fats', 'carbs', 'protein']
+type MacroField = 'calories' | 'protein' | 'carbs' | 'fats'
+type DraftIngredient = { key: string; name: string; brand?: string | null; calories: string; protein: string; carbs: string; fats: string; quantity: string }
 
-function calcTotals(ings: Ingredient[]) {
-    let totalProtein = 0
-    let totalCarbs = 0
-    let totalFats = 0
-    let totalCalories = 0
-    for (const ing of ings) {
-        const qty = ing.quantity || 1
-        totalProtein += ing.protein * qty
-        totalCarbs += ing.carbs * qty
-        totalFats += ing.fats * qty
-        totalCalories += ing.calories * qty
-    }
+const MACROS: { field: MacroField; short: string; unit: string }[] = [
+    { field: 'calories', short: 'Cal', unit: 'kcal' },
+    { field: 'protein', short: 'P', unit: 'g' },
+    { field: 'carbs', short: 'C', unit: 'g' },
+    { field: 'fats', short: 'F', unit: 'g' },
+]
+
+function toDraft(ing: Ingredient): DraftIngredient {
     return {
-        protein: Math.round(totalProtein * 10) / 10,
-        carbs: Math.round(totalCarbs * 10) / 10,
-        fats: Math.round(totalFats * 10) / 10,
-        calories: Math.round(totalCalories),
+        key: uuid.v4() as string,
+        name: ing.name,
+        brand: ing.brand ?? null,
+        calories: String(ing.calories ?? 0),
+        protein: String(ing.protein ?? 0),
+        carbs: String(ing.carbs ?? 0),
+        fats: String(ing.fats ?? 0),
+        quantity: String(ing.quantity ?? 1),
     }
 }
+
+function toIngredient(draft: DraftIngredient): Ingredient {
+    return {
+        name: draft.name.trim(),
+        brand: draft.brand,
+        quantity: parseNumericInput(draft.quantity) ?? 1,
+        protein: parseNumericInput(draft.protein) ?? 0,
+        carbs: parseNumericInput(draft.carbs) ?? 0,
+        fats: parseNumericInput(draft.fats) ?? 0,
+        calories: parseNumericInput(draft.calories) ?? 0,
+    }
+}
+
+const qtyValue = (s: string) => parseNumericInput(s) ?? 1
 
 export default function EditPhotoEntry() {
     const router = useRouter()
@@ -36,8 +54,13 @@ export default function EditPhotoEntry() {
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
 
-    // Parse entry from route params and rehydrate dates
-    const raw = JSON.parse(entryParam)
+    const entryStr = typeof entryParam === 'string' ? entryParam : entryParam?.[0]
+    if (!entryStr) {
+        router.back()
+        return null
+    }
+
+    const raw = JSON.parse(entryStr)
     const parsedEntry: NutritionEntry = {
         ...raw,
         date: new Date(raw.date),
@@ -46,42 +69,43 @@ export default function EditPhotoEntry() {
     }
 
     const [name, setName] = useState(parsedEntry.name)
-    const [focusedField, setFocusedField] = useState<string | null>(null)
-    const [ingredients, setIngredients] = useState<Ingredient[]>(parsedEntry.ingredients?.length ? parsedEntry.ingredients : [])
+    const [focused, setFocused] = useState<string | null>(null)
+    const [rows, setRows] = useState<DraftIngredient[]>(() => (parsedEntry.ingredients ?? []).map(toDraft))
 
-    const totals = calcTotals(ingredients)
+    const totals = sumIngredients(rows.map(toIngredient))
 
-    function updateIngredient(index: number, field: keyof Ingredient, value: string) {
-        setIngredients((prev) =>
-            prev.map((ing, i) => {
-                if (i !== index) return ing
-                return field === 'name' ? { ...ing, [field]: value } : { ...ing, [field]: parseFloat(value) || 0 }
+    function setField(key: string, field: keyof DraftIngredient, value: string) {
+        setRows((prev) => prev.map((r) => (r.key === key ? { ...r, [field]: value } : r)))
+    }
+
+    function stepQty(key: string, delta: number) {
+        setRows((prev) =>
+            prev.map((r) => {
+                if (r.key !== key) return r
+                const next = Math.max(0, Math.round((qtyValue(r.quantity) + delta) * 10) / 10)
+                return { ...r, quantity: String(next) }
             }),
         )
     }
 
     function addIngredient() {
-        setIngredients((prev) => [...prev, { name: '', quantity: 1, protein: 0, carbs: 0, fats: 0, calories: 0 }])
+        setRows((prev) => [...prev, { key: uuid.v4() as string, name: '', brand: null, calories: '', protein: '', carbs: '', fats: '', quantity: '1' }])
     }
 
-    function removeIngredient(index: number) {
-        if (ingredients.length <= 1) {
+    function removeIngredient(key: string) {
+        if (rows.length <= 1) {
             Alert.alert('Cannot Remove', 'At least one ingredient is required.')
             return
         }
-        setIngredients((prev) => prev.filter((_, i) => i !== index))
+        setRows((prev) => prev.filter((r) => r.key !== key))
     }
 
     function handleSave() {
-        const t = calcTotals(ingredients)
         const updatedEntry: NutritionEntry = {
             ...parsedEntry,
             name: name.trim() || parsedEntry.name,
-            ingredients,
-            protein: t.protein,
-            carbs: t.carbs,
-            fats: t.fats,
-            calories: t.calories,
+            ingredients: rows.map(toIngredient),
+            ...totals,
         }
         handleEditNutrition(parsedEntry.id, updatedEntry)
         router.back()
@@ -89,178 +113,114 @@ export default function EditPhotoEntry() {
 
     return (
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
-            {/* Drag Handle */}
             <View style={styles.handleContainer}>
                 <View style={styles.handle} />
             </View>
 
-            <ScrollView style={styles.scrollView} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-                {/* Icon */}
-                <View style={styles.iconContainer}>
-                    <View style={styles.iconCircle}>
-                        <Camera size={36} color={colors.nutrition} strokeWidth={2.5} />
-                    </View>
-                </View>
-
-                {/* Title */}
+            <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
                 <Text style={styles.title}>Edit Photo Entry</Text>
-                <Text style={styles.subtitle}>Adjust ingredients — totals update automatically</Text>
+                <Text style={styles.subtitle}>Adjust ingredients — totals update as you type</Text>
 
-                {/* Meal Name */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionLabel}>Meal Name</Text>
-                    <TextInput
-                        style={[styles.input, focusedField === 'name' && styles.inputFocused]}
-                        value={name}
-                        onChangeText={setName}
-                        placeholder="Meal name"
-                        placeholderTextColor={colors.placeholder}
-                        onFocus={() => setFocusedField('name')}
-                        onBlur={() => setFocusedField(null)}
-                    />
-                </View>
+                <Text style={styles.fieldLabel}>Meal name</Text>
+                <TextInput
+                    style={[styles.nameInput, focused === 'meal' && styles.nameInputFocused]}
+                    value={name}
+                    onChangeText={setName}
+                    placeholder="Meal name"
+                    placeholderTextColor={colors.placeholder}
+                    onFocus={() => setFocused('meal')}
+                    onBlur={() => setFocused(null)}
+                />
 
-                {/* Ingredients */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionLabel}>Ingredients</Text>
-
-                    {ingredients.map((ingredient, index) => (
-                        <View key={index} style={styles.ingredientCard}>
-                            {/* Name + delete */}
-                            <View style={styles.ingredientHeaderRow}>
+                <Text style={styles.section}>Ingredients</Text>
+                {rows.map((row) => {
+                    const excluded = qtyValue(row.quantity) === 0
+                    return (
+                        <View key={row.key} style={styles.card}>
+                            <View style={styles.titleRow}>
                                 <TextInput
-                                    style={[styles.ingredientNameInput, focusedField === `iname-${index}` && styles.inputFocused]}
-                                    value={ingredient.name}
-                                    onChangeText={(val) => updateIngredient(index, 'name', val)}
-                                    placeholder="Ingredient name"
+                                    style={styles.ingName}
+                                    value={row.name}
+                                    onChangeText={(v) => setField(row.key, 'name', v)}
+                                    placeholder="Ingredient"
                                     placeholderTextColor={colors.placeholder}
-                                    onFocus={() => setFocusedField(`iname-${index}`)}
-                                    onBlur={() => setFocusedField(null)}
+                                    multiline
                                 />
-                                <TouchableOpacity style={styles.deleteBtn} onPress={() => removeIngredient(index)} activeOpacity={0.5}>
-                                    <Trash2 size={16} color={colors.destructive} strokeWidth={2} />
+                                <TouchableOpacity onPress={() => removeIngredient(row.key)} hitSlop={8} style={styles.trash}>
+                                    <Trash2 size={14} color={colors.destructive} strokeWidth={2} />
                                 </TouchableOpacity>
                             </View>
 
-                            {/* Stacked macros */}
-                            <View style={styles.macrosStack}>
-                                {/* Macros */}
-                                {INGREDIENT_MACROS.map((macro) => (
-                                    <View key={macro} style={styles.macroRow}>
-                                        <View style={styles.labelContainer}>
-                                            <Text style={styles.macroRowLabel}>{macro.charAt(0).toUpperCase() + macro.slice(1)}</Text>
-                                            <Text style={styles.macroRowUnit}>({macro === 'calories' ? 'kcal' : 'g'})</Text>
-                                        </View>
-                                        <TextInput
-                                            style={[styles.macroRowInput, focusedField === `${macro}-${index}` && styles.inputFocused]}
-                                            value={(ingredient[macro] as number).toString()}
-                                            onChangeText={(val) => updateIngredient(index, macro, val)}
-                                            keyboardType="numeric"
-                                            onFocus={() => setFocusedField(`${macro}-${index}`)}
-                                            onBlur={() => setFocusedField(null)}
-                                            placeholderTextColor={colors.placeholder}
-                                        />
-                                    </View>
-                                ))}
-                            </View>
-
-                            {/* Quantity selector */}
-                            <View style={styles.quantitySection}>
-                                <Text style={styles.quantitySectionLabel}>Servings</Text>
-                                <View style={styles.quantityControls}>
-                                    <TouchableOpacity
-                                        style={styles.quantityButton}
-                                        onPress={() => {
-                                            const newQty = Math.max(0.1, ingredient.quantity - 1)
-                                            updateIngredient(index, 'quantity', newQty.toString())
-                                        }}
-                                        activeOpacity={0.5}
-                                    >
-                                        <Text style={styles.quantityButtonText}>−</Text>
+                            <View style={styles.servRow}>
+                                <Text style={styles.servLabel}>Servings</Text>
+                                <View style={styles.stepRow}>
+                                    <TouchableOpacity style={styles.stepBtn} onPress={() => stepQty(row.key, -0.5)} activeOpacity={0.6}>
+                                        <Minus size={13} color={colors.nutrition} strokeWidth={2.5} />
                                     </TouchableOpacity>
-
                                     <TextInput
-                                        style={[styles.quantityInput, focusedField === `qty-${index}` && styles.quantityInputFocused]}
-                                        value={ingredient.quantity.toString()}
-                                        onChangeText={(val) => updateIngredient(index, 'quantity', val)}
-                                        keyboardType="numeric"
-                                        onFocus={() => setFocusedField(`qty-${index}`)}
-                                        onBlur={() => setFocusedField(null)}
+                                        style={[styles.stepInput, excluded && styles.stepInputExcluded]}
+                                        value={row.quantity}
+                                        onChangeText={(v) => setField(row.key, 'quantity', v)}
+                                        keyboardType="decimal-pad"
+                                        placeholder="1"
                                         placeholderTextColor={colors.placeholder}
+                                        selectTextOnFocus
                                     />
-
-                                    <TouchableOpacity
-                                        style={styles.quantityButton}
-                                        onPress={() => {
-                                            const newQty = ingredient.quantity + 1
-                                            updateIngredient(index, 'quantity', newQty.toString())
-                                        }}
-                                        activeOpacity={0.5}
-                                    >
-                                        <Text style={styles.quantityButtonText}>+</Text>
+                                    <TouchableOpacity style={styles.stepBtn} onPress={() => stepQty(row.key, 0.5)} activeOpacity={0.6}>
+                                        <Plus size={13} color={colors.nutrition} strokeWidth={2.5} />
                                     </TouchableOpacity>
                                 </View>
                             </View>
 
-                            {/* Individual ingredient totals */}
-                            <View style={styles.ingredientTotals}>
-                                <Text style={styles.ingredientTotalsTitle}>{ingredient.name || 'Ingredient'} Total</Text>
-                                <View style={styles.ingredientTotalsGrid}>
-                                    <View style={styles.ingredientTotalItem}>
-                                        <Text style={styles.ingredientTotalValue}>{Math.round(ingredient.calories * ingredient.quantity)}</Text>
-                                        <Text style={styles.ingredientTotalLabel}>Calories{'\n'}(kcal)</Text>
-                                    </View>
-                                    <View style={styles.ingredientTotalItem}>
-                                        <Text style={styles.ingredientTotalValue}>{Math.round(ingredient.fats * ingredient.quantity * 10) / 10}</Text>
-                                        <Text style={styles.ingredientTotalLabel}>Fats{'\n'}(g)</Text>
-                                    </View>
-                                    <View style={styles.ingredientTotalItem}>
-                                        <Text style={styles.ingredientTotalValue}>{Math.round(ingredient.carbs * ingredient.quantity * 10) / 10}</Text>
-                                        <Text style={styles.ingredientTotalLabel}>Carbs{'\n'}(g)</Text>
-                                    </View>
-                                    <View style={styles.ingredientTotalItem}>
-                                        <Text style={styles.ingredientTotalValue}>{Math.round(ingredient.protein * ingredient.quantity * 10) / 10}</Text>
-                                        <Text style={styles.ingredientTotalLabel}>Protein{'\n'}(g)</Text>
-                                    </View>
-                                </View>
+                            <View style={styles.strip}>
+                                {MACROS.map((m) => {
+                                    const fkey = `${row.key}-${m.field}`
+                                    return (
+                                        <View key={m.field} style={[styles.cell, focused === fkey && styles.cellFocused]}>
+                                            <Text style={styles.cellCap}>{m.short}</Text>
+                                            <TextInput
+                                                style={styles.cellInput}
+                                                value={row[m.field]}
+                                                onChangeText={(v) => setField(row.key, m.field, v)}
+                                                keyboardType="decimal-pad"
+                                                placeholder="0"
+                                                placeholderTextColor={colors.placeholder}
+                                                selectTextOnFocus
+                                                onFocus={() => setFocused(fkey)}
+                                                onBlur={() => setFocused(null)}
+                                            />
+                                            <Text style={styles.cellUnit}>{m.unit}</Text>
+                                        </View>
+                                    )
+                                })}
                             </View>
-                        </View>
-                    ))}
 
-                    <View style={styles.addIngredientBelowWrap}>
-                        <TouchableOpacity style={styles.addIngredientBtn} onPress={addIngredient} activeOpacity={0.75}>
-                            <View style={styles.addIngredientIconCircle}>
-                                <Plus size={20} color={colors.nutrition} strokeWidth={2.5} />
+                            {excluded && <Text style={styles.excluded}>0 servings — excluded from the meal total</Text>}
+                        </View>
+                    )
+                })}
+
+                <TouchableOpacity style={styles.addRow} onPress={addIngredient} activeOpacity={0.7}>
+                    <Plus size={16} color={colors.nutrition} strokeWidth={2.5} />
+                    <Text style={styles.addText}>Add ingredient</Text>
+                </TouchableOpacity>
+
+                <Text style={styles.totalLabel}>Meal total</Text>
+                <View style={[styles.card, styles.totalCard]}>
+                    <View style={styles.strip}>
+                        {MACROS.map((m) => (
+                            <View key={m.field} style={styles.cell}>
+                                <Text style={styles.cellCap}>{m.short}</Text>
+                                <Text style={styles.cellInput}>{totals[m.field]}</Text>
+                                <Text style={styles.cellUnit}>{m.unit}</Text>
                             </View>
-                            <Text style={styles.addIngredientBtnText}>Add ingredient</Text>
-                        </TouchableOpacity>
-                    </View>
-
-                    {/* Calculated totals */}
-                    <View style={styles.totalsCard}>
-                        <Text style={styles.totalsCardTitle}>Calculated Totals</Text>
-                        <View style={styles.totalsRow}>
-                            {[
-                                { label: 'Calories', value: `${totals.calories}`, unit: 'kcal' },
-                                { label: 'Fats', value: `${totals.fats}`, unit: 'g' },
-                                { label: 'Carbs', value: `${totals.carbs}`, unit: 'g' },
-                                { label: 'Protein', value: `${totals.protein}`, unit: 'g' },
-                            ].map((item, idx, arr) => (
-                                <View key={item.label} style={styles.totalCol}>
-                                    <Text style={styles.totalValue}>{item.value}</Text>
-                                    <Text style={styles.totalUnit}>{item.unit}</Text>
-                                    <Text style={styles.totalLabel}>{item.label}</Text>
-                                    {idx < arr.length - 1 && <View style={styles.totalDivider} />}
-                                </View>
-                            ))}
-                        </View>
+                        ))}
                     </View>
                 </View>
 
-                {/* Save Button */}
-                <TouchableOpacity onPress={handleSave} activeOpacity={0.8} style={styles.saveButtonTouchable}>
-                    <LinearGradient colors={colors.nutritionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.saveButton}>
-                        <Text style={styles.saveButtonText}>Save Changes</Text>
+                <TouchableOpacity onPress={handleSave} activeOpacity={0.85} style={styles.saveWrap}>
+                    <LinearGradient colors={colors.nutritionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.save}>
+                        <Text style={styles.saveText}>Save changes</Text>
                     </LinearGradient>
                 </TouchableOpacity>
             </ScrollView>
@@ -270,466 +230,40 @@ export default function EditPhotoEntry() {
 
 function makeStyles(colors: Colors) {
     return StyleSheet.create({
-        container: {
-            flex: 1,
-            backgroundColor: colors.background,
-            borderTopLeftRadius: 20,
-            borderTopRightRadius: 20,
-            overflow: 'hidden',
-        },
-        handleContainer: {
-            alignItems: 'center',
-            paddingTop: 12,
-            paddingBottom: 8,
-        },
-        handle: {
-            width: 40,
-            height: 5,
-            backgroundColor: colors.border,
-            borderRadius: 3,
-        },
-        scrollView: {
-            flex: 1,
-        },
-        content: {
-            paddingHorizontal: 24,
-            paddingTop: 12,
-            paddingBottom: 32,
-        },
-        iconContainer: {
-            alignItems: 'center',
-            marginBottom: 16,
-            marginTop: 12,
-        },
-        iconCircle: {
-            width: 80,
-            height: 80,
-            borderRadius: 40,
-            backgroundColor: colors.surface,
-            justifyContent: 'center',
-            alignItems: 'center',
-            borderWidth: 2,
-            borderColor: colors.nutrition,
-        },
-        title: {
-            fontSize: 24,
-            color: colors.text,
-            textAlign: 'center',
-            marginBottom: 4,
-            letterSpacing: -0.5,
-            fontFamily: fonts.semibold,
-        },
-        subtitle: {
-            fontSize: 16,
-            color: colors.labelMuted,
-            textAlign: 'center',
-            marginBottom: 20,
-            fontFamily: fonts.regular,
-            letterSpacing: 0.2,
-        },
-        section: {
-            marginBottom: 24,
-        },
-        sectionLabel: {
-            fontSize: 16,
-            color: colors.text,
-            marginBottom: 12,
-            letterSpacing: -0.5,
-            fontFamily: fonts.semibold,
-        },
-        addIngredientBelowWrap: {
-            width: '100%',
-            marginBottom: 16,
-        },
-        input: {
-            backgroundColor: colors.surface,
-            borderRadius: 12,
-            paddingHorizontal: 16,
-            paddingVertical: 14,
-            fontSize: 15,
-            color: colors.text,
-            borderWidth: 2,
-            borderColor: colors.hairline,
-            fontFamily: fonts.regular,
-        },
-        inputFocused: {
-            borderColor: colors.nutrition,
-        },
-        addIngredientBtn: {
-            width: '100%',
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 12,
-            paddingVertical: 16,
-            paddingHorizontal: 18,
-            borderRadius: 12,
-            backgroundColor: colors.nutrition + '14',
-            borderWidth: 1,
-            borderColor: colors.nutrition + '66',
-        },
-        addIngredientIconCircle: {
-            width: 40,
-            height: 40,
-            borderRadius: 20,
-            backgroundColor: colors.nutrition + '22',
-            justifyContent: 'center',
-            alignItems: 'center',
-            borderWidth: 1,
-            borderColor: colors.nutrition + '66',
-        },
-        addIngredientBtnText: {
-            fontSize: 15,
-            color: colors.text,
-            letterSpacing: -0.4,
-            fontFamily: fonts.semibold,
-        },
-        ingredientCard: {
-            backgroundColor: colors.surface,
-            borderRadius: radius.card,
-            padding: 16,
-            marginBottom: 16,
-            borderWidth: StyleSheet.hairlineWidth,
-            borderColor: colors.hairline,
-        },
-        ingredientHeaderRow: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 10,
-            marginBottom: 14,
-        },
-        ingredientNameInput: {
-            flex: 1,
-            backgroundColor: colors.surfaceInset,
-            borderRadius: 8,
-            paddingHorizontal: 12,
-            paddingVertical: 10,
-            fontSize: 16,
-            color: colors.text,
-            borderWidth: 1,
-            borderColor: colors.hairline,
-            letterSpacing: -0.5,
-            fontFamily: fonts.semibold,
-        },
-        deleteBtn: {
-            width: 36,
-            height: 36,
-            borderRadius: 8,
-            backgroundColor: colors.surfaceInset,
-            justifyContent: 'center',
-            alignItems: 'center',
-        },
-        quantitySection: {
-            marginTop: 12,
-            marginBottom: 12,
-            paddingTop: 12,
-            paddingBottom: 12,
-            borderTopWidth: 1,
-            borderTopColor: colors.hairline,
-        },
-        quantitySectionLabel: {
-            fontSize: 11,
-            color: colors.nutrition,
-            textAlign: 'center',
-            marginBottom: 8,
-            letterSpacing: -0.5,
-            textTransform: 'uppercase',
-            fontFamily: fonts.semibold,
-        },
-        quantityControls: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 10,
-        },
-        quantityButton: {
-            width: 36,
-            height: 36,
-            borderRadius: 18,
-            backgroundColor: colors.surfaceInset,
-            justifyContent: 'center',
-            alignItems: 'center',
-            borderWidth: 1.5,
-            borderColor: colors.nutrition,
-        },
-        quantityButtonText: {
-            fontSize: 20,
-            color: colors.nutrition,
-            letterSpacing: -0.5,
-            fontFamily: fonts.semibold,
-        },
-        quantityInput: {
-            width: 70,
-            backgroundColor: colors.surfaceInset,
-            borderRadius: 8,
-            paddingHorizontal: 16,
-            paddingVertical: 10,
-            fontSize: 18,
-            color: colors.text,
-            borderWidth: 1.5,
-            borderColor: colors.nutrition,
-            textAlign: 'center',
-            letterSpacing: -0.5,
-            fontFamily: fonts.semibold,
-        },
-        quantityInputFocused: {
-            borderColor: colors.nutrition,
-            backgroundColor: colors.surfaceInset,
-        },
-        macrosStack: {
-            gap: 8,
-        },
-        macroRow: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 10,
-        },
-        labelContainer: {
-            flexDirection: 'column',
-        },
-        macroRowLabel: {
-            fontSize: 16,
-            color: colors.labelMuted,
-            width: 70,
-            letterSpacing: -0.5,
-            fontFamily: fonts.semibold,
-        },
-        macroRowInput: {
-            flex: 1,
-            backgroundColor: colors.surfaceInset,
-            borderRadius: 10,
-            paddingHorizontal: 14,
-            paddingVertical: 12,
-            fontSize: 15,
-            color: colors.text,
-            borderWidth: 2,
-            borderColor: colors.hairline,
-            fontFamily: fonts.regular,
-        },
-        macroRowUnit: {
-            fontSize: 14,
-            color: colors.labelMuted,
-            width: 70,
-            letterSpacing: -0.5,
-            fontFamily: fonts.semibold,
-        },
-        ingredientTotals: {
-            marginTop: 14,
-            paddingTop: 14,
-            paddingHorizontal: 10,
-            paddingBottom: 8,
-            borderTopWidth: 1,
-            borderTopColor: colors.hairline,
-            borderWidth: StyleSheet.hairlineWidth,
-            borderColor: colors.hairline,
-            backgroundColor: colors.nutrition + '14',
-            borderRadius: 8,
-        },
-        ingredientTotalsTitle: {
-            fontSize: 12,
-            color: colors.nutrition,
-            marginBottom: 10,
-            letterSpacing: -0.5,
-            fontFamily: fonts.semibold,
-        },
-        ingredientTotalsGrid: {
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            gap: 6,
-        },
-        ingredientTotalItem: {
-            flex: 1,
-            alignItems: 'center',
-            paddingVertical: 6,
-        },
-        ingredientTotalValue: {
-            fontSize: 20,
-            color: colors.text,
-            marginBottom: 2,
-            letterSpacing: -0.5,
-            fontFamily: fonts.semibold,
-        },
-        ingredientTotalLabel: {
-            fontSize: 12,
-            color: colors.textMuted,
-            textAlign: 'center',
-            fontFamily: fonts.regular,
-        },
-        compactMacrosRow: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 8,
-        },
-        compactMacroCell: {
-            flex: 1,
-            alignItems: 'center',
-        },
-        compactMacroLabel: {
-            fontSize: 11,
-            color: colors.textMuted,
-            marginBottom: 6,
-            letterSpacing: -0.5,
-            fontFamily: fonts.semibold,
-        },
-        compactMacroInput: {
-            width: '100%',
-            backgroundColor: colors.surfaceInset,
-            borderRadius: 6,
-            paddingHorizontal: 6,
-            paddingVertical: 8,
-            fontSize: 15,
-            color: colors.text,
-            borderWidth: 1,
-            borderColor: colors.hairline,
-            textAlign: 'center',
-            letterSpacing: -0.5,
-            fontFamily: fonts.semibold,
-        },
-        qtyRow: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 10,
-            marginBottom: 14,
-            paddingBottom: 14,
-            borderBottomWidth: 1,
-            borderBottomColor: colors.hairline,
-        },
-        ingredientFieldLabel: {
-            fontSize: 13,
-            color: colors.textMuted,
-            width: 70,
-            letterSpacing: -0.5,
-            fontFamily: fonts.semibold,
-        },
-        qtyInput: {
-            flex: 1,
-            backgroundColor: colors.surfaceInset,
-            borderRadius: 8,
-            paddingHorizontal: 12,
-            paddingVertical: 10,
-            fontSize: 16,
-            color: colors.text,
-            borderWidth: 1,
-            borderColor: colors.hairline,
-            textAlign: 'center',
-            fontFamily: fonts.regular,
-        },
-        unitLabel: {
-            fontSize: 13,
-            color: colors.placeholder,
-            width: 70,
-            fontFamily: fonts.regular,
-        },
-        macroGrid: {
-            flexDirection: 'row',
-            flexWrap: 'wrap',
-            gap: 10,
-        },
-        macroGridCell: {
-            width: '48%',
-            backgroundColor: colors.surfaceInset,
-            borderRadius: 8,
-            padding: 12,
-            borderWidth: 1,
-            borderColor: colors.hairline,
-        },
-        macroGridLabel: {
-            fontSize: 12,
-            color: colors.textMuted,
-            marginBottom: 6,
-            letterSpacing: -0.5,
-            fontFamily: fonts.semibold,
-        },
-        macroGridInput: {
-            fontSize: 18,
-            color: colors.text,
-            paddingVertical: 4,
-            borderBottomWidth: 1,
-            borderBottomColor: colors.hairline,
-            marginBottom: 4,
-            letterSpacing: -0.5,
-            fontFamily: fonts.semibold,
-        },
-        macroGridUnit: {
-            fontSize: 11,
-            color: colors.placeholder,
-            fontFamily: fonts.regular,
-        },
-        totalsCard: {
-            backgroundColor: colors.surface,
-            borderRadius: radius.card,
-            padding: 18,
-            marginTop: 6,
-            borderWidth: StyleSheet.hairlineWidth,
-            borderColor: colors.nutrition,
-        },
-        totalsCardTitle: {
-            fontSize: 12,
-            color: colors.nutrition,
-            letterSpacing: -0.5,
-            textTransform: 'uppercase',
-            marginBottom: 14,
-            textAlign: 'center',
-            fontFamily: fonts.semibold,
-        },
-        totalsRow: {
-            flexDirection: 'row',
-            justifyContent: 'space-around',
-        },
-        totalCol: {
-            alignItems: 'center',
-            flex: 1,
-            position: 'relative',
-        },
-        totalValue: {
-            fontSize: 20,
-            color: colors.text,
-            letterSpacing: -0.5,
-            fontFamily: fonts.semibold,
-        },
-        totalUnit: {
-            fontSize: 11,
-            color: colors.nutrition,
-            marginTop: 2,
-            letterSpacing: -0.5,
-            fontFamily: fonts.semibold,
-        },
-        totalLabel: {
-            fontSize: 11,
-            color: colors.textMuted,
-            marginTop: 3,
-            letterSpacing: 0.2,
-            fontFamily: fonts.regular,
-        },
-        totalDivider: {
-            position: 'absolute',
-            right: 0,
-            top: '10%',
-            height: '80%',
-            width: 1,
-            backgroundColor: colors.hairline,
-        },
-        saveButtonTouchable: {
-            borderRadius: 12,
-            overflow: 'hidden',
-            shadowColor: colors.nutrition,
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.4,
-            shadowRadius: 8,
-            elevation: 8,
-            marginTop: 8,
-        },
-        saveButton: {
-            borderRadius: 12,
-            paddingVertical: 17,
-            alignItems: 'center',
-            justifyContent: 'center',
-        },
-        saveButtonText: {
-            fontSize: 17,
-            color: '#FFF',
-            letterSpacing: -0.5,
-            fontFamily: fonts.semibold,
-        },
+        container: { flex: 1, backgroundColor: colors.background, borderTopLeftRadius: 20, borderTopRightRadius: 20, overflow: 'hidden' },
+        handleContainer: { alignItems: 'center', paddingTop: 12, paddingBottom: 8 },
+        handle: { width: 40, height: 5, backgroundColor: colors.border, borderRadius: 3 },
+        scroll: { flex: 1 },
+        content: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 40 },
+        title: { fontSize: 26, color: colors.text, letterSpacing: -0.5, marginTop: 8, fontFamily: fonts.semibold },
+        subtitle: { fontSize: 14, color: colors.labelMuted, marginTop: 4, marginBottom: 22, fontFamily: fonts.regular },
+        fieldLabel: { fontSize: 12, color: colors.labelMuted, marginBottom: 6, marginLeft: 2, textTransform: 'uppercase', letterSpacing: 0.4, fontFamily: fonts.semibold },
+        nameInput: { backgroundColor: colors.surface, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 13, fontSize: 15, color: colors.text, borderWidth: 2, borderColor: colors.hairline, fontFamily: fonts.regular, marginBottom: 22 },
+        nameInputFocused: { borderColor: colors.nutrition },
+        section: { fontSize: 12, color: colors.labelMuted, marginBottom: 10, marginLeft: 2, textTransform: 'uppercase', letterSpacing: 0.4, fontFamily: fonts.semibold },
+        card: { backgroundColor: colors.surface, borderRadius: radius.card, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.hairline, padding: 12, marginBottom: 10 },
+        titleRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 },
+        ingName: { flex: 1, fontSize: 16, color: colors.text, fontFamily: fonts.semibold, letterSpacing: -0.3, paddingVertical: 2 },
+        trash: { width: 28, height: 28, borderRadius: 8, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.surfaceInset },
+        servRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 },
+        servLabel: { fontSize: 11, color: colors.nutrition, textTransform: 'uppercase', letterSpacing: 0.5, fontFamily: fonts.semibold },
+        stepRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+        stepBtn: { width: 28, height: 28, borderRadius: 14, backgroundColor: colors.surfaceInset, justifyContent: 'center', alignItems: 'center', borderWidth: 1.5, borderColor: colors.nutrition + '66' },
+        stepInput: { minWidth: 40, backgroundColor: colors.surfaceInset, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5, fontSize: 14, color: colors.text, borderWidth: 1.5, borderColor: colors.nutrition + '66', textAlign: 'center', fontFamily: fonts.semibold },
+        stepInputExcluded: { borderColor: colors.destructive + '80', color: colors.destructive },
+        strip: { flexDirection: 'row', gap: 6, backgroundColor: colors.surfaceInset, borderRadius: 12, padding: 6 },
+        cell: { flex: 1, alignItems: 'center', backgroundColor: colors.surface, borderRadius: 9, borderWidth: 1, borderColor: colors.hairline, paddingVertical: 9 },
+        cellFocused: { borderColor: colors.nutrition },
+        cellCap: { fontSize: 10, color: colors.labelMuted, marginBottom: 2, fontFamily: fonts.semibold },
+        cellInput: { alignSelf: 'stretch', fontSize: 17, color: colors.text, fontFamily: fonts.bold, textAlign: 'center', paddingVertical: 1 },
+        cellUnit: { fontSize: 9, color: colors.textMuted, marginTop: 2, fontFamily: fonts.medium },
+        excluded: { fontSize: 12, color: colors.destructive, marginTop: 8, fontFamily: fonts.regular },
+        addRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14, marginTop: 4, borderRadius: 12, backgroundColor: colors.nutrition + '14', borderWidth: 1, borderColor: colors.nutrition + '55' },
+        addText: { fontSize: 15, color: colors.text, fontFamily: fonts.semibold, letterSpacing: -0.3 },
+        totalLabel: { fontSize: 11, color: colors.nutrition, textTransform: 'uppercase', letterSpacing: 0.5, marginTop: 18, marginBottom: 8, marginLeft: 2, fontFamily: fonts.semibold },
+        totalCard: { borderColor: colors.nutrition },
+        saveWrap: { borderRadius: 12, overflow: 'hidden', marginTop: 20, shadowColor: colors.nutrition, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.35, shadowRadius: 8, elevation: 6 },
+        save: { paddingVertical: 16, alignItems: 'center', justifyContent: 'center' },
+        saveText: { fontSize: 16, color: '#FFF', letterSpacing: -0.4, fontFamily: fonts.semibold },
     })
 }

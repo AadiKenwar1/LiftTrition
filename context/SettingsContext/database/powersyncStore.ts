@@ -1,5 +1,6 @@
 import type { SettingsRecord, WeightProgressRecord } from '@/lib/powersync/AppSchema'
 import { powerSync } from '@/lib/powersync/system'
+import { throwIfLoadFailureArmed } from '@/lib/devtools/forceLoadFailure'
 import { getDateKey, parseDateKey } from '@/lib/utils/dateHelper'
 import { Settings } from '../types'
 
@@ -33,6 +34,8 @@ export function settingsToRow(s: Settings, userId: string) {
 
 // Load settings and body weight progress from PowerSync
 export async function loadSettingsAndBw(userId: string): Promise<{ settings: Settings; bwProgress: Record<string, number>; hasData: boolean }> {
+    if (__DEV__) await throwIfLoadFailureArmed('settings')
+
     // Load settings
     const settingsRows = (await powerSync.getAll('SELECT * FROM settings WHERE user_id = ?', [userId])) as SettingsRecord[]
 

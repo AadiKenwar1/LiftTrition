@@ -1,6 +1,8 @@
 import { useAuth } from '@/context/AuthContext'
+import { useAsyncLoad } from '@/lib/hooks/useAsyncLoad'
+import { throwIfLoadFailureArmed } from '@/lib/devtools/forceLoadFailure'
 import { powerSync } from '@/lib/powersync/system'
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { AppLoadingScreen } from './AppLoadingScreen'
 
 type Props = {
@@ -9,33 +11,23 @@ type Props = {
 
 export function PowerSyncGuard({ children }: Props) {
     const { session, loading: authLoading } = useAuth()
-    const [powerSyncReady, setPowerSyncReady] = useState(false)
 
-    useEffect(() => {
-        if (authLoading) return
-
-        // If no session, no need to wait for PowerSync sync
-        if (!session) {
-            setPowerSyncReady(true)
-            return
-        }
-
-        // Wait for PowerSync to finish initial sync (per PowerSync docs)
-        const waitForSync = async () => {
-            try {
-                await powerSync.waitForFirstSync()
-                setPowerSyncReady(true)
-            } catch (error) {
-                console.warn('[PowerSyncGuard] waitForFirstSync failed, continuing anyway', error)
-                setPowerSyncReady(true)
-            }
-        }
-
-        waitForSync()
+    // Wait for PowerSync's first sync before rendering the app. A failure now
+    // surfaces the retry affordance instead of silently continuing.
+    const { status, retry } = useAsyncLoad(async () => {
+        if (!session) return
+        if (__DEV__) await throwIfLoadFailureArmed('powersync')
+        await powerSync.waitForFirstSync()
     }, [session, authLoading])
 
-    if (!powerSyncReady) {
-        return <AppLoadingScreen message="Syncing data..." />
+    if (authLoading || status !== 'ready') {
+        return (
+            <AppLoadingScreen
+                message="Syncing data..."
+                loadFailed={!authLoading && status === 'error'}
+                onRetry={retry}
+            />
+        )
     }
 
     return <>{children}</>

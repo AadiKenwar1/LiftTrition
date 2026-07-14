@@ -16,7 +16,7 @@ import { Asset } from 'expo-asset'
 import { useFonts } from 'expo-font'
 import { Stack } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
-import React, { type PropsWithChildren, useEffect, useState } from 'react'
+import React, { type PropsWithChildren, useCallback, useEffect, useState } from 'react'
 import { StyleSheet, View } from 'react-native'
 import 'react-native-gesture-handler'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
@@ -110,17 +110,24 @@ export default Sentry.wrap(function RootLayout() {
 
 function StackLayout() {
     const { session } = useAuth()
-    const { settings, loaded: settingsLoaded } = useSettings()
-    const { loaded: nutritionLoaded } = useNutrition()
-    const { loaded: workoutLoaded } = useWorkout()
+    const { settings, loaded: settingsLoaded, loadFailed: settingsFailed, retryLoad: retrySettings } = useSettings()
+    const { loaded: nutritionLoaded, loadFailed: nutritionFailed, retryLoad: retryNutrition } = useNutrition()
+    const { loaded: workoutLoaded, loadFailed: workoutFailed, retryLoad: retryWorkout } = useWorkout()
     const { loaded: billingLoaded } = useBilling()
     const colors = useColors()
     const allContextsLoaded = settingsLoaded && nutritionLoaded && workoutLoaded && billingLoaded
+    const anyLoadFailed = settingsFailed || nutritionFailed || workoutFailed
+
+    const retryAll = useCallback(() => {
+        if (settingsFailed) retrySettings()
+        if (nutritionFailed) retryNutrition()
+        if (workoutFailed) retryWorkout()
+    }, [settingsFailed, nutritionFailed, workoutFailed, retrySettings, retryNutrition, retryWorkout])
 
     if (!allContextsLoaded) {
         return (
             <AppColumn>
-                <AppLoadingScreen />
+                <AppLoadingScreen loadFailed={anyLoadFailed} onRetry={retryAll} />
             </AppColumn>
         )
     }
@@ -195,6 +202,8 @@ function StackLayout() {
                     <Stack.Screen name="devTest/activityBanner" options={{ headerShown: true, title: 'Activity Banner', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/colorHue" options={{ headerShown: true, title: 'Color Hue Review', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/numberParsing" options={{ headerShown: true, title: 'Number Parsing', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="devTest/editPhotoLab" options={{ headerShown: true, title: 'Edit Photo — Variants', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="devTest/editPhotoVariant" options={{ ...modalPresentation, headerShown: false }} />
                     <Stack.Screen name="devTest/suggestSet" options={{ headerShown: true, title: 'Suggest Set', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/addNutrition" options={{ headerShown: true, title: 'Add Nutrition', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/addNutritionVariant" options={{ ...modalPresentation, headerShown: false }} />

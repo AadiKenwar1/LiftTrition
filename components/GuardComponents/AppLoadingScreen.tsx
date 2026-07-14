@@ -1,17 +1,19 @@
 import { fonts, useColors, useLogo, type Colors } from '@/context/ThemeContext'
 import { Image } from 'expo-image'
 import { useEffect, useMemo, useRef } from 'react'
-import { Animated, Easing, StyleSheet, View } from 'react-native'
+import { Animated, Easing, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 type Props = {
     message?: string
+    loadFailed?: boolean
+    onRetry?: () => void
 }
 
 const MARK_AREA = 148
 const OUTER_ORBIT = 144
 const INNER_ORBIT = 116
 
-export function AppLoadingScreen({ message = 'Loading your profile...' }: Props) {
+export function AppLoadingScreen({ message = 'Loading your profile...', loadFailed = false, onRetry }: Props) {
     const colors = useColors()
     const logo = useLogo()
     const styles = useMemo(() => makeStyles(colors), [colors])
@@ -68,7 +70,7 @@ export function AppLoadingScreen({ message = 'Loading your profile...' }: Props)
     const breatheScale = breathe.interpolate({ inputRange: [0, 1], outputRange: [1, 1.12] })
     const messageRise = messageIn.interpolate({ inputRange: [0, 1], outputRange: [6, 0] })
     // The motion already signals "in progress" — the caption doesn't need an ellipsis.
-    const display = message.replace(/[.…]+$/, '')
+    const display = loadFailed ? 'Having trouble loading your data' : message.replace(/[.…]+$/, '')
 
     return (
         <View style={styles.container}>
@@ -88,6 +90,13 @@ export function AppLoadingScreen({ message = 'Loading your profile...' }: Props)
             <Animated.Text style={[styles.message, { opacity: messageIn, transform: [{ translateY: messageRise }] }]}>
                 {display}
             </Animated.Text>
+            {loadFailed && onRetry && (
+                <Animated.View style={{ opacity: messageIn, transform: [{ translateY: messageRise }] }}>
+                    <TouchableOpacity onPress={onRetry} activeOpacity={0.7} hitSlop={10}>
+                        <Text style={[styles.message, styles.retryLink]}>Tap to retry</Text>
+                    </TouchableOpacity>
+                </Animated.View>
+            )}
         </View>
     )
 }
@@ -151,6 +160,10 @@ function makeStyles(colors: Colors) {
             fontFamily: fonts.semibold,
             letterSpacing: 1.6,
             textTransform: 'uppercase',
+        },
+        retryLink: {
+            color: colors.workout,
+            marginTop: 12,
         },
     })
 }

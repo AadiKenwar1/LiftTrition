@@ -1,6 +1,8 @@
 import type { ScanMode } from '@/lib/openAI/mealImage'
 import type { WeekDayPoint } from '@/lib/utils/dateHelper'
 
+// Macros are per ONE unit; quantity is the multiplier. A total is always
+// macro × quantity. Ingredient math lives in functions/ingredients.ts.
 export interface Ingredient {
     name: string
     brand?: string | null
@@ -38,6 +40,8 @@ export interface NutritionContextInterface {
     savedNutritionEntries: NutritionEntry[]
     selectedDate: Date
     loaded: boolean
+    loadFailed: boolean
+    retryLoad: () => void
     setSelectedDate: (date: Date) => void
     handleAddNutrition: (nutritionEntry: NutritionEntry) => Promise<void>
     handleDeleteNutrition: (id: string) => Promise<void>

@@ -65,6 +65,8 @@ export interface WorkoutContextInterface {
     fullExerciseLibAsList: ScrollableListItem[]
     userExercises: ExerciseLib
     loaded: boolean
+    loadFailed: boolean
+    retryLoad: () => void
     setUserExercises: (exercises: ExerciseLib) => void
     lastExercise: string
     setLastExercise: (exercise: string) => void

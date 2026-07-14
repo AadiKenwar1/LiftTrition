@@ -4,6 +4,7 @@ import { ChevronRight } from 'lucide-react-native'
 import { useMemo } from 'react'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { PAGES as ONBOARDING_PAGES } from './onboarding/registry'
+import { ForceLoadFailureControls } from './ForceLoadFailureControls'
 
 /**
  * Dev-only hub: a menu of buttons that open isolated test pages for charts / popups / components.
@@ -32,6 +33,7 @@ const GROUPS: { title: string; items: { label: string; route: string }[] }[] = [
             { label: 'Suggest Set', route: '/devTest/suggestSet' },
             { label: 'Calendar', route: '/devTest/calendar' },
             { label: 'Add Nutrition Modal', route: '/devTest/addNutrition' },
+            { label: 'Edit Photo — Variants', route: '/devTest/editPhotoLab' },
             { label: 'Color Hue Review', route: '/devTest/colorHue' },
             { label: 'Number Parsing (F1)', route: '/devTest/numberParsing' },
         ],
@@ -79,6 +81,8 @@ export default function DevHub() {
                     ))}
                 </View>
             ))}
+
+            <ForceLoadFailureControls />
         </ScrollView>
     )
 }
