@@ -63,7 +63,7 @@ export default function ExerciseScreen() {
         handleUpdateExerciseOrder(workoutId, reordered)
     }
 
-    const renderHeader = () => (
+    const listHeader = (
         <>
             <View style={styles.hintRow}>
                 <Text style={styles.sectionSubtitle}>{'Tap to log '}</Text>
@@ -105,7 +105,7 @@ export default function ExerciseScreen() {
                     <Text style={styles.emptyTitle}>No Exercises Yet</Text>
                     <Text style={styles.emptySubtitle}>Tap the ⋮ button to add your first exercise and start logging your sets</Text>
                 </View>
-            :   <DraggableList data={activeExercises} renderItem={renderItem} keyExtractor={(item) => item.id} onDragEnd={handleDragEnd} ListHeaderComponent={renderHeader} contentContainerStyle={{ paddingTop: 8 }} />}
+            :   <DraggableList data={activeExercises} renderItem={renderItem} keyExtractor={(item) => item.id} onDragEnd={handleDragEnd} ListHeaderComponent={listHeader} contentContainerStyle={{ paddingTop: 8 }} />}
             <Fab>
                 {[
                     <TouchableOpacity activeOpacity={0.75} key="add-exercise" style={[styles.workoutFabButtons]} onPress={() => router.push({ pathname: '/workoutScreens/addExerciseModal', params: { workoutId: workoutId } })}>

@@ -112,9 +112,9 @@ function makeStyles(colors: Colors, isDark: boolean) {
             borderColor: colors.workout,
         },
         imageCircle: {
-            width: 48,
-            height: 48,
-            borderRadius: 24,
+            width: 50,
+            height: 50,
+            borderRadius: 25,
             backgroundColor: colors.surfaceInset,
             justifyContent: 'center',
             alignItems: 'center',

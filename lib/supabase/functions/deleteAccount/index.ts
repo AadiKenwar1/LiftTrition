@@ -23,16 +23,8 @@ serve(async (req: Request) => {
     const userId = user.id
 
     try {
-        // Delete in order respecting foreign keys.
-        // Cascades: workouts → exercises → logs; nutrition_entries → nutrition_entry_ingredients; saved_nutrition_entries → saved_nutrition_entry_ingredients
-
-        await supabase.from('nutrition_entries').delete().eq('user_id', userId)
-        await supabase.from('saved_nutrition_entries').delete().eq('user_id', userId)
-        await supabase.from('workouts').delete().eq('user_id', userId)
-        await supabase.from('user_exercises').delete().eq('user_id', userId)
-        await supabase.from('weight_progress').delete().eq('user_id', userId)
-        await supabase.from('settings').delete().eq('user_id', userId)
-
+        // All user-owned rows cascade from auth.users (migrations/user_cascade.sql),
+        // so this one call deletes everything atomically.
         const { error: deleteError } = await supabase.auth.admin.deleteUser(userId)
         if (deleteError) {
             return new Response(JSON.stringify({ error: deleteError.message }), { status: 500, headers: { 'Content-Type': 'application/json' } })

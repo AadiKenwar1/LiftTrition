@@ -38,6 +38,16 @@ APP STORE POLISH
 - Add expo-camera plugin to app.json with a purpose-specific permission
   string (current default wording is generic). Low priority.
 
+BUGS
+----
+- Saved meals list isn't newest-first after a sync round trip. The UI sort and
+  SQL ORDER BY are correct; the suspect is created_at coming back from
+  Postgres in a format Hermes' new Date() can't parse (space instead of T),
+  so getTime() is NaN and the sort silently no-ops. Confirm by logging
+  row.created_at after a fresh sync; fix = tolerant date parser at the
+  row-conversion boundary (rowToSavedNutritionEntry and siblings in
+  NutritionContext/database/powersyncStore.ts).
+
 DATA INTEGRITY
 --------------
 - getPendingUploadEstimate: return null on unknown SDK shapes instead of 0,
@@ -51,8 +61,13 @@ DATA INTEGRITY
 
 PERFORMANCE
 -----------
-- Memoize provider values for Auth/Settings/Workout/Nutrition and useCallback
-  the Nutrition/Settings handlers.
+- Memoize provider values for Auth/Settings/Workout and useCallback the
+  Settings handlers. (Nutrition done 2026-07-12 - see docs/RENDER_FIXES.txt.)
+- Speed up "Generate macros" (stacked serial costs, only one is the AI):
+  give the fetchOpenAI text path its own small/fast model instead of
+  inheriting OPENAI_VISION_MODEL (biggest win); replace the in-function
+  auth.getUser network hop with local JWT verification; cache identical
+  queries. Cold start + region RTT is the irreducible remainder.
 - React.memo list rows (Log, Entry, ScrollableList) and memoize the exercise
   picker's filter/renderItem - it re-sorts all 1,318 items per keystroke.
 

@@ -5,20 +5,19 @@ import { AuthProvider, useAuth } from '@/context/AuthContext'
 import { BillingProvider, useBilling } from '@/context/BillingContext'
 import { NutritionProvider, useNutrition } from '@/context/NutritionContext'
 import { SettingsProvider, useSettings } from '@/context/SettingsContext'
-import { brandAssets, ThemeProvider, useColorScheme, useColors } from '@/context/ThemeContext'
+import { brandAssets, ThemeProvider, useColors, useColorScheme } from '@/context/ThemeContext'
 import { useWorkout, WorkoutProvider } from '@/context/WorkoutContext'
 import { Archivo_400Regular, Archivo_500Medium, Archivo_600SemiBold, Archivo_700Bold, Archivo_800ExtraBold } from '@expo-google-fonts/archivo'
 import { Poppins_100Thin, Poppins_100Thin_Italic, Poppins_200ExtraLight, Poppins_200ExtraLight_Italic, Poppins_300Light, Poppins_300Light_Italic, Poppins_400Regular, Poppins_400Regular_Italic, Poppins_500Medium, Poppins_500Medium_Italic, Poppins_600SemiBold, Poppins_600SemiBold_Italic, Poppins_700Bold, Poppins_700Bold_Italic, Poppins_800ExtraBold, Poppins_800ExtraBold_Italic, Poppins_900Black, Poppins_900Black_Italic } from '@expo-google-fonts/poppins'
-import { Ionicons } from '@expo/vector-icons'
 import FontAwesome from '@expo/vector-icons/FontAwesome'
 import { DarkTheme, DefaultTheme, ThemeProvider as NavigationThemeProvider } from '@react-navigation/native'
 import * as Sentry from '@sentry/react-native'
 import { Asset } from 'expo-asset'
 import { useFonts } from 'expo-font'
-import { Stack, useRouter } from 'expo-router'
+import { Stack } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
 import React, { type PropsWithChildren, useEffect, useState } from 'react'
-import { Pressable, StyleSheet, View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import 'react-native-gesture-handler'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { KeyboardProvider } from 'react-native-keyboard-controller'
@@ -26,7 +25,10 @@ import 'react-native-reanimated'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 /** Largest common iPhone portrait width (~Pro Max); on iPad this centers a phone-width column with side gutters. */
-const PHONE_MAX_WIDTH = 400
+const PHONE_MAX_WIDTH = 1000
+
+/** Flip to false to disable the phone-width clamp — the app then fills the full window width. */
+const CLAMP_PHONE_WIDTH = true
 
 /** Modal routes keep swipe-to-dismiss; all other stack screens use header back only. */
 const modalPresentation = {
@@ -106,16 +108,6 @@ export default Sentry.wrap(function RootLayout() {
     return <RootLayoutNav />
 })
 
-function HeaderBackButton() {
-    const router = useRouter()
-    const colors = useColors()
-    return (
-        <Pressable onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-        </Pressable>
-    )
-}
-
 function StackLayout() {
     const { session } = useAuth()
     const { settings, loaded: settingsLoaded } = useSettings()
@@ -137,7 +129,10 @@ function StackLayout() {
             <Stack
                 screenOptions={{
                     gestureEnabled: false,
-                    headerLeft: ({ canGoBack }) => (canGoBack ? <HeaderBackButton /> : null),
+                    // Native back button (no custom headerLeft): iOS 26 wraps custom JS views in a
+                    // mis-centered Liquid Glass capsule; the OS-rendered chevron is always correct.
+                    // 'minimal' keeps it icon-only, matching the old custom arrow.
+                    headerBackButtonDisplayMode: 'minimal',
                     headerShadowVisible: false,
                     headerStyle: { backgroundColor: colors.background },
                     headerTintColor: colors.text,
@@ -198,6 +193,7 @@ function StackLayout() {
                     <Stack.Screen name="devTest/barChart" options={{ headerShown: true, title: 'Bar Chart', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/aiTest" options={{ headerShown: true, title: 'AI Test', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/activityBanner" options={{ headerShown: true, title: 'Activity Banner', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="devTest/colorHue" options={{ headerShown: true, title: 'Color Hue Review', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/suggestSet" options={{ headerShown: true, title: 'Suggest Set', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/addNutrition" options={{ headerShown: true, title: 'Add Nutrition', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/addNutritionVariant" options={{ ...modalPresentation, headerShown: false }} />
@@ -256,7 +252,7 @@ const styles = StyleSheet.create({
     phoneChromeInner: {
         flex: 1,
         width: '100%',
-        maxWidth: PHONE_MAX_WIDTH,
+        maxWidth: CLAMP_PHONE_WIDTH ? PHONE_MAX_WIDTH : undefined,
         alignSelf: 'center',
         backgroundColor: '#121212',
     },

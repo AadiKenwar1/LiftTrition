@@ -1,7 +1,7 @@
 -- Support requests table
 CREATE TABLE support_requests (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES auth.users(id),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   subject_type TEXT NOT NULL DEFAULT 'support' CHECK (subject_type IN ('support', 'feature_request')),
   subject TEXT NOT NULL,
   message TEXT NOT NULL,

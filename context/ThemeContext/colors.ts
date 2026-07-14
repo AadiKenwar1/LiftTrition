@@ -34,19 +34,21 @@ export const palettes = {
         chevron: '#B8B9C1',
         iconChipBg: 'rgba(47,128,237,0.10)',
         // Brand (nutritionInk = green for numerals; matches the unified accent below)
-        nutritionInk: '#168516',
+        nutritionInk: '#158440',
         // AA-contrast blue for small accent text/links on light surfaces (deepened from the fill accent)
         workoutInk: '#1A57B0',
         // Amber for "off-target" stat tone (AA-contrast on light surface)
         warning: '#9C5D00',
         // Accents — unified with the gradient fills below (deep enough to carry white at AA); identical in light + dark
         workout: '#2570D8',
-        nutrition: '#168516',
+        // Hue-matched to the dark accent's 143° (was 120° pure green) so light/dark read as one
+        // green at two intensities, same as workout — same ~4.77:1 white-text contrast as before.
+        nutrition: '#158440',
         // Measurement gold (light) — deep gold so the icon reads on the white surface and white Save text holds; pairs with the bright dark-mode gold below.
         measurement: '#A16207',
         // Gradient fills for CTAs/Fab/ModeSwitcher; top stop == accent so buttons match icons/borders.
         workoutGradient: ['#2570D8', '#2064C8'] as const,
-        nutritionGradient: ['#168516', '#0F7A0F'] as const,
+        nutritionGradient: ['#158440', '#0F7B38'] as const,
         // Deep-gold CTA fill (light) — white Save text reads on this deep gold.
         measurementGradient: ['#A16207', '#854D0E'] as const,
         // Destructive — deepened on light so red text/icons clear AA on light surfaces

@@ -1,0 +1,908 @@
+PLATES AUDIT — MAJOR ISSUES
+From the 2026-07-12 multi-agent audit. Confirmed-in-code issues only
+(technical detail + line numbers in AUDIT_REPORT.md). Delete entries as
+they get fixed.
+
+Each issue now carries a PLAN block: an implementation plan written
+from scratch against the current code, aimed at root causes rather
+than symptoms. The original one-line "Fix:" hints are kept for the
+record; where they differ, the PLAN supersedes them. Several plans
+build on the shared foundations below (referenced as F1-F6) — build
+each foundation once and every issue in its cluster becomes a small,
+readable change instead of a per-screen patch.
+
+
+SHARED FOUNDATIONS (F1-F6)
+--------------------------
+These are the six primitives the plans share. Each one retires a
+CLASS of bugs, not one instance, and gives future code exactly one
+place to do the thing correctly.
+
+F1. One numeric grammar — lib/utils/number.ts (new)
+    parseNumericInput(text): number | null
+      trim → convert decimal comma to dot → Number() → return the
+      value only if Number.isFinite, else null. This is the ONLY way
+      user-typed text becomes a number anywhere in the app.
+    sanitizeInt(n) / sanitizeMacro(n)
+      boundary coercers for row converters: non-finite → 0, integer
+      columns rounded whole, calories/macros/quantity to 1 decimal
+      (calories columns move to REAL — see issue 3 step 3).
+    Retires: NaN persistence, decimal-comma lockout, parseInt
+    truncation, fractional values in INTEGER columns (issues 3, 10,
+    11, 12).
+
+F2. Single-flight submit guard — lib/hooks/useSubmitOnce.ts (new)
+    const [guard, submitting] = useSubmitOnce()
+    guard(fn) returns a handler that ignores re-entry via a
+    synchronous ref (state alone is too slow for a double-tap) and
+    exposes `submitting` for disabled styling. Handlers that end by
+    navigating away never reset; retryable ones reset in finally.
+    Retires: the double-submit class (issues 13, 14, 20).
+
+F3. Connector: declarative upserts + a dead-letter backstop
+    (lib/powersync/Connector.ts)
+    a) UNIQUE_KEYS registry: { settings: [user_id], weight_progress:
+       [user_id, date], user_exercises: [user_id, name] }. One
+       generic createRecord path: look up the table's keys, select
+       the existing row by them, update (dropping the local id) or
+       insert. Replaces the two copy-pasted branches; a future
+       constrained table is a one-line registration (this makes
+       CLAUDE.md gotcha 3 structural instead of tribal).
+    b) Non-retryable upload errors: in uploadData, classify Postgres
+       errors — data/integrity violations (SQLSTATE 22*/23*) can
+       never succeed on retry, so report to Sentry, skip that op, and
+       complete the transaction instead of rethrowing forever. This
+       is the safety net that keeps ANY future bad row from wedging
+       the queue, and it un-jams already-wedged installs on update.
+    Retires: permanent sync wedges (issues 3, 18).
+
+F4. Session teardown owned in one place —
+    context/AuthContext/functions/accountFunctions.tsx
+    clearLocalSession(): supabase.auth.signOut({ scope: 'local' }) →
+    disconnectAndClearPowerSync(), each step guarded so a failure in
+    one never strands the next (the C1 lesson). signOut, forceSignOut
+    and deleteAccount all end in this one function. AsyncStorage is
+    NOT cleared here (see issue 19).
+    Also: give UploadFlushTimeoutError and UploadFlushNotConnectedError
+    a common UploadFlushError base + isUploadFlushError() so callers
+    react to the category "flush cannot complete", not one subclass.
+    Serves issues 1, 16, 19.
+
+F5. Dates: one serialize/deserialize pair + a live "today" —
+    lib/utils/dateHelper.ts
+    parseDateKey(key): Date — local-midnight inverse of getDateKey
+    (the split-and-new Date(y, m-1, d) logic that already exists,
+    copy-pasted, in two stores). getDateKey/parseDateKey become the
+    only date-string conversions in the app.
+    useToday() (lib/hooks/useToday.ts, new): returns today's dateKey
+    and updates on AppState 'active' when the calendar day changed —
+    the reusable primitive for anything that must not freeze "today"
+    at mount.
+    Serves issues 7, 22.
+
+F6. Errors stop pretending to be success
+    a) useAsyncLoad (lib/hooks/, new): wraps a context's load with
+       status 'loading' | 'ready' | 'error' + retry(). An error is a
+       distinct state — never defaults-presented-as-truth.
+    b) LoadErrorScreen (components/GuardComponents/, new): full-screen
+       "Couldn't load your data" + Retry, styled like
+       AppLoadingScreen.
+    c) reportPersistFailure(scope, error, { reload }) (lib/powersync/
+       persistErrors.ts, new): Sentry capture + a throttled user
+       alert + rollback-by-reload (re-run the owning context's load
+       from SQLite so the UI shows disk truth — one universal
+       rollback instead of per-handler inverse operations).
+    Serves issues 6, 17 (and the spirit of 2 and 20).
+
+
+CRITICAL (data loss, security, broken core flows)
+-------------------------------------------------
+
+1. Deleting your account can strand you half-signed-in
+   The app erases the account on the server FIRST, then tries to upload
+   any unsaved changes. Those uploads can never succeed for an account
+   that no longer exists, so the 60s wait always fails, local cleanup
+   never runs, and the user stays "signed in" to a dead account. Only a
+   reinstall escapes.
+   Where: context/AuthContext/functions/accountFunctions.tsx
+   Fix: upload (or discard) pending changes BEFORE deleting the server
+   account; always clear local state once the server confirms.
+
+   PLAN
+   Root cause: local cleanup hangs off a Gate C flush that can never
+   drain once the server account is gone — and the flush itself is
+   the wrong requirement. The user has already confirmed "all your
+   data will be permanently deleted"; unsynced changes are a subset
+   of that, and uploading them seconds before the server erases them
+   protects nothing. Deletion needs no flush at all.
+   Steps:
+   1) Keep the current macro-order — edge function first. If that
+      call fails, abort: account and local data both intact, and
+      profile.tsx's existing generic error alert is the right
+      outcome. Never wipe local state before the server confirms.
+   2) Once the edge function confirms, deleteAccount() stops calling
+      signOut() and instead runs clearLocalSession() (F4)
+      unconditionally — no flush, each teardown step guarded;
+      disconnectAndClearPowerSync() is what actually discards the
+      now-meaningless upload queue — then clearUserStorage(userID)
+      (issue 19). signOut keeps Gate C for the normal sign-out
+      path, where unsynced data still matters.
+   Files: accountFunctions.tsx.
+   Verify: log a meal in airplane mode → Delete Account → clean
+   abort, account intact, data still there. Online with unsynced
+   changes: delete → no 60s flush wait → lands on login, relaunch
+   stays signed out, no orphan local data.
+
+2. Anyone who ever contacted support can never delete their account
+   The server delete function forgets the support_requests table. The
+   database refuses to remove a user who still has rows there, so
+   deletion fails forever. Worse, the six deletes that ran first are not
+   error-checked, so the user's data is wiped even though the account
+   survives.
+   Where: lib/supabase/functions/deleteAccount/index.ts
+   Fix: also delete support_requests, check every delete's error, do it
+   all in one transaction.
+
+   PLAN
+   Root cause: deletion is a hand-maintained list of table deletes in
+   application code. Any new user-owned table (support_requests today,
+   whatever comes next tomorrow) silently breaks it, and per-table
+   error checking is busywork that was (predictably) skipped.
+   Steps:
+   1) Push ownership into the schema: migration that re-declares every
+      top-level user_id foreign key as ON DELETE CASCADE — workouts,
+      user_exercises, nutrition_entries, saved_nutrition_entries,
+      weight_progress, settings, support_requests. (Child tables
+      already cascade from their parents.) Version it as
+      lib/supabase/migrations/user_cascade.sql.
+   2) Shrink the edge function to: authenticate →
+      auth.admin.deleteUser(userId) → check the ONE error → respond.
+      Postgres deletes all user rows atomically in the same
+      transaction as the auth user — nothing partial, nothing to
+      forget, no per-table error handling to maintain.
+   3) Rule going forward (one line in the migration header): any new
+      table referencing auth.users must declare ON DELETE CASCADE —
+      deletion coverage is then automatic forever.
+   Files: new migration, lib/supabase/functions/deleteAccount/index.ts.
+   Verify: seed a user with data in every table incl. a support
+   request → delete → auth user and all rows gone in one shot; make
+   deleteUser fail → nothing was deleted (atomicity).
+
+3. One decimal calorie value can jam syncing forever
+   The database column for calories only accepts whole numbers, but the
+   food-search and manual-entry screens save unrounded values (a
+   FatSecret item like 130.5 cal x 3 servings is enough). The phone
+   accepts it, the server rejects it, and sync retries the same bad row
+   forever - nothing after it ever uploads. The only way out shown to
+   the user (force sign-out) throws away all their unsynced data.
+   Where: foodDBModal.tsx / addNutritionModal.tsx -> Connector.ts
+   Fix: round + sanity-check numbers once at the save boundary
+   (nutritionEntryToRow), or make the column accept decimals.
+
+   PLAN
+   Root cause: two holes, both structural. (a) The persistence
+   boundary trusts every screen — rows reach SQLite (then Postgres)
+   with whatever the screen produced (fractional calories from
+   foodDB/editManualEntry, NaN from unvalidated parsing). (b) The
+   Connector retries a permanently-rejected row forever, so one bad
+   value poisons everything behind it.
+   Steps:
+   1) Sanitize once at the converter boundary (F1): in
+      nutritionEntryToRow and savedNutritionEntryToRow (and the two
+      ingredient-insert loops in the same file), pass every numeric
+      field through sanitizeInt/sanitizeMacro — non-finite → 0,
+      calories/macros/quantity → 1 decimal. Every
+      write path (manual, foodDB, saved, photo/AI, edits) funnels
+      through these two converters, so no screen — current or future
+      — can produce an out-of-contract row again.
+   2) Dead-letter backstop in the Connector (F3b): data/integrity
+      errors from Postgres are non-retryable → report + skip +
+      complete, never wedge. This also automatically un-jams any
+      user already stuck when the update ships.
+   3) Decision (2026-07-13): decimal calories ARE allowed — migrate
+      the calories columns on nutrition_entries and
+      saved_nutrition_entries from INTEGER to REAL (Postgres
+      migration + AppSchema column.integer → column.real; settings
+      goal columns stay INTEGER). The ingredient tables already
+      store calories as REAL, so this also stops an entry total
+      disagreeing with its own ingredient breakdown. Ship the
+      migration before/with the app update; it alone un-jams users
+      already wedged on a decimal row. Note REAL does NOT fix the
+      NaN case — the boundary sanitizer (step 1) covers that.
+      Display: DailyIntakeCard already rounds at render, so totals
+      stay whole; entry rows may show one decimal — accepted.
+   (Screen-side parsing correctness is issue 10/11/12 — this issue is
+   the boundary + retry policy, which hold even if a screen slips.)
+   Files: context/NutritionContext/database/powersyncStore.ts,
+   lib/utils/number.ts (F1), lib/powersync/Connector.ts (F3),
+   calories REAL migration, lib/powersync/AppSchema.ts.
+   Verify: log a 130.5-cal FatSecret item ×3 → row stores 391.5 and
+   syncs; hand-inject a NaN row into the queue → it is skipped and
+   reported, queue drains, later entries upload.
+
+4. The paid AI and food-search features are free on the server
+   The two server functions only check that you're signed in - never
+   that you're subscribed, and there's no rate limit. Any free account's
+   token can call the AI analysis endpoint directly and run up the
+   OpenAI bill.
+   Where: lib/supabase/functions/fetchOpenAI + fetchFoodDB
+   Fix: check the subscription on the server (RevenueCat lookup) and add
+   per-user rate limits.
+
+   PLAN
+   Root cause: authorization is conflated with authentication —
+   entitlement exists only as client-side UI state (hasPremium hides
+   buttons), so the server grants the paid capability to any valid
+   JWT.
+   Steps:
+   1) One shared guard, used by both functions as their first line
+      after JWT validation:
+      lib/supabase/functions/_shared/entitlement.ts exporting
+      requirePremium(userId) — RevenueCat REST subscriber lookup
+      (secret key in an env var; app_user_id is the Supabase user id,
+      which BillingContext already uses for Purchases.logIn), require
+      an active 'LiftTrition Pro' entitlement, else return a 403
+      Response. Cache per-user results in memory ~5 min so hot users
+      don't cost a RevenueCat call per request.
+   2) Per-user daily quota in the same guard: api_usage(user_id, day,
+      calls) table + one atomic-increment RPC; over the cap (e.g.
+      vision N/day, search M/day, from env) → 429. DB-backed so it
+      survives edge-function instances, and doubles as usage
+      analytics.
+   3) Defense in depth on the client: cameraScreen and foodDBModal
+      check hasPremium on mount and redirect to the paywall (closes
+      the deep-link bypass past the FAB gate). Export the
+      entitlement id as a constant from BillingContext (shared with
+      issue 20) instead of the current string literal.
+   Files: _shared/entitlement.ts (new), fetchOpenAI/index.ts,
+   fetchFoodDB/index.ts, api_usage migration, cameraScreen.tsx,
+   foodDBModal.tsx, context/BillingContext.
+   Verify: curl the endpoint with a free account's JWT → 403; with a
+   premium JWT → works; exceed the daily cap → 429; free user
+   deep-linking to the camera lands on the paywall.
+
+5. One mis-tap in the archive screen permanently deletes a workout
+   The trash icon there deletes the workout AND all its logged history
+   instantly - no "are you sure?", no undo - and it sits right next to
+   the restore button. Everywhere else in the app deletion asks first.
+   Where: app/workoutScreens/archiveModal.tsx
+   Fix: use the same confirmation alert as the main screens.
+
+   PLAN
+   Root cause: there is no shared "confirm a destructive action"
+   primitive — every screen hand-rolls its Alert, so a screen that
+   forgets simply has no confirmation (the audit's minor list shows
+   the policy already drifting site by site).
+   Steps:
+   1) Add confirmDelete({ title, message, onConfirm }) in
+      lib/utils/confirmDelete.ts — the standard two-button
+      Cancel / Delete(destructive) Alert, ~10 lines.
+   2) archiveModal trash buttons call it with the same warning copy
+      the main screen uses ("Deleting a workout will delete all logs
+      within the workout…"), for both workouts and exercises.
+   3) Adopt the helper at the other delete sites (workoutScreen /
+      exerciseScreen option alerts, saved-meal unsave) as they get
+      touched — from now on destructive-confirm UX has one owner,
+      so it cannot diverge again.
+   Files: lib/utils/confirmDelete.ts (new), archiveModal.tsx.
+   Verify: tap trash on an archived workout → confirmation names the
+   log loss; Cancel keeps everything; Delete removes it.
+
+MAJOR (wrong behavior, bad UX)
+------------------------------
+
+6. A bad launch can dump an existing user back into onboarding
+   If loading settings fails once, the app quietly pretends the user is
+   brand-new (blank defaults, onboarding not complete) instead of
+   showing an error. If they re-do onboarding, their real goals and
+   macros on the server get overwritten.
+   Where: context/SettingsContext/index.tsx (load catch block)
+   Fix: show a retry/error screen on load failure; never treat a failed
+   load as a fresh account.
+
+   PLAN
+   Root cause: a failed load and a brand-new user produce the exact
+   same state (defaults + loaded=true), so the route guard cannot
+   tell disaster from day one. The same catch-and-pretend pattern is
+   copy-pasted in Nutrition, Workout, and PowerSyncGuard.
+   Steps:
+   1) Introduce load status via one shared hook (F6a): each context's
+      load runs through useAsyncLoad → status 'loading' | 'ready' |
+      'error' + retry(). The catch block stops writing defaults —
+      error is its own state, prior data stays untouched. Contexts
+      expose loaded (status==='ready'), loadFailed, retryLoad.
+   2) Route guard in app/_layout.tsx (StackLayout, which already
+      reads the contexts' loaded flags): if any context reports
+      loadFailed → render LoadErrorScreen (F6b) with a Retry button
+      wired to the retryLoad(s). Never route to onboarding from an
+      error state.
+   3) Persistence stays naturally safe: the persist effects key on
+      loaded/hasLoadedUserData, and an errored context never reaches
+      'ready' — so re-onboarding-over-real-data becomes impossible,
+      not just unlikely. Give PowerSyncGuard's catch (28-31) the
+      same error-state treatment.
+   Files: lib/hooks/useAsyncLoad.ts (new),
+   components/GuardComponents/LoadErrorScreen.tsx (new), Settings/
+   Nutrition/Workout context index.tsx, PowerSyncGuard.tsx,
+   app/_layout.tsx.
+   Verify: make loadSettingsAndBw throw once → error screen with
+   Retry (NOT onboarding); Retry succeeds → tabs with real data;
+   fresh account still onboards normally.
+
+7. Food logged the next morning lands on yesterday
+   The selected date is set once when the app starts and never rolls
+   over at midnight. Use the app in the evening, leave it in the
+   background, log breakfast tomorrow -> it's saved to yesterday, today
+   shows 0 calories, and the streak breaks.
+   Where: context/NutritionContext/index.tsx (selectedDate)
+   Fix: reset the selected date to today when the app comes back to the
+   foreground on a new day.
+
+   PLAN
+   Root cause: "today" is captured once at provider mount
+   (useState(new Date())) and nothing in the app observes the
+   calendar day changing — iOS keeps the process suspended for days.
+   Steps:
+   1) Build useToday() (F5): today's dateKey, recomputed on AppState
+      'active' (and on a mount check), updating state only when the
+      key actually changes.
+   2) NutritionContext: const todayKey = useToday(); one effect —
+      when todayKey changes, setSelectedDate(new Date()). A user who
+      deliberately picked a past date keeps it within the same day;
+      crossing midnight snaps selection to the new day, which is the
+      only behavior that keeps "log breakfast" correct.
+   3) useToday is the reusable primitive for every other
+      frozen-"today" consumer (streak chip, "Today" labels, charts) —
+      adopt opportunistically as those files get touched.
+   Files: lib/hooks/useToday.ts (new), NutritionContext/index.tsx.
+   Verify: evening session → background the app → advance the device
+   day → foreground: date chip says "Today", breakfast lands on the
+   new day, streak intact.
+
+8. Weighing in secretly rewrites your goals
+   Every body-weight update re-decides lose/maintain/gain by comparing
+   against the goal weight exactly. A "maintain" user who logs 0.5 lb
+   over is silently switched to "lose" with a 250-cal deficit; dip under
+   and they become "gain". It also resets the pace and overwrites any
+   hand-tuned macros. Same silent macro rewrite on height/activity edits.
+   Where: context/SettingsContext/functions/bodyWeightFunctions.tsx
+   Fix: don't flip the goal type without asking; don't clobber custom
+   macros (add a customized flag).
+
+   PLAN
+   Root cause: the weigh-in path conflates two responsibilities that
+   need opposite policies. TARGETS (calorie/macro numbers) should
+   track the user's weight — that's advertised in the modal copy and
+   users expect it. INTENT (goalType, pace) belongs to the user — but
+   the code re-derives it with an exact weight-vs-goal comparison, so
+   normal daily scale noise flips maintain users into ±250 kcal
+   swings, a cutter who dips past goal silently becomes a bulker, a
+   flip resets pace to 0.5, and every weigh-in regenerates all four
+   macro goals, wiping hand-tuned values — because nothing records
+   that they were hand-tuned.
+   Market check (researched 2026-07): Cal AI updates nothing on a
+   weigh-in (targets are static after onboarding — criticized as TOO
+   manual); MacroFactor, the most automated tracker, adjusts target
+   numbers weekly from logged data but the goal direction is always
+   user-chosen. No shipping tracker silently flips direction.
+   The rule to adopt: TARGETS ARE DERIVED, INTENT IS OWNED.
+   Automation may update numbers within the user's chosen goal, and
+   may END a phase into maintenance (announced), but only the user
+   starts a cut or a bulk.
+   Steps:
+   1) computeBwUpdate keeps updating bodyWeight AND regenerating
+      targets for the CURRENT goalType (numbers keep tracking
+      weight, as today) — but never touches goalType or goalPace.
+      Delete the exact-comparison flip and the 0.5 pace reset.
+   2) macrosCustomized flag (new settings column: Postgres
+      migration, AppSchema, Settings type, settingsToRow/
+      rowToSettings): set true when the user hand-edits macros
+      (EditMacroGoalModal / manual adjustNutrition path); cleared
+      whenever targets are explicitly regenerated (wizard
+      completion, or accepting any "Recalculate?" prompt). Every
+      IMPLICIT recalculation — weigh-ins, height/activity edits —
+      is skipped while the flag is true, so hand-tuned targets
+      survive the app's most frequent action.
+   3) Goal-crossing moment: when a weigh-in crosses goalWeight in
+      the goal's direction (previous weight on one side, new weight
+      at/past it — derived from prev vs new, no stored state), show
+      a one-time congrats prompt: "Goal reached! Update my plan"
+      (routes into the adjustNutrition wizard) / "Not now".
+   4) Auto-maintain safety net (answers "what if they never tap?"):
+      if goalType is lose/gain and the logged weight sits PAST
+      goalWeight by a deadband (unit-aware constant, ~2 lb / 1 kg —
+      big enough that boundary noise can't trigger it), switch
+      goalType to 'maintain', regenerate targets for maintenance
+      (still respecting macrosCustomized), and announce it: "You've
+      passed your goal — we've switched you to maintenance. Set a
+      new goal anytime." One-way by design: automation only ever
+      moves a user TO maintenance — a stale plan degrades to the
+      safest state (holding at goal) instead of an unwanted surplus
+      or deficit.
+   5) Persistent banner instead of a missable alert: while goalType
+      is lose/gain and weight is at/past goalWeight, the nutrition
+      screen shows "Goal reached — set your next goal" (reuse the
+      ActivityBanner pattern) linking to the wizard. Pure derived
+      render-time state — cannot be lost or forgotten.
+   6) Height/activity edits follow the same one rule: auto-recalc
+      numbers for non-customized users (consistent with weigh-ins),
+      never touch goalType; customized users get an explicit
+      "Recalculate targets?" prompt instead of silence.
+   7) Copy: updateBWModal subtitle stays honest per state — targets
+      update automatically (default) / your custom targets are kept
+      (customized).
+   Files: bodyWeightFunctions.tsx, SettingsContext/index.tsx +
+   database/powersyncStore.ts, settings migration
+   (macros_customized), lib/powersync/AppSchema.ts,
+   updateBWModal.tsx, profile.tsx, adjustTraining.tsx,
+   EditMacroGoalModal.tsx, goal-reached banner component (new).
+   Verify: maintain user logs +0.5 lb → goalType/pace untouched, no
+   kcal seesaw; lose user's calorie target tracks weight down across
+   weigh-ins; hand-edit protein → later weigh-ins keep it; crossing
+   goal → congrats prompt once + banner; ignoring everything and
+   passing goal by 2+ lb → announced auto-switch to maintenance;
+   automation never starts a surplus or deficit on its own.
+
+9. Re-logging a saved meal at 2x servings double-counts the ingredients
+   The scaling helper multiplies BOTH the quantity and the per-unit
+   macros, so the ingredient breakdown shows 4x at 2 servings (and
+   saving from that screen persists the inflated numbers).
+   Where: app/nutritionScreens/savedNutritionModal.tsx (scaleIngredients)
+   Fix: scale only one of the two.
+
+   PLAN
+   Root cause: ingredient semantics ("macros are per single unit;
+   quantity is the multiplier" — the contract aiFunctions and
+   editPhotoEntry already follow) live nowhere, so this screen
+   re-implemented them wrong. The math has two owners and they
+   drifted.
+   Steps:
+   1) Create the single owner: context/NutritionContext/functions/
+      ingredients.ts with sumIngredients(ings) (moved from
+      aiFunctions; also replaces editPhotoEntry's identical
+      calcTotals — see issue 12) and scaleIngredients(ings, factor)
+      that multiplies QUANTITY only, leaving per-unit macros alone.
+   2) Write the contract down where it can't be missed: a comment on
+      the Ingredient type — macros are per one unit; totals are
+      always macro × quantity.
+   3) savedNutritionModal imports both helpers and deletes its local
+      copy. (Its entry-level totals already multiply base × q
+      correctly and now agree with the persisted breakdown.)
+   Files: ingredients.ts (new), savedNutritionModal.tsx,
+   aiFunctions.tsx, editPhotoEntry.tsx.
+   Verify: save a meal with ingredients → re-log at ×2 → breakdown
+   shows 2× per-ingredient totals (not 4×); saving from that screen
+   persists the same numbers the day view shows.
+
+10. Typing "80,5" (or a stray ".") corrupts weight and macro goals
+    Number parsing lets NaN through every check in the body-weight modal
+    and manual meal entry. On iPhones set to a comma-decimal region
+    (most of Europe), the keypad only offers a comma - so their FIRST
+    decimal weight entry corrupts body weight, all four macro targets,
+    and the chart. Meals get NaN calories the same way.
+    Where: updateBWModal.tsx, addNutritionModal.tsx + both validators
+    Fix: one shared number parser (comma->dot, reject non-finite) used
+    by every numeric field.
+
+    PLAN
+    Root cause: the app has three parsing policies for one input
+    class (strict Number.isFinite in logsModal, parseFloat||0 in
+    editManualEntry, raw Number/parseFloat in updateBW/addNutrition)
+    and none normalizes the decimal comma iOS keypads produce.
+    Steps:
+    1) Build F1's parseNumericInput and make it the only reader of
+       numeric TextInputs: updateBWModal (null → block submit),
+       addNutritionModal and editManualEntry (empty → 0 for optional
+       macro fields; non-null required for a typed value),
+       logsModal (already strict — switch it too so comma locales
+       can log sets), plus the quantity fields (issue 11) and the
+       photo editor (issue 12).
+    2) Belt-and-suspenders in both validators: validateHeightWeight
+       and validateNutritionEntry reject non-finite values first —
+       so even a future screen that skips the parser can't push NaN
+       through.
+    3) Disable submit CTAs while a required field parses to null, so
+       the failure is visible at the field, not after save. (The
+       persistence boundary from issue 3 remains the last line of
+       defense.)
+    Files: lib/utils/number.ts (F1), updateBWModal.tsx,
+    addNutritionModal.tsx, editManualEntry.tsx, logsModal.tsx,
+    SettingsContext/functions/validator.tsx,
+    NutritionContext/functions/validator.tsx.
+    Verify: on a comma-locale simulator type "80,5" → weight 80.5
+    everywhere (chart included); "12..5" / "." is rejected with a
+    message and cannot corrupt macros; meals can't save NaN.
+
+11. Half a serving becomes a full serving
+    The servings box uses parseInt, so "0.5" turns into 1 - double what
+    the user actually ate, with no warning. (The photo editor supports
+    decimals, so the flows disagree.)
+    Where: foodDBModal.tsx + savedNutritionModal.tsx (confirmAddItem)
+    Fix: parseFloat + validate > 0.
+
+    PLAN
+    Root cause: same class as issue 10 — servings are parsed with a
+    different, integer-only grammar in these two modals while the
+    photo editor accepts decimals. One concept, two grammars.
+    Steps:
+    1) Both confirmAddItem handlers parse with parseNumericInput
+       (F1) and accept only parsed > 0 — "0.5" is a valid half
+       serving; 0, negative, or unparseable input leaves the Add
+       button disabled (no silent fallback to 1).
+    2) Set the quantity TextInputs to keyboardType="decimal-pad" so
+       the keypad offers the separator.
+    3) Totals stay clean automatically: entry math already
+       multiplies by quantity, and the issue-3 boundary sanitizes
+       the final calories (column now REAL), so fractional servings
+       can't reintroduce the sync wedge.
+    Files: foodDBModal.tsx, savedNutritionModal.tsx.
+    Verify: log 0.5 servings from food search → half the macros are
+    recorded; typing "0" or garbage can't confirm; whole numbers
+    behave exactly as before.
+
+12. The photo-meal editor can't take decimals at all
+    Each keystroke is parsed immediately, so typing "2.5" becomes "25"
+    (the dot is eaten) and fields can't be cleared. Also, an ingredient
+    set to 0 servings shows 0 in its own row but still counts as 1 in
+    the totals that get saved.
+    Where: app/nutritionScreens/editPhotoEntry.tsx
+    Fix: keep the text as a string while editing, parse on save; unify
+    the 0-quantity rule.
+
+    PLAN
+    Root cause: numeric state is stored as numbers and re-parsed on
+    every keystroke — the field renders parse(text) instead of the
+    text, so transient states ("2.", "") are destroyed as typed.
+    Separately, quantity-0 means two different things because
+    calcTotals treats 0 as "missing" (|| 1) while the row grid uses
+    the raw value.
+    Steps:
+    1) Draft-string editing (the pattern every other modal already
+       uses): hold each ingredient's fields as strings in state;
+       TextInputs read/write the strings untouched. Parse once with
+       parseNumericInput (F1) — live totals use a tolerant parse
+       (null → 0), handleSave builds the numeric Ingredient list.
+    2) The +/- steppers parse the current string, step, clamp at 0,
+       and write back the stringified result.
+    3) One quantity rule, decided in ONE place: in the shared
+       sumIngredients (issue 9), use quantity ?? 1 instead of
+       quantity || 1 — a missing quantity still defaults to 1, but
+       an explicit 0 counts as 0. Row grid, totals card, and the
+       saved entry now all agree that 0 servings = excluded.
+    Files: editPhotoEntry.tsx, ingredients.ts (shared sum from
+    issue 9).
+    Verify: type "2.5" → field shows 2.5 and totals use it; a field
+    can be cleared while editing; a 0-quantity ingredient shows 0 in
+    its row AND contributes 0 to the totals that get saved.
+
+13. Swiping away the "Analyzing..." screen doesn't cancel anything
+    The AI call keeps running. Up to 30s later it adds the meal anyway
+    and force-closes whatever screen the user has open since; on failure
+    it pops a "Try Again" alert over some unrelated screen. Re-taking
+    the photo after "cancelling" = duplicate meals and duplicate paid
+    AI calls.
+    Where: app/nutritionScreens/analyzingModal.tsx
+    Fix: block the swipe-dismiss on that screen, or track cancelled
+    state and drop the result.
+
+    PLAN
+    Root cause: a 30-second paid, uncancellable operation lives in a
+    casually dismissible screen, and its continuation assumes the
+    screen still owns navigation (router.dismissAll() fires wherever
+    the user has wandered to).
+    Steps:
+    1) Make the commitment explicit — the route is not dismissible
+       while analyzing: analyzingModal's Stack.Screen gets
+       gestureEnabled: false (it currently inherits modal
+       swipe-to-dismiss from modalPresentation), and Android
+       hardware back is blocked for the screen (usePreventRemove).
+       The user is committed for at most 30s (the existing timeout)
+       with visible progress; the failure alert still offers Try
+       Again / Cancel.
+    2) Guard the continuation anyway (cheap insurance for any future
+       programmatic dismissal): a doneRef/unmounted ref checked after
+       the await — if the screen is gone, drop the result: no
+       addNutrition, no dismissAll, no orphan Alert.
+    Result: "cancel then re-take" duplicates become impossible
+    because there is no half-cancelled state — analysis either
+    completes on-screen or fails on-screen.
+    Files: app/_layout.tsx (route options), analyzingModal.tsx.
+    Verify: swipe during analysis → screen stays; success dismisses
+    to home exactly once; simulate failure → alert appears on the
+    analyzing screen itself; no path produces two entries or two
+    paid calls.
+
+14. Nearly every "Add" button can be double-tapped
+    Add meal, Add All (food DB + saved meals), Add Exercises, Add
+    Workout, and Use Photo all stay live during the closing animation -
+    a quick double-tap creates duplicates, and Use Photo runs TWO paid
+    AI analyses. (Purchase buttons and set-logging are guarded
+    correctly.)
+    Where: the listed modals' submit handlers
+    Fix: set a submitted flag / disable the button on first press.
+
+    PLAN
+    Root cause: there is no shared single-flight primitive, so every
+    CTA re-implements (or forgets) the in-flight flag, and the modal
+    close animation leaves buttons live for a frame or two. The two
+    guarded flows (purchases, logsModal) prove the pattern — it just
+    isn't reusable.
+    Steps:
+    1) Build useSubmitOnce (F2): a synchronous ref-based guard (state
+       updates are a frame too late for a real double-tap) plus a
+       `submitting` boolean for the disabled style.
+    2) Wrap the offenders: addNutritionModal "Add meal", foodDBModal
+       "Add All", savedNutritionModal "Add All", addExerciseModal
+       "Add N Exercises", addWorkoutModal create, cameraScreen
+       "Use Photo" AND the shutter (takePicture has the same gap).
+       Handlers that end in router.back()/push never reset (the
+       screen is leaving); retryable ones reset in finally.
+    3) House rule going forward: any CTA whose handler awaits or
+       navigates uses useSubmitOnce — one import, no bespoke flags.
+    Files: lib/hooks/useSubmitOnce.ts (new), the six screens above.
+    Verify: machine-gun-tap every listed CTA → exactly one entry /
+    workout / analysis; buttons visibly disable during the closing
+    animation; Use Photo can never bill twice.
+
+15. Denying camera access once bricks the AI scan feature
+    After an iOS "Don't Allow", the Grant Permission button silently
+    does nothing (iOS won't re-prompt). No link to Settings is offered.
+    Where: app/nutritionScreens/cameraScreen.tsx
+    Fix: when iOS says it can't ask again, open the Settings app.
+
+    PLAN
+    Root cause: the permission flow ignores canAskAgain — after a
+    permanent denial iOS resolves the request without prompting, and
+    the UI keeps offering a prompt that can never appear. The photo-
+    library path (pickFromLibrary) has the identical dead end.
+    Steps:
+    1) Tiny shared helper lib/utils/permissions.ts: given a
+       permission response, decide 'request' vs 'settings', and
+       openAppSettings() (Linking.openSettings()) — so every current
+       and future permission (camera, library, whatever's next)
+       handles permanent denial the same way.
+    2) cameraScreen permission view: when !granted && !canAskAgain,
+       the button becomes "Open Settings" → openAppSettings(), with
+       copy explaining to enable Camera there. If a requestPermission
+       call comes back canAskAgain:false, swap the button
+       immediately — no dead tap.
+    3) pickFromLibrary's denial alert gains an "Open Settings"
+       action via the same helper.
+    Files: lib/utils/permissions.ts (new), cameraScreen.tsx.
+    Verify: deny camera on device → reopen scan → "Open Settings"
+    deep-links to the app's settings page; enable → camera works;
+    same for the library picker.
+
+16. You cannot sign out while offline
+    Sign-out requires a connected sync first; offline it fails with
+    "PowerSync is not connected." and only an OK button. The force
+    sign-out fallback is only offered for timeouts, not for this error.
+    Where: profile.tsx error handling + FlushUploads.ts
+    Fix: offer force sign-out (with the data-loss warning) here too.
+
+    PLAN
+    Root cause: the escape hatch is keyed to one error subclass
+    (UploadFlushTimeoutError) when the meaningful category is "the
+    flush cannot complete" — not-connected and disconnected-mid-flush
+    fall through to a dead-end OK alert.
+    Steps:
+    1) F4: UploadFlushTimeoutError and UploadFlushNotConnectedError
+       extend a common UploadFlushError base; export
+       isUploadFlushError(). Any future flush-failure type inherits
+       the escape hatch automatically instead of re-opening this bug.
+    2) profile.tsx handleSignOut: branch on isUploadFlushError →
+       the existing force-sign-out alert, with the message adapted
+       to the case ("You're offline — sign out anyway? Unsynced data
+       will be lost." vs the current "still uploading…" text).
+    3) Make the forced path actually work offline: forceSignOut ends
+       in clearLocalSession() (F4), which uses
+       supabase.auth.signOut({ scope: 'local' }) and guards each
+       teardown step — no network dependency, no half-teardown.
+    Files: FlushUploads.ts, accountFunctions.tsx, profile.tsx.
+    Verify: airplane mode → Sign Out → data-loss warning → Force
+    sign out → login screen; relaunch (still offline) stays signed
+    out.
+
+17. Failed saves look like successes
+    Every write updates the screen first and quietly logs any database
+    failure - the modal closes, the checkmark plays, and the data
+    vanishes on next launch. The settings row does retry, but in a tight
+    loop with no backoff.
+    Where: all context handlers (catch -> console.warn pattern)
+    Fix: tell the user + retry, or roll the UI back; add backoff.
+
+    PLAN
+    Root cause: optimistic UI with the failure swallowed — every
+    handler's catch is console.warn, so React state (what the user
+    sees) and SQLite (what survives restart) silently diverge. The
+    per-handler pattern makes fixing it screen-by-screen a treadmill;
+    the failure policy needs one owner.
+    Steps:
+    1) One failure policy (F6c): reportPersistFailure(scope, error,
+       { reload }) — Sentry capture, a throttled "Couldn't save your
+       change" alert (throttled so a burst of failures isn't an
+       alert storm), and rollback-by-reload: re-run the owning
+       context's existing load so the UI snaps back to disk truth.
+       One universal rollback instead of hand-written inverse
+       operations per handler.
+    2) Replace every catch → console.warn in Nutrition, Workout and
+       Settings write handlers with that helper (each callsite is a
+       one-line change).
+    3) Settings retry loop: exponential backoff (1s·2^n, capped 30s)
+       before bumping persistRetryNonce, and surface the failure
+       alert after ~3 consecutive misses instead of spinning
+       silently forever.
+    Files: lib/powersync/persistErrors.ts (new), NutritionContext/
+    index.tsx, WorkoutContext/index.tsx, SettingsContext/index.tsx.
+    Verify: force upsertNutritionEntry to throw → user is told, the
+    entry disappears from the list (matches disk), Sentry gets the
+    event; settings failure retries with growing gaps, not a tight
+    loop.
+
+18. Creating the same custom exercise on two devices jams sync
+    The server requires unique exercise names per user, but the upload
+    code has no handling for that conflict (unlike settings/weight).
+    One duplicate = the same forever-retry sync jam as issue 3.
+    Where: lib/powersync/Connector.ts (createRecord)
+    Fix: check-then-update branch for user_exercises like settings has.
+
+    PLAN
+    Root cause: unique-constraint handling is copy-pasted per table,
+    so each new constrained table starts broken until someone
+    remembers the pattern (CLAUDE.md gotcha 3 documents the rule;
+    the code doesn't enforce it).
+    Steps (F3):
+    1) Replace the two hand-written branches with a declarative
+       registry + one generic path: UNIQUE_KEYS = { settings:
+       ['user_id'], weight_progress: ['user_id','date'],
+       user_exercises: ['user_id','name'] }. createRecord looks up
+       the table's keys; if registered and present on the record,
+       select the existing server row by those keys → UPDATE with
+       the local id stripped (keeping the server row's id, exactly
+       like the settings branch does today) → else INSERT. ~25
+       lines replace ~60, and the next constrained table is a
+       one-line registration.
+    2) The issue-3 backstop (skip + report non-retryable 23505s)
+       stays underneath as the net for anything the registry misses
+       — a conflict can cost one report, never a wedged queue.
+    Files: lib/powersync/Connector.ts.
+    Verify: create the same custom exercise name from two devices
+    (or re-create before a delete syncs) → second upload updates the
+    existing row; upload queue drains; Connector unit tests cover
+    all three registered tables.
+
+19. Signing out erases the dark/light theme choice (and more)
+    Sign-out clears ALL of AsyncStorage, which also holds the theme
+    preference and every user's "last exercise" - things unrelated to
+    the session.
+    Where: accountFunctions.tsx (AsyncStorage.clear())
+    Fix: clear only known session keys.
+
+    PLAN
+    Root cause: teardown uses "clear everything" as its registry of
+    session storage. But every value in AsyncStorage already has a
+    rightful owner with its own lifecycle: Supabase's auth token is
+    removed by supabase.auth.signOut() itself; lastExercise is
+    already keyed per user (lastExercise:{userID}); colorScheme is a
+    device preference that should outlive any account.
+    Steps:
+    1) Delete the AsyncStorage.clear() calls from signOut/
+       forceSignOut (via F4's clearLocalSession, which does not
+       touch AsyncStorage). Sign-out then leaves the theme alone and
+       lastExercise per-user isolation finally works as designed —
+       signing back in restores your last exercise.
+    2) Data-erasure still honored on account deletion: a small
+       lib/utils/userStorage.ts exports the registry of user-scoped
+       key builders (today: lastExercise) and
+       clearUserStorage(userID) — deleteAccount calls it. Future
+       user-scoped keys are added to that one registry, so "what
+       storage belongs to a user" has a single owner.
+    Files: accountFunctions.tsx, lib/utils/userStorage.ts (new),
+    (WorkoutContext imports the key builder instead of its inline
+    template).
+    Verify: set dark mode → sign out → relaunch → still dark; sign
+    back in → last exercise remembered; delete account → that
+    user's keys removed, theme untouched.
+
+20. "Restore Purchases" says it worked even when there's nothing
+    For a user who never subscribed, restore still pops "Purchases
+    restored successfully!" while everything stays locked. It also has
+    no busy state, so it can be double-fired or run during a purchase.
+    Where: subscription.tsx + paywall.tsx (handleRestore)
+    Fix: check what actually came back; add a restoring flag.
+
+    PLAN
+    Root cause: the screens treat "the restore call resolved" as
+    "something was restored" — RevenueCat resolves successfully with
+    zero entitlements — and the restore outcome/in-flight state
+    isn't modeled anywhere, so each screen improvised (one lies,
+    one completes onboarding unconditionally).
+    Steps:
+    1) BillingContext owns the outcome: restorePurchases returns the
+       fresh CustomerInfo; add a `restoring` state alongside the
+       existing customerInfo update; export ENTITLEMENT_ID
+       ('LiftTrition Pro'), deduping the literal hasPremium uses
+       (shared with issue 4's server check).
+    2) Both screens branch on truth: restored =
+       !!info.entitlements.active[ENTITLEMENT_ID]. subscription.tsx:
+       success alert only when restored, else "No purchases found
+       for this Apple ID." paywall.tsx: completeOnboarding only when
+       restored — otherwise the alert, and the user still has
+       subscribe / Maybe later.
+    3) In-flight correctness: `restoring` (with F2's guard on the
+       tap) disables Restore AND the purchase CTAs (mutual
+       exclusion) and joins subscription.tsx's beforeRemove
+       condition so the screen can't be left mid-restore.
+    Files: BillingContext/index.tsx + functions/billingFunctions.ts,
+    subscription.tsx, paywall.tsx.
+    Verify: never-subscribed account → Restore → "No purchases
+    found", features stay locked, onboarding NOT completed;
+    subscribed account → restore unlocks; double-tap fires once;
+    purchase and restore can't run concurrently.
+
+21. Tapping the word "Settings" opens a developer diagnostics screen
+    The screen title is a live button into the dev stats modal (sync
+    internals, auth probes) with no dev-build guard - any user, and
+    every VoiceOver user, can land there.
+    Where: app/(tabs)/settings.tsx (title TouchableOpacity)
+    Fix: wrap it in __DEV__.
+
+    PLAN
+    Root cause: this dev surface predates (or skipped) the repo's own
+    dev-tooling convention — every other dev screen is reachable only
+    through __DEV__-guarded stubs, this one is wired straight into a
+    production screen with an accessibility label advertising it.
+    Steps:
+    1) Entry point: in settings.tsx render the title as plain Text in
+       production; only in dev wrap it in the TouchableOpacity (with
+       the accessibility props living on the dev branch only) —
+       VoiceOver stops announcing "Open developer stats" to users.
+    2) Route: give devStatsModal the documented devTest stub pattern
+       (__DEV__ ? require(real screen) : null) so even a deep link
+       or stray push renders nothing in production. Metro strips the
+       dev branch from release bundles, same as app/devTest/*.
+    Files: app/(tabs)/settings.tsx,
+    app/settingsScreens/devStatsModal.tsx.
+    Verify: release build — title is not tappable, VoiceOver reads
+    just "Settings", navigating to the route shows nothing; dev
+    build — behavior unchanged.
+
+22. Birthday and onboarding date can be stored one day off
+    Both are saved using UTC instead of local date (the exact pattern
+    the project's own docs warn about). Finish onboarding in the evening
+    in the US -> stored as tomorrow; week 1 becomes unreachable in the
+    progress pager. A birthday can be permanently one day early.
+    Where: context/SettingsContext/database/powersyncStore.ts (settingsToRow)
+    Fix: use getDateKey() for both, parse both as local dates.
+
+    PLAN
+    Root cause: there is no single serialize/deserialize pair for
+    date-only values — settingsToRow serializes with
+    toISOString().slice(0,10) (UTC), while the read side mixes local
+    parsing (onboarding_completed_at, hand-split) and UTC parsing
+    (birth_date via new Date("YYYY-MM-DD")). With no named inverse of
+    getDateKey, every callsite improvises.
+    Steps:
+    1) F5: add parseDateKey(key) to dateHelper — local-midnight
+       inverse of getDateKey. getDateKey/parseDateKey become the
+       ONLY conversions between Date and "YYYY-MM-DD" in the app.
+    2) settingsToRow writes birth_date and onboarding_completed_at
+       with getDateKey(); rowToSettings reads BOTH with
+       parseDateKey() (this also fixes the read-side half of the
+       birthday bug, where new Date(str) parses as UTC midnight).
+    3) Sweep the codebase for the two banned patterns —
+       toISOString().slice(0,10) and new Date("YYYY-MM-DD" strings) —
+       replacing with the pair (the nutrition store's hand-split
+       parse becomes parseDateKey), so the correct pattern is also
+       the easiest one to find and copy.
+    4) Data note for the release: values already stored under the
+       UTC bug may sit one day forward; that skew is not reliably
+       repairable after the fact (intent is unrecoverable), but all
+       new writes and all reads are correct from this change on.
+    Files: lib/utils/dateHelper.ts,
+    context/SettingsContext/database/powersyncStore.ts,
+    context/NutritionContext/database/powersyncStore.ts.
+    Verify: complete onboarding at 9pm US-Eastern (simulated) →
+    stored key equals the local date, week-1 pager reachable next
+    week; birthday round-trips to the exact day entered, in any
+    timezone.

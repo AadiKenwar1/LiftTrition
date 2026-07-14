@@ -1,7 +1,7 @@
 -- Settings table
 CREATE TABLE settings (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL UNIQUE REFERENCES auth.users(id),
+  user_id UUID NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
   birth_date DATE,
   gender TEXT,
   height REAL,
@@ -24,7 +24,7 @@ CREATE TABLE settings (
 -- User-created exercises table (only custom exercises, not the static library)
 CREATE TABLE user_exercises (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES auth.users(id),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   main_muscle TEXT NOT NULL,
   accessory_muscles TEXT[] NOT NULL DEFAULT '{}',
@@ -39,7 +39,7 @@ CREATE TABLE user_exercises (
 -- Users weight progress table
 CREATE TABLE weight_progress (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES auth.users(id),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   date DATE NOT NULL,
   weight REAL NOT NULL,
   created_at TIMESTAMP DEFAULT NOW(),
@@ -50,7 +50,7 @@ CREATE TABLE weight_progress (
 -- Nutrition items table (actual logged meals)
 CREATE TABLE nutrition_entries (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES auth.users(id),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   date DATE NOT NULL,
   time BIGINT NOT NULL,
@@ -80,7 +80,7 @@ CREATE TABLE nutrition_entry_ingredients (
 -- Saved nutrition items table
 CREATE TABLE saved_nutrition_entries (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES auth.users(id),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   protein REAL NOT NULL,
   carbs REAL NOT NULL,
@@ -108,7 +108,7 @@ CREATE TABLE saved_nutrition_entry_ingredients (
 -- Workouts table
 CREATE TABLE workouts (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES auth.users(id),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   "order" INTEGER NOT NULL,
   archived BOOLEAN DEFAULT false,
@@ -120,7 +120,7 @@ CREATE TABLE workouts (
 -- Exercises table (exercises within workouts - different from custom_exercises)
 CREATE TABLE exercises (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES auth.users(id),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   workout_id UUID NOT NULL REFERENCES workouts(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   user_max REAL DEFAULT 0,
@@ -133,7 +133,7 @@ CREATE TABLE exercises (
 -- Logs table (logs for each exercise in a workout)
 CREATE TABLE logs (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL REFERENCES auth.users(id),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   workout_id UUID NOT NULL REFERENCES workouts(id) ON DELETE CASCADE,
   exercise_id UUID NOT NULL REFERENCES exercises(id) ON DELETE CASCADE,
   date DATE NOT NULL,

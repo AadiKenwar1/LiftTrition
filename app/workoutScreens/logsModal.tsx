@@ -196,12 +196,16 @@ export default function LogsModal() {
 
                                     {dailyGoal ?
                                         goalHitToday && nextGoal ?
-                                            <View style={styles.goalHitRow}>
-                                                <Check size={14} color={colors.nutritionInk} strokeWidth={2.5} />
-                                                <Text style={styles.goalHitText}>
-                                                    Goal hit! Next session: {nextGoal.weight} {weightUnit} × {nextGoal.reps}
+                                            <>
+                                                <View style={styles.goalHitRow}>
+                                                    <Check size={14} color={colors.nutritionInk} strokeWidth={2.5} />
+                                                    <Text style={styles.goalHitText}>Goal hit!</Text>
+                                                </View>
+                                                <Text style={styles.goalHitNext}>
+                                                    <Text style={styles.goalLabel}>Next session: </Text>
+                                                    {nextGoal.weight} {weightUnit} × {nextGoal.reps}
                                                 </Text>
-                                            </View>
+                                            </>
                                         :   <Text style={styles.goalText}>
                                                 <Text style={styles.goalLabel}>PLATES suggested set: </Text>
                                                 {dailyGoal.weight} {weightUnit} × {dailyGoal.reps}
@@ -308,6 +312,14 @@ function makeStyles(colors: Colors) {
             fontSize: 13,
             color: colors.nutritionInk,
             fontFamily: fonts.semibold,
+            letterSpacing: -0.2,
+        },
+        goalHitNext: {
+            marginTop: 3,
+            fontSize: 13,
+            color: colors.labelMuted,
+            textAlign: 'center',
+            fontFamily: fonts.medium,
             letterSpacing: -0.2,
         },
         inputSection: {

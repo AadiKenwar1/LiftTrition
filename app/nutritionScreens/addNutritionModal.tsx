@@ -2,13 +2,12 @@ import { useAuth } from '@/context/AuthContext'
 import { useBilling } from '@/context/BillingContext'
 import { useNutrition } from '@/context/NutritionContext'
 import { analyzeText } from '@/context/NutritionContext/functions/aiFunctions'
-import { fonts, useColors, type Colors } from '@/context/ThemeContext'
-import Ionicons from '@expo/vector-icons/Ionicons'
+import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
-import { Utensils } from 'lucide-react-native'
+import { Lock, Sparkles } from 'lucide-react-native'
 import { useMemo, useState } from 'react'
-import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import uuid from 'react-native-uuid'
 
@@ -19,20 +18,19 @@ export default function AddNutritionModal() {
     const { hasPremium } = useBilling()
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
-    //State for the input fields
+    const insets = useSafeAreaInsets()
+
     const [mealName, setMealName] = useState('')
     const [calories, setCalories] = useState('')
     const [protein, setProtein] = useState('')
     const [carbs, setCarbs] = useState('')
     const [fats, setFats] = useState('')
     const [focusedField, setFocusedField] = useState<string | null>(null)
-
-    // AI generation state
     const [generating, setGenerating] = useState(false)
-    const insets = useSafeAreaInsets()
-    const scrollBottomPad = Math.max(insets.bottom, 20) + 120
+    const [aiFilled, setAiFilled] = useState(false)
 
-    //Adds a new entry to the nutrition context
+    const hasContent = mealName.trim().length > 0 || [calories, protein, carbs, fats].some((v) => v.trim().length > 0)
+
     const handleAddEntry = () => {
         const newEntry = {
             id: uuid.v4() as string,
@@ -66,6 +64,7 @@ export default function AddNutritionModal() {
             if (!protein.trim()) setProtein(macros.protein.toString())
             if (!carbs.trim()) setCarbs(macros.carbs.toString())
             if (!fats.trim()) setFats(macros.fats.toString())
+            setAiFilled(true)
         } catch (error: unknown) {
             const message = (error instanceof Error ? error.message : null) ?? 'Unable to generate macros.'
             Alert.alert('Generation Failed', message, [{ text: 'OK' }])
@@ -75,118 +74,105 @@ export default function AddNutritionModal() {
     }
 
     return (
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container} keyboardVerticalOffset={Platform.OS === 'ios' ? 8 : 0}>
-            {/* Drag Handle */}
+        <View style={styles.container}>
             <View style={styles.handleContainer}>
                 <View style={styles.handle} />
             </View>
 
-            <ScrollView style={styles.scrollView} contentContainerStyle={[styles.content, { paddingBottom: scrollBottomPad }]} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" bounces>
-                {/* Icon Section */}
-                <View style={styles.iconContainer}>
-                    <View style={styles.iconCircle}>
-                        <Utensils size={50} color={colors.nutrition} strokeWidth={2.5} />
-                    </View>
-                </View>
+            <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} automaticallyAdjustKeyboardInsets showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" bounces>
+                <Text style={styles.heroTitle}>Enter Nutrition</Text>
+                <Text style={styles.heroSub}>Describe your meal — AI fills in the macros</Text>
 
-                {/* Title */}
-                <Text style={styles.title} adjustsFontSizeToFit minimumFontScale={0.55} numberOfLines={2}>
-                    Add Nutrition
-                </Text>
-                <Text style={styles.subtitle} adjustsFontSizeToFit minimumFontScale={0.65} numberOfLines={3}>
-                    Log your nutrition with AI assistance
-                </Text>
+                <TextInput
+                    style={[styles.heroInput, focusedField === 'mealName' && styles.inputFocused]}
+                    placeholder="e.g. Two eggs on toast with butter, a black coffee"
+                    placeholderTextColor={colors.placeholder}
+                    value={mealName}
+                    onChangeText={setMealName}
+                    onFocus={() => setFocusedField('mealName')}
+                    onBlur={() => setFocusedField(null)}
+                    multiline
+                    textAlignVertical="top"
+                />
 
-                {/* Meal Name Input */}
-                <View style={styles.inputSection}>
-                    <Text style={styles.sectionTitle} adjustsFontSizeToFit minimumFontScale={0.65} numberOfLines={2}>
-                        Describe meal
-                    </Text>
-                    <View style={styles.inputContainer}>
-                        <TextInput style={[styles.input, focusedField === 'mealName' && styles.inputFocused]} placeholder="e.g., Grilled Chicken Salad" placeholderTextColor={colors.placeholder} value={mealName} onChangeText={setMealName} onFocus={() => setFocusedField('mealName')} onBlur={() => setFocusedField(null)} multiline numberOfLines={2} textAlignVertical="top" />
-                    </View>
-
-                    {/* Generate all macros with AI */}
-                    <TouchableOpacity style={[styles.generateButton, !hasPremium && styles.generateButtonUnavailable]} activeOpacity={0.8} disabled={generating} onPress={() => (hasPremium ? handleGenerateAllMacros() : router.replace('/settingsScreens/subscription'))}>
-                        {generating ?
-                            <ActivityIndicator size="small" color={colors.nutrition} />
-                        :   <View style={styles.generateButtonContent}>
-                                <Ionicons name="sparkles-outline" size={20} color={hasPremium ? colors.nutrition : colors.placeholder} />
-                                <Text style={[styles.generateButtonText, !hasPremium && styles.generateButtonTextUnavailable]}>{hasPremium ? 'Generate Macros with AI' : 'Generate Macros (Premium)'}</Text>
-                            </View>
-                        }
+                {hasPremium ?
+                    <TouchableOpacity activeOpacity={0.8} disabled={generating} style={styles.generatePrimaryTouchable} onPress={handleGenerateAllMacros}>
+                        <LinearGradient colors={colors.nutritionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.generatePrimary}>
+                            {generating ?
+                                <ActivityIndicator size="small" color="#FFF" />
+                            :   <>
+                                    <Sparkles size={17} color="#FFF" strokeWidth={2.2} />
+                                    <Text style={styles.generatePrimaryText}>Generate macros</Text>
+                                </>
+                            }
+                        </LinearGradient>
                     </TouchableOpacity>
+                :   <TouchableOpacity activeOpacity={0.8} style={styles.generateLocked} onPress={() => router.replace('/settingsScreens/subscription')}>
+                        <Lock size={15} color={colors.textMuted} strokeWidth={2.2} />
+                        <Text style={styles.generateLockedText}>Generate macros — Premium</Text>
+                    </TouchableOpacity>
+                }
+
+                <View style={styles.dividerRow}>
+                    <View style={styles.dividerLine} />
+                    <Text style={styles.dividerText}>or enter manually</Text>
+                    <View style={styles.dividerLine} />
                 </View>
 
-                {/* Macros Section */}
-                <View style={styles.macrosSection}>
-                    <Text style={styles.sectionTitle} adjustsFontSizeToFit minimumFontScale={0.65} numberOfLines={2}>
-                        Macronutrients
-                    </Text>
-
-                    {/* Calories */}
-                    <View style={styles.macroInputRow}>
-                        <View style={styles.macroLabelColumn}>
-                            <Text style={styles.macroLabel} adjustsFontSizeToFit minimumFontScale={0.6} numberOfLines={2}>
-                                Calories
-                            </Text>
-                            <Text style={styles.macroUnit} adjustsFontSizeToFit minimumFontScale={0.65} numberOfLines={1}>
-                                (kcal)
-                            </Text>
+                <View style={styles.insetPanel}>
+                    <View style={[styles.panelCalorieCell, focusedField === 'calories' && styles.inputFocused]}>
+                        <View>
+                            <Text style={styles.calorieLabel}>Calories</Text>
+                            <Text style={styles.cellUnit}>kcal</Text>
                         </View>
-                        <TextInput style={[styles.macroInput, focusedField === 'calories' && styles.inputFocused]} placeholder="0" placeholderTextColor={colors.placeholder} value={calories} onChangeText={setCalories} onFocus={() => setFocusedField('calories')} onBlur={() => setFocusedField(null)} keyboardType="numeric" />
+                        <TextInput
+                            style={styles.calorieInput}
+                            placeholder="0"
+                            placeholderTextColor={colors.placeholder}
+                            value={calories}
+                            onChangeText={setCalories}
+                            onFocus={() => setFocusedField('calories')}
+                            onBlur={() => setFocusedField(null)}
+                            keyboardType="numeric"
+                        />
                     </View>
-
-                    {/* Fats */}
-                    <View style={styles.macroInputRow}>
-                        <View style={styles.macroLabelColumn}>
-                            <Text style={styles.macroLabel} adjustsFontSizeToFit minimumFontScale={0.6} numberOfLines={2}>
-                                Fats
-                            </Text>
-                            <Text style={styles.macroUnit} adjustsFontSizeToFit minimumFontScale={0.65} numberOfLines={1}>
-                                (g)
-                            </Text>
-                        </View>
-                        <TextInput style={[styles.macroInput, focusedField === 'fats' && styles.inputFocused]} placeholder="0" placeholderTextColor={colors.placeholder} value={fats} onChangeText={setFats} onFocus={() => setFocusedField('fats')} onBlur={() => setFocusedField(null)} keyboardType="numeric" />
-                    </View>
-
-                    {/* Carbs */}
-                    <View style={styles.macroInputRow}>
-                        <View style={styles.macroLabelColumn}>
-                            <Text style={styles.macroLabel} adjustsFontSizeToFit minimumFontScale={0.6} numberOfLines={2}>
-                                Carbs
-                            </Text>
-                            <Text style={styles.macroUnit} adjustsFontSizeToFit minimumFontScale={0.65} numberOfLines={1}>
-                                (g)
-                            </Text>
-                        </View>
-                        <TextInput style={[styles.macroInput, focusedField === 'carbs' && styles.inputFocused]} placeholder="0" placeholderTextColor={colors.placeholder} value={carbs} onChangeText={setCarbs} onFocus={() => setFocusedField('carbs')} onBlur={() => setFocusedField(null)} keyboardType="numeric" />
-                    </View>
-
-                    {/* Protein */}
-                    <View style={styles.macroInputRow}>
-                        <View style={styles.macroLabelColumn}>
-                            <Text style={styles.macroLabel} adjustsFontSizeToFit minimumFontScale={0.6} numberOfLines={2}>
-                                Protein
-                            </Text>
-                            <Text style={styles.macroUnit} adjustsFontSizeToFit minimumFontScale={0.65} numberOfLines={1}>
-                                (g)
-                            </Text>
-                        </View>
-                        <TextInput style={[styles.macroInput, focusedField === 'protein' && styles.inputFocused]} placeholder="0" placeholderTextColor={colors.placeholder} value={protein} onChangeText={setProtein} onFocus={() => setFocusedField('protein')} onBlur={() => setFocusedField(null)} keyboardType="numeric" />
+                    <View style={styles.panelCellRow}>
+                        {(
+                            [
+                                ['fats', 'Fats', fats, setFats],
+                                ['carbs', 'Carbs', carbs, setCarbs],
+                                ['protein', 'Protein', protein, setProtein],
+                            ] as const
+                        ).map(([key, label, value, setter]) => (
+                            <View key={key} style={[styles.panelMacroCell, focusedField === key && styles.inputFocused]}>
+                                <Text style={styles.cellLabel}>{label}</Text>
+                                <TextInput
+                                    style={styles.panelMacroCellInput}
+                                    placeholder="0"
+                                    placeholderTextColor={colors.placeholder}
+                                    value={value}
+                                    onChangeText={setter}
+                                    onFocus={() => setFocusedField(key)}
+                                    onBlur={() => setFocusedField(null)}
+                                    keyboardType="numeric"
+                                />
+                                <Text style={styles.cellUnit}>g</Text>
+                            </View>
+                        ))}
                     </View>
                 </View>
 
-                {/* Add Button */}
-                <TouchableOpacity onPress={handleAddEntry} activeOpacity={0.8} style={styles.addButtonTouchable}>
-                    <LinearGradient colors={colors.nutritionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.addButton}>
-                        <Text style={styles.addButtonText} adjustsFontSizeToFit minimumFontScale={0.7} numberOfLines={1}>
-                            Add Meal
-                        </Text>
+                {aiFilled && <Text style={styles.aiEstimateNote}>AI estimate — tap any value to adjust</Text>}
+            </ScrollView>
+
+            <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+                <TouchableOpacity activeOpacity={0.8} disabled={!hasContent} onPress={handleAddEntry} style={[styles.ctaTouchable, !hasContent && styles.ctaDisabled]}>
+                    <LinearGradient colors={colors.nutritionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.cta}>
+                        <Text style={styles.ctaText}>Add meal</Text>
                     </LinearGradient>
                 </TouchableOpacity>
-            </ScrollView>
-        </KeyboardAvoidingView>
+            </View>
+        </View>
     )
 }
 
@@ -213,175 +199,199 @@ function makeStyles(colors: Colors) {
         scrollView: {
             flex: 1,
         },
-        content: {
-            flexGrow: 1,
-            paddingHorizontal: 24,
-            paddingTop: 12,
+        scrollContent: {
+            paddingHorizontal: 20,
+            paddingTop: 4,
+            paddingBottom: 24,
         },
-        iconContainer: {
-            alignItems: 'center',
-            marginBottom: 16,
-            marginTop: 12,
-        },
-        iconCircle: {
-            width: 100,
-            height: 100,
-            borderRadius: 50,
-            backgroundColor: colors.surface,
-            justifyContent: 'center',
-            alignItems: 'center',
-            borderWidth: 2,
-            borderColor: colors.nutrition,
-        },
-        title: {
-            width: '100%',
+        heroTitle: {
             fontSize: 24,
             color: colors.text,
-            textAlign: 'center',
-            marginBottom: 4,
             letterSpacing: -0.5,
             fontFamily: fonts.semibold,
+            marginTop: 8,
+            marginBottom: 4,
         },
-        subtitle: {
-            width: '100%',
-            fontSize: 16,
+        heroSub: {
+            fontSize: 14,
             color: colors.labelMuted,
-            textAlign: 'center',
-            marginBottom: 20,
             fontFamily: fonts.regular,
-            letterSpacing: 0.2,
+            letterSpacing: 0.1,
+            marginBottom: 16,
         },
-        inputSection: {
-            marginBottom: 20,
-        },
-        inputContainer: {
-            marginBottom: 0,
-        },
-        input: {
+        heroInput: {
             backgroundColor: colors.surface,
-            borderRadius: 12,
+            borderRadius: 14,
             paddingHorizontal: 16,
             paddingVertical: 14,
-            fontSize: 15,
-            lineHeight: 20,
-            minHeight: 68,
-            textAlignVertical: 'top',
+            fontSize: 16,
+            lineHeight: 22,
+            minHeight: 110,
             color: colors.text,
-            borderWidth: 2,
+            borderWidth: 1,
             borderColor: colors.hairline,
             fontFamily: fonts.regular,
+            marginBottom: 12,
         },
         inputFocused: {
             borderColor: colors.nutrition,
         },
-        macrosSection: {
-            marginBottom: 20,
+        generatePrimaryTouchable: {
+            borderRadius: radius.cardLg,
+            overflow: 'hidden',
+            shadowColor: colors.nutrition,
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 6,
         },
-        sectionTitle: {
-            width: '100%',
+        generatePrimary: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+            borderRadius: radius.cardLg,
+            minHeight: 50,
+            paddingHorizontal: 20,
+        },
+        generatePrimaryText: {
             fontSize: 16,
-            color: colors.text,
-            marginBottom: 12,
-            letterSpacing: -0.5,
+            color: '#FFF',
             fontFamily: fonts.semibold,
+            letterSpacing: -0.3,
         },
-        macroInputRow: {
+        generateLocked: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+            borderRadius: radius.cardLg,
+            minHeight: 50,
+            backgroundColor: colors.surface,
+            borderWidth: 1,
+            borderColor: colors.hairline,
+        },
+        generateLockedText: {
+            fontSize: 15,
+            color: colors.textMuted,
+            fontFamily: fonts.semibold,
+            letterSpacing: -0.3,
+        },
+        dividerRow: {
             flexDirection: 'row',
             alignItems: 'center',
             gap: 10,
-            marginBottom: 10,
+            marginVertical: 18,
         },
-        macroLabelColumn: {
-            flexDirection: 'column',
-            justifyContent: 'center',
-            minWidth: 72,
-            maxWidth: 112,
-            flexShrink: 1,
-        },
-        macroLabel: {
-            width: '100%',
-            fontSize: 16,
-            color: colors.labelMuted,
-            letterSpacing: -0.5,
-            fontFamily: fonts.semibold,
-        },
-        macroInput: {
+        dividerLine: {
             flex: 1,
-            minWidth: 0,
-            backgroundColor: colors.surface,
-            borderRadius: 10,
-            paddingHorizontal: 14,
-            paddingVertical: 12,
-            fontSize: 15,
-            color: colors.text,
-            borderWidth: 2,
-            borderColor: colors.hairline,
-            fontFamily: fonts.regular,
+            height: 1,
+            backgroundColor: colors.divider,
         },
-        macroUnit: {
-            width: '100%',
+        dividerText: {
             fontSize: 12,
             color: colors.textMuted,
             fontFamily: fonts.medium,
         },
-        generateButton: {
-            marginTop: 14,
+        insetPanel: {
+            backgroundColor: colors.surfaceInset,
+            borderRadius: 14,
+            padding: 10,
+        },
+        panelCalorieCell: {
             flexDirection: 'row',
             alignItems: 'center',
-            justifyContent: 'center',
-            minHeight: 48,
-            paddingHorizontal: 16,
-            backgroundColor: colors.nutrition + '22',
-            borderRadius: 12,
-            borderWidth: 1.5,
-            borderColor: colors.nutrition + '66',
+            justifyContent: 'space-between',
+            backgroundColor: colors.surface,
+            borderRadius: radius.cardLg,
+            borderWidth: 1,
+            borderColor: colors.hairline,
+            paddingHorizontal: 14,
+            paddingVertical: 10,
+            marginBottom: 10,
         },
-        generateButtonUnavailable: {
-            backgroundColor: colors.textMuted + '40',
-            borderColor: colors.textMuted + '80',
-        },
-        generateButtonContent: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 8,
-        },
-        generateButtonText: {
+        calorieLabel: {
             fontSize: 15,
-            color: colors.nutrition,
-            letterSpacing: -0.3,
+            color: colors.labelMuted,
             fontFamily: fonts.semibold,
+            letterSpacing: -0.3,
         },
-        generateButtonTextUnavailable: {
-            color: colors.placeholder,
+        calorieInput: {
+            flex: 1,
+            fontSize: 24,
+            color: colors.text,
+            fontFamily: fonts.bold,
+            textAlign: 'right',
+            paddingVertical: 4,
+            paddingLeft: 12,
         },
-
-        addButtonTouchable: {
-            borderRadius: 12,
+        panelCellRow: {
+            flexDirection: 'row',
+            gap: 10,
+        },
+        panelMacroCell: {
+            flex: 1,
+            alignItems: 'center',
+            backgroundColor: colors.surface,
+            borderRadius: radius.cardLg,
+            borderWidth: 1,
+            borderColor: colors.hairline,
+            paddingVertical: 10,
+        },
+        panelMacroCellInput: {
+            alignSelf: 'stretch',
+            fontSize: 20,
+            color: colors.text,
+            fontFamily: fonts.bold,
+            textAlign: 'center',
+            paddingVertical: 2,
+        },
+        cellLabel: {
+            fontSize: 12,
+            color: colors.labelMuted,
+            fontFamily: fonts.medium,
+        },
+        cellUnit: {
+            fontSize: 11,
+            color: colors.textMuted,
+            fontFamily: fonts.medium,
+        },
+        aiEstimateNote: {
+            fontSize: 12,
+            color: colors.nutritionInk,
+            fontFamily: fonts.medium,
+            marginTop: 10,
+        },
+        footer: {
+            paddingHorizontal: 20,
+            paddingTop: 12,
+            borderTopWidth: 1,
+            borderTopColor: colors.hairline,
+            backgroundColor: colors.background,
+        },
+        ctaTouchable: {
+            borderRadius: radius.cardLg,
             overflow: 'hidden',
             shadowColor: colors.nutrition,
-            shadowOffset: {
-                width: 0,
-                height: 4,
-            },
-            shadowOpacity: 0.4,
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.35,
             shadowRadius: 8,
-            elevation: 8,
-            marginTop: 0,
+            elevation: 6,
         },
-        addButton: {
-            borderRadius: 12,
-            paddingVertical: 16,
-            paddingHorizontal: 20,
+        ctaDisabled: {
+            opacity: 0.4,
+        },
+        cta: {
+            borderRadius: radius.cardLg,
+            paddingVertical: 15,
             alignItems: 'center',
             justifyContent: 'center',
         },
-        addButtonText: {
-            maxWidth: '100%',
-            fontSize: 17,
+        ctaText: {
+            fontSize: 16,
             color: '#FFF',
-            letterSpacing: -0.5,
             fontFamily: fonts.semibold,
-            textAlign: 'center',
+            letterSpacing: -0.3,
         },
     })
 }
