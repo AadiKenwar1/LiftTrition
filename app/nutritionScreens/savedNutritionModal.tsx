@@ -3,6 +3,7 @@ import SavedEntry from '@/components/NutritionComponents/SavedEntry'
 import { useAuth } from '@/context/AuthContext'
 import { useNutrition } from '@/context/NutritionContext'
 import { getFilteredSavedNutritionEntries } from '@/context/NutritionContext/functions/crudFunctions'
+import { scaleIngredients } from '@/context/NutritionContext/functions/ingredients'
 import { Ingredient, NutritionEntry } from '@/context/NutritionContext/types'
 import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { confirmDelete } from '@/lib/utils/confirmDelete'
@@ -18,19 +19,6 @@ type StagedSavedMeal = {
     lineId: string
     savedItem: NutritionEntry
     quantity: number
-}
-
-function scaleIngredients(ingredients: Ingredient[], factor: number): Ingredient[] {
-    if (!ingredients.length) return []
-    if (factor === 1) return ingredients.map((ing) => ({ ...ing }))
-    return ingredients.map((ing) => ({
-        ...ing,
-        quantity: ing.quantity * factor,
-        protein: ing.protein * factor,
-        carbs: ing.carbs * factor,
-        fats: ing.fats * factor,
-        calories: ing.calories * factor,
-    }))
 }
 
 export default function SavedNutritionModal() {

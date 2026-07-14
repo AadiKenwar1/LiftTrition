@@ -22,3 +22,12 @@ export function sumIngredients(ingredients: Ingredient[]) {
         calories: Math.round(calories),
     }
 }
+
+// Scales quantity only — per-unit macros stay untouched, so totals (macro × quantity) come out N×, not N²×.
+export function scaleIngredients(ingredients: Ingredient[], factor: number): Ingredient[] {
+    if (factor === 1) return ingredients.map((ing) => ({ ...ing }))
+    return ingredients.map((ing) => ({
+        ...ing,
+        quantity: (ing.quantity ?? 1) * factor,
+    }))
+}

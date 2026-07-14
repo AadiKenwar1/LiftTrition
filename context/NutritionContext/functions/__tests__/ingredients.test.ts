@@ -1,5 +1,5 @@
 import { Ingredient } from '../../types';
-import { sumIngredients } from '../ingredients';
+import { scaleIngredients, sumIngredients } from '../ingredients';
 
 const ing = (partial: Partial<Ingredient>): Ingredient => ({
   name: 'x',
@@ -59,5 +59,45 @@ describe('sumIngredients', () => {
 
   test('empty list is all zeros', () => {
     expect(sumIngredients([])).toEqual({ protein: 0, carbs: 0, fats: 0, calories: 0 });
+  });
+});
+
+describe('scaleIngredients', () => {
+  test('factor 2 doubles quantity but leaves macros unchanged', () => {
+    const scaled = scaleIngredients([ing({ quantity: 1, protein: 10, carbs: 20, fats: 5, calories: 100 })], 2);
+    expect(scaled).toEqual([
+      ing({ quantity: 2, protein: 10, carbs: 20, fats: 5, calories: 100 }),
+    ]);
+  });
+
+  test('regression: sumIngredients(scaleIngredients(list, 2)) is 2x, not 4x', () => {
+    const list = [
+      ing({ quantity: 1, protein: 10, carbs: 20, fats: 5, calories: 100 }),
+      ing({ quantity: 2, protein: 3, carbs: 4, fats: 1, calories: 50 }),
+    ];
+    const base = sumIngredients(list);
+    const scaledTotals = sumIngredients(scaleIngredients(list, 2));
+    expect(scaledTotals).toEqual({
+      protein: Math.round(base.protein * 2 * 10) / 10,
+      carbs: Math.round(base.carbs * 2 * 10) / 10,
+      fats: Math.round(base.fats * 2 * 10) / 10,
+      calories: Math.round(base.calories * 2),
+    });
+  });
+
+  test('factor 1 returns unchanged quantity/macros and copies (does not mutate input)', () => {
+    const original = [ing({ quantity: 1, protein: 10, carbs: 20, fats: 5, calories: 100 })];
+    const scaled = scaleIngredients(original, 1);
+    expect(scaled).toEqual(original);
+    expect(scaled[0]).not.toBe(original[0]);
+    scaled[0].quantity = 999;
+    expect(original[0].quantity).toBe(1);
+  });
+
+  test('a missing quantity scales from a default of 1', () => {
+    const scaled = scaleIngredients([ing({ quantity: undefined as unknown as number, protein: 7, calories: 70 })], 3);
+    expect(scaled[0].quantity).toBe(3);
+    expect(scaled[0].protein).toBe(7);
+    expect(scaled[0].calories).toBe(70);
   });
 });

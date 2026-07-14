@@ -297,7 +297,7 @@ CRITICAL (data loss, security, broken core flows)
 MAJOR (wrong behavior, bad UX)
 ------------------------------
 
-6. A bad launch can dump an existing user back into onboarding
+*6. A bad launch can dump an existing user back into onboarding
    If loading settings fails once, the app quietly pretends the user is
    brand-new (blank defaults, onboarding not complete) instead of
    showing an error. If they re-do onboarding, their real goals and
@@ -336,7 +336,7 @@ MAJOR (wrong behavior, bad UX)
    "tap to retry" (NOT onboarding); Retry succeeds → tabs with real
    data; fresh account still onboards normally.
 
-7. Food logged the next morning lands on yesterday
+*7. Food logged the next morning lands on yesterday
    The selected date is set once when the app starts and never rolls
    over at midnight. Use the app in the evening, leave it in the
    background, log breakfast tomorrow -> it's saved to yesterday, today
