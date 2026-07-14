@@ -8,7 +8,6 @@ import { useNutrition } from '@/context/NutritionContext'
 import { useSettings } from '@/context/SettingsContext'
 import { fonts, radius, useColorScheme, useColors, type Colors } from '@/context/ThemeContext'
 import { useWorkout } from '@/context/WorkoutContext'
-
 import { useToday } from '@/lib/hooks/useToday'
 import { addDays, formatDate, getWeekStart } from '@/lib/utils/dateHelper'
 import { useRouter } from 'expo-router'

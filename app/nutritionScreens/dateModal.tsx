@@ -5,7 +5,7 @@ import { isDateAfterToday } from '@/lib/utils/dateHelper'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { Calendar } from 'lucide-react-native'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Alert, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -16,6 +16,10 @@ export default function DateModal() {
     const styles = useMemo(() => makeStyles(colors), [colors])
     const [tempDate, setTempDate] = useState(selectedDate)
     const insets = useSafeAreaInsets()
+
+    useEffect(() => {
+        setTempDate(selectedDate)
+    }, [selectedDate])
     const scrollBottomPad = Math.max(insets.bottom, 20) + 140
 
     const showInvalidDateAlert = () => {
