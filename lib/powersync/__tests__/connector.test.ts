@@ -234,7 +234,10 @@ describe('Connector', () => {
             expect(Sentry.captureException).toHaveBeenCalledTimes(1)
             expect(Sentry.captureException).toHaveBeenCalledWith(
                 mockError,
-                { extra: { table: 'workouts', opType: UpdateType.DELETE, opId: 'test-id-1' } }
+                {
+                    tags: { area: 'powersync-dead-letter' },
+                    extra: { table: 'workouts', opType: UpdateType.DELETE, opId: 'test-id-1' },
+                }
             )
             expect(mockTransaction.complete).toHaveBeenCalledTimes(1)
         })
@@ -263,7 +266,10 @@ describe('Connector', () => {
             expect(Sentry.captureException).toHaveBeenCalledTimes(1)
             expect(Sentry.captureException).toHaveBeenCalledWith(
                 mockError,
-                { extra: { table: 'workouts', opType: UpdateType.DELETE, opId: 'test-id-1' } }
+                {
+                    tags: { area: 'powersync-dead-letter' },
+                    extra: { table: 'workouts', opType: UpdateType.DELETE, opId: 'test-id-1' },
+                }
             )
             expect(mockTransaction.complete).toHaveBeenCalledTimes(1)
         })
@@ -349,6 +355,54 @@ describe('Connector', () => {
             ;(mockDatabase.getNextCrudTransaction as jest.Mock).mockResolvedValue(mockTransaction)
 
             const mockError = { message: 'JWT expired', code: 'PGRST301' }
+            const mockEq = jest.fn().mockReturnValue({ error: mockError })
+            ;(supabase.from as jest.Mock).mockReturnValue({ delete: jest.fn().mockReturnValue({ eq: mockEq }) })
+
+            await expect(connector.uploadData(mockDatabase)).rejects.toEqual(mockError)
+            expect(mockTransaction.complete).not.toHaveBeenCalled()
+            expect(Sentry.captureException).not.toHaveBeenCalled()
+        })
+
+        it('should rethrow and not complete transaction on 23505 for the settings table (check-then-insert race self-heals on retry)', async () => {
+            const mockTransaction = {
+                crud: [
+                    {
+                        op: UpdateType.DELETE,
+                        table: 'settings',
+                        id: 'test-id-1',
+                        opData: {},
+                    },
+                ],
+                complete: jest.fn(),
+            }
+
+            ;(mockDatabase.getNextCrudTransaction as jest.Mock).mockResolvedValue(mockTransaction)
+
+            const mockError = { message: 'Database error', code: '23505' }
+            const mockEq = jest.fn().mockReturnValue({ error: mockError })
+            ;(supabase.from as jest.Mock).mockReturnValue({ delete: jest.fn().mockReturnValue({ eq: mockEq }) })
+
+            await expect(connector.uploadData(mockDatabase)).rejects.toEqual(mockError)
+            expect(mockTransaction.complete).not.toHaveBeenCalled()
+            expect(Sentry.captureException).not.toHaveBeenCalled()
+        })
+
+        it('should rethrow and not complete transaction on 23505 for the weight_progress table (check-then-insert race self-heals on retry)', async () => {
+            const mockTransaction = {
+                crud: [
+                    {
+                        op: UpdateType.DELETE,
+                        table: 'weight_progress',
+                        id: 'test-id-1',
+                        opData: {},
+                    },
+                ],
+                complete: jest.fn(),
+            }
+
+            ;(mockDatabase.getNextCrudTransaction as jest.Mock).mockResolvedValue(mockTransaction)
+
+            const mockError = { message: 'Database error', code: '23505' }
             const mockEq = jest.fn().mockReturnValue({ error: mockError })
             ;(supabase.from as jest.Mock).mockReturnValue({ delete: jest.fn().mockReturnValue({ eq: mockEq }) })
 
