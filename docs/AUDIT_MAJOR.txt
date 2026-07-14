@@ -83,7 +83,12 @@ F5. Dates: one serialize/deserialize pair + a live "today" —
 F6. Errors stop pretending to be success
     a) useAsyncLoad (lib/hooks/, new): wraps a context's load with
        status 'loading' | 'ready' | 'error' + retry(). An error is a
-       distinct state — never defaults-presented-as-truth.
+       distinct state — never defaults-presented-as-truth. Also ignores
+       a stale run whose deps changed mid-flight (cancelled flag +
+       isStale() passed to the loader): Settings/Nutrition/Workout
+       share one copy-pasted load effect with NO such guard today, so
+       an in-flight load for the old user can clobber the new one —
+       retires that skeleton and the race across all three at once.
     b) AppLoadingScreen error variant (no new component): when a load
        has failed, the existing loading screen fades in "Having
        trouble loading your data — Tap to retry" wired to the

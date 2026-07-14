@@ -4,6 +4,7 @@ import { useNutrition } from '@/context/NutritionContext'
 import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { getFoodItem, getFoodSearchResults } from '@/lib/foodDB/foodDB'
 import { FoodItem, FoodSearchResult } from '@/lib/foodDB/types'
+import { parseNumericInput } from '@/lib/utils/number'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { Check, Database, Plus, X } from 'lucide-react-native'
@@ -76,10 +77,12 @@ export default function FoodDBModal() {
     }
 
     //Adds item in the list of added items
+    const parsedQuantity = parseNumericInput(quantityValue)
+    const quantityValid = parsedQuantity !== null && parsedQuantity > 0
+
     function confirmAddItem() {
-        if (quantityInputItem) {
-            const quantity = parseInt(quantityValue) || 1
-            setAddedItems([...addedItems, { ...quantityInputItem, quantity }])
+        if (quantityInputItem && quantityValid) {
+            setAddedItems([...addedItems, { ...quantityInputItem, quantity: parsedQuantity }])
             setQuantityInputItem(null)
             setQuantityValue('1')
             setSelectedSearchItem(null)
@@ -181,13 +184,13 @@ export default function FoodDBModal() {
                     <View style={styles.quantityContent}>
                         <Text style={styles.quantityTitle}>How many servings?</Text>
                         <Text style={styles.quantitySubtitle}>{quantityInputItem?.name}</Text>
-                        <TextInput style={styles.quantityInput} placeholder="1" placeholderTextColor={colors.placeholder} value={quantityValue} onChangeText={setQuantityValue} keyboardType="numeric" autoFocus />
+                        <TextInput style={styles.quantityInput} placeholder="1" placeholderTextColor={colors.placeholder} value={quantityValue} onChangeText={setQuantityValue} keyboardType="decimal-pad" autoFocus />
                         <View style={styles.quantityButtons}>
                             <TouchableOpacity style={[styles.quantityButton, styles.cancelButton]} onPress={cancelAddItem} activeOpacity={0.5}>
                                 <X size={18} color={colors.destructive} strokeWidth={2.5} />
                                 <Text style={[styles.quantityButtonText, styles.cancelButtonText]}>Cancel</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={[styles.quantityButton, styles.confirmButton]} onPress={confirmAddItem} activeOpacity={0.5}>
+                            <TouchableOpacity style={[styles.quantityButton, styles.confirmButton, !quantityValid && styles.confirmButtonDisabled]} onPress={confirmAddItem} disabled={!quantityValid} activeOpacity={0.5}>
                                 <Check size={18} color={colors.nutrition} strokeWidth={2.5} />
                                 <Text style={[styles.quantityButtonText, styles.confirmButtonText]}>Add</Text>
                             </TouchableOpacity>
@@ -624,6 +627,9 @@ function makeStyles(colors: Colors) {
         confirmButton: {
             backgroundColor: colors.nutrition + '1F',
             borderColor: colors.nutrition + '40',
+        },
+        confirmButtonDisabled: {
+            opacity: 0.4,
         },
         quantityButtonText: {
             fontSize: 15,

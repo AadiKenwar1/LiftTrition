@@ -1,5 +1,6 @@
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { validateMacro } from '@/context/SettingsContext/functions/validator'
+import { parseNumericInput } from '@/lib/utils/number'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Animated, Easing, Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
@@ -96,8 +97,8 @@ export default function EditMacroGoalModal({ visible, kind, initialValue, onDism
     }
 
     const handleSave = () => {
-        const parsed = parseFloat(draft.trim())
-        if (!validateMacro(parsed)) return
+        const parsed = parseNumericInput(draft)
+        if (parsed === null || !validateMacro(parsed)) return
         animateOutThen(() => onSave(Math.round(parsed)))
     }
 

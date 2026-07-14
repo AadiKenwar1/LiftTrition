@@ -22,6 +22,17 @@ const PRESETS = [
     { label: 'Infinity', value: 'Infinity' },
 ]
 
+const SERVINGS_PRESETS = [
+    { label: '0.5 (half)', value: '0.5' },
+    { label: '0,5 (comma)', value: '0,5' },
+    { label: '1', value: '1' },
+    { label: '2.5', value: '2.5' },
+    { label: '0', value: '0' },
+    { label: '-1', value: '-1' },
+    { label: 'empty', value: '' },
+    { label: 'abc', value: 'abc' },
+]
+
 function show(n: number | null): string {
     if (n === null) return 'null'
     if (Number.isNaN(n)) return 'NaN'
@@ -49,6 +60,20 @@ export default function NumberParsingTest() {
             return
         }
         setLastSubmit(`saved ${show(parsed)}`)
+    }
+
+    // Servings (issue 11) — quantity uses a `> 0` rule, not just `!== null`
+    const [servings, setServings] = useState('0.5')
+    const [lastAdd, setLastAdd] = useState('—')
+
+    const parsedServings = parseNumericInput(servings)
+    const legacyParseInt = parseInt(servings) || 1 // old foodDBModal
+    const legacyClamped = Math.max(1, parseInt(servings, 10) || 1) // old savedNutritionModal
+    const servingsValid = parsedServings !== null && parsedServings > 0
+
+    const addServing = () => {
+        if (!servingsValid) return
+        setLastAdd(`added quantity ${show(parsedServings)}`)
     }
 
     return (
@@ -108,6 +133,39 @@ export default function NumberParsingTest() {
                     <Text style={styles.resultValue}>{lastSubmit}</Text>
                 </View>
             </View>
+
+            <Text style={styles.sectionTitle}>Servings (issue 11)</Text>
+            <Field label="Servings — decimal-pad, same as the food/saved modals">
+                <Segmented options={SERVINGS_PRESETS} value={servings} onChange={setServings} />
+            </Field>
+            <View style={styles.inputWrap}>
+                <TextInput style={styles.input} value={servings} onChangeText={setServings} keyboardType="decimal-pad" placeholder="How many servings?" placeholderTextColor={colors.placeholder} />
+            </View>
+            <View style={styles.card}>
+                <View style={styles.resultRow}>
+                    <Text style={styles.resultLabel}>parseInt||1 — old foodDBModal</Text>
+                    <Text style={[styles.resultValue, legacyParseInt !== parsedServings && styles.bad]}>{show(legacyParseInt)}</Text>
+                </View>
+                <View style={styles.resultRow}>
+                    <Text style={styles.resultLabel}>max(1,parseInt) — old saved</Text>
+                    <Text style={[styles.resultValue, legacyClamped !== parsedServings && styles.bad]}>{show(legacyClamped)}</Text>
+                </View>
+                <View style={styles.resultRow}>
+                    <Text style={styles.resultLabel}>parseNumericInput ( &gt; 0 )</Text>
+                    <Text style={[styles.resultValue, servingsValid ? styles.good : styles.warn]}>{show(parsedServings)}</Text>
+                </View>
+                <View style={styles.resultRow}>
+                    <Text style={styles.resultLabel}>Add button</Text>
+                    <Text style={[styles.resultValue, servingsValid ? styles.good : styles.warn]}>{servingsValid ? 'enabled' : 'disabled (null or ≤ 0)'}</Text>
+                </View>
+                <TouchableOpacity style={[styles.submitButton, !servingsValid && styles.submitDisabled]} disabled={!servingsValid} onPress={addServing} activeOpacity={0.8}>
+                    <Text style={styles.submitText}>Add serving</Text>
+                </TouchableOpacity>
+                <View style={styles.resultRow}>
+                    <Text style={styles.resultLabel}>Last add</Text>
+                    <Text style={styles.resultValue}>{lastAdd}</Text>
+                </View>
+            </View>
         </ScrollView>
     )
 }
@@ -143,6 +201,9 @@ function makeStyles(colors: Colors) {
             fontFamily: fonts.semibold,
             fontSize: 14,
             color: colors.textSecondary,
+        },
+        inputWrap: {
+            marginBottom: 12,
         },
         input: {
             flex: 1,
