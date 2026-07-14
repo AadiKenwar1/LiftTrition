@@ -5,11 +5,12 @@ import { useNutrition } from '@/context/NutritionContext'
 import { getFilteredSavedNutritionEntries } from '@/context/NutritionContext/functions/crudFunctions'
 import { Ingredient, NutritionEntry } from '@/context/NutritionContext/types'
 import { fonts, useColors, type Colors } from '@/context/ThemeContext'
+import { confirmDelete } from '@/lib/utils/confirmDelete'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { Bookmark, Check, X } from 'lucide-react-native'
 import { useEffect, useMemo, useState } from 'react'
-import { Alert, FlatList, KeyboardAvoidingView, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { FlatList, KeyboardAvoidingView, Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import uuid from 'react-native-uuid'
 
 type StagedSavedMeal = {
@@ -81,10 +82,7 @@ export default function SavedNutritionModal() {
     }
 
     function confirmUnsave(savedItem: NutritionEntry) {
-        Alert.alert('Remove saved meal?', `"${savedItem.name}" will be removed from your saved meals.`, [
-            { text: 'Cancel', style: 'cancel' },
-            { text: 'Remove', style: 'destructive', onPress: () => handleUnsaveNutrition(savedItem.id) },
-        ])
+        confirmDelete({ title: 'Remove saved meal?', message: `"${savedItem.name}" will be removed from your saved meals.`, confirmText: 'Remove', onConfirm: () => handleUnsaveNutrition(savedItem.id) })
     }
 
     async function handleAddAll() {

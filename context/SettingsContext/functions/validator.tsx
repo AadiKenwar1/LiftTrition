@@ -6,6 +6,10 @@ const MIN_WEIGHT_IMPERIAL = 50
 const MIN_WEIGHT_METRIC = 20
 
 export function validateHeightWeight(height: number, weight: number, unitSystem: 'imperial' | 'metric'): boolean {
+    if (!Number.isFinite(height) || !Number.isFinite(weight)) {
+        Alert.alert('Invalid Input', 'Please enter a valid number.', [{ text: 'OK' }])
+        return false
+    }
     const minH = unitSystem === 'imperial' ? MIN_HEIGHT_IMPERIAL : MIN_HEIGHT_METRIC
     const minW = unitSystem === 'imperial' ? MIN_WEIGHT_IMPERIAL : MIN_WEIGHT_METRIC
     if (height < minH) {
@@ -42,7 +46,7 @@ export function validateTargetWeight(targetWeight: number, currentWeight: number
 }
 
 export function validateMacro(value: number): boolean {
-    if (Number.isNaN(value) || !Number.isFinite(value)) {
+    if (!Number.isFinite(value)) {
         Alert.alert('Invalid Input', 'Please enter a valid number.', [{ text: 'OK' }])
         return false
     }

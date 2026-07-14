@@ -1,5 +1,6 @@
 import { fonts, motion, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { useWorkout } from '@/context/WorkoutContext'
+import { confirmDelete } from '@/lib/utils/confirmDelete'
 import { IMAGE_MAP } from '@/context/WorkoutContext/exerciseLibrary/dataV2/imageMap'
 import { Exercise, Workout } from '@/context/WorkoutContext/types'
 import { Image } from 'expo-image'
@@ -64,7 +65,14 @@ export default function ArchiveModal() {
                                 <ArchiveRestore size={20 * 1.5} color={colors.workout} strokeWidth={2} />
                             </View>
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.iconButton} activeOpacity={0.5} onPress={() => (logType === 'workouts' ? handleDeleteWorkout(item.id) : handleDeleteExercise(item.id))}>
+                        <TouchableOpacity
+                            style={styles.iconButton}
+                            activeOpacity={0.5}
+                            onPress={() =>
+                                logType === 'workouts'
+                                    ? confirmDelete({ title: `Delete ${item.name}?`, message: 'Deleting a workout will delete all logs within the workout. This cannot be undone.', onConfirm: () => handleDeleteWorkout(item.id) })
+                                    : confirmDelete({ title: `Delete ${item.name}?`, message: 'Deleting an exercise will delete all logs associated with it. This cannot be undone.', onConfirm: () => handleDeleteExercise(item.id) })
+                            }>
                             <View style={[styles.iconCircle, styles.deleteIconCircle]}>
                                 <Trash size={20} color={colors.destructive} strokeWidth={2.5} />
                             </View>

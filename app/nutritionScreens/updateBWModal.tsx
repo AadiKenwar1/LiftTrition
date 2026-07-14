@@ -1,6 +1,7 @@
 import { useSettings } from '@/context/SettingsContext'
 import { validateHeightWeight } from '@/context/SettingsContext/functions/validator'
 import { fonts, useColors, type Colors } from '@/context/ThemeContext'
+import { parseNumericInput } from '@/lib/utils/number'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
 import { Scale } from 'lucide-react-native'
@@ -18,6 +19,7 @@ export default function UpdateBWModal() {
     const scrollBottomPad = Math.max(insets.bottom, 20) + 140
 
     const currentWeight = settings.bodyWeight > 0 ? settings.bodyWeight.toFixed(1) : '--'
+    const parsedWeight = parseNumericInput(weight)
 
     return (
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container} keyboardVerticalOffset={Platform.OS === 'ios' ? 8 : 0}>
@@ -58,16 +60,16 @@ export default function UpdateBWModal() {
                 {/* Update Button */}
                 <TouchableOpacity
                     onPress={() => {
-                        const parsed = Number(weight)
-                        if (!validateHeightWeight(settings.height, parsed, settings.unitSystem)) return
-                        handleUpdateBw(parsed)
+                        if (parsedWeight === null) return
+                        if (!validateHeightWeight(settings.height, parsedWeight, settings.unitSystem)) return
+                        handleUpdateBw(parsedWeight)
                         router.back()
                     }}
-                    disabled={!weight.trim()}
+                    disabled={parsedWeight === null}
                     activeOpacity={0.8}
                     style={styles.updateButtonTouchable}
                 >
-                    <LinearGradient colors={!weight.trim() ? [colors.disabled, colors.disabled] : colors.nutritionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.updateButton}>
+                    <LinearGradient colors={parsedWeight === null ? [colors.disabled, colors.disabled] : colors.nutritionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.updateButton}>
                         <Text style={styles.updateButtonText}>Update Weight</Text>
                     </LinearGradient>
                 </TouchableOpacity>

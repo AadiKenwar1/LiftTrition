@@ -7,6 +7,12 @@ import { NutritionEntry } from "../types";
  * Returns false if validation fails and shows alert
  */
 export function validateNutritionEntry(entry: Partial<NutritionEntry>): boolean {
+    for (const value of [entry.protein, entry.carbs, entry.fats, entry.calories]) {
+        if (value !== undefined && !Number.isFinite(value)) {
+            Alert.alert('Invalid Input', 'Please enter a valid number');
+            return false;
+        }
+    }
     if (entry.protein !== undefined && entry.protein < 0) {
         Alert.alert('Invalid Input', 'Protein cannot be negative');
         return false;

@@ -6,6 +6,7 @@ import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { useWorkout } from '@/context/WorkoutContext'
 import { IMAGE_MAP } from '@/context/WorkoutContext/exerciseLibrary/dataV2/imageMap'
 import { Exercise } from '@/context/WorkoutContext/types'
+import { confirmDelete } from '@/lib/utils/confirmDelete'
 import { Ionicons } from '@expo/vector-icons'
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
 import { Dumbbell, Pencil } from 'lucide-react-native'
@@ -41,7 +42,7 @@ export default function ExerciseScreen() {
     useLayoutEffect(() => navigation.setOptions({ title: `${workout?.name}` }), [navigation, workout?.name])
 
     function handleEdit(exercise: Exercise) {
-        Alert.alert(`Options for Exercise: ${exercise.name}`, `Warning: Deleting an exercise will delete all logs associated with it. To preserve logs archiving is recommended.`, [
+        Alert.alert(`${exercise.name}`, ``, [
             {
                 text: 'Archive',
                 style: 'default',
@@ -50,7 +51,7 @@ export default function ExerciseScreen() {
             {
                 text: 'Delete',
                 style: 'destructive',
-                onPress: () => handleDeleteExercise(exercise.id),
+                onPress: () => confirmDelete({ title: `Delete ${exercise.name}?`, message: 'Deleting an exercise will delete all logs associated with it. This cannot be undone.', onConfirm: () => handleDeleteExercise(exercise.id) }),
             },
             {
                 text: 'Cancel',
@@ -80,19 +81,7 @@ export default function ExerciseScreen() {
         const muscleGroups = fullExerciseLib[item.name]?.mainMuscle ?? ''
         const imgSource = exerciseImageSources[item.name]
 
-        return (
-            <Log
-                text={item.name}
-                subtitle={muscleGroups}
-                imgSource={imgSource}
-                showImageFallback
-                wrapperHeight={120}
-                textLines={3}
-                onPress={() => router.push({ pathname: '/workoutScreens/logsModal', params: { workoutId: workoutId, exerciseId: item.id, exerciseName: item.name } })}
-                onMenuPress={drag}
-                onEditPress={() => handleEdit(item)}
-            />
-        )
+        return <Log text={item.name} subtitle={muscleGroups} imgSource={imgSource} showImageFallback wrapperHeight={120} textLines={3} onPress={() => router.push({ pathname: '/workoutScreens/logsModal', params: { workoutId: workoutId, exerciseId: item.id, exerciseName: item.name } })} onMenuPress={drag} onEditPress={() => handleEdit(item)} />
     }
 
     return (
