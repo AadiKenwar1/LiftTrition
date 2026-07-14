@@ -1,6 +1,7 @@
 import type { NutritionEntryIngredientRecord, NutritionEntryRecord, SavedNutritionEntryIngredientRecord, SavedNutritionEntryRecord } from '@/lib/powersync/AppSchema'
 import { powerSync } from '@/lib/powersync/system'
 import { getDateKey } from '@/lib/utils/dateHelper'
+import { sanitizeInt, sanitizeMacro } from '@/lib/utils/number'
 import { NutritionEntry } from '../types'
 
 // Map DB row -> NutritionEntry
@@ -40,7 +41,7 @@ function rowToNutritionEntry(row: NutritionEntryRecord, ingredients: NutritionEn
 }
 
 // Map NutritionEntry -> DB row
-function nutritionEntryToRow(entry: NutritionEntry) {
+export function nutritionEntryToRow(entry: NutritionEntry) {
     const localDate = new Date(entry.date)
     localDate.setHours(0, 0, 0, 0)
 
@@ -48,11 +49,11 @@ function nutritionEntryToRow(entry: NutritionEntry) {
         user_id: entry.userId,
         name: entry.name,
         date: getDateKey(localDate),
-        time: entry.time,
-        protein: entry.protein,
-        carbs: entry.carbs,
-        fats: entry.fats,
-        calories: entry.calories,
+        time: sanitizeInt(entry.time),
+        protein: sanitizeMacro(entry.protein),
+        carbs: sanitizeMacro(entry.carbs),
+        fats: sanitizeMacro(entry.fats),
+        calories: sanitizeMacro(entry.calories),
         is_photo: entry.isPhoto ? 1 : 0,
         photo_uri: entry.photoUri || null,
         created_at: entry.createdAt.toISOString(),
@@ -88,14 +89,14 @@ function rowToSavedNutritionEntry(row: SavedNutritionEntryRecord, ingredients: S
 }
 
 // Map SavedNutritionEntry -> DB row
-function savedNutritionEntryToRow(entry: NutritionEntry) {
+export function savedNutritionEntryToRow(entry: NutritionEntry) {
     return {
         user_id: entry.userId,
         name: entry.name,
-        protein: entry.protein,
-        carbs: entry.carbs,
-        fats: entry.fats,
-        calories: entry.calories,
+        protein: sanitizeMacro(entry.protein),
+        carbs: sanitizeMacro(entry.carbs),
+        fats: sanitizeMacro(entry.fats),
+        calories: sanitizeMacro(entry.calories),
         is_photo: entry.isPhoto ? 1 : 0,
         photo_uri: entry.photoUri || null,
         created_at: entry.createdAt.toISOString(),
@@ -185,7 +186,7 @@ export async function upsertNutritionEntry(entry: NutritionEntry): Promise<void>
                 `INSERT INTO nutrition_entry_ingredients (
                    id, nutrition_entry_id, name, quantity, protein, carbs, fats, calories, created_at
                  ) VALUES (uuid(), ?, ?, ?, ?, ?, ?, ?, datetime('now'))`,
-                [entry.id, ing.name, ing.quantity, ing.protein, ing.carbs, ing.fats, ing.calories],
+                [entry.id, ing.name, sanitizeMacro(ing.quantity), sanitizeMacro(ing.protein), sanitizeMacro(ing.carbs), sanitizeMacro(ing.fats), sanitizeMacro(ing.calories)],
             )
         }
     })
@@ -225,7 +226,7 @@ export async function upsertSavedNutritionEntry(entry: NutritionEntry): Promise<
                 `INSERT INTO saved_nutrition_entry_ingredients (
                    id, saved_nutrition_entry_id, name, quantity, protein, carbs, fats, calories, created_at
                  ) VALUES (uuid(), ?, ?, ?, ?, ?, ?, ?, datetime('now'))`,
-                [entry.id, ing.name, ing.quantity, ing.protein, ing.carbs, ing.fats, ing.calories],
+                [entry.id, ing.name, sanitizeMacro(ing.quantity), sanitizeMacro(ing.protein), sanitizeMacro(ing.carbs), sanitizeMacro(ing.fats), sanitizeMacro(ing.calories)],
             )
         }
     })
