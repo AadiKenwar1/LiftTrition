@@ -24,15 +24,19 @@ const MACRO_PRESETS = { lose: { protein: 0.35, fat: 0.25, carbs: 0.4 }, maintain
  * Mifflin-St Jeor → BMR → TDEE -> Daily Adjustment -> Macros
  * No deficit/surplus adjustment (calories = TDEE)
  * Macro split driven by goalType preset.
+ * Maintenance anchors to goalWeight (the maintain weight), not the drifting scale
+ * weight — weigh-ins never move a maintain user's targets. goalWeight <= 0 falls
+ * back to bodyWeight so a legacy row without an anchor can't zero the BMR.
  */
 export function calculateMacros(settings: Settings, isImperial: boolean = true) {
-    let weightKg = settings.bodyWeight
+    const weightForTargets = settings.goalType === 'maintain' && settings.goalWeight > 0 ? settings.goalWeight : settings.bodyWeight
+    let weightKg = weightForTargets
     let heightCm = settings.height
     const age = calculateAge(settings.birthDate)
     const gender = settings.gender
 
     if (isImperial) {
-        weightKg = settings.bodyWeight / 2.20462
+        weightKg = weightForTargets / 2.20462
         heightCm = settings.height * 2.54
     }
 

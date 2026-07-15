@@ -1,9 +1,11 @@
 import EditHeightModal from '@/components/NeutralComponents/EditHeightModal'
 import EditMacroGoalModal, { type MacroGoalKind } from '@/components/NutritionComponents/EditMacroGoalModal'
 import { useAuth } from '@/context/AuthContext'
-import { forceSignOut, isUploadFlushTimeoutError } from '@/context/AuthContext/functions/accountFunctions'
+import { forceSignOut } from '@/context/AuthContext/functions/accountFunctions'
 import { useSettings } from '@/context/SettingsContext'
+import { withRegeneratedTargets } from '@/context/SettingsContext/functions/bodyWeightFunctions'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
+import { isUploadFlushError, UploadFlushNotConnectedError } from '@/lib/powersync/FlushUploads'
 import { inchesToFeetInches } from '@/lib/utils/unitConversions'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -19,7 +21,7 @@ export default function ProfileScreen() {
     const SHOW_APPLE_ACCOUNT = false
 
     const { user, signOut, deleteAccount } = useAuth()
-    const { settings, setSettings, calculateMacros } = useSettings()
+    const { settings, setSettings } = useSettings()
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
     const [editingKind, setEditingKind] = useState<MacroGoalKind | null>(null)
@@ -38,24 +40,26 @@ export default function ProfileScreen() {
         }
     }
 
+    // Hand-editing any macro marks targets as customized: implicit recalcs
+    // (weigh-ins, height/activity edits) preserve them from then on.
     function handleSaveMacro(value: number) {
         if (!editingKind) return
-        if (editingKind === 'calories') setSettings({ ...settings, calorieGoal: value })
-        else if (editingKind === 'protein') setSettings({ ...settings, proteinGoal: value })
-        else if (editingKind === 'carbs') setSettings({ ...settings, carbsGoal: value })
-        else setSettings({ ...settings, fatsGoal: value })
+        if (editingKind === 'calories') setSettings({ ...settings, calorieGoal: value, macrosCustomized: true })
+        else if (editingKind === 'protein') setSettings({ ...settings, proteinGoal: value, macrosCustomized: true })
+        else if (editingKind === 'carbs') setSettings({ ...settings, carbsGoal: value, macrosCustomized: true })
+        else setSettings({ ...settings, fatsGoal: value, macrosCustomized: true })
     }
 
     function handleSaveHeight(totalHeight: number) {
         const updatedSettings = { ...settings, height: totalHeight }
-        const macros = calculateMacros(updatedSettings, settings.unitSystem === 'imperial')
-        setSettings({
-            ...updatedSettings,
-            calorieGoal: macros.calResult,
-            proteinGoal: macros.proteinGrams,
-            carbsGoal: macros.carbGrams,
-            fatsGoal: macros.fatGrams,
-        })
+        if (settings.macrosCustomized) {
+            Alert.alert('Recalculate targets?', 'You have hand-tuned macro targets. Recalculate them for your new height, or keep them as they are?', [
+                { text: 'Keep custom', onPress: () => setSettings(updatedSettings) },
+                { text: 'Recalculate', onPress: () => setSettings(withRegeneratedTargets({ ...updatedSettings, macrosCustomized: false })) },
+            ])
+            return
+        }
+        setSettings(withRegeneratedTargets(updatedSettings))
     }
 
     const router = useRouter()
@@ -92,8 +96,11 @@ export default function ProfileScreen() {
                     try {
                         await signOut()
                     } catch (error: unknown) {
-                        if (isUploadFlushTimeoutError(error)) {
-                            Alert.alert('Still syncing', "We're still uploading your data. You can wait and try again, or force sign out (unsynced data may be lost).", [
+                        if (isUploadFlushError(error)) {
+                            const offline = error instanceof UploadFlushNotConnectedError
+                            const title = offline ? "You're offline" : 'Still syncing'
+                            const message = offline ? 'Sign out anyway? Unsynced data will be lost.' : "We're still uploading your data. You can wait and try again, or force sign out (unsynced data may be lost)."
+                            Alert.alert(title, message, [
                                 { text: 'Cancel', style: 'cancel' },
                                 {
                                     text: 'Force sign out',

@@ -4,7 +4,7 @@ import { useAsyncLoad } from '@/lib/hooks/useAsyncLoad'
 import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useRef, useState, type SetStateAction } from 'react'
 import { loadSettingsAndBw, upsertSettings, upsertWeightForDate } from './database/powersyncStore'
 import { persistBackoffMs, reportPersistFailure } from '@/lib/powersync/persistErrors'
-import { computeBwUpdate, getBodyWeightProgressData } from './functions/bodyWeightFunctions'
+import { applySwitchToMaintenance, computeBwUpdate, getBodyWeightProgressData, type BwPrompt } from './functions/bodyWeightFunctions'
 import { getDateKey } from '@/lib/utils/dateHelper'
 import { calculateMacros } from './functions/macroCalculation'
 import { Settings, SettingsContextInterface } from './types'
@@ -25,6 +25,8 @@ const defaultSettings: Settings = {
     proteinGoal: 130,
     carbsGoal: 200,
     fatsGoal: 54,
+    macrosCustomized: false,
+    goalOvershootAcknowledged: false,
 }
 
 // Settings carry the whole app's targets, so a lost save matters more than one
@@ -94,8 +96,11 @@ export const SettingsProvider = ({ children }: PropsWithChildren) => {
     // Handles a body weight update: updates state and directly persists only the two changed rows.
     // Uses functional updaters so it always builds from the latest state, even when called
     // immediately after another setSettings (e.g. onboarding4 sets height then calls this).
-    const handleUpdateBw = useCallback(async (updatedWeight: number) => {
-        if (updatedWeight <= 0) return
+    // Returns the goal prompt to show (crossing / auto-maintain), recomputed from closure
+    // settings: cheap, pure, and its inputs (goal fields + previous weight) are never part
+    // of the same-tick setSettings that precedes this call.
+    const handleUpdateBw = useCallback(async (updatedWeight: number): Promise<BwPrompt | null> => {
+        if (updatedWeight <= 0) return null
 
         const dateKey = getDateKey(new Date())
 
@@ -106,13 +111,27 @@ export const SettingsProvider = ({ children }: PropsWithChildren) => {
         })
         markSettingsPersistDirty()  // settings row persisted via persistDirty effect
 
-        if (!userID) return
-        try {
-            await upsertWeightForDate(userID, dateKey, updatedWeight)
-        } catch (e) {
-            reportPersistFailure('settings', e, { reload: reloadFromDisk, severity: 'high', onboarding: onboardingCompleteRef.current === false })
+        const prompt = computeBwUpdate(updatedWeight, settings)?.prompt ?? null
+
+        // Weight-row persist stays fire-and-forget so callers awaiting the prompt never
+        // wait on the DB write — same close-the-modal latency as before the prompt existed.
+        if (userID) {
+            void upsertWeightForDate(userID, dateKey, updatedWeight).catch((e) => {
+                reportPersistFailure('settings', e, { reload: reloadFromDisk, severity: 'high', onboarding: onboardingCompleteRef.current === false })
+            })
         }
-    }, [userID, markSettingsPersistDirty, reloadFromDisk])
+        return prompt
+    }, [userID, settings, markSettingsPersistDirty, reloadFromDisk])
+
+    // Consented goal-prompt actions (issue 8): the only two intent changes the app may
+    // apply on the user's behalf, each a single explicit tap.
+    const switchToMaintenance = useCallback(() => {
+        setSettings(prev => applySwitchToMaintenance(prev))
+    }, [setSettings])
+
+    const acknowledgeGoalOvershoot = useCallback(() => {
+        setSettings(prev => ({ ...prev, goalOvershootAcknowledged: true }))
+    }, [setSettings])
 
     const handleGetBodyWeightProgressData = (onboardingCompletedAt?: Date) => getBodyWeightProgressData(bwProgress, onboardingCompletedAt)
 
@@ -225,6 +244,8 @@ export const SettingsProvider = ({ children }: PropsWithChildren) => {
                 setMode,
                 bwProgress,
                 handleUpdateBw,
+                switchToMaintenance,
+                acknowledgeGoalOvershoot,
                 handleGetBodyWeightProgressData,
                 calculateMacros,
                 loaded,

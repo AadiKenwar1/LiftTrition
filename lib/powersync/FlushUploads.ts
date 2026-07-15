@@ -1,18 +1,25 @@
 import { getPendingUploadEstimate } from '@/lib/powersync/uploadQueueStats'
 import { powerSync } from '@/lib/powersync/system'
 
-export class UploadFlushTimeoutError extends Error {
+/** Category for "the flush cannot complete" — the sign-out escape hatch keys off this, so any new flush-failure subclass inherits it automatically. */
+export class UploadFlushError extends Error {}
+
+export class UploadFlushTimeoutError extends UploadFlushError {
     readonly name = 'UploadFlushTimeoutError'
     constructor(message = 'Timed out waiting for uploads to finish.') {
         super(message)
     }
 }
 
-export class UploadFlushNotConnectedError extends Error {
+export class UploadFlushNotConnectedError extends UploadFlushError {
     readonly name = 'UploadFlushNotConnectedError'
     constructor(message = 'PowerSync is not connected.') {
         super(message)
     }
+}
+
+export function isUploadFlushError(e: unknown): e is UploadFlushError {
+    return e instanceof UploadFlushError
 }
 
 type FlushUploadsOptions = {

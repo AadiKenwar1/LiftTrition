@@ -3,7 +3,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { useMemo } from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
-interface ScanPromptCardProps {
+interface PromptCardProps {
     icon: React.ComponentType<any>
     title: string
     message: string
@@ -12,9 +12,8 @@ interface ScanPromptCardProps {
     onGoBack?: () => void
 }
 
-// Overlay card shown on top of ScanBackdrop for every non-live scan state:
-// upgrade (free), grant permission (canAskAgain), open settings (permanently denied).
-export default function ScanPromptCard({ icon: Icon, title, message, ctaLabel, onPress, onGoBack }: ScanPromptCardProps) {
+// Shared overlay prompt card (upsell / permission / settings) shown over any screen.
+export default function PromptCard({ icon: Icon, title, message, ctaLabel, onPress, onGoBack }: PromptCardProps) {
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
 

@@ -1,4 +1,4 @@
-import { flushUploadsOrThrow, UploadFlushTimeoutError } from '@/lib/powersync/FlushUploads'
+import { flushUploadsOrThrow } from '@/lib/powersync/FlushUploads'
 import { disconnectAndClearPowerSync } from '@/lib/powersync/orchestrator'
 import { supabase } from '@/lib/supabase/client'
 import { clearUserStorage } from '@/lib/utils/userStorage'
@@ -50,16 +50,36 @@ export async function forceSignOut(): Promise<void> {
 }
 
 /**
- * End the session on this device and wipe the local PowerSync replica.
- * Each step is guarded so a failure in one never strands the next.
+ * Remove the auth session from this device without requiring the network.
+ * signOut({ scope: 'local' }) calls the server BEFORE deleting the stored
+ * session, so offline it returns an error with the session still on disk.
+ * The fallback calls supabase's private _removeSession — the exact cleanup a
+ * successful sign-out runs (storage keys, memory, SIGNED_OUT event). Its
+ * existence is pinned by lib/supabase/__tests__/authInternals.test.ts.
  */
-export async function clearLocalSession(): Promise<void> {
+async function removeLocalAuthSession(): Promise<void> {
     try {
         const { error } = await supabase.auth.signOut({ scope: 'local' })
-        if (error) console.warn('clearLocalSession: auth signOut failed', error)
+        if (!error) return
+        console.warn('clearLocalSession: auth signOut failed; removing local session directly', error)
     } catch (e) {
-        console.warn('clearLocalSession: auth signOut threw', e)
+        console.warn('clearLocalSession: auth signOut threw; removing local session directly', e)
     }
+
+    const auth = supabase.auth as unknown as { _removeSession?: () => Promise<void> }
+    if (typeof auth._removeSession !== 'function') {
+        throw new Error('Could not sign out on this device. Please try again when back online.')
+    }
+    await auth._removeSession()
+}
+
+/**
+ * End the session on this device and wipe the local PowerSync replica.
+ * Session removal must succeed BEFORE anything is wiped — otherwise a failed
+ * sign-out would leave the user signed in with an empty local database.
+ */
+export async function clearLocalSession(): Promise<void> {
+    await removeLocalAuthSession()
 
     try {
         await disconnectAndClearPowerSync()
@@ -81,8 +101,4 @@ async function currentUserID(): Promise<string | undefined> {
         console.warn('currentUserID: getSession failed', e)
         return undefined
     }
-}
-
-export function isUploadFlushTimeoutError(e: unknown): e is UploadFlushTimeoutError {
-    return e instanceof UploadFlushTimeoutError
 }

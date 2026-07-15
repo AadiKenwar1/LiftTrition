@@ -1,19 +1,17 @@
+import {
+    applySwitchToMaintenance as applySettingsSwitchToMaintenance,
+    computeBwUpdate,
+    isGoalReached as isSettingsGoalReached,
+    OVERSHOOT_DEADBAND,
+} from '@/context/SettingsContext/functions/bodyWeightFunctions'
 import { calculateMacros } from '@/context/SettingsContext/functions/macroCalculation'
 import type { Settings } from '@/context/SettingsContext/types'
 
 /**
- * Dev-only simulation of the Issue 8 weigh-in rules ("targets are derived, intent is owned").
- * Pure functions over SimState so the sandbox page can drive them and the real fix can port
- * them (with these semantics + the unit tests) into context/SettingsContext/functions.
- *
- * Rules simulated:
- * - Weigh-ins update bodyWeight and regenerate targets for the CURRENT goalType only —
- *   goalType/goalPace are never touched implicitly.
- * - macrosCustomized: hand-tuned targets survive every implicit recalculation.
- * - Crossing goalWeight in the goal's direction → one-time 'goalReached' prompt (ask).
- * - Safety net: only after the user had their chance (previous weight already at/past goal),
- *   passing goal by a unit-aware deadband auto-switches to maintain, announced (act).
- * - 'Keep Going' sets goalOvershootAcknowledged → no prompts, no net, until the goal changes.
+ * Dev-only sandbox layer over the PRODUCTION issue-8 logic. The rules live in
+ * context/SettingsContext/functions (computeBwUpdate / applySwitchToMaintenance /
+ * calculateMacros with the maintenance anchor); this module only adapts a slim SimState
+ * with a fixed dev profile onto real Settings and narrates outcomes as event strings.
  */
 
 export interface SimState {
@@ -38,7 +36,7 @@ export interface WeighInOutcome {
     prompt: PromptKind | null
 }
 
-export const OVERSHOOT_DEADBAND = { imperial: 2, metric: 1 } as const
+export { OVERSHOOT_DEADBAND }
 
 // Fixed dev profile for TDEE math (male, 28, 5'10" / 178 cm, moderate activity)
 const PROFILE = {
@@ -70,6 +68,23 @@ function toSettings(state: SimState): Settings {
         proteinGoal: state.proteinGoal,
         carbsGoal: state.carbsGoal,
         fatsGoal: state.fatsGoal,
+        macrosCustomized: state.macrosCustomized,
+        goalOvershootAcknowledged: state.goalOvershootAcknowledged,
+    }
+}
+
+function fromSettings(prev: SimState, s: Settings): SimState {
+    return {
+        ...prev,
+        bodyWeight: s.bodyWeight,
+        goalType: s.goalType,
+        goalPace: s.goalPace,
+        calorieGoal: s.calorieGoal,
+        proteinGoal: s.proteinGoal,
+        carbsGoal: s.carbsGoal,
+        fatsGoal: s.fatsGoal,
+        macrosCustomized: s.macrosCustomized,
+        goalOvershootAcknowledged: s.goalOvershootAcknowledged,
     }
 }
 
@@ -97,64 +112,46 @@ export function initSimState(init: Pick<SimState, 'unitSystem' | 'goalType' | 'g
 
 /** Banner predicate — pure derived state, no storage. */
 export function isGoalReached(state: SimState): boolean {
-    if (state.goalType === 'lose') return state.bodyWeight <= state.goalWeight
-    if (state.goalType === 'gain') return state.bodyWeight >= state.goalWeight
-    return false
-}
-
-function atOrPastGoal(state: SimState, weight: number): boolean {
-    return state.goalType === 'lose' ? weight <= state.goalWeight : weight >= state.goalWeight
-}
-
-function pastDeadband(state: SimState, weight: number): boolean {
-    const deadband = OVERSHOOT_DEADBAND[state.unitSystem]
-    return state.goalType === 'lose' ? weight <= state.goalWeight - deadband : weight >= state.goalWeight + deadband
+    return isSettingsGoalReached(toSettings(state))
 }
 
 export function applyWeighIn(prev: SimState, newWeight: number): WeighInOutcome {
     const unit = unitLabel(prev)
     const events: string[] = [`Weigh-in: ${prev.bodyWeight} → ${newWeight} ${unit}`]
-    let state: SimState = { ...prev, bodyWeight: newWeight }
+
+    const result = computeBwUpdate(newWeight, toSettings(prev))
+    if (!result) return { state: prev, events: [...events, 'Rejected — invalid weight'], prompt: null }
+
+    const state = fromSettings(prev, result.newSettings)
 
     if (state.macrosCustomized) {
         events.push('Targets preserved — hand-tuned (macrosCustomized)')
+    } else if (prev.goalType === 'maintain') {
+        events.push(`Targets pinned to maintain weight ${state.goalWeight} ${unit} — weigh-ins never move them: ${targetsSummary(state)}`)
     } else {
-        state = recalcTargets(state)
-        events.push(`Targets recalculated for "${state.goalType}": ${targetsSummary(state)}`)
+        events.push(`Targets recalculated for "${prev.goalType}": ${targetsSummary(state)}`)
     }
 
-    let prompt: PromptKind | null = null
-    if (state.goalType !== 'maintain' && !state.goalOvershootAcknowledged) {
-        const wasPast = atOrPastGoal(prev, prev.bodyWeight)
-        const crossed = !wasPast && atOrPastGoal(prev, newWeight)
-
-        if (wasPast && pastDeadband(state, newWeight)) {
-            state = { ...state, goalType: 'maintain' }
-            if (state.macrosCustomized) {
-                events.push(`Safety net: ${OVERSHOOT_DEADBAND[state.unitSystem]} ${unit} past goal → auto-switched to maintain (announced); hand-tuned targets kept`)
-            } else {
-                state = recalcTargets(state)
-                events.push(`Safety net: ${OVERSHOOT_DEADBAND[state.unitSystem]} ${unit} past goal → auto-switched to maintain (announced): ${targetsSummary(state)}`)
-            }
-            prompt = 'autoMaintain'
-        } else if (crossed) {
-            events.push('Crossed goal weight → congrats prompt (goalType untouched)')
-            prompt = 'goalReached'
-        }
+    if (result.prompt === 'autoMaintain') {
+        events.push(
+            state.macrosCustomized
+                ? `Safety net: ${OVERSHOOT_DEADBAND[state.unitSystem]} ${unit} past goal → auto-switched to maintain (announced); hand-tuned targets kept`
+                : `Safety net: ${OVERSHOOT_DEADBAND[state.unitSystem]} ${unit} past goal → auto-switched to maintain (announced): ${targetsSummary(state)}`,
+        )
+    } else if (result.prompt === 'goalReached') {
+        events.push('Crossed goal weight → congrats prompt (goalType untouched)')
     }
 
-    return { state, events, prompt }
+    return { state, events, prompt: result.prompt }
 }
 
 export function applySwitchToMaintenance(prev: SimState): WeighInOutcome {
-    let state: SimState = { ...prev, goalType: 'maintain', goalOvershootAcknowledged: false }
-    const events: string[] = []
-    if (state.macrosCustomized) {
-        events.push('User chose "Switch to Maintenance" — goalType=maintain; hand-tuned targets kept')
-    } else {
-        state = recalcTargets(state)
-        events.push(`User chose "Switch to Maintenance" — goalType=maintain: ${targetsSummary(state)}`)
-    }
+    const state = fromSettings(prev, applySettingsSwitchToMaintenance(toSettings(prev)))
+    const events = [
+        state.macrosCustomized
+            ? 'User chose "Switch to Maintenance" — goalType=maintain; hand-tuned targets kept'
+            : `User chose "Switch to Maintenance" — goalType=maintain: ${targetsSummary(state)}`,
+    ]
     return { state, events, prompt: null }
 }
 

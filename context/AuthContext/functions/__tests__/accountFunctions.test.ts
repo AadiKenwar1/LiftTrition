@@ -2,7 +2,7 @@ import { flushUploadsOrThrow } from '@/lib/powersync/FlushUploads'
 import { disconnectAndClearPowerSync } from '@/lib/powersync/orchestrator'
 import { supabase } from '@/lib/supabase/client'
 import { clearUserStorage } from '@/lib/utils/userStorage'
-import { deleteAccount, forceSignOut, signOut } from '../accountFunctions'
+import { clearLocalSession, deleteAccount, forceSignOut, signOut } from '../accountFunctions'
 
 jest.mock('@/lib/supabase/client', () => ({
     supabase: {
@@ -19,7 +19,6 @@ jest.mock('@/lib/powersync/orchestrator', () => ({
 
 jest.mock('@/lib/powersync/FlushUploads', () => ({
     flushUploadsOrThrow: jest.fn(),
-    UploadFlushTimeoutError: class UploadFlushTimeoutError extends Error {},
 }))
 
 jest.mock('@/lib/utils/userStorage', () => ({
@@ -28,6 +27,9 @@ jest.mock('@/lib/utils/userStorage', () => ({
 
 const mockFetch = jest.fn()
 global.fetch = mockFetch as unknown as typeof fetch
+
+const authMock = supabase.auth as unknown as { getSession: jest.Mock; signOut: jest.Mock; _removeSession?: jest.Mock }
+const mockRemoveSession = jest.fn()
 
 let warnSpy: jest.SpyInstance
 
@@ -40,6 +42,8 @@ beforeEach(() => {
         data: { session: { access_token: 'token-123', user: { id: 'user-123' } } },
     })
     ;(supabase.auth.signOut as jest.Mock).mockResolvedValue({ error: null })
+    authMock._removeSession = mockRemoveSession
+    mockRemoveSession.mockResolvedValue(undefined)
     ;(disconnectAndClearPowerSync as jest.Mock).mockResolvedValue(undefined)
     ;(clearUserStorage as jest.Mock).mockResolvedValue(undefined)
     ;(flushUploadsOrThrow as jest.Mock).mockResolvedValue(undefined)
@@ -145,7 +149,54 @@ describe('forceSignOut', () => {
 
         await expect(forceSignOut()).resolves.toBeUndefined()
 
+        expect(mockRemoveSession).toHaveBeenCalledTimes(1)
         expect(disconnectAndClearPowerSync).toHaveBeenCalledTimes(1)
         expect(clearUserStorage).toHaveBeenCalledWith('user-123')
+    })
+
+    it('skips every teardown step when the session cannot be removed', async () => {
+        ;(supabase.auth.signOut as jest.Mock).mockRejectedValue(new TypeError('Network request failed'))
+        delete authMock._removeSession
+
+        await expect(forceSignOut()).rejects.toThrow('Could not sign out on this device')
+
+        expect(disconnectAndClearPowerSync).not.toHaveBeenCalled()
+        expect(clearUserStorage).not.toHaveBeenCalled()
+    })
+})
+
+describe('clearLocalSession', () => {
+    it('does not touch _removeSession when the official signOut succeeds', async () => {
+        await clearLocalSession()
+
+        expect(mockRemoveSession).not.toHaveBeenCalled()
+        expect(disconnectAndClearPowerSync).toHaveBeenCalledTimes(1)
+    })
+
+    it('falls back to _removeSession when signOut returns an error, then wipes', async () => {
+        ;(supabase.auth.signOut as jest.Mock).mockResolvedValue({ error: new Error('Network request failed') })
+
+        await expect(clearLocalSession()).resolves.toBeUndefined()
+
+        expect(mockRemoveSession).toHaveBeenCalledTimes(1)
+        expect(disconnectAndClearPowerSync).toHaveBeenCalledTimes(1)
+    })
+
+    it('falls back to _removeSession when signOut throws', async () => {
+        ;(supabase.auth.signOut as jest.Mock).mockRejectedValue(new TypeError('Network request failed'))
+
+        await expect(clearLocalSession()).resolves.toBeUndefined()
+
+        expect(mockRemoveSession).toHaveBeenCalledTimes(1)
+        expect(disconnectAndClearPowerSync).toHaveBeenCalledTimes(1)
+    })
+
+    it('aborts before wiping anything when the session cannot be removed', async () => {
+        ;(supabase.auth.signOut as jest.Mock).mockResolvedValue({ error: new Error('Network request failed') })
+        delete authMock._removeSession
+
+        await expect(clearLocalSession()).rejects.toThrow('Could not sign out on this device')
+
+        expect(disconnectAndClearPowerSync).not.toHaveBeenCalled()
     })
 })

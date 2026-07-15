@@ -1,0 +1,37 @@
+# PowerSync sync rules — REFERENCE COPY (last synced from dashboard 2026-07-14).
+#
+# Source of truth is the PowerSync Cloud dashboard: deploys happen there, not from
+# this file. When you change rules in the dashboard, paste the new version here in
+# the same commit so the repo stays honest.
+#
+# Notes:
+# - Every data query is SELECT *, so ADDING a column to a synced table requires NO
+#   sync-rules change or redeploy. But PowerSync only replicates row CHANGES: existing
+#   rows don't pick up a new column's default until they're UPDATEd. Backfill with a
+#   touch-update in the same migration, and/or default the value in the client row
+#   mappers (rowToX) — old app versions ignore unknown columns either way.
+# - Tables here must stay in lockstep with AppSchema.ts (same folder) and the
+#   Connector's UNIQUE_KEYS/upsert handling for constrained tables.
+
+bucket_definitions:
+  user_data:
+    parameters: SELECT request.user_id() AS user_id
+    data:
+      - SELECT * FROM settings WHERE user_id = bucket.user_id
+      - SELECT * FROM weight_progress WHERE user_id = bucket.user_id
+      - SELECT * FROM user_exercises WHERE user_id = bucket.user_id
+      - SELECT * FROM nutrition_entries WHERE user_id = bucket.user_id
+      - SELECT * FROM saved_nutrition_entries WHERE user_id = bucket.user_id
+      - SELECT * FROM workouts WHERE user_id = bucket.user_id
+      - SELECT * FROM exercises WHERE user_id = bucket.user_id
+      - SELECT * FROM logs WHERE user_id = bucket.user_id
+
+  nutrition_ingredients:
+    parameters: SELECT id AS nutrition_entry_id FROM nutrition_entries WHERE user_id = request.user_id()
+    data:
+      - SELECT * FROM nutrition_entry_ingredients WHERE nutrition_entry_id = bucket.nutrition_entry_id
+
+  saved_nutrition_ingredients:
+    parameters: SELECT id AS saved_nutrition_entry_id FROM saved_nutrition_entries WHERE user_id = request.user_id()
+    data:
+      - SELECT * FROM saved_nutrition_entry_ingredients WHERE saved_nutrition_entry_id = bucket.saved_nutrition_entry_id

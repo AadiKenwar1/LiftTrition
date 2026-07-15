@@ -1,5 +1,5 @@
 import ScanBackdrop from '@/components/NutritionComponents/ScanBackdrop'
-import ScanPromptCard from '@/components/NutritionComponents/ScanPromptCard'
+import PromptCard from '@/components/NeutralComponents/PromptCard'
 import { useBilling } from '@/context/BillingContext'
 import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { useSubmitOnce } from '@/lib/hooks/useSubmitOnce'
@@ -39,7 +39,7 @@ export default function CameraScreen() {
                     <View style={styles.handle} />
                 </View>
                 <ScanBackdrop />
-                <ScanPromptCard
+                <PromptCard
                     icon={Sparkles}
                     title="Scan Meals with AI"
                     message="Snap a photo of any meal, item, or nutrition label and let AI log the macros for you. Upgrade to unlock scanning."
@@ -70,7 +70,7 @@ export default function CameraScreen() {
                     <View style={styles.handle} />
                 </View>
                 <ScanBackdrop />
-                <ScanPromptCard
+                <PromptCard
                     icon={needsSettings ? Settings : Camera}
                     title={needsSettings ? 'Camera Access Denied' : 'Camera Access Required'}
                     message={

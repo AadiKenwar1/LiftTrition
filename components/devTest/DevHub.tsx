@@ -36,6 +36,7 @@ const GROUPS: { title: string; items: { label: string; route: string }[] }[] = [
             { label: 'Calendar', route: '/devTest/calendar' },
             { label: 'Add Nutrition Modal', route: '/devTest/addNutrition' },
             { label: 'Scan Screen (Issue 15)', route: '/devTest/scanScreen' },
+            { label: 'Food DB — Teaser (working)', route: '/devTest/foodDB' },
             { label: 'Goal Reached — UI (Issue 8)', route: '/devTest/goalReached' },
             { label: 'Goal Reached — Logic Sim (Issue 8)', route: '/devTest/goalReachedSim' },
             { label: 'Edit Photo — Variants', route: '/devTest/editPhotoLab' },

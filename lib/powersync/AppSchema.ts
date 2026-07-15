@@ -18,6 +18,8 @@ const settings = new Table({
   fats_goal: column.integer,
   onboarding_complete: column.integer,
   onboarding_completed_at: column.text,
+  macros_customized: column.integer,
+  goal_overshoot_acknowledged: column.integer,
   created_at: column.text,
   updated_at: column.text
 });

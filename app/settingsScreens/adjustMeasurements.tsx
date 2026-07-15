@@ -9,7 +9,7 @@ import { useMemo, useState } from 'react'
 import { Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
 export default function AdjustMeasurementsScreen() {
-    const { settings, setSettings, handleUpdateBw, calculateMacros } = useSettings()
+    const { settings, setSettings, handleUpdateBw } = useSettings()
     const colors = useColors()
     const isDark = useColorScheme() === 'dark'
     const styles = useMemo(() => makeStyles(colors), [colors])
@@ -27,21 +27,11 @@ export default function AdjustMeasurementsScreen() {
 
         if (!validateHeightWeight(totalHeight, Number(weight), unitSystem)) return
 
-        const updatedSettings = {
-            ...settings,
-            height: totalHeight,
-            bodyWeight: Number(weight),
-        }
-        const macros = calculateMacros(updatedSettings, unitSystem === 'imperial')
-
-        setSettings({
-            ...updatedSettings,
-            calorieGoal: macros.calResult,
-            proteinGoal: macros.proteinGrams,
-            carbsGoal: macros.carbGrams,
-            fatsGoal: macros.fatGrams,
-        })
-        handleUpdateBw(Number(weight)) // Updates bwProgress; it also calls setSettings - see note below
+        // Height first, then the weigh-in: handleUpdateBw's functional updater sees the
+        // queued height and regenerates targets itself (respecting macrosCustomized).
+        // No prompt hosting here — a crossing shows the goal-reached banner on Progress.
+        setSettings({ ...settings, height: totalHeight })
+        handleUpdateBw(Number(weight))
         router.back()
     }
 

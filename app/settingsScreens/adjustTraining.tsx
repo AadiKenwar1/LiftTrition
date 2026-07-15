@@ -1,9 +1,10 @@
 import OptionCard from '@/components/NeutralComponents/OptionCard'
 import { useSettings } from '@/context/SettingsContext'
+import { withRegeneratedTargets } from '@/context/SettingsContext/functions/bodyWeightFunctions'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { router } from 'expo-router'
 import { useMemo, useState } from 'react'
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'active' | 'gymrat'
 
@@ -16,22 +17,21 @@ const FREQUENCIES = [
 ]
 
 export default function AdjustTrainingScreen() {
-    const { settings, setSettings, calculateMacros } = useSettings()
+    const { settings, setSettings } = useSettings()
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
     const [selectedFrequency, setSelectedFrequency] = useState<ActivityLevel>(settings.activityLevel)
 
     function handleSave() {
         const updatedSettings = { ...settings, activityLevel: selectedFrequency }
-        const macros = calculateMacros(updatedSettings, updatedSettings.unitSystem === 'imperial')
-
-        setSettings({
-            ...updatedSettings,
-            calorieGoal: macros.calResult,
-            proteinGoal: macros.proteinGrams,
-            carbsGoal: macros.carbGrams,
-            fatsGoal: macros.fatGrams,
-        })
+        if (settings.macrosCustomized) {
+            Alert.alert('Recalculate targets?', 'You have hand-tuned macro targets. Recalculate them for your new activity level, or keep them as they are?', [
+                { text: 'Keep custom', onPress: () => { setSettings(updatedSettings); router.back() } },
+                { text: 'Recalculate', onPress: () => { setSettings(withRegeneratedTargets({ ...updatedSettings, macrosCustomized: false })); router.back() } },
+            ])
+            return
+        }
+        setSettings(withRegeneratedTargets(updatedSettings))
         router.back()
     }
 

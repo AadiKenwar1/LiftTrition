@@ -40,6 +40,8 @@ export default function AdjustNutrition4Screen() {
     }, [weeks])
 
     const handleSave = () => {
+        // Wizard completion is an explicit regeneration: hand-tuned macros are replaced
+        // by choice, and a fresh goal re-arms the crossing prompt + safety net.
         setSettings({
             ...settings,
             height: Number(params.height),
@@ -52,6 +54,8 @@ export default function AdjustNutrition4Screen() {
             proteinGoal: Number(params.proteinGoal),
             carbsGoal: Number(params.carbsGoal),
             fatsGoal: Number(params.fatsGoal),
+            macrosCustomized: false,
+            goalOvershootAcknowledged: false,
         })
         router.push('/(tabs)/settings')
     }

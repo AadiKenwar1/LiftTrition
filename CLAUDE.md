@@ -81,7 +81,8 @@ context/
   WorkoutContext/       Workouts, exercises, logs, fatigue
 
 lib/
-  powersync/            Schema (10 tables), Connector, orchestrator, flush logic
+  powersync/            Schema (10 tables), Connector, orchestrator, flush logic,
+                        sync-rules.yaml (reference copy — dashboard is source of truth)
   supabase/             Client setup
   openAI/               Vision + text calls (via Edge Function)
   foodDB/               FatSecret search (via Edge Function, in-memory cache)

@@ -22,6 +22,8 @@ function makeSettings(overrides: Partial<Settings> = {}): Settings {
         proteinGoal: 130,
         carbsGoal: 200,
         fatsGoal: 54,
+        macrosCustomized: false,
+        goalOvershootAcknowledged: false,
         ...overrides,
     }
 }
@@ -92,5 +94,23 @@ describe('settingsToRow / rowToSettings round-trip', () => {
         const settings = makeSettings({ birthDate: d })
         const row = settingsToRow(settings, 'user-1')
         expect(row.birth_date).toBe(getDateKey(d))
+    })
+
+    it('round-trips the intent flags', () => {
+        const row = settingsToRow(makeSettings({ macrosCustomized: true, goalOvershootAcknowledged: true }), 'user-1')
+        expect(row.macros_customized).toBe(1)
+        expect(row.goal_overshoot_acknowledged).toBe(1)
+        const back = rowToSettings(row as unknown as SettingsRecord)
+        expect(back.macrosCustomized).toBe(true)
+        expect(back.goalOvershootAcknowledged).toBe(true)
+    })
+
+    it('defaults missing intent flags to false (legacy rows not yet backfilled)', () => {
+        const legacyRow = makeRow()
+        delete (legacyRow as Record<string, unknown>).macros_customized
+        delete (legacyRow as Record<string, unknown>).goal_overshoot_acknowledged
+        const back = rowToSettings(legacyRow)
+        expect(back.macrosCustomized).toBe(false)
+        expect(back.goalOvershootAcknowledged).toBe(false)
     })
 })

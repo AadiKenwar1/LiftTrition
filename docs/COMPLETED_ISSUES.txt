@@ -12,7 +12,7 @@ guard), F3 (Connector declarative upserts + dead-letter backstop), F4
 (clearLocalSession teardown), F5 (parseDateKey + useToday), F6
 (useAsyncLoad + AppLoadingScreen retry variant + reportPersistFailure).
 
-Completed and migrated: 1, 2, 3, 5, 6, 7, 9, 10, 11, 12, 14, 17, 19, 20, 21, 22.
+Completed and migrated: 1, 2, 3, 5, 6, 7, 9, 10, 11, 12, 14, 15, 16, 17, 19, 20, 21, 22.
 
 ==================================================================
 
@@ -417,6 +417,128 @@ Completed and migrated: 1, 2, 3, 5, 6, 7, 9, 10, 11, 12, 14, 17, 19, 20, 21, 22.
     Verify: machine-gun-tap every listed CTA → exactly one entry /
     workout / analysis; buttons visibly disable during the closing
     animation; Use Photo can never bill twice.
+
+15. Denying camera access once bricks the AI scan feature
+    After an iOS "Don't Allow", the Grant Permission button silently
+    does nothing (iOS won't re-prompt). No link to Settings is offered.
+    Where: app/nutritionScreens/cameraScreen.tsx
+    Fix: when iOS says it can't ask again, open the Settings app.
+
+    PLAN
+    Root cause: the permission flow ignores canAskAgain — after a
+    permanent denial iOS resolves the request without prompting, and
+    the UI keeps offering a prompt that can never appear. The photo-
+    library path (pickFromLibrary) has the identical dead end.
+    Steps:
+    1) Tiny shared helper lib/utils/permissions.ts: given a
+       permission response, decide 'request' vs 'settings', and
+       openAppSettings() (Linking.openSettings()) — so every current
+       and future permission (camera, library, whatever's next)
+       handles permanent denial the same way.
+    2) cameraScreen permission view: when !granted && !canAskAgain,
+       the button becomes "Open Settings" → openAppSettings(), with
+       copy explaining to enable Camera there. If a requestPermission
+       call comes back canAskAgain:false, swap the button
+       immediately — no dead tap.
+    3) pickFromLibrary's denial alert gains an "Open Settings"
+       action via the same helper.
+
+    Scope expanded — unified scan screen (full spec:
+    docs/superpowers/specs/2026-07-14-unified-camera-scan-screen-
+    design.md). The permission fix above is the seed of a single
+    cameraScreen that handles all four states (free vs premium ×
+    granted vs not-granted), so the fix and the free-user paywall
+    bounce are solved in one place.
+    Second problem: the camera FAB (app/(tabs)/index.tsx:62)
+    hard-bounces non-premium users straight to the subscription
+    page — they never see what they're paying for.
+    Design: one static "ScanBackdrop" (scan chrome over a
+    dark-gradient/blur placeholder — a live preview is impossible
+    without granted permission) with a swappable "ScanPromptCard"
+    overlay. Free → "Upgrade to scan" (→ subscription); premium &
+    !granted & canAskAgain → "Grant Permission"; premium & !granted
+    & !canAskAgain → "Open Settings"; premium & granted → live
+    CameraView (unchanged). Free path never requests permission.
+    The premium priming screen stays (one-shot iOS prompt — priming
+    lifts the Allow rate); no cold auto-prompt.
+    Extra steps:
+    4) New presentational units: ScanBackdrop.tsx and
+       ScanPromptCard.tsx (components/NutritionComponents/).
+    5) cameraScreen.tsx becomes a hasPremium × permission state
+       router composing those pieces; live camera / preview /
+       takePicture / mode+flash state unchanged.
+    6) index.tsx camera FAB always opens cameraScreen — drop the
+       hasPremium branch and nutritionUnavailableFabButtons on the
+       camera button only (Food DB button out of scope).
+    Phasing: Phase 0 builds ScanBackdrop + ScanPromptCard + a Dev
+    Hub preview page (all prompt variants, light/dark) to lock the
+    look with zero risk; Phase 1 wires the helper (TDD), the router,
+    and the FAB into the real flow.
+    Files: lib/utils/permissions.ts (new), cameraScreen.tsx,
+    app/(tabs)/index.tsx, ScanBackdrop.tsx (new),
+    ScanPromptCard.tsx (new), + Dev Hub harness (Phase 0).
+    Verify: Dev Hub → Scan Screen shows every prompt variant over
+    the backdrop in light and dark. On device: free → teaser →
+    Upgrade → subscription; upgrade → return → permission/live
+    path. Premium first run → priming → prompt → camera. Permanent
+    deny → "Open Settings" deep-links to the app's settings page;
+    same for the library picker.
+    Completed 2026-07-14: implemented as specced (Phase 0 Dev Hub
+    preview, then TDD helper + state router + FAB). One deviation found
+    on device: the teaser's upgrade CTA must router.replace (not push)
+    to /settingsScreens/subscription — pushing a card route from inside
+    the camera modal presents it as a second, undismissable modal (same
+    pattern addNutritionModal already uses). Companion dev tool added:
+    Dev Hub "Force free mode" (lib/devtools/forceFreeMode.ts) overrides
+    hasPremium to false app-wide for testing free flows.
+
+16. You cannot sign out while offline
+    Sign-out requires a connected sync first; offline it fails with
+    "PowerSync is not connected." and only an OK button. The force
+    sign-out fallback is only offered for timeouts, not for this error.
+    Where: profile.tsx error handling + FlushUploads.ts
+    Fix: offer force sign-out (with the data-loss warning) here too.
+
+    PLAN
+    Root cause: the escape hatch is keyed to one error subclass
+    (UploadFlushTimeoutError) when the meaningful category is "the
+    flush cannot complete" — not-connected and disconnected-mid-flush
+    fall through to a dead-end OK alert.
+    Steps:
+    1) F4: UploadFlushTimeoutError and UploadFlushNotConnectedError
+       extend a common UploadFlushError base; export
+       isUploadFlushError(). Any future flush-failure type inherits
+       the escape hatch automatically instead of re-opening this bug.
+    2) profile.tsx handleSignOut: branch on isUploadFlushError →
+       the existing force-sign-out alert, with the message adapted
+       to the case ("You're offline — sign out anyway? Unsynced data
+       will be lost." vs the current "still uploading…" text).
+    3) Make the forced path actually work offline: forceSignOut ends
+       in clearLocalSession() (F4), which uses
+       supabase.auth.signOut({ scope: 'local' }) and guards each
+       teardown step — no network dependency, no half-teardown.
+    Files: FlushUploads.ts, accountFunctions.tsx, profile.tsx.
+    Verify: airplane mode → Sign Out → data-loss warning → Force
+    sign out → login screen; relaunch (still offline) stays signed
+    out.
+    Completed 2026-07-14: implemented as specced. isUploadFlushError()
+    lives beside the error classes in FlushUploads.ts (new
+    flushUploads.test.ts covers the hierarchy + both throw paths);
+    the old isUploadFlushTimeoutError guard in accountFunctions was
+    retired (profile.tsx was its only consumer).
+    Follow-up (same day, found verifying on device): step 3's premise
+    was wrong — supabase's signOut({ scope: 'local' }) calls the
+    server BEFORE deleting the stored session, so offline it returned
+    an error with the session still on disk; force sign-out wiped the
+    PowerSync data while leaving the user signed in. Fixed in
+    accountFunctions: removeLocalAuthSession() falls back to
+    supabase's private _removeSession() (the exact cleanup a
+    successful sign-out runs, incl. the SIGNED_OUT event AuthContext
+    navigation keys off), and clearLocalSession now wipes only AFTER
+    session removal succeeds — otherwise it throws 'Could not sign
+    out on this device'. lib/supabase/__tests__/authInternals.test.ts
+    pins the private method so a supabase upgrade fails tests instead
+    of silently breaking offline sign-out.
 
 17. Failed saves look like successes
     Every write updates the screen first and quietly logs any database

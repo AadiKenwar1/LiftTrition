@@ -5,7 +5,7 @@ import { throwIfSaveFailureArmed } from '@/lib/devtools/forceSaveFailure'
 import { getDateKey, parseDateKey } from '@/lib/utils/dateHelper'
 import { Settings } from '../types'
 
-const defaultSettings: Settings = { onboardingComplete: false, onboardingCompletedAt: undefined, birthDate: new Date(), gender: 'male', height: 175, bodyWeight: 170, activityLevel: 'moderate', unitSystem: 'imperial', goalType: 'maintain', goalWeight: 190, goalPace: 0, calorieGoal: 2000, proteinGoal: 130, carbsGoal: 200, fatsGoal: 54 }
+const defaultSettings: Settings = { onboardingComplete: false, onboardingCompletedAt: undefined, birthDate: new Date(), gender: 'male', height: 175, bodyWeight: 170, activityLevel: 'moderate', unitSystem: 'imperial', goalType: 'maintain', goalWeight: 190, goalPace: 0, calorieGoal: 2000, proteinGoal: 130, carbsGoal: 200, fatsGoal: 54, macrosCustomized: false, goalOvershootAcknowledged: false }
 
 // Map DB row -> Settings
 export function rowToSettings(row: SettingsRecord): Settings {
@@ -25,12 +25,14 @@ export function rowToSettings(row: SettingsRecord): Settings {
         proteinGoal: row.protein_goal ?? 130,
         carbsGoal: row.carbs_goal ?? 200,
         fatsGoal: row.fats_goal ?? 54,
+        macrosCustomized: !!row.macros_customized,
+        goalOvershootAcknowledged: !!row.goal_overshoot_acknowledged,
     }
 }
 
 // Map Settings -> DB row
 export function settingsToRow(s: Settings, userId: string) {
-    return { user_id: userId, birth_date: getDateKey(s.birthDate), gender: s.gender, height: s.height, body_weight: s.bodyWeight, unit_system: s.unitSystem, activity_level: s.activityLevel, goal_type: s.goalType, goal_weight: s.goalWeight, goal_pace: s.goalPace, calorie_goal: s.calorieGoal, protein_goal: s.proteinGoal, carbs_goal: s.carbsGoal, fats_goal: s.fatsGoal, onboarding_complete: s.onboardingComplete ? 1 : 0, onboarding_completed_at: s.onboardingCompletedAt ? getDateKey(s.onboardingCompletedAt) : null }
+    return { user_id: userId, birth_date: getDateKey(s.birthDate), gender: s.gender, height: s.height, body_weight: s.bodyWeight, unit_system: s.unitSystem, activity_level: s.activityLevel, goal_type: s.goalType, goal_weight: s.goalWeight, goal_pace: s.goalPace, calorie_goal: s.calorieGoal, protein_goal: s.proteinGoal, carbs_goal: s.carbsGoal, fats_goal: s.fatsGoal, onboarding_complete: s.onboardingComplete ? 1 : 0, onboarding_completed_at: s.onboardingCompletedAt ? getDateKey(s.onboardingCompletedAt) : null, macros_customized: s.macrosCustomized ? 1 : 0, goal_overshoot_acknowledged: s.goalOvershootAcknowledged ? 1 : 0 }
 }
 
 // Load settings and body weight progress from PowerSync
@@ -83,9 +85,11 @@ export async function upsertSettings(userId: string, settings: Settings): Promis
                    fats_goal = ?,
                    onboarding_complete = ?,
                    onboarding_completed_at = ?,
+                   macros_customized = ?,
+                   goal_overshoot_acknowledged = ?,
                    updated_at = datetime('now')
                  WHERE user_id = ?`,
-                [row.birth_date, row.gender, row.height, row.body_weight, row.unit_system, row.activity_level, row.goal_type, row.goal_weight, row.goal_pace, row.calorie_goal, row.protein_goal, row.carbs_goal, row.fats_goal, row.onboarding_complete, row.onboarding_completed_at, userId],
+                [row.birth_date, row.gender, row.height, row.body_weight, row.unit_system, row.activity_level, row.goal_type, row.goal_weight, row.goal_pace, row.calorie_goal, row.protein_goal, row.carbs_goal, row.fats_goal, row.onboarding_complete, row.onboarding_completed_at, row.macros_customized, row.goal_overshoot_acknowledged, userId],
             )
         } else {
             await tx.execute(
@@ -94,6 +98,7 @@ export async function upsertSettings(userId: string, settings: Settings): Promis
                    unit_system, activity_level, goal_type, goal_weight, goal_pace,
                    calorie_goal, protein_goal, carbs_goal, fats_goal,
                    onboarding_complete, onboarding_completed_at,
+                   macros_customized, goal_overshoot_acknowledged,
                    created_at, updated_at
                  )
                  VALUES (
@@ -101,9 +106,10 @@ export async function upsertSettings(userId: string, settings: Settings): Promis
                    ?, ?, ?, ?, ?,
                    ?, ?, ?, ?,
                    ?, ?,
+                   ?, ?,
                    datetime('now'), datetime('now')
                  )`,
-                [row.user_id, row.birth_date, row.gender, row.height, row.body_weight, row.unit_system, row.activity_level, row.goal_type, row.goal_weight, row.goal_pace, row.calorie_goal, row.protein_goal, row.carbs_goal, row.fats_goal, row.onboarding_complete, row.onboarding_completed_at],
+                [row.user_id, row.birth_date, row.gender, row.height, row.body_weight, row.unit_system, row.activity_level, row.goal_type, row.goal_weight, row.goal_pace, row.calorie_goal, row.protein_goal, row.carbs_goal, row.fats_goal, row.onboarding_complete, row.onboarding_completed_at, row.macros_customized, row.goal_overshoot_acknowledged],
             )
         }
     })

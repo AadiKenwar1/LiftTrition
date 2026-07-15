@@ -1,5 +1,5 @@
 import ScanBackdrop from '@/components/NutritionComponents/ScanBackdrop'
-import ScanPromptCard from '@/components/NutritionComponents/ScanPromptCard'
+import PromptCard from '@/components/NeutralComponents/PromptCard'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { openAppSettings } from '@/lib/utils/permissions'
 import { useRouter } from 'expo-router'
@@ -12,7 +12,7 @@ type ScanState = 'upgrade' | 'grant' | 'settings' | 'loading' | 'live'
 
 /**
  * Issue 15 / unified scan screen preview. The upgrade/grant/settings cards render the real
- * shippable components (ScanBackdrop + ScanPromptCard); CTA taps show stub alerts instead of
+ * shippable components (ScanBackdrop + PromptCard); CTA taps show stub alerts instead of
  * navigating — except "Open Settings", which exercises the real deep link, and "live", which
  * opens the actual (unchanged) camera screen.
  */
@@ -62,7 +62,7 @@ export default function ScanScreenTest() {
                 :   <>
                         <ScanBackdrop />
                         {state === 'upgrade' && (
-                            <ScanPromptCard
+                            <PromptCard
                                 icon={Sparkles}
                                 title="Scan Meals with AI"
                                 message="Snap a photo of any meal, item, or nutrition label and let AI log the macros for you. Upgrade to unlock scanning."
@@ -72,7 +72,7 @@ export default function ScanScreenTest() {
                             />
                         )}
                         {state === 'grant' && (
-                            <ScanPromptCard
+                            <PromptCard
                                 icon={Camera}
                                 title="Camera Access Required"
                                 message="We need access to your camera to take photos of your meals for nutrition tracking with AI analysis."
@@ -82,7 +82,7 @@ export default function ScanScreenTest() {
                             />
                         )}
                         {state === 'settings' && (
-                            <ScanPromptCard
+                            <PromptCard
                                 icon={Settings}
                                 title="Camera Access Denied"
                                 message="Camera access is turned off for this app. Enable Camera in Settings to scan your meals."

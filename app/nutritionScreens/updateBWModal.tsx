@@ -1,4 +1,6 @@
+import GoalReachedPrompt from '@/components/NutritionComponents/GoalReachedPrompt'
 import { useSettings } from '@/context/SettingsContext'
+import type { BwPrompt } from '@/context/SettingsContext/functions/bodyWeightFunctions'
 import { validateHeightWeight } from '@/context/SettingsContext/functions/validator'
 import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { parseNumericInput } from '@/lib/utils/number'
@@ -10,11 +12,12 @@ import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 export default function UpdateBWModal() {
-    const { settings, handleUpdateBw } = useSettings()
+    const { settings, handleUpdateBw, switchToMaintenance, acknowledgeGoalOvershoot } = useSettings()
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
     const [weight, setWeight] = useState('')
     const [isFocused, setIsFocused] = useState(false)
+    const [goalPrompt, setGoalPrompt] = useState<BwPrompt | null>(null)
     const insets = useSafeAreaInsets()
     const scrollBottomPad = Math.max(insets.bottom, 20) + 140
 
@@ -39,7 +42,8 @@ export default function UpdateBWModal() {
                 {/* Title */}
                 <Text style={styles.title}>Update Body Weight</Text>
                 <Text style={styles.subtitle}>
-                    Current: {currentWeight} {settings.unitSystem === 'imperial' ? 'lbs' : 'kg'} {'\n'}Nutrition goals will be updated automatically
+                    Current: {currentWeight} {settings.unitSystem === 'imperial' ? 'lbs' : 'kg'} {'\n'}
+                    {settings.macrosCustomized ? 'Your custom targets are kept' : 'Nutrition goals will be updated automatically'}
                 </Text>
 
                 {/* Input Field */}
@@ -59,11 +63,15 @@ export default function UpdateBWModal() {
 
                 {/* Update Button */}
                 <TouchableOpacity
-                    onPress={() => {
+                    onPress={async () => {
                         if (parsedWeight === null) return
                         if (!validateHeightWeight(settings.height, parsedWeight, settings.unitSystem)) return
-                        handleUpdateBw(parsedWeight)
-                        router.back()
+                        const prompt = await handleUpdateBw(parsedWeight)
+                        if (prompt) {
+                            setGoalPrompt(prompt)
+                        } else {
+                            router.back()
+                        }
                     }}
                     disabled={parsedWeight === null}
                     activeOpacity={0.8}
@@ -74,6 +82,23 @@ export default function UpdateBWModal() {
                     </LinearGradient>
                 </TouchableOpacity>
             </ScrollView>
+
+            <GoalReachedPrompt
+                visible={goalPrompt !== null}
+                variant={goalPrompt ?? 'goalReached'}
+                goalWeight={settings.goalWeight}
+                unitLabel={settings.unitSystem === 'imperial' ? 'lbs' : 'kg'}
+                onSwitchToMaintenance={() => {
+                    switchToMaintenance()
+                    router.back()
+                }}
+                onSetNewGoal={() => router.replace('/settingsScreens/adjustNutrition/adjustNutrition1')}
+                onKeepGoing={() => {
+                    acknowledgeGoalOvershoot()
+                    router.back()
+                }}
+                onDismiss={() => router.back()}
+            />
         </KeyboardAvoidingView>
     )
 }

@@ -3,49 +3,72 @@ import { Settings } from "../types";
 import { calculateMacros } from "./macroCalculation";
 
 /**
- * Pure function: computes the new settings and date key after a body weight update.
- * Returns null if the weight is invalid.
- * The caller is responsible for updating state and persisting to DB.
+ * Issue 8 rules: targets are derived, intent is owned. A weigh-in updates bodyWeight and
+ * regenerates targets for the CURRENT goalType — it never flips goalType or resets pace.
+ * Crossing the goal returns a 'goalReached' prompt (ask); only a previously-crossed user
+ * drifting past the deadband gets the announced auto-switch to maintenance (act). Both are
+ * suppressed once the user explicitly chose "Keep Going" (goalOvershootAcknowledged).
+ */
+export type BwPrompt = 'goalReached' | 'autoMaintain'
+
+export const OVERSHOOT_DEADBAND = { imperial: 2, metric: 1 } as const
+
+export function isGoalReached(s: Pick<Settings, 'goalType' | 'bodyWeight' | 'goalWeight'>): boolean {
+    if (s.goalType === 'lose') return s.bodyWeight <= s.goalWeight
+    if (s.goalType === 'gain') return s.bodyWeight >= s.goalWeight
+    return false
+}
+
+function atOrPastGoal(s: Settings, weight: number): boolean {
+    return s.goalType === 'lose' ? weight <= s.goalWeight : weight >= s.goalWeight
+}
+
+function pastDeadband(s: Settings, weight: number): boolean {
+    const deadband = OVERSHOOT_DEADBAND[s.unitSystem]
+    return s.goalType === 'lose' ? weight <= s.goalWeight - deadband : weight >= s.goalWeight + deadband
+}
+
+// Hand-tuned targets survive every implicit regeneration (macrosCustomized).
+export function withRegeneratedTargets(s: Settings): Settings {
+    if (s.macrosCustomized) return s
+    const macros = calculateMacros(s, s.unitSystem === 'imperial')
+    return { ...s, calorieGoal: macros.calResult, proteinGoal: macros.proteinGrams, carbsGoal: macros.carbGrams, fatsGoal: macros.fatGrams }
+}
+
+export function applySwitchToMaintenance(s: Settings): Settings {
+    return withRegeneratedTargets({ ...s, goalType: 'maintain', goalOvershootAcknowledged: false })
+}
+
+/**
+ * Pure function: computes the new settings, date key and any prompt to show after a body
+ * weight update. Returns null if the weight is invalid.
+ * The caller is responsible for updating state, persisting, and hosting the prompt UI.
  */
 export function computeBwUpdate(
     updatedWeight: number,
     currentSettings: Settings,
-): { dateKey: string; newSettings: Settings } | null {
-    if (updatedWeight <= 0) return null;
+): { dateKey: string; newSettings: Settings; prompt: BwPrompt | null } | null {
+    if (updatedWeight <= 0) return null
 
-    const dateKey = getDateKey(new Date());
+    const dateKey = getDateKey(new Date())
 
-    let goalType: 'lose' | 'gain' | 'maintain';
-    if (updatedWeight > currentSettings.goalWeight) {
-        goalType = 'lose';
-    } else if (updatedWeight === currentSettings.goalWeight) {
-        goalType = 'maintain';
-    } else {
-        goalType = 'gain';
+    let newSettings = withRegeneratedTargets({ ...currentSettings, bodyWeight: updatedWeight })
+
+    let prompt: BwPrompt | null = null
+    if (newSettings.goalType !== 'maintain' && !newSettings.goalOvershootAcknowledged) {
+        const wasPast = atOrPastGoal(currentSettings, currentSettings.bodyWeight)
+        if (wasPast && pastDeadband(newSettings, updatedWeight)) {
+            // Ask-before-act: the net only fires on a user who already had their chance
+            // to answer (previous weigh-in was at/past goal). A single jump straight past
+            // the deadband still asks via the crossing branch below.
+            newSettings = applySwitchToMaintenance(newSettings)
+            prompt = 'autoMaintain'
+        } else if (!wasPast && atOrPastGoal(currentSettings, updatedWeight)) {
+            prompt = 'goalReached'
+        }
     }
 
-    const newGoalPace = currentSettings.goalType !== goalType ? 0.5 : currentSettings.goalPace;
-
-    const updatedSettings: Settings = {
-        ...currentSettings,
-        bodyWeight: updatedWeight,
-        goalType,
-        goalPace: newGoalPace,
-    };
-
-    const isImperial = currentSettings.unitSystem === 'imperial';
-    const newMacros = calculateMacros(updatedSettings, isImperial);
-
-    return {
-        dateKey,
-        newSettings: {
-            ...updatedSettings,
-            calorieGoal: newMacros.calResult,
-            proteinGoal: newMacros.proteinGrams,
-            carbsGoal: newMacros.carbGrams,
-            fatsGoal: newMacros.fatGrams,
-        },
-    };
+    return { dateKey, newSettings, prompt }
 }
 
 /**

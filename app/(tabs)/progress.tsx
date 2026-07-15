@@ -4,8 +4,10 @@ import Graph1 from '@/components/GraphComponents/Graph1'
 import GraphStats from '@/components/GraphComponents/GraphStats'
 import SelectionModal from '@/components/GraphComponents/SelectionModal'
 import ModeSwitcher from '@/components/NeutralComponents/ModeSwitcher'
+import GoalReachedBanner from '@/components/NutritionComponents/GoalReachedBanner'
 import { useNutrition } from '@/context/NutritionContext'
 import { useSettings } from '@/context/SettingsContext'
+import { isGoalReached } from '@/context/SettingsContext/functions/bodyWeightFunctions'
 import { fonts, radius, useColorScheme, useColors, type Colors } from '@/context/ThemeContext'
 import { useWorkout } from '@/context/WorkoutContext'
 import { useToday } from '@/lib/hooks/useToday'
@@ -113,9 +115,10 @@ export default function ProgressScreen() {
     // Card headers (title + simple subtitle, shown inside each card)
     const topTitle = mode ? selectedExercise : 'Body Weight'
     const weightUnit = settings.unitSystem === 'imperial' ? 'lb' : 'kg'
+    const goalDescriptor = { lose: 'Cutting to', gain: 'Bulking to', maintain: 'Maintaining at' }[settings.goalType]
     const topSubtitle =
         mode ? 'Estimated 1 rep max'
-        : settings.goalWeight > 0 ? `Goal ${parseFloat(settings.goalWeight.toFixed(1))} ${weightUnit}`
+        : settings.goalWeight > 0 ? `${goalDescriptor} ${parseFloat(settings.goalWeight.toFixed(1))} ${weightUnit}`
         : 'Daily'
     const bottomTitle = mode ? 'Sets' : selectedMacro.charAt(0).toUpperCase() + selectedMacro.slice(1)
     const bottomSubtitle = mode ? 'Total per day' : 'Daily intake'
@@ -142,6 +145,7 @@ export default function ProgressScreen() {
             <ModeSwitcher />
             <ScrollView contentContainerStyle={styles.container} style={styles.scroll}>
                 <ActivityBanner mode={mode} trainedDays={trainedDaysThisWeek} nutritionStreak={nutritionStreak} />
+                {!mode && isGoalReached(settings) && <GoalReachedBanner onPress={() => router.push('/settingsScreens/adjustNutrition/adjustNutrition1')} />}
 
                 {/* TOP card — line chart */}
                 <View style={styles.graphCard}>

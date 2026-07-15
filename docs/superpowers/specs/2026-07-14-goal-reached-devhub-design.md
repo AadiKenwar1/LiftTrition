@@ -1,9 +1,10 @@
 # Goal-Reached Dev Hub Variants (Issue 8 preview) — Design
 
 Date: 2026-07-14
-Status: agreed in conversation; this doc records the design the Dev Hub pages preview.
-Scope: Dev Hub preview ONLY — nothing here wires into shipping screens yet. The real
-issue-8 implementation (AUDIT_MAJOR.txt §8) ports these components + logic later.
+Status: IMPLEMENTED 2026-07-14 — the real fix shipped per
+docs/superpowers/plans/2026-07-14-issue8-goal-intent.md (rules live in
+context/SettingsContext/functions; the Dev Hub sim delegates to them). Pending at
+release: run lib/supabase/migrations/settings_goal_intent_flags.sql in Supabase.
 
 ## The rule being previewed
 
@@ -31,12 +32,26 @@ respecting macrosCustomized), announce it. Ask-before-act: a single weigh-in tha
 jumps from not-past straight beyond the deadband shows the congrats prompt instead —
 the net only acts on users who had their chance to answer.
 
+Maintenance anchors (decided 2026-07-14): maintain targets are computed at
+goalWeight (the maintain weight), NOT the drifting scale weight. Weigh-ins never
+move a maintain user's targets; the displayed goal stays meaningful; mild drift
+self-corrects (eating TDEE-at-anchor while heavier is a gentle implicit pull back
+— a static target is not automation acting). Lose/gain keep tracking the scale so
+the deficit/surplus stays sized to actual TDEE. Real-fix requirement: every
+maintain user must have a sane goalWeight anchor — onboarding and the wizard set
+it to current weight when maintain is chosen; verify legacy rows.
+
 macrosCustomized: set by hand-editing macros; while true, every implicit recalc
 (weigh-in, height/activity edit, auto-maintain) preserves the hand-tuned numbers.
 Cleared only by explicit regeneration (wizard / accepting a recalc prompt).
 
 goalOvershootAcknowledged: set by "Keep Going"; cleared when goalWeight/goalType
 change. Both flags become settings columns in the real implementation.
+Deploy note (verified 2026-07-14): sync rules use SELECT * on settings (reference
+copy: lib/powersync/sync-rules.yaml), so the new columns need NO sync-rules change
+or PowerSync redeploy — just the Postgres migration (with a touch-update or
+mapper-side null→false defaults for backfill, since PowerSync only replicates row
+changes) and the EAS build carrying the AppSchema/type/mapper updates.
 
 Banner (pure derived state, no storage): visible while goalType is lose/gain AND
 weight is at/past goalWeight. Tap routes to the wizard. Placement (decided

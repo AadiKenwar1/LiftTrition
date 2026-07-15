@@ -129,7 +129,7 @@ export default function GoalReachedSimTest() {
                 <WeightTrack sim={sim} />
                 <Text style={styles.hint}>
                     {sim.goalType === 'maintain'
-                        ? 'Maintaining — weigh-ins update targets only; nothing ever flips your goal.'
+                        ? `Maintaining — targets pinned to your maintain weight (${sim.goalWeight} ${unit}); weigh-ins never move them.`
                         : `Light green = goal reached (asks) · dark green = ${deadband} ${unit} past goal (auto-maintain acts)`}
                 </Text>
 

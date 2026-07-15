@@ -17,6 +17,8 @@ export interface Settings {
     proteinGoal: number;
     carbsGoal: number;
     fatsGoal: number;
+    macrosCustomized: boolean;
+    goalOvershootAcknowledged: boolean;
 }
 
 export interface BodyWeightProgress {
@@ -36,7 +38,9 @@ export interface SettingsContextInterface {
     mode: boolean;
     setMode: (mode: boolean) => void;
     bwProgress: Record<string, number>;
-    handleUpdateBw: (updatedWeight: number) => void;
+    handleUpdateBw: (updatedWeight: number) => Promise<'goalReached' | 'autoMaintain' | null>;
+    switchToMaintenance: () => void;
+    acknowledgeGoalOvershoot: () => void;
     handleGetBodyWeightProgressData: (onboardingCompletedAt?: Date) => Array<{ day: string; value: number }>;
     calculateMacros: (settings: Settings, isImperial?: boolean) => {
         calResult: number;

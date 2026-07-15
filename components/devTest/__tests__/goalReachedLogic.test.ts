@@ -23,6 +23,21 @@ describe('goalReachedLogic (Issue 8 rules)', () => {
         expect(prompt).toBeNull()
     })
 
+    test('maintain targets anchor to the maintain weight — scale drift never moves them', () => {
+        const state = initSimState({ unitSystem: 'imperial', goalType: 'maintain', goalWeight: 170, goalPace: 0.5, bodyWeight: 170 })
+        const drifted = applyWeighIn(state, 174)
+        expect(drifted.state.calorieGoal).toBe(state.calorieGoal)
+        expect(drifted.state.proteinGoal).toBe(state.proteinGoal)
+        expect(drifted.state.bodyWeight).toBe(174)
+    })
+
+    test('auto-maintain targets are computed at the goal weight, not the overshoot weight', () => {
+        const fired = applyWeighIn(loseState({ bodyWeight: 169 }), 168)
+        expect(fired.prompt).toBe('autoMaintain')
+        const anchored = initSimState({ unitSystem: 'imperial', goalType: 'maintain', goalWeight: 170, goalPace: 1, bodyWeight: 170 })
+        expect(fired.state.calorieGoal).toBe(anchored.calorieGoal)
+    })
+
     test('weigh-in before crossing: targets recalc for current goal, no prompt', () => {
         const { state: next, prompt } = applyWeighIn(loseState(), 173)
         expect(next.goalType).toBe('lose')
