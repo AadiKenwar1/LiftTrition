@@ -1,9 +1,9 @@
+import { CALENDAR_GRID_HEIGHT, CalendarMonthGrid, type SelectableRange } from '@/components/NeutralComponents/CalendarMonthGrid'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { getDateKey } from '@/lib/utils/dateHelper'
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react-native'
 import { useMemo, useState } from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import { CalendarMonthGrid, type SelectableRange } from './CalendarMonthGrid'
 import { Field, Segmented } from './DevControls'
 import MockupShell from './mockups/MockupShell'
 
@@ -202,18 +202,7 @@ export default function CalendarTest() {
                     }
 
                     <View style={styles.body}>
-                        {viewMode === 'days' && (
-                            <CalendarMonthGrid
-                                year={cursor.year}
-                                month={cursor.month}
-                                todayDay={todayKey}
-                                selectedDay={selectedDay}
-                                eventDays={eventDays}
-                                onSelectDay={setSelectedDay}
-                                accent={accent}
-                                selectable={selectable}
-                            />
-                        )}
+                        {viewMode === 'days' && <CalendarMonthGrid year={cursor.year} month={cursor.month} todayDay={todayKey} selectedDay={selectedDay} eventDays={eventDays} onSelectDay={setSelectedDay} accent={accent} selectable={selectable} />}
                         {viewMode === 'months' && (
                             <View style={styles.pickerGrid}>
                                 {MONTH_ABBR.map((label, i) => {
@@ -222,7 +211,19 @@ export default function CalendarTest() {
                                     return (
                                         <TouchableOpacity key={label} disabled={disabled} onPress={() => pickMonth(i)} activeOpacity={0.6} style={[styles.pickerCell, disabled && styles.pickerCellDisabled]}>
                                             <View style={[styles.pickerBox, isCurrent && { borderWidth: 1.5, borderColor: accent }]}>
-                                                <Text style={[styles.pickerText, { color: disabled ? colors.textMuted : isCurrent ? accent : colors.text }]}>{label}</Text>
+                                                <Text
+                                                    style={[
+                                                        styles.pickerText,
+                                                        {
+                                                            color:
+                                                                disabled ? colors.textMuted
+                                                                : isCurrent ? accent
+                                                                : colors.text,
+                                                        },
+                                                    ]}
+                                                >
+                                                    {label}
+                                                </Text>
                                             </View>
                                         </TouchableOpacity>
                                     )
@@ -237,7 +238,19 @@ export default function CalendarTest() {
                                     return (
                                         <TouchableOpacity key={year} disabled={disabled} onPress={() => pickYear(year)} activeOpacity={0.6} style={[styles.pickerCell, disabled && styles.pickerCellDisabled]}>
                                             <View style={[styles.pickerBox, isCurrent && { borderWidth: 1.5, borderColor: accent }]}>
-                                                <Text style={[styles.pickerText, { color: disabled ? colors.textMuted : isCurrent ? accent : colors.text }]}>{year}</Text>
+                                                <Text
+                                                    style={[
+                                                        styles.pickerText,
+                                                        {
+                                                            color:
+                                                                disabled ? colors.textMuted
+                                                                : isCurrent ? accent
+                                                                : colors.text,
+                                                        },
+                                                    ]}
+                                                >
+                                                    {year}
+                                                </Text>
                                             </View>
                                         </TouchableOpacity>
                                     )
@@ -246,11 +259,9 @@ export default function CalendarTest() {
                         )}
                     </View>
 
-                    {!isHome && (
-                        <TouchableOpacity onPress={goToday} activeOpacity={0.6} style={styles.todayButton}>
-                            <Text style={[styles.todayText, { color: accent }]}>Today</Text>
-                        </TouchableOpacity>
-                    )}
+                    <TouchableOpacity onPress={goToday} activeOpacity={0.6} disabled={isHome} style={[styles.todayButton, isHome && styles.todayButtonHidden]}>
+                        <Text style={[styles.todayText, { color: accent }]}>Today</Text>
+                    </TouchableOpacity>
                 </View>
                 <Text style={styles.readout}>{selectedDay ? `Selected: ${selectedDay}` : 'Tap a day'}</Text>
             </View>
@@ -298,7 +309,7 @@ function makeStyles(colors: Colors) {
             letterSpacing: -0.3,
         },
         body: {
-            minHeight: 300,
+            minHeight: CALENDAR_GRID_HEIGHT,
             justifyContent: 'center',
         },
         pickerGrid: {
@@ -327,6 +338,9 @@ function makeStyles(colors: Colors) {
             marginTop: 10,
             paddingVertical: 6,
             paddingHorizontal: 14,
+        },
+        todayButtonHidden: {
+            opacity: 0,
         },
         todayText: {
             fontFamily: fonts.semibold,

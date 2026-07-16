@@ -2,7 +2,7 @@ import EditMacroGoalModal, { type MacroGoalKind } from '@/components/NutritionCo
 import OnboardingScaffold from '@/components/NeutralComponents/OnboardingScaffold'
 import PressableScale from '@/components/NeutralComponents/PressableScale'
 import { useSettings } from '@/context/SettingsContext'
-import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
+import { fonts, macroColors, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { onboardingStep } from '@/lib/onboarding/steps'
 import { router } from 'expo-router'
 import { Beef, Droplet, Flame, Pencil, Wheat } from 'lucide-react-native'
@@ -45,9 +45,9 @@ export default function OnboardingPlan() {
     }
 
     const CARDS = [
-        { kind: 'calories' as const, Icon: Flame, color: '#FF9500', label: 'Calories', value: `${macros.calorieGoal}` },
-        { kind: 'protein' as const, Icon: Beef, color: '#FF5A5A', label: 'Protein', value: `${macros.proteinGoal}g` },
-        { kind: 'carbs' as const, Icon: Wheat, color: '#EAB308', label: 'Carbs', value: `${macros.carbsGoal}g` },
+        { kind: 'calories' as const, Icon: Flame, color: macroColors.calories, label: 'Calories', value: `${macros.calorieGoal}` },
+        { kind: 'protein' as const, Icon: Beef, color: macroColors.protein, label: 'Protein', value: `${macros.proteinGoal}g` },
+        { kind: 'carbs' as const, Icon: Wheat, color: macroColors.carbs, label: 'Carbs', value: `${macros.carbsGoal}g` },
         { kind: 'fats' as const, Icon: Droplet, color: colors.nutrition, label: 'Fats', value: `${macros.fatsGoal}g` },
     ]
 

@@ -12,6 +12,7 @@ import { fonts, radius, useColorScheme, useColors, type Colors } from '@/context
 import { useWorkout } from '@/context/WorkoutContext'
 import { useToday } from '@/lib/hooks/useToday'
 import { addDays, formatDate, getWeekStart } from '@/lib/utils/dateHelper'
+import { weightUnitLabel } from '@/lib/utils/unitConversions'
 import { useRouter } from 'expo-router'
 import { ChevronDown, ChevronLeft, ChevronRight, Dumbbell, Pencil, Scale, Utensils } from 'lucide-react-native'
 import { useEffect, useMemo, useState } from 'react'
@@ -41,7 +42,7 @@ export default function ProgressScreen() {
     const [bwRange, setBwRange] = useState<number>(90)
     const topRange = mode ? liftRange : bwRange
     const [bottomWeekOffset, setBottomWeekOffset] = useState(0)
-    const [selectedExercise, setSelectedExercise] = useState<string>(lastExercise || 'Barbell Bench Press')
+    const [selectedExercise, setSelectedExercise] = useState<string>(lastExercise || 'Bench Press')
     const [selectedMacro, setSelectedMacro] = useState<'calories' | 'protein' | 'carbs' | 'fats'>('calories')
 
     // Modal visibility state
@@ -114,7 +115,7 @@ export default function ProgressScreen() {
 
     // Card headers (title + simple subtitle, shown inside each card)
     const topTitle = mode ? selectedExercise : 'Body Weight'
-    const weightUnit = settings.unitSystem === 'imperial' ? 'lb' : 'kg'
+    const weightUnit = weightUnitLabel(settings.unitSystem)
     const goalDescriptor = { lose: 'Cutting to', gain: 'Bulking to', maintain: 'Maintaining at' }[settings.goalType]
     const topSubtitle =
         mode ? 'Estimated 1 rep max'
@@ -145,7 +146,7 @@ export default function ProgressScreen() {
             <ModeSwitcher />
             <ScrollView contentContainerStyle={styles.container} style={styles.scroll}>
                 <ActivityBanner mode={mode} trainedDays={trainedDaysThisWeek} nutritionStreak={nutritionStreak} />
-                {!mode && isGoalReached(settings) && <GoalReachedBanner onPress={() => router.push('/settingsScreens/adjustNutrition/adjustNutrition1')} />}
+                {!mode && isGoalReached(settings) && <GoalReachedBanner state={settings} onPress={() => router.push('/settingsScreens/adjustNutrition/adjustNutrition1')} />}
 
                 {/* TOP card — line chart */}
                 <View style={styles.graphCard}>

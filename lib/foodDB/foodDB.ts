@@ -1,11 +1,19 @@
+import { ENV } from '@/lib/env'
 import { supabase } from '@/lib/supabase/client'
 import { CacheEntry, FoodDetails, FoodItem, FoodSearchResult } from './types'
 
 const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000 // 1 week
-const EDGE_FN_URL = `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/fetchFoodDB`
+const EDGE_FN_URL = `${ENV.SUPABASE_URL}/functions/v1/fetchFoodDB`
 
 const searchCache: Record<string, CacheEntry<FoodSearchResult[]>> = {}
 const detailsCache: Record<string, CacheEntry<FoodDetails>> = {}
+
+// Sign-out hook: both caches are keyed per query, not per user, but letting
+// them survive an account switch is unbounded memory for stale sessions.
+export function clearFoodDBCaches(): void {
+    for (const key of Object.keys(searchCache)) delete searchCache[key]
+    for (const key of Object.keys(detailsCache)) delete detailsCache[key]
+}
 
 function isFresh<T>(entry: CacheEntry<T> | undefined): boolean {
     return !!entry && Date.now() - entry.timestamp < CACHE_TTL_MS

@@ -1,7 +1,7 @@
 import { useSettings } from '@/context/SettingsContext'
 import { validateHeightWeight } from '@/context/SettingsContext/functions/validator'
 import { fonts, radius, useColors, useColorScheme, type Colors } from '@/context/ThemeContext'
-import { feetInchesToInches, inchesToFeetInches } from '@/lib/utils/unitConversions'
+import { feetInchesToInches, inchesToFeetInches, weightUnitLabel } from '@/lib/utils/unitConversions'
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
@@ -29,7 +29,8 @@ export default function AdjustMeasurementsScreen() {
 
         // Height first, then the weigh-in: handleUpdateBw's functional updater sees the
         // queued height and regenerates targets itself (respecting macrosCustomized).
-        // No prompt hosting here — a crossing shows the goal-reached banner on Progress.
+        // Any goal-reached prompt is raised by handleUpdateBw and shown by the global
+        // GoalPromptHost after this screen closes.
         setSettings({ ...settings, height: totalHeight })
         handleUpdateBw(Number(weight))
         router.back()
@@ -78,7 +79,7 @@ export default function AdjustMeasurementsScreen() {
                             <Text style={styles.inputLabel}>Weight</Text>
                             <View style={styles.inputWrapper}>
                                 <TextInput style={styles.input} placeholder={unitSystem === 'imperial' ? '160' : '73'} placeholderTextColor={colors.placeholder} keyboardType="numeric" value={weight} onChangeText={setWeight} returnKeyType="done" onSubmitEditing={handleSave} />
-                                <Text style={styles.unitText}>{unitSystem === 'imperial' ? 'lbs' : 'kg'}</Text>
+                                <Text style={styles.unitText}>{weightUnitLabel(unitSystem)}</Text>
                             </View>
                         </View>
                     </View>

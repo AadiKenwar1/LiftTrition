@@ -1,4 +1,5 @@
 import { fonts, useColors, type Colors } from '@/context/ThemeContext'
+import { weightUnitLabel } from '@/lib/utils/unitConversions'
 import { ArrowDown, ArrowRight, ArrowUp } from 'lucide-react-native'
 import { useMemo } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
@@ -35,7 +36,7 @@ function computeStats(graphType: GraphType, data: Array<{ day: string; value: nu
     const first = values[0] ?? 0
     const last = values[values.length - 1] ?? 0
     const change = last - first
-    const weightUnit = unitSystem === 'imperial' ? 'lb' : 'kg'
+    const weightUnit = weightUnitLabel(unitSystem)
 
     // For per-day nutrition metrics, average/trend over days actually logged (ignore unlogged 0 days).
     const loggedValues = values.filter((v) => v > 0)

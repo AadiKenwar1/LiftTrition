@@ -67,12 +67,11 @@ export default function FoodDBModalPreview() {
     }
 
     // Debounced auto-search — premium only (free users are gated at the
-    // keyboard, so this can never fire for them). Min 3 chars trims the
-    // worthless prefix queries ("ch", "chi") the old 500ms debounce paid for.
+    // keyboard, so this can never fire for them).
     useEffect(() => {
         if (simFree) return
         const q = searchQuery.trim()
-        if (q.length < 3) return
+        if (!q) return
         const timeoutId = setTimeout(async () => {
             setIsSearching(true)
             try {
@@ -138,6 +137,10 @@ export default function FoodDBModalPreview() {
     }
 
     function handleAddAll() {
+        if (simFree) {
+            openGate()
+            return
+        }
         if (combineItems && addedItems.length >= 2) {
             const createdAt = new Date()
             let protein = 0
@@ -202,16 +205,7 @@ export default function FoodDBModalPreview() {
                 <View style={styles.handle} />
             </View>
 
-            <ScrollView style={styles.body} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-                <View style={styles.iconContainer}>
-                    <View style={styles.iconCircle}>
-                        <Database size={40} color={colors.nutrition} strokeWidth={2.5} />
-                    </View>
-                </View>
-                <Text style={styles.title}>Food Database</Text>
-                <Text style={styles.subtitle}>Search and add food items</Text>
-
-                <Modal visible={isLoadingDetails} transparent animationType="fade">
+            <Modal visible={isLoadingDetails} transparent animationType="fade">
                     <View style={styles.loadingModal}>
                         <View style={styles.loadingContent}>
                             <ActivityIndicator size="large" color={colors.nutrition} />
@@ -253,24 +247,43 @@ export default function FoodDBModalPreview() {
                     </View>
                 </Modal>
 
-                <View style={styles.searchContainer}>
-                    <TextInput
-                        style={styles.searchInput}
-                        placeholder="Search foods..."
-                        placeholderTextColor={colors.placeholder}
-                        value={searchQuery}
-                        onChangeText={handleQueryChange}
-                        onFocus={() => {
-                            if (simFree) openGate()
-                        }}
-                        returnKeyType="search"
-                    />
-                    {isSearching && (
-                        <View style={styles.searchLoader}>
-                            <ActivityIndicator size="small" color={colors.nutrition} />
-                        </View>
-                    )}
+            <ScrollView style={styles.body} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+                <View style={styles.iconContainer}>
+                    <View style={styles.iconCircle}>
+                        <Database size={40} color={colors.nutrition} strokeWidth={2.5} />
+                    </View>
                 </View>
+                <Text style={styles.title}>Food Database</Text>
+                <Text style={styles.subtitle}>Search and add food items</Text>
+
+                {simFree ?
+                    // Inert (non-focusable) input for free users so tapping raises the gate
+                    // directly instead of flashing the keyboard open then dismissing it.
+                    <TouchableOpacity style={styles.searchContainer} activeOpacity={0.7} onPress={openGate}>
+                        <TextInput
+                            style={styles.searchInput}
+                            placeholder="Search foods..."
+                            placeholderTextColor={colors.placeholder}
+                            editable={false}
+                            pointerEvents="none"
+                        />
+                    </TouchableOpacity>
+                :   <View style={styles.searchContainer}>
+                        <TextInput
+                            style={styles.searchInput}
+                            placeholder="Search foods..."
+                            placeholderTextColor={colors.placeholder}
+                            value={searchQuery}
+                            onChangeText={handleQueryChange}
+                            returnKeyType="search"
+                        />
+                        {isSearching && (
+                            <View style={styles.searchLoader}>
+                                <ActivityIndicator size="small" color={colors.nutrition} />
+                            </View>
+                        )}
+                    </View>
+                }
 
                 {addedItems.length > 0 && (
                     <StagedSection label="Added" count={addedItems.length} color={colors.nutrition} combineItems={combineItems} onCombineItemsChange={setCombineItems}>
@@ -325,11 +338,7 @@ export default function FoodDBModalPreview() {
                     </View>
                 :   <View style={styles.section}>
                         <Text style={styles.sectionTitle}>{hasSearched ? `Results (${searchResults.length})` : 'Search'}</Text>
-                        {searchQuery.trim().length < 3 ?
-                            <View style={styles.emptyState}>
-                                <Text style={styles.emptyText}>Keep typing to search (3+ letters)</Text>
-                            </View>
-                        : isSearching || !hasSearched ?
+                        {isSearching || !hasSearched ?
                             <View style={styles.emptyState}>
                                 <ActivityIndicator size="large" color={colors.nutrition} />
                                 <Text style={styles.emptyText}>Searching...</Text>

@@ -1210,3 +1210,38 @@ describe('FoodDB API', () => {
         })
     })
 })
+
+describe('clearFoodDBCaches', () => {
+    test('clearFoodDBCaches forces a refetch on the next identical search', async () => {
+        jest.resetModules()
+        jest.doMock('@/lib/env', () => ({
+            ENV: { SUPABASE_URL: 'https://test.supabase.co' },
+        }))
+        jest.doMock('@/lib/supabase/client', () => ({
+            supabase: { auth: { getSession: jest.fn() } },
+        }))
+
+        const { supabase } = require('@/lib/supabase/client')
+        ;(supabase.auth.getSession as jest.Mock).mockResolvedValue({
+            data: { session: { access_token: 'test-token' } },
+        })
+        ;(global.fetch as jest.Mock).mockReset().mockResolvedValue({
+            ok: true,
+            json: async () => [{ description: 'Apple', fdcId: 'apple-1' }],
+        })
+
+        const { getFoodSearchResults } = require('../foodDB')
+
+        await getFoodSearchResults('apple')
+        const callsAfterFirst = (global.fetch as jest.Mock).mock.calls.length
+
+        await getFoodSearchResults('apple') // cache hit — no new network call
+        expect((global.fetch as jest.Mock).mock.calls.length).toBe(callsAfterFirst)
+
+        const { clearFoodDBCaches } = require('../foodDB')
+        clearFoodDBCaches()
+
+        await getFoodSearchResults('apple') // cache cleared — network again
+        expect((global.fetch as jest.Mock).mock.calls.length).toBeGreaterThan(callsAfterFirst)
+    })
+})

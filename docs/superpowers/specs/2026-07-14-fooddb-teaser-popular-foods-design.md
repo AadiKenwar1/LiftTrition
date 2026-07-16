@@ -76,9 +76,9 @@ never scan-specific. Update imports in `cameraScreen.tsx`,
 ### explicit-button design)
 
 Debounced auto-search returns, tuned for cost: 700 ms debounce (was 500),
-minimum 3 characters before a call fires (kills worthless prefix queries),
 premium-only (free users are gated at the keyboard, below, so the effect can
-never fire for them). Editing the query invalidates the previous results
+never fire for them). (A minimum-length guard was tried and removed by user
+decision.) Editing the query invalidates the previous results
 (no stale list while composing). The in-memory cache in `lib/foodDB` applies
 as always. Rationale: FatSecret matching is literal, so users cope by
 iterative refinement — search-as-you-type is the UX that matching quality

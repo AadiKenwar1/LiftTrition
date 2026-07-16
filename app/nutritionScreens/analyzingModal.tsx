@@ -3,25 +3,37 @@ import { useNutrition } from '@/context/NutritionContext'
 import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import type { ScanMode } from '@/lib/openAI/mealImage'
 import { LinearGradient } from 'expo-linear-gradient'
-import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
 import { Sparkles } from 'lucide-react-native'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { ActivityIndicator, Alert, Animated, Image, StyleSheet, Text, View } from 'react-native'
 
 export default function AnalyzingModal() {
-    const { photoUri, mode } = useLocalSearchParams<{ photoUri: string; mode?: string }>()
+    const { photoUri, mode, devFakeMs, devFakeOutcome } = useLocalSearchParams<{ photoUri: string; mode?: string; devFakeMs?: string; devFakeOutcome?: string }>()
     const { handleAnalyzeAndAddPhoto } = useNutrition()
     const { userID } = useAuth()
     const router = useRouter()
+    const navigation = useNavigation()
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
     const [progress] = useState(new Animated.Value(0))
     const [pulseAnim] = useState(new Animated.Value(1))
+    const canceledRef = useRef(false)
 
     // Normalize param (Expo Router can return string | string[] | undefined)
     const photoUriStr = typeof photoUri === 'string' ? photoUri : photoUri?.[0]
     const rawMode = typeof mode === 'string' ? mode : mode?.[0]
     const modeStr: ScanMode = rawMode === 'label' ? 'label' : rawMode === 'item' ? 'item' : 'meal'
+    const devFakeMsStr = typeof devFakeMs === 'string' ? devFakeMs : devFakeMs?.[0]
+    const devFakeOutcomeStr = typeof devFakeOutcome === 'string' ? devFakeOutcome : devFakeOutcome?.[0]
+
+    // Swipe-dismiss / hardware back = cancel: drop the in-flight result silently.
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('beforeRemove', () => {
+            canceledRef.current = true
+        })
+        return unsubscribe
+    }, [navigation])
 
     useEffect(() => {
         if (!photoUriStr) {
@@ -64,10 +76,18 @@ export default function AnalyzingModal() {
     async function analyzePhoto() {
         if (!photoUriStr) return
         try {
-            await handleAnalyzeAndAddPhoto(photoUriStr, userID, modeStr)
+            // Dev Hub fake mode (stripped from production): simulate analysis without an API call.
+            if (__DEV__ && devFakeMsStr) {
+                await new Promise((resolve) => setTimeout(resolve, Number(devFakeMsStr)))
+                if (devFakeOutcomeStr === 'fail') throw new Error('Dev-forced failure (no API call was made)')
+            } else {
+                await handleAnalyzeAndAddPhoto(photoUriStr, userID, modeStr, () => !canceledRef.current)
+            }
+            if (canceledRef.current) return
             // Success! Dismiss all modals and return to home
             router.dismissAll()
         } catch (error: any) {
+            if (canceledRef.current) return
             const msg = typeof error?.message === 'string' && error.message.length > 0 ? error.message : "Sorry we weren't able to analyze your photo. Please try again."
             Alert.alert(
                 'Analysis Failed',

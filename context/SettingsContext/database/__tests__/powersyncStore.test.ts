@@ -4,6 +4,7 @@ import { settingsToRow, rowToSettings } from '../powersyncStore'
 import { Settings } from '../../types'
 import type { SettingsRecord } from '@/lib/powersync/AppSchema'
 import { getDateKey } from '@/lib/utils/dateHelper'
+import { DEFAULT_SETTINGS } from '../../defaults'
 
 function makeSettings(overrides: Partial<Settings> = {}): Settings {
     return {
@@ -112,5 +113,13 @@ describe('settingsToRow / rowToSettings round-trip', () => {
         const back = rowToSettings(legacyRow)
         expect(back.macrosCustomized).toBe(false)
         expect(back.goalOvershootAcknowledged).toBe(false)
+    })
+
+    it('hydrates NULL goal_pace to the shared default', () => {
+        const row = settingsToRow(makeSettings(), 'user-1') as Record<string, unknown>
+        row.goal_pace = null
+        const back = rowToSettings(row as unknown as SettingsRecord)
+        expect(back.goalPace).toBe(DEFAULT_SETTINGS.goalPace)
+        expect(DEFAULT_SETTINGS.goalPace).toBe(0.5)
     })
 })

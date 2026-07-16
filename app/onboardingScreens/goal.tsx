@@ -4,6 +4,7 @@ import { useSettings } from '@/context/SettingsContext'
 import { validateTargetWeight } from '@/context/SettingsContext/functions/validator'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { onboardingStep } from '@/lib/onboarding/steps'
+import { weightUnitLabel } from '@/lib/utils/unitConversions'
 import { router } from 'expo-router'
 import { useMemo, useState } from 'react'
 import { Keyboard, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from 'react-native'
@@ -30,7 +31,7 @@ export default function OnboardingGoal() {
     const { current, total } = onboardingStep('goal', settings.goalType)
 
     const metric = settings.unitSystem === 'metric'
-    const unit = metric ? 'kg' : 'lb'
+    const unit = weightUnitLabel(settings.unitSystem)
     const placeholder = phase === 'cut' ? (metric ? '68' : '150') : metric ? '80' : '176'
 
     function handleNext() {

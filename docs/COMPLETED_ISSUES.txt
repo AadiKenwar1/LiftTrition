@@ -12,7 +12,11 @@ guard), F3 (Connector declarative upserts + dead-letter backstop), F4
 (clearLocalSession teardown), F5 (parseDateKey + useToday), F6
 (useAsyncLoad + AppLoadingScreen retry variant + reportPersistFailure).
 
-Completed and migrated: 1, 2, 3, 5, 6, 7, 9, 10, 11, 12, 14, 15, 16, 17, 19, 20, 21, 22.
+Completed and migrated: 1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 19, 20, 21, 22.
+
+MINOR audit issues (a separate 1-18 numbering scheme) were all completed
+2026-07-15; their per-issue records live in docs/MINOR_FIXES/ (see
+docs/AUDIT_MINOR.txt for the index). They are not duplicated here.
 
 ==================================================================
 
@@ -254,6 +258,121 @@ Completed and migrated: 1, 2, 3, 5, 6, 7, 9, 10, 11, 12, 14, 15, 16, 17, 19, 20,
    new day, streak recomputes; cross a week boundary → "this week"
    bar chart shows the new week with today highlighted.
 
+8. Weighing in secretly rewrites your goals
+   Every body-weight update re-decides lose/maintain/gain by comparing
+   against the goal weight exactly. A "maintain" user who logs 0.5 lb
+   over is silently switched to "lose" with a 250-cal deficit; dip under
+   and they become "gain". It also resets the pace and overwrites any
+   hand-tuned macros. Same silent macro rewrite on height/activity edits.
+   Where: context/SettingsContext/functions/bodyWeightFunctions.tsx
+   Fix: don't flip the goal type without asking; don't clobber custom
+   macros (add a customized flag).
+
+   PLAN
+   Root cause: the weigh-in path conflates two responsibilities that
+   need opposite policies. TARGETS (calorie/macro numbers) should
+   track the user's weight — that's advertised in the modal copy and
+   users expect it. INTENT (goalType, pace) belongs to the user — but
+   the code re-derives it with an exact weight-vs-goal comparison, so
+   normal daily scale noise flips maintain users into ±250 kcal
+   swings, a cutter who dips past goal silently becomes a bulker, a
+   flip resets pace to 0.5, and every weigh-in regenerates all four
+   macro goals, wiping hand-tuned values — because nothing records
+   that they were hand-tuned.
+   Market check (researched 2026-07): Cal AI updates nothing on a
+   weigh-in (targets are static after onboarding — criticized as TOO
+   manual); MacroFactor, the most automated tracker, adjusts target
+   numbers weekly from logged data but the goal direction is always
+   user-chosen. No shipping tracker silently flips direction.
+   The rule to adopt: TARGETS ARE DERIVED, INTENT IS OWNED.
+   Automation may update numbers within the user's chosen goal, but
+   never changes direction: it asks (level-triggered prompt) and
+   reminds (persistent banner). Every goalType change is a user tap.
+   Steps:
+   1) computeBwUpdate keeps updating bodyWeight AND regenerating
+      targets for the CURRENT goalType — but never touches goalType
+      or goalPace. Delete the exact-comparison flip and the 0.5 pace
+      reset. Lose/gain targets track the scale weight (deficit stays
+      sized to actual TDEE); MAINTAIN targets anchor to goalWeight
+      (the maintain weight) instead — weigh-ins never move a
+      maintain user's targets, and mild drift self-corrects toward
+      the anchor. (Requires: onboarding/wizard set goalWeight =
+      current weight when maintain is chosen; verify legacy rows.)
+   2) macrosCustomized flag (new settings column: Postgres
+      migration, AppSchema, Settings type, settingsToRow/
+      rowToSettings): set true when the user hand-edits macros
+      (EditMacroGoalModal / manual adjustNutrition path); cleared
+      whenever targets are explicitly regenerated (wizard
+      completion, or accepting any "Recalculate?" prompt). Every
+      IMPLICIT recalculation — weigh-ins, height/activity edits —
+      is skipped while the flag is true, so hand-tuned targets
+      survive the app's most frequent action.
+   3) Goal-reached prompt (REVISED 2026-07-15 — level-triggered;
+      replaces the original one-time crossing prompt AND step 4):
+      any weigh-in landing at/past goalWeight, from ANY screen (the
+      prompt is hosted globally by GoalPromptHost), shows "Goal
+      Reached!" with three choices — "Switch to Maintenance"
+      (consented switch, targets anchored at goalWeight), "Set a
+      New Goal" (wizard), "Keep Going" (sets
+      goal_overshoot_acknowledged → stops the asking; banner
+      stays). Dismissing changes nothing: it asks again on the next
+      weigh-in past goal. Silence is re-asked, never acted on.
+   4) REMOVED (2026-07-15): the auto-maintain safety net and its
+      announcement card. Automation never switches goalType.
+      Rationale: the net could only ever fire on a weigh-in, and
+      every weigh-in now raises the step-3 ask wherever it happens,
+      while the banner (step 5) holds the progress screen — so the
+      net protected no one the ask doesn't. Its deadband constant
+      and edge detection are deleted; goal_overshoot_acknowledged
+      keeps its column with the smaller meaning "stop asking".
+   5) Persistent banner instead of a missable alert: while goalType
+      is lose/gain and weight is at/past goalWeight, the progress
+      screen (nutrition mode only, directly beneath ActivityBanner —
+      weigh-ins happen on that screen) shows "Goal reached — set
+      your next goal" (reuse the ActivityBanner pattern) linking to
+      the wizard. Pure derived render-time state — cannot be lost or
+      forgotten.
+   6) Height/activity edits follow the same one rule: auto-recalc
+      numbers for non-customized users (consistent with weigh-ins),
+      never touch goalType; customized users get an explicit
+      "Recalculate targets?" prompt instead of silence.
+   7) Copy: updateBWModal subtitle stays honest per state — targets
+      update automatically (default) / your custom targets are kept
+      (customized).
+   Files: bodyWeightFunctions.tsx, SettingsContext/index.tsx +
+   database/powersyncStore.ts, settings migration
+   (macros_customized), lib/powersync/AppSchema.ts,
+   updateBWModal.tsx, profile.tsx, adjustTraining.tsx,
+   EditMacroGoalModal.tsx, (tabs)/progress.tsx (banner host),
+   goal-reached banner component (new — previewed with the prompt
+   + logic in Dev Hub; see components/NutritionComponents/
+   GoalReached* and devTest/goalReachedLogic.ts).
+   Verify: maintain user logs +0.5 lb → goalType/pace untouched, no
+   kcal seesaw; lose user's calorie target tracks weight down across
+   weigh-ins; hand-edit protein → later weigh-ins keep it; any
+   weigh-in at/past goal (from any screen) → prompt asks, and asks
+   again next weigh-in until answered; banner persists until a new
+   goal; automation never changes goalType — every switch is a tap.
+   STATUS: IMPLEMENTED 2026-07-14 (plan: docs/superpowers/plans/
+   2026-07-14-issue8-goal-intent.md; Dev Hub sim runs the
+   production logic). REVISED 2026-07-15 (plans/2026-07-15-
+   remove-safety-net.md): safety net deleted, prompt made
+   level-triggered and hosted globally; 71 tests green.
+   REFINED 2026-07-15 (plans/2026-07-15-goal-banner-copy-and-
+   rearm.md): (a) Keep Going mute re-scoped from "forever for this
+   goal" to "while at/past goal" — a weigh-in back on the pre-goal
+   side clears goal_overshoot_acknowledged (zero margin: the
+   mute's edge is the banner's edge), fixing hit goal → Keep Going
+   → backtrack → re-hit goal never asking again; (b) banner copy
+   is dynamic — past a DISPLAY-ONLY band (2 lbs / 1 kg,
+   GOAL_COPY_BAND; gates no behavior) it reads "N lbs past your
+   goal — set your next goal", so a Keep-Going user who keeps
+   drifting sees accurate copy. Prompt copy unchanged (with the
+   re-arm it fires at the reach moment, where "at your goal" is
+   accurate). No schema change.
+   MIGRATION APPLIED 2026-07-15: settings_goal_intent_flags.sql run
+   in Supabase (no sync-rules change — SELECT *).
+
 9. Re-logging a saved meal at 2x servings double-counts the ingredients
    The scaling helper multiplies BOTH the quantity and the per-unit
    macros, so the ingredient breakdown shows 4x at 2 servings (and
@@ -385,6 +504,60 @@ Completed and migrated: 1, 2, 3, 5, 6, 7, 9, 10, 11, 12, 14, 15, 16, 17, 19, 20,
     Verify: type "2.5" → field shows 2.5 and totals use it; a field
     can be cleared while editing; a 0-quantity ingredient shows 0 in
     its row AND contributes 0 to the totals that get saved.
+
+13. Swiping away the "Analyzing..." screen doesn't cancel anything
+    The AI call keeps running. Up to 30s later it adds the meal anyway
+    and force-closes whatever screen the user has open since; on failure
+    it pops a "Try Again" alert over some unrelated screen. Re-taking
+    the photo after "cancelling" = duplicate meals and duplicate paid
+    AI calls.
+    Where: app/nutritionScreens/analyzingModal.tsx
+    Fix: block the swipe-dismiss on that screen, or track cancelled
+    state and drop the result.
+
+    PLAN
+    Root cause: a 30-second paid, uncancellable operation lives in a
+    casually dismissible screen, and its continuation assumes the
+    screen still owns navigation (router.dismissAll() fires wherever
+    the user has wandered to).
+    Steps:
+    1) Make the commitment explicit — the route is not dismissible
+       while analyzing: analyzingModal's Stack.Screen gets
+       gestureEnabled: false (it currently inherits modal
+       swipe-to-dismiss from modalPresentation), and Android
+       hardware back is blocked for the screen (usePreventRemove).
+       The user is committed for at most 30s (the existing timeout)
+       with visible progress; the failure alert still offers Try
+       Again / Cancel.
+    2) Guard the continuation anyway (cheap insurance for any future
+       programmatic dismissal): a doneRef/unmounted ref checked after
+       the await — if the screen is gone, drop the result: no
+       addNutrition, no dismissAll, no orphan Alert.
+    Result: "cancel then re-take" duplicates become impossible
+    because there is no half-cancelled state — analysis either
+    completes on-screen or fails on-screen.
+    Files: app/_layout.tsx (route options), analyzingModal.tsx.
+    Verify: swipe during analysis → screen stays; success dismisses
+    to home exactly once; simulate failure → alert appears on the
+    analyzing screen itself; no path produces two entries or two
+    paid calls.
+    Completed 2026-07-15: implemented the "track cancelled state and
+    drop the result" alternative from the Fix line rather than the
+    PLAN's block-the-swipe approach (user choice: swipe stays enabled
+    and silently cancels — no confirmation, no alert). analyzeAndAddPhoto
+    gained an optional shouldCommit?: () => boolean checked between
+    compute (runPhotoAnalysis) and commit (addNutrition); the modal
+    threads () => !canceledRef.current (set by a 'beforeRemove'
+    listener, covering swipe and Android back) and guards dismissAll
+    and the failure alert with the same ref. The network call is NOT
+    aborted — the result is discarded, so a canceled scan still bills
+    one AI call. New aiFunctions.test.ts covers the gate (discard
+    mid-flight, commit on true/omitted, failure still throws).
+    Companion dev tool: Dev Hub → Nutrition AI → "Scan Cancel
+    (Issue 13)" launches the real modal with a __DEV__ fake analysis
+    (devFakeMs/devFakeOutcome params, no API call) to rehearse
+    swipe-cancel on the simulator. Spec:
+    docs/superpowers/specs/2026-07-15-scan-cancel-discard-design.md.
 
 14. Nearly every "Add" button can be double-tapped
     Add meal, Add All (food DB + saved meals), Add Exercises, Add

@@ -1,12 +1,13 @@
 // lib/openAI/openAI.ts
 // Calls Supabase Edge Function (fetchOpenAI) instead of OpenAI directly. No API key in client.
 
+import { ENV } from '@/lib/env';
 import type { ScanMode } from '@/lib/openAI/mealImage';
 import { supabase } from '@/lib/supabase/client';
 
 export type VisionProvider = 'openai' | 'gemini'
 
-const EDGE_FN_URL = `${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/fetchOpenAI`
+const EDGE_FN_URL = `${ENV.SUPABASE_URL}/functions/v1/fetchOpenAI`
 
 async function callEdgeFunction(
     body:

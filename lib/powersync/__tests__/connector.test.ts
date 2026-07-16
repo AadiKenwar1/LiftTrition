@@ -22,6 +22,12 @@ jest.mock('@/lib/supabase/client', () => ({
     },
 }))
 
+// Mock env — jest.mock calls are hoisted above imports, so this reliably beats
+// the real @/lib/env module's process.env snapshot-at-import-time behavior.
+jest.mock('@/lib/env', () => ({
+    ENV: { POWERSYNC_URL: 'https://test.powersync.com' },
+}))
+
 // Mock Sentry
 jest.mock('@sentry/react-native', () => ({
     captureException: jest.fn(),
@@ -55,8 +61,6 @@ describe('Connector', () => {
             }
 
             ;(supabase.auth.getSession as jest.Mock).mockResolvedValue(mockSession)
-
-            process.env.EXPO_PUBLIC_POWERSYNC_URL = 'https://test.powersync.com'
 
             const result = await connector.fetchCredentials()
 

@@ -93,12 +93,21 @@ describe('Workout Functions', () => {
             test('should handle negative orders', () => {
                 const workouts = [createMockWorkout({ id: '1', order: -5 })];
                 const result = incrementWorkoutOrders(workouts);
-                
+
                 expect(result[0].order).toBe(-4);
             });
         });
+
+        test('does not bump archived workouts', () => {
+            const result = incrementWorkoutOrders([
+                createMockWorkout({ id: 'a', order: 0, archived: false }),
+                createMockWorkout({ id: 'b', order: 3, archived: true }),
+            ]);
+            expect(result[0].order).toBe(1);
+            expect(result[1].order).toBe(3);
+        });
     });
-    
+
     describe('addWorkout', () => {
         
         describe('Normal Cases', () => {
@@ -201,8 +210,22 @@ describe('Workout Functions', () => {
                 expect(uniqueIds.size).toBe(3);
             });
         });
+
+        test('does not bump archived workouts when inserting', () => {
+            const { setter, getState, setState } = createMockSetter<Workout>();
+            setState([
+                createMockWorkout({ id: '1', order: 0, archived: false }),
+                createMockWorkout({ id: '2', order: 5, archived: true }),
+            ]);
+
+            addWorkout('New Workout', 'user-1', setter);
+
+            const result = getState();
+            expect(result.find(w => w.id === '1')?.order).toBe(1);
+            expect(result.find(w => w.id === '2')?.order).toBe(5);
+        });
     });
-    
+
     describe('deleteWorkout', () => {
         
         describe('Normal Cases', () => {
@@ -372,13 +395,45 @@ describe('Workout Functions', () => {
                 setState([createMockWorkout({ id: '1', archived: false, updatedAt: oldDate })]);
                 
                 archiveWorkout('1', false, setter);
-                
+
                 const result = getState();
                 expect(result[0].updatedAt.getTime()).toBeGreaterThan(oldDate.getTime());
             });
         });
+
+        test('unarchiving bumps only active siblings, archived rows keep their order', () => {
+            const { setter, getState, setState } = createMockSetter<Workout>();
+            setState([
+                createMockWorkout({ id: '1', archived: true, order: 10 }),
+                createMockWorkout({ id: '2', archived: false, order: 0 }),
+                createMockWorkout({ id: '3', archived: true, order: 5 }),
+            ]);
+
+            archiveWorkout('1', true, setter);
+
+            const result = getState();
+            expect(result.find(w => w.id === '1')).toMatchObject({ archived: false, order: 0 });
+            expect(result.find(w => w.id === '2')?.order).toBe(1);
+            expect(result.find(w => w.id === '3')?.order).toBe(5);
+        });
+
+        test('archiving places the target at order 0 and bumps other archived rows only', () => {
+            const { setter, getState, setState } = createMockSetter<Workout>();
+            setState([
+                createMockWorkout({ id: '1', archived: false, order: 0 }),
+                createMockWorkout({ id: '2', archived: true, order: 0 }),
+                createMockWorkout({ id: '3', archived: false, order: 1 }),
+            ]);
+
+            archiveWorkout('1', false, setter);
+
+            const result = getState();
+            expect(result.find(w => w.id === '1')).toMatchObject({ archived: true, order: 0 });
+            expect(result.find(w => w.id === '2')?.order).toBe(1);
+            expect(result.find(w => w.id === '3')?.order).toBe(1);
+        });
     });
-    
+
     describe('renameWorkout', () => {
         
         describe('Normal Cases', () => {

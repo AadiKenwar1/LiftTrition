@@ -1,5 +1,6 @@
 import { useAuth } from '@/context/AuthContext'
 import { useForceFreeMode } from '@/lib/devtools/forceFreeMode'
+import { ENV } from '@/lib/env'
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { Platform } from 'react-native'
 import Purchases, { CustomerInfo, LOG_LEVEL, PurchasesPackage } from 'react-native-purchases'
@@ -28,8 +29,8 @@ export function BillingProvider({ children }: { children: React.ReactNode }) {
     // Initialize RevenueCat SDK (runs once on mount)
     useEffect(() => {
         const apiKey = Platform.select({
-            ios: process.env.EXPO_PUBLIC_REVENUECAT_API_KEY_IOS,
-            android: process.env.EXPO_PUBLIC_REVENUECAT_API_KEY_ANDROID,
+            ios: ENV.REVENUECAT_API_KEY_IOS,
+            android: ENV.REVENUECAT_API_KEY_ANDROID,
         })
 
         if (!apiKey || apiKey === 'NULL') return

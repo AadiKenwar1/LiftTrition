@@ -28,3 +28,13 @@ export const spacing = {
 export const motion = {
     imageFade: 200,
 } as const
+
+/**
+ * Macro accent colors — scheme-independent brand hues for calories/protein/carbs.
+ * (Fats reuses the nutrition accent from useColors(), which does vary by scheme.)
+ */
+export const macroColors = {
+    calories: '#FF9500',
+    protein: '#FF5A5A',
+    carbs: '#EAB308',
+} as const

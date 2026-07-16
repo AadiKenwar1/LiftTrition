@@ -9,6 +9,7 @@ import { Log } from '@/context/WorkoutContext/types'
 import { useToday } from '@/lib/hooks/useToday'
 import { addDays, formatDate, getDateKey, isDateAfterToday, sortByDateDesc } from '@/lib/utils/dateHelper'
 import { parseNumericInput } from '@/lib/utils/number'
+import { weightUnitLabel } from '@/lib/utils/unitConversions'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useLocalSearchParams } from 'expo-router'
 import { BicepsFlexed, Calendar, Check, RotateCcw } from 'lucide-react-native'
@@ -24,7 +25,7 @@ export default function LogsModal() {
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
 
-    const weightUnit = settings.unitSystem === 'imperial' ? 'lbs' : 'kg'
+    const weightUnit = weightUnitLabel(settings.unitSystem)
     // Normalize params to strings
     const workoutId = typeof params.workoutId === 'string' ? params.workoutId : params.workoutId?.[0] || ''
     const exerciseId = typeof params.exerciseId === 'string' ? params.exerciseId : params.exerciseId?.[0] || ''

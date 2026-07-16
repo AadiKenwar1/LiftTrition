@@ -1,5 +1,11 @@
 # Issue 8 — Goal Intent Rules Implementation Plan
 
+> **SUPERSEDED (historical record):** the deadband/auto-maintain "safety net" described
+> below was removed by plans/2026-07-15-remove-safety-net.md (no `OVERSHOOT_DEADBAND`,
+> no `autoMaintain` prompt — automation never switches goalType). Keep-Going mute and
+> banner copy were further refined by plans/2026-07-15-goal-banner-copy-and-rearm.md.
+> The live rules are context/SettingsContext/functions/bodyWeightFunctions.tsx.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Weigh-ins update numbers but never flip the user's goal; crossing the goal asks; only sustained, unanswered overshoot auto-lands in maintenance (announced); hand-tuned macros survive every implicit recalc.

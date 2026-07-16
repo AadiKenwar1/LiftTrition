@@ -1,11 +1,12 @@
 import Graph1 from '@/components/GraphComponents/Graph1'
+import { getBodyWeightProgressData } from '@/context/SettingsContext/functions/bodyWeightFunctions'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { formatDateMinimal, getDateKey } from '@/lib/utils/dateHelper'
 import { useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 import { Field, Segmented } from './DevControls'
 
-type DataKey = 'normal' | 'one' | 'two' | 'flat' | 'big' | 'empty' | 'daily' | 'short'
+type DataKey = 'normal' | 'one' | 'two' | 'flat' | 'big' | 'empty' | 'daily' | 'short' | 'pipeline'
 type GoalKey = 'off' | 'in' | 'below' | 'above'
 
 /**
@@ -29,6 +30,23 @@ function genDailyBodyWeight(days: number): { day: string; value: number }[] {
         out.push({ day: formatDateMinimal(getDateKey(d)), value: logged })
     }
     return out
+}
+
+// Runs the REAL getBodyWeightProgressData: onboarding ~40 days ago, a weigh-in
+// every 5 days, gaps carried forward. Exercises the function the DST fix lives
+// in. In March (spring-forward in-window) the pre-fix code drops day 0 and the
+// line leads with zeros; the fixed code always starts at the first weigh-in.
+function genPipeline(): { day: string; value: number }[] {
+    const today = new Date()
+    const onboarding = new Date(today)
+    onboarding.setDate(onboarding.getDate() - 40)
+    const bwProgress: Record<string, number> = {}
+    for (let age = 0; age <= 40; age += 5) {
+        const d = new Date(onboarding)
+        d.setDate(d.getDate() + age)
+        bwProgress[getDateKey(d)] = Math.round((190 - age * 0.1) * 10) / 10
+    }
+    return getBodyWeightProgressData(bwProgress, onboarding)
 }
 
 const DATASETS: Record<DataKey, { day: string; value: number }[]> = {
@@ -69,6 +87,8 @@ const DATASETS: Record<DataKey, { day: string; value: number }[]> = {
     daily: genDailyBodyWeight(365),
     // New account: 12 days of history — 3M+ ranges fall back to M/D ticks (no month boundaries yet).
     short: genDailyBodyWeight(12),
+    // Real getBodyWeightProgressData pipeline — see genPipeline() above.
+    pipeline: genPipeline(),
 }
 
 function goalFor(data: { value: number }[], key: GoalKey): number | undefined {
@@ -110,6 +130,7 @@ export default function LineChartTest() {
                         { label: 'Empty', value: 'empty' },
                         { label: 'BW daily (1Y)', value: 'daily' },
                         { label: 'New user (12d)', value: 'short' },
+                        { label: 'BW pipeline (real fn)', value: 'pipeline' },
                     ]}
                 />
             </Field>

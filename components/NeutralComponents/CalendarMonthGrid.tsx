@@ -10,6 +10,17 @@ import { Pressable, StyleSheet, Text, View } from 'react-native'
 
 const WEEKDAY_LETTERS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'] as const
 
+const DAY_BOX_SIZE = 36
+const DOT_SLOT_HEIGHT = 8
+const CELL_GAP = 4
+const ROW_HEIGHT = DAY_BOX_SIZE + DOT_SLOT_HEIGHT + CELL_GAP
+const WEEKDAY_ROW_HEIGHT = 22
+const WEEK_ROWS = 6
+
+/** Height of the fully-padded 6-row day grid. Single source of truth so the
+ * containing view can reserve exactly this space and never resize between months. */
+export const CALENDAR_GRID_HEIGHT = WEEKDAY_ROW_HEIGHT + ROW_HEIGHT * WEEK_ROWS
+
 export type SelectableRange = 'past' | 'future' | 'all'
 
 export interface CalendarMonthGridProps {
@@ -36,13 +47,13 @@ export function CalendarMonthGrid({ year, month, todayDay, selectedDay, eventDay
         ...Array.from({ length: firstWeekday }, () => null),
         ...Array.from({ length: daysInMonth }, (_, i) => getDateKey(new Date(year, month, i + 1))),
     ]
-    while (cells.length % 7 !== 0) cells.push(null)
+    while (cells.length < WEEK_ROWS * 7) cells.push(null)
 
     return (
         <View>
             <View style={styles.weekRow}>
                 {WEEKDAY_LETTERS.map((letter, i) => (
-                    <Text key={`${letter}-${i}`} style={[styles.weekLetter, { color: colors.textMuted }]}>
+                    <Text key={`${letter}-${i}`} allowFontScaling={false} style={[styles.weekLetter, { color: colors.textMuted }]}>
                         {letter}
                     </Text>
                 ))}
@@ -76,6 +87,7 @@ export function CalendarMonthGrid({ year, month, todayDay, selectedDay, eventDay
                                     ]}
                                 >
                                     <Text
+                                        allowFontScaling={false}
                                         style={[
                                             styles.dayText,
                                             {
@@ -124,20 +136,21 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         fontFamily: fonts.medium,
         fontSize: 10,
+        lineHeight: WEEKDAY_ROW_HEIGHT - 8,
         letterSpacing: 1,
         marginBottom: 8,
     },
     cell: {
         width: 40,
         alignItems: 'center',
-        marginBottom: 4,
+        marginBottom: CELL_GAP,
     },
     cellDisabled: {
         opacity: 0.5,
     },
     dayBox: {
-        width: 36,
-        height: 36,
+        width: DAY_BOX_SIZE,
+        height: DAY_BOX_SIZE,
         borderRadius: radius.card,
         alignItems: 'center',
         justifyContent: 'center',
@@ -147,7 +160,7 @@ const styles = StyleSheet.create({
         fontSize: 15,
     },
     dotSlot: {
-        height: 8,
+        height: DOT_SLOT_HEIGHT,
         justifyContent: 'center',
     },
     dot: {

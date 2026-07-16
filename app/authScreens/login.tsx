@@ -21,7 +21,19 @@ export default function LoginScreen() {
     const styles = useMemo(() => makeStyles(colors), [colors])
     const insets = useSafeAreaInsets()
     const [termsVisible, setTermsVisible] = useState(false)
+    const [signingIn, setSigningIn] = useState(false)
     const logo = logoForScheme(scheme)
+
+    const handleSignIn = async () => {
+        setSigningIn(true)
+        try {
+            await signInWithApple()
+        } finally {
+            setSigningIn(false)
+        }
+    }
+
+    const busy = signingIn || loading
 
     return (
         <View style={styles.container}>
@@ -44,9 +56,9 @@ export default function LoginScreen() {
             </View>
 
             <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) + 24 }]}>
-                <TouchableOpacity style={[styles.appleButton, loading && { opacity: 0.6 }]} onPress={() => signInWithApple()} activeOpacity={0.85} disabled={loading}>
+                <TouchableOpacity style={[styles.appleButton, busy && { opacity: 0.6 }]} onPress={handleSignIn} activeOpacity={0.85} disabled={busy}>
                     <Ionicons name="logo-apple" size={19} color={colors.background} style={{ marginRight: 8, marginTop: -2 }} />
-                    <Text style={styles.appleText}>{loading ? 'Signing in…' : 'Sign in with Apple'}</Text>
+                    <Text style={styles.appleText}>{busy ? 'Signing in…' : 'Sign in with Apple'}</Text>
                 </TouchableOpacity>
                 <Text style={styles.legal}>
                     By continuing you agree to our{' '}

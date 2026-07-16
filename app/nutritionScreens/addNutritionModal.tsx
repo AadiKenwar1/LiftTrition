@@ -1,3 +1,4 @@
+import PromptCard from '@/components/NeutralComponents/PromptCard'
 import { useAuth } from '@/context/AuthContext'
 import { useBilling } from '@/context/BillingContext'
 import { useNutrition } from '@/context/NutritionContext'
@@ -7,9 +8,9 @@ import { useSubmitOnce } from '@/lib/hooks/useSubmitOnce'
 import { parseNumericInput } from '@/lib/utils/number'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
-import { Lock, Sparkles } from 'lucide-react-native'
+import { Sparkles, Utensils } from 'lucide-react-native'
 import { useMemo, useState } from 'react'
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Alert, Keyboard, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import uuid from 'react-native-uuid'
 
@@ -30,6 +31,7 @@ export default function AddNutritionModal() {
     const [focusedField, setFocusedField] = useState<string | null>(null)
     const [generating, setGenerating] = useState(false)
     const [aiFilled, setAiFilled] = useState(false)
+    const [upsellVisible, setUpsellVisible] = useState(false)
     const [guardSubmit, submitting] = useSubmitOnce()
 
     const hasContent = mealName.trim().length > 0 || [calories, protein, carbs, fats].some((v) => v.trim().length > 0)
@@ -64,6 +66,11 @@ export default function AddNutritionModal() {
 
     // Generates all macros at once, filling only the fields the user hasn't already entered.
     const handleGenerateAllMacros = async () => {
+        if (!hasPremium) {
+            Keyboard.dismiss()
+            setUpsellVisible(true)
+            return
+        }
         if (!mealName.trim()) {
             Alert.alert('Missing Food Name', 'Please enter a food name before generating macros.')
             return
@@ -91,8 +98,13 @@ export default function AddNutritionModal() {
             </View>
 
             <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} automaticallyAdjustKeyboardInsets showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" bounces>
-                <Text style={styles.heroTitle}>Enter Nutrition</Text>
-                <Text style={styles.heroSub}>Describe your meal — AI fills in the macros</Text>
+                <View style={styles.iconContainer}>
+                    <View style={styles.iconCircle}>
+                        <Utensils size={40} color={colors.nutrition} strokeWidth={2.5} />
+                    </View>
+                </View>
+                <Text style={styles.title}>Enter Nutrition</Text>
+                <Text style={styles.subtitle}>Describe your meal — AI fills in the macros</Text>
 
                 <TextInput
                     style={[styles.heroInput, focusedField === 'mealName' && styles.inputFocused]}
@@ -106,23 +118,17 @@ export default function AddNutritionModal() {
                     textAlignVertical="top"
                 />
 
-                {hasPremium ?
-                    <TouchableOpacity activeOpacity={0.8} disabled={generating} style={styles.generatePrimaryTouchable} onPress={handleGenerateAllMacros}>
-                        <LinearGradient colors={colors.nutritionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.generatePrimary}>
-                            {generating ?
-                                <ActivityIndicator size="small" color="#FFF" />
-                            :   <>
-                                    <Sparkles size={17} color="#FFF" strokeWidth={2.2} />
-                                    <Text style={styles.generatePrimaryText}>Generate macros</Text>
-                                </>
-                            }
-                        </LinearGradient>
-                    </TouchableOpacity>
-                :   <TouchableOpacity activeOpacity={0.8} style={styles.generateLocked} onPress={() => router.replace('/settingsScreens/subscription')}>
-                        <Lock size={15} color={colors.textMuted} strokeWidth={2.2} />
-                        <Text style={styles.generateLockedText}>Generate macros — Premium</Text>
-                    </TouchableOpacity>
-                }
+                <TouchableOpacity activeOpacity={0.8} disabled={generating} style={styles.generatePrimaryTouchable} onPress={handleGenerateAllMacros}>
+                    <LinearGradient colors={colors.nutritionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.generatePrimary}>
+                        {generating ?
+                            <ActivityIndicator size="small" color="#FFF" />
+                        :   <>
+                                <Sparkles size={17} color="#FFF" strokeWidth={2.2} />
+                                <Text style={styles.generatePrimaryText}>Generate macros</Text>
+                            </>
+                        }
+                    </LinearGradient>
+                </TouchableOpacity>
 
                 <View style={styles.dividerRow}>
                     <View style={styles.dividerLine} />
@@ -183,6 +189,17 @@ export default function AddNutritionModal() {
                     </LinearGradient>
                 </TouchableOpacity>
             </View>
+
+            {upsellVisible && (
+                <PromptCard
+                    icon={Sparkles}
+                    title="Unlock AI Macros"
+                    message="Describe any meal and let AI fill in the macros instantly. Upgrade to generate."
+                    ctaLabel="Upgrade to Continue"
+                    onPress={() => router.replace('/settingsScreens/subscription')}
+                    onGoBack={() => setUpsellVisible(false)}
+                />
+            )}
         </View>
     )
 }
@@ -215,20 +232,36 @@ function makeStyles(colors: Colors) {
             paddingTop: 4,
             paddingBottom: 24,
         },
-        heroTitle: {
+        iconContainer: {
+            alignItems: 'center',
+            marginBottom: 16,
+            marginTop: 12,
+        },
+        iconCircle: {
+            width: 80,
+            height: 80,
+            borderRadius: 40,
+            backgroundColor: colors.surface,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderWidth: 2,
+            borderColor: colors.nutrition,
+        },
+        title: {
             fontSize: 24,
             color: colors.text,
+            textAlign: 'center',
+            marginBottom: 4,
             letterSpacing: -0.5,
             fontFamily: fonts.semibold,
-            marginTop: 8,
-            marginBottom: 4,
         },
-        heroSub: {
-            fontSize: 14,
+        subtitle: {
+            fontSize: 16,
             color: colors.labelMuted,
+            textAlign: 'center',
+            marginBottom: 20,
             fontFamily: fonts.regular,
-            letterSpacing: 0.1,
-            marginBottom: 16,
+            letterSpacing: 0.2,
         },
         heroInput: {
             backgroundColor: colors.surface,
@@ -268,23 +301,6 @@ function makeStyles(colors: Colors) {
         generatePrimaryText: {
             fontSize: 16,
             color: '#FFF',
-            fontFamily: fonts.semibold,
-            letterSpacing: -0.3,
-        },
-        generateLocked: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 8,
-            borderRadius: radius.cardLg,
-            minHeight: 50,
-            backgroundColor: colors.surface,
-            borderWidth: 1,
-            borderColor: colors.hairline,
-        },
-        generateLockedText: {
-            fontSize: 15,
-            color: colors.textMuted,
             fontFamily: fonts.semibold,
             letterSpacing: -0.3,
         },

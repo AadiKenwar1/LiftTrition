@@ -2,7 +2,6 @@ import {
     applySwitchToMaintenance as applySettingsSwitchToMaintenance,
     computeBwUpdate,
     isGoalReached as isSettingsGoalReached,
-    OVERSHOOT_DEADBAND,
 } from '@/context/SettingsContext/functions/bodyWeightFunctions'
 import { calculateMacros } from '@/context/SettingsContext/functions/macroCalculation'
 import type { Settings } from '@/context/SettingsContext/types'
@@ -28,15 +27,13 @@ export interface SimState {
     goalOvershootAcknowledged: boolean
 }
 
-export type PromptKind = 'goalReached' | 'autoMaintain'
+export type PromptKind = 'goalReached'
 
 export interface WeighInOutcome {
     state: SimState
     events: string[]
     prompt: PromptKind | null
 }
-
-export { OVERSHOOT_DEADBAND }
 
 // Fixed dev profile for TDEE math (male, 28, 5'10" / 178 cm, moderate activity)
 const PROFILE = {
@@ -132,14 +129,12 @@ export function applyWeighIn(prev: SimState, newWeight: number): WeighInOutcome 
         events.push(`Targets recalculated for "${prev.goalType}": ${targetsSummary(state)}`)
     }
 
-    if (result.prompt === 'autoMaintain') {
-        events.push(
-            state.macrosCustomized
-                ? `Safety net: ${OVERSHOOT_DEADBAND[state.unitSystem]} ${unit} past goal → auto-switched to maintain (announced); hand-tuned targets kept`
-                : `Safety net: ${OVERSHOOT_DEADBAND[state.unitSystem]} ${unit} past goal → auto-switched to maintain (announced): ${targetsSummary(state)}`,
-        )
-    } else if (result.prompt === 'goalReached') {
-        events.push('Crossed goal weight → congrats prompt (goalType untouched)')
+    if (result.prompt === 'goalReached') {
+        events.push('At/past goal weight → goal-reached prompt (asks each weigh-in until answered; goalType untouched)')
+    }
+
+    if (prev.goalOvershootAcknowledged && !state.goalOvershootAcknowledged) {
+        events.push('Crossed back before goal — "Keep Going" re-armed; reaching goal asks again')
     }
 
     return { state, events, prompt: result.prompt }
@@ -158,7 +153,7 @@ export function applySwitchToMaintenance(prev: SimState): WeighInOutcome {
 export function applyKeepGoing(prev: SimState): WeighInOutcome {
     return {
         state: { ...prev, goalOvershootAcknowledged: true },
-        events: ['User chose "Keep Going" — auto-switch disarmed for this goal; banner stays'],
+        events: ['User chose "Keep Going" — asking muted while at/past goal; banner stays'],
         prompt: null,
     }
 }

@@ -2,9 +2,10 @@ import { Dispatch, SetStateAction } from 'react';
 import uuid from 'react-native-uuid';
 import { Exercise, Log, Workout } from '../types';
 
-// Increments the order of all workouts by 1 (used in tests and internally).
+// Bumps the order of all ACTIVE workouts by 1 — archived rows keep their
+// order, matching the SQL bumpers' WHERE archived = 0.
 export function incrementWorkoutOrders(workouts: Workout[]): Workout[] {
-    return workouts.map(w => ({ ...w, order: w.order + 1, updatedAt: new Date() }));
+    return workouts.map(w => (w.archived ? w : { ...w, order: w.order + 1, updatedAt: new Date() }));
 }
 
 // Adds a new workout; returns the new workout so the caller can persist it.
@@ -24,10 +25,7 @@ export function addWorkout(
         updatedAt: new Date(),
     };
 
-    setWorkouts(prev => {
-        const incremented = prev.map(w => ({ ...w, order: w.order + 1, updatedAt: new Date() }));
-        return [...incremented, newWorkout];
-    });
+    setWorkouts(prev => [...incrementWorkoutOrders(prev), newWorkout]);
 
     return newWorkout;
 }
@@ -44,30 +42,21 @@ export function deleteWorkout(
     setLogs(prev => prev.filter(l => l.workoutID !== id));
 }
 
-// Archives OR unarchives a workout.
-// Returns the updated workout (and all workouts that had their order bumped on unarchive).
+// Archives OR unarchives a workout (state only; the provider persists via SQL).
+// Unarchive: target → active at order 0, active siblings bump. Archive: target
+// → archived at order 0, archived siblings bump. Mirrors the inline SQL in
+// WorkoutContext's handleArchiveWorkout exactly.
 export function archiveWorkout(
     id: string,
     archived: boolean,
     setWorkouts: Dispatch<SetStateAction<Workout[]>>
-): Workout[] {
-    let affected: Workout[] = [];
-    setWorkouts(prev => {
-        let next: Workout[];
-        if (archived) {
-            // Unarchive: put back at top, bump all active ones
-            next = prev.map(w => {
-                if (w.id === id) return { ...w, archived: false, order: 0, updatedAt: new Date() };
-                return { ...w, order: w.order + 1, updatedAt: new Date() };
-            });
-        } else {
-            // Archive: just mark archived
-            next = prev.map(w => w.id === id ? { ...w, archived: true, updatedAt: new Date() } : w);
-        }
-        affected = next.filter(w => w.id === id || (archived && !w.archived));
-        return next;
-    });
-    return affected;
+): void {
+    const now = new Date();
+    setWorkouts(prev => prev.map(w => {
+        if (w.id === id) return { ...w, archived: !archived, order: 0, updatedAt: now };
+        if (w.archived === !archived) return { ...w, order: w.order + 1, updatedAt: now };
+        return w;
+    }));
 }
 
 // Renames a workout; returns the updated workout.
@@ -155,10 +144,7 @@ export function duplicateWorkout(
             updatedAt: now,
         }));
 
-    setWorkouts(prev => {
-        const incremented = prev.map(w => ({ ...w, order: w.order + 1, updatedAt: now }));
-        return [...incremented, newWorkout];
-    });
+    setWorkouts(prev => [...incrementWorkoutOrders(prev), newWorkout]);
     setExercises(prev => [...prev, ...newExercises]);
 
     return { newWorkout, newExercises };

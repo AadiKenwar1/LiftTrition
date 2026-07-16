@@ -29,3 +29,9 @@ export function lbsToKg(lbs: number): number {
 export function kgToLbs(kg: number): number {
     return Math.round((kg * 2.20462) * 10) / 10
 }
+
+// User-facing weight-unit label. Single source so adjacent screens can never
+// disagree on lb vs lbs again.
+export function weightUnitLabel(unitSystem: 'imperial' | 'metric'): 'lbs' | 'kg' {
+    return unitSystem === 'imperial' ? 'lbs' : 'kg'
+}

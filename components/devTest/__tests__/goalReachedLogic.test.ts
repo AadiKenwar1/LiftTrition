@@ -31,13 +31,6 @@ describe('goalReachedLogic (Issue 8 rules)', () => {
         expect(drifted.state.bodyWeight).toBe(174)
     })
 
-    test('auto-maintain targets are computed at the goal weight, not the overshoot weight', () => {
-        const fired = applyWeighIn(loseState({ bodyWeight: 169 }), 168)
-        expect(fired.prompt).toBe('autoMaintain')
-        const anchored = initSimState({ unitSystem: 'imperial', goalType: 'maintain', goalWeight: 170, goalPace: 1, bodyWeight: 170 })
-        expect(fired.state.calorieGoal).toBe(anchored.calorieGoal)
-    })
-
     test('weigh-in before crossing: targets recalc for current goal, no prompt', () => {
         const { state: next, prompt } = applyWeighIn(loseState(), 173)
         expect(next.goalType).toBe('lose')
@@ -61,38 +54,38 @@ describe('goalReachedLogic (Issue 8 rules)', () => {
         expect(next.goalType).toBe('gain')
     })
 
-    test('ask before act: a single jump past the deadband still asks instead of auto-switching', () => {
+    test('a big jump straight past goal still only asks', () => {
         const state = loseState({ bodyWeight: 171 })
         const { state: next, prompt } = applyWeighIn(state, 167)
         expect(prompt).toBe('goalReached')
         expect(next.goalType).toBe('lose')
     })
 
-    test('safety net: inside deadband does nothing, at deadband auto-switches to maintain (announced)', () => {
-        const past = loseState({ bodyWeight: 169 })
-        const inside = applyWeighIn(past, 168.5)
-        expect(inside.prompt).toBeNull()
-        expect(inside.state.goalType).toBe('lose')
+    test('level-triggered: every weigh-in at/past goal asks again, and nothing ever switches', () => {
+        const first = applyWeighIn(loseState({ bodyWeight: 170.5 }), 169.5)
+        expect(first.prompt).toBe('goalReached')
+        expect(first.state.goalType).toBe('lose')
 
-        const at = applyWeighIn(inside.state, 168)
-        expect(at.prompt).toBe('autoMaintain')
-        expect(at.state.goalType).toBe('maintain')
+        const second = applyWeighIn(first.state, 168)
+        expect(second.prompt).toBe('goalReached')
+        expect(second.state.goalType).toBe('lose')
     })
 
-    test('metric deadband is 1 kg', () => {
-        const state = initSimState({ unitSystem: 'metric', goalType: 'gain', goalWeight: 77, goalPace: 0.5, bodyWeight: 77.2 })
-        expect(applyWeighIn(state, 77.9).prompt).toBeNull()
-        const fired = applyWeighIn(state, 78)
-        expect(fired.prompt).toBe('autoMaintain')
-        expect(fired.state.goalType).toBe('maintain')
-    })
-
-    test('Keep Going disarms the safety net and future prompts for this goal', () => {
+    test('Keep Going mutes the asking while staying at/past goal', () => {
         const acknowledged = applyKeepGoing(loseState({ bodyWeight: 169.8 })).state
         expect(acknowledged.goalOvershootAcknowledged).toBe(true)
         const { state: next, prompt } = applyWeighIn(acknowledged, 166)
         expect(prompt).toBeNull()
         expect(next.goalType).toBe('lose')
+    })
+
+    test('Keep Going mute clears when weight crosses back above goal; re-reaching asks again', () => {
+        const acknowledged = applyKeepGoing(loseState({ bodyWeight: 169.8 })).state
+        const bounced = applyWeighIn(acknowledged, 170.4)
+        expect(bounced.state.goalOvershootAcknowledged).toBe(false)
+        expect(bounced.events.some((e) => e.includes('re-arm'))).toBe(true)
+        const rereached = applyWeighIn(bounced.state, 169.9)
+        expect(rereached.prompt).toBe('goalReached')
     })
 
     test('hand-tuned macros survive weigh-ins', () => {
@@ -103,10 +96,9 @@ describe('goalReachedLogic (Issue 8 rules)', () => {
         expect(next.macrosCustomized).toBe(true)
     })
 
-    test('hand-tuned macros survive even the auto-maintain switch', () => {
+    test('hand-tuned macros survive the consented switch to maintenance', () => {
         const tuned = applyHandTuneMacros(loseState({ bodyWeight: 169 })).state
-        const { state: next, prompt } = applyWeighIn(tuned, 168)
-        expect(prompt).toBe('autoMaintain')
+        const { state: next } = applySwitchToMaintenance(tuned)
         expect(next.goalType).toBe('maintain')
         expect(next.proteinGoal).toBe(tuned.proteinGoal)
     })

@@ -169,7 +169,7 @@ export default function SavedNutritionModal() {
                                     </Text>
                                     <View style={styles.macroRow}>
                                         <View style={styles.macroPill}>
-                                            <Text style={styles.macroPillText}>{Math.round(s.calories * q)} cal</Text>
+                                            <Text style={styles.macroPillText}>{Math.round(s.calories * q)} kcal</Text>
                                         </View>
                                         <View style={styles.macroPill}>
                                             <Text style={styles.macroPillText}>{Math.round(s.fats * q * 10) / 10}g F</Text>

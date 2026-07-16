@@ -23,7 +23,10 @@ const GROUPS: { title: string; items: { label: string; route: string }[] }[] = [
     },
     {
         title: 'Nutrition AI',
-        items: [{ label: 'AI (NLP + Vision)', route: '/devTest/aiTest' }],
+        items: [
+            { label: 'AI (NLP + Vision)', route: '/devTest/aiTest' },
+            { label: 'Scan Cancel (Issue 13)', route: '/devTest/scanCancel' },
+        ],
     },
     {
         title: 'Components',
@@ -34,14 +37,17 @@ const GROUPS: { title: string; items: { label: string; route: string }[] }[] = [
             { label: 'Spinner Lab', route: '/devTest/spinnerLab' },
             { label: 'Suggest Set', route: '/devTest/suggestSet' },
             { label: 'Calendar', route: '/devTest/calendar' },
+            { label: 'Date Sheet', route: '/devTest/dateSheet' },
             { label: 'Add Nutrition Modal', route: '/devTest/addNutrition' },
             { label: 'Scan Screen (Issue 15)', route: '/devTest/scanScreen' },
             { label: 'Food DB — Teaser (working)', route: '/devTest/foodDB' },
+            { label: 'Add Nutrition — Teaser (icon + gate)', route: '/devTest/addNutritionTeaser' },
             { label: 'Goal Reached — UI (Issue 8)', route: '/devTest/goalReached' },
             { label: 'Goal Reached — Logic Sim (Issue 8)', route: '/devTest/goalReachedSim' },
             { label: 'Edit Photo — Variants', route: '/devTest/editPhotoLab' },
             { label: 'Color Hue Review', route: '/devTest/colorHue' },
             { label: 'Number Parsing (F1)', route: '/devTest/numberParsing' },
+            { label: 'Log History — delete (Issues 9+12)', route: '/devTest/logHistory' },
         ],
     },
     {

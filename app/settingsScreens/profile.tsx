@@ -6,7 +6,8 @@ import { useSettings } from '@/context/SettingsContext'
 import { withRegeneratedTargets } from '@/context/SettingsContext/functions/bodyWeightFunctions'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { isUploadFlushError, UploadFlushNotConnectedError } from '@/lib/powersync/FlushUploads'
-import { inchesToFeetInches } from '@/lib/utils/unitConversions'
+import { calculateAge } from '@/lib/utils/dateHelper'
+import { inchesToFeetInches, lbsToKg, weightUnitLabel } from '@/lib/utils/unitConversions'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
@@ -63,18 +64,6 @@ export default function ProfileScreen() {
     }
 
     const router = useRouter()
-
-    const calculateAge = (birthDate: Date): number => {
-        const today = new Date()
-        let age = today.getFullYear() - birthDate.getFullYear()
-        const monthDiff = today.getMonth() - birthDate.getMonth()
-
-        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-            age--
-        }
-
-        return age
-    }
 
     const formatActivityLevel = (level: string) => {
         const map: Record<string, string> = { sedentary: 'Sedentary', light: 'Light', moderate: 'Moderate', active: 'Active', gymrat: 'Gym Rat' }
@@ -233,7 +222,7 @@ export default function ProfileScreen() {
                             <Text style={styles.infoLabel}>Weight</Text>
                             <View style={styles.editRow}>
                                 <Text style={styles.infoValue}>
-                                    {settings.bodyWeight} {settings.unitSystem === 'imperial' ? 'lbs' : 'kg'}
+                                    {settings.bodyWeight} {weightUnitLabel(settings.unitSystem)}
                                 </Text>
                                 <Pencil size={14} color={colors.textMuted} strokeWidth={2} />
                             </View>
@@ -271,7 +260,7 @@ export default function ProfileScreen() {
                                     <Text style={styles.infoLabel}>Target Weight</Text>
                                     <View style={styles.editRow}>
                                         <Text style={styles.infoValue}>
-                                            {settings.goalWeight} {settings.unitSystem === 'imperial' ? 'lbs' : 'kg'}
+                                            {settings.goalWeight} {weightUnitLabel(settings.unitSystem)}
                                         </Text>
                                         <Pencil size={14} color={colors.textMuted} strokeWidth={2} />
                                     </View>
@@ -283,7 +272,7 @@ export default function ProfileScreen() {
                                     <Text style={styles.infoLabel}>Goal Pace</Text>
                                     <View style={styles.editRow}>
                                         <Text style={styles.infoValue}>
-                                            {settings.goalPace.toFixed(1)} {settings.unitSystem === 'imperial' ? 'lbs' : 'kg'}/week
+                                            {(settings.unitSystem === 'imperial' ? settings.goalPace : lbsToKg(settings.goalPace)).toFixed(1)} {weightUnitLabel(settings.unitSystem)}/week
                                         </Text>
                                         <Pencil size={14} color={colors.textMuted} strokeWidth={2} />
                                     </View>
@@ -298,7 +287,7 @@ export default function ProfileScreen() {
                     <Text style={styles.sectionTitle}>Nutrition Goals</Text>
                     <View style={styles.card}>
                         {[
-                            { kind: 'calories' as MacroGoalKind, label: 'Calories', value: `${settings.calorieGoal} cal` },
+                            { kind: 'calories' as MacroGoalKind, label: 'Calories', value: `${settings.calorieGoal} kcal` },
                             { kind: 'protein' as MacroGoalKind, label: 'Protein', value: `${settings.proteinGoal}g` },
                             { kind: 'carbs' as MacroGoalKind, label: 'Carbs', value: `${settings.carbsGoal}g` },
                             { kind: 'fats' as MacroGoalKind, label: 'Fats', value: `${settings.fatsGoal}g` },

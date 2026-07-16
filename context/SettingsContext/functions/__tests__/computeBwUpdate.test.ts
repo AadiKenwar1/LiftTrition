@@ -1,4 +1,4 @@
-import { applySwitchToMaintenance, computeBwUpdate, isGoalReached, OVERSHOOT_DEADBAND } from '../bodyWeightFunctions'
+import { applySwitchToMaintenance, computeBwUpdate, goalReachedBannerCopy, isGoalReached } from '../bodyWeightFunctions'
 import { calculateMacros } from '../macroCalculation'
 import type { Settings } from '../../types'
 
@@ -76,41 +76,30 @@ describe('computeBwUpdate (issue 8 rules)', () => {
         expect(result.newSettings.goalType).toBe('gain')
     })
 
-    test('ask before act: a single jump past the deadband asks instead of auto-switching', () => {
+    test('a big jump straight past goal still only asks', () => {
         const result = computeBwUpdate(167, makeSettings({ bodyWeight: 171 }))!
         expect(result.prompt).toBe('goalReached')
         expect(result.newSettings.goalType).toBe('lose')
     })
 
-    test('safety net: inside deadband does nothing, at deadband auto-switches to maintain', () => {
-        const past = makeSettings({ bodyWeight: 169 })
-        const inside = computeBwUpdate(168.5, past)!
-        expect(inside.prompt).toBeNull()
-        expect(inside.newSettings.goalType).toBe('lose')
+    test('level-triggered: every weigh-in at/past goal asks again, and nothing ever switches', () => {
+        const first = computeBwUpdate(169.5, makeSettings({ bodyWeight: 170.5 }))!
+        expect(first.prompt).toBe('goalReached')
+        expect(first.newSettings.goalType).toBe('lose')
 
-        const at = computeBwUpdate(168, inside.newSettings)!
-        expect(at.prompt).toBe('autoMaintain')
-        expect(at.newSettings.goalType).toBe('maintain')
+        const second = computeBwUpdate(168, first.newSettings)!
+        expect(second.prompt).toBe('goalReached')
+        expect(second.newSettings.goalType).toBe('lose')
+        expect(second.newSettings.goalPace).toBe(1)
     })
 
-    test('auto-maintain targets are anchored at goalWeight, not the overshoot weight', () => {
-        const fired = computeBwUpdate(168, makeSettings({ bodyWeight: 169 }))!
-        expect(fired.prompt).toBe('autoMaintain')
-        const anchored = calculateMacros(makeSettings({ goalType: 'maintain', bodyWeight: 168, goalWeight: 170 }), true)
-        expect(fired.newSettings.calorieGoal).toBe(anchored.calResult)
-        expect(fired.newSettings.proteinGoal).toBe(anchored.proteinGrams)
+    test('bouncing back above goal stops the asking until past goal again', () => {
+        const past = computeBwUpdate(169.8, makeSettings({ bodyWeight: 170.5 }))!
+        const bounced = computeBwUpdate(170.4, past.newSettings)!
+        expect(bounced.prompt).toBeNull()
     })
 
-    test('metric deadband is 1 kg', () => {
-        const settings = makeSettings({ unitSystem: 'metric', goalType: 'gain', goalWeight: 77, bodyWeight: 77.2, goalPace: 0.5, height: 178 })
-        expect(computeBwUpdate(77.9, settings)!.prompt).toBeNull()
-        const fired = computeBwUpdate(78, settings)!
-        expect(fired.prompt).toBe('autoMaintain')
-        expect(fired.newSettings.goalType).toBe('maintain')
-        expect(OVERSHOOT_DEADBAND.metric).toBe(1)
-    })
-
-    test('goalOvershootAcknowledged disarms both the prompt and the safety net', () => {
+    test('goalOvershootAcknowledged silences the prompt (Keep Going = mute while at/past goal)', () => {
         const acknowledged = makeSettings({ bodyWeight: 169.8, goalOvershootAcknowledged: true })
         const result = computeBwUpdate(166, acknowledged)!
         expect(result.prompt).toBeNull()
@@ -125,12 +114,11 @@ describe('computeBwUpdate (issue 8 rules)', () => {
         expect(result.newSettings.macrosCustomized).toBe(true)
     })
 
-    test('hand-tuned macros survive even the auto-maintain switch', () => {
-        const tuned = makeSettings({ bodyWeight: 169, macrosCustomized: true, proteinGoal: 225 })
-        const result = computeBwUpdate(168, tuned)!
-        expect(result.prompt).toBe('autoMaintain')
-        expect(result.newSettings.goalType).toBe('maintain')
-        expect(result.newSettings.proteinGoal).toBe(225)
+    test('hand-tuned macros survive the consented switch to maintenance', () => {
+        const tuned = makeSettings({ macrosCustomized: true, proteinGoal: 225 })
+        const next = applySwitchToMaintenance(tuned)
+        expect(next.goalType).toBe('maintain')
+        expect(next.proteinGoal).toBe(225)
     })
 
     test('applySwitchToMaintenance switches immediately and re-arms acknowledgement', () => {
@@ -139,6 +127,51 @@ describe('computeBwUpdate (issue 8 rules)', () => {
         expect(next.goalType).toBe('maintain')
         expect(next.goalOvershootAcknowledged).toBe(false)
         expect(next.calorieGoal).toBe(calculateMacros(next, true).calResult)
+    })
+
+    test('crossing back above goal clears the Keep Going mute (zero-margin re-arm)', () => {
+        const acknowledged = makeSettings({ bodyWeight: 169.8, goalOvershootAcknowledged: true })
+        const bounced = computeBwUpdate(170.4, acknowledged)!
+        expect(bounced.newSettings.goalOvershootAcknowledged).toBe(false)
+        expect(bounced.prompt).toBeNull()
+    })
+
+    test('re-reaching goal after a re-arm asks again', () => {
+        const acknowledged = makeSettings({ bodyWeight: 169.8, goalOvershootAcknowledged: true })
+        const bounced = computeBwUpdate(170.4, acknowledged)!
+        const rereached = computeBwUpdate(169.9, bounced.newSettings)!
+        expect(rereached.prompt).toBe('goalReached')
+    })
+
+    test('the mute persists while staying at/past goal', () => {
+        const acknowledged = makeSettings({ bodyWeight: 169.8, goalOvershootAcknowledged: true })
+        const result = computeBwUpdate(166, acknowledged)!
+        expect(result.newSettings.goalOvershootAcknowledged).toBe(true)
+        expect(result.prompt).toBeNull()
+    })
+
+    test('gain mirror: dropping back below goal re-arms, re-reaching asks', () => {
+        const acknowledged = makeSettings({ goalType: 'gain', bodyWeight: 170.5, goalOvershootAcknowledged: true })
+        const bounced = computeBwUpdate(169.5, acknowledged)!
+        expect(bounced.newSettings.goalOvershootAcknowledged).toBe(false)
+        const rereached = computeBwUpdate(170, bounced.newSettings)!
+        expect(rereached.prompt).toBe('goalReached')
+    })
+
+    test('goalReachedBannerCopy: within the display band keeps the reached copy', () => {
+        expect(goalReachedBannerCopy(makeSettings({ bodyWeight: 170 }))).toBe('Goal reached — set your next goal')
+        expect(goalReachedBannerCopy(makeSettings({ bodyWeight: 168.1 }))).toBe('Goal reached — set your next goal')
+    })
+
+    test('goalReachedBannerCopy: at/past the band switches to delta copy', () => {
+        expect(goalReachedBannerCopy(makeSettings({ bodyWeight: 168 }))).toBe('2 lbs past your goal — set your next goal')
+        expect(goalReachedBannerCopy(makeSettings({ bodyWeight: 165.5 }))).toBe('4.5 lbs past your goal — set your next goal')
+    })
+
+    test('goalReachedBannerCopy: gain direction and the metric band', () => {
+        expect(goalReachedBannerCopy({ goalType: 'gain', bodyWeight: 173, goalWeight: 170, unitSystem: 'imperial' })).toBe('3 lbs past your goal — set your next goal')
+        expect(goalReachedBannerCopy({ goalType: 'gain', bodyWeight: 78, goalWeight: 77, unitSystem: 'metric' })).toBe('1 kg past your goal — set your next goal')
+        expect(goalReachedBannerCopy({ goalType: 'lose', bodyWeight: 76.5, goalWeight: 77, unitSystem: 'metric' })).toBe('Goal reached — set your next goal')
     })
 
     test('isGoalReached: lose at/below goal, gain at/above goal, maintain never', () => {

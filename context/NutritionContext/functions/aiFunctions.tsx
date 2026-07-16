@@ -7,6 +7,7 @@ import uuid from 'react-native-uuid';
 import { Ingredient, NutritionEntry } from '../types';
 import { addNutrition } from './crudFunctions';
 import { sumIngredients } from './ingredients';
+import { nutritionEntryError } from './validator';
 
 // Timeout helper
 function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
@@ -134,11 +135,18 @@ export async function runPhotoAnalysis(
   return { entry, sources, rawIngredients };
 }
 
-// Analyze Photo Function — returns the created NutritionEntry so callers can persist it.
-export async function analyzeAndAddPhoto(photoUri: string, userID: string, setNutritionData: Dispatch<SetStateAction<NutritionEntry[]>>, date: Date = new Date(), mode: ScanMode = 'meal'): Promise<NutritionEntry> {
+// Analyze Photo Function — returns the created NutritionEntry so callers can persist it,
+// or null when shouldCommit reports the caller no longer wants the result (e.g. swiped away).
+export async function analyzeAndAddPhoto(photoUri: string, userID: string, setNutritionData: Dispatch<SetStateAction<NutritionEntry[]>>, date: Date = new Date(), mode: ScanMode = 'meal', shouldCommit?: () => boolean): Promise<NutritionEntry | null> {
     try {
       const { entry } = await runPhotoAnalysis(photoUri, userID, mode);
       const nutritionItem: NutritionEntry = { ...entry, date: new Date(date) };
+      if (shouldCommit && !shouldCommit()) return null;
+      // Gate on the pure check so an invalid AI entry never reaches the DB (the manual path's
+      // validator would fire its own alert; here we surface one message via the analyzing modal).
+      if (nutritionEntryError(nutritionItem)) {
+        throw new Error("Couldn't read that meal — try a clearer photo, or add it manually.");
+      }
       addNutrition(nutritionItem, setNutritionData);
       return nutritionItem;
   } catch (error: any) {

@@ -54,3 +54,28 @@ describe('calculateMacros maintenance anchor', () => {
         expect(noAnchor.calResult).toBeGreaterThan(1500)
     })
 })
+
+describe('calculateMacros calorie floor', () => {
+    // Small, older, sedentary user on an aggressive cut whose raw TDEE lands well below the 1200 floor.
+    const subFloor = makeSettings({
+        gender: 'female',
+        birthDate: new Date(1960, 0, 1),
+        height: 60,
+        bodyWeight: 100,
+        activityLevel: 'sedentary',
+        goalType: 'lose',
+        goalWeight: 90,
+        goalPace: 1,
+    })
+
+    test('clamps calResult up to the 1200 floor for women', () => {
+        expect(calculateMacros(subFloor, true).calResult).toBe(1200)
+    })
+
+    test('macros reconcile with the clamped calorie target, not the raw TDEE', () => {
+        const { calResult, proteinGrams, fatGrams, carbGrams } = calculateMacros(subFloor, true)
+        const macroCalories = proteinGrams * 4 + fatGrams * 9 + carbGrams * 4
+        // Within rounding slack of the three integer-rounded macro grams.
+        expect(Math.abs(macroCalories - calResult)).toBeLessThanOrEqual(15)
+    })
+})

@@ -1,16 +1,20 @@
+import PromptCard from '@/components/NeutralComponents/PromptCard'
 import StagedSection from '@/components/NeutralComponents/StagedSection'
+import FoodRow from '@/components/NutritionComponents/FoodRow'
 import { useAuth } from '@/context/AuthContext'
+import { useBilling } from '@/context/BillingContext'
 import { useNutrition } from '@/context/NutritionContext'
 import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { getFoodItem, getFoodSearchResults } from '@/lib/foodDB/foodDB'
+import { POPULAR_FOODS, type PopularFood } from '@/lib/foodDB/popularFoods'
 import { FoodItem, FoodSearchResult } from '@/lib/foodDB/types'
 import { useSubmitOnce } from '@/lib/hooks/useSubmitOnce'
 import { parseNumericInput } from '@/lib/utils/number'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
-import { Check, Database, Plus, X } from 'lucide-react-native'
+import { Check, Database, X } from 'lucide-react-native'
 import { useEffect, useMemo, useState } from 'react'
-import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Alert, Keyboard, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import uuid from 'react-native-uuid'
 
 interface FoodItemWithQuantity extends FoodItem {
@@ -20,51 +24,81 @@ interface FoodItemWithQuantity extends FoodItem {
 export default function FoodDBModal() {
     const { handleAddNutrition, selectedDate } = useNutrition()
     const { userID } = useAuth()
+    const { hasPremium } = useBilling()
+    const locked = !hasPremium
     const router = useRouter()
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
 
     const [guardSubmit, submitting] = useSubmitOnce()
-    const [searchQuery, setSearchQuery] = useState('')
-    const [addedItems, setAddedItems] = useState<FoodItemWithQuantity[]>([])
-    const [combineItems, setCombineItems] = useState(false)
-    const [isFocused, setIsFocused] = useState(false)
-    const [quantityInputItem, setQuantityInputItem] = useState<FoodItem | null>(null)
-    const [quantityValue, setQuantityValue] = useState('1')
+    const [upsellVisible, setUpsellVisible] = useState(false)
 
-    // API integration states
+    const [searchQuery, setSearchQuery] = useState('')
     const [searchResults, setSearchResults] = useState<FoodSearchResult[]>([])
     const [isSearching, setIsSearching] = useState(false)
+    const [hasSearched, setHasSearched] = useState(false)
+
+    const [addedItems, setAddedItems] = useState<FoodItemWithQuantity[]>([])
+    const [combineItems, setCombineItems] = useState(false)
+    const [quantityInputItem, setQuantityInputItem] = useState<FoodItem | null>(null)
+    const [quantityValue, setQuantityValue] = useState('1')
     const [isLoadingDetails, setIsLoadingDetails] = useState(false)
     const [selectedSearchItem, setSelectedSearchItem] = useState<FoodSearchResult | null>(null)
-
-    // Debounced search effect
-    useEffect(() => {
-        const timeoutId = setTimeout(async () => {
-            if (searchQuery.trim()) {
-                setIsSearching(true)
-                try {
-                    const results = await getFoodSearchResults(searchQuery)
-                    setSearchResults(results)
-                } catch {
-                    setSearchResults([])
-                    Alert.alert('Search Failed', 'Unable to search the food database. Check your connection and try again.')
-                } finally {
-                    setIsSearching(false)
-                }
-            } else {
-                setSearchResults([])
-            }
-        }, 500)
-        return () => clearTimeout(timeoutId)
-    }, [searchQuery])
 
     useEffect(() => {
         if (addedItems.length < 2) setCombineItems(false)
     }, [addedItems.length])
 
-    //Adds item from the list of search results
-    async function handleAddItem(searchItem: FoodSearchResult) {
+    function openGate() {
+        Keyboard.dismiss()
+        setUpsellVisible(true)
+    }
+
+    // Editing invalidates the previous search so stale results never show;
+    // the debounce below refreshes them ~700ms after typing settles.
+    function handleQueryChange(text: string) {
+        setSearchQuery(text)
+        if (hasSearched) {
+            setHasSearched(false)
+            setSearchResults([])
+        }
+    }
+
+    // Debounced auto-search — premium only (free users are gated at the
+    // keyboard, so this can never fire for them).
+    useEffect(() => {
+        if (locked) return
+        const q = searchQuery.trim()
+        if (!q) return
+        const timeoutId = setTimeout(async () => {
+            setIsSearching(true)
+            try {
+                setSearchResults(await getFoodSearchResults(q))
+            } catch {
+                setSearchResults([])
+                Alert.alert('Search Failed', 'Unable to search the food database. Check your connection and try again.')
+            } finally {
+                setIsSearching(false)
+                setHasSearched(true)
+            }
+        }, 700)
+        return () => clearTimeout(timeoutId)
+    }, [searchQuery, locked])
+
+    function handleAddPopular(food: PopularFood) {
+        if (locked) {
+            openGate()
+            return
+        }
+        setQuantityInputItem({ id: food.id, name: food.name, calories: food.calories, protein: food.protein, carbs: food.carbs, fats: food.fats })
+        setQuantityValue('1')
+    }
+
+    async function handleAddResult(searchItem: FoodSearchResult) {
+        if (locked) {
+            openGate()
+            return
+        }
         if (addedItems.find((item) => item.id === searchItem.fdcId)) return
         setIsLoadingDetails(true)
         setSelectedSearchItem(searchItem)
@@ -78,7 +112,6 @@ export default function FoodDBModal() {
         setIsLoadingDetails(false)
     }
 
-    //Adds item in the list of added items
     const parsedQuantity = parseNumericInput(quantityValue)
     const quantityValid = parsedQuantity !== null && parsedQuantity > 0
 
@@ -91,20 +124,21 @@ export default function FoodDBModal() {
         }
     }
 
-    //Cancels the addition of an item
     function cancelAddItem() {
         setQuantityInputItem(null)
         setQuantityValue('1')
         setSelectedSearchItem(null)
     }
 
-    //Removes an item from the list of added items
     function handleRemoveItem(id: string) {
         setAddedItems(addedItems.filter((item) => item.id !== id))
     }
 
-    //Adds all items from the list of added items to the nutrition context
     function handleAddAll() {
+        if (locked) {
+            openGate()
+            return
+        }
         if (combineItems && addedItems.length >= 2) {
             const createdAt = new Date()
             let protein = 0
@@ -141,7 +175,7 @@ export default function FoodDBModal() {
             for (const item of addedItems) {
                 const createdAt = new Date()
                 const quantity = item.quantity || 1
-                const nutritionEntry = {
+                handleAddNutrition({
                     id: uuid.v4() as string,
                     userId: userID,
                     name: item.name,
@@ -155,8 +189,7 @@ export default function FoodDBModal() {
                     ingredients: [],
                     createdAt,
                     updatedAt: createdAt,
-                }
-                handleAddNutrition(nutritionEntry)
+                })
             }
         }
         router.back()
@@ -165,93 +198,106 @@ export default function FoodDBModal() {
     return (
         <View style={styles.container}>
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.keyboardView}>
-            {/* Drag Handle */}
-            <View style={styles.handleContainer}>
-                <View style={styles.handle} />
-            </View>
-
-            {/* Loading Modal for Details */}
-            <Modal visible={isLoadingDetails} transparent animationType="fade">
-                <View style={styles.loadingModal}>
-                    <View style={styles.loadingContent}>
-                        <ActivityIndicator size="large" color={colors.nutrition} />
-                        <Text style={styles.loadingText}>Loading food details...</Text>
-                    </View>
+                <View style={styles.handleContainer}>
+                    <View style={styles.handle} />
                 </View>
-            </Modal>
 
-            {/* Quantity Input Modal */}
-            <Modal visible={quantityInputItem !== null} transparent animationType="fade" onRequestClose={cancelAddItem}>
-                <View style={styles.quantityModal}>
-                    <View style={styles.quantityContent}>
-                        <Text style={styles.quantityTitle}>How many servings?</Text>
-                        <Text style={styles.quantitySubtitle}>{quantityInputItem?.name}</Text>
-                        <TextInput style={styles.quantityInput} placeholder="1" placeholderTextColor={colors.placeholder} value={quantityValue} onChangeText={setQuantityValue} keyboardType="decimal-pad" autoFocus />
-                        <View style={styles.quantityButtons}>
-                            <TouchableOpacity style={[styles.quantityButton, styles.cancelButton]} onPress={cancelAddItem} activeOpacity={0.5}>
-                                <X size={18} color={colors.destructive} strokeWidth={2.5} />
-                                <Text style={[styles.quantityButtonText, styles.cancelButtonText]}>Cancel</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={[styles.quantityButton, styles.confirmButton, !quantityValid && styles.confirmButtonDisabled]} onPress={confirmAddItem} disabled={!quantityValid} activeOpacity={0.5}>
-                                <Check size={18} color={colors.nutrition} strokeWidth={2.5} />
-                                <Text style={[styles.quantityButtonText, styles.confirmButtonText]}>Add</Text>
-                            </TouchableOpacity>
+                <Modal visible={isLoadingDetails} transparent animationType="fade">
+                    <View style={styles.loadingModal}>
+                        <View style={styles.loadingContent}>
+                            <ActivityIndicator size="large" color={colors.nutrition} />
+                            <Text style={styles.loadingText}>Loading food details...</Text>
                         </View>
                     </View>
-                </View>
-            </Modal>
+                </Modal>
 
-            <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-                <View style={styles.content}>
-                    {/* Icon Section */}
+                <Modal visible={quantityInputItem !== null} transparent animationType="fade" onRequestClose={cancelAddItem}>
+                    <View style={styles.quantityModal}>
+                        <View style={styles.quantityContent}>
+                            <Text style={styles.quantityTitle}>How many servings?</Text>
+                            <Text style={styles.quantitySubtitle}>{quantityInputItem?.name}</Text>
+                            <TextInput
+                                style={styles.quantityInput}
+                                placeholder="1"
+                                placeholderTextColor={colors.placeholder}
+                                value={quantityValue}
+                                onChangeText={setQuantityValue}
+                                keyboardType="decimal-pad"
+                                autoFocus
+                            />
+                            <View style={styles.quantityButtons}>
+                                <TouchableOpacity style={[styles.quantityButton, styles.cancelButton]} onPress={cancelAddItem} activeOpacity={0.5}>
+                                    <X size={18} color={colors.destructive} strokeWidth={2.5} />
+                                    <Text style={[styles.quantityButtonText, styles.cancelButtonText]}>Cancel</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[styles.quantityButton, styles.confirmButton, !quantityValid && styles.confirmButtonDisabled]}
+                                    onPress={confirmAddItem}
+                                    disabled={!quantityValid}
+                                    activeOpacity={0.5}
+                                >
+                                    <Check size={18} color={colors.nutrition} strokeWidth={2.5} />
+                                    <Text style={[styles.quantityButtonText, styles.confirmButtonText]}>Add</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+
+                <ScrollView style={styles.body} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
                     <View style={styles.iconContainer}>
                         <View style={styles.iconCircle}>
                             <Database size={40} color={colors.nutrition} strokeWidth={2.5} />
                         </View>
                     </View>
-
-                    {/* Title */}
                     <Text style={styles.title}>Food Database</Text>
                     <Text style={styles.subtitle}>Search and add food items</Text>
 
-                    {/* Search Input */}
-                    <View style={styles.searchContainer}>
-                        <TextInput
-                            style={[styles.searchInput, isFocused && styles.searchInputFocused]}
-                            placeholder="Search foods..."
-                            placeholderTextColor={colors.placeholder}
-                            value={searchQuery}
-                            onChangeText={setSearchQuery}
-                            onFocus={() => setIsFocused(true)}
-                            onBlur={() => setIsFocused(false)}
-                        />
-                        {isSearching && (
-                            <View style={styles.searchLoader}>
-                                <ActivityIndicator size="small" color={colors.nutrition} />
-                            </View>
-                        )}
-                    </View>
+                    {locked ?
+                        // Inert (non-focusable) input for free users so tapping raises the gate
+                        // directly instead of flashing the keyboard open then dismissing it.
+                        <TouchableOpacity style={styles.searchContainer} activeOpacity={0.7} onPress={openGate}>
+                            <TextInput
+                                style={styles.searchInput}
+                                placeholder="Search foods..."
+                                placeholderTextColor={colors.placeholder}
+                                editable={false}
+                                pointerEvents="none"
+                            />
+                        </TouchableOpacity>
+                    :   <View style={styles.searchContainer}>
+                            <TextInput
+                                style={styles.searchInput}
+                                placeholder="Search foods..."
+                                placeholderTextColor={colors.placeholder}
+                                value={searchQuery}
+                                onChangeText={handleQueryChange}
+                                returnKeyType="search"
+                            />
+                            {isSearching && (
+                                <View style={styles.searchLoader}>
+                                    <ActivityIndicator size="small" color={colors.nutrition} />
+                                </View>
+                            )}
+                        </View>
+                    }
 
-                    {/* Added Items Section */}
                     {addedItems.length > 0 && (
-                        <StagedSection
-                            label="Added"
-                            count={addedItems.length}
-                            color={colors.nutrition}
-                            combineItems={combineItems}
-                            onCombineItemsChange={setCombineItems}
-                        >
+                        <StagedSection label="Added" count={addedItems.length} color={colors.nutrition} combineItems={combineItems} onCombineItemsChange={setCombineItems}>
                             {addedItems.map((item) => {
                                 const q = item.quantity || 1
                                 return (
                                     <View key={item.id} style={styles.stagedRow}>
                                         <View style={styles.stagedInfo}>
                                             <Text style={styles.stagedName}>
-                                                {item.name}{q > 1 ? <Text style={styles.stagedQty}> ×{q}</Text> : ''}
+                                                {item.name}
+                                                {q > 1 ?
+                                                    <Text style={styles.stagedQty}> ×{q}</Text>
+                                                :   ''}
                                             </Text>
                                             <View style={styles.macroRow}>
                                                 <View style={styles.macroPill}>
-                                                    <Text style={styles.macroPillText}>{Math.round(item.calories * q)} cal</Text>
+                                                    <Text style={styles.macroPillText}>{Math.round(item.calories * q)} kcal</Text>
                                                 </View>
                                                 <View style={styles.macroPill}>
                                                     <Text style={styles.macroPillText}>{Math.round(item.fats * q * 10) / 10}g F</Text>
@@ -273,61 +319,73 @@ export default function FoodDBModal() {
                         </StagedSection>
                     )}
 
-                    {/* Search Results Section */}
-                    <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>{searchQuery ? `Results (${searchResults.length})` : 'Start searching for foods...'}</Text>
-                        {isSearching ?
-                            <View style={styles.emptyState}>
-                                <ActivityIndicator size="large" color={colors.nutrition} />
-                                <Text style={styles.emptyText}>Searching...</Text>
-                            </View>
-                        : searchResults.length > 0 ?
-                            searchResults.map((item) => {
-                                const isAdded = addedItems.find((addedItem) => addedItem.id === item.fdcId)
-                                const isLoading = isLoadingDetails && selectedSearchItem?.fdcId === item.fdcId
-                                return (
-                                    <View key={item.fdcId} style={styles.foodItem}>
-                                        <View style={styles.foodInfo}>
-                                            <Text style={styles.foodName}>{item.description}</Text>
-                                            {item.brandName && <Text style={styles.brandName}>{item.brandName}</Text>}
-                                            {isLoading && <Text style={styles.loadingDetailsText}>Loading details...</Text>}
-                                        </View>
-                                        <TouchableOpacity style={[styles.addButton, (isAdded || isLoading) && styles.addButtonDisabled]} onPress={() => handleAddItem(item)} activeOpacity={0.5} disabled={!!isAdded || isLoading}>
-                                            {isLoading ?
-                                                <ActivityIndicator size="small" color={colors.placeholder} />
-                                            :   <Plus size={18} color={isAdded ? colors.placeholder : colors.nutrition} strokeWidth={2.5} />}
-                                        </TouchableOpacity>
-                                    </View>
-                                )
-                            })
-                        : searchQuery ?
-                            <View style={styles.emptyState}>
-                                <Text style={styles.emptyText}>No results found</Text>
-                                <Text style={styles.emptySubtext}>Try a different search term</Text>
-                            </View>
-                        :   <View style={styles.emptyState}>
-                                <Text style={styles.emptyText}>Enter a search term to find foods</Text>
-                            </View>
-                        }
-                    </View>
-                </View>
-            </ScrollView>
-
+                    {searchQuery.trim() === '' ?
+                        <View style={styles.section}>
+                            <Text style={styles.sectionTitle}>Popular foods</Text>
+                            {POPULAR_FOODS.map((food) => (
+                                <FoodRow
+                                    key={food.id}
+                                    name={food.name}
+                                    servingSize={food.servingSize}
+                                    macros={food}
+                                    onAdd={() => handleAddPopular(food)}
+                                    added={!!addedItems.find((item) => item.id === food.id)}
+                                />
+                            ))}
+                        </View>
+                    :   <View style={styles.section}>
+                            <Text style={styles.sectionTitle}>{hasSearched ? `Results (${searchResults.length})` : 'Search'}</Text>
+                            {isSearching || !hasSearched ?
+                                <View style={styles.emptyState}>
+                                    <ActivityIndicator size="large" color={colors.nutrition} />
+                                    <Text style={styles.emptyText}>Searching...</Text>
+                                </View>
+                            : searchResults.length > 0 ?
+                                searchResults.map((item) => {
+                                    const isAdded = !!addedItems.find((addedItem) => addedItem.id === item.fdcId)
+                                    const isLoading = isLoadingDetails && selectedSearchItem?.fdcId === item.fdcId
+                                    return (
+                                        <FoodRow
+                                            key={item.fdcId}
+                                            name={item.description}
+                                            brandName={item.brandName}
+                                            onAdd={() => handleAddResult(item)}
+                                            added={isAdded}
+                                            loading={isLoading}
+                                        />
+                                    )
+                                })
+                            :   <View style={styles.emptyState}>
+                                    <Text style={styles.emptyText}>No results found</Text>
+                                    <Text style={styles.emptySubtext}>Try a different search term</Text>
+                                </View>
+                            }
+                        </View>
+                    }
+                </ScrollView>
             </KeyboardAvoidingView>
 
-            {/* Add All Button - Fixed at bottom */}
             {addedItems.length > 0 && (
                 <View style={styles.addAllContainer}>
                     <TouchableOpacity onPress={guardSubmit(handleAddAll)} disabled={submitting} activeOpacity={0.8} style={styles.addAllButtonTouchable}>
                         <LinearGradient colors={colors.nutritionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.addAllButton}>
                             <Text style={styles.addAllButtonText}>
-                                {combineItems && addedItems.length >= 2
-                                    ? 'Add 1 combined meal'
-                                    : `Add ${addedItems.length} Item${addedItems.length > 1 ? 's' : ''}`}
+                                {combineItems && addedItems.length >= 2 ? 'Add 1 combined meal' : `Add ${addedItems.length} Item${addedItems.length > 1 ? 's' : ''}`}
                             </Text>
                         </LinearGradient>
                     </TouchableOpacity>
                 </View>
+            )}
+
+            {upsellVisible && (
+                <PromptCard
+                    icon={Database}
+                    title="Unlock the Food Database"
+                    message="Search a million-plus foods and log macros in seconds. Upgrade to add foods straight from the database."
+                    ctaLabel="Upgrade to Continue"
+                    onPress={() => router.replace('/settingsScreens/subscription')}
+                    onGoBack={() => setUpsellVisible(false)}
+                />
             )}
         </View>
     )
@@ -356,13 +414,9 @@ function makeStyles(colors: Colors) {
             backgroundColor: colors.border,
             borderRadius: 3,
         },
-        scrollView: {
+        body: {
             flex: 1,
-        },
-        content: {
-            paddingHorizontal: 24,
-            paddingTop: 12,
-            paddingBottom: 32,
+            paddingHorizontal: 16,
         },
         iconContainer: {
             alignItems: 'center',
@@ -396,23 +450,20 @@ function makeStyles(colors: Colors) {
             letterSpacing: 0.2,
         },
         searchContainer: {
-            marginBottom: 24,
+            marginBottom: 20,
             position: 'relative',
         },
         searchInput: {
             backgroundColor: colors.surface,
             borderRadius: 12,
             paddingHorizontal: 16,
-            paddingVertical: 14,
+            paddingVertical: 12,
             paddingRight: 50,
             fontSize: 15,
             color: colors.text,
             borderWidth: 2,
             borderColor: colors.hairline,
             fontFamily: fonts.regular,
-        },
-        searchInputFocused: {
-            borderColor: colors.nutrition,
         },
         searchLoader: {
             position: 'absolute',
@@ -429,33 +480,6 @@ function makeStyles(colors: Colors) {
             marginBottom: 12,
             letterSpacing: -0.5,
             fontFamily: fonts.semibold,
-        },
-        foodItem: {
-            flexDirection: 'row',
-            alignItems: 'center',
-            backgroundColor: colors.surface,
-            borderRadius: 12,
-            padding: 14,
-            marginBottom: 8,
-            borderWidth: StyleSheet.hairlineWidth,
-            borderColor: colors.hairline,
-        },
-        foodInfo: {
-            flex: 1,
-            marginRight: 12,
-        },
-        foodName: {
-            fontSize: 15,
-            color: colors.text,
-            marginBottom: 4,
-            letterSpacing: -0.5,
-            fontFamily: fonts.semibold,
-        },
-        foodMacros: {
-            fontSize: 12,
-            color: colors.textMuted,
-            letterSpacing: 0.2,
-            fontFamily: fonts.regular,
         },
         stagedRow: {
             flexDirection: 'row',
@@ -499,20 +523,6 @@ function makeStyles(colors: Colors) {
             color: colors.textMuted,
             fontFamily: fonts.medium,
         },
-        addButton: {
-            width: 32,
-            height: 32,
-            borderRadius: 16,
-            backgroundColor: colors.nutrition + '22',
-            justifyContent: 'center',
-            alignItems: 'center',
-            borderWidth: 1.5,
-            borderColor: colors.nutrition + '66',
-        },
-        addButtonDisabled: {
-            backgroundColor: colors.textMuted + '1F',
-            borderColor: colors.textMuted + '40',
-        },
         removeButton: {
             width: 28,
             height: 28,
@@ -535,18 +545,6 @@ function makeStyles(colors: Colors) {
         emptySubtext: {
             fontSize: 12,
             color: colors.labelMuted,
-        },
-        brandName: {
-            fontSize: 12,
-            color: colors.textMuted,
-            marginTop: 2,
-            fontStyle: 'italic',
-        },
-        loadingDetailsText: {
-            fontSize: 11,
-            color: colors.nutrition,
-            marginTop: 4,
-            fontStyle: 'italic',
         },
         loadingModal: {
             flex: 1,

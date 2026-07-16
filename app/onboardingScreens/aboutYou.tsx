@@ -4,7 +4,8 @@ import PressableScale from '@/components/NeutralComponents/PressableScale'
 import { useSettings } from '@/context/SettingsContext'
 import { validateHeightWeight } from '@/context/SettingsContext/functions/validator'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
-import { cmToInches, feetInchesToInches, inchesToCm, inchesToFeetInches, kgToLbs, lbsToKg } from '@/lib/utils/unitConversions'
+import { calculateAge } from '@/lib/utils/dateHelper'
+import { cmToInches, feetInchesToInches, inchesToCm, inchesToFeetInches, kgToLbs, lbsToKg, weightUnitLabel } from '@/lib/utils/unitConversions'
 import { onboardingStep } from '@/lib/onboarding/steps'
 import { router } from 'expo-router'
 import { ShieldCheck } from 'lucide-react-native'
@@ -58,10 +59,7 @@ export default function OnboardingAboutYou() {
         const totalHeight = unitSystem === 'imperial' ? feetInchesToInches(Number(heightFt) || 0, Number(heightIn) || 0) : Number(height) || 0
         const w = Number(weight) || 0
         if (!validateHeightWeight(totalHeight, w, unitSystem)) return
-        const now = new Date()
-        let age = now.getFullYear() - birthDate.getFullYear()
-        const m = now.getMonth() - birthDate.getMonth()
-        if (m < 0 || (m === 0 && now.getDate() < birthDate.getDate())) age--
+        const age = calculateAge(birthDate)
         if (age < 13) {
             Alert.alert('Age Requirement', 'You must be at least 13 years old to use Plates.', [{ text: 'OK' }])
             return
@@ -117,7 +115,7 @@ export default function OnboardingAboutYou() {
                     }
                     <View style={[styles.inputWrapper, { marginTop: 12 }]}>
                         <TextInput style={styles.input} placeholder={unitSystem === 'imperial' ? '160' : '73'} placeholderTextColor={colors.placeholder} keyboardType="numeric" value={weight} onChangeText={setWeight} />
-                        <Text style={styles.unit}>{unitSystem === 'imperial' ? 'lbs' : 'kg'}</Text>
+                        <Text style={styles.unit}>{weightUnitLabel(unitSystem)}</Text>
                     </View>
 
                     <View style={styles.trustRow}>

@@ -126,6 +126,28 @@ export function addDays(date: Date, n: number): Date {
 }
 
 /**
+ * Whole-year age on `today` (defaults to now); the month/day check handles
+ * not-yet-reached birthdays.
+ */
+export function calculateAge(birthDate: Date, today: Date = new Date()): number {
+    let age = today.getFullYear() - birthDate.getFullYear()
+    const monthDiff = today.getMonth() - birthDate.getMonth()
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--
+    }
+    return age
+}
+
+// Calendar-day difference (b − a). Both dates are taken at local midnight and
+// the divide is rounded, so the ±1h a DST transition injects into a
+// milliseconds difference can never drop or add a day.
+export function daysBetween(a: Date, b: Date): number {
+    const start = new Date(a.getFullYear(), a.getMonth(), a.getDate())
+    const end = new Date(b.getFullYear(), b.getMonth(), b.getDate())
+    return Math.round((end.getTime() - start.getTime()) / 86_400_000)
+}
+
+/**
  * Returns the start (00:00 local) of the calendar week containing `date`.
  * weekStartsOn: 0 = Sunday (default), 1 = Monday.
  */
@@ -195,7 +217,7 @@ export function calculateStartDate(
       return new Date(today);
     }
     
-    const daysSinceOnboarding = Math.floor((today.getTime() - onboardingDate.getTime()) / (1000 * 60 * 60 * 24));
+    const daysSinceOnboarding = daysBetween(onboardingDate, today);
     
     if (daysSinceOnboarding <= maxDays) {
       return onboardingDate;
@@ -207,7 +229,7 @@ export function calculateStartDate(
       return new Date(today);
     }
     
-    const daysSinceFirstEntry = Math.floor((today.getTime() - earliestDate.getTime()) / (1000 * 60 * 60 * 24));
+    const daysSinceFirstEntry = daysBetween(earliestDate, today);
     if (daysSinceFirstEntry < maxDays) {
       return earliestDate;
     }

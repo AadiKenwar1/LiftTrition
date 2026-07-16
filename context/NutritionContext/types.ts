@@ -48,7 +48,7 @@ export interface NutritionContextInterface {
     handleEditNutrition: (id: string, nutritionEntry: NutritionEntry) => Promise<void>
     handleSaveNutrition: (nutritionEntry: NutritionEntry) => Promise<void>
     handleUnsaveNutrition: (id: string) => Promise<void>
-    handleAnalyzeAndAddPhoto: (photoUri: string, userID: string, mode?: ScanMode) => Promise<void>
+    handleAnalyzeAndAddPhoto: (photoUri: string, userID: string, mode?: ScanMode, shouldCommit?: () => boolean) => Promise<void>
     handleGetMacrosForDate: (date: Date) => { totalProtein: number; totalCarbs: number; totalFats: number; totalCalories: number }
     handleGetMacroDataForGraph: (macroType: 'calories' | 'protein' | 'carbs' | 'fats', onboardingCompletedAt?: Date) => Array<{ day: string; value: number }>
     handleGetMacroForWeek: (macroType: 'calories' | 'protein' | 'carbs' | 'fats', weekStart: Date) => WeekDayPoint[]

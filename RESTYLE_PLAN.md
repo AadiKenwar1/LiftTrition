@@ -79,7 +79,7 @@ For restyled files, adopt `const styles = useMemo(() => makeStyles(colors), [col
 - **`components/NeutralComponents/EditHeightModal.tsx`** — inline height editor, sibling of `EditMacroGoalModal` (same scrim/card/animation/buttons). Unit-aware (ft+in / cm), validates via `validateHeightWeight`, returns TOTAL height via `onSave`; the caller (profile) recalcs macros + commits. Profile edits height inline and routes weight through `updateBWModal` (the canonical `handleUpdateBw` path). Adjust Measurements is fully unlinked (no Settings-tab row, no `_layout` registration) — the screen file is kept but unreachable.
 - **`components/NutritionComponents/GoalProjectionChart.tsx`** — the V4 signature projection chart (react-native-svg, animated draw, reduced-motion aware). Variants: `lose` (green down-slope), `gain` (green up-slope), `maintain` (recomp: flat green weight line + rising blue strength line). Used by `adjustNutrition4`.
 - **`components/NutritionComponents/ScanBackdrop.tsx`** — static, non-interactive stand-in for the live camera (mode pills, scan frame, capture controls) over a dark gradient; used by the camera screen's non-live states and the Dev Hub harness. Intentionally mirrors `cameraScreen.tsx`'s dark chrome hexes rather than tokens (see residual-hex exceptions below).
-- **`components/NeutralComponents/PromptCard.tsx`** — shared overlay prompt card (upsell / permission / settings) shown over any screen. Fully tokenized (`surface`, `nutrition`, fonts, radius).
+- **`components/NeutralComponents/PromptCard.tsx`** — shared overlay prompt card (upsell / permission / settings) shown over any screen. Fully tokenized (`surface`, `nutrition`, fonts, radius). Icon sits in a soft `nutrition`-tinted borderless circle (64px, glyph size 30), matching `GoalReachedPrompt`. Entrance motion mirrors `GoalReachedPrompt` (scrim fade + card spring-up, RN `Animated`; icon is static); Go Back animates out, the primary CTA fires immediately.
 - **`components/NutritionComponents/FoodRow.tsx`** — shared food search-result row (name, italic brand line, muted serving-size line, optional macro-pill row, circular `+`/loading add button); extracted pixel-identical from `foodDBModal.tsx`'s inline row + staged macro pills so Popular Foods and the Dev Hub can reuse it. Fully tokenized.
 
 ### Settings adjust flows (restyled to V4, June 2026)
@@ -180,6 +180,7 @@ Applies to `settingsScreens/` and is the default for the full-app rollout.
 - Profile/billing: `useAuth().user`, `useBilling().hasPremium`.
 - Theme: `useColors`/`useColorScheme`/`useSetColorScheme` (no API changes).
 - Charts: existing victory-native `CartesianChart`/`Line`/`Area` + `@shopify/react-native-skia` (`LinearGradient`, `vec`) — already installed.
+- Unit labels: calorie values always suffix "kcal"; "Calories" is reserved for field/section titles. Weight labels come from weightUnitLabel() (lib/utils/unitConversions).
 
 ## Execution & agent strategy
 

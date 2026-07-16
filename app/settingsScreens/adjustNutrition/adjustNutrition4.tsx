@@ -2,7 +2,8 @@ import GoalProjectionChart from '@/components/NutritionComponents/GoalProjection
 import StepProgress from '@/components/NeutralComponents/StepProgress'
 import { useSettings } from '@/context/SettingsContext'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
-import { lbsToKg } from '@/lib/utils/unitConversions'
+import { weeksToGoal } from '@/lib/utils/goalMath'
+import { lbsToKg, weightUnitLabel } from '@/lib/utils/unitConversions'
 import { router, useLocalSearchParams } from 'expo-router'
 import { useMemo } from 'react'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
@@ -25,14 +26,14 @@ export default function AdjustNutrition4Screen() {
     }>()
 
     const metric = params.unitSystem === 'metric'
-    const unit = metric ? 'kg' : 'lb'
+    const unit = weightUnitLabel(settings.unitSystem)
     const variant = (params.goal === 'maintain' ? 'maintain' : params.goal === 'gain' ? 'gain' : 'lose') as 'lose' | 'gain' | 'maintain'
     const current = Number(params.weight) || 0
     const goalWeight = Number(params.targetWeight) || 0
 
     // goalPace param is lb/week (storage unit); convert to the display unit for the weeks estimate.
     const paceDisplay = metric ? lbsToKg(Number(params.goalPace) || 0) : Number(params.goalPace) || 0
-    const weeks = variant === 'maintain' ? 12 : Math.max(1, Math.round(Math.abs(current - goalWeight) / (paceDisplay > 0 ? paceDisplay : 1)))
+    const weeks = weeksToGoal(variant, current, goalWeight, paceDisplay)
     const targetDate = useMemo(() => {
         const d = new Date()
         d.setDate(d.getDate() + weeks * 7)
@@ -41,7 +42,7 @@ export default function AdjustNutrition4Screen() {
 
     const handleSave = () => {
         // Wizard completion is an explicit regeneration: hand-tuned macros are replaced
-        // by choice, and a fresh goal re-arms the crossing prompt + safety net.
+        // by choice, and a fresh goal re-arms the goal-reached prompt.
         setSettings({
             ...settings,
             height: Number(params.height),
@@ -89,7 +90,7 @@ export default function AdjustNutrition4Screen() {
                         </>
                     :   <>
                             <View style={styles.statCard}>
-                                <Text style={[styles.statValue, { color: colors.nutrition }]}>{variant === 'gain' ? '+' : '−'}{Math.abs(current - goalWeight)} {unit}</Text>
+                                <Text style={[styles.statValue, { color: colors.nutrition }]}>{variant === 'gain' ? '+' : '−'}{Math.round(Math.abs(current - goalWeight) * 10) / 10} {unit}</Text>
                                 <Text style={styles.statLabel}>to goal</Text>
                             </View>
                             <View style={styles.statCard}>

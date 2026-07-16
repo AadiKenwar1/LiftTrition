@@ -1,3 +1,5 @@
+import { ENV } from '@/lib/env'
+import { clearFoodDBCaches } from '@/lib/foodDB/foodDB'
 import { flushUploadsOrThrow } from '@/lib/powersync/FlushUploads'
 import { disconnectAndClearPowerSync } from '@/lib/powersync/orchestrator'
 import { supabase } from '@/lib/supabase/client'
@@ -9,7 +11,7 @@ export async function deleteAccount(): Promise<void> {
         throw new Error('You must be signed in to delete your account.')
     }
 
-    const res = await fetch(`${process.env.EXPO_PUBLIC_SUPABASE_URL}/functions/v1/deleteAccount`, {
+    const res = await fetch(`${ENV.SUPABASE_URL}/functions/v1/deleteAccount`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${session.access_token}` },
     })
@@ -37,6 +39,7 @@ export async function signOut(): Promise<void> {
 
     await disconnectAndClearPowerSync()
     if (userID) await clearUserStorage(userID)
+    clearFoodDBCaches()
 }
 
 /**
@@ -86,6 +89,8 @@ export async function clearLocalSession(): Promise<void> {
     } catch (e) {
         console.warn('clearLocalSession: PowerSync clear failed', e)
     }
+
+    clearFoodDBCaches()
 }
 
 /**

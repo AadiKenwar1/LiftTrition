@@ -13,6 +13,12 @@ jest.mock('@/lib/supabase/client', () => ({
     },
 }))
 
+// jest.mock calls are hoisted above imports, so this reliably beats the real
+// @/lib/env module's process.env snapshot-at-import-time behavior.
+jest.mock('@/lib/env', () => ({
+    ENV: { SUPABASE_URL: 'https://test.supabase.co' },
+}))
+
 jest.mock('@/lib/powersync/orchestrator', () => ({
     disconnectAndClearPowerSync: jest.fn(),
 }))
@@ -37,7 +43,6 @@ beforeEach(() => {
     jest.clearAllMocks()
     warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
 
-    process.env.EXPO_PUBLIC_SUPABASE_URL = 'https://test.supabase.co'
     ;(supabase.auth.getSession as jest.Mock).mockResolvedValue({
         data: { session: { access_token: 'token-123', user: { id: 'user-123' } } },
     })

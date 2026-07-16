@@ -1,3 +1,4 @@
+import { ENV } from '@/lib/env';
 import { supabase } from '@/lib/supabase/client';
 import { AbstractPowerSyncDatabase, PowerSyncBackendConnector, UpdateType } from '@powersync/react-native';
 import * as Sentry from '@sentry/react-native';
@@ -34,7 +35,7 @@ export class Connector implements PowerSyncBackendConnector {
     }
 
     return {
-      endpoint: process.env.EXPO_PUBLIC_POWERSYNC_URL!,
+      endpoint: ENV.POWERSYNC_URL!,
       token: session.data.session.access_token
     };
   }

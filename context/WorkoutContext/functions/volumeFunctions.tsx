@@ -1,4 +1,4 @@
-import { formatDateMinimal, getDateKey, calculateStartDate, addDays, WEEKDAY_INITIALS, type WeekDayPoint } from "@/lib/utils/dateHelper";
+import { formatDateMinimal, getDateKey, calculateStartDate, addDays, daysBetween, WEEKDAY_INITIALS, type WeekDayPoint } from "@/lib/utils/dateHelper";
 import { Log } from "../types";
 
 /**
@@ -36,7 +36,7 @@ export function getVolumeData(logs: Log[], onboardingCompletedAt?: Date): Array<
     startDate.setHours(0, 0, 0, 0);
 
     // Calculate days to show
-    const daysToShow = Math.floor((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    const daysToShow = daysBetween(startDate, today) + 1;
 
     // Build result array (oldest to newest, filling gaps with 0)
     const result: Array<{ day: string; value: number }> = [];
@@ -87,7 +87,7 @@ export function getSetsData(logs: Log[], onboardingCompletedAt?: Date): Array<{ 
     const startDate = calculateStartDate(today, maxDays, onboardingCompletedAt, earliestDate, hasData);
     startDate.setHours(0, 0, 0, 0);
 
-    const daysToShow = Math.floor((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    const daysToShow = daysBetween(startDate, today) + 1;
 
     const result: Array<{ day: string; value: number }> = [];
     for (let i = daysToShow - 1; i >= 0; i--) {

@@ -1,5 +1,6 @@
 import { useSettings } from '@/context/SettingsContext'
 import { fonts, radius, useColorScheme, useColors, type Colors } from '@/context/ThemeContext'
+import { weightUnitLabel } from '@/lib/utils/unitConversions'
 import { useRouter } from 'expo-router'
 import { Pencil } from 'lucide-react-native'
 import { useMemo } from 'react'
@@ -35,10 +36,10 @@ export default function BwCard({ height = 120 }: CardProps) {
                         <View style={styles.mainSection}>
                             <View style={styles.valueRow}>
                                 <Text style={styles.mainValue}>{formatWeight(settings.bodyWeight)}</Text>
-                                <Text style={styles.mainUnit}>{settings.unitSystem === 'imperial' ? 'lbs' : 'kg'}</Text>
+                                <Text style={styles.mainUnit}>{weightUnitLabel(settings.unitSystem)}</Text>
                             </View>
                             <Text style={styles.goalText}>
-                                Goal: {formatWeight(settings.goalWeight)} {settings.unitSystem === 'imperial' ? 'lbs' : 'kg'} {settings.bodyWeight == settings.goalWeight ? '🎉' : ''}
+                                Goal: {formatWeight(settings.goalWeight)} {weightUnitLabel(settings.unitSystem)} {settings.bodyWeight == settings.goalWeight ? '🎉' : ''}
                             </Text>
                             <Text style={styles.hintText}>(Tap pencil to update)</Text>
                         </View>

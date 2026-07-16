@@ -3,6 +3,7 @@ import StepProgress from '@/components/NeutralComponents/StepProgress'
 import { useSettings } from '@/context/SettingsContext'
 import { validateHeightWeight, validateTargetWeight } from '@/context/SettingsContext/functions/validator'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
+import { weightUnitLabel } from '@/lib/utils/unitConversions'
 import { router } from 'expo-router'
 import { useMemo, useState } from 'react'
 import { Keyboard, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
@@ -59,7 +60,7 @@ export default function AdjustNutrition1Screen() {
                         <Text style={styles.inputLabel}>Target weight</Text>
                         <View style={styles.inputWrapper}>
                             <TextInput style={styles.input} placeholder="150" placeholderTextColor={colors.placeholder} keyboardType="numeric" value={targetWeight} onChangeText={setTargetWeight} />
-                            <Text style={styles.unitText}>{settings.unitSystem === 'metric' ? 'kg' : 'lbs'}</Text>
+                            <Text style={styles.unitText}>{weightUnitLabel(settings.unitSystem)}</Text>
                         </View>
                     </>
                 )}

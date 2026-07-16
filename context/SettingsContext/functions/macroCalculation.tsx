@@ -1,20 +1,10 @@
+import { calculateAge } from '@/lib/utils/dateHelper'
 import { Settings } from '../types'
 
 //Activity multipliers for TDEE (Mifflin-St Jeor flow)
 function getActivityFactor(activityLevel: Settings['activityLevel']): number {
     const factorMap = { sedentary: 1.2, light: 1.375, moderate: 1.55, active: 1.725, gymrat: 1.9 }
     return factorMap[activityLevel]
-}
-
-//Calculate age from birth date
-function calculateAge(birthDate: Date): number {
-    const today = new Date()
-    let age = today.getFullYear() - birthDate.getFullYear()
-    const monthDiff = today.getMonth() - birthDate.getMonth()
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-        age--
-    }
-    return age
 }
 
 //Macro preset splits
@@ -59,13 +49,17 @@ export function calculateMacros(settings: Settings, isImperial: boolean = true) 
         TDEE += dailyAdjustment
     }
 
-    // Step 3: Macro split from goal preset
-    const preset = MACRO_PRESETS[settings.goalType]
-    const proteinGrams = (TDEE * preset.protein) / 4
-    const fatGrams = (TDEE * preset.fat) / 9
-    const carbGrams = (TDEE * preset.carbs) / 4
-
-    //Harvard Health Publishing recommends at least 1500 calories for men and 1200 calories for women
+    //Harvard Health Publishing recommends at least 1500 calories for men and 1200 calories for women.
+    //Clamp before the macro split so the grams reconcile with the shown calorie target (a sub-floor TDEE
+    //would otherwise leave macros summing to fewer calories than calResult).
     const minCalories = settings.gender === 'male' ? 1500 : 1200
-    return { calResult: Math.max(minCalories, Math.round(TDEE)), proteinGrams: Math.max(1, Math.round(proteinGrams)), fatGrams: Math.max(1, Math.round(fatGrams)), carbGrams: Math.max(1, Math.round(carbGrams)) }
+    const calResult = Math.max(minCalories, Math.round(TDEE))
+
+    // Step 3: Macro split from goal preset, driven by the clamped calorie target
+    const preset = MACRO_PRESETS[settings.goalType]
+    const proteinGrams = (calResult * preset.protein) / 4
+    const fatGrams = (calResult * preset.fat) / 9
+    const carbGrams = (calResult * preset.carbs) / 4
+
+    return { calResult, proteinGrams: Math.max(1, Math.round(proteinGrams)), fatGrams: Math.max(1, Math.round(fatGrams)), carbGrams: Math.max(1, Math.round(carbGrams)) }
 }

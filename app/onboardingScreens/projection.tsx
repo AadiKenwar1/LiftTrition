@@ -2,7 +2,8 @@ import GoalProjectionChart from '@/components/NutritionComponents/GoalProjection
 import OnboardingScaffold from '@/components/NeutralComponents/OnboardingScaffold'
 import { useSettings } from '@/context/SettingsContext'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
-import { lbsToKg } from '@/lib/utils/unitConversions'
+import { weeksToGoal } from '@/lib/utils/goalMath'
+import { lbsToKg, weightUnitLabel } from '@/lib/utils/unitConversions'
 import { onboardingStep } from '@/lib/onboarding/steps'
 import { router } from 'expo-router'
 import { useMemo } from 'react'
@@ -19,12 +20,12 @@ export default function OnboardingProjection() {
     const { current, total } = onboardingStep('projection', settings.goalType)
 
     const metric = settings.unitSystem === 'metric'
-    const unit = metric ? 'kg' : 'lb'
+    const unit = weightUnitLabel(settings.unitSystem)
     const variant = settings.goalType // 'lose' | 'gain' | 'maintain'
     const currentWeight = settings.bodyWeight
     const goalWeight = settings.goalWeight
     const paceDisplay = metric ? lbsToKg(settings.goalPace) : settings.goalPace
-    const weeks = variant === 'maintain' ? 12 : Math.max(1, Math.round(Math.abs(currentWeight - goalWeight) / (paceDisplay > 0 ? paceDisplay : 1)))
+    const weeks = weeksToGoal(variant, currentWeight, goalWeight, paceDisplay)
     const targetDate = useMemo(() => {
         const d = new Date()
         d.setDate(d.getDate() + weeks * 7)

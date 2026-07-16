@@ -1,12 +1,14 @@
 import { AppLoadingScreen } from '@/components/GuardComponents/AppLoadingScreen'
 import { PowerSyncGuard } from '@/components/GuardComponents/PowerSyncGuard'
 import { SyncWatchdog } from '@/components/GuardComponents/SyncWatchdog'
+import GoalPromptHost from '@/components/NutritionComponents/GoalPromptHost'
 import { AuthProvider, useAuth } from '@/context/AuthContext'
 import { BillingProvider, useBilling } from '@/context/BillingContext'
 import { NutritionProvider, useNutrition } from '@/context/NutritionContext'
 import { SettingsProvider, useSettings } from '@/context/SettingsContext'
-import { brandAssets, ThemeProvider, useColors, useColorScheme } from '@/context/ThemeContext'
+import { brandAssets, fonts, ThemeProvider, useColors, useColorScheme } from '@/context/ThemeContext'
 import { useWorkout, WorkoutProvider } from '@/context/WorkoutContext'
+import { assertRequiredEnv, ENV } from '@/lib/env'
 import { Archivo_400Regular, Archivo_500Medium, Archivo_600SemiBold, Archivo_700Bold, Archivo_800ExtraBold } from '@expo-google-fonts/archivo'
 import { Poppins_100Thin, Poppins_100Thin_Italic, Poppins_200ExtraLight, Poppins_200ExtraLight_Italic, Poppins_300Light, Poppins_300Light_Italic, Poppins_400Regular, Poppins_400Regular_Italic, Poppins_500Medium, Poppins_500Medium_Italic, Poppins_600SemiBold, Poppins_600SemiBold_Italic, Poppins_700Bold, Poppins_700Bold_Italic, Poppins_800ExtraBold, Poppins_800ExtraBold_Italic, Poppins_900Black, Poppins_900Black_Italic } from '@expo-google-fonts/poppins'
 import FontAwesome from '@expo/vector-icons/FontAwesome'
@@ -54,8 +56,10 @@ export const unstable_settings = { initialRouteName: '(tabs)' }
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync()
 
+assertRequiredEnv()
+
 Sentry.init({
-    dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
+    dsn: ENV.SENTRY_DSN,
     enableInExpoDevelopment: false,
 })
 
@@ -144,7 +148,7 @@ function StackLayout() {
                     headerStyle: { backgroundColor: colors.background },
                     headerTintColor: colors.text,
                     headerTitleStyle: {
-                        fontFamily: 'Poppins_600SemiBold',
+                        fontFamily: fonts.semibold,
                         fontSize: 22,
                         color: colors.text,
                     },
@@ -200,8 +204,11 @@ function StackLayout() {
                     <Stack.Screen name="devTest/scanScreen" options={{ headerShown: true, title: 'Scan Screen', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/foodDB" options={{ headerShown: true, title: 'Food DB (Teaser)', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/foodDBVariant" options={{ ...modalPresentation, headerShown: false }} />
+                    <Stack.Screen name="devTest/addNutritionTeaser" options={{ headerShown: true, title: 'Add Nutrition (Teaser)', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="devTest/addNutritionTeaserVariant" options={{ ...modalPresentation, headerShown: false }} />
                     <Stack.Screen name="devTest/barChart" options={{ headerShown: true, title: 'Bar Chart', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/aiTest" options={{ headerShown: true, title: 'AI Test', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="devTest/scanCancel" options={{ headerShown: true, title: 'Scan Cancel', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/activityBanner" options={{ headerShown: true, title: 'Activity Banner', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/colorHue" options={{ headerShown: true, title: 'Color Hue Review', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/numberParsing" options={{ headerShown: true, title: 'Number Parsing', headerBackTitle: 'Back' }} />
@@ -217,11 +224,14 @@ function StackLayout() {
                     <Stack.Screen name="devTest/loadingRetry" options={{ headerShown: false, gestureEnabled: true }} />
                     <Stack.Screen name="devTest/spinnerLab" options={{ headerShown: false, gestureEnabled: true }} />
                     <Stack.Screen name="devTest/calendar" options={{ headerShown: false, gestureEnabled: true }} />
+                    <Stack.Screen name="devTest/dateSheet" options={{ headerShown: false, gestureEnabled: true }} />
                     <Stack.Screen name="devTest/mockup" options={{ headerShown: false, gestureEnabled: true }} />
                     <Stack.Screen name="devTest/goalReached" options={{ headerShown: true, title: 'Goal Reached — UI', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/goalReachedSim" options={{ headerShown: true, title: 'Goal Reached — Logic', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="devTest/logHistory" options={{ headerShown: true, title: 'Log History', headerBackTitle: 'Back' }} />
                 </Stack.Protected>
             </Stack>
+            <GoalPromptHost />
         </AppColumn>
     )
 }

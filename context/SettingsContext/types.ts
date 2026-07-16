@@ -38,7 +38,9 @@ export interface SettingsContextInterface {
     mode: boolean;
     setMode: (mode: boolean) => void;
     bwProgress: Record<string, number>;
-    handleUpdateBw: (updatedWeight: number) => Promise<'goalReached' | 'autoMaintain' | null>;
+    handleUpdateBw: (updatedWeight: number) => Promise<void>;
+    pendingGoalPrompt: 'goalReached' | null;
+    dismissGoalPrompt: () => void;
     switchToMaintenance: () => void;
     acknowledgeGoalOvershoot: () => void;
     handleGetBodyWeightProgressData: (onboardingCompletedAt?: Date) => Array<{ day: string; value: number }>;

@@ -40,22 +40,16 @@ export default function ProgressWheel({ percent = 0, size = 120, strokeWidth = 1
     const { mode } = useSettings()
     const colors = useColors()
 
-    // Define gradient stops matching app theme
-    const workoutStops = [
-        { offset: '0%', color: '#4A95F3' },
-        { offset: '50%', color: '#2F80ED' },
-        { offset: '100%', color: '#1F6FD8' },
-    ]
-
-    const nutritionStops = [
-        { offset: '0%', color: '#39D94B' },
-        { offset: '50%', color: '#22C933' },
-        { offset: '100%', color: '#1FB52E' },
-    ]
-
+    // Build 3-stop gradient from the theme's 2-stop brand gradients (start, lerped mid, end)
+    // so the rings track the palette instead of hardcoded hexes.
     const gradientStops = useMemo(() => {
-        return mode ? workoutStops : nutritionStops
-    }, [mode])
+        const [start, end] = mode ? colors.workoutGradient : colors.nutritionGradient
+        return [
+            { offset: '0%', color: start },
+            { offset: '50%', color: lerpHex(start, end, 0.5) },
+            { offset: '100%', color: end },
+        ]
+    }, [mode, colors])
 
     // Animated values
     const animatedValue = useRef(new Animated.Value(0)).current
@@ -98,15 +92,14 @@ export default function ProgressWheel({ percent = 0, size = 120, strokeWidth = 1
     // Interpolate marker color from gradient based on current percent
     const markerColor = useMemo(() => {
         const p = wheelPercent / 100
-        const stops = mode ? workoutStops : nutritionStops
         if (p <= 0.5) {
             const t = p * 2 // 0->1 as p goes 0->0.5
-            return lerpHex(stops[0].color, stops[1].color, t)
+            return lerpHex(gradientStops[0].color, gradientStops[1].color, t)
         } else {
             const t = (p - 0.5) * 2
-            return lerpHex(stops[1].color, stops[2].color, t)
+            return lerpHex(gradientStops[1].color, gradientStops[2].color, t)
         }
-    }, [wheelPercent, mode])
+    }, [wheelPercent, gradientStops])
 
     const strokeColor = color ?? 'url(#grad)'
     const track = trackColor ?? colors.ringTrack

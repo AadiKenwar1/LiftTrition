@@ -8,26 +8,7 @@ import { applySwitchToMaintenance, computeBwUpdate, getBodyWeightProgressData, t
 import { getDateKey } from '@/lib/utils/dateHelper'
 import { calculateMacros } from './functions/macroCalculation'
 import { Settings, SettingsContextInterface } from './types'
-
-const defaultSettings: Settings = {
-    onboardingComplete: false,
-    onboardingCompletedAt: undefined,
-    birthDate: new Date(),
-    gender: 'male',
-    height: 175,
-    bodyWeight: 170,
-    activityLevel: 'moderate',
-    unitSystem: 'imperial',
-    goalType: 'maintain',
-    goalWeight: 190,
-    goalPace: 0.5,
-    calorieGoal: 2000,
-    proteinGoal: 130,
-    carbsGoal: 200,
-    fatsGoal: 54,
-    macrosCustomized: false,
-    goalOvershootAcknowledged: false,
-}
+import { DEFAULT_SETTINGS } from './defaults'
 
 // Settings carry the whole app's targets, so a lost save matters more than one
 // entry — but still surface it to the user only after a few consecutive misses,
@@ -37,9 +18,8 @@ const SETTINGS_ALERT_AFTER = 3
 const SettingsContext = createContext<SettingsContextInterface | undefined>(undefined)
 
 export const SettingsProvider = ({ children }: PropsWithChildren) => {
-    const [settings, setSettingsState] = useState<Settings>(defaultSettings)
+    const [settings, setSettingsState] = useState<Settings>(DEFAULT_SETTINGS)
     const [bwProgress, setBwProgressState] = useState<Record<string, number>>({})
-    const [hasLoadedUserData, setHasLoadedUserData] = useState(false)
     const [mode, setMode] = useState<boolean>(true)
     const [persistDirty, setPersistDirty] = useState(false)
     const [persistRetryNonce, setPersistRetryNonce] = useState(0)
@@ -93,14 +73,21 @@ export const SettingsProvider = ({ children }: PropsWithChildren) => {
         }
     }, [])
 
+    // Pending goal-reached prompt, raised by handleUpdateBw and rendered once by
+    // GoalPromptHost in the root layout — so every weigh-in entry point shows it
+    // over whatever screen remains after its own sheet closes. Deliberately ephemeral
+    // in-memory state: if the process dies, the progress-screen banner is the survivor.
+    const [pendingGoalPrompt, setPendingGoalPrompt] = useState<BwPrompt | null>(null)
+    const dismissGoalPrompt = useCallback(() => setPendingGoalPrompt(null), [])
+
     // Handles a body weight update: updates state and directly persists only the two changed rows.
     // Uses functional updaters so it always builds from the latest state, even when called
     // immediately after another setSettings (e.g. onboarding4 sets height then calls this).
-    // Returns the goal prompt to show (crossing / auto-maintain), recomputed from closure
-    // settings: cheap, pure, and its inputs (goal fields + previous weight) are never part
-    // of the same-tick setSettings that precedes this call.
-    const handleUpdateBw = useCallback(async (updatedWeight: number): Promise<BwPrompt | null> => {
-        if (updatedWeight <= 0) return null
+    // The goal prompt is recomputed from closure settings: cheap, pure, and its inputs
+    // (goal fields + previous weight) are never part of the same-tick setSettings that
+    // precedes this call.
+    const handleUpdateBw = useCallback(async (updatedWeight: number): Promise<void> => {
+        if (updatedWeight <= 0) return
 
         const dateKey = getDateKey(new Date())
 
@@ -112,15 +99,14 @@ export const SettingsProvider = ({ children }: PropsWithChildren) => {
         markSettingsPersistDirty()  // settings row persisted via persistDirty effect
 
         const prompt = computeBwUpdate(updatedWeight, settings)?.prompt ?? null
+        if (prompt) setPendingGoalPrompt(prompt)
 
-        // Weight-row persist stays fire-and-forget so callers awaiting the prompt never
-        // wait on the DB write — same close-the-modal latency as before the prompt existed.
+        // Weight-row persist stays fire-and-forget so callers never wait on the DB write.
         if (userID) {
             void upsertWeightForDate(userID, dateKey, updatedWeight).catch((e) => {
                 reportPersistFailure('settings', e, { reload: reloadFromDisk, severity: 'high', onboarding: onboardingCompleteRef.current === false })
             })
         }
-        return prompt
     }, [userID, settings, markSettingsPersistDirty, reloadFromDisk])
 
     // Consented goal-prompt actions (issue 8): the only two intent changes the app may
@@ -139,36 +125,28 @@ export const SettingsProvider = ({ children }: PropsWithChildren) => {
     // writes nothing, so prior state is preserved and status becomes 'error'
     // (never blank-defaults-presented-as-a-fresh-user).
     const { status: loadStatus, retry: retryLoad } = useAsyncLoad(async (isStale) => {
-        setHasLoadedUserData(false)
         setPersistDirty(false)
+        setPendingGoalPrompt(null)
         persistRetryCountRef.current = 0
         if (!userID) {
-            setSettingsState(defaultSettings)
+            setSettingsState(DEFAULT_SETTINGS)
             setBwProgressState({})
             return
         }
         await powerSync.waitForFirstSync()
-        const { settings, bwProgress, hasData } = await loadSettingsAndBw(userID)
+        const { settings, bwProgress } = await loadSettingsAndBw(userID)
         if (isStale()) return
         setSettingsState(settings)
         setBwProgressState(bwProgress)
-        setHasLoadedUserData(hasData)
     }, [userID])
 
     const loaded = loadStatus === 'ready'
     const loadFailed = loadStatus === 'error'
 
-    // Set hasLoadedUserData to true when user completes onboarding (so new users can save)
-    useEffect(() => {
-        if (settings.onboardingComplete && !hasLoadedUserData) {
-            setHasLoadedUserData(true)
-        }
-    }, [settings.onboardingComplete, hasLoadedUserData])
-
     // Save settings row to PowerSync only after real mutations (persistDirty), not after cold-load hydration.
     // bwProgress is excluded — individual weight entries are persisted directly in handleUpdateBw.
     useEffect(() => {
-        if (!loaded || !userID || !hasLoadedUserData || !persistDirty) return
+        if (!loaded || !userID || !persistDirty) return
         if (persistSavingRef.current) return
 
         let cancelled = false
@@ -210,7 +188,7 @@ export const SettingsProvider = ({ children }: PropsWithChildren) => {
                 persistRetryTimerRef.current = null
             }
         }
-    }, [settings, loaded, userID, hasLoadedUserData, persistDirty, persistRetryNonce, reloadFromDisk])
+    }, [settings, loaded, userID, persistDirty, persistRetryNonce, reloadFromDisk])
 
     // The final onboarding commit is the one write we must not fire-and-forget:
     // if it's lost, the route guard drops the user back into onboarding on next
@@ -225,7 +203,6 @@ export const SettingsProvider = ({ children }: PropsWithChildren) => {
         try {
             await upsertSettings(userID, next)
             setSettingsState(next)
-            setHasLoadedUserData(true)
             return true
         } catch (e) {
             // Sentry only (no reload — memory is still the truth); the caller
@@ -244,6 +221,8 @@ export const SettingsProvider = ({ children }: PropsWithChildren) => {
                 setMode,
                 bwProgress,
                 handleUpdateBw,
+                pendingGoalPrompt,
+                dismissGoalPrompt,
                 switchToMaintenance,
                 acknowledgeGoalOvershoot,
                 handleGetBodyWeightProgressData,

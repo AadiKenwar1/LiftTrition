@@ -26,7 +26,7 @@ import { getOneRepMaxData } from './functions/graphFunctions'
 import { deleteLog as deleteLogFromState } from './functions/logFunctions'
 import { validateLog } from './functions/validator'
 import { getSetsData, getSetsForWeek } from './functions/volumeFunctions'
-import { deleteWorkout } from './functions/workoutFunctions'
+import { addWorkout, archiveWorkout, deleteWorkout, duplicateWorkout, renameWorkout, updateWorkoutNote, updateWorkoutOrder } from './functions/workoutFunctions'
 import { reportPersistFailure } from '@/lib/powersync/persistErrors'
 import { getWeekStart } from '@/lib/utils/dateHelper'
 import { CreateExerciseData, Exercise, ExerciseLib, ExerciseLibraryEntry, Log, Workout, WorkoutContextInterface } from './types'
@@ -68,21 +68,7 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
     // ------------------------------------------------------------------
 
     const handleAddWorkout = useCallback(async (name: string, userId: string) => {
-        const now = new Date()
-        const newWorkout: Workout = {
-            id: uuid.v4() as string,
-            userID: userId,
-            name,
-            order: 0,
-            archived: false,
-            note: '',
-            createdAt: now,
-            updatedAt: now,
-        }
-        setWorkoutsState(prev => [
-            ...prev.map(w => ({ ...w, order: w.order + 1, updatedAt: now })),
-            newWorkout,
-        ])
+        const newWorkout = addWorkout(name, userId, setWorkoutsState)
         try {
             await insertWorkoutWithOrderBump(newWorkout)
         } catch (e) {
@@ -92,46 +78,10 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
 
     const handleDuplicateWorkout = useCallback(async (id: string) => {
         if (!userID) return
-        const source = workouts.find(w => w.id === id)
-        if (!source) return
-
-        const now = new Date()
-        const newWorkoutId = uuid.v4() as string
-
-        const newWorkout: Workout = {
-            id: newWorkoutId,
-            userID,
-            name: `${source.name} (Copy)`,
-            order: 0,
-            archived: false,
-            note: source.note,
-            createdAt: now,
-            updatedAt: now,
-        }
-
-        const newExercises: Exercise[] = exercises
-            .filter(e => e.workoutID === id && !e.archived)
-            .sort((a, b) => a.order - b.order)
-            .map((ex, index) => ({
-                id: uuid.v4() as string,
-                userID,
-                workoutID: newWorkoutId,
-                name: ex.name,
-                userMax: ex.userMax,
-                order: index,
-                archived: false,
-                createdAt: now,
-                updatedAt: now,
-            }))
-
-        setWorkoutsState(prev => [
-            ...prev.map(w => ({ ...w, order: w.order + 1, updatedAt: now })),
-            newWorkout,
-        ])
-        setExercisesState(prev => [...prev, ...newExercises])
-
+        const result = duplicateWorkout(id, userID, workouts, exercises, setWorkoutsState, setExercisesState)
+        if (!result) return
         try {
-            await insertDuplicateWorkout(newWorkout, newExercises)
+            await insertDuplicateWorkout(result.newWorkout, result.newExercises)
         } catch (e) {
             reportPersistFailure('workout', e, { reload: reloadFromDisk })
         }
@@ -153,64 +103,25 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
     }, [userID])
 
     const handleArchiveWorkout = useCallback(async (id: string, archived: boolean) => {
-        const now = new Date()
-        if (archived) {
-            // Currently archived → unarchiving: place at order 0, bump all active siblings
-            setWorkoutsState(prev => prev.map(w => {
-                if (w.id === id) return { ...w, archived: false, order: 0, updatedAt: now }
-                if (!w.archived) return { ...w, order: w.order + 1, updatedAt: now }
-                return w
-            }))
-            if (userID) {
-                try {
-                    await powerSync.writeTransaction(async (tx) => {
-                        await tx.execute(
-                            `UPDATE workouts SET "order" = "order" + 1, updated_at = datetime('now') WHERE user_id = ? AND archived = 0`,
-                            [userID]
-                        )
-                        await tx.execute(
-                            `UPDATE workouts SET archived = 0, "order" = 0, updated_at = datetime('now') WHERE id = ?`,
-                            [id]
-                        )
-                    })
-                } catch (e) {
-                    reportPersistFailure('workout', e, { reload: reloadFromDisk })
+        archiveWorkout(id, archived, setWorkoutsState)
+        if (!userID) return
+        try {
+            await powerSync.writeTransaction(async (tx) => {
+                if (archived) {
+                    await tx.execute(`UPDATE workouts SET "order" = "order" + 1, updated_at = datetime('now') WHERE user_id = ? AND archived = 0`, [userID])
+                    await tx.execute(`UPDATE workouts SET archived = 0, "order" = 0, updated_at = datetime('now') WHERE id = ?`, [id])
+                } else {
+                    await tx.execute(`UPDATE workouts SET "order" = "order" + 1, updated_at = datetime('now') WHERE user_id = ? AND archived = 1 AND id != ?`, [userID, id])
+                    await tx.execute(`UPDATE workouts SET archived = 1, "order" = 0, updated_at = datetime('now') WHERE id = ?`, [id])
                 }
-            }
-        } else {
-            // Currently active → archiving: place at top of archived list, bump other archived
-            setWorkoutsState(prev => prev.map(w => {
-                if (w.id === id) return { ...w, archived: true, order: 0, updatedAt: now }
-                if (w.archived) return { ...w, order: w.order + 1, updatedAt: now }
-                return w
-            }))
-            if (userID) {
-                try {
-                    await powerSync.writeTransaction(async (tx) => {
-                        await tx.execute(
-                            `UPDATE workouts SET "order" = "order" + 1, updated_at = datetime('now') WHERE user_id = ? AND archived = 1 AND id != ?`,
-                            [userID, id]
-                        )
-                        await tx.execute(
-                            `UPDATE workouts SET archived = 1, "order" = 0, updated_at = datetime('now') WHERE id = ?`,
-                            [id]
-                        )
-                    })
-                } catch (e) {
-                    reportPersistFailure('workout', e, { reload: reloadFromDisk })
-                }
-            }
+            })
+        } catch (e) {
+            reportPersistFailure('workout', e, { reload: reloadFromDisk })
         }
     }, [userID])
 
     const handleRenameWorkout = useCallback(async (id: string, name: string) => {
-        const now = new Date()
-        let updated: Workout | undefined
-        setWorkoutsState(prev => prev.map(w => {
-            if (w.id !== id) return w
-            updated = { ...w, name, updatedAt: now }
-            return updated
-        }))
+        const updated = renameWorkout(id, name, setWorkoutsState)
         if (updated) {
             try {
                 await upsertWorkout(updated)
@@ -221,13 +132,7 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
     }, [])
 
     const handleUpdateWorkoutNote = useCallback(async (id: string, note: string) => {
-        const now = new Date()
-        let updated: Workout | undefined
-        setWorkoutsState(prev => prev.map(w => {
-            if (w.id !== id) return w
-            updated = { ...w, note, updatedAt: now }
-            return updated
-        }))
+        const updated = updateWorkoutNote(id, note, setWorkoutsState)
         if (updated) {
             try {
                 await upsertWorkout(updated)
@@ -238,12 +143,7 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
     }, [])
 
     const handleUpdateWorkoutOrder = useCallback(async (reorderedWorkouts: Workout[]) => {
-        const now = new Date()
-        const withOrder = reorderedWorkouts.map((w, i) => ({ ...w, order: i, updatedAt: now }))
-        setWorkoutsState(prev => prev.map(w => {
-            const updated = withOrder.find(u => u.id === w.id)
-            return updated ?? w
-        }))
+        const withOrder = updateWorkoutOrder(reorderedWorkouts, setWorkoutsState)
         try {
             await updateWorkoutOrders(withOrder)
         } catch (e) {
@@ -269,7 +169,7 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
             updatedAt: now,
         }
         setExercisesState(prev => [
-            ...prev.map(e => e.workoutID === workoutID ? { ...e, order: e.order + 1, updatedAt: now } : e),
+            ...prev.map(e => e.workoutID === workoutID && !e.archived ? { ...e, order: e.order + 1, updatedAt: now } : e),
             newExercise,
         ])
         try {
@@ -294,7 +194,7 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
             updatedAt: now,
         }))
         setExercisesState(prev => [
-            ...prev.map(e => e.workoutID === workoutID ? { ...e, order: e.order + names.length, updatedAt: now } : e),
+            ...prev.map(e => e.workoutID === workoutID && !e.archived ? { ...e, order: e.order + names.length, updatedAt: now } : e),
             ...newExercises,
         ])
         try {

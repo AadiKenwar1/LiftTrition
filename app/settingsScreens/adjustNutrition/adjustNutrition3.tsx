@@ -2,7 +2,7 @@ import EditMacroGoalModal, { type MacroGoalKind } from '@/components/NutritionCo
 import PressableScale from '@/components/NeutralComponents/PressableScale'
 import StepProgress from '@/components/NeutralComponents/StepProgress'
 import { useSettings } from '@/context/SettingsContext'
-import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
+import { fonts, macroColors, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { router, useLocalSearchParams } from 'expo-router'
 import { Beef, Droplet, Flame, Pencil, Wheat } from 'lucide-react-native'
 import { useEffect, useMemo, useState } from 'react'
@@ -92,9 +92,9 @@ export default function AdjustNutrition3Screen() {
     }
 
     const CARDS = [
-        { kind: 'calories' as const, Icon: Flame, color: '#FF9500', label: 'Calories', value: `${macroGoals.calorieGoal}` },
-        { kind: 'protein' as const, Icon: Beef, color: '#FF5A5A', label: 'Protein', value: `${macroGoals.proteinGoal}g` },
-        { kind: 'carbs' as const, Icon: Wheat, color: '#EAB308', label: 'Carbs', value: `${macroGoals.carbsGoal}g` },
+        { kind: 'calories' as const, Icon: Flame, color: macroColors.calories, label: 'Calories', value: `${macroGoals.calorieGoal}` },
+        { kind: 'protein' as const, Icon: Beef, color: macroColors.protein, label: 'Protein', value: `${macroGoals.proteinGoal}g` },
+        { kind: 'carbs' as const, Icon: Wheat, color: macroColors.carbs, label: 'Carbs', value: `${macroGoals.carbsGoal}g` },
         { kind: 'fats' as const, Icon: Droplet, color: colors.nutrition, label: 'Fats', value: `${macroGoals.fatsGoal}g` },
     ]
 

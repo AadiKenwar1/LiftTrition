@@ -5,6 +5,7 @@ import { parseNumericInput } from '@/lib/utils/number'
 import { useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import { Field, Segmented } from './DevControls'
+import { GOAL_REACHED_PATHS, runGoalReachedPaths, type PathResult } from './goalReachedPaths'
 import {
     applyAcceptRecalc,
     applyHandTuneMacros,
@@ -13,7 +14,6 @@ import {
     applyWeighIn,
     initSimState,
     isGoalReached,
-    OVERSHOOT_DEADBAND,
     unitLabel,
     type PromptKind,
     type SimState,
@@ -22,8 +22,8 @@ import {
 
 /**
  * Issue 8 — interactive sandbox for the weigh-in decision rules. Pick a scenario, then step
- * the scale with the ± buttons and watch: the weight track shows the goal + deadband zones,
- * crossings ask via the real prompt, the safety net acts, and the event log narrates every
+ * the scale with the ± buttons and watch: the weight track shows the goal + ask zone,
+ * weigh-ins at/past goal ask via the real prompt, and the event log narrates every
  * decision. Custom setup lives at the bottom.
  */
 type SimInit = Parameters<typeof initSimState>[0]
@@ -37,7 +37,7 @@ const SCENARIOS: { key: string; label: string; init: SimInit }[] = [
 ]
 
 const QUICK_STEPS = [-1, -0.5, 0.5, 1]
-const DECISION_LINE = /Safety net|Crossed|Keep Going|Switch to Maintenance/
+const DECISION_LINE = /Keep Going|Switch to Maintenance/
 
 const GOAL_DESCRIPTION = { lose: 'Losing', gain: 'Gaining', maintain: 'Maintaining' } as const
 
@@ -60,7 +60,6 @@ export default function GoalReachedSimTest() {
     const [weighInput, setWeighInput] = useState('')
 
     const unit = unitLabel(sim)
-    const deadband = OVERSHOOT_DEADBAND[sim.unitSystem]
     const parsedWeighIn = parseNumericInput(weighInput)
 
     const pushEvents = (events: string[]) => setLog((l) => [...events, ...l])
@@ -103,6 +102,19 @@ export default function GoalReachedSimTest() {
         setWeighInput('')
     }
 
+    const runPath = (label: string, result: PathResult) => {
+        setPrompt(null)
+        setSim(result.finalState)
+        pushEvents([`▶ ${label} — ${result.pass ? 'PASS' : 'FAIL'}`, ...result.lines])
+    }
+
+    const runAllPaths = () => {
+        setPrompt(null)
+        const results = runGoalReachedPaths()
+        const passed = results.filter((r) => r.result.pass).length
+        pushEvents([`▶ Ran ${results.length} paths — ${passed}/${results.length} PASS`, ...results.map((r) => `${r.result.pass ? '✓' : '✗'} ${r.label}`)])
+    }
+
     return (
         <ScrollView style={styles.screen} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
             <Field label="Theme">
@@ -115,7 +127,7 @@ export default function GoalReachedSimTest() {
             <Text style={styles.hint}>Pick a scenario, then step the scale below. Custom setup is at the bottom.</Text>
 
             <View style={styles.stateCard}>
-                {isGoalReached(sim) && <GoalReachedBanner onPress={() => pushEvents(['Banner tapped → adjustNutrition wizard (not part of this sandbox)'])} />}
+                {isGoalReached(sim) && <GoalReachedBanner state={sim} onPress={() => pushEvents(['Banner tapped → adjustNutrition wizard (not part of this sandbox)'])} />}
                 <View style={styles.weightRow}>
                     <Text style={styles.weightBig}>
                         {sim.bodyWeight} <Text style={styles.weightUnit}>{unit}</Text>
@@ -130,13 +142,13 @@ export default function GoalReachedSimTest() {
                 <Text style={styles.hint}>
                     {sim.goalType === 'maintain'
                         ? `Maintaining — targets pinned to your maintain weight (${sim.goalWeight} ${unit}); weigh-ins never move them.`
-                        : `Light green = goal reached (asks) · dark green = ${deadband} ${unit} past goal (auto-maintain acts)`}
+                        : 'Green tint = at/past goal — the prompt asks on each weigh-in until answered; nothing switches automatically.'}
                 </Text>
 
                 {(sim.macrosCustomized || sim.goalOvershootAcknowledged) && (
                     <View style={styles.chipRow}>
                         {sim.macrosCustomized && <Text style={styles.flagChip}>Hand-tuned macros — protected</Text>}
-                        {sim.goalOvershootAcknowledged && <Text style={styles.flagChip}>Keep Going — auto-switch off</Text>}
+                        {sim.goalOvershootAcknowledged && <Text style={styles.flagChip}>Keep Going — asking muted</Text>}
                     </View>
                 )}
             </View>
@@ -164,6 +176,19 @@ export default function GoalReachedSimTest() {
                 </TouchableOpacity>
             </Field>
 
+            <Text style={styles.sectionLabel}>Guided paths (tap to run & self-check)</Text>
+            <Field label="Main paths — each drives the real logic and asserts the outcome">
+                {GOAL_REACHED_PATHS.map((p) => (
+                    <TouchableOpacity key={p.key} style={styles.actionBtn} onPress={() => runPath(p.label, p.run())} activeOpacity={0.7}>
+                        <Text style={styles.actionBtnText}>{p.label}</Text>
+                    </TouchableOpacity>
+                ))}
+                <TouchableOpacity style={[styles.actionBtn, styles.runAllBtn]} onPress={runAllPaths} activeOpacity={0.7}>
+                    <Text style={[styles.actionBtnText, styles.runAllText]}>Run all ▶</Text>
+                </TouchableOpacity>
+            </Field>
+            <Text style={styles.hint}>Results (and full step narration) drop into the event log below. Running a path leaves the sim in that path's final state.</Text>
+
             <View style={styles.logHeader}>
                 <Text style={styles.sectionLabelInline}>Event log (newest first)</Text>
                 {log.length > 0 && (
@@ -175,10 +200,16 @@ export default function GoalReachedSimTest() {
             {log.length === 0 && <Text style={styles.hint}>No events yet — step the scale above.</Text>}
             {log.map((line, i) => {
                 const isHeader = line.startsWith('Weigh-in') || line.startsWith('Simulation reset')
+                const isPathHeader = line.startsWith('▶')
                 const isDecision = DECISION_LINE.test(line)
+                const isPass = isPathHeader && line.includes('PASS')
+                const isFail = (isPathHeader && line.includes('FAIL')) || line.startsWith('✗')
                 return (
-                    <Text key={`${log.length - i}-${line}`} style={[styles.logLine, isHeader && styles.logLineHeader, isDecision && styles.logLineDecision]}>
-                        {isHeader ? line : `   ${line}`}
+                    <Text
+                        key={`${log.length - i}-${line}`}
+                        style={[styles.logLine, (isHeader || isPathHeader) && styles.logLineHeader, isDecision && styles.logLineDecision, isPass && styles.logLinePass, isFail && styles.logLineFail]}
+                    >
+                        {isHeader || isPathHeader ? line : `   ${line}`}
                     </Text>
                 )
             })}
@@ -204,7 +235,6 @@ export default function GoalReachedSimTest() {
 
             <GoalReachedPrompt
                 visible={prompt !== null}
-                variant={prompt ?? 'goalReached'}
                 goalWeight={sim.goalWeight}
                 unitLabel={unit}
                 onSwitchToMaintenance={() => {
@@ -221,7 +251,7 @@ export default function GoalReachedSimTest() {
                 }}
                 onDismiss={() => {
                     setPrompt(null)
-                    pushEvents(prompt === 'goalReached' ? ['Prompt dismissed → nothing changes; banner stays; safety net armed'] : ['Got It — already switched to maintenance'])
+                    pushEvents(['Prompt dismissed → nothing changes; banner stays; asks again next weigh-in past goal'])
                 }}
             />
         </ScrollView>
@@ -229,48 +259,37 @@ export default function GoalReachedSimTest() {
 }
 
 /**
- * Weight number line: neutral track, goal + deadband markers, one accent dot for the current
- * weight. Zones are the same hue at two intensities (sequential emphasis): light = at/past
- * goal (prompt asks), dark = past the deadband (safety net acts). Weight increases left→right.
+ * Weight number line: neutral track, a goal marker, one accent dot for the current weight.
+ * The single tinted zone is at/past the goal — the region where the prompt asks (nothing
+ * ever switches automatically). Weight increases left→right.
  */
 function WeightTrack({ sim }: { sim: SimState }) {
     const colors = useColors()
     const isDark = useColorScheme() === 'dark'
     const styles = useMemo(() => makeTrackStyles(colors), [colors])
 
-    const deadband = OVERSHOOT_DEADBAND[sim.unitSystem]
     const isLose = sim.goalType === 'lose'
-    const edge = isLose ? sim.goalWeight - deadband : sim.goalWeight + deadband
-    const points = sim.goalType === 'maintain' ? [sim.goalWeight, sim.bodyWeight] : [sim.goalWeight, edge, sim.bodyWeight]
-    const lo = Math.min(...points) - deadband
-    const hi = Math.max(...points) + deadband
+    const pad = sim.unitSystem === 'imperial' ? 2 : 1
+    const points = [sim.goalWeight, sim.bodyWeight]
+    const lo = Math.min(...points) - pad
+    const hi = Math.max(...points) + pad
     const pct = (v: number): `${number}%` => `${((v - lo) / (hi - lo)) * 100}%`
     const width = (a: number, b: number): `${number}%` => `${(Math.abs(b - a) / (hi - lo)) * 100}%`
 
     const askFill = colors.nutrition + (isDark ? '2E' : '3D')
-    const actFill = colors.nutrition + (isDark ? '59' : '73')
 
     return (
         <View style={styles.wrap}>
             <View style={styles.trackArea}>
                 <View style={styles.track}>
                     {sim.goalType !== 'maintain' && (
-                        <>
-                            <View style={[styles.zone, { backgroundColor: askFill, left: pct(Math.min(sim.goalWeight, edge)), width: width(sim.goalWeight, edge) }]} />
-                            <View style={[styles.zone, { backgroundColor: actFill, left: isLose ? 0 : pct(edge), width: isLose ? pct(edge) : width(edge, hi) }]} />
-                        </>
+                        <View style={[styles.zone, { backgroundColor: askFill, left: isLose ? 0 : pct(sim.goalWeight), width: isLose ? pct(sim.goalWeight) : width(sim.goalWeight, hi) }]} />
                     )}
                 </View>
-                {sim.goalType !== 'maintain' && <View style={[styles.marker, { left: pct(edge), backgroundColor: colors.labelMuted }]} />}
                 <View style={[styles.marker, { left: pct(sim.goalWeight), backgroundColor: colors.text }]} />
                 <View style={[styles.dot, { left: pct(sim.bodyWeight) }]} />
             </View>
             <View style={styles.labelRow}>
-                {sim.goalType !== 'maintain' && (
-                    <Text style={[styles.tickLabel, { left: pct(edge) }]} numberOfLines={1}>
-                        {edge}
-                    </Text>
-                )}
                 <Text style={[styles.tickLabel, styles.tickLabelStrong, { left: pct(sim.goalWeight) }]} numberOfLines={1}>
                     goal {sim.goalWeight}
                 </Text>
@@ -473,6 +492,14 @@ function makeStyles(colors: Colors) {
             fontSize: 13,
             color: colors.text,
         },
+        runAllBtn: {
+            backgroundColor: colors.workout,
+            borderColor: colors.workout,
+        },
+        runAllText: {
+            color: '#fff',
+            fontFamily: fonts.bold,
+        },
         logHeader: {
             flexDirection: 'row',
             alignItems: 'center',
@@ -501,6 +528,12 @@ function makeStyles(colors: Colors) {
         logLineDecision: {
             fontFamily: fonts.bold,
             color: colors.nutritionInk,
+        },
+        logLinePass: {
+            color: colors.nutritionInk,
+        },
+        logLineFail: {
+            color: colors.destructive,
         },
     })
 }

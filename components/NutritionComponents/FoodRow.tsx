@@ -28,7 +28,7 @@ export default function FoodRow({ name, brandName, servingSize, macros, onAdd, a
                 {macros && (
                     <View style={styles.macroRow}>
                         <View style={styles.macroPill}>
-                            <Text style={styles.macroPillText}>{Math.round(macros.calories)} cal</Text>
+                            <Text style={styles.macroPillText}>{Math.round(macros.calories)} kcal</Text>
                         </View>
                         <View style={styles.macroPill}>
                             <Text style={styles.macroPillText}>{Math.round(macros.fats * 10) / 10}g F</Text>

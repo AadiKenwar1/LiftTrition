@@ -15,7 +15,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated'
  */
 const RANGES = {
     metric: { min: 0.1, max: 1.5, def: 0.5, unit: 'kg' },
-    imperial: { min: 0.1, max: 3, def: 1, unit: 'lb' },
+    imperial: { min: 0.1, max: 3, def: 1, unit: 'lbs' },
 } as const
 
 const paceLabel = (v: number, max: number) => {

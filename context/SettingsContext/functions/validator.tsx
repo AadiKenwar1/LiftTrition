@@ -1,3 +1,4 @@
+import { weightUnitLabel } from '@/lib/utils/unitConversions'
 import { Alert } from 'react-native'
 
 const MIN_HEIGHT_IMPERIAL = 24
@@ -17,7 +18,7 @@ export function validateHeightWeight(height: number, weight: number, unitSystem:
         return false
     }
     if (weight < minW) {
-        Alert.alert('Invalid Input', `Weight must be at least ${minW} ${unitSystem === 'imperial' ? 'lbs' : 'kg'}`, [{ text: 'OK' }])
+        Alert.alert('Invalid Input', `Weight must be at least ${minW} ${weightUnitLabel(unitSystem)}`, [{ text: 'OK' }])
         return false
     }
     return true
@@ -31,7 +32,7 @@ export function validateTargetWeight(targetWeight: number, currentWeight: number
     }
     const minWeight = unitSystem === 'imperial' ? MIN_WEIGHT_IMPERIAL : MIN_WEIGHT_METRIC
     if (targetWeight < minWeight) {
-        Alert.alert('Invalid Input', `Target weight must be at least ${minWeight} ${unitSystem === 'imperial' ? 'lbs' : 'kg'}`, [{ text: 'OK' }])
+        Alert.alert('Invalid Input', `Target weight must be at least ${minWeight} ${weightUnitLabel(unitSystem)}`, [{ text: 'OK' }])
         return false
     }
     if (goal === 'lose' && targetWeight >= currentWeight) {

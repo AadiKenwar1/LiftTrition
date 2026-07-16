@@ -1,47 +1,44 @@
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { LinearGradient } from 'expo-linear-gradient'
-import { ShieldCheck, Trophy } from 'lucide-react-native'
+import { Trophy } from 'lucide-react-native'
 import { useLayoutEffect, useMemo, useRef } from 'react'
 import { Animated, Easing, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 /**
- * Goal-crossing prompt (Issue 8). Same scrim/card/animation pattern as EditHeightModal.
- * Two variants:
- * - 'goalReached': fired the moment a weigh-in crosses goalWeight — the user chooses what's
- *   next. Scrim tap is a plain dismiss (banner stays, safety net stays armed); only the
- *   explicit "Keep Going" disarms the auto-maintain net.
- * - 'autoMaintain': announces the safety-net switch to maintenance after the user passed
- *   their goal by the deadband without answering.
+ * Goal-reached prompt (Issue 8). Same scrim/card/animation pattern as EditHeightModal.
+ * Level-triggered by weigh-ins at/past the goal (hosted globally by GoalPromptHost): it
+ * asks on every such weigh-in until answered. Scrim tap is a plain dismiss — the banner
+ * stays and it asks again on the next weigh-in past goal; only "Keep Going" stops the
+ * asking. Automation never switches goals; "Switch to Maintenance" is the consented tap.
  */
 const OPEN_MS = 260
 const CLOSE_MS = 200
 const openEasing = Easing.out(Easing.cubic)
 const closeEasing = Easing.in(Easing.cubic)
 
-export type GoalReachedPromptVariant = 'goalReached' | 'autoMaintain'
-
 type Props = {
     visible: boolean
-    variant: GoalReachedPromptVariant
     goalWeight: number
     unitLabel: 'lbs' | 'kg'
+    onSwitchToMaintenance: () => void
     onSetNewGoal: () => void
+    onKeepGoing: () => void
     onDismiss: () => void
-    onSwitchToMaintenance?: () => void
-    onKeepGoing?: () => void
 }
 
-export default function GoalReachedPrompt({ visible, variant, goalWeight, unitLabel, onSetNewGoal, onDismiss, onSwitchToMaintenance, onKeepGoing }: Props) {
+export default function GoalReachedPrompt({ visible, goalWeight, unitLabel, onSwitchToMaintenance, onSetNewGoal, onKeepGoing, onDismiss }: Props) {
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
     const backdropOpacity = useRef(new Animated.Value(0)).current
     const cardAnim = useRef(new Animated.Value(0)).current
     const dismissingRef = useRef(false)
 
-    const translateY = cardAnim.interpolate({ inputRange: [0, 1], outputRange: [18, 0] })
-    const scale = cardAnim.interpolate({ inputRange: [0, 1], outputRange: [0.94, 1] })
+    const translateY = cardAnim.interpolate({ inputRange: [0, 1], outputRange: [24, 0] })
+    const scale = cardAnim.interpolate({ inputRange: [0, 1], outputRange: [0.9, 1] })
 
-    // useLayoutEffect: start enter animation before paint (useEffect waits until after paint → felt lag)
+    // Reset to hidden before paint; the enter animation itself starts in Modal onShow —
+    // after the native modal has actually presented — so a fresh mount with visible=true
+    // (the GoalPromptHost path) can't swallow the animation in a first-present race.
     useLayoutEffect(() => {
         if (!visible) return
         dismissingRef.current = false
@@ -49,11 +46,15 @@ export default function GoalReachedPrompt({ visible, variant, goalWeight, unitLa
         cardAnim.stopAnimation()
         backdropOpacity.setValue(0)
         cardAnim.setValue(0)
+    }, [visible])
+
+    // Celebratory entrance: scrim fades, the card springs up with a slight overshoot.
+    const startEnterAnimation = () => {
         Animated.parallel([
             Animated.timing(backdropOpacity, { toValue: 1, duration: OPEN_MS, easing: openEasing, useNativeDriver: true }),
-            Animated.timing(cardAnim, { toValue: 1, duration: OPEN_MS, easing: openEasing, useNativeDriver: true }),
+            Animated.spring(cardAnim, { toValue: 1, friction: 7, tension: 65, useNativeDriver: true }),
         ]).start()
-    }, [visible])
+    }
 
     const animateOutThen = (action?: () => void) => {
         if (dismissingRef.current) return
@@ -69,15 +70,8 @@ export default function GoalReachedPrompt({ visible, variant, goalWeight, unitLa
         })
     }
 
-    const isCrossing = variant === 'goalReached'
-    const Icon = isCrossing ? Trophy : ShieldCheck
-    const title = isCrossing ? 'Goal Reached!' : 'Goal Passed — Now Maintaining'
-    const message = isCrossing
-        ? `You're at your goal weight of ${goalWeight} ${unitLabel}. What's next?`
-        : `You've passed your goal weight of ${goalWeight} ${unitLabel}, so we've switched you to maintenance to hold steady here. Set a new goal anytime.`
-
     return (
-        <Modal visible={visible} transparent animationType="none" onRequestClose={() => animateOutThen()}>
+        <Modal visible={visible} transparent animationType="none" onShow={startEnterAnimation} onRequestClose={() => animateOutThen()}>
             <View style={styles.layerStack}>
                 <Animated.View style={[styles.scrim, { opacity: backdropOpacity }]}>
                     <Pressable style={StyleSheet.absoluteFill} onPress={() => animateOutThen()} accessibilityRole="button" accessibilityLabel="Dismiss" />
@@ -86,36 +80,24 @@ export default function GoalReachedPrompt({ visible, variant, goalWeight, unitLa
                     <Animated.View style={{ opacity: cardAnim, transform: [{ translateY }, { scale }] }}>
                         <Pressable style={styles.card} onPress={(e) => e.stopPropagation()}>
                             <View style={styles.iconCircle}>
-                                <Icon size={30} color={colors.nutrition} strokeWidth={2.4} />
+                                <Trophy size={30} color={colors.nutrition} strokeWidth={2.4} />
                             </View>
-                            <Text style={styles.cardTitle}>{title}</Text>
-                            <Text style={styles.message}>{message}</Text>
+                            <Text style={styles.cardTitle}>Goal Reached!</Text>
+                            <Text style={styles.message}>{`You're at your goal weight of ${goalWeight} ${unitLabel}. What's next?`}</Text>
 
-                            {isCrossing ?
-                                <View style={styles.actions}>
-                                    <TouchableOpacity onPress={() => animateOutThen(onSwitchToMaintenance)} activeOpacity={0.8} style={styles.primaryTouchable}>
-                                        <LinearGradient colors={colors.nutritionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.primaryBtn}>
-                                            <Text style={styles.primaryText}>Switch to Maintenance</Text>
-                                        </LinearGradient>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity onPress={() => animateOutThen(onSetNewGoal)} activeOpacity={0.8} style={styles.secondaryBtn}>
-                                        <Text style={styles.secondaryText}>Set a New Goal</Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity onPress={() => animateOutThen(onKeepGoing)} activeOpacity={0.7} style={styles.ghostBtn}>
-                                        <Text style={styles.ghostText}>Keep Going</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            :   <View style={styles.actions}>
-                                    <TouchableOpacity onPress={() => animateOutThen()} activeOpacity={0.8} style={styles.primaryTouchable}>
-                                        <LinearGradient colors={colors.nutritionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.primaryBtn}>
-                                            <Text style={styles.primaryText}>Got It</Text>
-                                        </LinearGradient>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity onPress={() => animateOutThen(onSetNewGoal)} activeOpacity={0.8} style={styles.secondaryBtn}>
-                                        <Text style={styles.secondaryText}>Set a New Goal</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            }
+                            <View style={styles.actions}>
+                                <TouchableOpacity onPress={() => animateOutThen(onSwitchToMaintenance)} activeOpacity={0.8} style={styles.primaryTouchable}>
+                                    <LinearGradient colors={colors.nutritionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.primaryBtn}>
+                                        <Text style={styles.primaryText}>Switch to Maintenance</Text>
+                                    </LinearGradient>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => animateOutThen(onSetNewGoal)} activeOpacity={0.8} style={styles.secondaryBtn}>
+                                    <Text style={styles.secondaryText}>Set a New Goal</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => animateOutThen(onKeepGoing)} activeOpacity={0.7} style={styles.ghostBtn}>
+                                    <Text style={styles.ghostText}>Keep Going</Text>
+                                </TouchableOpacity>
+                            </View>
                         </Pressable>
                     </Animated.View>
                 </View>

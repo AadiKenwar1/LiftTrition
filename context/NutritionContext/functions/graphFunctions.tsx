@@ -1,4 +1,4 @@
-import { addDays, calculateStartDate, formatDateMinimal, getDateKey, WEEKDAY_INITIALS, type WeekDayPoint } from "@/lib/utils/dateHelper";
+import { addDays, calculateStartDate, daysBetween, formatDateMinimal, getDateKey, WEEKDAY_INITIALS, type WeekDayPoint } from "@/lib/utils/dateHelper";
 import { NutritionEntry, NutritionStreakState } from "../types";
 
 
@@ -53,7 +53,7 @@ export function getMacroDataForGraph(macroType: 'calories' | 'protein' | 'carbs'
     startDate.setHours(0, 0, 0, 0);
     
     // Calculate days to show
-    const daysToShow = Math.floor((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    const daysToShow = daysBetween(startDate, today) + 1;
 
     // Macro value extractor map
     const macroExtractor = {

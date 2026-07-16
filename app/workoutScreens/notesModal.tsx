@@ -1,8 +1,9 @@
 import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { useWorkout } from '@/context/WorkoutContext'
+import { useDebouncedSave } from '@/lib/hooks/useDebouncedSave'
 import { useLocalSearchParams } from 'expo-router'
 import { FileText } from 'lucide-react-native'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -23,12 +24,7 @@ export default function NoteModal() {
     const insets = useSafeAreaInsets()
     const scrollBottomPad = Math.max(insets.bottom, 20) + 140
 
-    // Auto-save when note changes (after initial load)
-    useEffect(() => {
-        if (workout && note !== workout.note) {
-            handleUpdateWorkoutNote(workoutId, note)
-        }
-    }, [note])
+    useDebouncedSave(note, workout?.note ?? '', (v) => handleUpdateWorkoutNote(workoutId, v))
 
     return (
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container} keyboardVerticalOffset={Platform.OS === 'ios' ? 8 : 0}>

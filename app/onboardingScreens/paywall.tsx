@@ -4,7 +4,8 @@ import { hasActiveEntitlement, useBilling } from '@/context/BillingContext'
 import { useSettings } from '@/context/SettingsContext'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { useSubmitOnce } from '@/lib/hooks/useSubmitOnce'
-import { lbsToKg } from '@/lib/utils/unitConversions'
+import { weeksToGoal } from '@/lib/utils/goalMath'
+import { lbsToKg, weightUnitLabel } from '@/lib/utils/unitConversions'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
 import { BarChart3, Database, Sparkles, Zap } from 'lucide-react-native'
@@ -41,9 +42,9 @@ export default function OnboardingPaywall() {
     const [termsVisible, setTermsVisible] = useState(false)
 
     const metric = settings.unitSystem === 'metric'
-    const unit = metric ? 'kg' : 'lb'
+    const unit = weightUnitLabel(settings.unitSystem)
     const paceDisplay = metric ? lbsToKg(settings.goalPace) : settings.goalPace
-    const weeks = settings.goalType === 'maintain' ? 12 : Math.max(1, Math.round(Math.abs(settings.bodyWeight - settings.goalWeight) / (paceDisplay > 0 ? paceDisplay : 1)))
+    const weeks = weeksToGoal(settings.goalType, settings.bodyWeight, settings.goalWeight, paceDisplay)
     const targetDate = useMemo(() => {
         const d = new Date()
         d.setDate(d.getDate() + weeks * 7)

@@ -1,10 +1,11 @@
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import type { Log } from '@/context/WorkoutContext/types'
+import { confirmDelete } from '@/lib/utils/confirmDelete'
 import { formatDateOrToday, getDateKey } from '@/lib/utils/dateHelper'
 import { Trash } from 'lucide-react-native'
 import type { RefObject } from 'react'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { Animated, FlatList, Keyboard, LayoutAnimation, Platform, Pressable, StyleSheet, Text, TouchableOpacity, UIManager, View } from 'react-native'
+import { useEffect, useMemo } from 'react'
+import { FlatList, Keyboard, LayoutAnimation, Platform, Pressable, StyleSheet, Text, TouchableOpacity, UIManager, View } from 'react-native'
 
 type LogHistoryListProps = {
     logs: Log[]
@@ -17,9 +18,6 @@ type LogHistoryListProps = {
 export default function LogHistoryList({ logs, weightUnit, lastAddedLogId, onDeleteConfirmed, flatListRef }: LogHistoryListProps) {
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
-    const [deletingLogId, setDeletingLogId] = useState<string | null>(null)
-    const deleteOpacity = useRef(new Animated.Value(1)).current
-    const deleteTranslateX = useRef(new Animated.Value(0)).current
 
     useEffect(() => {
         if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -27,29 +25,18 @@ export default function LogHistoryList({ logs, weightUnit, lastAddedLogId, onDel
         }
     }, [])
 
-    // Run the slide-out animation for the log being deleted, then remove it from the list.
-    useEffect(() => {
-        if (!deletingLogId) return
-
-        deleteOpacity.setValue(1)
-        deleteTranslateX.setValue(0)
-
-        const deletingIdSnapshot = deletingLogId
-
-        Animated.parallel([Animated.timing(deleteOpacity, { toValue: 0, duration: 250, useNativeDriver: true }), Animated.timing(deleteTranslateX, { toValue: 100, duration: 250, useNativeDriver: true })]).start(({ finished }) => {
-            if (!finished) return
-            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
-            onDeleteConfirmed(deletingIdSnapshot)
-            setDeletingLogId(null)
-        })
-    }, [deletingLogId, deleteOpacity, deleteTranslateX, onDeleteConfirmed])
-
     const handleDelete = (id: string) => {
-        setDeletingLogId(id)
+        confirmDelete({
+            title: 'Delete set?',
+            message: 'This set will be permanently removed. This cannot be undone.',
+            onConfirm: () => {
+                LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
+                onDeleteConfirmed(id)
+            },
+        })
     }
 
     const renderLog = ({ item, index }: { item: Log; index: number }) => {
-        const isDeleting = item.id === deletingLogId
         const showDateHeader = index === 0 || getDateKey(item.date) !== getDateKey(logs[index - 1].date)
         const wrapperStyle = [styles.logItemWrapper, item.id === lastAddedLogId && styles.logItemWrapperHighlight]
 
@@ -74,17 +61,13 @@ export default function LogHistoryList({ logs, weightUnit, lastAddedLogId, onDel
                             {/* <Text style={styles.logDate}>{formatDateOrToday(item.date, true)}</Text> */}
                         </View>
 
-                        <TouchableOpacity onPress={() => handleDelete(item.id)} style={styles.deleteButton} activeOpacity={0.6} disabled={isDeleting}>
+                        <TouchableOpacity onPress={() => handleDelete(item.id)} style={styles.deleteButton} activeOpacity={0.6}>
                             <Trash size={20} color={colors.destructive} strokeWidth={2.5} />
                         </TouchableOpacity>
                     </View>
                 </View>
             </View>
         )
-
-        if (isDeleting) {
-            return <Animated.View style={{ opacity: deleteOpacity, transform: [{ translateX: deleteTranslateX }] }}>{content}</Animated.View>
-        }
 
         return content
     }

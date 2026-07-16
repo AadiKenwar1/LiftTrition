@@ -2,7 +2,6 @@ import NutritionScreen from '@/app/nutritionScreens/nutritionScreen'
 import WorkoutScreen from '@/app/workoutScreens/workoutScreen'
 import Fab from '@/components/NeutralComponents/Fab'
 import ModeSwitcher from '@/components/NeutralComponents/ModeSwitcher'
-import { useBilling } from '@/context/BillingContext'
 import { useSettings } from '@/context/SettingsContext'
 import { useColors, type Colors } from '@/context/ThemeContext'
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
@@ -13,7 +12,6 @@ import { StyleSheet, TouchableOpacity } from 'react-native'
 export default function LogScreen() {
     const { mode } = useSettings()
     const router = useRouter()
-    const { hasPremium } = useBilling()
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
 
@@ -64,7 +62,7 @@ export default function LogScreen() {
                         </TouchableOpacity>,
 
                         //Food Database Button
-                        <TouchableOpacity activeOpacity={0.75} key="food-database" style={[hasPremium ? styles.nutritionFabButtons : styles.nutritionUnavailableFabButtons]} onPress={() => (hasPremium ? router.push('/nutritionScreens/foodDBModal') : router.push('/settingsScreens/subscription'))}>
+                        <TouchableOpacity activeOpacity={0.75} key="food-database" style={[styles.nutritionFabButtons]} onPress={() => router.push('/nutritionScreens/foodDBModal')}>
                             <MaterialCommunityIcons name="database-search" size={35} color="#FFFFFF" shadowColor="white" shadowRadius={0} shadowOpacity={0} />
                         </TouchableOpacity>,
 
@@ -81,10 +79,6 @@ export default function LogScreen() {
 
 function makeStyles(colors: Colors) {
     return StyleSheet.create({
-        container: {
-            flex: 1,
-            backgroundColor: colors.background,
-        },
         workoutFabButtons: {
             height: 60,
             width: 60,
@@ -101,42 +95,10 @@ function makeStyles(colors: Colors) {
             borderWidth: 0.0,
             zIndex: 10,
         },
-        workoutUnavailableFabButtons: {
-            height: 60,
-            width: 60,
-            backgroundColor: colors.textMuted,
-            borderRadius: 40,
-            borderColor: 'black',
-            alignItems: 'center',
-            justifyContent: 'center',
-            elevation: 3,
-            shadowColor: 'black',
-            shadowOffset: { width: 0, height: 1 },
-            shadowOpacity: 0.2,
-            shadowRadius: 2,
-            borderWidth: 0.0,
-            zIndex: 10,
-        },
         nutritionFabButtons: {
             height: 60,
             width: 60,
             backgroundColor: colors.nutritionGradient[0],
-            borderRadius: 40,
-            borderColor: 'black',
-            alignItems: 'center',
-            justifyContent: 'center',
-            elevation: 3,
-            shadowColor: 'black',
-            shadowOffset: { width: 0, height: 1 },
-            shadowOpacity: 0.2,
-            shadowRadius: 2,
-            borderWidth: 0.0,
-            zIndex: 10,
-        },
-        nutritionUnavailableFabButtons: {
-            height: 60,
-            width: 60,
-            backgroundColor: colors.textMuted,
             borderRadius: 40,
             borderColor: 'black',
             alignItems: 'center',

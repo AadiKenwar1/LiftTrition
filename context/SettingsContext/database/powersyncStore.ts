@@ -4,8 +4,7 @@ import { throwIfLoadFailureArmed } from '@/lib/devtools/forceLoadFailure'
 import { throwIfSaveFailureArmed } from '@/lib/devtools/forceSaveFailure'
 import { getDateKey, parseDateKey } from '@/lib/utils/dateHelper'
 import { Settings } from '../types'
-
-const defaultSettings: Settings = { onboardingComplete: false, onboardingCompletedAt: undefined, birthDate: new Date(), gender: 'male', height: 175, bodyWeight: 170, activityLevel: 'moderate', unitSystem: 'imperial', goalType: 'maintain', goalWeight: 190, goalPace: 0, calorieGoal: 2000, proteinGoal: 130, carbsGoal: 200, fatsGoal: 54, macrosCustomized: false, goalOvershootAcknowledged: false }
+import { DEFAULT_SETTINGS } from '../defaults'
 
 // Map DB row -> Settings
 export function rowToSettings(row: SettingsRecord): Settings {
@@ -14,17 +13,17 @@ export function rowToSettings(row: SettingsRecord): Settings {
         onboardingCompletedAt: row.onboarding_completed_at ? parseDateKey(row.onboarding_completed_at) : undefined,
         birthDate: row.birth_date ? parseDateKey(row.birth_date) : new Date(),
         gender: (row.gender || 'male') as Settings['gender'],
-        height: row.height ?? 175,
-        bodyWeight: row.body_weight ?? 170,
+        height: row.height ?? DEFAULT_SETTINGS.height,
+        bodyWeight: row.body_weight ?? DEFAULT_SETTINGS.bodyWeight,
         activityLevel: (row.activity_level === 'veryActive' ? 'gymrat' : row.activity_level || 'moderate') as Settings['activityLevel'],
         unitSystem: (row.unit_system || 'imperial') as Settings['unitSystem'],
         goalType: (row.goal_type || 'maintain') as Settings['goalType'],
-        goalWeight: row.goal_weight ?? 190,
-        goalPace: row.goal_pace ?? 0.5,
-        calorieGoal: row.calorie_goal ?? 2000,
-        proteinGoal: row.protein_goal ?? 130,
-        carbsGoal: row.carbs_goal ?? 200,
-        fatsGoal: row.fats_goal ?? 54,
+        goalWeight: row.goal_weight ?? DEFAULT_SETTINGS.goalWeight,
+        goalPace: row.goal_pace ?? DEFAULT_SETTINGS.goalPace,
+        calorieGoal: row.calorie_goal ?? DEFAULT_SETTINGS.calorieGoal,
+        proteinGoal: row.protein_goal ?? DEFAULT_SETTINGS.proteinGoal,
+        carbsGoal: row.carbs_goal ?? DEFAULT_SETTINGS.carbsGoal,
+        fatsGoal: row.fats_goal ?? DEFAULT_SETTINGS.fatsGoal,
         macrosCustomized: !!row.macros_customized,
         goalOvershootAcknowledged: !!row.goal_overshoot_acknowledged,
     }
@@ -43,7 +42,7 @@ export async function loadSettingsAndBw(userId: string): Promise<{ settings: Set
     const settingsRows = (await powerSync.getAll('SELECT * FROM settings WHERE user_id = ?', [userId])) as SettingsRecord[]
 
     const hasData = settingsRows.length > 0
-    const settings = hasData ? rowToSettings(settingsRows[0]) : defaultSettings
+    const settings = hasData ? rowToSettings(settingsRows[0]) : DEFAULT_SETTINGS
 
     // Load weight progress
     const weightRows = (await powerSync.getAll('SELECT * FROM weight_progress WHERE user_id = ? ORDER BY date ASC', [userId]    )) as WeightProgressRecord[]
