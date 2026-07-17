@@ -6,11 +6,12 @@ import { useMemo, useState } from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 /**
- * Centralized date-picker content shared by the workout (LogDateModal) and
- * nutrition (dateModal) date pickers. Rendered inside a BottomSheet, which owns
- * the surface, drag handle, and slide/swipe animation. Tapping a day selects it;
- * the Confirm button applies. Future dates are disabled inline via `selectable`,
- * so no post-hoc "invalid date" alert is needed.
+ * Centralized date-picker content used by the workout (logsModal) and nutrition
+ * (nutritionScreen) date pickers via `DatePickerPopup`. Rendered inside a
+ * presentation wrapper (CenterPopup in production; BottomSheet in the Dev Hub
+ * preview) that owns the surface and animation. Tapping a day selects it; the
+ * Confirm button applies. Future dates are disabled inline via `selectable`, so
+ * no post-hoc "invalid date" alert is needed.
  */
 
 export interface DateSheetProps {
@@ -35,7 +36,7 @@ export default function DateSheet({ selectedDate, onConfirm, subtitle, accent, a
             <Text style={styles.title}>Change Date</Text>
             <Text style={styles.subtitle}>{subtitle}</Text>
             <Calendar selectedDate={temp} onSelectDate={setTemp} selectable={selectable} accent={accent} eventDays={eventDays} />
-            <TouchableOpacity onPress={() => onConfirm(temp)} activeOpacity={0.85} style={[styles.confirmTouchable, { shadowColor: accent }]}>
+            <TouchableOpacity onPress={() => onConfirm(temp)} activeOpacity={0.85} accessibilityRole="button" accessibilityLabel="Confirm" style={[styles.confirmTouchable, { shadowColor: accent }]}>
                 <LinearGradient colors={accentGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.confirmButton}>
                     <Text style={styles.confirmText}>Confirm</Text>
                 </LinearGradient>

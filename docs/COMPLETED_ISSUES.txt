@@ -1020,3 +1020,25 @@ Ingredient brand names silently vanish + unify the entry editors
       field; nothing breaks).
    c) Pre-existing, unrelated, still open: nutrition_calories_real.sql
       (see issue 3) remains pending at release.
+
+DATE PICKER UNIFICATION (2026-07-17)
+------------------------------------
+The two near-duplicate date pickers — the nutrition `dateModal` pushed route
+and the workout `LogDateModal` inline Modal, both wrapping the wheel
+`DatePicker` and both rejecting future dates with a post-hoc Alert — were
+replaced by a single centralized `DatePickerPopup`
+(components/NeutralComponents). It composes `CenterPopup` (fade + scale-in
+centered dialog, tap-backdrop to dismiss) over the shared `DateSheet`
+(title/subtitle + calendar + gradient Confirm). The calendar (`Calendar` +
+`CalendarMonthGrid`, proven in the Dev Hub) uses title-zoom navigation and a
+fixed-height 6-row grid so paging months never shifts the header, and
+disables out-of-range days inline via `selectable="past"` — so the "invalid
+date" alerts are gone. Both screens render it inline via a `visible` boolean:
+nutritionScreen (the dateModal route + its _layout Stack registration were
+deleted) and logsModal (LogDateModal deleted). The wheel `DatePicker` is kept
+— onboarding's birthday picker still uses it (wheels beat a calendar for
+far-past dates). New TDD test: tap a day → Confirm → the correct local Date,
+exercising the getDateKey/parseDateKey boundary through the real component
+tree. Closes the BACKLOG "DATE PICKING" items. Superpowers pipeline: spec →
+plan (docs/superpowers/plans/2026-07-17-centralized-date-picker.md) → TDD →
+code-simplifier → verify.

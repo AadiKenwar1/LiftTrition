@@ -1,4 +1,4 @@
-import LogDateModal from '@/components/WorkoutComponents/LogDateModal'
+import DatePickerPopup from '@/components/NeutralComponents/DatePickerPopup'
 import LogHistoryList from '@/components/WorkoutComponents/LogHistoryList'
 import { useAuth } from '@/context/AuthContext'
 import { useSettings } from '@/context/SettingsContext'
@@ -229,11 +229,11 @@ export default function LogsModal() {
                 </View>
             </KeyboardAvoidingView>
 
-            <LogDateModal
+            <DatePickerPopup
                 visible={showDateModal}
-                selectedDate={selectedLogDate}
                 onClose={() => setShowDateModal(false)}
-                onInvalidDate={showInvalidDateAlert}
+                mode="workout"
+                selectedDate={selectedLogDate}
                 onConfirm={(date) => {
                     setSelectedLogDate(date)
                     setShowDateModal(false)

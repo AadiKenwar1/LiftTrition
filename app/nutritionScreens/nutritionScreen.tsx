@@ -1,3 +1,4 @@
+import DatePickerPopup from '@/components/NeutralComponents/DatePickerPopup'
 import DailyIntakeCard from '@/components/NutritionComponents/DailyIntakeCard'
 import Entry from '@/components/NutritionComponents/Entry'
 import { useNutrition } from '@/context/NutritionContext'
@@ -6,14 +7,15 @@ import { entrySubtitle } from '@/context/NutritionContext/functions/entryBuilder
 import { NutritionEntry } from '@/context/NutritionContext/types'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { useToday } from '@/lib/hooks/useToday'
-import { formatDate, formatDateShort, getDateKey } from '@/lib/utils/dateHelper'
+import { formatDate, getDateKey } from '@/lib/utils/dateHelper'
 import { useRouter } from 'expo-router'
-import { Calendar, Utensils } from 'lucide-react-native'
-import { useMemo } from 'react'
+import { Calendar, RotateCcw, Utensils } from 'lucide-react-native'
+import { useMemo, useState } from 'react'
 import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 export default function NutritionScreen() {
-    const { nutritionData, selectedDate, handleSaveNutrition, handleDeleteNutrition } = useNutrition()
+    const { nutritionData, selectedDate, setSelectedDate, handleSaveNutrition, handleDeleteNutrition } = useNutrition()
+    const [datePickerVisible, setDatePickerVisible] = useState(false)
     const todayKey = useToday()
     const router = useRouter()
     const colors = useColors()
@@ -71,10 +73,17 @@ export default function NutritionScreen() {
             {/* Section Header */}
             <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>Logged Meals</Text>
-                <TouchableOpacity style={styles.dateChip} activeOpacity={0.5} onPress={() => router.push('/nutritionScreens/dateModal')}>
-                    <Calendar size={18} color={colors.nutrition} strokeWidth={2.5} />
-                    <Text style={styles.dateChipText}>{isToday ? 'Today' : formatDateShort(selectedDate)}</Text>
-                </TouchableOpacity>
+                <View style={styles.dateControls}>
+                    <TouchableOpacity style={styles.dateChip} activeOpacity={0.5} onPress={() => setDatePickerVisible(true)}>
+                        <Calendar size={18} color={colors.nutrition} strokeWidth={2.5} />
+                        <Text style={styles.dateChipText}>{isToday ? 'Today' : formatDate(selectedDate, true)}</Text>
+                    </TouchableOpacity>
+                    {!isToday && (
+                        <TouchableOpacity onPress={() => setSelectedDate(new Date())} style={styles.revertButton} activeOpacity={0.5} accessibilityRole="button" accessibilityLabel="Revert to today">
+                            <RotateCcw size={18} color={colors.nutrition} strokeWidth={2.5} />
+                        </TouchableOpacity>
+                    )}
+                </View>
             </View>
         </>
     )
@@ -90,16 +99,28 @@ export default function NutritionScreen() {
     )
 
     return (
-        <FlatList
-            data={todayEntries}
-            renderItem={({ item }) => <Entry name={item.name} calories={item.calories} protein={item.protein} carbs={item.carbs} fats={item.fats} onEditPress={() => handleEdit(item)} showBreakdown={item.isPhoto} onBreakdownPress={() => router.push(editEntryHref(item))} subtitle={entrySubtitle(item.items)} />}
-            keyExtractor={(item) => item.id}
-            ListHeaderComponent={listHeader}
-            ListEmptyComponent={listEmpty}
-            contentContainerStyle={styles.listContent}
-            showsVerticalScrollIndicator={false}
-            style={styles.container}
-        />
+        <>
+            <FlatList
+                data={todayEntries}
+                renderItem={({ item }) => <Entry name={item.name} calories={item.calories} protein={item.protein} carbs={item.carbs} fats={item.fats} onEditPress={() => handleEdit(item)} showBreakdown={item.isPhoto} onBreakdownPress={() => router.push(editEntryHref(item))} subtitle={entrySubtitle(item.items)} />}
+                keyExtractor={(item) => item.id}
+                ListHeaderComponent={listHeader}
+                ListEmptyComponent={listEmpty}
+                contentContainerStyle={styles.listContent}
+                showsVerticalScrollIndicator={false}
+                style={styles.container}
+            />
+            <DatePickerPopup
+                visible={datePickerVisible}
+                onClose={() => setDatePickerVisible(false)}
+                mode="nutrition"
+                selectedDate={selectedDate}
+                onConfirm={(date) => {
+                    setSelectedDate(date)
+                    setDatePickerVisible(false)
+                }}
+            />
+        </>
     )
 }
 
@@ -142,6 +163,21 @@ function makeStyles(colors: Colors) {
             letterSpacing: -0.5,
             marginRight: 12,
             fontFamily: fonts.extrabold,
+        },
+        dateControls: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 8,
+        },
+        revertButton: {
+            alignItems: 'center',
+            justifyContent: 'center',
+            paddingVertical: 9,
+            paddingHorizontal: 11,
+            backgroundColor: colors.surface,
+            borderRadius: radius.chip,
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: colors.hairline,
         },
         dateChip: {
             flexDirection: 'row',

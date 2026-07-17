@@ -185,7 +185,6 @@ function StackLayout() {
                     <Stack.Screen name="nutritionScreens/cameraScreen" options={{ ...modalPresentation, headerShown: false, contentStyle: { backgroundColor: '#000' } }} />
                     <Stack.Screen name="nutritionScreens/analyzingModal" options={{ ...modalPresentation, headerShown: false }} />
                     <Stack.Screen name="nutritionScreens/updateBWModal" options={{ ...modalPresentation, headerShown: false }} />
-                    <Stack.Screen name="nutritionScreens/dateModal" options={{ ...modalPresentation, headerShown: false }} />
                     <Stack.Screen name="nutritionScreens/editEntry" options={{ ...modalPresentation, headerShown: false }} />
                     <Stack.Screen name="settingsScreens/profile" options={{ headerShown: true, title: 'Profile', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="settingsScreens/subscription" options={{ headerShown: true, title: '', headerBackTitle: 'Back', headerShadowVisible: false }} />

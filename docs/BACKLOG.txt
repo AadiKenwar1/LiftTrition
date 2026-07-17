@@ -19,13 +19,11 @@ CLAUDE SKILLS
 
 DATE PICKING
 ------------
-- Swap the wheel DatePicker for the calendar grid (CalendarMonthGrid, proven
-  in the Dev Hub) in dateModal.tsx and LogDateModal.tsx only. Leave
-  onboarding's birthday picker (native wheels) alone - wheels beat a calendar
-  for far-past dates.
-- Unify dateModal.tsx and LogDateModal.tsx into one component - they're
-  already near-duplicates, differing only in host shape (pushed route vs.
-  inline Modal).
+- DONE 2026-07-17: both items shipped as the centralized DatePickerPopup
+  (CenterPopup + DateSheet + Calendar grid, fade-in popup, inline future-
+  blocking). dateModal.tsx and LogDateModal.tsx deleted; both screens render
+  DatePickerPopup inline. Onboarding's birthday picker keeps the native wheels
+  as intended. See COMPLETED_ISSUES.
 
 BILLING
 -------
