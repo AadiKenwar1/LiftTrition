@@ -933,3 +933,90 @@ docs/AUDIT_MINOR.txt for the index). They are not duplicated here.
     stored key equals the local date, week-1 pager reachable next
     week; birthday round-trips to the exact day entered, in any
     timezone.
+
+Ingredient brand names silently vanish + unify the entry editors
+(minor #9, promoted)
+   Base bug: the AI vision contract returns a brand per ingredient and
+   the app type carries it (Ingredient.brand), but no ingredient table
+   has a column, so brand is gone after every restart. Promoted from
+   minor because the fix now carries product scope beyond persistence.
+   Where: NutritionContext/types.ts + database/powersyncStore.ts vs
+   lib/powersync/AppSchema.ts (+ a Supabase migration).
+   Scope:
+   a) Persist brand: add a nullable `brand` column to BOTH ingredient
+      tables (nutrition_entry_ingredients + saved_nutrition_entry_
+      ingredients) and round-trip it through the converters. Connector
+      needs no change (nutrition uses the generic upsert path).
+   b) Show brand on entries: display it wherever ingredients are listed
+      (saved meals + added / photo entries).
+   c) Combine-meals -> photo editor: "combine meals" in saved AND added
+      foods currently opens editManualEntry, which has no per-ingredient
+      UI, so a combined multi-ingredient entry can't have its
+      ingredients edited. Route combined entries to editPhotoEntry
+      (which already renders and edits an ingredient list) instead.
+   d) Absorbed from minor #4 (moved here 2026-07-15): the cleared-meal-
+      name divergence — Add writes "Unnamed Entry", Edit silently
+      restores the old name (addNutritionModal vs editManualEntry). If
+      the editors merge (below) the shared save handler fixes this by
+      construction; otherwise it is a one-liner in editManualEntry.
+   e) (Undecided direction) It may be simpler to make editPhotoEntry the
+      single editor for ALL entries and retire editManualEntry — which
+      also subsumes (d). Evaluate before committing.
+   Full implementation plan:
+   docs/superpowers/plans/2026-07-15-audit-minor-fixes.md (Task 17).
+   Completed 2026-07-16: promoted again — (e) was decided, and the fix
+   grew into a full design/plan pair rather than staying inside Task 17.
+   Design: docs/superpowers/specs/2026-07-15-universal-item-editor-
+   design.md (+ its 2026-07-16 revision note under W3). Plan:
+   docs/superpowers/plans/2026-07-15-universal-item-editor.md. Shipped:
+   (W1) nullable `brand` column on both ingredient tables, round-tripped
+   through the powersyncStore converters — Connector/sync-rules
+   unchanged. (rename) TS type Ingredient → Item, NutritionEntry.
+   ingredients → items, functions/ingredients.ts → items.ts
+   (sumItems/scaleItems), and every developer-read identifier + on-
+   screen label, with "item = ingredient" notes left on the type, the
+   converter boundary, and CLAUDE.md — DB table/column names, the
+   *IngredientRecord types, and the AI wire key were deliberately kept.
+   (W2) every add path now writes at least one item via new pure
+   builders (entryBuilders.ts + entryRouting.ts, fully Jest-covered):
+   manual add → 1 item; foodDB single add → 1 item carrying its brand
+   (FoodItem.brand added, getFoodItem maps it); foodDB combine → N
+   items, each with its own brand, replacing the old summed-blob " + "
+   path; saved paths reuse itemsForEntry(base) so legacy zero-item
+   saved meals still open cleanly. The combine UI (StagedSection) grew
+   a pre-filled, editable combined-name field (lib/hooks/
+   useCombineName.ts) — blank falls back to "Combined Items". Entry
+   totals are sumItems(items) everywhere. (W3) editPhotoEntry.tsx was
+   renamed to editEntry.tsx and made the ONE editor for every entry
+   type (manual, saved, foodDB, photo); editManualEntry.tsx is deleted;
+   per-item brand editing and a single-item name sync (one entry with
+   exactly one item keeps entry-name and item-name as the same field)
+   were added, and blank-name rules were unified (manual blank →
+   "Unnamed Entry", combined blank → "Combined Items", single-item
+   blank → the item's own name) so Add and Edit can no longer disagree
+   — solving (d) by construction. REVISED 2026-07-16 (owner decision,
+   recorded in the design doc): the "Tap to see the breakdown" footer
+   stays photo-only (showBreakdown={item.isPhoto}) — the pencil already
+   edits every entry via editEntry, and the collapsed row's "N items"
+   subtitle already signals internal structure, so the footer's only
+   distinct job (revealing AI-decomposed contents the user didn't
+   author) doesn't apply to hand-assembled entries. Collapsed rows
+   (Entry + SavedEntry) gained a subtitle line via entrySubtitle() —
+   brand for a 1-item entry, "N items" for a multi-item entry. (W4,
+   design scope beyond Task 17) FatSecret's food_description is now
+   passed through the fetchFoodDB edge function and parsed client-side
+   (lib/foodDB/parseFoodDescription.ts, TDD), so search rows show macro
+   pills + serving basis + brand before adding. Dev Hub gained four
+   approved pages (CombineTest, EditEntryTest, EntryRowTest, FoodRowTest
+   — light + dark) replacing the retired editPhoto variants lab. Test
+   coverage: 73 new Jest tests, zero new failures against the repo
+   baseline.
+   RELEASE PREREQUISITES:
+   a) lib/supabase/migrations/ingredient_brand.sql — already run in
+      Supabase 2026-07-16.
+   b) `supabase functions deploy fetchFoodDB` is still PENDING at
+      release — until deployed, search rows simply show no macro
+      preview (parseFoodDescription degrades gracefully on the missing
+      field; nothing breaks).
+   c) Pre-existing, unrelated, still open: nutrition_calories_real.sql
+      (see issue 3) remains pending at release.

@@ -72,6 +72,7 @@ const nutrition_entries = new Table({
 const nutrition_entry_ingredients = new Table({
   nutrition_entry_id: column.text,
   name: column.text,
+  brand: column.text,
   quantity: column.real,
   protein: column.real,
   carbs: column.real,
@@ -102,6 +103,7 @@ const saved_nutrition_entries = new Table({
 const saved_nutrition_entry_ingredients = new Table({
   saved_nutrition_entry_id: column.text,
   name: column.text,
+  brand: column.text,
   quantity: column.real,
   protein: column.real,
   carbs: column.real,

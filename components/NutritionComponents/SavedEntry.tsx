@@ -11,9 +11,10 @@ interface SavedEntryProps {
     fats: number
     onAddPress: () => void
     onDeletePress: () => void
+    subtitle?: string | null
 }
 
-export default function SavedEntry({ name, calories, protein, carbs, fats, onAddPress, onDeletePress }: SavedEntryProps) {
+export default function SavedEntry({ name, calories, protein, carbs, fats, onAddPress, onDeletePress, subtitle }: SavedEntryProps) {
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
     return (
@@ -24,6 +25,11 @@ export default function SavedEntry({ name, calories, protein, carbs, fats, onAdd
                     <Text style={styles.name} numberOfLines={7}>
                         {name}
                     </Text>
+                    {subtitle ? (
+                        <Text style={styles.subtitle} numberOfLines={1}>
+                            {subtitle}
+                        </Text>
+                    ) : null}
                     <View style={styles.macrosGrid}>
                         {/* Calories - Full Width */}
                         <View style={styles.caloriesRow}>
@@ -101,17 +107,23 @@ function makeStyles(colors: Colors) {
             fontSize: 16,
             color: colors.text,
             letterSpacing: -0.5,
-            marginBottom: 8,
             fontFamily: fonts.semibold,
         },
+        subtitle: {
+            fontSize: 12,
+            color: colors.textMuted,
+            marginTop: 2,
+            fontStyle: 'italic',
+            fontFamily: fonts.regular,
+        },
         macrosGrid: {
+            marginTop: 4,
             gap: 6,
         },
         caloriesRow: {
             flexDirection: 'row',
             alignItems: 'baseline',
             gap: 5,
-            marginBottom: 6,
         },
         caloriesValue: {
             fontSize: 20,
@@ -186,10 +198,6 @@ function makeStyles(colors: Colors) {
             justifyContent: 'center',
             alignItems: 'center',
             borderWidth: 1.5,
-            borderColor: colors.destructive,
-        },
-        deleteIconCircle: {
-            backgroundColor: colors.destructive + '1F',
             borderColor: colors.destructive,
         },
     })

@@ -66,6 +66,7 @@ serve(async (req: Request) => {
       description: f.food_name ?? "",
       fdcId: f.food_id ?? "",
       brandName: f.brand_name,
+      foodDescription: f.food_description,
     }))
     return new Response(JSON.stringify(results), { headers: { "Content-Type": "application/json" } })
   }

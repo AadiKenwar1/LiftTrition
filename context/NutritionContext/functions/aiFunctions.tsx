@@ -4,9 +4,9 @@ import type { ScanMode } from '@/lib/openAI/mealImage';
 import { File } from 'expo-file-system';
 import { Dispatch, SetStateAction } from 'react';
 import uuid from 'react-native-uuid';
-import { Ingredient, NutritionEntry } from '../types';
+import { Item, NutritionEntry } from '../types';
 import { addNutrition } from './crudFunctions';
-import { sumIngredients } from './ingredients';
+import { sumItems } from './items';
 import { nutritionEntryError } from './validator';
 
 // Timeout helper
@@ -17,27 +17,27 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
   ]);
 }
 
-// Where each ingredient's macros came from (sources[i] aligns 1:1 with ingredients[i]).
+// Where each item's macros came from (sources[i] aligns 1:1 with items[i]).
 export type EnrichmentSource = 'fatsecret' | 'vision';
 
 const MAX_BRANDED_ENRICH = 5;
 const ENRICH_TIMEOUT_MS = 15000;
 
-// Resolve one branded ingredient via FatSecret (trusting its relevance ranking). On a miss or any
+// Resolve one branded item via FatSecret (trusting its relevance ranking). On a miss or any
 // FatSecret error, return null so the caller keeps the vision call's own estimate.
-async function enrichBrandedIngredient(ing: Ingredient): Promise<Ingredient | null> {
-  const brand = ing.brand?.trim();
+async function enrichBrandedItem(item: Item): Promise<Item | null> {
+  const brand = item.brand?.trim();
   if (!brand) return null;
 
-  const query = ing.name && !brand.toLowerCase().includes(ing.name.toLowerCase()) ? `${brand} ${ing.name}` : brand;
+  const query = item.name && !brand.toLowerCase().includes(item.name.toLowerCase()) ? `${brand} ${item.name}` : brand;
 
   try {
     const results = await getFoodSearchResults(query);
     const best = results.find((r) => r.brandName) ?? results[0];
     if (best) {
-      const item = await getFoodItem(best);
-      if (item) {
-        return { ...ing, name: item.name || ing.name, protein: item.protein, carbs: item.carbs, fats: item.fats, calories: item.calories };
+      const foodItem = await getFoodItem(best);
+      if (foodItem) {
+        return { ...item, name: foodItem.name || item.name, protein: foodItem.protein, carbs: foodItem.carbs, fats: foodItem.fats, calories: foodItem.calories };
       }
     }
   } catch {
@@ -47,19 +47,19 @@ async function enrichBrandedIngredient(ing: Ingredient): Promise<Ingredient | nu
   return null;
 }
 
-// Enrich all branded ingredients (parallel, capped). Returns the enriched list plus a per-index
-// source array (sources[i] === 'fatsecret' when that ingredient was replaced by a DB match).
-export async function enrichBrandedIngredients(ingredients: Ingredient[]): Promise<{ ingredients: Ingredient[]; sources: EnrichmentSource[] }> {
-  const sources: EnrichmentSource[] = ingredients.map(() => 'vision');
-  const branded = ingredients
-    .map((ing, i) => ({ ing, i }))
-    .filter((x) => x.ing.brand && x.ing.brand.trim())
+// Enrich all branded items (parallel, capped). Returns the enriched list plus a per-index
+// source array (sources[i] === 'fatsecret' when that item was replaced by a DB match).
+export async function enrichBrandedItems(items: Item[]): Promise<{ items: Item[]; sources: EnrichmentSource[] }> {
+  const sources: EnrichmentSource[] = items.map(() => 'vision');
+  const branded = items
+    .map((item, i) => ({ item, i }))
+    .filter((x) => x.item.brand && x.item.brand.trim())
     .slice(0, MAX_BRANDED_ENRICH);
-  if (branded.length === 0) return { ingredients, sources };
+  if (branded.length === 0) return { items, sources };
 
-  const resolved = await Promise.all(branded.map((x) => enrichBrandedIngredient(x.ing)));
+  const resolved = await Promise.all(branded.map((x) => enrichBrandedItem(x.item)));
 
-  const out = [...ingredients];
+  const out = [...items];
   branded.forEach((x, k) => {
     const r = resolved[k];
     if (r) {
@@ -68,11 +68,11 @@ export async function enrichBrandedIngredients(ingredients: Ingredient[]): Promi
     }
   });
 
-  return { ingredients: out, sources };
+  return { items: out, sources };
 }
 
-// Strip code fences and parse the JSON vision response.
-function parseVisionResponse(response: string): { name?: string; ingredients?: any[] } {
+// OpenAI sometimes wraps JSON responses in a ```json fence; strip it before parsing.
+function parseJsonResponse<T>(response: string): T {
   let cleaned = response.trim();
   if (cleaned.startsWith('```')) {
     cleaned = cleaned.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim();
@@ -87,38 +87,39 @@ export async function runPhotoAnalysis(
   userID: string,
   mode: ScanMode = 'meal',
   provider?: VisionProvider,
-): Promise<{ entry: NutritionEntry; sources: EnrichmentSource[]; rawIngredients: Ingredient[] }> {
+): Promise<{ entry: NutritionEntry; sources: EnrichmentSource[]; rawItems: Item[] }> {
   const file = new File(photoUri);
   const base64 = await file.base64();
   const response = await withTimeout(askOpenAIVision(`data:image/jpeg;base64,${base64}`, mode, provider), 30000);
 
-  const data = parseVisionResponse(response);
-  let ingredients: Ingredient[] = Array.isArray(data.ingredients) ? data.ingredients : [];
-  if (ingredients.length === 0) {
+  const data = parseJsonResponse<{ name?: string; ingredients?: any[] }>(response);
+  // Wire key from the vision prompt contract stays "ingredients"; in-app these are items.
+  let items: Item[] = Array.isArray(data.ingredients) ? data.ingredients : [];
+  if (items.length === 0) {
     throw new Error('No food detected in this photo. Try a clearer picture, or add your meal manually.');
   }
   // Vision output before any DB enrichment (Path B; surfaced for the dev harness).
-  const rawIngredients: Ingredient[] = ingredients;
+  const rawItems: Item[] = items;
 
   // Branded enrichment applies to meal AND item photos (labels already carry the printed values).
-  let sources: EnrichmentSource[] = ingredients.map(() => 'vision');
+  let sources: EnrichmentSource[] = items.map(() => 'vision');
   if (mode !== 'label') {
     try {
-      const enriched = await withTimeout(enrichBrandedIngredients(ingredients), ENRICH_TIMEOUT_MS);
-      ingredients = enriched.ingredients;
+      const enriched = await withTimeout(enrichBrandedItems(items), ENRICH_TIMEOUT_MS);
+      items = enriched.items;
       sources = enriched.sources;
     } catch {
       // keep vision estimates on any enrichment failure/timeout
     }
   }
 
-  const totals = sumIngredients(ingredients);
+  const totals = sumItems(items);
 
   const entry: NutritionEntry = {
     id: uuid.v4() as string,
     userId: userID,
     // Item entries are named after the product (brand), not the generic photo label.
-    name: (mode === 'item' && (ingredients[0]?.brand || ingredients[0]?.name)) || data.name || (mode === 'label' ? 'Label Entry' : 'Photo Entry'),
+    name: (mode === 'item' && (items[0]?.brand || items[0]?.name)) || data.name || (mode === 'label' ? 'Label Entry' : 'Photo Entry'),
     date: new Date(),
     time: Date.now(),
     protein: totals.protein,
@@ -127,12 +128,12 @@ export async function runPhotoAnalysis(
     calories: totals.calories,
     isPhoto: true,
     photoUri,
-    ingredients,
+    items,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
 
-  return { entry, sources, rawIngredients };
+  return { entry, sources, rawItems };
 }
 
 // Analyze Photo Function — returns the created NutritionEntry so callers can persist it,
@@ -154,21 +155,10 @@ export async function analyzeAndAddPhoto(photoUri: string, userID: string, setNu
   }
 }
 
-
-//Analyze nutritional text input
 export async function analyzeText(foodName: string): Promise<{ calories: number; protein: number; carbs: number; fats: number }> {
   try {
-    //30 second timeout for failure
     const response = await withTimeout(askOpenAIText(foodName), 30000);
-    //Clean up the json Response
-    let cleanedResponse = response.trim();
-    if (cleanedResponse.startsWith('```')) {
-      cleanedResponse = cleanedResponse.replace(/^```(?:json)?\n?/, '');
-      cleanedResponse = cleanedResponse.replace(/\n?```$/, '');
-      cleanedResponse = cleanedResponse.trim();
-    }
-    //Parse the json Response
-    const data = JSON.parse(cleanedResponse);
+    const data = parseJsonResponse<{ calories?: number; protein?: number; carbs?: number; fats?: number }>(response);
     const macros = {
       calories: Math.round(data.calories || 0),
       protein: Math.round((data.protein || 0) * 10) / 10,

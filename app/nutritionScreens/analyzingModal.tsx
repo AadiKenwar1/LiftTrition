@@ -144,7 +144,7 @@ export default function AnalyzingModal() {
 
                 {/* Status Text */}
                 <Text style={styles.title}>{modeStr === 'label' ? 'Reading Nutrition Label' : modeStr === 'item' ? 'Identifying Product' : 'Analyzing Your Meal'}</Text>
-                <Text style={styles.subtitle}>{modeStr === 'label' ? 'Our AI is reading the label values...' : modeStr === 'item' ? 'Our AI is identifying the product and its nutrition...' : 'Our AI is identifying ingredients and calculating nutrition...'}</Text>
+                <Text style={styles.subtitle}>{modeStr === 'label' ? 'Our AI is reading the label values...' : modeStr === 'item' ? 'Our AI is identifying the product and its nutrition...' : 'Our AI is identifying items and calculating nutrition...'}</Text>
 
                 {/* Progress Bar */}
                 <View style={styles.progressContainer}>

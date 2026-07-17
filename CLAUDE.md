@@ -126,6 +126,7 @@ assets/                 Fonts, images, legal
 - **Styling:** `StyleSheet.create()` for static files, or `makeStyles(colors)` + `useMemo` for theme-reactive files. No CSS-in-JS library. Pull colors/fonts/radii from `@/context/ThemeContext` — see **Theming & UI** below.
 - **Icons:** Prefer `lucide-react-native`; fallback to `@expo/vector-icons` (Ionicons, MaterialCommunityIcons).
 - **Dates:** Always use `getDateKey(date)` from `lib/utils/dateHelper` for YYYY-MM-DD keys. Use `en-CA` locale to ensure consistent ISO format.
+- **Item = ingredient.** Code and UI say "item"; the DB tables keep their legacy `*_ingredients` names (`nutrition_entry_ingredients`, `saved_nutrition_entry_ingredients`). Same concept — don't rename the tables.
 - **UUIDs:** `react-native-uuid` — never use `Math.random()` for IDs.
 - **Graph data:** All graph functions return `{ day: string, value: number }[]`. Charts pre-slice data by range in `progress.tsx`; `downsampleDataPreserveEndpoints` (`lib/utils/downsample`) is available for long series but is not currently in the live render path.
 - **Persistence pattern:** Write to PowerSync via `powerSync.execute()` or `writeTransaction()`. Contexts use a `persistDirty` flag + `useEffect` for debounced saves.

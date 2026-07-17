@@ -1,5 +1,6 @@
 import BottomSheet from '@/components/NeutralComponents/BottomSheet'
 import { type SelectableRange } from '@/components/NeutralComponents/CalendarMonthGrid'
+import CenterPopup from '@/components/NeutralComponents/CenterPopup'
 import DateSheet from '@/components/NeutralComponents/DateSheet'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { getDateKey } from '@/lib/utils/dateHelper'
@@ -17,12 +18,14 @@ import MockupShell from './mockups/MockupShell'
 const LOGGED_PATTERN = [2, 4, 7, 9, 12, 15, 18, 21, 24, 27, 30]
 
 type Mode = 'workout' | 'nutrition'
+type Presentation = 'sheet' | 'popup'
 
 export default function DateSheetTest() {
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
 
     const [mode, setMode] = useState<Mode>('workout')
+    const [presentation, setPresentation] = useState<Presentation>('sheet')
     const [selectable, setSelectable] = useState<SelectableRange>('past')
     const [density, setDensity] = useState<'some' | 'none'>('some')
     const [selectedDate, setSelectedDate] = useState(() => new Date())
@@ -48,6 +51,16 @@ export default function DateSheetTest() {
 
     const controls = (
         <>
+            <Field label="Presentation">
+                <Segmented
+                    value={presentation}
+                    onChange={setPresentation}
+                    options={[
+                        { label: 'Bottom sheet', value: 'sheet' },
+                        { label: 'Center popup', value: 'popup' },
+                    ]}
+                />
+            </Field>
             <Field label="Mode">
                 <Segmented
                     value={mode}
@@ -81,6 +94,21 @@ export default function DateSheetTest() {
         </>
     )
 
+    const sheet = (
+        <DateSheet
+            selectedDate={selectedDate}
+            subtitle={subtitle}
+            accent={accent}
+            accentGradient={accentGradient}
+            selectable={selectable}
+            eventDays={eventDays}
+            onConfirm={(date) => {
+                setSelectedDate(date)
+                setOpen(false)
+            }}
+        />
+    )
+
     return (
         <MockupShell controls={controls} padTop>
             <View style={styles.content}>
@@ -90,20 +118,14 @@ export default function DateSheetTest() {
                 <Text style={styles.readout}>Confirmed: {getDateKey(selectedDate)}</Text>
             </View>
 
-            <BottomSheet visible={open} onClose={() => setOpen(false)}>
-                <DateSheet
-                    selectedDate={selectedDate}
-                    subtitle={subtitle}
-                    accent={accent}
-                    accentGradient={accentGradient}
-                    selectable={selectable}
-                    eventDays={eventDays}
-                    onConfirm={(date) => {
-                        setSelectedDate(date)
-                        setOpen(false)
-                    }}
-                />
-            </BottomSheet>
+            {presentation === 'sheet' ?
+                <BottomSheet visible={open} onClose={() => setOpen(false)}>
+                    {sheet}
+                </BottomSheet>
+            :   <CenterPopup visible={open} onClose={() => setOpen(false)}>
+                    {sheet}
+                </CenterPopup>
+            }
         </MockupShell>
     )
 }

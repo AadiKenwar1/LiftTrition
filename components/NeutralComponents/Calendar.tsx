@@ -4,7 +4,7 @@ import { getDateKey, parseDateKey } from '@/lib/utils/dateHelper'
 import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react-native'
 import { useMemo, useState } from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import { CalendarMonthGrid, type SelectableRange } from './CalendarMonthGrid'
+import { CALENDAR_GRID_HEIGHT, CalendarMonthGrid, type SelectableRange } from './CalendarMonthGrid'
 
 /**
  * Production month calendar with title-zoom navigation (day → year → month → day).
@@ -92,11 +92,6 @@ export default function Calendar({ selectedDate, onSelectDate, selectable = 'all
         setViewMode('days')
     }
 
-    const goToday = () => {
-        setCursor({ year: todayYear, month: todayMonth })
-        setViewMode('days')
-    }
-
     const handleSelectDay = (day: string) => {
         onSelectDate(parseDateKey(day))
     }
@@ -116,7 +111,6 @@ export default function Calendar({ selectedDate, onSelectDate, selectable = 'all
         : viewMode === 'months' ? `${cursor.year}`
         : `${MONTH_NAMES[cursor.month]} ${cursor.year}`
 
-    const isHome = viewMode === 'days' && cursor.year === todayYear && cursor.month === todayMonth
     const years = Array.from({ length: YEAR_PAGE }, (_, i) => yearBase + i)
 
     return (
@@ -141,7 +135,7 @@ export default function Calendar({ selectedDate, onSelectDate, selectable = 'all
                 </TouchableOpacity>
             </View>
 
-            <View>
+            <View style={styles.body}>
                 {viewMode === 'days' && (
                     <CalendarMonthGrid
                         year={cursor.year}
@@ -186,11 +180,6 @@ export default function Calendar({ selectedDate, onSelectDate, selectable = 'all
                 )}
             </View>
 
-            {!isHome && (
-                <TouchableOpacity onPress={goToday} activeOpacity={0.6} style={styles.todayButton} accessibilityRole="button" accessibilityLabel="Go to today">
-                    <Text style={[styles.todayText, { color: tint }]}>Today</Text>
-                </TouchableOpacity>
-            )}
         </View>
     )
 }
@@ -238,15 +227,9 @@ function makeStyles(colors: Colors) {
             fontFamily: fonts.medium,
             fontSize: 15,
         },
-        todayButton: {
-            alignSelf: 'center',
-            marginTop: 10,
-            paddingVertical: 6,
-            paddingHorizontal: 14,
-        },
-        todayText: {
-            fontFamily: fonts.semibold,
-            fontSize: 13,
+        body: {
+            minHeight: CALENDAR_GRID_HEIGHT,
+            justifyContent: 'center',
         },
     })
 }

@@ -1,9 +1,12 @@
 import type { ScanMode } from '@/lib/openAI/mealImage'
 import type { WeekDayPoint } from '@/lib/utils/dateHelper'
 
-// Macros are per ONE unit; quantity is the multiplier. A total is always
-// macro × quantity. Ingredient math lives in functions/ingredients.ts.
-export interface Ingredient {
+// Item = the DB's "ingredient" row, renamed in code/UI; the tables keep their
+// nutrition_entry_ingredients / saved_nutrition_entry_ingredients names to
+// avoid a live-data migration. Macros are per ONE unit; quantity is the
+// multiplier. A total is always macro × quantity. Item math lives in
+// functions/items.ts.
+export interface Item {
     name: string
     brand?: string | null
     quantity: number
@@ -24,7 +27,7 @@ export interface NutritionEntry {
     calories: number
     isPhoto: boolean
     photoUri?: string
-    ingredients: Ingredient[]
+    items: Item[]
     createdAt: Date
     updatedAt: Date
 }

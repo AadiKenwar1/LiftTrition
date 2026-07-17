@@ -3,9 +3,9 @@ From the 2026-07-12 multi-agent audit. Confirmed-in-code issues only
 (technical detail + line numbers in AUDIT_REPORT.md). Entries are moved
 to COMPLETED_ISSUES.txt as they get fixed, so issue numbers here are
 non-contiguous by design (17 migrated 2026-07-14; issue 8 migrated
-2026-07-15). Open: issue 4 (critical), promoted minor #9 (ingredient
-brand + entry-editor unify), and promoted minor #15 (food-search hook)
-— both added 2026-07-15.
+2026-07-15). Open: issue 4 (critical) and promoted minor #15
+(food-search hook), added 2026-07-15. Promoted minor #9 (ingredient
+brand + entry-editor unify) migrated to COMPLETED_ISSUES.txt 2026-07-16.
 
 Each issue now carries a PLAN block: an implementation plan written
 from scratch against the current code, aimed at root causes rather
@@ -152,38 +152,6 @@ CRITICAL (data loss, security, broken core flows)
 
 PROMOTED FROM MINOR (2026-07-15)
 --------------------------------
-
-Ingredient brand names silently vanish + unify the entry editors
-(minor #9, promoted)
-   Base bug: the AI vision contract returns a brand per ingredient and
-   the app type carries it (Ingredient.brand), but no ingredient table
-   has a column, so brand is gone after every restart. Promoted from
-   minor because the fix now carries product scope beyond persistence.
-   Where: NutritionContext/types.ts + database/powersyncStore.ts vs
-   lib/powersync/AppSchema.ts (+ a Supabase migration).
-   Scope:
-   a) Persist brand: add a nullable `brand` column to BOTH ingredient
-      tables (nutrition_entry_ingredients + saved_nutrition_entry_
-      ingredients) and round-trip it through the converters. Connector
-      needs no change (nutrition uses the generic upsert path).
-   b) Show brand on entries: display it wherever ingredients are listed
-      (saved meals + added / photo entries).
-   c) Combine-meals -> photo editor: "combine meals" in saved AND added
-      foods currently opens editManualEntry, which has no per-ingredient
-      UI, so a combined multi-ingredient entry can't have its
-      ingredients edited. Route combined entries to editPhotoEntry
-      (which already renders and edits an ingredient list) instead.
-   d) Absorbed from minor #4 (moved here 2026-07-15): the cleared-meal-
-      name divergence — Add writes "Unnamed Entry", Edit silently
-      restores the old name (addNutritionModal vs editManualEntry). If
-      the editors merge (below) the shared save handler fixes this by
-      construction; otherwise it is a one-liner in editManualEntry.
-   e) (Undecided direction) It may be simpler to make editPhotoEntry the
-      single editor for ALL entries and retire editManualEntry — which
-      also subsumes (d). Evaluate before committing.
-   Full implementation plan:
-   docs/superpowers/plans/2026-07-15-audit-minor-fixes.md (Task 17).
-
 
 Food search flashes stale results / spams offline alerts
 (minor #15, promoted)

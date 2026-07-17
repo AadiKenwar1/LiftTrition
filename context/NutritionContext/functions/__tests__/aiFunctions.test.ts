@@ -29,7 +29,7 @@ jest.mock('react-native-uuid', () => ({
 
 const mockVision = askOpenAIVision as jest.Mock
 
-// brand: null keeps every ingredient un-branded → the FatSecret enrichment path is skipped.
+// brand: null keeps every item un-branded → the FatSecret enrichment path is skipped.
 const VISION_JSON = JSON.stringify({
     name: 'Test Meal',
     ingredients: [{ name: 'Rice', brand: null, quantity: 1, protein: 5, carbs: 40, fats: 1, calories: 200 }],

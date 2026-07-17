@@ -4,10 +4,13 @@ import FoodRow from '@/components/NutritionComponents/FoodRow'
 import { useAuth } from '@/context/AuthContext'
 import { useBilling } from '@/context/BillingContext'
 import { useNutrition } from '@/context/NutritionContext'
+import { buildEntryFromItems, foodItemToItem, resolveCombinedName } from '@/context/NutritionContext/functions/entryBuilders'
 import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { getFoodItem, getFoodSearchResults } from '@/lib/foodDB/foodDB'
+import { parseFoodDescription } from '@/lib/foodDB/parseFoodDescription'
 import { POPULAR_FOODS, type PopularFood } from '@/lib/foodDB/popularFoods'
 import { FoodItem, FoodSearchResult } from '@/lib/foodDB/types'
+import { useCombineName } from '@/lib/hooks/useCombineName'
 import { useSubmitOnce } from '@/lib/hooks/useSubmitOnce'
 import { parseNumericInput } from '@/lib/utils/number'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -15,7 +18,6 @@ import { useRouter } from 'expo-router'
 import { Check, Database, X } from 'lucide-react-native'
 import { useEffect, useMemo, useState } from 'react'
 import { ActivityIndicator, Alert, Keyboard, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import uuid from 'react-native-uuid'
 
 interface FoodItemWithQuantity extends FoodItem {
     quantity?: number
@@ -40,6 +42,8 @@ export default function FoodDBModal() {
 
     const [addedItems, setAddedItems] = useState<FoodItemWithQuantity[]>([])
     const [combineItems, setCombineItems] = useState(false)
+    const stagedNames = useMemo(() => addedItems.map((i) => ({ name: i.name, quantity: i.quantity })), [addedItems])
+    const [combineName, onCombineNameChange] = useCombineName(combineItems, stagedNames)
     const [quantityInputItem, setQuantityInputItem] = useState<FoodItem | null>(null)
     const [quantityValue, setQuantityValue] = useState('1')
     const [isLoadingDetails, setIsLoadingDetails] = useState(false)
@@ -140,56 +144,24 @@ export default function FoodDBModal() {
             return
         }
         if (combineItems && addedItems.length >= 2) {
-            const createdAt = new Date()
-            let protein = 0
-            let carbs = 0
-            let fats = 0
-            let calories = 0
-            const names: string[] = []
-
-            for (const item of addedItems) {
-                const quantity = item.quantity || 1
-                names.push(quantity > 1 ? `${item.name} ×${quantity}` : item.name)
-                protein += item.protein * quantity
-                carbs += item.carbs * quantity
-                fats += item.fats * quantity
-                calories += item.calories * quantity
-            }
-
-            handleAddNutrition({
-                id: uuid.v4() as string,
-                userId: userID,
-                name: names.join(' + '),
-                date: new Date(selectedDate),
-                time: createdAt.getTime(),
-                protein,
-                carbs,
-                fats,
-                calories,
-                isPhoto: false,
-                ingredients: [],
-                createdAt,
-                updatedAt: createdAt,
-            })
+            handleAddNutrition(
+                buildEntryFromItems({
+                    userId: userID,
+                    date: new Date(selectedDate),
+                    name: resolveCombinedName(combineName),
+                    items: addedItems.map((item) => foodItemToItem(item, item.quantity || 1)),
+                }),
+            )
         } else {
             for (const item of addedItems) {
-                const createdAt = new Date()
-                const quantity = item.quantity || 1
-                handleAddNutrition({
-                    id: uuid.v4() as string,
-                    userId: userID,
-                    name: item.name,
-                    date: new Date(selectedDate),
-                    time: createdAt.getTime(),
-                    protein: item.protein * quantity,
-                    carbs: item.carbs * quantity,
-                    fats: item.fats * quantity,
-                    calories: item.calories * quantity,
-                    isPhoto: false,
-                    ingredients: [],
-                    createdAt,
-                    updatedAt: createdAt,
-                })
+                handleAddNutrition(
+                    buildEntryFromItems({
+                        userId: userID,
+                        date: new Date(selectedDate),
+                        name: item.name,
+                        items: [foodItemToItem(item, item.quantity || 1)],
+                    }),
+                )
             }
         }
         router.back()
@@ -283,7 +255,7 @@ export default function FoodDBModal() {
                     }
 
                     {addedItems.length > 0 && (
-                        <StagedSection label="Added" count={addedItems.length} color={colors.nutrition} combineItems={combineItems} onCombineItemsChange={setCombineItems}>
+                        <StagedSection label="Added" count={addedItems.length} color={colors.nutrition} combineItems={combineItems} onCombineItemsChange={setCombineItems} combineName={combineName} onCombineNameChange={onCombineNameChange}>
                             {addedItems.map((item) => {
                                 const q = item.quantity || 1
                                 return (
@@ -344,11 +316,14 @@ export default function FoodDBModal() {
                                 searchResults.map((item) => {
                                     const isAdded = !!addedItems.find((addedItem) => addedItem.id === item.fdcId)
                                     const isLoading = isLoadingDetails && selectedSearchItem?.fdcId === item.fdcId
+                                    const preview = parseFoodDescription(item.foodDescription)
                                     return (
                                         <FoodRow
                                             key={item.fdcId}
                                             name={item.description}
                                             brandName={item.brandName}
+                                            servingSize={preview?.basis}
+                                            macros={preview ?? undefined}
                                             onAdd={() => handleAddResult(item)}
                                             added={isAdded}
                                             loading={isLoading}

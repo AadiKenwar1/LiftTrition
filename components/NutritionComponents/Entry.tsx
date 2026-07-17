@@ -12,9 +12,10 @@ interface EntryProps {
     onEditPress?: () => void
     showBreakdown?: boolean
     onBreakdownPress?: () => void
+    subtitle?: string | null
 }
 
-export default function Entry({ name, calories, protein, carbs, fats, onEditPress, showBreakdown, onBreakdownPress }: EntryProps) {
+export default function Entry({ name, calories, protein, carbs, fats, onEditPress, showBreakdown, onBreakdownPress, subtitle }: EntryProps) {
     const colors = useColors()
     const isDark = useColorScheme() === 'dark'
     const styles = useMemo(() => makeStyles(colors, isDark), [colors, isDark])
@@ -29,6 +30,11 @@ export default function Entry({ name, calories, protein, carbs, fats, onEditPres
                             <Text style={styles.name} numberOfLines={7}>
                                 {name}
                             </Text>
+                            {subtitle ? (
+                                <Text style={styles.subtitle} numberOfLines={1}>
+                                    {subtitle}
+                                </Text>
+                            ) : null}
                             <View style={styles.caloriesRow}>
                                 <Text style={styles.caloriesValue}>{calories}</Text>
                                 <Text style={styles.caloriesLabel}>kcal</Text>
@@ -114,6 +120,13 @@ function makeStyles(colors: Colors, isDark: boolean) {
             color: colors.text,
             letterSpacing: -0.3,
             fontFamily: fonts.bold,
+        },
+        subtitle: {
+            fontSize: 12,
+            color: colors.textMuted,
+            marginTop: 2,
+            fontStyle: 'italic',
+            fontFamily: fonts.regular,
         },
         caloriesRow: {
             flexDirection: 'row',

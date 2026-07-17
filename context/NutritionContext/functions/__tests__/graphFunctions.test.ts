@@ -15,7 +15,7 @@ function createMockNutritionEntry(overrides: Partial<NutritionEntry> = {}): Nutr
         fats: 10,
         calories: 300,
         isPhoto: false,
-        ingredients: [],
+        items: [],
         createdAt: new Date('2024-01-15'),
         updatedAt: new Date('2024-01-15'),
         ...overrides,

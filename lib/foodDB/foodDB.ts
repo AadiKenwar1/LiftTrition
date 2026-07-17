@@ -83,6 +83,7 @@ export async function getFoodItem(searchItem: FoodSearchResult): Promise<FoodIte
     return {
         id: details.fdcId,
         name: details.name,
+        brand: details.brandName?.trim() || null,
         calories: details.calories,
         protein: details.protein,
         carbs: details.carbs,

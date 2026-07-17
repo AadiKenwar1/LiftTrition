@@ -3,6 +3,7 @@ export interface FoodSearchResult {
   description: string;
   fdcId: string;
   brandName?: string;
+  foodDescription?: string;
 }
 
 export interface FoodDetails {
@@ -24,6 +25,7 @@ export interface FoodItem {
   protein: number;
   carbs: number;
   fats: number;
+  brand?: string | null;
 }
 
 // --- Internal Types ---

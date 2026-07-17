@@ -186,8 +186,7 @@ function StackLayout() {
                     <Stack.Screen name="nutritionScreens/analyzingModal" options={{ ...modalPresentation, headerShown: false }} />
                     <Stack.Screen name="nutritionScreens/updateBWModal" options={{ ...modalPresentation, headerShown: false }} />
                     <Stack.Screen name="nutritionScreens/dateModal" options={{ ...modalPresentation, headerShown: false }} />
-                    <Stack.Screen name="nutritionScreens/editManualEntry" options={{ ...modalPresentation, headerShown: false }} />
-                    <Stack.Screen name="nutritionScreens/editPhotoEntry" options={{ ...modalPresentation, headerShown: false }} />
+                    <Stack.Screen name="nutritionScreens/editEntry" options={{ ...modalPresentation, headerShown: false }} />
                     <Stack.Screen name="settingsScreens/profile" options={{ headerShown: true, title: 'Profile', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="settingsScreens/subscription" options={{ headerShown: true, title: '', headerBackTitle: 'Back', headerShadowVisible: false }} />
                     <Stack.Screen name="settingsScreens/adjustTraining" options={{ headerShown: true, title: '', headerBackTitle: 'Back', headerShadowVisible: false }} />
@@ -212,8 +211,7 @@ function StackLayout() {
                     <Stack.Screen name="devTest/activityBanner" options={{ headerShown: true, title: 'Activity Banner', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/colorHue" options={{ headerShown: true, title: 'Color Hue Review', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/numberParsing" options={{ headerShown: true, title: 'Number Parsing', headerBackTitle: 'Back' }} />
-                    <Stack.Screen name="devTest/editPhotoLab" options={{ headerShown: true, title: 'Edit Photo — Variants', headerBackTitle: 'Back' }} />
-                    <Stack.Screen name="devTest/editPhotoVariant" options={{ ...modalPresentation, headerShown: false }} />
+                    <Stack.Screen name="devTest/editEntry" options={{ headerShown: true, title: 'Edit Entry — Test', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/suggestSet" options={{ headerShown: true, title: 'Suggest Set', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/addNutrition" options={{ headerShown: true, title: 'Add Nutrition', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/addNutritionVariant" options={{ ...modalPresentation, headerShown: false }} />
@@ -229,6 +227,9 @@ function StackLayout() {
                     <Stack.Screen name="devTest/goalReached" options={{ headerShown: true, title: 'Goal Reached — UI', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/goalReachedSim" options={{ headerShown: true, title: 'Goal Reached — Logic', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/logHistory" options={{ headerShown: true, title: 'Log History', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="devTest/combine" options={{ headerShown: true, title: 'Combine', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="devTest/foodRow" options={{ headerShown: true, title: 'Food Row', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="devTest/entryRow" options={{ headerShown: true, title: 'Entry Rows', headerBackTitle: 'Back' }} />
                 </Stack.Protected>
             </Stack>
             <GoalPromptHost />

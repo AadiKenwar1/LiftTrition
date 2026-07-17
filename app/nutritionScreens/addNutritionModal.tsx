@@ -3,6 +3,7 @@ import { useAuth } from '@/context/AuthContext'
 import { useBilling } from '@/context/BillingContext'
 import { useNutrition } from '@/context/NutritionContext'
 import { analyzeText } from '@/context/NutritionContext/functions/aiFunctions'
+import { buildEntryFromItems, resolveEntryName } from '@/context/NutritionContext/functions/entryBuilders'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { useSubmitOnce } from '@/lib/hooks/useSubmitOnce'
 import { parseNumericInput } from '@/lib/utils/number'
@@ -12,7 +13,6 @@ import { Sparkles, Utensils } from 'lucide-react-native'
 import { useMemo, useState } from 'react'
 import { ActivityIndicator, Alert, Keyboard, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import uuid from 'react-native-uuid'
 
 export default function AddNutritionModal() {
     const { handleAddNutrition, selectedDate } = useNutrition()
@@ -45,22 +45,15 @@ export default function AddNutritionModal() {
 
     const handleAddEntry = () => {
         if (parsedProtein === null || parsedCarbs === null || parsedFats === null || parsedCalories === null) return
-        const newEntry = {
-            id: uuid.v4() as string,
-            userId: userID,
-            name: mealName.trim() || 'Unnamed Entry',
-            date: new Date(selectedDate),
-            time: Date.now(),
-            protein: parsedProtein,
-            carbs: parsedCarbs,
-            fats: parsedFats,
-            calories: parsedCalories,
-            isPhoto: false,
-            ingredients: [],
-            createdAt: new Date(),
-            updatedAt: new Date(),
-        }
-        handleAddNutrition(newEntry)
+        const name = resolveEntryName(mealName, [])
+        handleAddNutrition(
+            buildEntryFromItems({
+                userId: userID,
+                date: new Date(selectedDate),
+                name,
+                items: [{ name, brand: null, quantity: 1, protein: parsedProtein, carbs: parsedCarbs, fats: parsedFats, calories: parsedCalories }],
+            }),
+        )
         router.back()
     }
 

@@ -1,6 +1,6 @@
 import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import React, { useMemo } from 'react'
-import { StyleSheet, Switch, Text, View } from 'react-native'
+import { StyleSheet, Switch, Text, TextInput, View } from 'react-native'
 
 interface StagedSectionProps {
     label: string
@@ -9,9 +9,11 @@ interface StagedSectionProps {
     children: React.ReactNode
     combineItems?: boolean
     onCombineItemsChange?: (value: boolean) => void
+    combineName?: string
+    onCombineNameChange?: (value: string) => void
 }
 
-export default function StagedSection({ label, count, color, children, combineItems, onCombineItemsChange }: StagedSectionProps) {
+export default function StagedSection({ label, count, color, children, combineItems, onCombineItemsChange, combineName, onCombineNameChange }: StagedSectionProps) {
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
     const showCombineToggle = count >= 2 && onCombineItemsChange != null
@@ -35,6 +37,15 @@ export default function StagedSection({ label, count, color, children, combineIt
                         thumbColor={combineItems ? color : colors.textMuted}
                     />
                 </View>
+            )}
+            {showCombineToggle && combineItems && onCombineNameChange != null && (
+                <TextInput
+                    style={styles.combineNameInput}
+                    value={combineName}
+                    onChangeText={onCombineNameChange}
+                    placeholder="Combined Items"
+                    placeholderTextColor={colors.placeholder}
+                />
             )}
             {children}
         </View>
@@ -85,7 +96,8 @@ function makeStyles(colors: Colors) {
         combineRow: {
             flexDirection: 'row',
             alignItems: 'center',
-            justifyContent: 'space-between',
+            justifyContent: 'flex-start',
+            gap: 10,
             marginBottom: 10,
             paddingVertical: 4,
         },
@@ -94,6 +106,18 @@ function makeStyles(colors: Colors) {
             color: colors.textSecondary,
             fontFamily: fonts.medium,
             letterSpacing: -0.2,
+        },
+        combineNameInput: {
+            backgroundColor: colors.surface,
+            borderRadius: 10,
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: colors.hairline,
+            paddingHorizontal: 12,
+            paddingVertical: 9,
+            fontSize: 14,
+            color: colors.text,
+            fontFamily: fonts.regular,
+            marginBottom: 10,
         },
     })
 }

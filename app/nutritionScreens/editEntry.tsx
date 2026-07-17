@@ -1,6 +1,7 @@
 import { useNutrition } from '@/context/NutritionContext'
-import { sumIngredients } from '@/context/NutritionContext/functions/ingredients'
-import { Ingredient, NutritionEntry } from '@/context/NutritionContext/types'
+import { applyEdits, itemsForEntry } from '@/context/NutritionContext/functions/entryBuilders'
+import { sumItems } from '@/context/NutritionContext/functions/items'
+import { Item, NutritionEntry } from '@/context/NutritionContext/types'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { parseNumericInput } from '@/lib/utils/number'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -11,7 +12,7 @@ import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, Te
 import uuid from 'react-native-uuid'
 
 type MacroField = 'calories' | 'protein' | 'carbs' | 'fats'
-type DraftIngredient = { key: string; name: string; brand?: string | null; calories: string; protein: string; carbs: string; fats: string; quantity: string }
+type DraftItem = { key: string; name: string; brand?: string | null; calories: string; protein: string; carbs: string; fats: string; quantity: string }
 
 const MACROS: { field: MacroField; short: string; unit: string }[] = [
     { field: 'calories', short: 'Cal', unit: 'kcal' },
@@ -20,23 +21,23 @@ const MACROS: { field: MacroField; short: string; unit: string }[] = [
     { field: 'fats', short: 'F', unit: 'g' },
 ]
 
-function toDraft(ing: Ingredient): DraftIngredient {
+function toDraft(item: Item): DraftItem {
     return {
         key: uuid.v4() as string,
-        name: ing.name,
-        brand: ing.brand ?? null,
-        calories: String(ing.calories ?? 0),
-        protein: String(ing.protein ?? 0),
-        carbs: String(ing.carbs ?? 0),
-        fats: String(ing.fats ?? 0),
-        quantity: String(ing.quantity ?? 1),
+        name: item.name,
+        brand: item.brand ?? null,
+        calories: String(item.calories ?? 0),
+        protein: String(item.protein ?? 0),
+        carbs: String(item.carbs ?? 0),
+        fats: String(item.fats ?? 0),
+        quantity: String(item.quantity ?? 1),
     }
 }
 
-function toIngredient(draft: DraftIngredient): Ingredient {
+function toItem(draft: DraftItem): Item {
     return {
         name: draft.name.trim(),
-        brand: draft.brand,
+        brand: draft.brand?.trim() || null,
         quantity: parseNumericInput(draft.quantity) ?? 1,
         protein: parseNumericInput(draft.protein) ?? 0,
         carbs: parseNumericInput(draft.carbs) ?? 0,
@@ -47,7 +48,7 @@ function toIngredient(draft: DraftIngredient): Ingredient {
 
 const qtyValue = (s: string) => parseNumericInput(s) ?? 1
 
-export default function EditPhotoEntry() {
+export default function EditEntry() {
     const router = useRouter()
     const { entry: entryParam } = useLocalSearchParams<{ entry: string }>()
     const { handleEditNutrition } = useNutrition()
@@ -70,11 +71,11 @@ export default function EditPhotoEntry() {
 
     const [name, setName] = useState(parsedEntry.name)
     const [focused, setFocused] = useState<string | null>(null)
-    const [rows, setRows] = useState<DraftIngredient[]>(() => (parsedEntry.ingredients ?? []).map(toDraft))
+    const [rows, setRows] = useState<DraftItem[]>(() => itemsForEntry(parsedEntry).map(toDraft))
 
-    const totals = sumIngredients(rows.map(toIngredient))
+    const totals = sumItems(rows.map(toItem))
 
-    function setField(key: string, field: keyof DraftIngredient, value: string) {
+    function setField(key: string, field: keyof DraftItem, value: string) {
         setRows((prev) => prev.map((r) => (r.key === key ? { ...r, [field]: value } : r)))
     }
 
@@ -88,26 +89,23 @@ export default function EditPhotoEntry() {
         )
     }
 
-    function addIngredient() {
-        setRows((prev) => [...prev, { key: uuid.v4() as string, name: '', brand: null, calories: '', protein: '', carbs: '', fats: '', quantity: '1' }])
+    function addItem() {
+        setRows((prev) => {
+            const seeded = prev.length === 1 ? [{ ...prev[0], name: name.trim() || prev[0].name }] : [...prev]
+            return [...seeded, { key: uuid.v4() as string, name: '', brand: null, calories: '', protein: '', carbs: '', fats: '', quantity: '1' }]
+        })
     }
 
-    function removeIngredient(key: string) {
+    function removeItem(key: string) {
         if (rows.length <= 1) {
-            Alert.alert('Cannot Remove', 'At least one ingredient is required.')
+            Alert.alert('Cannot Remove', 'At least one item is required.')
             return
         }
         setRows((prev) => prev.filter((r) => r.key !== key))
     }
 
     function handleSave() {
-        const updatedEntry: NutritionEntry = {
-            ...parsedEntry,
-            name: name.trim() || parsedEntry.name,
-            ingredients: rows.map(toIngredient),
-            ...totals,
-        }
-        handleEditNutrition(parsedEntry.id, updatedEntry)
+        handleEditNutrition(parsedEntry.id, applyEdits(parsedEntry, name, rows.map(toItem)))
         router.back()
     }
 
@@ -118,8 +116,8 @@ export default function EditPhotoEntry() {
             </View>
 
             <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-                <Text style={styles.title}>Edit Photo Entry</Text>
-                <Text style={styles.subtitle}>Adjust ingredients — totals update as you type</Text>
+                <Text style={styles.title}>Edit Entry</Text>
+                <Text style={styles.subtitle}>Adjust items — totals update as you type</Text>
 
                 <Text style={styles.fieldLabel}>Meal name</Text>
                 <TextInput
@@ -132,24 +130,36 @@ export default function EditPhotoEntry() {
                     onBlur={() => setFocused(null)}
                 />
 
-                <Text style={styles.section}>Ingredients</Text>
+                <Text style={styles.section}>Items</Text>
                 {rows.map((row) => {
                     const excluded = qtyValue(row.quantity) === 0
                     return (
                         <View key={row.key} style={styles.card}>
                             <View style={styles.titleRow}>
-                                <TextInput
-                                    style={styles.ingName}
-                                    value={row.name}
-                                    onChangeText={(v) => setField(row.key, 'name', v)}
-                                    placeholder="Ingredient"
-                                    placeholderTextColor={colors.placeholder}
-                                    multiline
-                                />
-                                <TouchableOpacity onPress={() => removeIngredient(row.key)} hitSlop={8} style={styles.trash}>
+                                {rows.length > 1 ? (
+                                    <TextInput
+                                        style={styles.ingName}
+                                        value={row.name}
+                                        onChangeText={(v) => setField(row.key, 'name', v)}
+                                        placeholder="Item"
+                                        placeholderTextColor={colors.placeholder}
+                                        multiline
+                                    />
+                                ) : (
+                                    <Text style={[styles.ingName, styles.ingNameSynced]} numberOfLines={2}>{name.trim() || row.name}</Text>
+                                )}
+                                <TouchableOpacity onPress={() => removeItem(row.key)} hitSlop={8} style={styles.trash}>
                                     <Trash2 size={14} color={colors.destructive} strokeWidth={2} />
                                 </TouchableOpacity>
                             </View>
+
+                            <TextInput
+                                style={styles.brandInput}
+                                value={row.brand ?? ''}
+                                onChangeText={(v) => setField(row.key, 'brand', v)}
+                                placeholder="Brand (optional)"
+                                placeholderTextColor={colors.placeholder}
+                            />
 
                             <View style={styles.servRow}>
                                 <Text style={styles.servLabel}>Servings</Text>
@@ -200,9 +210,9 @@ export default function EditPhotoEntry() {
                     )
                 })}
 
-                <TouchableOpacity style={styles.addRow} onPress={addIngredient} activeOpacity={0.7}>
+                <TouchableOpacity style={styles.addRow} onPress={addItem} activeOpacity={0.7}>
                     <Plus size={16} color={colors.nutrition} strokeWidth={2.5} />
-                    <Text style={styles.addText}>Add ingredient</Text>
+                    <Text style={styles.addText}>Add item</Text>
                 </TouchableOpacity>
 
                 <Text style={styles.totalLabel}>Meal total</Text>
@@ -244,7 +254,9 @@ function makeStyles(colors: Colors) {
         card: { backgroundColor: colors.surface, borderRadius: radius.card, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.hairline, padding: 12, marginBottom: 10 },
         titleRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 },
         ingName: { flex: 1, fontSize: 16, color: colors.text, fontFamily: fonts.semibold, letterSpacing: -0.3, paddingVertical: 2 },
+        ingNameSynced: { color: colors.labelMuted },
         trash: { width: 28, height: 28, borderRadius: 8, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.surfaceInset },
+        brandInput: { fontSize: 13, color: colors.textMuted, fontFamily: fonts.regular, fontStyle: 'italic', paddingVertical: 2, marginTop: -8, marginBottom: 10 },
         servRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 },
         servLabel: { fontSize: 11, color: colors.nutrition, textTransform: 'uppercase', letterSpacing: 0.5, fontFamily: fonts.semibold },
         stepRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },

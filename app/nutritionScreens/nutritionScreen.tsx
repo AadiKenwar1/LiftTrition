@@ -1,6 +1,8 @@
 import DailyIntakeCard from '@/components/NutritionComponents/DailyIntakeCard'
 import Entry from '@/components/NutritionComponents/Entry'
 import { useNutrition } from '@/context/NutritionContext'
+import { editEntryHref } from '@/context/NutritionContext/functions/entryRouting'
+import { entrySubtitle } from '@/context/NutritionContext/functions/entryBuilders'
 import { NutritionEntry } from '@/context/NutritionContext/types'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { useToday } from '@/lib/hooks/useToday'
@@ -35,13 +37,7 @@ export default function NutritionScreen() {
             {
                 text: 'Edit',
                 style: 'default',
-                onPress: () => {
-                    const pathname = nutritionEntry.isPhoto ? '/nutritionScreens/editPhotoEntry' : '/nutritionScreens/editManualEntry'
-                    router.push({
-                        pathname,
-                        params: { entry: JSON.stringify(nutritionEntry) },
-                    })
-                },
+                onPress: () => router.push(editEntryHref(nutritionEntry)),
             },
             {
                 text: 'Save',
@@ -96,7 +92,7 @@ export default function NutritionScreen() {
     return (
         <FlatList
             data={todayEntries}
-            renderItem={({ item }) => <Entry name={item.name} calories={item.calories} protein={item.protein} carbs={item.carbs} fats={item.fats} onEditPress={() => handleEdit(item)} showBreakdown={item.isPhoto} onBreakdownPress={() => router.push({ pathname: '/nutritionScreens/editPhotoEntry', params: { entry: JSON.stringify(item) } })} />}
+            renderItem={({ item }) => <Entry name={item.name} calories={item.calories} protein={item.protein} carbs={item.carbs} fats={item.fats} onEditPress={() => handleEdit(item)} showBreakdown={item.isPhoto} onBreakdownPress={() => router.push(editEntryHref(item))} subtitle={entrySubtitle(item.items)} />}
             keyExtractor={(item) => item.id}
             ListHeaderComponent={listHeader}
             ListEmptyComponent={listEmpty}

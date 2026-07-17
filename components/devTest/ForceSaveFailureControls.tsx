@@ -104,7 +104,7 @@ function makeDevNutritionEntry(userID?: string): NutritionEntry {
         fats: 0,
         calories: 0,
         isPhoto: false,
-        ingredients: [],
+        items: [],
         createdAt: now,
         updatedAt: now,
     }

@@ -23,7 +23,7 @@ function createMockSavedEntry(id: string, createdAt: Date): NutritionEntry {
         fats: 10,
         calories: 300,
         isPhoto: false,
-        ingredients: [],
+        items: [],
         createdAt,
         updatedAt: createdAt,
     }

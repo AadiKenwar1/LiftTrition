@@ -169,7 +169,7 @@ export default function FoodDBModalPreview() {
                 fats,
                 calories,
                 isPhoto: false,
-                ingredients: [],
+                items: [],
                 createdAt,
                 updatedAt: createdAt,
             })
@@ -188,7 +188,7 @@ export default function FoodDBModalPreview() {
                     fats: item.fats * quantity,
                     calories: item.calories * quantity,
                     isPhoto: false,
-                    ingredients: [],
+                    items: [],
                     createdAt,
                     updatedAt: createdAt,
                 })

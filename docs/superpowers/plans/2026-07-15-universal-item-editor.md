@@ -998,10 +998,12 @@ And `toItem` must emit `brand: draft.brand?.trim() || null` (adjust if Task 2 le
 ```
 
 (delete the `const pathname = ...isPhoto...` line.)
-- renderItem: `showBreakdown` for every entry, breakdown routes the same way:
+- renderItem: the pencil edits every entry, but the breakdown footer stays
+  photo-only (`showBreakdown={item.isPhoto}` — revised 2026-07-16, see the spec's
+  W3 note); breakdown routes the same way:
 
 ```tsx
-            renderItem={({ item }) => <Entry name={item.name} calories={item.calories} protein={item.protein} carbs={item.carbs} fats={item.fats} onEditPress={() => handleEdit(item)} showBreakdown onBreakdownPress={() => router.push(editEntryHref(item))} />}
+            renderItem={({ item }) => <Entry name={item.name} calories={item.calories} protein={item.protein} carbs={item.carbs} fats={item.fats} onEditPress={() => handleEdit(item)} showBreakdown={item.isPhoto} onBreakdownPress={() => router.push(editEntryHref(item))} />}
 ```
 
 `app/_layout.tsx` (lines 186-187): delete the `editManualEntry` screen; rename the other:
@@ -1446,7 +1448,7 @@ Run: `npx tsc --noEmit` → clean.
 2. FoodDB: search shows macros+brand on rows (after edge deploy); add 1 branded food → entry row shows brand subtitle; Edit → item carries the brand.
 3. FoodDB: stage 2+ foods, combine ON → name pre-fills joined; clear it → entry lands as "Combined Items"; entry row shows "N items"; Edit → each food its own row with its own brand.
 4. Saved: combine 2 saved meals (incl. one legacy meal saved before this change) → all items present, totals correct.
-5. Photo entry: unchanged flow; breakdown button now appears on ALL entries and opens editEntry.
+5. Photo entry: unchanged flow; the breakdown footer appears on photo entries ONLY (revised 2026-07-16 — see the spec's W3 note) and opens editEntry; non-photo entries edit via the pencil.
 6. Restart the app → brands still present (persistence).
 7. Old entry from before this change → Edit opens with 1 synthesized item matching its totals.
 
@@ -1459,7 +1461,7 @@ Run: `npx tsc --noEmit` → clean.
 - Spec W1 (brand persistence + converters + tests) → Task 1. Connector/sync-rules no-change verified in code.
 - Spec vocabulary rename + "item = ingredient" notes (type comment, converter comment, CLAUDE.md) → Task 2.
 - Spec W2 (manual 1-item, foodDB 1-item/N-items with brands, saved keeps `scaleItems`, combined-name pre-fill/fallback, totals = sum of items) → Tasks 3–4. Legacy zero-item entries handled via `itemsForEntry` (plan addition — the spec's "always satisfiable" guard assumption only holds for NEW entries; synthesis makes it hold for old ones too).
-- Spec W3 (rename file → editEntry, retire editManualEntry, routing + registration, blank name → Unnamed Entry, single-item name sync, per-item brand editing, breakdown for every entry) → Task 5 (`applyEdits` keeps the name rules Jest-covered).
+- Spec W3 (rename file → editEntry, retire editManualEntry, routing + registration, blank name → Unnamed Entry, single-item name sync, per-item brand editing; pencil edits every entry while the breakdown footer is photo-only per the 2026-07-16 revision) → Task 5 (`applyEdits` keeps the name rules Jest-covered).
 - Spec collapsed-row display (brand / "N items") → Task 6 (`entrySubtitle` Jest-covered in Task 3).
 - Spec W4 (edge passthrough, `FoodSearchResult` extension, client parse + FoodRow render, Task-11 coordination) → Task 7.
 - Spec Testing section: Jest per workstream → Tasks 1, 3, 4, 7; Dev Hub pages + blocking approval gates → Tasks 4, 5, 6, 7. `useCombineName`'s edited-flag interaction is gate-verified rather than unit-tested (documented in the hook comment).

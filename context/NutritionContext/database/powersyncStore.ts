@@ -6,8 +6,10 @@ import { getDateKey, parseDateKey } from '@/lib/utils/dateHelper'
 import { sanitizeInt, sanitizeMacro } from '@/lib/utils/number'
 import { NutritionEntry } from '../types'
 
+// Item = the DB's "ingredient" row. Table/column names keep the legacy
+// *_ingredients naming (no live migration); only the code vocabulary changed.
 // Map DB row -> NutritionEntry
-function rowToNutritionEntry(row: NutritionEntryRecord, ingredients: NutritionEntryIngredientRecord[]): NutritionEntry {
+export function rowToNutritionEntry(row: NutritionEntryRecord, items: NutritionEntryIngredientRecord[]): NutritionEntry {
     const parsedDate = row.date ? parseDateKey(row.date) : new Date()
 
     return {
@@ -22,13 +24,14 @@ function rowToNutritionEntry(row: NutritionEntryRecord, ingredients: NutritionEn
         calories: row.calories ?? 0,
         isPhoto: !!row.is_photo,
         photoUri: row.photo_uri ?? undefined,
-        ingredients: ingredients.map((ing) => ({
-            name: ing.name!,
-            quantity: ing.quantity ?? 1,
-            protein: ing.protein ?? 0,
-            carbs: ing.carbs ?? 0,
-            fats: ing.fats ?? 0,
-            calories: ing.calories ?? 0,
+        items: items.map((item) => ({
+            name: item.name!,
+            brand: item.brand ?? null,
+            quantity: item.quantity ?? 1,
+            protein: item.protein ?? 0,
+            carbs: item.carbs ?? 0,
+            fats: item.fats ?? 0,
+            calories: item.calories ?? 0,
         })),
         createdAt: row.created_at ? new Date(row.created_at) : new Date(),
         updatedAt: row.updated_at ? new Date(row.updated_at) : new Date(),
@@ -57,7 +60,7 @@ export function nutritionEntryToRow(entry: NutritionEntry) {
 }
 
 // Map DB row -> SavedNutritionEntry
-function rowToSavedNutritionEntry(row: SavedNutritionEntryRecord, ingredients: SavedNutritionEntryIngredientRecord[]): NutritionEntry {
+export function rowToSavedNutritionEntry(row: SavedNutritionEntryRecord, items: SavedNutritionEntryIngredientRecord[]): NutritionEntry {
     return {
         id: row.id!,
         userId: row.user_id!,
@@ -70,13 +73,14 @@ function rowToSavedNutritionEntry(row: SavedNutritionEntryRecord, ingredients: S
         calories: row.calories ?? 0,
         isPhoto: !!row.is_photo,
         photoUri: row.photo_uri ?? undefined,
-        ingredients: ingredients.map((ing) => ({
-            name: ing.name!,
-            quantity: ing.quantity ?? 1,
-            protein: ing.protein ?? 0,
-            carbs: ing.carbs ?? 0,
-            fats: ing.fats ?? 0,
-            calories: ing.calories ?? 0,
+        items: items.map((item) => ({
+            name: item.name!,
+            brand: item.brand ?? null,
+            quantity: item.quantity ?? 1,
+            protein: item.protein ?? 0,
+            carbs: item.carbs ?? 0,
+            fats: item.fats ?? 0,
+            calories: item.calories ?? 0,
         })),
         createdAt: row.created_at ? new Date(row.created_at) : new Date(),
         updatedAt: row.updated_at ? new Date(row.updated_at) : new Date(),
@@ -113,18 +117,18 @@ export async function loadNutritionData(userId: string): Promise<{
 
     const allIngredients = entryIds.length > 0 ? ((await powerSync.getAll('SELECT * FROM nutrition_entry_ingredients WHERE nutrition_entry_id IN (' + entryIds.map(() => '?').join(',') + ')', entryIds)) as NutritionEntryIngredientRecord[]) : []
 
-    const ingredientsByEntryId = new Map<string, NutritionEntryIngredientRecord[]>()
-    for (const ing of allIngredients) {
-        if (ing.nutrition_entry_id) {
-            const existing = ingredientsByEntryId.get(ing.nutrition_entry_id) || []
-            existing.push(ing)
-            ingredientsByEntryId.set(ing.nutrition_entry_id, existing)
+    const itemsByEntryId = new Map<string, NutritionEntryIngredientRecord[]>()
+    for (const item of allIngredients) {
+        if (item.nutrition_entry_id) {
+            const existing = itemsByEntryId.get(item.nutrition_entry_id) || []
+            existing.push(item)
+            itemsByEntryId.set(item.nutrition_entry_id, existing)
         }
     }
 
     const nutritionData: NutritionEntry[] = entryRows.map((row) => {
-        const ingredients = ingredientsByEntryId.get(row.id!) || []
-        return rowToNutritionEntry(row, ingredients)
+        const items = itemsByEntryId.get(row.id!) || []
+        return rowToNutritionEntry(row, items)
     })
 
     const savedEntryRows = (await powerSync.getAll('SELECT * FROM saved_nutrition_entries WHERE user_id = ? ORDER BY created_at DESC', [userId])) as SavedNutritionEntryRecord[]
@@ -133,16 +137,16 @@ export async function loadNutritionData(userId: string): Promise<{
 
     const allSavedIngredients = savedEntryIds.length > 0 ? ((await powerSync.getAll('SELECT * FROM saved_nutrition_entry_ingredients WHERE saved_nutrition_entry_id IN (' + savedEntryIds.map(() => '?').join(',') + ')', savedEntryIds)) as SavedNutritionEntryIngredientRecord[]) : []
 
-    const savedIngredientsByEntryId = new Map<string, SavedNutritionEntryIngredientRecord[]>()
-    for (const ing of allSavedIngredients) {
-        if (ing.saved_nutrition_entry_id) {
-            const existing = savedIngredientsByEntryId.get(ing.saved_nutrition_entry_id) || []
-            existing.push(ing)
-            savedIngredientsByEntryId.set(ing.saved_nutrition_entry_id, existing)
+    const savedItemsByEntryId = new Map<string, SavedNutritionEntryIngredientRecord[]>()
+    for (const item of allSavedIngredients) {
+        if (item.saved_nutrition_entry_id) {
+            const existing = savedItemsByEntryId.get(item.saved_nutrition_entry_id) || []
+            existing.push(item)
+            savedItemsByEntryId.set(item.saved_nutrition_entry_id, existing)
         }
     }
 
-    const savedNutritionEntries: NutritionEntry[] = savedEntryRows.map((row) => rowToSavedNutritionEntry(row, savedIngredientsByEntryId.get(row.id!) || []))
+    const savedNutritionEntries: NutritionEntry[] = savedEntryRows.map((row) => rowToSavedNutritionEntry(row, savedItemsByEntryId.get(row.id!) || []))
 
     const hasData = nutritionData.length > 0 || savedNutritionEntries.length > 0
     return { nutritionData, savedNutritionEntries, hasData }
@@ -179,12 +183,12 @@ export async function upsertNutritionEntry(entry: NutritionEntry): Promise<void>
         }
 
         await tx.execute('DELETE FROM nutrition_entry_ingredients WHERE nutrition_entry_id = ?', [entry.id])
-        for (const ing of entry.ingredients) {
+        for (const item of entry.items) {
             await tx.execute(
                 `INSERT INTO nutrition_entry_ingredients (
-                   id, nutrition_entry_id, name, quantity, protein, carbs, fats, calories, created_at
-                 ) VALUES (uuid(), ?, ?, ?, ?, ?, ?, ?, datetime('now'))`,
-                [entry.id, ing.name, sanitizeMacro(ing.quantity), sanitizeMacro(ing.protein), sanitizeMacro(ing.carbs), sanitizeMacro(ing.fats), sanitizeMacro(ing.calories)],
+                   id, nutrition_entry_id, name, brand, quantity, protein, carbs, fats, calories, created_at
+                 ) VALUES (uuid(), ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))`,
+                [entry.id, item.name, item.brand ?? null, sanitizeMacro(item.quantity), sanitizeMacro(item.protein), sanitizeMacro(item.carbs), sanitizeMacro(item.fats), sanitizeMacro(item.calories)],
             )
         }
     })
@@ -220,12 +224,12 @@ export async function upsertSavedNutritionEntry(entry: NutritionEntry): Promise<
         }
 
         await tx.execute('DELETE FROM saved_nutrition_entry_ingredients WHERE saved_nutrition_entry_id = ?', [entry.id])
-        for (const ing of entry.ingredients) {
+        for (const item of entry.items) {
             await tx.execute(
                 `INSERT INTO saved_nutrition_entry_ingredients (
-                   id, saved_nutrition_entry_id, name, quantity, protein, carbs, fats, calories, created_at
-                 ) VALUES (uuid(), ?, ?, ?, ?, ?, ?, ?, datetime('now'))`,
-                [entry.id, ing.name, sanitizeMacro(ing.quantity), sanitizeMacro(ing.protein), sanitizeMacro(ing.carbs), sanitizeMacro(ing.fats), sanitizeMacro(ing.calories)],
+                   id, saved_nutrition_entry_id, name, brand, quantity, protein, carbs, fats, calories, created_at
+                 ) VALUES (uuid(), ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))`,
+                [entry.id, item.name, item.brand ?? null, sanitizeMacro(item.quantity), sanitizeMacro(item.protein), sanitizeMacro(item.carbs), sanitizeMacro(item.fats), sanitizeMacro(item.calories)],
             )
         }
     })

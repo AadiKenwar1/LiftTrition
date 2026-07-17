@@ -3,9 +3,11 @@ import SavedEntry from '@/components/NutritionComponents/SavedEntry'
 import { useAuth } from '@/context/AuthContext'
 import { useNutrition } from '@/context/NutritionContext'
 import { getFilteredSavedNutritionEntries } from '@/context/NutritionContext/functions/crudFunctions'
-import { scaleIngredients } from '@/context/NutritionContext/functions/ingredients'
-import { Ingredient, NutritionEntry } from '@/context/NutritionContext/types'
+import { buildEntryFromItems, entrySubtitle, itemsForEntry, resolveCombinedName } from '@/context/NutritionContext/functions/entryBuilders'
+import { scaleItems } from '@/context/NutritionContext/functions/items'
+import { Item, NutritionEntry } from '@/context/NutritionContext/types'
 import { fonts, useColors, type Colors } from '@/context/ThemeContext'
+import { useCombineName } from '@/lib/hooks/useCombineName'
 import { useSubmitOnce } from '@/lib/hooks/useSubmitOnce'
 import { confirmDelete } from '@/lib/utils/confirmDelete'
 import { parseNumericInput } from '@/lib/utils/number'
@@ -32,6 +34,8 @@ export default function SavedNutritionModal() {
     const [guardSubmit, submitting] = useSubmitOnce()
     const [addedItems, setAddedItems] = useState<StagedSavedMeal[]>([])
     const [combineItems, setCombineItems] = useState(false)
+    const stagedNames = useMemo(() => addedItems.map((row) => ({ name: row.savedItem.name, quantity: row.quantity })), [addedItems])
+    const [combineName, onCombineNameChange] = useCombineName(combineItems, stagedNames)
     const [quantityInputItem, setQuantityInputItem] = useState<NutritionEntry | null>(null)
     const [quantityValue, setQuantityValue] = useState('1')
     const [searchQuery, setSearchQuery] = useState('')
@@ -80,63 +84,31 @@ export default function SavedNutritionModal() {
 
     async function handleAddAll() {
         if (combineItems && addedItems.length >= 2) {
-            const createdAt = new Date()
-            let protein = 0
-            let carbs = 0
-            let fats = 0
-            let calories = 0
-            const ingredients: Ingredient[] = []
-            const names: string[] = []
-
+            const items: Item[] = []
             for (const row of addedItems) {
-                const q = row.quantity
-                const base = row.savedItem
-                names.push(q > 1 ? `${base.name} ×${q}` : base.name)
-                protein += base.protein * q
-                carbs += base.carbs * q
-                fats += base.fats * q
-                calories += base.calories * q
-                ingredients.push(...scaleIngredients(base.ingredients, q))
+                items.push(...scaleItems(itemsForEntry(row.savedItem), row.quantity))
             }
-
-            const nutritionEntry: NutritionEntry = {
-                id: uuid.v4() as string,
-                userId: userID,
-                name: names.join(' + '),
-                date: new Date(selectedDate),
-                time: createdAt.getTime(),
-                protein: Math.round(protein * 10) / 10,
-                carbs: Math.round(carbs * 10) / 10,
-                fats: Math.round(fats * 10) / 10,
-                calories: Math.round(calories),
-                isPhoto: false,
-                ingredients,
-                createdAt,
-                updatedAt: createdAt,
-            }
-            handleAddNutrition(nutritionEntry)
+            handleAddNutrition(
+                buildEntryFromItems({
+                    userId: userID,
+                    date: new Date(selectedDate),
+                    name: resolveCombinedName(combineName),
+                    items,
+                }),
+            )
         } else {
             for (const row of addedItems) {
-                const createdAt = new Date()
-                const q = row.quantity
                 const base = row.savedItem
-                const nutritionEntry: NutritionEntry = {
-                    id: uuid.v4() as string,
-                    userId: userID,
-                    name: base.name,
-                    date: new Date(selectedDate),
-                    time: createdAt.getTime(),
-                    protein: Math.round(base.protein * q * 10) / 10,
-                    carbs: Math.round(base.carbs * q * 10) / 10,
-                    fats: Math.round(base.fats * q * 10) / 10,
-                    calories: Math.round(base.calories * q),
-                    isPhoto: base.isPhoto,
-                    photoUri: base.photoUri,
-                    ingredients: scaleIngredients(base.ingredients, q),
-                    createdAt,
-                    updatedAt: createdAt,
-                }
-                handleAddNutrition(nutritionEntry)
+                handleAddNutrition(
+                    buildEntryFromItems({
+                        userId: userID,
+                        date: new Date(selectedDate),
+                        name: base.name,
+                        items: scaleItems(itemsForEntry(base), row.quantity),
+                        isPhoto: base.isPhoto,
+                        photoUri: base.photoUri,
+                    }),
+                )
             }
         }
         router.back()
@@ -154,7 +126,7 @@ export default function SavedNutritionModal() {
             <Text style={styles.subtitle}>Sorted by most recently saved</Text>
 
             {addedItems.length > 0 && (
-                <StagedSection label="Added" count={addedItems.length} color={colors.nutrition} combineItems={combineItems} onCombineItemsChange={setCombineItems}>
+                <StagedSection label="Added" count={addedItems.length} color={colors.nutrition} combineItems={combineItems} onCombineItemsChange={setCombineItems} combineName={combineName} onCombineNameChange={onCombineNameChange}>
                     {addedItems.map((row) => {
                         const q = row.quantity
                         const s = row.savedItem
@@ -252,7 +224,7 @@ export default function SavedNutritionModal() {
                         extraData={savedNutritionEntries.length}
                         keyExtractor={(item) => item.id}
                         ListHeaderComponent={listHeader}
-                        renderItem={({ item }) => <SavedEntry name={item.name} calories={item.calories} protein={item.protein} carbs={item.carbs} fats={item.fats} onAddPress={() => openQuantityModal(item)} onDeletePress={() => confirmUnsave(item)} />}
+                        renderItem={({ item }) => <SavedEntry name={item.name} calories={item.calories} protein={item.protein} carbs={item.carbs} fats={item.fats} onAddPress={() => openQuantityModal(item)} onDeletePress={() => confirmUnsave(item)} subtitle={entrySubtitle(item.items)} />}
                         ListEmptyComponent={renderListEmpty}
                         contentContainerStyle={[styles.listContent, savedNutritionEntries.length === 0 && styles.listContentEmpty]}
                         showsVerticalScrollIndicator={false}

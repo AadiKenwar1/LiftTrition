@@ -146,9 +146,16 @@ Every add path produces ≥1 item, each carrying its own `brand` where known:
      kept to avoid a live migration."
   2. A one-line entry in `CLAUDE.md` conventions.
 - **Routing** (`app/nutritionScreens/nutritionScreen.tsx`): `handleEdit`
-  (38-44) and the breakdown button (99) both route to `editEntry` for **all**
-  entries — drop the `isPhoto ?` branch; the edit/breakdown affordance shows
-  for every entry, not just photo entries.
+  (38-44) and the breakdown button both route to `editEntry` for **all**
+  entries — drop the `isPhoto ?` branch on the **edit** path (the pencil edits
+  every entry). **Revised 2026-07-16:** the *breakdown footer* ("Tap to see
+  the breakdown") stays gated to `showBreakdown={item.isPhoto}` — only photo
+  entries get it. Rationale: editing every entry's items is already reachable
+  via the pencil (same `editEntry` screen), and the collapsed row's "N items"
+  subtitle already signals internal structure; the footer's only distinct job
+  is *revealing* contents the user didn't author, which is true only for
+  AI-decomposed photo entries. Non-photo entries were hand-assembled by the
+  user, so there is nothing to reveal.
 - **Registration** (`app/_layout.tsx`): remove the `editManualEntry` Stack
   screen; rename the `editPhotoEntry` route to `editEntry`.
 - **Shared save handler:** blank name → `'Unnamed Entry'` (change
@@ -179,8 +186,9 @@ Every add path produces ≥1 item, each carrying its own `brand` where known:
 ### Collapsed entry-row display (W2/W3 UI)
 
 - `Entry` / `SavedEntry` collapsed rows: subtitle = the single item's brand
-  when the entry has 1 item, else "N items". Breakdown (per-item, with brands)
-  is the tap-through, now available for every entry.
+  when the entry has 1 item, else "N items". Editing per-item detail is reached
+  via the pencil on every entry; the breakdown *footer* is photo-only (see the
+  2026-07-16 revision under W3).
 
 ---
 

@@ -21,7 +21,7 @@ const SAMPLES: { label: string; mode: ScanMode; module: number }[] = [
 
 type Macros = { calories: number; protein: number; carbs: number; fats: number }
 type TextResult = { ms: number; raw?: string; macros?: Macros; allZero?: boolean; error?: string }
-type PhotoResult = { ms: number; provider: string; entry?: NutritionEntry; sources?: EnrichmentSource[]; rawIngredients?: NutritionEntry['ingredients']; error?: string }
+type PhotoResult = { ms: number; provider: string; entry?: NutritionEntry; sources?: EnrichmentSource[]; rawItems?: NutritionEntry['items']; error?: string }
 
 function parseMacros(raw: string): Macros | null {
     let c = raw.trim()
@@ -115,8 +115,8 @@ export default function AiTest() {
         try {
             // Same production pipeline (mode-aware resize/quality) the real camera uses.
             const processed = await processPickedImageUri(selectedImage, scanMode)
-            const { entry, sources, rawIngredients } = await runPhotoAnalysis(processed, userID || 'dev-test', scanMode, provider)
-            setPhotoResult({ ms: Date.now() - start, provider: providerSel, entry, sources, rawIngredients })
+            const { entry, sources, rawItems } = await runPhotoAnalysis(processed, userID || 'dev-test', scanMode, provider)
+            setPhotoResult({ ms: Date.now() - start, provider: providerSel, entry, sources, rawItems })
         } catch (error: any) {
             setPhotoResult({ ms: Date.now() - start, provider: providerSel, error: error?.message ?? 'Failed' })
         } finally {
@@ -193,16 +193,16 @@ export default function AiTest() {
                             <Text style={styles.resultText}>
                                 Total: {photoResult.entry?.calories} kcal · P {photoResult.entry?.protein}g · C {photoResult.entry?.carbs}g · F {photoResult.entry?.fats}g
                             </Text>
-                            {photoResult.entry?.ingredients.map((ing, i) => {
-                                const raw = photoResult.rawIngredients?.[i]
+                            {photoResult.entry?.items.map((item, i) => {
+                                const raw = photoResult.rawItems?.[i]
                                 const used = photoResult.sources?.[i] ?? 'vision'
                                 return (
                                     <View key={i} style={styles.ingredientRow}>
                                         <Text style={styles.ingredientName} numberOfLines={2}>
-                                            {ing.quantity}× {ing.brand || ing.name}
+                                            {item.quantity}× {item.brand || item.name}
                                         </Text>
                                         <Text style={styles.pathLine}>Path B (vision): {raw?.calories}kcal · P{raw?.protein} C{raw?.carbs} F{raw?.fats}</Text>
-                                        <Text style={styles.pathLine}>Path A (FatSecret): {used === 'fatsecret' ? `${ing.calories}kcal · P${ing.protein} C${ing.carbs} F${ing.fats}` : ing.brand ? 'no match' : 'n/a (not branded)'}</Text>
+                                        <Text style={styles.pathLine}>Path A (FatSecret): {used === 'fatsecret' ? `${item.calories}kcal · P${item.protein} C${item.carbs} F${item.fats}` : item.brand ? 'no match' : 'n/a (not branded)'}</Text>
                                         <Text style={styles.sourceTag}>Used: {used}</Text>
                                     </View>
                                 )

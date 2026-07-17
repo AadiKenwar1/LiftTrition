@@ -1,6 +1,7 @@
 jest.mock('@/lib/powersync/system', () => ({ powerSync: { getAll: jest.fn(), writeTransaction: jest.fn(), execute: jest.fn() } }))
 
-import { nutritionEntryToRow, savedNutritionEntryToRow } from '../powersyncStore'
+import { nutritionEntryToRow, rowToNutritionEntry, rowToSavedNutritionEntry, savedNutritionEntryToRow } from '../powersyncStore'
+import type { NutritionEntryIngredientRecord, NutritionEntryRecord, SavedNutritionEntryIngredientRecord, SavedNutritionEntryRecord } from '@/lib/powersync/AppSchema'
 import { NutritionEntry } from '../../types'
 
 function makeEntry(overrides: Partial<NutritionEntry> = {}): NutritionEntry {
@@ -15,7 +16,7 @@ function makeEntry(overrides: Partial<NutritionEntry> = {}): NutritionEntry {
         fats: 10,
         calories: 391.50000000000006,
         isPhoto: false,
-        ingredients: [],
+        items: [],
         createdAt: new Date(2026, 0, 1),
         updatedAt: new Date(2026, 0, 1),
         ...overrides,
@@ -75,5 +76,55 @@ describe('savedNutritionEntryToRow', () => {
         expect(row.carbs).toBe(20)
         expect(row.fats).toBe(10)
         expect(row.calories).toBe(400)
+    })
+})
+
+const entryRow = {
+    id: 'e1', user_id: 'u1', name: 'Bowl', date: '2026-07-15', time: 0,
+    protein: 10, carbs: 5, fats: 2, calories: 80, is_photo: 0, photo_uri: null,
+    created_at: '2026-07-15T12:00:00.000Z', updated_at: '2026-07-15T12:00:00.000Z',
+} as NutritionEntryRecord
+
+const savedRow = {
+    id: 's1', user_id: 'u1', name: 'Bowl', protein: 10, carbs: 5, fats: 2, calories: 80,
+    is_photo: 0, photo_uri: null,
+    created_at: '2026-07-15T12:00:00.000Z', updated_at: '2026-07-15T12:00:00.000Z',
+} as SavedNutritionEntryRecord
+
+function ingredientRow(overrides: Record<string, unknown> = {}): NutritionEntryIngredientRecord {
+    return {
+        id: 'i1', nutrition_entry_id: 'e1', name: 'Greek Yogurt', brand: 'Fage',
+        quantity: 1, protein: 10, carbs: 5, fats: 2, calories: 80,
+        created_at: '2026-07-15T12:00:00.000Z', ...overrides,
+    } as NutritionEntryIngredientRecord
+}
+
+function savedIngredientRow(overrides: Record<string, unknown> = {}): SavedNutritionEntryIngredientRecord {
+    return {
+        id: 'i1', saved_nutrition_entry_id: 's1', name: 'Greek Yogurt', brand: 'Fage',
+        quantity: 1, protein: 10, carbs: 5, fats: 2, calories: 80,
+        created_at: '2026-07-15T12:00:00.000Z', ...overrides,
+    } as SavedNutritionEntryIngredientRecord
+}
+
+describe('brand round-trip', () => {
+    it('reads brand from a nutrition ingredient row', () => {
+        const entry = rowToNutritionEntry(entryRow, [ingredientRow()])
+        expect(entry.items[0].brand).toBe('Fage')
+    })
+
+    it('maps a legacy nutrition ingredient row without brand to null', () => {
+        const entry = rowToNutritionEntry(entryRow, [ingredientRow({ brand: null })])
+        expect(entry.items[0].brand).toBeNull()
+    })
+
+    it('reads brand from a saved ingredient row', () => {
+        const entry = rowToSavedNutritionEntry(savedRow, [savedIngredientRow()])
+        expect(entry.items[0].brand).toBe('Fage')
+    })
+
+    it('maps a legacy saved ingredient row without brand to null', () => {
+        const entry = rowToSavedNutritionEntry(savedRow, [savedIngredientRow({ brand: null })])
+        expect(entry.items[0].brand).toBeNull()
     })
 })
