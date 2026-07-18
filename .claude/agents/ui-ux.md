@@ -33,3 +33,39 @@ write or apply code.
   where relevant), Difficulty + Severity tags, Trivial → one-liner (flag
   `⚠ LAUNCH-BLOCKER` if Critical/High or an App-Review blocker).
 - **Report only. Do not write code.**
+
+## DevHub approval (required on every ui-ux brief)
+
+A ui-ux fix must be verifiable in **Dev Hub** (Settings → Developer → Dev Hub) before it
+can be approved — reasoning in a brief is not enough for a visual/interaction change. So
+every ui-ux brief carries a `devHubPlan`:
+
+- **Component(s) under test** — what the fix changes.
+- **Test page** — the existing `components/devTest/*` page that exercises it, OR `NEW:`
+  plus the four touchpoints to add one: `components/devTest/XTest.tsx`, the
+  `app/devTest/x.tsx` route stub, the `_layout.tsx` Stack entry, and the `GROUPS` entry
+  in `DevHub.tsx`.
+- **Scenarios** — the `DevControls` toggles to exercise; they MUST include **light and
+  dark**, plus the exact state the fix targets (primary-CTA contrast, a row at the
+  largest Dynamic Type, VoiceOver focus/label order, a 44pt touch target, …).
+- **Expected result** per scenario — what "approved" looks like.
+- **`devHubApproval`** — leave as `pending`; a human flips it after viewing in Dev Hub.
+
+Pure copy-only or navigation-only fixes may set `devHubApproval = 'na'` with a one-line
+reason instead of inventing a preview. Anything with a visual or interactive change needs
+a real plan. A dedicated `devhub` gate reviews this plan and raises a finding if it is
+missing, inadequate, or not actually previewable.
+
+## Review mode
+
+You may be invoked to **review** an existing fix brief instead of authoring one — the
+prompt will hand you a brief and say REVIEW MODE. In that mode:
+
+- Assume the fix is flawed. From your domain lens, hunt for: wrong or incomplete root
+  cause, missed call sites/consumers, unhandled edge cases, behavior regressions, and
+  hallucinated `file:line` references — and flag a materially simpler *correct* approach
+  if one exists.
+- Anchor EVERY finding to real code you verified: `path:line` + one line of why.
+- Do NOT rate severity or confidence — the adjudicator decides materiality.
+- Do NOT rewrite the fix or produce a new brief. Report findings only.
+- If you find nothing material, return `clean = true` with an empty findings list.

@@ -1,0 +1,466 @@
+===============================================================================
+ PLATES — PRODUCTION-READINESS INDEX
+ Plain-language, difficulty-sorted, agent-routed companion to
+ docs/PRODUCTION_READINESS_AUDIT.md
+===============================================================================
+
+HOW TO READ THIS FILE
+  Every issue from the audit is restated in 1-2 plain sentences and tagged:
+
+    [Difficulty]  <ID>  (Severity)  [flags]   route: <agent(s)>
+
+  Difficulty = how much design thought the FIX needs (independent of severity):
+    Deep     - needs real thought: many call sites, shared/duplicated logic,
+               concurrency, data-migration ordering, or a contract to preserve.
+    Moderate - localized but non-obvious: one file/flow, a few edge cases.
+    Trivial  - mechanical/copy/token/one-liner, no real blast radius.
+
+  Severity is carried verbatim from the audit (Critical / High / Medium / Low).
+
+  Flags:
+    LAUNCH-BLOCKER  - must be fixed (or verified) before submission, even if the
+                      fix itself is Trivial. Do not let it get lost.
+    -> coordinator  - targeted by >1 agent; each domain agent writes a brief, then
+                      the coordinator merges them into one reconciled fix.
+
+  Routing agents: security-cost, logic-correctness, ui-ux, infra-reliability,
+  performance, code-structure  (+ coordinator for multi-agent issues).
+
+PLAN
+  - DEEP + MODERATE issues (58) get a full agent-authored fix brief in Step 2.
+  - TRIVIAL issues (24) do NOT get an agent; their one-line fix note is inline
+    below (few-word "why easy" + the fix in a phrase).
+
+TALLY
+  Deep: 13   Moderate: 45   Trivial: 24   (82 issues)
+  Full briefs planned: 58   Inline one-liners: 24
+
+===============================================================================
+ DEEP  — hardest, most design thought (full fix brief)
+===============================================================================
+
+[Deep] C1  (Critical)   route: security-cost
+  What: Both the AI-vision and food-search Edge Functions do one auth check and then
+        call the paid provider (OpenAI/Gemini/FatSecret) with no rate limit, quota, or
+        cap, so any free account can script the most expensive path in a loop and run up
+        unbounded API spend.
+  Files: lib/supabase/functions/fetchOpenAI/index.ts:162-206; fetchFoodDB/index.ts:47-98
+
+[Deep] C3  (Critical)   route: logic-correctness
+  What: If a setting changes while a save is in flight, a ref that guards saving sticks
+        "true" forever, so every later settings change lives only in memory and is lost
+        on app kill — for the whole session, silently.
+  Files: context/SettingsContext/index.tsx:148-191
+
+[Deep] H1  (High)   route: security-cost
+  What: Premium is enforced only by a local "if (!hasPremium)" in the client; the Edge
+        Functions never check entitlement, so a direct HTTP call gets AI scan / macros /
+        food search for free — and this is what makes C1 free to exploit.
+  Files: context/BillingContext/index.tsx:133; cameraScreen.tsx:35; addNutritionModal.tsx:62; foodDBModal.tsx:30,93
+
+[Deep] H2  (High)   -> coordinator   route: infra-reliability + logic-correctness + code-structure
+  What: The PowerSync Connector only dead-letters two error classes; any other permanent
+        error retries forever and wedges all syncing (only escape = force sign-out = data
+        loss), while a custom-exercise unique-conflict silently drops the row. The branches
+        are hand-duplicated and "any"-typed, so every new table risks repeating this.
+  Files: lib/powersync/Connector.ts:10,15-24,116,181-188; FlushUploads.ts:73
+
+[Deep] H4  (High)   route: infra-reliability
+  What: Production observability is near-zero — only 3 Sentry capture sites, no breadcrumbs,
+        no setUser, route crashes swallowed — so the scariest silent bugs (sync wedge,
+        settings wedge, forced sign-out data loss) would be completely invisible.
+  Files: app/_layout.tsx:52,67; SyncWatchdog.tsx:73-83; orchestrator.ts:66; plus 5 more
+
+[Deep] H6  (High)   -> coordinator   route: performance + code-structure
+  What: Settings, Workout, and Auth providers pass fresh inline value objects and the repo
+        has zero React.memo, so every settings write triggers two extra app-wide render
+        passes and any auth refresh ripples through everything.
+  Files: context/SettingsContext/index.tsx:216-234,122; WorkoutContext/index.tsx:477-514; AuthContext/index.tsx:60-69
+
+[Deep] H7  (High)   -> coordinator   route: performance + security-cost
+  What: Startup loads a user's ENTIRE history ("SELECT *" with no date bounds or paging)
+        into context with 2-3 Date allocations per row — paid on every cold start, user
+        change, and failed write; a 2-year user carries ~13k rows in RAM permanently.
+  Files: WorkoutContext/database/powersyncStore.ts:80-83; NutritionContext/database/powersyncStore.ts:114-149
+
+[Deep] H8  (High)   route: performance
+  What: The hottest taps (logging a set, the always-mounted Progress tab, nutrition home)
+        re-filter/re-sort full history using getDateKey, an Intl call, twice per comparison
+        — tens of thousands of Intl calls per "+" tap at 10k logs.
+  Files: lib/utils/dateHelper.ts:25-27; logsModal.tsx:56-68; progressionFunctions.ts:50-76; progress.tsx:77-86
+
+[Deep] H10  (High)   -> coordinator   route: code-structure + logic-correctness
+  What: The "walk back 30 days and gap-fill" logic exists in 4 copies that have already
+        drifted (volume rounds, macros don't, body-weight parses keys by hand) and now
+        carry live bugs like leading-zero backfill corrupting the "Change" stat.
+  Files: graphFunctions.tsx:24-82; volumeFunctions.tsx:9-107; bodyWeightFunctions.tsx:74-122; GraphStats.tsx:36-38
+
+[Deep] H15  (High)   -> coordinator   route: code-structure + ui-ux + logic-correctness
+  What: Near-identical modal twins got hardening on one side only — addWorkoutModal has
+        useSubmitOnce but renameModal doesn't, editEntry's Save and its JSON.parse are
+        unguarded, and the food-staging state machine + item math are duplicated by hand.
+  Files: renameModal.tsx:32-44; editEntry.tsx:107-110; foodDBModal.tsx vs savedNutritionModal.tsx
+
+[Deep] M2  (Medium)   route: infra-reliability
+  What: There is no backup/DR story — a Supabase loss syncs DOWN over the local copy with
+        no re-upload path (and sign-out destroys the local copy), and meal photos point at
+        a purgeable cache dir, so "synced" photos render broken after any restore.
+  Files: lib/powersync/orchestrator.ts:100; lib/openAI/mealImage.ts:35-40
+
+[Deep] M12  (Medium)   route: performance
+  What: The upload queue drains one HTTP round-trip per operation with extra pre-SELECTs,
+        and a single drag-reorder queues N order-bump ops, so multi-day offline backlogs
+        drain slowly and stress the sign-out flush gate.
+  Files: lib/powersync/Connector.ts:88-121,129-180; workout powersyncStore.ts:159-169,262-272
+
+[Deep] M17  (Medium)   route: code-structure
+  What: The nutrition store duplicates its row-mapping, upsert, and load blocks 2-4 times
+        in the same file, so adding one column means editing up to 4 places or entry and
+        saved-meal behavior silently diverges.
+  Files: NutritionContext/database/powersyncStore.ts:27-35/76-84, 163-194/205-235, 114-149
+
+===============================================================================
+ MODERATE  — localized but non-obvious (full fix brief)
+===============================================================================
+
+[Moderate] C2  (Critical)   -> coordinator   route: infra-reliability + logic-correctness
+  What: The client already writes decimal calories but production Postgres columns are still
+        INTEGER until a pending migration runs, so a decimal upload errors and is dead-lettered
+        — the entry silently vanishes server-side. Nothing enforces running the migration first.
+  Files: lib/supabase/migrations/nutrition_calories_real.sql; AppSchema.ts:62,93; Connector.ts:15-24,108-117
+
+[Moderate] H3  (High)   -> coordinator   route: ui-ux + infra-reliability + logic-correctness
+  What: waitForFirstSync never rejects on network failure and the retry UI only shows on
+        rejection, so a fresh install with PowerSync unreachable is stuck on "Syncing data..."
+        forever with no timeout, retry, or sign-out escape. (Strongest hotspot in the audit.)
+  Files: PowerSyncGuard.tsx:17-31; useAsyncLoad.ts:30-35; AppLoadingScreen.tsx:93-99
+
+[Moderate] H5  (High)   route: infra-reliability
+  What: There is no CI gate at all — tests never run pre-build, there's no lint config and no
+        typecheck script, and EAS builds are triggered manually, so a shipped regression costs
+        a full App Store review cycle.
+  Files: .github/workflows/codeql.yml; package.json:5-13
+
+[Moderate] H9  (High)   route: logic-correctness
+  What: Item quantities are pushed through a macro-rounder on save (0.25 servings persists as
+        0.3), but the stored totals were computed from the unrounded value — so merely opening
+        and re-saving a meal silently changes its calories with no user edit.
+  Files: NutritionContext/database/powersyncStore.ts:191,232; lib/utils/number.ts:21-26; entryBuilders.ts:65-69
+
+[Moderate] H11  (High)   -> coordinator   route: code-structure + logic-correctness
+  What: The home-screen bodies live under app/ so Expo Router auto-registers them as routes,
+        but they're in no Stack.Protected group — reachable by deep link before auth/paywall —
+        and the onboarding guard doesn't even require a session.
+  Files: app/(tabs)/index.tsx:1-2; app/_layout.tsx:159-236
+
+[Moderate] H12  (High)   route: ui-ux
+  What: Only 25 accessibilityLabels exist across 14 files, so the FAB, mode switcher, entry
+        edit pencil, delete/restore actions and the loading retry link are all unlabeled —
+        core logging flows cannot be completed with VoiceOver.
+  Files: Fab.tsx:93-97; ModeSwitcher.tsx:30-41; Entry.tsx:43-47; Log.tsx:52-56; +10 more
+
+
+[Moderate] M1  (Medium)   route: logic-correctness
+  What: Sign-out flushes only the PowerSync queue, then wipes SQLite — a settings change still
+        in the retry loop (or wedged by C3) is destroyed silently. Gate sign-out on the dirty
+        flag or force a final upsert first.
+  Files: AuthContext/functions/accountFunctions.tsx:30-43; FlushUploads.ts:44-74
+
+[Moderate] M3  (Medium)   route: infra-reliability
+  What: Migrations are eight loose SQL files applied by hand via the dashboard with no ledger,
+        and the reference schema already shows the post-migration state while prod is pre-migration,
+        so it's aspirational, not a source of truth.
+  Files: lib/supabase/migrations/
+
+[Moderate] M4  (Medium)   route: infra-reliability
+  What: assertRequiredEnv() throws at module scope BEFORE Sentry.init, so a missing env var
+        crashes with no telemetry, and eas.json has no env blocks in any profile so
+        preview/production separation is invisible from the repo.
+  Files: app/_layout.tsx:60-65; eas.json
+
+[Moderate] M5  (Medium)   route: infra-reliability
+  What: Sentry has no environment/release separation (preview and App Store builds share one
+        stream), no tracing, and SENTRY_AUTH_TOKEN is unreferenced so source-map symbolication
+        is unverified.
+  Files: app/_layout.tsx:62-65
+
+[Moderate] M6  (Medium)   route: infra-reliability
+  What: expo-updates isn't installed and app.json has no runtimeVersion/updates config, so every
+        hotfix is a full review cycle — which materially lengthens any incident window given the
+        C2/H2 data-loss risks.
+  Files: app.json; package.json
+
+[Moderate] M7  (Medium)   route: security-cost
+  What: Supabase access and long-lived refresh tokens are stored unencrypted in AsyncStorage;
+        consider swapping the auth storage adapter to expo-secure-store.
+  Files: lib/supabase/client.ts:10-15
+
+[Moderate] M8  (Medium)   route: security-cost
+  What: The Edge Functions have no AbortController, so when the client's 30s timeout gives up
+        the provider call still completes and bills.
+  Files: lib/supabase/functions/fetchOpenAI/index.ts:93-97,138-145
+
+[Moderate] M9  (Medium)   route: performance
+  What: AI photos upload full-size (no dimension cap), allocating ~3-5MB base64 on the JS thread
+        per shot; a ~1024px resize cuts the payload roughly 10x.
+  Files: cameraScreen.tsx:100-102,130-134; aiFunctions.tsx:91-93
+
+[Moderate] M10  (Medium)   route: performance
+  What: The downsample util is dead code (only its own test imports it) while the 1Y chart feeds
+        365 raw points into a graph that rebuilds an O(n) key per render, recomputes scale
+        unmemoized, remounts, and imposes a deliberate 200ms spinner each time.
+  Files: lib/utils/downsample.ts; Graph1.tsx:39,47-51,74-117
+
+[Moderate] M11  (Medium)   -> coordinator   route: performance + code-structure
+  What: The Settings tab polls SQLite every second forever (getUploadQueueStats on a 1s interval
+        with no focus gating), and since tabs stay mounted it runs for the whole session.
+  Files: app/(tabs)/settings.tsx:29-47
+
+[Moderate] M13  (Medium)   route: performance
+  What: Exercise search runs Fuse over 1,318 items on every keystroke with no debounce (food
+        search is properly debounced at 700ms), and 1,318 exercise PNGs (~12MB) are statically
+        required up front.
+  Files: exerciseLibrary/dataV2/imageMap.ts; addExerciseModal.tsx:39-50
+
+[Moderate] M14  (Medium)   route: logic-correctness
+  What: useToday only recomputes on app foreground/background transitions, so while the app stays
+        open past midnight, streaks, "Today" labels, and date grouping stay on yesterday until a
+        background/foreground cycle.
+  Files: lib/hooks/useToday.ts:8-17
+
+[Moderate] M15  (Medium)   -> coordinator   route: logic-correctness + code-structure
+  What: The persistence state machines have zero tests — the SettingsContext save loop (home of
+        C3), the orchestrator, and the 312-line workout store are all untested while their sibling
+        stores are tested.
+  Files: SettingsContext/index.tsx:148-191; orchestrator.ts:23-30,113-141; workout powersyncStore.ts:117-312
+
+[Moderate] M16  (Medium)   route: code-structure
+  What: Each context has two write paths — delete/archive embed raw writeTransaction SQL in the
+        provider while inserts go through the database layer — and the fault-injection harness only
+        covers the store path, so inline write errors can't be exercised.
+  Files: WorkoutContext/index.tsx:94-98,211-264,327,354
+
+[Moderate] M20  (Medium)   route: code-structure
+  What: Type erosion: RevenueCat offerings are "any" throughout (an SDK upgrade breaking
+        offerings.current.monthly fails at runtime in the paywall), and ~19 non-null assertions on
+        PowerSync row parsing push nulls into typed state instead of validating.
+  Files: BillingContext/types.ts:4; nutrition/workout powersyncStore row parsing
+
+[Moderate] M21  (Medium)   route: code-structure
+  What: Several lib/ modules import upward from context/, a layering inversion that means they
+        can't be reused or tested below the context layer.
+  Files: useNotificationScheduler.ts:1; useCombineName.ts:1; notifications/scheduler.ts:1; builders.ts:1
+
+[Moderate] M22  (Medium)   route: code-structure   (overlaps H11)
+  What: 33 devTest routes are registered in the production navigator — the component code is
+        stripped from the bundle, but the route table, titles, and deep-linkable null screens
+        still ship.
+  Files: app/_layout.tsx:203-235
+
+
+[Moderate] M27  (Medium)   route: ui-ux
+  What: Saving a meal gives no feedback (silent success) and has no duplicate guard, so re-taps
+        mint "name (2)" copies.
+  Files: app/nutritionScreens/nutritionScreen.tsx:44-48 Developer note: The duplicate logic we have right now is fine
+
+[Moderate] M28  (Medium)   route: ui-ux
+  What: After the OS revokes notification permission, the toggle keys on the wrong state — tapping
+        it does visibly nothing and never points the user to Settings.
+  Files: app/settingsScreens/notifications.tsx:39-51
+
+[Moderate] M29  (Medium)   route: ui-ux
+  What: Font scaling is enabled but several rows and CTAs hardcode fixed heights, so text clips at
+        large Dynamic Type; use minHeight or maxFontSizeMultiplier.
+  Files: Log.tsx:27,78; OnboardingScaffold.tsx:77-79; logsModal.tsx:364-405; progress.tsx:350 
+
+[Moderate] M30  (Medium)   route: ui-ux
+  What: Account deletion gets the same one-tap Alert as deleting a single set — no second stage and
+        no note that the App Store subscription won't auto-cancel.
+  Files: app/settingsScreens/profile.tsx:120-138
+
+[Moderate] M31  (Medium)   route: ui-ux
+  What: There's no sign-out escape during onboarding, so a user signed in with the wrong Apple ID
+        must fabricate a profile or delete the app to switch accounts.
+  Files: app/onboardingScreens/goals.tsx:28; app/_layout.tsx:162-175
+
+[Moderate] M32  (Medium)   route: ui-ux
+  What: Frequent remove/add/stepper controls are 18-32pt with no hitSlop, below the 44pt touch-target
+        floor.
+  Files: foodDBModal.tsx:501-510; savedNutritionModal.tsx:375-384; FoodRow.tsx:105-114; addExerciseModal.tsx:139
+
+[Moderate] L1  (Low)   route: logic-correctness
+  What: The default height 175 is metric but the default unit system is imperial, so a null-height
+        row hydrates as 175 INCHES (heightCm = 444) and produces absurd BMR/targets.
+  Files: SettingsContext/defaults.ts:12,15; macroCalculation.tsx:30
+
+[Moderate] L2  (Low)   route: logic-correctness
+  What: The "maintain" path in the adjust wizard overwrites goalPace with 0, showing "0.0 lbs/week"
+        and hitting a unit-ambiguous pace<=0 fallback.
+  Files: adjustNutrition1.tsx:38; adjustNutrition4.tsx:53; lib/utils/goalMath.ts:6
+
+[Moderate] L3  (Low)   -> coordinator   route: infra-reliability + logic-correctness
+  What: A settings PATCH is silently dropped when no server row exists yet — the op is marked done
+        with no capture, so the change is lost.
+  Files: lib/powersync/Connector.ts:220-224
+
+[Moderate] L12  (Low)   route: logic-correctness
+  What: Legacy fatigue/1RM windows compare midnight-normalized log dates against a time-of-day cutoff,
+        so whether a boundary day is included varies by wall clock. (Fatigue is de-emphasized, so
+        impact is limited.)
+  Files: fatigueFunctions.tsx:212-219; oneRepMaxFunctions.tsx:23-34
+
+[Moderate] L13  (Low)   route: logic-correctness
+  What: Concurrent notification reschedules can interleave their cancel/schedule steps and double-book
+        a reminder.
+  Files: lib/notifications/scheduler.ts:22-30; useNotificationScheduler.ts:19-34
+
+[Moderate] L14  (Low)   route: logic-correctness   (gap-fill family, see H10)
+  What: The body-weight graph backfills days before the first entry with 0, which crushes the chart
+        scale and corrupts the "Change" stat if the day-1 weigh-in is missing.
+  Files: bodyWeightFunctions.tsx:101-118; GraphStats.tsx:36-38
+
+[Moderate] L16  (Low)   route: performance
+  What: The ProgressWheel animates its number via per-frame setState (~60 renders/sec per calorie
+        change).
+  Files: components/GraphComponents/ProgressWheel.tsx:67-81
+
+[Moderate] L17  (Low)   route: performance
+  What: Some memos are self-defeating because their deps are freshly-built arrays, and the archive
+        image map is built over all exercises each time.
+  Files: exerciseScreen.tsx:29-40; archiveModal.tsx:33-41
+
+[Moderate] L18  (Low)   route: performance
+  What: Food search results render via .map() in a ScrollView (bounded ~50 by page size) and the
+        in-memory food cache is unbounded per key with a 7-day TTL.
+  Files: foodDBModal.tsx:219,316-332; lib/foodDB/foodDB.ts:49-66
+
+[Moderate] L19  (Low)   route: performance
+  What: The static exercise library is copied into React state and re-spread wholesale whenever a
+        custom exercise changes; the fatigue handlers it feeds have zero production callers.
+  Files: WorkoutContext/index.tsx:41,370-380,409-416
+
+[Moderate] L21  (Low)   route: code-structure
+  What: Entry and SavedEntry are near-duplicate cards with cosmetic drift ("kcal" vs "calories",
+        token vs hardcoded radii) that will keep diverging.
+  Files: Entry.tsx:38-41,161-184; SavedEntry.tsx:33-57,140-167
+
+[Moderate] L30  (Low)   route: ui-ux
+  What: A stuck upload queue shows only a passive "Syncing N changes..." line forever; the
+        SyncWatchdog never escalates the wedge to the user.
+  Files: app/(tabs)/settings.tsx:49-53
+
+[Moderate] L31  (Low)   route: ui-ux
+  What: If the post-purchase onboarding-commit fails, "Maybe later" becomes the mislabeled retry
+        path for a user who has already paid.
+  Files: app/onboardingScreens/paywall.tsx:59-66,76
+
+===============================================================================
+ TRIVIAL  — mechanical / one-liner (inline fix note; no agent)
+===============================================================================
+
+[Trivial] C4  (Critical)  LAUNCH-BLOCKER   route: ui-ux
+  What: The nutrition entry Delete in the options menu fires immediately with no confirm dialog, so
+        one mis-tap permanently destroys the entry.
+  Fix (why easy): every sibling flow already wraps delete in confirmDelete — copy that one call.
+        (app/nutritionScreens/nutritionScreen.tsx:50-52)
+
+[Trivial] H14  (High)  LAUNCH-BLOCKER   route: security-cost
+  What: A checked-in migration creates a BYPASSRLS role with a literal placeholder password and
+        SELECT on auth.users; if the deployed DB used it verbatim that's a full cross-user breach.
+  Fix (why easy): operational verify — confirm powersync_role's password was rotated in the live DB;
+        no code change. (powersync_setup.sql:15,33)
+
+[Trivial] M18  (Medium)   route: code-structure
+  What: A cluster of dead code exists (zero-importer files, a tested-but-never-called function, an
+        unused upsert, an unread return, an empty legacy dir).
+  Fix (why easy): delete the unreferenced files/symbols after a quick grep confirms no importers.
+        (dateDeserialization.ts; getVolumeData; upsertExercise; legacy data/ dir)
+
+[Trivial] M19  (Medium)   route: code-structure (+ security-cost)
+  What: Five unused dependencies ship, including jsonwebtoken (a Node crypto lib that shouldn't be in
+        an RN client).
+  Fix (why easy): remove them from package.json after confirming zero imports.
+        (base-64, jsonwebtoken, react-native-draggable-flatlist, react-native-inner-shadow, expo-web-browser)
+
+
+[Trivial] M24  (Medium)  LAUNCH-BLOCKER   route: infra-reliability
+  What: expo-camera isn't in the plugins array, so prebuild applies generic default purpose strings —
+        including a microphone permission the app never uses — a review-friction risk.
+  Fix (why easy): add expo-camera to plugins with a custom camera purpose string and drop the mic one.
+        (app.json:48-54)
+
+[Trivial] L4  (Low)   route: security-cost
+  What: The manual "Try Again" on analyze is unbounded, and each retry is a fresh paid vision call.
+  Fix (why easy): cap the retry count. (analyzingModal.tsx:96-104)
+
+[Trivial] L5  (Low)   route: security-cost
+  What: Raw upstream error bodies are surfaced directly in user-facing Alerts.
+  Fix (why easy): replace with a generic message, log the detail. (openAI.ts:44; foodDB.ts:38-39)
+
+[Trivial] L6  (Low)   route: security-cost
+  What: A live SENTRY_AUTH_TOKEN sits in a gitignored .env.local (never committed).
+  Fix (why easy): rotate it if the working copy was ever shared; no code change.
+
+[Trivial] L7  (Low)   route: security-cost
+  What: npm audit shows 33 vulns, all in Expo/Metro build tooling (not the shipped bundle).
+  Fix (why easy): note only — the real fix is an Expo SDK bump; nothing to change now.
+
+[Trivial] L8  (Low)   route: infra-reliability
+  What: A leftover enableInExpoDevelopment option (a no-op in this SDK) can send dev-client sessions
+        into prod Sentry.
+  Fix (why easy): delete the dead option. (app/_layout.tsx:64)
+
+[Trivial] L9  (Low)   route: infra-reliability
+  What: Jest transformIgnorePatterns still references dead sentry-expo and drops @sentry/react-native
+        from the whitelist.
+  Fix (why easy): update the pattern to the current package. (package.json:83)
+
+[Trivial] L10  (Low)   route: infra-reliability
+  What: Billing checks apiKey === 'NULL' (a string sentinel), implying placeholder env text can leak in.
+  Fix (why easy): tidy the env hygiene / sentinel check. (BillingContext/index.tsx:36)
+
+[Trivial] L11  (Low)   route: infra-reliability
+  What: eas.json submit.production is empty, so submission isn't reproducible from the repo.
+  Fix (why easy): fill in the submit config. (eas.json)
+
+[Trivial] L15  (Low)   route: logic-correctness
+  What: The "Last 30 days" builders return 31 points in the default branch (currently unrendered paths).
+  Fix (why easy): fix the off-by-one in the day count. (dateHelper.ts:243-246)
+
+[Trivial] L20  (Low)   route: code-structure
+  What: 109 hardcoded borderRadius literals exist despite a radius token set, and a '#FFD93D' star color
+        is duplicated verbatim.
+  Fix (why easy): swap literals for the existing radius/color tokens. (addWorkoutModal.tsx; paywall.tsx:230)
+
+[Trivial] L22  (Low)   route: code-structure
+  What: A devTest preview re-derives item math without the rounding contract, and ~11 devTest comments
+        cite a deleted RESTYLE_PLAN doc.
+  Fix (why easy): use the shared item-math helper and delete the stale comments.
+
+
+[Trivial] L24  (Low)   route: ui-ux
+  What: Row option menus can exceed Android's 3-button Alert limit (latent; app is iOS-first).
+  Fix (why easy): note / move to an action sheet later. (workoutScreen.tsx:40-67; nutritionScreen.tsx:38-58)
+
+[Trivial] L25  (Low)   route: ui-ux
+  What: The archive modal mixes "Click" vs "Tap" copy and pairs a 54pt restore button with a 36pt delete.
+  Fix (why easy): unify the copy and button sizes. (archiveModal.tsx:112,239-258)
+
+[Trivial] L26  (Low)   route: ui-ux
+  What: The exercise screen header can render the literal string "undefined".
+  Fix (why easy): guard the header value with a fallback. (exerciseScreen.tsx:42)
+
+
+[Trivial] L28  (Low)   route: ui-ux
+  What: Fatigue is still surfaced in settings copy despite the decision to de-emphasize it.
+  Fix (why easy): remove the fatigue copy. (adjustTraining.tsx:42; settings.tsx:103)
+
+[Trivial] L29  (Low)   route: ui-ux
+  What: The nutrition adjust wizard uses push back to settings, leaving the wizard stack in history.
+  Fix (why easy): replace instead of push. (adjustNutrition4.tsx:61)
+
+===============================================================================
+ END — 82 issues (13 Deep, 45 Moderate, 24 Trivial)
+ Next: Step 2 dispatches domain agents for the 58 Deep+Moderate issues (batched
+ per domain), then the coordinator merges the 12 multi-agent issues.
+===============================================================================

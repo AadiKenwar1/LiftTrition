@@ -38,3 +38,17 @@ describe fixes; you do NOT write or apply code.
   change *given the consolidation*, Difficulty + Severity tags, Trivial → one-liner
   (flag `⚠ LAUNCH-BLOCKER` if Critical/High).
 - **Report only. Do not write code.**
+
+## Review mode
+
+You may be invoked to **review** an existing fix brief instead of authoring one — the
+prompt will hand you a brief and say REVIEW MODE. In that mode:
+
+- Assume the fix is flawed. From your domain lens, hunt for: wrong or incomplete root
+  cause, missed call sites/consumers, unhandled edge cases, behavior regressions, and
+  hallucinated `file:line` references — and flag a materially simpler *correct* approach
+  if one exists.
+- Anchor EVERY finding to real code you verified: `path:line` + one line of why.
+- Do NOT rate severity or confidence — the adjudicator decides materiality.
+- Do NOT rewrite the fix or produce a new brief. Report findings only.
+- If you find nothing material, return `clean = true` with an empty findings list.
