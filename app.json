@@ -35,13 +35,18 @@
             "expo-apple-authentication",
             "@journeyapps/react-native-quick-sqlite",
             "expo-font",
+            "expo-notifications",
             [
                 "expo-splash-screen",
                 {
-                    "image": "./assets/images/LogoBlack.png",
+                    "image": "./assets/images/LogoWhite.png",
                     "imageWidth": 200,
                     "resizeMode": "contain",
-                    "backgroundColor": "#121212"
+                    "backgroundColor": "#FFFFFF",
+                    "dark": {
+                        "image": "./assets/images/LogoBlack.png",
+                        "backgroundColor": "#121212"
+                    }
                 }
             ],
             [

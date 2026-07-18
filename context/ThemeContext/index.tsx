@@ -1,19 +1,22 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type PropsWithChildren } from 'react'
+import { useColorScheme as useSystemColorScheme } from 'react-native'
 import { logoForScheme } from './assets'
-import { defaultColorScheme, getColors, isColorScheme } from './colors'
-import type { ColorScheme, Colors, ThemeContextValue } from './types'
+import { defaultThemePreference, getColors, isThemePreference, resolveColorScheme } from './colors'
+import type { ColorScheme, Colors, ThemeContextValue, ThemePreference } from './types'
 
 export { brandAssets, logoForScheme } from './assets'
-export { defaultColorScheme, getColors, isColorScheme, palettes } from './colors'
+export { defaultThemePreference, getColors, isColorScheme, isThemePreference, palettes, resolveColorScheme } from './colors'
 export { FONT_FAMILY, fonts, type } from './typography'
 export { macroColors, motion, radius, spacing } from './tokens'
-export type { ColorScheme, Colors, ThemeContextValue } from './types'
+export type { ColorScheme, Colors, ThemeContextValue, ThemePreference } from './types'
 
+// Legacy key: previously stored 'light'/'dark' values remain valid explicit preferences
 const STORAGE_KEY = 'colorScheme'
 
 const ThemeContext = createContext<ThemeContextValue | null>(null)
 
+// Guarded accessor for the theme context
 function useThemeContext(): ThemeContextValue {
     const ctx = useContext(ThemeContext)
     if (!ctx) {
@@ -22,37 +25,42 @@ function useThemeContext(): ThemeContextValue {
     return ctx
 }
 
+// Provides the theme preference, the resolved color scheme, and its palette
 export function ThemeProvider({ children }: PropsWithChildren) {
-    const [colorScheme, setColorSchemeState] = useState<ColorScheme>(defaultColorScheme)
+    const [themePreference, setThemePreferenceState] = useState<ThemePreference>(defaultThemePreference)
+    const systemScheme = useSystemColorScheme()
 
-    // Load color scheme from AsyncStorage
+    // Load the persisted theme preference from AsyncStorage
     useEffect(() => {
         void AsyncStorage.getItem(STORAGE_KEY).then((stored) => {
-            if (isColorScheme(stored)) {
-                setColorSchemeState(stored)
+            if (isThemePreference(stored)) {
+                setThemePreferenceState(stored)
             }
         })
     }, [])
 
-    // Set color scheme and persist to AsyncStorage
-    const setColorScheme = useCallback((scheme: ColorScheme) => {
-        setColorSchemeState(scheme)
-        void AsyncStorage.setItem(STORAGE_KEY, scheme)
+    // Set the theme preference and persist it to AsyncStorage
+    const setThemePreference = useCallback((pref: ThemePreference) => {
+        setThemePreferenceState(pref)
+        void AsyncStorage.setItem(STORAGE_KEY, pref)
     }, [])
 
-    // Get colors for the current theme
+    // Resolve the preference against the live OS appearance
+    const colorScheme = resolveColorScheme(themePreference, systemScheme)
+
+    // Get colors for the resolved scheme
     const colors = useMemo(() => getColors(colorScheme), [colorScheme])
 
-    // Create the context value
+    // Create the context value (setColorScheme stores an explicit scheme, permanently overriding 'system')
     const value = useMemo(
-        () => ({ colorScheme, setColorScheme, colors }),
-        [colorScheme, setColorScheme, colors],
+        () => ({ colorScheme, setColorScheme: setThemePreference, colors }),
+        [colorScheme, setThemePreference, colors],
     )
 
     return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
 }
 
-// Custom hooks to access the theme context
+// Resolved color scheme ('light' | 'dark') for the current theme
 export function useColorScheme(): ColorScheme {
     return useThemeContext().colorScheme
 }
@@ -67,7 +75,7 @@ export function useLogo() {
     return logoForScheme(useThemeContext().colorScheme)
 }
 
-// Set color scheme
+// Set an explicit color scheme (permanently overrides the 'system' default)
 export function useSetColorScheme(): (scheme: ColorScheme) => void {
     return useThemeContext().setColorScheme
 }

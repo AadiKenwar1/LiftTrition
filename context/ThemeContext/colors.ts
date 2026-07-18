@@ -1,4 +1,4 @@
-import type { ColorScheme, Colors } from './types'
+import type { ColorScheme, Colors, ThemePreference } from './types'
 
 // Accent FILLS (buttons): LIGHT stays deep and clears white text at AA (~4.5:1+). DARK uses the neon
 // brand accents (`nutrition` #00BD48, `workout` #2f80ed) for BOTH solid buttons and gradients so every
@@ -102,12 +102,25 @@ export const palettes = {
     },
 } as const satisfies Record<ColorScheme, Colors>
 
-export const defaultColorScheme: ColorScheme = 'dark'
+export const defaultThemePreference: ThemePreference = 'system'
 
+// Get the palette for a resolved color scheme
 export function getColors(scheme: ColorScheme): Colors {
     return palettes[scheme]
 }
 
+// Validate a stored value as a resolved color scheme
 export function isColorScheme(value: string | null | undefined): value is ColorScheme {
     return value != null && value in palettes
+}
+
+// Validate a stored value as a theme preference (explicit scheme or 'system')
+export function isThemePreference(value: string | null | undefined): value is ThemePreference {
+    return value === 'system' || isColorScheme(value)
+}
+
+// Resolve a theme preference to a concrete scheme: explicit choices win; 'system' follows the OS, falling back to dark
+export function resolveColorScheme(preference: ThemePreference, osScheme: ColorScheme | null | undefined): ColorScheme {
+    if (preference !== 'system') return preference
+    return osScheme ?? 'dark'
 }

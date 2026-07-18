@@ -5,7 +5,7 @@ import { powerSync } from '@/lib/powersync/system'
 import { getPendingUploadEstimate } from '@/lib/powersync/uploadQueueStats'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
-import { ChevronRight, CreditCard, Dumbbell, FileText, FlaskConical, HelpCircle, Moon, Sun, Utensils, Wrench } from 'lucide-react-native'
+import { Bell, ChevronRight, CreditCard, Dumbbell, FileText, FlaskConical, HelpCircle, Moon, Sun, Utensils, Wrench } from 'lucide-react-native'
 import { useEffect, useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
@@ -14,6 +14,19 @@ interface SettingsOption {
     title: string
     subtitle?: string
     onPress: () => void
+}
+
+// Uppercase avatar initials: up to two from the display name, else the email's first letter
+function getInitials(fullName: string | undefined, email: string): string {
+    if (fullName) {
+        return fullName
+            .split(/\s+/)
+            .map((w) => w[0])
+            .slice(0, 2)
+            .join('')
+            .toUpperCase()
+    }
+    return (email[0] || 'U').toUpperCase()
 }
 
 export default function SettingsScreen() {
@@ -54,14 +67,7 @@ export default function SettingsScreen() {
 
     const fullName = (user?.user_metadata?.full_name as string | undefined)?.trim()
     const email = user?.email ?? ''
-    const initials = (
-        fullName ?
-            fullName
-                .split(/\s+/)
-                .map((w) => w[0])
-                .slice(0, 2)
-                .join('')
-        :   email[0] || 'U').toUpperCase()
+    const initials = getInitials(fullName, email)
     const isDark = colorScheme === 'dark'
 
     // Grouped per section (rendered by map) — never reference rows by array index; a removed row used to
@@ -86,6 +92,14 @@ export default function SettingsScreen() {
             title: 'Adjust Training',
             subtitle: 'Personalize your workout plan',
             onPress: () => router.push('/settingsScreens/adjustTraining'),
+        },
+    ]
+    const preferenceOptions: SettingsOption[] = [
+        {
+            icon: Bell,
+            title: 'Notifications',
+            subtitle: 'Meal reminders, streaks, and check-ins',
+            onPress: () => router.push('/settingsScreens/notifications'),
         },
     ]
     const supportOptions: SettingsOption[] = [
@@ -138,7 +152,7 @@ export default function SettingsScreen() {
                         onPress={() => setColorScheme(isDark ? 'light' : 'dark')}
                         activeOpacity={0.7}
                         accessibilityRole="button"
-                        accessibilityLabel={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+                        accessibilityLabel={`Switch to ${isDark ? 'light' : 'dark'} theme`}
                     >
                         {isDark ? <Sun size={20} color={colors.text} strokeWidth={2.2} /> : <Moon size={20} color={colors.text} strokeWidth={2.2} />}
                     </TouchableOpacity>
@@ -178,6 +192,12 @@ export default function SettingsScreen() {
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Goal adjustments</Text>
                     {goalOptions.map(renderSettingItem)}
+                </View>
+
+                {/* Preferences Section */}
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>Preferences</Text>
+                    {preferenceOptions.map(renderSettingItem)}
                 </View>
 
                 {/* Support Section */}

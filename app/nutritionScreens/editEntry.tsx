@@ -12,7 +12,7 @@ import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, Te
 import uuid from 'react-native-uuid'
 
 type MacroField = 'calories' | 'protein' | 'carbs' | 'fats'
-type DraftItem = { key: string; name: string; brand?: string | null; calories: string; protein: string; carbs: string; fats: string; quantity: string }
+type DraftItem = { key: string; name: string; brand?: string | null; hasBrand: boolean; calories: string; protein: string; carbs: string; fats: string; quantity: string }
 
 const MACROS: { field: MacroField; short: string; unit: string }[] = [
     { field: 'calories', short: 'Cal', unit: 'kcal' },
@@ -21,11 +21,13 @@ const MACROS: { field: MacroField; short: string; unit: string }[] = [
     { field: 'fats', short: 'F', unit: 'g' },
 ]
 
+// Snapshot an item into an editable draft row; brand visibility is gated once at seed time.
 function toDraft(item: Item): DraftItem {
     return {
         key: uuid.v4() as string,
         name: item.name,
         brand: item.brand ?? null,
+        hasBrand: !!item.brand?.trim(),
         calories: String(item.calories ?? 0),
         protein: String(item.protein ?? 0),
         carbs: String(item.carbs ?? 0),
@@ -34,6 +36,7 @@ function toDraft(item: Item): DraftItem {
     }
 }
 
+// Convert a draft row back into a persisted item.
 function toItem(draft: DraftItem): Item {
     return {
         name: draft.name.trim(),
@@ -46,8 +49,12 @@ function toItem(draft: DraftItem): Item {
     }
 }
 
-const qtyValue = (s: string) => parseNumericInput(s) ?? 1
+// Parse a quantity string, defaulting to a single serving.
+function qtyValue(s: string): number {
+    return parseNumericInput(s) ?? 1
+}
 
+// Full-screen editor for an existing nutrition entry and its items.
 export default function EditEntry() {
     const router = useRouter()
     const { entry: entryParam } = useLocalSearchParams<{ entry: string }>()
@@ -75,10 +82,12 @@ export default function EditEntry() {
 
     const totals = sumItems(rows.map(toItem))
 
+    // Update a single field on one draft row.
     function setField(key: string, field: keyof DraftItem, value: string) {
         setRows((prev) => prev.map((r) => (r.key === key ? { ...r, [field]: value } : r)))
     }
 
+    // Nudge a row's serving count by delta, clamped at zero.
     function stepQty(key: string, delta: number) {
         setRows((prev) =>
             prev.map((r) => {
@@ -89,13 +98,15 @@ export default function EditEntry() {
         )
     }
 
+    // Append a blank draft row, seeding the meal name onto a lone existing row first.
     function addItem() {
         setRows((prev) => {
             const seeded = prev.length === 1 ? [{ ...prev[0], name: name.trim() || prev[0].name }] : [...prev]
-            return [...seeded, { key: uuid.v4() as string, name: '', brand: null, calories: '', protein: '', carbs: '', fats: '', quantity: '1' }]
+            return [...seeded, { key: uuid.v4() as string, name: '', brand: null, hasBrand: false, calories: '', protein: '', carbs: '', fats: '', quantity: '1' }]
         })
     }
 
+    // Remove a row, guarding against emptying the last item.
     function removeItem(key: string) {
         if (rows.length <= 1) {
             Alert.alert('Cannot Remove', 'At least one item is required.')
@@ -104,6 +115,7 @@ export default function EditEntry() {
         setRows((prev) => prev.filter((r) => r.key !== key))
     }
 
+    // Persist edits and close the editor.
     function handleSave() {
         handleEditNutrition(parsedEntry.id, applyEdits(parsedEntry, name, rows.map(toItem)))
         router.back()
@@ -146,20 +158,22 @@ export default function EditEntry() {
                                         multiline
                                     />
                                 ) : (
-                                    <Text style={[styles.ingName, styles.ingNameSynced]} numberOfLines={2}>{name.trim() || row.name}</Text>
+                                    <Text style={styles.ingName} numberOfLines={2}>{name.trim() || row.name}</Text>
                                 )}
                                 <TouchableOpacity onPress={() => removeItem(row.key)} hitSlop={8} style={styles.trash}>
                                     <Trash2 size={14} color={colors.destructive} strokeWidth={2} />
                                 </TouchableOpacity>
                             </View>
 
-                            <TextInput
-                                style={styles.brandInput}
-                                value={row.brand ?? ''}
-                                onChangeText={(v) => setField(row.key, 'brand', v)}
-                                placeholder="Brand (optional)"
-                                placeholderTextColor={colors.placeholder}
-                            />
+                            {row.hasBrand && (
+                                <TextInput
+                                    style={styles.brandInput}
+                                    value={row.brand ?? ''}
+                                    onChangeText={(v) => setField(row.key, 'brand', v)}
+                                    placeholder="Brand (optional)"
+                                    placeholderTextColor={colors.placeholder}
+                                />
+                            )}
 
                             <View style={styles.servRow}>
                                 <Text style={styles.servLabel}>Servings</Text>
@@ -238,6 +252,7 @@ export default function EditEntry() {
     )
 }
 
+// Theme-reactive styles for the edit-entry screen.
 function makeStyles(colors: Colors) {
     return StyleSheet.create({
         container: { flex: 1, backgroundColor: colors.background, borderTopLeftRadius: 20, borderTopRightRadius: 20, overflow: 'hidden' },
@@ -254,7 +269,6 @@ function makeStyles(colors: Colors) {
         card: { backgroundColor: colors.surface, borderRadius: radius.card, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.hairline, padding: 12, marginBottom: 10 },
         titleRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 },
         ingName: { flex: 1, fontSize: 16, color: colors.text, fontFamily: fonts.semibold, letterSpacing: -0.3, paddingVertical: 2 },
-        ingNameSynced: { color: colors.labelMuted },
         trash: { width: 28, height: 28, borderRadius: 8, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.surfaceInset },
         brandInput: { fontSize: 13, color: colors.textMuted, fontFamily: fonts.regular, fontStyle: 'italic', paddingVertical: 2, marginTop: -8, marginBottom: 10 },
         servRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 },

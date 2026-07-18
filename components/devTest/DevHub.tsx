@@ -69,6 +69,10 @@ const GROUPS: { title: string; items: { label: string; route: string }[] }[] = [
             ...ONBOARDING_PAGES.map((p, i) => ({ label: p.label, route: `/devTest/onboardingPage?page=${i}` })),
         ],
     },
+    {
+        title: 'Notifications',
+        items: [{ label: 'Local Notifications', route: '/devTest/notifications' }],
+    },
 ]
 
 export default function DevHub() {

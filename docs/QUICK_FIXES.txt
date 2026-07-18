@@ -1,0 +1,24 @@
+QUICK FIXES
+===========
+
+1. Photo brand field
+   Hide "Brand (optional)" for photo entries — brand should never show for photos.
+   -> app/nutritionScreens/editEntry.tsx:156-162 (gate on parsedEntry.isPhoto)
+
+2. Ingredient name is grey
+   In the single-item edit/breakdown view the name uses labelMuted (grey in both
+   modes). Make it proper white/black by mode (colors.text).
+   -> app/nutritionScreens/editEntry.tsx:149 and :257 (ingNameSynced)
+
+3. Daily Intake macros = intake/goal
+   Fats/Carbs/Protein show intake only; want "intake / goal" format like calories
+   already do.
+   -> components/NutritionComponents/DailyIntakeCard.tsx:58-60
+
+4. Theme default = system preference
+   Currently hardcoded to dark. Should follow the OS by default, with user override.
+   -> context/ThemeContext/colors.ts:105, context/ThemeContext/index.tsx:26
+
+5. Splash screen = system preference
+   Currently a single dark splash. Should follow OS light/dark.
+   -> app.json:39-47

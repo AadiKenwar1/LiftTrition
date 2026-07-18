@@ -37,6 +37,9 @@ export type Colors = {
 
 export type ColorScheme = 'light' | 'dark'
 
+// Internal theme state: an explicit scheme, or 'system' (the unstored default) to follow the OS appearance
+export type ThemePreference = ColorScheme | 'system'
+
 export interface ThemeContextValue {
     colorScheme: ColorScheme
     setColorScheme: (scheme: ColorScheme) => void

@@ -12,19 +12,23 @@ interface DailyIntakeCardProps {
 
 interface MacroBarRowProps {
     label: string
-    value: string
-    pct: number
-    colors: Colors
+    intake: number
+    goal: number
     styles: ReturnType<typeof makeStyles>
 }
 
-function MacroBarRow({ label, value, pct, styles }: MacroBarRowProps) {
+// Single macro row: label, "intake / goal" value, and a proportional fill bar.
+function MacroBarRow({ label, intake, goal, styles }: MacroBarRowProps) {
+    const pct = goal > 0 ? (intake / goal) * 100 : 0
     const width = `${Math.min(100, Math.max(0, pct))}%` as const
     return (
         <View>
             <View style={styles.barHeader}>
                 <Text style={styles.barLabel}>{label}</Text>
-                <Text style={styles.barValue}>{value}</Text>
+                <Text style={styles.barValue}>
+                    {Math.round(intake)}
+                    <Text style={styles.barValueGoal}> / {goal}g</Text>
+                </Text>
             </View>
             <View style={styles.track}>
                 <View style={[styles.fill, { width }]} />
@@ -40,8 +44,7 @@ export default function DailyIntakeCard({ date = new Date() }: DailyIntakeCardPr
     const styles = useMemo(() => makeStyles(colors), [colors])
 
     const macros = handleGetMacrosForDate(date)
-    const pct = (value: number, goal: number) => (goal > 0 ? (value / goal) * 100 : 0)
-    const caloriePct = pct(macros.totalCalories, settings.calorieGoal)
+    const caloriePct = settings.calorieGoal > 0 ? (macros.totalCalories / settings.calorieGoal) * 100 : 0
     const remaining = Math.round(settings.calorieGoal - macros.totalCalories)
 
     return (
@@ -55,9 +58,9 @@ export default function DailyIntakeCard({ date = new Date() }: DailyIntakeCardPr
             <View style={styles.right}>
                 <Text style={styles.kcalLeft}>{remaining >= 0 ? `${remaining.toLocaleString()} kcal left` : `${Math.abs(remaining).toLocaleString()} kcal over`}</Text>
                 <View style={styles.bars}>
-                    <MacroBarRow label="Fats" value={`${Math.round(macros.totalFats)}g`} pct={pct(macros.totalFats, settings.fatsGoal)} colors={colors} styles={styles} />
-                    <MacroBarRow label="Carbs" value={`${Math.round(macros.totalCarbs)}g`} pct={pct(macros.totalCarbs, settings.carbsGoal)} colors={colors} styles={styles} />
-                    <MacroBarRow label="Protein" value={`${Math.round(macros.totalProtein)}g`} pct={pct(macros.totalProtein, settings.proteinGoal)} colors={colors} styles={styles} />
+                    <MacroBarRow label="Fats" intake={macros.totalFats} goal={settings.fatsGoal} styles={styles} />
+                    <MacroBarRow label="Carbs" intake={macros.totalCarbs} goal={settings.carbsGoal} styles={styles} />
+                    <MacroBarRow label="Protein" intake={macros.totalProtein} goal={settings.proteinGoal} styles={styles} />
                 </View>
             </View>
         </View>
@@ -119,6 +122,11 @@ function makeStyles(colors: Colors) {
             fontFamily: fonts.bold,
             fontSize: 13,
             color: colors.text,
+        },
+        barValueGoal: {
+            fontFamily: fonts.medium,
+            fontSize: 12,
+            color: colors.labelMuted,
         },
         track: {
             height: 7,

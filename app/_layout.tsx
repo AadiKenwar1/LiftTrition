@@ -9,6 +9,7 @@ import { SettingsProvider, useSettings } from '@/context/SettingsContext'
 import { brandAssets, fonts, ThemeProvider, useColors, useColorScheme } from '@/context/ThemeContext'
 import { useWorkout, WorkoutProvider } from '@/context/WorkoutContext'
 import { assertRequiredEnv, ENV } from '@/lib/env'
+import { useNotificationScheduler } from '@/lib/hooks/useNotificationScheduler'
 import { Archivo_400Regular, Archivo_500Medium, Archivo_600SemiBold, Archivo_700Bold, Archivo_800ExtraBold } from '@expo-google-fonts/archivo'
 import { Poppins_100Thin, Poppins_100Thin_Italic, Poppins_200ExtraLight, Poppins_200ExtraLight_Italic, Poppins_300Light, Poppins_300Light_Italic, Poppins_400Regular, Poppins_400Regular_Italic, Poppins_500Medium, Poppins_500Medium_Italic, Poppins_600SemiBold, Poppins_600SemiBold_Italic, Poppins_700Bold, Poppins_700Bold_Italic, Poppins_800ExtraBold, Poppins_800ExtraBold_Italic, Poppins_900Black, Poppins_900Black_Italic } from '@expo-google-fonts/poppins'
 import FontAwesome from '@expo/vector-icons/FontAwesome'
@@ -119,6 +120,7 @@ function StackLayout() {
     const { loaded: workoutLoaded, loadFailed: workoutFailed, retryLoad: retryWorkout } = useWorkout()
     const { loaded: billingLoaded } = useBilling()
     const colors = useColors()
+    useNotificationScheduler()
     const allContextsLoaded = settingsLoaded && nutritionLoaded && workoutLoaded && billingLoaded
     const anyLoadFailed = settingsFailed || nutritionFailed || workoutFailed
 
@@ -196,6 +198,7 @@ function StackLayout() {
                     <Stack.Screen name="settingsScreens/termsAndPrivacy" options={{ headerShown: true, title: 'Terms & Privacy', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="settingsScreens/support" options={{ headerShown: true, title: 'Support', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="settingsScreens/howItWorks" options={{ headerShown: true, title: 'How It Works', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="settingsScreens/notifications" options={{ headerShown: true, title: 'Notifications', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="settingsScreens/devStatsModal" options={{ ...modalPresentation, headerShown: false }} />
                     <Stack.Screen name="devTest/index" options={{ headerShown: true, title: 'Dev Hub', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/lineChart" options={{ headerShown: true, title: 'Line Chart', headerBackTitle: 'Back' }} />
@@ -229,6 +232,7 @@ function StackLayout() {
                     <Stack.Screen name="devTest/combine" options={{ headerShown: true, title: 'Combine', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/foodRow" options={{ headerShown: true, title: 'Food Row', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/entryRow" options={{ headerShown: true, title: 'Entry Rows', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="devTest/notifications" options={{ headerShown: true, title: 'Notifications', headerBackTitle: 'Back' }} />
                 </Stack.Protected>
             </Stack>
             <GoalPromptHost />
