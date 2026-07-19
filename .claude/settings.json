@@ -1,4 +1,4 @@
-{
+/*{
   "permissions": {
     "allow": [
       "Bash(git --no-pager diff --stat)",
@@ -8,4 +8,4 @@
       "Bash(npx tsc *)"
     ]
   }
-}
+}*/

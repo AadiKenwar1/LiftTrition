@@ -4,11 +4,12 @@
  * Turns docs/PRODUCTION_READINESS_AUDIT.md (+ docs/PRODUCTION_READINESS_INDEX.txt)
  * into a set of adjudicated fix briefs.
  *
- * SCOPE: the 58 Deep + Moderate issues. The 24 Trivial issues keep their inline
- * one-liners in the index and are intentionally NOT run through this pipeline.
+ * SCOPE: the 58 Deep + Moderate issues, PLUS the 9 ui-ux Trivial items (so they hit the
+ * DevHub gate). The remaining 15 non-ui-ux Trivial issues keep their inline one-liners in
+ * the index and are intentionally NOT run through this pipeline.
  *
  * FLOW PER ISSUE
- *   Single-agent (47): author -> review (same-domain + adversary) -> adjudicate-if-findings
+ *   Single-agent (56): author -> review (same-domain + adversary [+ devhub gate for ui-ux]) -> adjudicate-if-findings
  *   Multi-agent  (11): authors(parallel) -> before-merge review each -> MERGE
  *                      -> after-merge review (the gate) -> adjudicate-if-findings
  *
@@ -108,6 +109,18 @@ const SINGLE_ISSUES = [
   { id: 'L21', severity: 'Low',      difficulty: 'Moderate', domains: ['code-structure'] },
   { id: 'L30', severity: 'Low',      difficulty: 'Moderate', domains: ['ui-ux'] },
   { id: 'L31', severity: 'Low',      difficulty: 'Moderate', domains: ['ui-ux'] },
+
+  // ui-ux Trivial items — promoted into the pipeline so they hit the DevHub gate.
+  // (non-visual ones resolve to devHubApproval='na', which the gate confirms.)
+  { id: 'C4',  severity: 'Critical', difficulty: 'Trivial',  domains: ['ui-ux'] },
+  { id: 'M23', severity: 'Medium',   difficulty: 'Trivial',  domains: ['ui-ux'] },
+  { id: 'L23', severity: 'Low',      difficulty: 'Trivial',  domains: ['ui-ux'] },
+  { id: 'L24', severity: 'Low',      difficulty: 'Trivial',  domains: ['ui-ux'] },
+  { id: 'L25', severity: 'Low',      difficulty: 'Trivial',  domains: ['ui-ux'] },
+  { id: 'L26', severity: 'Low',      difficulty: 'Trivial',  domains: ['ui-ux'] },
+  { id: 'L27', severity: 'Low',      difficulty: 'Trivial',  domains: ['ui-ux'] },
+  { id: 'L28', severity: 'Low',      difficulty: 'Trivial',  domains: ['ui-ux'] },
+  { id: 'L29', severity: 'Low',      difficulty: 'Trivial',  domains: ['ui-ux'] },
 ];
 
 // Multi-domain issues: authors -> before-merge review -> merge -> after-merge review -> adjudicate.
