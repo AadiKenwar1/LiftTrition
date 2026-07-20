@@ -119,8 +119,8 @@ describe('Body Weight Functions', () => {
                     
                     // Should have 16 days (15 days ago + today)
                     expect(result.length).toBe(16);
-                    // First entry should be from onboarding date
-                    expect(result[0].value).toBe(0); // No data on onboarding date
+                    // First entry (onboarding date) carries the earliest weigh-in backward (seed), not a fake 0
+                    expect(result[0].value).toBe(180.0);
                 });
 
                 test('should carry forward last known weight for days without weight entries', () => {
@@ -132,10 +132,10 @@ describe('Body Weight Functions', () => {
                     const result = getBodyWeightProgressData(bwProgress, onboardingDate);
                     
                     expect(result.length).toBe(6); // 5 days ago + today
-                    // Day 5 ago (onboarding) - no data yet, should be 0
-                    expect(result[0].value).toBe(0);
-                    // Day 4 ago - no data yet, should be 0
-                    expect(result[1].value).toBe(0);
+                    // Day 5 ago (onboarding) - before the first weigh-in, carries it backward (seed)
+                    expect(result[0].value).toBe(180.0);
+                    // Day 4 ago - still before the first weigh-in, carries it backward (seed)
+                    expect(result[1].value).toBe(180.0);
                     // Day 3 ago - has data, sets last known weight to 180.0
                     expect(result[2].value).toBe(180.0);
                     // Day 2 ago - no data, carries forward 180.0
@@ -159,8 +159,8 @@ describe('Body Weight Functions', () => {
 
                     // Should have 46 days (45 days ago through today, inclusive)
                     expect(result.length).toBe(46);
-                    // No entry on the onboarding day itself
-                    expect(result[0].value).toBe(0);
+                    // Onboarding day itself carries the earliest weigh-in (180.0) backward (seed), not 0
+                    expect(result[0].value).toBe(180.0);
                     // The entry from 35 days ago is inside the window
                     const day35AgoEntry = result.find(entry => entry.value === 180.0);
                     expect(day35AgoEntry).toBeDefined();
@@ -264,8 +264,9 @@ describe('Body Weight Functions', () => {
 
                 // Window is capped at 365 days back (366 entries inclusive of today)
                 expect(result.length).toBe(366);
-                // The 400-day-old entry is outside the window
-                expect(result[0].value).toBe(0);
+                // The 400-day-old entry is outside the visible window, but it is still the
+                // last-known weight at window start, so it seeds the leading days.
+                expect(result[0].value).toBe(175.0);
                 const recentEntry = result.find(entry => entry.value === 182.0);
                 expect(recentEntry).toBeDefined();
             });
@@ -442,6 +443,26 @@ describe('Body Weight Functions', () => {
                 for (let i = day2AgoIndex + 1; i < result.length; i++) {
                     expect(result[i].value).toBe(180.0);
                 }
+            });
+
+            test('never leads with 0 when a weigh-in exists inside the window (Change stat is a true delta)', () => {
+                // Onboarding predates the first weigh-in, so the leading days must carry the first
+                // weigh-in backward instead of a fake 0 — otherwise GraphStats.computeStats reads
+                // first = values[0] = 0 and reports change = last - 0 = the user's ENTIRE body weight.
+                const onboardingDate = daysAgo(20);
+                const bwProgress: Record<string, number> = {
+                    [getDateKey(daysAgo(10))]: 180.0,
+                    [getDateKey(daysAgo(1))]: 178.0,
+                };
+
+                const result = getBodyWeightProgressData(bwProgress, onboardingDate);
+
+                // Leading day (20 ago, before any weigh-in) carries the first weigh-in, not 0.
+                expect(result[0].value).toBe(180.0);
+                // The Change stat (last - first) is the real 2-unit delta, not the raw body weight.
+                const change = result[result.length - 1].value - result[0].value;
+                expect(change).toBe(-2.0);
+                expect(change).not.toBe(178.0);
             });
         });
     });

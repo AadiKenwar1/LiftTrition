@@ -1,4 +1,5 @@
-import { formatDateMinimal, getDateKey, calculateStartDate, addDays, daysBetween, WEEKDAY_INITIALS, type WeekDayPoint } from "@/lib/utils/dateHelper";
+import { getDateKey, addDays, WEEKDAY_INITIALS, type WeekDayPoint } from "@/lib/utils/dateHelper";
+import { buildDailySeries } from "@/lib/utils/graphSeries";
 import { Log } from "../types";
 
 /**
@@ -7,10 +8,6 @@ import { Log } from "../types";
  * Fills gaps with 0s for days without logs
  */
 export function getVolumeData(logs: Log[], onboardingCompletedAt?: Date): Array<{ day: string; value: number }> {
-    const maxDays = 30;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
     // Group logs by date and calculate total volume (weight × reps) per day
     const volumeByDate = new Map<string, number>();
     let earliestDate: Date | null = null;
@@ -18,7 +15,7 @@ export function getVolumeData(logs: Log[], onboardingCompletedAt?: Date): Array<
 
     for (const log of logs) {
         if (log.weight <= 0 || log.reps <= 0) continue;
-        
+
         hasData = true;
         const logDate = new Date(log.date);
         logDate.setHours(0, 0, 0, 0);
@@ -31,29 +28,15 @@ export function getVolumeData(logs: Log[], onboardingCompletedAt?: Date): Array<
         }
     }
 
-    // Determine start date
-    const startDate = calculateStartDate(today, maxDays, onboardingCompletedAt, earliestDate, hasData);
-    startDate.setHours(0, 0, 0, 0);
-
-    // Calculate days to show
-    const daysToShow = daysBetween(startDate, today) + 1;
-
-    // Build result array (oldest to newest, filling gaps with 0)
-    const result: Array<{ day: string; value: number }> = [];
-    for (let i = daysToShow - 1; i >= 0; i--) {
-        const date = new Date(today);
-        date.setDate(date.getDate() - i);
-        date.setHours(0, 0, 0, 0);
-        const dateKey = getDateKey(date);
-        const volume = volumeByDate.get(dateKey) || 0;
-
-        result.push({
-            day: formatDateMinimal(dateKey),
-            value: Math.round(volume),
-        });
-    }
-    
-    return result;
+    // Delegate the day-by-day gap-fill walk to the shared helper (zero-fill, rounded, 30-day window).
+    return buildDailySeries(volumeByDate, {
+        maxDays: 30,
+        onboardingCompletedAt,
+        earliestDate,
+        hasData,
+        fill: 'zero',
+        round: true,
+    });
 }
 
 /**
@@ -62,10 +45,6 @@ export function getVolumeData(logs: Log[], onboardingCompletedAt?: Date): Array<
  * Fills gaps with 0s for days without logs
  */
 export function getSetsData(logs: Log[], onboardingCompletedAt?: Date): Array<{ day: string; value: number }> {
-    const maxDays = 30;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
     const setsByDate = new Map<string, number>();
     let earliestDate: Date | null = null;
     let hasData = false;
@@ -84,26 +63,14 @@ export function getSetsData(logs: Log[], onboardingCompletedAt?: Date): Array<{ 
         }
     }
 
-    const startDate = calculateStartDate(today, maxDays, onboardingCompletedAt, earliestDate, hasData);
-    startDate.setHours(0, 0, 0, 0);
-
-    const daysToShow = daysBetween(startDate, today) + 1;
-
-    const result: Array<{ day: string; value: number }> = [];
-    for (let i = daysToShow - 1; i >= 0; i--) {
-        const date = new Date(today);
-        date.setDate(date.getDate() - i);
-        date.setHours(0, 0, 0, 0);
-        const dateKey = getDateKey(date);
-        const count = setsByDate.get(dateKey) || 0;
-
-        result.push({
-            day: formatDateMinimal(dateKey),
-            value: count,
-        });
-    }
-
-    return result;
+    // Delegate the day-by-day gap-fill walk to the shared helper (zero-fill, no rounding, 30-day window).
+    return buildDailySeries(setsByDate, {
+        maxDays: 30,
+        onboardingCompletedAt,
+        earliestDate,
+        hasData,
+        fill: 'zero',
+    });
 }
 
 /**

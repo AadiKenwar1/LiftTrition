@@ -1,4 +1,5 @@
-import { calculateStartDate, daysBetween, formatDateMinimal, getDateKey } from "@/lib/utils/dateHelper";
+import { getDateKey, parseDateKey } from "@/lib/utils/dateHelper";
+import { buildDailySeries } from "@/lib/utils/graphSeries";
 import { Settings } from "../types";
 import { calculateMacros } from "./macroCalculation";
 
@@ -68,55 +69,36 @@ export function computeBwUpdate(
 }
 
 /**
- * Get body weight progress data for graph (since onboarding completion, capped at the last 365 days)
- * Fills gaps with 0s for days without weight entries
+ * Get body weight progress data for graph (since onboarding completion, capped at the last 365 days).
+ * Carries the last known weight forward for days without an entry; leading days before the first
+ * weigh-in are seeded with the earliest recorded weight (not 0) so the Change stat is a true delta.
  */
 export function getBodyWeightProgressData(bwProgress: Record<string, number>, onboardingCompletedAt?: Date): Array<{ day: string; value: number }> {
-    const maxDays = 365;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    // Find earliest date in bwProgress
+    // Scan every recorded weigh-in (including entries older than the 365-day display window) to
+    // find the earliest date AND its weight — that weight is the true last-known value at the
+    // window start, so it seeds the carry-forward instead of a fake 0.
     let earliestDate: Date | null = null;
+    let earliestWeight = 0;
     let hasData = false;
-    
-    for (const dateKey of Object.keys(bwProgress)) {
+
+    for (const [dateKey, weight] of Object.entries(bwProgress)) {
         hasData = true;
-        const date = new Date(dateKey + 'T00:00:00');
-        date.setHours(0, 0, 0, 0);
+        const date = parseDateKey(dateKey);
         if (!earliestDate || date < earliestDate) {
             earliestDate = date;
+            earliestWeight = weight;
         }
     }
 
-    // Determine start date
-    const startDate = calculateStartDate(today, maxDays, onboardingCompletedAt, earliestDate, hasData);
-    startDate.setHours(0, 0, 0, 0);
-
-    // Calculate days to show
-    const daysToShow = daysBetween(startDate, today) + 1;
-
-    // Build result array (oldest to newest, filling gaps with last known weight)
-    const result: Array<{ day: string; value: number }> = [];
-    let lastKnownWeight = 0; // Track last known weight
-    
-    for (let i = daysToShow - 1; i >= 0; i--) {
-        const date = new Date(today);
-        date.setDate(date.getDate() - i);
-        date.setHours(0, 0, 0, 0);
-        const dateKey = getDateKey(date);
-        const weight = bwProgress[dateKey];
-        
-        // Use last known weight if no entry exists, otherwise use the entry and update last known
-        if (weight !== undefined) {
-            lastKnownWeight = weight;
-        }
-        
-        result.push({
-            day: formatDateMinimal(dateKey),
-            value: lastKnownWeight, // Use last known weight (0 if no data yet)
-        });
-    }
-
-    return result;
+    // Delegate the day-by-day walk to the shared helper: carry the last known weight forward,
+    // seeded with the earliest recorded weight so leading days aren't a fake 0 (365-day window).
+    const valuesByDate = new Map<string, number>(Object.entries(bwProgress));
+    return buildDailySeries(valuesByDate, {
+        maxDays: 365,
+        onboardingCompletedAt,
+        earliestDate,
+        hasData,
+        fill: 'carryForward',
+        seed: earliestWeight,
+    });
 }

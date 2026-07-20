@@ -1,4 +1,5 @@
-import { addDays, calculateStartDate, daysBetween, formatDateMinimal, getDateKey, WEEKDAY_INITIALS, type WeekDayPoint } from "@/lib/utils/dateHelper";
+import { addDays, getDateKey, WEEKDAY_INITIALS, type WeekDayPoint } from "@/lib/utils/dateHelper";
+import { buildDailySeries } from "@/lib/utils/graphSeries";
 import { NutritionEntry, NutritionStreakState } from "../types";
 
 
@@ -22,9 +23,6 @@ export function getMacrosForDate(nutritionData: NutritionEntry[], date: Date){
 
 // Get macro data for graph (last 30 days or since onboarding completion) - fills gaps with 0s for days without logs
 export function getMacroDataForGraph(macroType: 'calories' | 'protein' | 'carbs' | 'fats',  nutritionData: NutritionEntry[], onboardingCompletedAt?: Date): Array<{ day: string; value: number }> {
-    const maxDays = 30;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Normalize to start of day    
     const macrosByDate = new Map<string, { protein: number; carbs: number; fats: number; calories: number }>();
     let earliestDate: Date | null = null;
 
@@ -33,7 +31,7 @@ export function getMacroDataForGraph(macroType: 'calories' | 'protein' | 'carbs'
         const entryDate = new Date(entry.date);
         entryDate.setHours(0, 0, 0, 0);
         const dateKey = getDateKey(entryDate);
-        
+
         const existing = macrosByDate.get(dateKey) || { protein: 0, carbs: 0, fats: 0, calories: 0 };
         macrosByDate.set(dateKey, {
             protein: existing.protein + entry.protein,
@@ -41,19 +39,12 @@ export function getMacroDataForGraph(macroType: 'calories' | 'protein' | 'carbs'
             fats: existing.fats + entry.fats,
             calories: existing.calories + entry.calories,
         });
-        
+
         // Track earliest date in single pass
         if (!earliestDate || entryDate < earliestDate) {
             earliestDate = entryDate;
         }
     }
-    
-    // Determine start date
-    const startDate = calculateStartDate(today, maxDays, onboardingCompletedAt, earliestDate, nutritionData.length > 0);
-    startDate.setHours(0, 0, 0, 0);
-    
-    // Calculate days to show
-    const daysToShow = daysBetween(startDate, today) + 1;
 
     // Macro value extractor map
     const macroExtractor = {
@@ -62,23 +53,22 @@ export function getMacroDataForGraph(macroType: 'calories' | 'protein' | 'carbs'
         carbs: (m: { carbs: number }) => m.carbs,
         fats: (m: { fats: number }) => m.fats,
     };
-    
-    // Build result array (oldest to newest)
-    const result: Array<{ day: string; value: number }> = [];
-    for (let i = daysToShow - 1; i >= 0; i--) {
-        const date = new Date(today);
-        date.setDate(date.getDate() - i);
-        date.setHours(0, 0, 0, 0); // Ensure normalization
-        const dateKey = getDateKey(date);
-        const macros = macrosByDate.get(dateKey) || { protein: 0, carbs: 0, fats: 0, calories: 0 };
-        
-        result.push({
-            day: formatDateMinimal(dateKey),
-            value: macroExtractor[macroType](macros),
-        });
+
+    // Reduce the per-day macro buckets to the single requested macro, then delegate the
+    // day-by-day gap-fill walk to the shared helper (zero-fill, 30-day window).
+    const extract = macroExtractor[macroType];
+    const valuesByDate = new Map<string, number>();
+    for (const [dateKey, macros] of macrosByDate) {
+        valuesByDate.set(dateKey, extract(macros));
     }
 
-    return result;
+    return buildDailySeries(valuesByDate, {
+        maxDays: 30,
+        onboardingCompletedAt,
+        earliestDate,
+        hasData: nutritionData.length > 0,
+        fill: 'zero',
+    });
 }
 
 /**
