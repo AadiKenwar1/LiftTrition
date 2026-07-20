@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase/client'
-import { Connector } from '../Connector'
+import { Connector, MAX_CONCURRENT_UPLOAD_OPS } from '../Connector'
 
 // Mock PowerSync imports
 jest.mock('@powersync/react-native', () => ({
@@ -58,6 +58,58 @@ function mockConflictTable(existing: { id: string } | null) {
     const upsert = jest.fn().mockReturnValue({ error: null })
 
     return { from: { select, update, insert, upsert }, select, selectBuilder, update, updateBuilder, insert, upsert }
+}
+
+// Drain pending microtasks so chained .then()/.catch() hops inside the concurrency pool settle
+// before the next assertion. Connector never uses real timers, so a generous fixed tick count is
+// always enough regardless of exactly how deep any one op's chain is.
+async function flushMicrotasks(times = 30) {
+    for (let i = 0; i < times; i++) {
+        await Promise.resolve()
+    }
+}
+
+// Build a controllable async mock: each call returns a NEW pending promise (queued so the test can
+// resolve them one at a time via resolveNext, or a specific one via resolveMatching) and tracks how
+// many are unresolved ("in flight") at once, so tests can prove ops were dispatched concurrently
+// (multiple in flight before any resolves) and that concurrency never exceeds a cap.
+function makeDeferredResult(resolveValue: unknown = { error: null }) {
+    const pending: Array<{ args: unknown[]; resolve: () => void }> = []
+    let inFlight = 0
+    let maxInFlight = 0
+
+    const fn = jest.fn().mockImplementation((...args: unknown[]) => {
+        inFlight += 1
+        maxInFlight = Math.max(maxInFlight, inFlight)
+        return new Promise((resolve) => {
+            pending.push({
+                args,
+                resolve: () => {
+                    inFlight -= 1
+                    resolve(resolveValue)
+                },
+            })
+        })
+    })
+
+    return {
+        fn,
+        resolveNext: () => {
+            const next = pending.shift()
+            if (!next) throw new Error('makeDeferredResult: no pending call to resolve')
+            next.resolve()
+        },
+        // Resolve the pending call whose args satisfy `predicate` - for tests that need to control
+        // resolution by IDENTITY (e.g. which row id a call targeted) rather than raw FIFO order.
+        resolveMatching: (predicate: (args: unknown[]) => boolean) => {
+            const index = pending.findIndex((p) => predicate(p.args))
+            if (index === -1) throw new Error('makeDeferredResult: no pending call matches predicate')
+            const [match] = pending.splice(index, 1)
+            match.resolve()
+        },
+        pendingCount: () => pending.length,
+        getMaxInFlight: () => maxInFlight,
+    }
 }
 
 describe('Connector', () => {
@@ -673,6 +725,292 @@ describe('Connector', () => {
             expect(m.insert).toHaveBeenCalledWith({ id: 'local-uuid', user_id: 'user-1', date: '2026-07-20', weight: 70.5 })
             expect(m.update).not.toHaveBeenCalled()
             expect(mockTransaction.complete).toHaveBeenCalledTimes(1)
+        })
+
+        // ---- M12: bounded-concurrency upload pool ----
+        describe('concurrency (bounded pool)', () => {
+            const opTypeCases: Array<[string, UpdateType]> = [
+                ['PUT', UpdateType.PUT],
+                ['PATCH', UpdateType.PATCH],
+                ['DELETE', UpdateType.DELETE],
+            ]
+
+            it.each(opTypeCases)(
+                'runs N same-table %s ops concurrently (capped at MAX_CONCURRENT_UPLOAD_OPS) and still issues N distinct Supabase calls, never collapsed',
+                async (_label, op) => {
+                    const opCount = MAX_CONCURRENT_UPLOAD_OPS + 3
+                    const crud = Array.from({ length: opCount }, (_, i) => ({
+                        op,
+                        table: 'workouts',
+                        id: `workout-${i}`,
+                        opData: { name: `Workout ${i}` },
+                    }))
+                    const mockTransaction = { crud, complete: jest.fn().mockResolvedValue(undefined) }
+                    ;(mockDatabase.getNextCrudTransaction as jest.Mock).mockResolvedValue(mockTransaction)
+
+                    const deferred = makeDeferredResult({ error: null })
+                    // 'workouts' is not a CONFLICT_KEYS table, so PUT goes through the plain
+                    // upsert(record) path (single call), while PATCH/DELETE chain a final .eq().
+                    let tableStub: Record<string, unknown>
+                    if (op === UpdateType.PUT) {
+                        tableStub = { upsert: deferred.fn }
+                    } else if (op === UpdateType.PATCH) {
+                        tableStub = { update: jest.fn(() => ({ eq: deferred.fn })) }
+                    } else {
+                        tableStub = { delete: jest.fn(() => ({ eq: deferred.fn })) }
+                    }
+                    ;(supabase.from as jest.Mock).mockReturnValue(tableStub)
+
+                    const uploadPromise = connector.uploadData(mockDatabase)
+                    await flushMicrotasks()
+
+                    // Dispatch is bounded: only the cap's worth of ops have actually reached Supabase.
+                    expect(deferred.fn).toHaveBeenCalledTimes(MAX_CONCURRENT_UPLOAD_OPS)
+
+                    // Drain one call at a time; the pool backfills up to the cap as each slot frees,
+                    // never exceeding it, until every op has issued its own distinct Supabase call.
+                    for (let i = 0; i < opCount; i++) {
+                        deferred.resolveNext()
+                        await flushMicrotasks()
+                    }
+
+                    await uploadPromise
+
+                    expect(deferred.fn).toHaveBeenCalledTimes(opCount) // N distinct calls, not collapsed
+                    expect(deferred.getMaxInFlight()).toBeLessThanOrEqual(MAX_CONCURRENT_UPLOAD_OPS)
+                    expect(mockTransaction.complete).toHaveBeenCalledTimes(1)
+                }
+            )
+
+            const putConflictTableCases: Array<[string, (i: number) => Record<string, unknown>]> = [
+                ['settings', (i) => ({ user_id: `user-${i}`, body_weight: 70 + i })],
+                ['weight_progress', (i) => ({ user_id: `user-${i}`, date: '2026-07-20', weight: 70 + i })],
+            ]
+
+            it.each(putConflictTableCases)(
+                'runs %s PUT ops strictly serially, never concurrently, even with multiple ops in one run',
+                async (table, buildOpData) => {
+                    const opCount = 3
+                    const crud = Array.from({ length: opCount }, (_, i) => ({
+                        op: UpdateType.PUT,
+                        table,
+                        id: `local-${i}`,
+                        opData: buildOpData(i),
+                    }))
+                    const mockTransaction = { crud, complete: jest.fn().mockResolvedValue(undefined) }
+                    ;(mockDatabase.getNextCrudTransaction as jest.Mock).mockResolvedValue(mockTransaction)
+
+                    // Natural-key SELECT resolves instantly to "no existing row" so every op takes
+                    // the insert path; INSERT itself is deferred/controllable so timing is observable.
+                    const selectBuilder: any = { single: jest.fn().mockResolvedValue({ data: null }) }
+                    selectBuilder.eq = jest.fn(() => selectBuilder)
+                    const deferred = makeDeferredResult({ error: null })
+                    ;(supabase.from as jest.Mock).mockReturnValue({ select: jest.fn(() => selectBuilder), insert: deferred.fn })
+
+                    const uploadPromise = connector.uploadData(mockDatabase)
+                    await flushMicrotasks()
+
+                    // Strictly serial: only the FIRST op's insert has reached Supabase so far.
+                    expect(deferred.fn).toHaveBeenCalledTimes(1)
+
+                    for (let i = 0; i < opCount; i++) {
+                        expect(deferred.pendingCount()).toBe(1) // never more than one in flight
+                        deferred.resolveNext()
+                        await flushMicrotasks()
+                    }
+
+                    await uploadPromise
+
+                    expect(deferred.fn).toHaveBeenCalledTimes(opCount)
+                    expect(deferred.getMaxInFlight()).toBe(1)
+                    expect(mockTransaction.complete).toHaveBeenCalledTimes(1)
+                }
+            )
+
+            it('runs settings PATCH ops strictly serially, never concurrently, even with multiple ops in one run', async () => {
+                const opCount = 3
+                const crud = Array.from({ length: opCount }, (_, i) => ({
+                    op: UpdateType.PATCH,
+                    table: 'settings',
+                    id: `settings-id-${i}`,
+                    opData: { body_weight: 70 + i },
+                }))
+                const mockTransaction = { crud, complete: jest.fn().mockResolvedValue(undefined) }
+                ;(mockDatabase.getNextCrudTransaction as jest.Mock).mockResolvedValue(mockTransaction)
+
+                // The id lookup resolves instantly with a user_id so every op reaches the final
+                // update; that final update is deferred/controllable so timing is observable.
+                const mockSelect = jest.fn(() => ({
+                    eq: jest.fn((_col: string, id: string) => ({
+                        maybeSingle: jest.fn().mockResolvedValue({ data: { user_id: `user-${id}` } }),
+                    })),
+                }))
+                const deferred = makeDeferredResult({ error: null })
+                const mockUpdate = jest.fn(() => ({ eq: deferred.fn }))
+                ;(supabase.from as jest.Mock).mockReturnValue({ select: mockSelect, update: mockUpdate })
+
+                const uploadPromise = connector.uploadData(mockDatabase)
+                await flushMicrotasks()
+
+                expect(deferred.fn).toHaveBeenCalledTimes(1)
+
+                for (let i = 0; i < opCount; i++) {
+                    expect(deferred.pendingCount()).toBe(1)
+                    deferred.resolveNext()
+                    await flushMicrotasks()
+                }
+
+                await uploadPromise
+
+                expect(deferred.fn).toHaveBeenCalledTimes(opCount)
+                expect(deferred.getMaxInFlight()).toBe(1)
+                expect(mockTransaction.complete).toHaveBeenCalledTimes(1)
+            })
+
+            it('runs weight_progress PATCH ops strictly serially, never concurrently, even though this table has no special lookup step', async () => {
+                const opCount = 3
+                const crud = Array.from({ length: opCount }, (_, i) => ({
+                    op: UpdateType.PATCH,
+                    table: 'weight_progress',
+                    id: `wp-id-${i}`,
+                    opData: { weight: 70 + i },
+                }))
+                const mockTransaction = { crud, complete: jest.fn().mockResolvedValue(undefined) }
+                ;(mockDatabase.getNextCrudTransaction as jest.Mock).mockResolvedValue(mockTransaction)
+
+                const deferred = makeDeferredResult({ error: null })
+                const mockUpdate = jest.fn(() => ({ eq: deferred.fn }))
+                ;(supabase.from as jest.Mock).mockReturnValue({ update: mockUpdate })
+
+                const uploadPromise = connector.uploadData(mockDatabase)
+                await flushMicrotasks()
+
+                expect(deferred.fn).toHaveBeenCalledTimes(1)
+
+                for (let i = 0; i < opCount; i++) {
+                    expect(deferred.pendingCount()).toBe(1)
+                    deferred.resolveNext()
+                    await flushMicrotasks()
+                }
+
+                await uploadPromise
+
+                expect(deferred.fn).toHaveBeenCalledTimes(opCount)
+                expect(deferred.getMaxInFlight()).toBe(1)
+                expect(mockTransaction.complete).toHaveBeenCalledTimes(1)
+            })
+
+            it('serializes repeated same-id ops within a run relative to each other, while distinct-id ops in the run still run concurrently', async () => {
+                const crud = [
+                    { op: UpdateType.PATCH, table: 'workout_exercises', id: 'dup-id', opData: { order: 0 } },
+                    { op: UpdateType.PATCH, table: 'workout_exercises', id: 'other-id-1', opData: { order: 1 } },
+                    { op: UpdateType.PATCH, table: 'workout_exercises', id: 'dup-id', opData: { order: 2 } },
+                    { op: UpdateType.PATCH, table: 'workout_exercises', id: 'other-id-2', opData: { order: 3 } },
+                ]
+                const mockTransaction = { crud, complete: jest.fn().mockResolvedValue(undefined) }
+                ;(mockDatabase.getNextCrudTransaction as jest.Mock).mockResolvedValue(mockTransaction)
+
+                const deferred = makeDeferredResult({ error: null })
+                const mockUpdate = jest.fn(() => ({ eq: deferred.fn }))
+                ;(supabase.from as jest.Mock).mockReturnValue({ update: mockUpdate })
+
+                const uploadPromise = connector.uploadData(mockDatabase)
+                await flushMicrotasks()
+
+                // The first dup-id op and both distinct-id ops dispatch immediately (3 calls); the
+                // SECOND dup-id op must wait for the first one's turn.
+                expect(deferred.fn).toHaveBeenCalledTimes(3)
+                expect(mockUpdate).toHaveBeenCalledWith({ order: 0 })
+                expect(mockUpdate).toHaveBeenCalledWith({ order: 1 })
+                expect(mockUpdate).toHaveBeenCalledWith({ order: 3 })
+                expect(mockUpdate).not.toHaveBeenCalledWith({ order: 2 })
+
+                // Resolve the two distinct-id ops (other-id-1, other-id-2) first, by identity (not
+                // FIFO position) - the second dup-id op (order=2) must still be blocked purely on
+                // the first dup-id op (order=0), which is deliberately left pending here.
+                deferred.resolveMatching((args) => args[1] === 'other-id-1')
+                deferred.resolveMatching((args) => args[1] === 'other-id-2')
+                await flushMicrotasks()
+                expect(deferred.fn).toHaveBeenCalledTimes(3)
+                expect(mockUpdate).not.toHaveBeenCalledWith({ order: 2 })
+
+                // Resolving the first dup-id call (order=0) frees dup-id's turn for order=2 to
+                // finally dispatch.
+                deferred.resolveMatching((args) => args[1] === 'dup-id')
+                await flushMicrotasks()
+                expect(deferred.fn).toHaveBeenCalledTimes(4)
+                expect(mockUpdate).toHaveBeenCalledWith({ order: 2 })
+
+                deferred.resolveMatching((args) => args[1] === 'dup-id')
+                await uploadPromise
+
+                expect(mockTransaction.complete).toHaveBeenCalledTimes(1)
+            })
+
+            it('dead-letters one op via Sentry and still attempts its sibling when both run concurrently in the same run', async () => {
+                const mockTransaction = {
+                    crud: [
+                        { op: UpdateType.DELETE, table: 'workouts', id: 'poison-id', opData: {} },
+                        { op: UpdateType.DELETE, table: 'workouts', id: 'ok-id', opData: {} },
+                    ],
+                    complete: jest.fn().mockResolvedValue(undefined),
+                }
+                ;(mockDatabase.getNextCrudTransaction as jest.Mock).mockResolvedValue(mockTransaction)
+
+                const mockError = { message: 'Database error', code: '23505' }
+                const mockEq = jest.fn().mockImplementation((_col: string, idArg: string) => ({
+                    error: idArg === 'poison-id' ? mockError : null,
+                }))
+                ;(supabase.from as jest.Mock).mockReturnValue({ delete: jest.fn().mockReturnValue({ eq: mockEq }) })
+
+                await connector.uploadData(mockDatabase)
+
+                expect(mockEq).toHaveBeenCalledWith('id', 'poison-id')
+                expect(mockEq).toHaveBeenCalledWith('id', 'ok-id')
+                expect(Sentry.captureException).toHaveBeenCalledTimes(1)
+                expect(Sentry.captureException).toHaveBeenCalledWith(
+                    mockError,
+                    { tags: { area: 'powersync-dead-letter' }, extra: { table: 'workouts', opType: UpdateType.DELETE, opId: 'poison-id' } }
+                )
+                expect(mockTransaction.complete).toHaveBeenCalledTimes(1)
+            })
+
+            it('rethrows and does not complete the transaction when one op in a concurrent run has a retryable failure, without preventing its sibling from also being attempted', async () => {
+                const mockTransaction = {
+                    crud: [
+                        { op: UpdateType.DELETE, table: 'workouts', id: 'fail-id', opData: {} },
+                        { op: UpdateType.DELETE, table: 'workouts', id: 'ok-id', opData: {} },
+                    ],
+                    complete: jest.fn(),
+                }
+                ;(mockDatabase.getNextCrudTransaction as jest.Mock).mockResolvedValue(mockTransaction)
+
+                const networkError = new TypeError('Network request failed')
+                const mockEq = jest.fn().mockImplementation((_col: string, idArg: string) => {
+                    if (idArg === 'fail-id') {
+                        throw networkError
+                    }
+                    return { error: null }
+                })
+                ;(supabase.from as jest.Mock).mockReturnValue({ delete: jest.fn().mockReturnValue({ eq: mockEq }) })
+
+                const uploadPromise = connector.uploadData(mockDatabase)
+                const outcome = uploadPromise.then(
+                    () => ({ ok: true as const }),
+                    (error: unknown) => ({ ok: false as const, error })
+                )
+                // Give both concurrently-dispatched ops (and the rejection propagation) time to
+                // fully settle before asserting - avoids racing Promise.all's first-rejection-wins
+                // behavior against the sibling op's own in-flight completion.
+                await flushMicrotasks()
+
+                const result = await outcome
+                expect(result).toEqual({ ok: false, error: networkError })
+                expect(mockTransaction.complete).not.toHaveBeenCalled()
+                // Both ops were dispatched concurrently - one failing doesn't cancel its sibling.
+                expect(mockEq).toHaveBeenCalledTimes(2)
+                expect(Sentry.captureException).not.toHaveBeenCalled()
+            })
         })
     })
 })

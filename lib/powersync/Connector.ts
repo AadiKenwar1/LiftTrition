@@ -1,6 +1,6 @@
 import { ENV } from '@/lib/env';
 import { supabase } from '@/lib/supabase/client';
-import { AbstractPowerSyncDatabase, PowerSyncBackendConnector, UpdateType } from '@powersync/react-native';
+import { AbstractPowerSyncDatabase, CrudEntry, PowerSyncBackendConnector, UpdateType } from '@powersync/react-native';
 import * as Sentry from '@sentry/react-native';
 
 // Natural-key UNIQUE constraints per table (columns other than the primary key `id`).
@@ -17,6 +17,23 @@ const CONFLICT_KEYS: Record<string, string[]> = {
   user_exercises: ['user_id', 'name'],
 };
 const SELF_HEALING_CONFLICT_TABLES = new Set(Object.keys(CONFLICT_KEYS));
+
+// Tables force-serialized for PUT and PATCH (never through the concurrency pool below). Both
+// tables' PUT path (createRecord) does a genuine read-then-write on a single shared row
+// (settings: one row per user; weight_progress: one row per user+date) via CONFLICT_KEYS, which
+// concurrent PUTs in the same run would race on. settings' PATCH path (updateRecord) also reads
+// before writing (looks up user_id first); weight_progress's PATCH is actually a plain PK write
+// today, but is kept serial here too so the rule is per-table rather than per-op-type. DELETE has
+// no read-then-write step on either table, so it is left eligible for the pool. Deliberately a
+// separate set from SELF_HEALING_CONFLICT_TABLES: user_exercises shares the natural-key PUT path
+// but each row is independent per exercise name, so it has no same-row race to guard here.
+const FORCE_SERIAL_TABLES = new Set(['settings', 'weight_progress']);
+
+// Cap on simultaneous in-flight upload ops per contiguous same-(op,table) run (e.g. every row of
+// a drag-reorder's N-row PATCH run). Bounded so a large run overlaps HTTP round-trip latency
+// without fanning out to N simultaneous requests and tripping PostgREST/connection-pool limits.
+// Exported so tests can assert against the real cap instead of duplicating the literal.
+export const MAX_CONCURRENT_UPLOAD_OPS = 5;
 
 // Classify a Supabase upload rejection as permanently non-retryable (dead-letter) vs transient (retry).
 // Permanent: SQLSTATE classes 22 (data exception), 23 (integrity constraint) and 42 (access rule /
@@ -38,6 +55,62 @@ function isNonRetryableUploadError(error: unknown, table: string): boolean {
     return false;
   }
   return true;
+}
+
+// Split a transaction's crud ops into contiguous runs sharing the same (op, table) pair. Order is
+// preserved both across and within runs so FK-dependent writes (e.g. inserting a workout before
+// its exercises) are never reordered relative to each other - only ops within a single run are
+// eligible to run concurrently.
+function groupIntoContiguousRuns(crud: CrudEntry[]): CrudEntry[][] {
+  const runs: CrudEntry[][] = [];
+  for (const entry of crud) {
+    const currentRun = runs[runs.length - 1];
+    if (currentRun && currentRun[0].op === entry.op && currentRun[0].table === entry.table) {
+      currentRun.push(entry);
+    } else {
+      runs.push([entry]);
+    }
+  }
+  return runs;
+}
+
+// Whether a run must be drained strictly serially rather than through the concurrency pool - see
+// FORCE_SERIAL_TABLES for the read-then-write race this guards against.
+function isForceSerialRun(run: CrudEntry[]): boolean {
+  const { op, table } = run[0];
+  return op !== UpdateType.DELETE && FORCE_SERIAL_TABLES.has(table);
+}
+
+// Minimal counting semaphore bounding how many callers may hold a slot at once: acquire()
+// resolves immediately while capacity remains, otherwise queues the caller until release() frees one.
+class UploadSemaphore {
+  private available: number;
+  private readonly waiters: Array<() => void> = [];
+
+  constructor(capacity: number) {
+    this.available = capacity;
+  }
+
+  // Reserve a slot, waiting if the cap is already fully in use.
+  acquire(): Promise<void> {
+    if (this.available > 0) {
+      this.available -= 1;
+      return Promise.resolve();
+    }
+    return new Promise((resolve) => {
+      this.waiters.push(resolve);
+    });
+  }
+
+  // Free a slot, handing it directly to the longest-waiting caller if one is queued.
+  release(): void {
+    const next = this.waiters.shift();
+    if (next) {
+      next();
+    } else {
+      this.available += 1;
+    }
+  }
 }
 
 export class Connector implements PowerSyncBackendConnector {
@@ -101,41 +174,85 @@ export class Connector implements PowerSyncBackendConnector {
       return;
     }
 
-    // Process each operation in the transaction
-    for (const op of transaction.crud) {
-      const record = { ...op.opData, id: op.id };
-      // Prepare record for Supabase (convert JSON arrays to PostgreSQL arrays)
-      const preparedRecord = this.prepareRecordForSupabase(op.table, record);
-      
-      try {
-        switch (op.op) {
-          case UpdateType.PUT:
-            // Create new record in Supabase
-            await this.createRecord(op.table, preparedRecord);
-            break;
-          case UpdateType.PATCH:
-            // Update existing record in Supabase
-            await this.updateRecord(op.table, preparedRecord);
-            break;
-          case UpdateType.DELETE:
-            // Delete record from Supabase
-            await this.deleteRecord(op.table, op.id);
-            break;
+    // Runs are drained strictly in original order, so cross-table FK ordering (e.g. inserting a
+    // workout before its exercises) is preserved; only ops WITHIN a run may run concurrently.
+    // A retryable error propagates out immediately (same as the old serial loop), so
+    // transaction.complete() below is only reached once every op has been attempted.
+    const runs = groupIntoContiguousRuns(transaction.crud);
+    for (const run of runs) {
+      if (isForceSerialRun(run)) {
+        for (const op of run) {
+          await this.processCrudOp(op);
         }
-      } catch (error) {
-        if (isNonRetryableUploadError(error, op.table)) {
-          Sentry.captureException(error, {
-            tags: { area: 'powersync-dead-letter' },
-            extra: { table: op.table, opType: op.op, opId: op.id }
-          });
-          continue;
-        }
-        throw error;
+      } else {
+        await this.processRunConcurrently(run);
       }
     }
 
     // Mark transaction as complete
     await transaction.complete();
+  }
+
+  // Dispatch every op in a run through the bounded-concurrency pool: ops sharing the same row id
+  // are chained to run strictly serially relative to each other (in original order), while
+  // distinct-id ops may run at once, capped at MAX_CONCURRENT_UPLOAD_OPS in flight.
+  private async processRunConcurrently(run: CrudEntry[]): Promise<void> {
+    const semaphore = new UploadSemaphore(MAX_CONCURRENT_UPLOAD_OPS);
+    const lastByRowId = new Map<string, Promise<void>>();
+
+    const tasks = run.map((op) => {
+      const previousSameId = lastByRowId.get(op.id) ?? Promise.resolve();
+      // Wait for any same-id predecessor to settle (its outcome doesn't block this op from being
+      // attempted - each op's own error handling below is independent), then take a pool slot.
+      const task = previousSameId.catch(() => {}).then(async () => {
+        await semaphore.acquire();
+        try {
+          await this.processCrudOp(op);
+        } finally {
+          semaphore.release();
+        }
+      });
+      lastByRowId.set(op.id, task);
+      return task;
+    });
+
+    await Promise.all(tasks);
+  }
+
+  // Execute a single CRUD op's existing single-row Supabase call, dead-lettering any permanent
+  // (non-retryable) failure via isNonRetryableUploadError and rethrowing everything else so
+  // PowerSync retries the whole transaction. Byte-identical to the original per-op loop body -
+  // unaffected by whether the caller runs this serially or through the concurrency pool.
+  private async processCrudOp(op: CrudEntry): Promise<void> {
+    const record = { ...op.opData, id: op.id };
+    // Prepare record for Supabase (convert JSON arrays to PostgreSQL arrays)
+    const preparedRecord = this.prepareRecordForSupabase(op.table, record);
+
+    try {
+      switch (op.op) {
+        case UpdateType.PUT:
+          // Create new record in Supabase
+          await this.createRecord(op.table, preparedRecord);
+          break;
+        case UpdateType.PATCH:
+          // Update existing record in Supabase
+          await this.updateRecord(op.table, preparedRecord);
+          break;
+        case UpdateType.DELETE:
+          // Delete record from Supabase
+          await this.deleteRecord(op.table, op.id);
+          break;
+      }
+    } catch (error) {
+      if (isNonRetryableUploadError(error, op.table)) {
+        Sentry.captureException(error, {
+          tags: { area: 'powersync-dead-letter' },
+          extra: { table: op.table, opType: op.op, opId: op.id }
+        });
+        return;
+      }
+      throw error;
+    }
   }
 
   // Create a record in Supabase, resolving natural-key conflicts (CONFLICT_KEYS) before the generic PK upsert.

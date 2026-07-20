@@ -259,6 +259,22 @@ After the rollback, EVERY remaining pending issue was gated against `docs/PRODUC
 
 ---
 
+## M12 — DONE — `fix(DONE/M12)` — 2026-07-20
+
+**Finding (audit line 96):** `Connector.uploadData` drained a CRUD transaction's ops with one serial `await` per op — a full Supabase round-trip each, even for many same-table ops in one local writeTransaction (a drag-reorder emits N `UPDATE "order"` PATCHes; bulk exercise insert / duplicate-workout emit runs of PUT/DELETE).
+
+**Fix (perf-only, bounded concurrency):** `uploadData` now groups `transaction.crud` into contiguous `(op, table)` runs and drains each op via its EXISTING single-row `createRecord`/`updateRecord`/`deleteRecord` call through a semaphore-bounded pool (`MAX_CONCURRENT_UPLOAD_OPS = 5`). NO array/`.in()` batching (the adjudication proved it introduces dup-PK 21000, PGRST102 heterogeneous-key, and URL-length regressions + loses per-op dead-letter attribution). Safeguards: settings + weight_progress PUT/PATCH stay strictly serial (single-row race protection); same-row-id ops within a run serialize. Contiguous runs drain IN ORDER (a run completes before the next starts) so cross-table FK order holds. Per-op try/catch + `isNonRetryableUploadError` dead-letter/Sentry logic extracted VERBATIM into a shared `processCrudOp` (serial + concurrent paths byte-identical). H2's CONFLICT_KEYS untouched.
+
+**file_review:** fixed one inaccurate comment (the FORCE_SERIAL justification claimed weight_progress PATCH does a read-then-write, but it's a plain PK update — code was already correct, comment now matches). Verified semaphore correctness (no off-by-one/deadlock), byte-identical per-op error handling, rethrow still blocks `transaction.complete()`. Evaluated + reverted a micro-opt on the error path.
+
+**wide_review:** no edits. Traced every multi-op writeTransaction producer — order-bumps set independent values with NO UNIQUE on `"order"` (concurrent-safe); parent/child inserts are different tables → different sequential runs (FK order preserved); nutrition delete-then-reinsert re-mints child ids. settings/weight_progress race protection holds; DELETE safely pooled. No global/leaking state; in-flight ≤ cap; no deadlock. One SAFE deliberate change: on a concurrent-run failure, already-dispatched siblings finish (floating) and re-run idempotently on PowerSync's whole-transaction retry.
+
+**verify:** tsc **0**, jest **773/773** (763 + non-vacuous concurrency tests — deferred-promise mocks observe max-in-flight/capping/seriality). GREEN.
+
+**Scope note:** perf-only — no rendered/stored value change, op count unchanged, only round-trips-in-flight. Does NOT speed cross-transaction backlogs (getCrudBatch unchanged) — only large single writeTransactions, per the rescoped root cause.
+
+---
+
 ## H9 — DONE — `fix(DONE/H9)` — 2026-07-20
 
 **Finding:** ingredient-row quantities were persisted via `sanitizeMacro` (1-decimal round): 0.25 servings → 0.3 (+20%). Stored entry totals were computed from the raw value, so items stopped reconciling with totals, and merely opening `editEntry` + tapping Save silently rewrote the meal's macros with no user edit.
