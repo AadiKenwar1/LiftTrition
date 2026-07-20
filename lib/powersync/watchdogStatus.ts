@@ -37,6 +37,6 @@ export function setWatchdogStatus(partial: Partial<WatchdogStatus>) {
 export function subscribeWatchdogStatus(listener: Listener) {
     listeners.add(listener)
     listener(status)
-    return () => listeners.delete(listener)
+    return () => { listeners.delete(listener) }
 }
 

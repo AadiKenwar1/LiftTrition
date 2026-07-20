@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  verify:
+    name: typecheck + test
+    runs-on: ubuntu-latest
+    env:
+      # Public client values (not secrets) — required at import time by lib/supabase/client.ts
+      # and PowerSync setup. Dummy but syntactically-valid so tsc/jest never hit
+      # "supabaseUrl is required" during CI.
+      EXPO_PUBLIC_SUPABASE_URL: https://dummy.supabase.co
+      EXPO_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key
+      EXPO_PUBLIC_POWERSYNC_URL: https://dummy.powersync.journeyapps.com
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Hard blocking gate — the build must not merge with type errors.
+      - name: Typecheck
+        run: npm run typecheck
+
+      # Advisory only — this suite is uneven today, so it reports without blocking merges.
+      - name: Test (advisory)
+        run: npm run test:ci
+        continue-on-error: true

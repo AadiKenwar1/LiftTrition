@@ -126,13 +126,15 @@ describe('Connector', () => {
 
             ;(mockDatabase.getNextCrudTransaction as jest.Mock).mockResolvedValue(mockTransaction)
 
-            const mockInsert = jest.fn().mockReturnValue({ error: null })
-            ;(supabase.from as jest.Mock).mockReturnValue({ insert: mockInsert })
+            // settings is a natural-key conflict table (CONFLICT_KEYS): createRecord selects by
+            // user_id first. No existing row here, so it falls through to insert.
+            const m = mockConflictTable(null)
+            ;(supabase.from as jest.Mock).mockReturnValue(m.from)
 
             await connector.uploadData(mockDatabase)
 
             expect(supabase.from).toHaveBeenCalledWith('settings')
-            expect(mockInsert).toHaveBeenCalledWith({ id: 'test-id-1', user_id: 'user-1', body_weight: 70.5 })
+            expect(m.insert).toHaveBeenCalledWith({ id: 'test-id-1', user_id: 'user-1', body_weight: 70.5 })
             expect(mockTransaction.complete).toHaveBeenCalledTimes(1)
         })
 
@@ -151,17 +153,26 @@ describe('Connector', () => {
 
             ;(mockDatabase.getNextCrudTransaction as jest.Mock).mockResolvedValue(mockTransaction)
 
-            const mockUpdate = jest.fn().mockReturnValue({ error: null })
+            // PATCH ops never carry user_id, so settings looks up user_id by id first
+            // (select...maybeSingle), then updates by user_id rather than by id.
+            const maybeSingleById = jest.fn().mockResolvedValue({ data: { user_id: 'user-1' } })
+            const selectByIdBuilder = { eq: jest.fn(() => ({ maybeSingle: maybeSingleById })) }
+            const mockSelect = jest.fn(() => selectByIdBuilder)
+
             const mockEq = jest.fn().mockReturnValue({ error: null })
+            const mockUpdate = jest.fn().mockReturnValue({ eq: mockEq })
+
             ;(supabase.from as jest.Mock).mockReturnValue({
-                update: mockUpdate.mockReturnValue({ eq: mockEq }),
+                select: mockSelect,
+                update: mockUpdate,
             })
 
             await connector.uploadData(mockDatabase)
 
             expect(supabase.from).toHaveBeenCalledWith('settings')
+            expect(selectByIdBuilder.eq).toHaveBeenCalledWith('id', 'test-id-1')
             expect(mockUpdate).toHaveBeenCalledWith({ body_weight: 71.0 })
-            expect(mockEq).toHaveBeenCalledWith('id', 'test-id-1')
+            expect(mockEq).toHaveBeenCalledWith('user_id', 'user-1')
             expect(mockTransaction.complete).toHaveBeenCalledTimes(1)
         })
 
@@ -215,19 +226,21 @@ describe('Connector', () => {
 
             ;(mockDatabase.getNextCrudTransaction as jest.Mock).mockResolvedValue(mockTransaction)
 
-            const mockInsert = jest.fn().mockReturnValue({ error: null })
+            // settings PUT is a natural-key conflict table: no existing row here, so it inserts.
+            // workouts PATCH is a generic table: updates by id directly.
+            const settingsMock = mockConflictTable(null)
             const mockUpdate = jest.fn().mockReturnValue({ eq: jest.fn().mockReturnValue({ error: null }) })
 
             ;(supabase.from as jest.Mock).mockImplementation((table) => {
                 if (table === 'settings') {
-                    return { insert: mockInsert }
+                    return settingsMock.from
                 }
                 return { update: mockUpdate }
             })
 
             await connector.uploadData(mockDatabase)
 
-            expect(mockInsert).toHaveBeenCalledTimes(1)
+            expect(settingsMock.insert).toHaveBeenCalledTimes(1)
             expect(mockUpdate).toHaveBeenCalledTimes(1)
             expect(mockTransaction.complete).toHaveBeenCalledTimes(1)
         })

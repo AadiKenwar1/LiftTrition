@@ -9,7 +9,8 @@
     "web": "expo start --web",
     "test": "jest --watchAll",
     "test:watch": "jest --watch",
-    "test:ci": "jest"
+    "test:ci": "jest --ci",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@expo-google-fonts/archivo": "^0.4.2",

@@ -1,3 +1,4 @@
+import { SetStateAction } from 'react'
 import { NutritionEntry } from '../../types'
 import { getFilteredSavedNutritionEntries, saveNutrition, sortSavedNutritionEntries } from '../crudFunctions'
 
@@ -71,8 +72,8 @@ describe('saveNutrition', () => {
         const existing = createMockSavedEntry('a', new Date(1))
         const incoming = createMockSavedEntry('b', new Date(2))
         let state = [existing]
-        const setter = jest.fn((updater: (prev: NutritionEntry[]) => NutritionEntry[]) => {
-            state = updater(state)
+        const setter = jest.fn((updater: SetStateAction<NutritionEntry[]>) => {
+            state = typeof updater === 'function' ? updater(state) : updater
         })
 
         expect(saveNutrition(incoming, setter)).toBe(true)

@@ -13,32 +13,17 @@ commit.
   exists only so the driver can tell a NEW red test (was-green-now-red → investigate) from a
   pre-existing one (already here → ignore). A test that flips green gets removed here.
 
-## tsc --noEmit — 3 errors (all app/test-surface; Deno dir excluded from tsconfig)
+## tsc --noEmit — 0 errors (CLEAN)
 
-- `components/devTest/DevStatsModal.tsx` — TS2345, EffectCallback given `() => () => boolean`.
-  True source is `lib/powersync/watchdogStatus.ts:40`, whose returned cleanup
-  `() => listeners.delete(listener)` yields a boolean (Set.delete). Fix at the source.
-- `context/NutritionContext/functions/__tests__/crudFunctions.test.ts` — TS2345, jest `Mock`
-  not assignable to `Dispatch<SetStateAction<NutritionEntry[]>>` (mock typing).
-- `context/WorkoutContext/functions/__tests__/graphFunctions.test.ts` — TS2353, object literal
-  specifies `name`, which is not a key of `Partial<Log>` (fixture typing).
+H5 cleared the last 3 (watchdogStatus cleanup return at its source; crudFunctions +
+WorkoutContext graphFunctions test-mock types). `lib/supabase/functions/**` stays excluded
+from tsconfig (H1). Any tsc error now is NEW — the CI hard gate (H5) blocks on it.
 
-## jest — 4 failing suites / 7 failing tests
+## jest — 0 failing (CLEAN)
 
-**`lib/notifications/__tests__/prefs.test.ts`** (2)
-- notification prefs › returns defaults when nothing stored
-- notification prefs › merges partial stored shapes over defaults
-
-**`lib/notifications/__tests__/builders.test.ts`** (1)
-- buildMealReminders › schedules 7 days x 3 meals when nothing logged and all times upcoming
-
-**`context/NutritionContext/functions/__tests__/graphFunctions.test.ts`** (1)
-- Graph Functions › getMacroDataForGraph › Edge Cases › should handle onboarding date in the future
-
-**`lib/powersync/__tests__/connector.test.ts`** (3)
-- Connector › uploadData › should handle PUT operation (create record)
-- Connector › uploadData › should handle PATCH operation (update record)
-- Connector › uploadData › should handle multiple operations in a transaction
+H5 corrected the last 4 stale suites (connector mocks, prefs/builders meal-time defaults,
+NutritionContext graph future-date). Full suite is **70/70 suites, 724/724 tests**. Any red
+test now is NEW — investigate it; it is not pre-existing.
 
 ## Changelog
 
@@ -48,6 +33,9 @@ commit.
   RPE > 10) as failing when that suite was actually GREEN — a phantom that would have let the
   gate mask a real regression against exactly those test names. The rebuild is the honest
   starting point for H5 onward.
+- `2026-07-20` after **H5**: cleared ALL remaining entries — the 3 tsc errors and all 4 jest
+  suites. **Baseline is now clean: tsc 0 errors, jest 724/724.** The CI gate added by H5
+  blocks on tsc; jest is advisory.
 - Still in effect from earlier commits: `lib/supabase/functions/**` excluded from tsconfig +
   jest (H1) so the former ~20-error Deno-can't-resolve class does not appear here (validate
   Edge Functions with `deno check`, not this gate); `app/_layout.tsx` TS2353 removed (H4);

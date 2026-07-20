@@ -89,7 +89,7 @@ describe('Workout Graph Functions', () => {
 
     test('should return empty array when no matching logs', () => {
       const logs: Log[] = [
-        createMockLog({ exerciseID: 'other', name: 'Squat' }),
+        createMockLog({ exerciseID: 'other' }),
       ];
       const exercises: Exercise[] = [
         createMockExercise({ id: 'ex1', name: 'Bench Press' }),

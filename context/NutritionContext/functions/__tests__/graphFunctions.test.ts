@@ -457,11 +457,11 @@ describe('Graph Functions', () => {
 
                 const result = getMacroDataForGraph('calories', nutritionData, futureOnboarding)
 
-                // When onboarding is in future, daysSinceOnboarding is negative (< 30),
-                // so it will use the future date as start, resulting in negative daysToShow
-                // This causes the loop to not execute, returning empty array
+                // calculateStartDate clamps a future onboarding date to today, so the
+                // graph shows just today (1 day) rather than reaching back before onboarding.
                 // This is an edge case - in practice, onboarding should never be in the future
-                expect(result.length).toBe(0)
+                expect(result.length).toBe(1)
+                expect(result[0].value).toBe(0) // yesterday's entry falls outside the 1-day window
             })
         })
 

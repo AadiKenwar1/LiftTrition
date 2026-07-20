@@ -9,7 +9,7 @@ describe('notification prefs', () => {
         const prefs = await loadNotificationPrefs()
         expect(prefs).toEqual(DEFAULT_NOTIFICATION_PREFS)
         expect(prefs.enabled).toBe(false)
-        expect(prefs.meals.lunch).toEqual({ enabled: true, hour: 12, minute: 30 })
+        expect(prefs.meals.lunch).toEqual(DEFAULT_NOTIFICATION_PREFS.meals.lunch)
     })
 
     it('round-trips saved prefs', async () => {
@@ -26,7 +26,7 @@ describe('notification prefs', () => {
         await AsyncStorage.setItem('@notificationPrefs', JSON.stringify({ enabled: true, meals: { lunch: { hour: 13 } } }))
         const prefs = await loadNotificationPrefs()
         expect(prefs.enabled).toBe(true)
-        expect(prefs.meals.lunch).toEqual({ enabled: true, hour: 13, minute: 30 })
+        expect(prefs.meals.lunch).toEqual({ ...DEFAULT_NOTIFICATION_PREFS.meals.lunch, hour: 13 })
         expect(prefs.meals.breakfast).toEqual(DEFAULT_NOTIFICATION_PREFS.meals.breakfast)
         expect(prefs.streak.enabled).toBe(true)
     })

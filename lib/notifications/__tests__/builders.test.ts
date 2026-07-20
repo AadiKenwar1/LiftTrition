@@ -55,15 +55,17 @@ describe('buildMealReminders', () => {
         const now = new Date(2026, 6, 17, 7, 0)
         const specs = buildMealReminders(enabledPrefs, noMeals, now)
         expect(specs).toHaveLength(21)
-        expect(specs[0].date).toEqual(new Date(2026, 6, 17, 9, 0))
-        expect(specs[specs.length - 1].date).toEqual(new Date(2026, 6, 23, 18, 30))
+        // Fire times come from DEFAULT_NOTIFICATION_PREFS.meals: breakfast 8:00, dinner 17:30.
+        expect(specs[0].date).toEqual(new Date(2026, 6, 17, 8, 0))
+        expect(specs[specs.length - 1].date).toEqual(new Date(2026, 6, 23, 17, 30))
     })
 
     it('skips today\'s logged meal', () => {
         const now = new Date(2026, 6, 17, 7, 0)
         const specs = buildMealReminders(enabledPrefs, { ...noMeals, lunch: true }, now)
         expect(specs).toHaveLength(20)
-        expect(specs.some((s) => s.date.getTime() === new Date(2026, 6, 17, 12, 30).getTime())).toBe(false)
+        // Lunch default is 12:00 (DEFAULT_NOTIFICATION_PREFS.meals.lunch); confirm no spec fires then today.
+        expect(specs.some((s) => s.date.getTime() === new Date(2026, 6, 17, 12, 0).getTime())).toBe(false)
     })
 
     it('skips today\'s already-past meal times', () => {

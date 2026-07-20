@@ -211,3 +211,28 @@ One block per issue, appended as the pipeline runs. Newest at the bottom.
 ## 🎉 MILESTONE — all 10 launch-blockers done (2026-07-20)
 
 C1, C3, C4, H1, H2, H3, H4, H9, H15, M23 — every `[LAUNCH-BLOCKER]` issue implemented, root-caused, double-reviewed, verified at baseline, and atomically committed. Remaining 52 issues are non-blockers (post-launch track), continuing in severity order starting at H5. The release OPS checklist (C1 migration + caps, H1 RevenueCat secret, H2 migration deploy-ordering, H4 app-env) and the follow-up backlog live above.
+
+---
+
+## H5 — DONE — `fix(DONE/H5)` — 2026-07-20  ▶ first non-blocker; clean re-run after a scrapped attempt
+
+**Finding:** no automated verification anywhere — the only workflow was `codeql.yml` (build-mode none, no tests/typecheck), `package.json` had no `typecheck` script and `test:ci` was a bare `jest`, and EAS builds are triggered manually. Any regression, including in the data-loss-critical sync paths, ships unverified.
+
+**Fix (root cause):** added `.github/workflows/ci.yml` (on PR + push to main) with **tsc typecheck as the blocking gate and jest as an advisory `continue-on-error` step** — deliberately tsc-first, because the suite is uneven and shouldn't block merges (matches the driver's own verify-gate reframe). Env block supplies dummy public `EXPO_PUBLIC_SUPABASE_URL`/`ANON_KEY`/`POWERSYNC_URL` so `client.ts`'s import-time `createClient()` doesn't throw in CI. `package.json`: added `typecheck = tsc --noEmit`, `test:ci = jest --ci`. No lint config, no `@types/react-test-renderer` (both confirmed unnecessary).
+
+**Made the hard gate real:** cleared the 3 genuine tsc errors — `watchdogStatus.ts:40` cleanup wrapped in braces (Set.delete's boolean → void, fixed at the shared source not the DevStatsModal call site); `crudFunctions.test.ts` mock retyped to the real `Dispatch<SetStateAction<NutritionEntry[]>>`; `WorkoutContext/graphFunctions.test.ts` dropped a bogus `name` key absent from `Log`. Only ONE production line changed (watchdogStatus), behavior-identical.
+
+**Tests-are-evidence triage (the 4 failing suites were all STALE TESTS, not product bugs):** `connector.test.ts` (3) — mocks were missing the `select`/`eq` chains the post-H2 Connector actually calls, and the old PATCH test even asserted the wrong filter column (`.eq('id')` vs the real `.eq('user_id')`); fixed the mocks, `Connector.ts` untouched. `prefs`/`builders` (3) — pinned to abandoned plan-doc meal times (9:00/12:30/18:30) that never matched the shipped `DEFAULT_NOTIFICATION_PREFS` (8:00/12:00/17:30); corrected to the shipped constant (the single source of truth). `NutritionContext/graphFunctions` (1) — expected an empty array for a future onboarding date, but `calculateStartDate` clamps future→today; corrected to length 1.
+
+**file_review:** independently re-derived all 6 test-expectation changes from real source and confirmed each is a genuine "test was wrong" case (not force-greened); one diff-scoped simplification to the connector PATCH mock; ran the affected suites (93/93).
+
+**wide_review:** no code edits. Confirmed watchdogStatus is prod-identical (useEffect cleanup return ignored), `test:ci → jest --ci` is inert (already single-run, zero snapshot tests), ci.yml env/lock/gate wiring correct, connector tests still assert real behavior. One non-blocking caveat (typecheck blocks on the whole repo being clean) — satisfied by the verify run.
+
+**verify:** tsc **0 errors** (hard gate green — cleared the 3 baseline errors), jest **70/70 suites / 724/724 tests** (cleared all 4 baseline suites). Baseline is now fully clean. GREEN.
+
+**OPS CHECKLIST (human — not done by pipeline):**
+- On GitHub, mark the new CI **Typecheck** job a **required status check** via branch protection on `main` (the workflow runs, but "required" is a repo setting the pipeline can't toggle).
+- Optionally promote the advisory jest step to blocking later, once the suite is trusted (currently `continue-on-error: true` by design).
+- H4's source-map upload for readable Sentry stack traces was nominally scoped to H5 — NOT implemented here (out of the CI-gate brief's scope); track separately if wanted.
+
+**NOTE — scrapped first attempt:** an earlier H5 dispatch was interrupted mid-run and left partial edits that (from a stale baseline + an over-prescriptive prompt) wrongly rewrote the already-green validator. Fully reverted; the validator 0-rep change is the user's own, committed separately (`4be645d`) with its `logFunctions` blast-radius reconciled (`3a528f8`). This clean re-run followed the hardened agents (repro-before-fix, tests-as-evidence) and the rebuilt real-run baseline (`1455db1`).
