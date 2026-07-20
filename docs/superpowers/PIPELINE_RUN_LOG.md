@@ -241,6 +241,24 @@ After the rollback, EVERY remaining pending issue was gated against `docs/PRODUC
 
 ---
 
+## M10 — DONE — `fix(DONE/M10)` — 2026-07-20 — Part A only (Part B deferred)
+
+**Finding (audit line 95):** `Graph1.tsx` recomputes an O(n) `chartKey` per-point join AND an O(n) `yScaleInfo` (min/max + nice-step) on EVERY render — including incidental re-renders (press-drag, onLayout, font churn) — cost scaling with account age (up to 365 dense body-weight points at 1Y). `downsample.ts` is dead code.
+
+**Fix (Part A — memoization, ZERO behavior change):** wrapped `chartKey` in `useMemo` keyed on `[data, chartColor, colors.textSecondary, colors.ringTrack]` (full per-point `day:value` join KEPT byte-identical — the only mechanism that repaints on interior-only edits, since the parent's topSig is lossy) and `yScaleInfo` in `useMemo` keyed on `[data, goal]` (verbatim old IIFE). Deps exhaustive. The 200ms `minDelayDone` remount-glitch guard is untouched (removing it risks a visual regression — separate follow-up).
+
+**Part B DEFERRED (not implemented):** reviving `downsampleDataPreserveEndpoints` to weekly-average the 6M/1Y body-weight line is optional per the brief and changes RENDERED output (approximate month-boundary ticks ±~6 days, zero-fill trimming) — a UX decision the owner should make. `downsample.ts` / `progress.tsx` / `downsample.test.ts` untouched.
+
+**file_review:** no edits. simplify found nothing (matches existing memo idioms). Verified deps exhaustive, bodies verbatim, join not truncated, minDelayDone untouched; cross-checked the topSig-is-lossy claim.
+
+**wide_review:** no edits. All 3 Graph1 renderers (progress.tsx + 2 dev harnesses) pass the unchanged prop contract. Interior-edit repaint VERIFIED SAFE — an interior edit yields a fresh `topRawData.slice()` (new `data` identity), so the memo recomputes and the unchanged full join differs; contexts update immutably; matches the pre-existing `monthTickValues` memo pattern.
+
+**verify:** tsc **0**, jest **763/763** (memoization-only, no new tests — no Graph1 render-test infra exists in the repo). GREEN.
+
+**FOLLOW-UPS:** (1) Part B (downsample revival for 6M/1Y body-weight) — optional, changes rendered output, needs a UX call. (2) removing the 200ms minDelayDone gate — gated on manual device QA (no visible flash in dark+light, rapid range switching).
+
+---
+
 ## H9 — DONE — `fix(DONE/H9)` — 2026-07-20
 
 **Finding:** ingredient-row quantities were persisted via `sanitizeMacro` (1-decimal round): 0.25 servings → 0.3 (+20%). Stored entry totals were computed from the raw value, so items stopped reconciling with totals, and merely opening `editEntry` + tapping Save silently rewrote the meal's macros with no user edit.

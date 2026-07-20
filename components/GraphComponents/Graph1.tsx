@@ -36,7 +36,15 @@ export default function Graph1({ mode, data, selectedRange, goal, formatValue, s
     const chartColor = mode === true ? colors.workout : colors.nutrition
     // Remount the inner chart when data OR colors change so the persisted Skia canvas repaints
     // (victory-native won't refresh on a prop change alone — a theme switch changes colors, not data).
-    const chartKey = `${chartColor}|${colors.textSecondary}|${colors.ringTrack}|` + data.map((d) => `${d.day}:${d.value}`).join('|')
+    // Memoized so this O(n) per-point join only recomputes when data/colors actually change, not on
+    // every incidental re-render (press-drag state updates, containerWidth onLayout, font-readiness
+    // churn). The full per-point join is kept (not truncated to color-only) because it's the only
+    // mechanism that forces a repaint on interior-only data edits, e.g. correcting a past body-weight
+    // day — the parent's key (progress.tsx topSig) only encodes length + last day + last value.
+    const chartKey = useMemo(
+        () => `${chartColor}|${colors.textSecondary}|${colors.ringTrack}|` + data.map((d) => `${d.day}:${d.value}`).join('|'),
+        [data, chartColor, colors.textSecondary, colors.ringTrack],
+    )
     const flagTextColor = '#ffffff'
     const fmt = formatValue ?? ((n: number) => Math.round(n).toLocaleString())
     const [minDelayDone, setMinDelayDone] = useState(false)
@@ -71,7 +79,9 @@ export default function Graph1({ mode, data, selectedRange, goal, formatValue, s
     // max, which gives the end-value flag room to sit above a peak last-point (e.g. a new PR)
     // without needing a large empty band on top. Degenerate single-point/all-equal ranges keep
     // a ±10 band so gridlines render and the dot sits mid-chart.
-    const yScaleInfo = (() => {
+    // Memoized so this O(n) min/max + nice-step computation only reruns when data/goal actually
+    // change, not on every incidental re-render.
+    const yScaleInfo = useMemo(() => {
         if (data.length === 0) return { domain: undefined as [number, number] | undefined, ticks: [0, 100, 200, 300] }
         const values = data.map((d) => d.value)
         let lo = Math.min(...values)
@@ -100,7 +110,7 @@ export default function Graph1({ mode, data, selectedRange, goal, formatValue, s
         const ticks: number[] = []
         for (let v = niceMin; v <= niceMax + step * 1e-6; v += step) ticks.push(Math.round(v * 100) / 100)
         return { domain: [niceMin, niceMax] as [number, number], ticks }
-    })()
+    }, [data, goal])
 
     // Show placeholder while fonts load, and for a minimum duration.
     if (!font || !flagFont || !minDelayDone) {
