@@ -66,7 +66,9 @@ lean (only that issue's agent summaries), which is what makes the run survivable
      exact failure output + "repair the root cause; do not weaken/delete tests to pass."
      Re-verify. Still red → `git add -A && git stash`, set `status:"needs-human"`, log the
      error, `git commit -m "chore(pipeline): <ID> needs-human"`, go to step 9.
-8. **Commit:** set manifest row `status:"done"`, append the run-log block, then
+8. **Commit:** set manifest row `status:"done"` AND add a `"summary"` field to that row —
+   1–2 sentences stating what was fixed and why it mattered (the user's at-a-glance
+   ledger; concrete, no agent/process narration). Append the run-log block, then
    `git add -A && git commit -m "fix(<BUCKET>/<ID>): <one-line summary>"`. MERGED ids keep
    the `MERGED/` prefix — the user post-hoc reviews those 6 commits.
 9. **Schedule the next turn (LAST action — ends the turn):**
