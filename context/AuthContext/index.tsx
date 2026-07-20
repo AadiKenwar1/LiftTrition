@@ -2,7 +2,7 @@ import { disconnectPowerSync, ensurePowerSyncConnected } from '@/lib/powersync/o
 import { supabase } from '@/lib/supabase/client'
 import { Session, User } from '@supabase/supabase-js'
 import * as Sentry from '@sentry/react-native'
-import { createContext, PropsWithChildren, useContext, useEffect, useState } from 'react'
+import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useState } from 'react'
 import { deleteAccount, signOut } from './functions/accountFunctions'
 import { signInWithApple } from './functions/authFunctions'
 import { AuthContextInterface } from './types'
@@ -65,21 +65,29 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
         Sentry.setUser(user ? { id: user.id } : null)
     }, [user])
 
-    return (
-        <AuthContext.Provider
-            value={{
-                user,
-                session,
-                loading,
-                userID,
-                signInWithApple,
-                signOut,
-                deleteAccount,
-            }}
-        >
-            {children}
-        </AuthContext.Provider>
+    // Memoized provider value: a stable reference so consumers re-render only when an
+    // exposed field actually changes, not on every AuthProvider render. signInWithApple/
+    // signOut/deleteAccount are stable module-level imports, so they are intentionally not deps.
+    // Caveat (H6, out of scope): the onAuthStateChange listener above hands back a NEW `session`
+    // object on every token refresh, and `session`/`user` must stay deps so consumers reading
+    // them stay correct — so this memo still recomputes on a same-user refresh even though
+    // `userID` is unchanged. It removes Auth's OWN redundant re-renders but does not fully
+    // insulate downstream consumers from a genuine refresh; narrowing what Auth exposes to
+    // break that ripple is a separate, larger change.
+    const value = useMemo(
+        () => ({
+            user,
+            session,
+            loading,
+            userID,
+            signInWithApple,
+            signOut,
+            deleteAccount,
+        }),
+        [user, session, loading, userID],
     )
+
+    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
 export function useAuth() {

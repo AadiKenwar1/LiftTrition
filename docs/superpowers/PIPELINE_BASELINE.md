@@ -22,8 +22,9 @@ from tsconfig (H1). Any tsc error now is NEW — the CI hard gate (H5) blocks on
 ## jest — 0 failing (CLEAN)
 
 H5 corrected the last 4 stale suites (connector mocks, prefs/builders meal-time defaults,
-NutritionContext graph future-date). Full suite is **70/70 suites, 724/724 tests**. Any red
-test now is NEW — investigate it; it is not pre-existing.
+NutritionContext graph future-date). Full suite passes with **0 failures** (the exact
+totals grow as later issues add tests). Any red test now is NEW — investigate it; it is not
+pre-existing.
 
 ## Changelog
 

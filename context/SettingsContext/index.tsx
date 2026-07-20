@@ -1,7 +1,7 @@
 import { useAuth } from '@/context/AuthContext'
 import { powerSync } from '@/lib/powersync/system'
 import { useAsyncLoad } from '@/lib/hooks/useAsyncLoad'
-import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useRef, useState, type SetStateAction } from 'react'
+import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useRef, useState, type SetStateAction } from 'react'
 import { loadSettingsAndBw, upsertSettings, upsertWeightForDate } from './database/powersyncStore'
 import { persistBackoffMs, reportPersistFailure } from '@/lib/powersync/persistErrors'
 import { applySwitchToMaintenance, computeBwUpdate, getBodyWeightProgressData, type BwPrompt } from './functions/bodyWeightFunctions'
@@ -119,7 +119,13 @@ export const SettingsProvider = ({ children }: PropsWithChildren) => {
         setSettings(prev => ({ ...prev, goalOvershootAcknowledged: true }))
     }, [setSettings])
 
-    const handleGetBodyWeightProgressData = (onboardingCompletedAt?: Date) => getBodyWeightProgressData(bwProgress, onboardingCompletedAt)
+    // Body-weight progress series for the Progress chart; memoized on bwProgress so it keeps a
+    // stable identity — this both feeds the value memo below and stops progress.tsx's topRawData
+    // useMemo (which lists this as a dep) from being defeated on every SettingsProvider render.
+    const handleGetBodyWeightProgressData = useCallback(
+        (onboardingCompletedAt?: Date) => getBodyWeightProgressData(bwProgress, onboardingCompletedAt),
+        [bwProgress],
+    )
 
     // Load from PowerSync via the shared status hook. On failure the loader
     // writes nothing, so prior state is preserved and status becomes 'error'
@@ -223,27 +229,34 @@ export const SettingsProvider = ({ children }: PropsWithChildren) => {
         }
     }, [settings, userID])
 
+    // Memoized provider value: a stable reference so the whole consumer tree re-renders only
+    // when an exposed field changes — NOT on the persistDirty / persistRetryNonce save-cycle
+    // flips, which are provider-local (not in this object) and so are deliberately excluded
+    // from the deps; the settled `settings` they eventually produce is a dep and still propagates.
+    const value = useMemo(
+        () => ({
+            settings,
+            setSettings,
+            mode,
+            setMode,
+            bwProgress,
+            handleUpdateBw,
+            pendingGoalPrompt,
+            dismissGoalPrompt,
+            switchToMaintenance,
+            acknowledgeGoalOvershoot,
+            handleGetBodyWeightProgressData,
+            calculateMacros,
+            loaded,
+            loadFailed,
+            retryLoad,
+            completeOnboarding,
+        }),
+        [settings, setSettings, mode, setMode, bwProgress, handleUpdateBw, pendingGoalPrompt, dismissGoalPrompt, switchToMaintenance, acknowledgeGoalOvershoot, handleGetBodyWeightProgressData, calculateMacros, loaded, loadFailed, retryLoad, completeOnboarding],
+    )
+
     return (
-        <SettingsContext.Provider
-            value={{
-                settings,
-                setSettings,
-                mode,
-                setMode,
-                bwProgress,
-                handleUpdateBw,
-                pendingGoalPrompt,
-                dismissGoalPrompt,
-                switchToMaintenance,
-                acknowledgeGoalOvershoot,
-                handleGetBodyWeightProgressData,
-                calculateMacros,
-                loaded,
-                loadFailed,
-                retryLoad,
-                completeOnboarding,
-            }}
-        >
+        <SettingsContext.Provider value={value}>
             {children}
         </SettingsContext.Provider>
     )
