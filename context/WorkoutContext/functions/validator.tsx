@@ -7,7 +7,7 @@ export function validateLog(weight: number, reps: number, rpe: number): boolean 
         return false
     }
     if (reps <= 0) {
-        Alert.alert('Invalid Input', 'Reps cannot be 0 or negative')
+        Alert.alert('Invalid Input', 'Reps cannot be less than 0')
         return false
     }
     if (rpe < 0) {
@@ -15,7 +15,7 @@ export function validateLog(weight: number, reps: number, rpe: number): boolean 
         return false
     }
     if (rpe > 10) {
-        Alert.alert('Invalid Input', 'RPE must be between 1-10')
+        Alert.alert('Invalid Input', 'RPE must be between 0-10')
         return false
     }
 

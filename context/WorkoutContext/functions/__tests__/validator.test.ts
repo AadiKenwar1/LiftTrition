@@ -23,7 +23,11 @@ describe('Workout Validator', () => {
 
     test('should return false for negative reps', () => {
       expect(validateLog(100, -5, 8)).toBe(false);
-      expect(mockAlert).toHaveBeenCalledWith('Invalid Input', 'Reps cannot be negative');
+      expect(mockAlert).toHaveBeenCalledWith('Invalid Input', 'Reps cannot be less than 0');
+    });
+
+    test('should return false for zero reps', () => {
+      expect(validateLog(100, 0, 8)).toBe(false);
     });
 
     test('should return false for negative RPE', () => {
