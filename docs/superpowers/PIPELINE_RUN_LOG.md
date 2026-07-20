@@ -254,3 +254,21 @@ C1, C3, C4, H1, H2, H3, H4, H9, H15, M23 — every `[LAUNCH-BLOCKER]` issue impl
 **verify:** tsc **0 errors**, jest **71 suites / 729 tests** (baseline 70/724 + 1 suite/5 tests), 0 failures. GREEN.
 
 **FOLLOW-UP (explicitly out of H6 scope, noted):** `React.memo` on leaf components was deliberately NOT added (separate follow-on, co-sequenced with the H8 performance track). AuthContext's value still re-keys on a same-user token refresh because `session` must remain a dep — fully insulating `userID`-only consumers from a refresh would need a data-shape change (narrowing what Auth exposes), out of scope for H6.
+
+---
+
+## H8 — DONE — `fix(DONE/H8)` — 2026-07-20
+
+**Finding:** `getDateKey` (the calendar-day key on every hot date-bucketing path) was `date.toLocaleDateString("en-CA")` — an Intl call 1-2 orders of magnitude slower than arithmetic. At large log counts, one "+" tap fired thousands of Intl calls (logs sort comparator ×2/comparison, progression goal re-filters, the always-mounted Progress tab's weekly transform, and the nutrition home's unmemoized `todayEntries` render-body scan).
+
+**Fix (root cause):** replaced the Intl call with an arithmetic build `${getFullYear()}-${pad(getMonth()+1)}-${pad(getDate())}` (2-digit zero-pad) — byte-identical to en-CA for all real dates, reading LOCAL calendar components (not UTC), fixing the cost at the shared helper so every one of ~135 call sites benefits. JSDoc rewritten to describe the arithmetic build and retain the local-not-UTC rationale (CLAUDE.md's deliberate negative-offset contract). Memoized `nutritionScreen.tsx`'s `todayEntries` (`useMemo([nutritionData, selectedDateKey])`). + equivalence / lexicographic-ordering / DST-spring-forward tests.
+
+**implement (pipeline-implementer-done):** reproduced the brief's claims first (getDateKey was Intl; todayEntries was unmemoized); executed the vetted brief; left the logsModal/LogHistoryList 2×-per-comparison multiplier and the dead getVolumeData/getSetsData untouched (adjudication ruled both out of scope).
+
+**file_review:** no edits. Verified byte-identity (4-digit year, 2-digit pad, local components), the JSDoc is accurately updated (not stale), the memo deps are complete and effective (nutritionData is a stable state ref, so the memo genuinely skips recompute), scope correct.
+
+**wide_review:** no edits. Audited all ~135 call sites: every one uses getDateKey as a calendar-day compare/bucket/sort key (speed-only change). Verified the one format-sensitive fixed-position slice `CalendarMonthGrid.tsx:102` (`parseInt(day.slice(8),10)`) stays correct under the padded build; the Invalid-Date divergence ('Invalid Date' vs 'NaN-NaN-NaN') is unreachable (all inputs typed Date from valid constructors); persisted writers/readers round-trip via getDateKey/parseDateKey; no structural twin produces a competing YYYY-MM-DD key.
+
+**verify:** tsc **0 errors**, jest **71 suites / 732 tests** (729 + 3 new), 0 failures. GREEN.
+
+**OPS CHECKLIST (human — REQUIRED before shipping this change):** on an actual iOS device/simulator (Hermes), run `date.toLocaleDateString('en-CA')` and the new arithmetic build side-by-side for a spread of dates INCLUDING at least one date already persisted in a test account's `weight_progress`/`nutrition_entries` rows, and confirm the strings are identical. getDateKey's output is a persisted/synced DB value (`weight_progress.date` is unique on user_id+date); the Jest equivalence test only proves parity under Node ICU, not Hermes. If they ever diverge, a one-time key-format backfill/migration is required, NOT a silent redeploy.

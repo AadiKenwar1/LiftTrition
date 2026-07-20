@@ -15,15 +15,30 @@ export function isDateAfterToday(date: Date): boolean {
     return d.getTime() > today.getTime()
 }
 
+// Zero-pads a 1-2 digit number to 2 digits (e.g. 3 -> "03").
+function pad(n: number): string {
+    return String(n).padStart(2, '0')
+}
+
 /**
- * Get a date key in YYYY-MM-DD format using local timezone
- * Uses en-CA locale which returns dates in ISO 8601 format
- * 
+ * Get a date key in YYYY-MM-DD format using local timezone.
+ * Builds the string arithmetically from LOCAL calendar components
+ * (getFullYear/getMonth/getDate) rather than an Intl `toLocaleDateString`
+ * call — this is a hot path (called per-row on date-bucketing/sort
+ * comparisons) and arithmetic string building is 1-2 orders of magnitude
+ * faster. Deliberately reads local components, not UTC (e.g. via
+ * toISOString) — using UTC would shift the date onto the wrong calendar
+ * day in negative-offset timezones. Output is byte-identical to the
+ * previous `date.toLocaleDateString("en-CA")` for all real dates, which
+ * matters because this key is persisted/synced (weight_progress.date,
+ * nutrition_entries.date, settings.birth_date/onboarding_completed_at)
+ * and compared against previously-stored keys.
+ *
  * @param date - Date object to convert
  * @returns Date string in YYYY-MM-DD format (e.g., "2024-02-03")
  */
 export function getDateKey(date: Date): string {
-    return date.toLocaleDateString("en-CA");
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
 
 /**

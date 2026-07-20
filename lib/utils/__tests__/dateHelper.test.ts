@@ -33,6 +33,38 @@ describe('parseDateKey', () => {
     })
 })
 
+describe('getDateKey', () => {
+    // Equivalence holds under Jest/Node ICU; supplemented by a required on-device (Hermes) check before merge, since the output is persisted/synced.
+    it('matches toLocaleDateString("en-CA") for a spread of real dates', () => {
+        const dates = [
+            new Date(2024, 0, 1), // single-digit month & day
+            new Date(2024, 8, 9), // single-digit month & day
+            new Date(2024, 11, 31), // double-digit month & day
+            new Date(2024, 1, 29), // leap day
+            new Date(2026, 6, 20),
+            new Date(1990, 5, 22),
+        ]
+        for (const d of dates) {
+            expect(getDateKey(d)).toBe(d.toLocaleDateString('en-CA'))
+        }
+    })
+
+    it('preserves lexicographic ordering across dates', () => {
+        const earlier = getDateKey(new Date(2024, 1, 9))
+        const later = getDateKey(new Date(2024, 1, 29))
+        expect(earlier < later).toBe(true)
+
+        const yearBoundaryEarlier = getDateKey(new Date(2023, 11, 31))
+        const yearBoundaryLater = getDateKey(new Date(2024, 0, 1))
+        expect(yearBoundaryEarlier < yearBoundaryLater).toBe(true)
+    })
+
+    it('returns the correct calendar day across a DST spring-forward boundary', () => {
+        // 2024-03-10 is US spring-forward (2 AM -> 3 AM); local midnight must still read as Mar 10.
+        expect(getDateKey(new Date(2024, 2, 10))).toBe('2024-03-10')
+    })
+})
+
 describe('daysBetween', () => {
     test('spring-forward inside the window still counts calendar days', () => {
         // 2024-03-10 is US spring-forward: Mar 9 → Mar 11 spans a 23h day + a 24h day.

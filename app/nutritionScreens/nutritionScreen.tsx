@@ -24,12 +24,16 @@ export default function NutritionScreen() {
 
     // Filter entries for selected date
     const selectedDateKey = getDateKey(selectedDate)
-    const todayEntries = nutritionData
-        .filter((entry) => {
-            const entryDateKey = getDateKey(entry.date)
-            return entryDateKey === selectedDateKey
-        })
-        .sort((a, b) => b.time - a.time)
+    const todayEntries = useMemo(
+        () =>
+            nutritionData
+                .filter((entry) => {
+                    const entryDateKey = getDateKey(entry.date)
+                    return entryDateKey === selectedDateKey
+                })
+                .sort((a, b) => b.time - a.time),
+        [nutritionData, selectedDateKey]
+    )
 
     // Check if selected date is today
     const isToday = todayKey === selectedDateKey
