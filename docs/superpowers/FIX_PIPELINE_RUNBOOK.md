@@ -98,6 +98,7 @@ lean (only that issue's agent summaries), which is what makes the run survivable
 
 ## Known baseline failures
 
-Recorded in **`docs/superpowers/PIPELINE_BASELINE.md`** (8 Jest suites / 67 tests + 27
-tsc errors, snapshotted at commit `1d51d47`). Verify green = nothing failing beyond that
-list. A fix that clears baseline entries updates that file in its own commit.
+Recorded in **`docs/superpowers/PIPELINE_BASELINE.md`** (kept current — it has a
+changelog). Verify green = nothing failing beyond that list, matching tsc errors by
+file+code+symbol (not line/count). A fix that clears or shifts baseline entries updates
+that file in its own commit.

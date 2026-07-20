@@ -85,6 +85,25 @@ function toResponse(result: CallResult): Response {
 
 const OPENAI_VISION_MODEL = () => Deno.env.get('OPENAI_VISION_MODEL') ?? 'gpt-5.4-mini'
 
+// Per-user/day caps (audit C1) — env-configurable, safe defaults sized for normal logging
+// (several meal/item/label scans and manual macro estimates per day) while still bounding
+// worst-case spend from a scripted loop. Label/item scans are counted under 'vision' too,
+// even though detail:'high' is pricier than 'meal' mode's 'auto' — acceptable first cut.
+const VISION_DAILY_LIMIT = () => Number(Deno.env.get('AI_VISION_DAILY_LIMIT') ?? '30')
+const TEXT_DAILY_LIMIT = () => Number(Deno.env.get('AI_TEXT_DAILY_LIMIT') ?? '60')
+
+// Atomically increments today's usage counter for (user, kind) and reports whether the caller
+// is still within limit. Fails closed: any RPC/DB error (including the RPC not existing yet)
+// is treated as "blocked" so an outage can never reopen the unbounded-spend hole this closes.
+async function consumeQuota(supabase: ReturnType<typeof createClient>, userId: string, kind: string, limit: number): Promise<boolean> {
+    const { data, error } = await supabase.rpc('consume_ai_quota', { p_user_id: userId, p_kind: kind, p_limit: limit })
+    if (error) {
+        console.error('[fetchOpenAI] consume_ai_quota error', kind, error)
+        return false
+    }
+    return data === true
+}
+
 // --- OpenAI (Chat Completions) ---
 async function callOpenAI(messages: unknown, model: string, label: string): Promise<CallResult> {
     const apiKey = Deno.env.get('OPENAI_API_KEY')
@@ -178,6 +197,12 @@ serve(async (req: Request) => {
 
     // Vision: pick provider (per-request override → VISION_PROVIDER env → openai default).
     if (body.type === 'vision' && body.base64Image) {
+        // Quota gate BEFORE the paid call. Charged pre-flight, so a subsequent refusal (422)
+        // or provider error (502) still consumes the unit already spent here — intentional
+        // fail-safe for a cost blocker, not refunded.
+        const allowed = await consumeQuota(supabase, user.id, 'vision', VISION_DAILY_LIMIT())
+        if (!allowed) return new Response(JSON.stringify({ error: 'quota_exceeded' }), { status: 429 })
+
         const mode = body.mode === 'label' ? 'label' : body.mode === 'item' ? 'item' : 'meal'
         const prompt = mode === 'label' ? LABEL_PROMPT : mode === 'item' ? ITEM_PROMPT : VISION_PROMPT
         const provider =
@@ -191,6 +216,9 @@ serve(async (req: Request) => {
 
     // Text (NLP): OpenAI only for now.
     if (body.type === 'text' && body.foodName) {
+        const allowed = await consumeQuota(supabase, user.id, 'text', TEXT_DAILY_LIMIT())
+        if (!allowed) return new Response(JSON.stringify({ error: 'quota_exceeded' }), { status: 429 })
+
         const result = await callOpenAI(
             [
                 { role: 'system', content: TEXT_SYSTEM },

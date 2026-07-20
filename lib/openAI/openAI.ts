@@ -29,6 +29,11 @@ async function callEdgeFunction(
     })
 
     if (!res.ok) {
+        // Daily quota hit (audit C1) — checked first, and without reading the body, so the
+        // upstream/edge response is never touched let alone leaked into the thrown message.
+        if (res.status === 429) {
+            throw new Error('Daily scan limit reached. Try again tomorrow, or add this meal manually.')
+        }
         const text = await res.text()
         let parsed: { error?: string } | null = null
         try {

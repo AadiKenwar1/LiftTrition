@@ -5,6 +5,11 @@ import { CacheEntry, FoodDetails, FoodItem, FoodSearchResult } from './types'
 const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000 // 1 week
 const EDGE_FN_URL = `${ENV.SUPABASE_URL}/functions/v1/fetchFoodDB`
 
+// Friendly, user-facing message thrown when the per-user daily food-DB quota (audit C1) is hit.
+// Exported so a caller (e.g. foodDBModal) can distinguish a quota block from a generic network
+// failure and surface this copy, instead of a misleading "check your connection" message.
+export const FOOD_SEARCH_QUOTA_MESSAGE = 'Daily search limit reached. Try again tomorrow.'
+
 const searchCache: Record<string, CacheEntry<FoodSearchResult[]>> = {}
 const detailsCache: Record<string, CacheEntry<FoodDetails>> = {}
 
@@ -35,6 +40,11 @@ async function callEdgeFunction<T>(body: { type: 'search'; query: string } | { t
     })
 
     if (!res.ok) {
+        // Daily quota hit (audit C1) — checked first, and without reading the body, so the
+        // upstream/edge response is never touched let alone leaked into the thrown message.
+        if (res.status === 429) {
+            throw new Error(FOOD_SEARCH_QUOTA_MESSAGE)
+        }
         const text = await res.text()
         throw new Error(`Edge function error: ${res.status} - ${text}`)
     }
@@ -72,6 +82,11 @@ export async function getFoodDetails(item: FoodSearchResult): Promise<FoodDetail
         }
         return details
     } catch {
+        // Known degraded path (audit C1): this swallows every edge error, including a 429
+        // "daily search limit reached". A cap hit while tapping a search result in foodDBModal
+        // therefore surfaces as a silent "no details" rather than a quota message — accepted to
+        // keep this call site's behavior (and enrichBrandedItem's silent-fallback contract)
+        // unchanged; not a hidden accident.
         return null
     }
 }

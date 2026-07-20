@@ -44,6 +44,27 @@ async function fatSecretRequest(method: string, params: Record<string, string>):
   try { return JSON.parse(text) } catch { return null }
 }
 
+// Per-user/day cap (audit C1) — env-configurable, safe default. A single 'foodsearch' kind
+// covers both manual search (foodDBModal) and details lookups, including the up-to-5 search +
+// 5 details calls a photo/label scan makes via enrichBrandedItem (context/NutritionContext/
+// functions/aiFunctions.tsx, MAX_BRANDED_ENRICH=5). Sized generously (well above any realistic
+// manual-search volume) specifically so routine scanning cannot starve manual search — the
+// alternative (a separate 'enrich' kind) was rejected here to keep this a self-contained
+// Edge-Function-only change; see the ai_usage_quota.sql migration for the quota mechanics.
+const FOODSEARCH_DAILY_LIMIT = () => Number(Deno.env.get("AI_FOODSEARCH_DAILY_LIMIT") ?? "300")
+
+// Atomically increments today's usage counter for (user, kind) and reports whether the caller
+// is still within limit. Fails closed: any RPC/DB error (including the RPC not existing yet) is
+// treated as "blocked" so an outage can never reopen the unbounded-spend hole this closes.
+async function consumeQuota(supabase: ReturnType<typeof createClient>, userId: string, kind: string, limit: number): Promise<boolean> {
+  const { data, error } = await supabase.rpc("consume_ai_quota", { p_user_id: userId, p_kind: kind, p_limit: limit })
+  if (error) {
+    console.error("[fetchFoodDB] consume_ai_quota error", kind, error)
+    return false
+  }
+  return data === true
+}
+
 serve(async (req: Request) => {
   const auth = req.headers.get("Authorization")
   if (!auth) return new Response(null, { status: 401 })
@@ -60,6 +81,9 @@ serve(async (req: Request) => {
   try { body = await req.json() } catch { return new Response(null, { status: 400 }) }
 
   if (body.type === "search" && body.query?.trim()) {
+    const allowed = await consumeQuota(supabase, user.id, "foodsearch", FOODSEARCH_DAILY_LIMIT())
+    if (!allowed) return new Response(JSON.stringify({ error: "quota_exceeded" }), { status: 429, headers: { "Content-Type": "application/json" } })
+
     const json = await fatSecretRequest("foods.search", { search_expression: body.query.trim() }) as { foods?: { food?: any[] } }
     const list = json?.foods?.food ?? []
     const results = list.map((f: any) => ({
@@ -72,6 +96,9 @@ serve(async (req: Request) => {
   }
 
   if (body.type === "details" && body.foodId?.trim()) {
+    const allowed = await consumeQuota(supabase, user.id, "foodsearch", FOODSEARCH_DAILY_LIMIT())
+    if (!allowed) return new Response(JSON.stringify({ error: "quota_exceeded" }), { status: 429, headers: { "Content-Type": "application/json" } })
+
     const json = await fatSecretRequest("food.get", { food_id: body.foodId.trim() }) as { food?: any }
     const f = json?.food
     if (!f) return new Response(JSON.stringify(null), { headers: { "Content-Type": "application/json" } })

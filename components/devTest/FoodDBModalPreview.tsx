@@ -4,7 +4,7 @@ import FoodRow from '@/components/NutritionComponents/FoodRow'
 import { useAuth } from '@/context/AuthContext'
 import { useNutrition } from '@/context/NutritionContext'
 import { fonts, useColors, type Colors } from '@/context/ThemeContext'
-import { getFoodItem, getFoodSearchResults } from '@/lib/foodDB/foodDB'
+import { FOOD_SEARCH_QUOTA_MESSAGE, getFoodItem, getFoodSearchResults } from '@/lib/foodDB/foodDB'
 import { POPULAR_FOODS, type PopularFood } from '@/lib/foodDB/popularFoods'
 import { FoodItem, FoodSearchResult } from '@/lib/foodDB/types'
 import { useSubmitOnce } from '@/lib/hooks/useSubmitOnce'
@@ -76,9 +76,15 @@ export default function FoodDBModalPreview() {
             setIsSearching(true)
             try {
                 setSearchResults(await getFoodSearchResults(q))
-            } catch {
+            } catch (error) {
                 setSearchResults([])
-                Alert.alert('Search Failed', 'Unable to search the food database. Check your connection and try again.')
+                // Kept in sync with the real foodDBModal (audit C1): surface the daily-quota
+                // message verbatim, generic connection copy otherwise.
+                const message =
+                    error instanceof Error && error.message === FOOD_SEARCH_QUOTA_MESSAGE ?
+                        error.message
+                    :   'Unable to search the food database. Check your connection and try again.'
+                Alert.alert('Search Failed', message)
             } finally {
                 setIsSearching(false)
                 setHasSearched(true)
