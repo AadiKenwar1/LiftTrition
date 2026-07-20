@@ -225,6 +225,22 @@ After the rollback, EVERY remaining pending issue was gated against `docs/PRODUC
 
 ---
 
+## M9 — DONE — `fix(DONE/M9)` — 2026-07-20 — premise stale (regression guard only)
+
+**Finding (audit line 94):** "AI photos upload full-size — no dimension cap." **Premise STALE:** git history shows `lib/openAI/mealImage.ts` (resize/compress caps) landed 2026-06-26, ~3 weeks BEFORE the audit (2026-07-18); every capture path already resizes+compresses before base64 (meal 800px/0.8, item·label 1400px/0.9, JPEG). The audit's ~3-5MB estimate is already mitigated. So NO product-code change — the resize values are deliberate (800 cheap for recognition, 1400 high-res for OCR legibility) and were left untouched.
+
+**Fix (regression guard only):** new `lib/openAI/__tests__/mealImage.test.ts` pins width (≤800/≤1400) AND exact compress (0.8/0.9) AND JPEG AND crop-only-for-meal-capture per mode (so a future compress bump can't slip past a width-only guard); new `app/nutritionScreens/__tests__/cameraScreen.test.tsx` asserts `pickFromLibrary` still passes `allowsEditing:true` (the implicit iOS square-crop height bound for library picks). One comment-only note in `mealImage.ts` that the width/compress constants + allowsEditing are jointly load-bearing for payload size. Implementer mutation-tested every assertion (broke width, compress-only, allowsEditing → each caught → reverted).
+
+**file_review:** two simplify edits (folded item/label test pairs into `it.each`; consolidated the forwardRef passthrough mocks into a `mockPassthrough` helper). Independently re-verified the git-history claim and re-ran the mutation checks.
+
+**wide_review:** no edits. Confirmed `mealImage.ts` diff is comment-only (all constants + crop + exports unchanged), no global mock leakage (file-scoped), no duplicate coverage. **Env note:** hit a transient STALE jest transform cache on Windows (old compiled values) — `npx jest --clearCache` fixed it; not a code defect. (The driver also cleared the cache before the gate.)
+
+**verify:** tsc **0**, jest **763/763** (756 + 7 new; cache cleared first). GREEN.
+
+**Audit paper-trail (recorded here, NOT edited into the audit — the audit is the user's scope doc):** line 94 "AI photos upload full-size" is already MITIGATED (cap predates the audit, applies before base64). Residual is mode-aware: item/label (1400px, uncropped) is the higher-residual mode (~1.3-3.3MB base64 — well under the 3-5MB estimate but above the audit's 1024px suggestion), a deliberate OCR-legibility tradeoff, now regression-guarded.
+
+---
+
 ## H9 — DONE — `fix(DONE/H9)` — 2026-07-20
 
 **Finding:** ingredient-row quantities were persisted via `sanitizeMacro` (1-decimal round): 0.25 servings → 0.3 (+20%). Stored entry totals were computed from the raw value, so items stopped reconciling with totals, and merely opening `editEntry` + tapping Save silently rewrote the meal's macros with no user edit.

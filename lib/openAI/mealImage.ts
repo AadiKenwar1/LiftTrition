@@ -20,6 +20,9 @@ export function getFrameSize(screenWidth: number): { width: number; height: numb
     return { width, height: width / SCAN_FRAME.aspectRatio }
 }
 
+// M9: every WIDTH/COMPRESS pair below is jointly load-bearing for base64 payload size (pinned
+// together in mealImage.test.ts) — resize bounds width only, so height/pixel-count safety for
+// library picks additionally depends on cameraScreen.tsx's allowsEditing:true (iOS square crop).
 // Meal photos: cropped to the on-screen frame, downscaled for cheap/fast vision (recognition task).
 const MEAL_IMAGE_MAX_WIDTH = 800
 const MEAL_IMAGE_COMPRESS = 0.8
