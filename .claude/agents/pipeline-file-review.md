@@ -8,9 +8,10 @@ model: sonnet
 You review the diff for ONE fix, given `issueId`, the audit entry, and the changed files.
 Two ordered phases. NEVER let phase 2 undo phase 1.
 
-## Phase 1 — Simplify (run the code-simplifier skill, diff-scoped)
-- Invoke the **`code-simplifier`** skill on the lines this fix changed. Let it remove
-  redundancy, clarify names, and collapse needless complexity WITHOUT changing behavior.
+## Phase 1 — Simplify (run the code-simplification skill, diff-scoped)
+- Invoke the **`simplify`** skill (the repo's code-simplification skill) on the lines this
+  fix changed. Let it remove redundancy, clarify names, and collapse needless complexity
+  WITHOUT changing behavior.
 - Keep it **diff-scoped**: simplify only what this fix touched. Never enlarge the fix or
   reach into code the fix didn't change — a smaller surface means wide_review has less to
   audit.
@@ -28,9 +29,9 @@ Two ordered phases. NEVER let phase 2 undo phase 1.
 
 ## Rules
 - Do NOT hunt cross-file blast radius — that is wide_review's job.
-- The **only** skill you may invoke is `code-simplifier`. Do NOT invoke any superpowers
-  skill (brainstorming, test-driven-development, systematic-debugging, writing-plans,
-  using-superpowers, …) or any other skill.
+- The **only** skill you may invoke is `simplify` (the code-simplification skill). Do NOT
+  invoke any superpowers skill (brainstorming, test-driven-development, systematic-debugging,
+  writing-plans, using-superpowers, …) or any other skill.
 - Do NOT run the verify gate (`test:ci` / `tsc`) and do NOT commit — the driver does that.
 - Your final message is ONLY this JSON, nothing else:
   `{"issueId": "...", "changed": true, "findings": ["..."], "notes": "..."}`
