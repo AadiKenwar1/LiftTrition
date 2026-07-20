@@ -87,10 +87,13 @@ export async function runPhotoAnalysis(
   userID: string,
   mode: ScanMode = 'meal',
   provider?: VisionProvider,
+  signal?: AbortSignal,
 ): Promise<{ entry: NutritionEntry; sources: EnrichmentSource[]; rawItems: Item[] }> {
   const file = new File(photoUri);
   const base64 = await file.base64();
-  const response = await withTimeout(askOpenAIVision(`data:image/jpeg;base64,${base64}`, mode, provider), 30000);
+  // signal aborts the in-flight edge-function fetch on cancel (M8); the 30s withTimeout race
+  // below is unrelated and untouched — it only bounds how long the UI waits, it does not abort.
+  const response = await withTimeout(askOpenAIVision(`data:image/jpeg;base64,${base64}`, mode, provider, signal), 30000);
 
   const data = parseJsonResponse<{ name?: string; ingredients?: any[] }>(response);
   // Wire key from the vision prompt contract stays "ingredients"; in-app these are items.
@@ -138,9 +141,9 @@ export async function runPhotoAnalysis(
 
 // Analyze Photo Function — returns the created NutritionEntry so callers can persist it,
 // or null when shouldCommit reports the caller no longer wants the result (e.g. swiped away).
-export async function analyzeAndAddPhoto(photoUri: string, userID: string, setNutritionData: Dispatch<SetStateAction<NutritionEntry[]>>, date: Date = new Date(), mode: ScanMode = 'meal', shouldCommit?: () => boolean): Promise<NutritionEntry | null> {
+export async function analyzeAndAddPhoto(photoUri: string, userID: string, setNutritionData: Dispatch<SetStateAction<NutritionEntry[]>>, date: Date = new Date(), mode: ScanMode = 'meal', shouldCommit?: () => boolean, signal?: AbortSignal): Promise<NutritionEntry | null> {
     try {
-      const { entry } = await runPhotoAnalysis(photoUri, userID, mode);
+      const { entry } = await runPhotoAnalysis(photoUri, userID, mode, undefined, signal);
       const nutritionItem: NutritionEntry = { ...entry, date: new Date(date) };
       if (shouldCommit && !shouldCommit()) return null;
       // Gate on the pure check so an invalid AI entry never reaches the DB (the manual path's

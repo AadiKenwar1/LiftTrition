@@ -10,10 +10,19 @@ export type VisionProvider = 'openai' | 'gemini'
 
 const EDGE_FN_URL = `${ENV.SUPABASE_URL}/functions/v1/fetchOpenAI`
 
+// True for the AbortError a fetch()/body-read rejects with when `signal` fires — an intentional
+// client-side cancel (M8), not an ops-relevant failure, so it must never hit Sentry as noise.
+// Checked structurally (not `instanceof Error`/DOMException) since which concrete type a fetch
+// abort rejects with is runtime-dependent.
+function isAbortError(e: unknown): boolean {
+    return typeof e === 'object' && e !== null && (e as { name?: unknown }).name === 'AbortError'
+}
+
 async function callEdgeFunction(
     body:
         | { type: 'text'; foodName: string }
         | { type: 'vision'; base64Image: string; mode: ScanMode; provider?: VisionProvider },
+    signal?: AbortSignal,
 ): Promise<string> {
     const {
         data: { session },
@@ -29,8 +38,12 @@ async function callEdgeFunction(
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(body),
+            signal,
         })
     } catch (e) {
+        // An aborted analyze (modal cancelled mid-flight) rejects here too — expected, not an
+        // ops failure, so it's rethrown uncaptured (analyzePhoto's canceledRef guard swallows it).
+        if (isAbortError(e)) throw e
         // Offline/DNS/TLS failures never reach the edge function at all, so without this the most
         // common real-world trigger for this funnel would stay invisible to ops.
         Sentry.captureException(e, { tags: { area: 'edge-openai' } })
@@ -75,6 +88,9 @@ async function callEdgeFunction(
     try {
         return await res.text()
     } catch (e) {
+        // An abort after headers arrive (cancel raced the body read) lands here too — same
+        // no-capture rule as the fetch-level catch above.
+        if (isAbortError(e)) throw e
         // A 2xx response whose body stream fails mid-read (e.g. a dropped connection during the
         // ~30s vision call) is a genuine failure — captured once here, the last throwing step in
         // this function.
@@ -87,10 +103,10 @@ export async function askOpenAI(_question: string): Promise<string> {
     throw new Error('Generic askOpenAI is not supported. Use askOpenAIText or askOpenAIVision for nutrition.')
 }
 
-export async function askOpenAIVision(base64Image: string, mode: ScanMode = 'meal', provider?: VisionProvider): Promise<string> {
-    return callEdgeFunction({ type: 'vision', base64Image, mode, ...(provider ? { provider } : {}) })
+export async function askOpenAIVision(base64Image: string, mode: ScanMode = 'meal', provider?: VisionProvider, signal?: AbortSignal): Promise<string> {
+    return callEdgeFunction({ type: 'vision', base64Image, mode, ...(provider ? { provider } : {}) }, signal)
 }
 
-export async function askOpenAIText(foodName: string): Promise<string> {
-    return callEdgeFunction({ type: 'text', foodName })
+export async function askOpenAIText(foodName: string, signal?: AbortSignal): Promise<string> {
+    return callEdgeFunction({ type: 'text', foodName }, signal)
 }

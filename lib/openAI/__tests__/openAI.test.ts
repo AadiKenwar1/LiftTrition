@@ -143,6 +143,52 @@ describe('askOpenAIVision', () => {
     })
 })
 
+// M8: the client half of cancellation propagation — an AbortSignal threaded down to this
+// module's fetch() call, so cancelling the analyze modal actually tears down the in-flight
+// request instead of only discarding the result once it resolves.
+describe('cancellation (M8)', () => {
+    it('forwards a passed AbortSignal into the fetch call', async () => {
+        mockFetch.mockResolvedValue({ ok: true, text: async () => '{}' })
+        const controller = new AbortController()
+
+        await askOpenAIVision('data:image/jpeg;base64,abc', 'meal', undefined, controller.signal)
+
+        expect(mockFetch).toHaveBeenCalledWith(
+            'https://test.supabase.co/functions/v1/fetchOpenAI',
+            expect.objectContaining({ signal: controller.signal }),
+        )
+    })
+
+    it('makes no fetch call with an undefined signal when the caller passes none (unchanged default)', async () => {
+        mockFetch.mockResolvedValue({ ok: true, text: async () => '{}' })
+
+        await askOpenAIText('grilled chicken')
+
+        expect(mockFetch).toHaveBeenCalledWith(
+            expect.any(String),
+            expect.objectContaining({ signal: undefined }),
+        )
+    })
+
+    it('rejects with the AbortError but never captures it to Sentry — an intentional cancel, not an ops failure', async () => {
+        const abortError = new DOMException('The operation was aborted', 'AbortError')
+        mockFetch.mockRejectedValue(abortError)
+
+        await expect(askOpenAIVision('data:image/jpeg;base64,abc')).rejects.toBe(abortError)
+
+        expect(Sentry.captureException).not.toHaveBeenCalled()
+    })
+
+    it('still captures a non-abort fetch rejection to Sentry (abort-filtering does not swallow real failures)', async () => {
+        const networkError = new Error('Network request failed')
+        mockFetch.mockRejectedValue(networkError)
+
+        await expect(askOpenAIVision('data:image/jpeg;base64,abc')).rejects.toBe(networkError)
+
+        expect(Sentry.captureException).toHaveBeenCalledTimes(1)
+    })
+})
+
 describe('askOpenAIText', () => {
     it('posts to the fetchOpenAI edge function and returns a 200 body unchanged', async () => {
         const rawBody = '{"calories":250,"protein":20,"carbs":30,"fats":5}'

@@ -101,3 +101,27 @@ describe('analyzeAndAddPhoto shouldCommit gate', () => {
         expect(setter).not.toHaveBeenCalled()
     })
 })
+
+// M8: analyzeAndAddPhoto must thread an AbortSignal all the way down to askOpenAIVision so
+// cancelling the analyze modal actually aborts the in-flight edge-function request, not just
+// discards the result once it resolves (the previously-adjudicated hard-gate defect).
+describe('analyzeAndAddPhoto signal propagation (M8)', () => {
+    it('forwards the given AbortSignal through to askOpenAIVision', async () => {
+        mockVision.mockResolvedValue(VISION_JSON)
+        const { setter } = makeSetter()
+        const controller = new AbortController()
+
+        await analyzeAndAddPhoto('file://p.jpg', 'user-1', setter, new Date('2026-07-15'), 'meal', () => true, controller.signal)
+
+        expect(mockVision).toHaveBeenCalledWith('data:image/jpeg;base64,fake-base64', 'meal', undefined, controller.signal)
+    })
+
+    it('calls askOpenAIVision with an undefined signal when none is passed (existing callers unchanged)', async () => {
+        mockVision.mockResolvedValue(VISION_JSON)
+        const { setter } = makeSetter()
+
+        await analyzeAndAddPhoto('file://p.jpg', 'user-1', setter, new Date('2026-07-15'))
+
+        expect(mockVision).toHaveBeenCalledWith('data:image/jpeg;base64,fake-base64', 'meal', undefined, undefined)
+    })
+})

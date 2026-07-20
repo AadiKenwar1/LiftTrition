@@ -19,6 +19,9 @@ export default function AnalyzingModal() {
     const [progress] = useState(new Animated.Value(0))
     const [pulseAnim] = useState(new Animated.Value(1))
     const canceledRef = useRef(false)
+    // Owns the in-flight attempt's AbortController — recreated per analyzePhoto() call (a retry
+    // needs a fresh one; an already-aborted signal can never un-abort).
+    const abortControllerRef = useRef<AbortController | null>(null)
 
     // Normalize param (Expo Router can return string | string[] | undefined)
     const photoUriStr = typeof photoUri === 'string' ? photoUri : photoUri?.[0]
@@ -27,10 +30,13 @@ export default function AnalyzingModal() {
     const devFakeMsStr = typeof devFakeMs === 'string' ? devFakeMs : devFakeMs?.[0]
     const devFakeOutcomeStr = typeof devFakeOutcome === 'string' ? devFakeOutcome : devFakeOutcome?.[0]
 
-    // Swipe-dismiss / hardware back = cancel: drop the in-flight result silently.
+    // Swipe-dismiss / hardware back = cancel: drop the in-flight result AND abort the underlying
+    // network call (M8) — previously this only set the flag, leaving the edge-function request
+    // (and provider billing) running to completion with nothing left to read the response.
     useEffect(() => {
         const unsubscribe = navigation.addListener('beforeRemove', () => {
             canceledRef.current = true
+            abortControllerRef.current?.abort()
         })
         return unsubscribe
     }, [navigation])
@@ -75,13 +81,17 @@ export default function AnalyzingModal() {
 
     async function analyzePhoto() {
         if (!photoUriStr) return
+        // Fresh controller per attempt so a retry after a failed/timed-out analysis isn't stuck
+        // wired to an already-aborted signal.
+        const controller = new AbortController()
+        abortControllerRef.current = controller
         try {
             // Dev Hub fake mode (stripped from production): simulate analysis without an API call.
             if (__DEV__ && devFakeMsStr) {
                 await new Promise((resolve) => setTimeout(resolve, Number(devFakeMsStr)))
                 if (devFakeOutcomeStr === 'fail') throw new Error('Dev-forced failure (no API call was made)')
             } else {
-                await handleAnalyzeAndAddPhoto(photoUriStr, userID, modeStr, () => !canceledRef.current)
+                await handleAnalyzeAndAddPhoto(photoUriStr, userID, modeStr, () => !canceledRef.current, controller.signal)
             }
             if (canceledRef.current) return
             // Success! Dismiss all modals and return to home

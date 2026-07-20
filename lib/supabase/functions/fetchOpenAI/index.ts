@@ -84,6 +84,28 @@ function toResponse(result: CallResult): Response {
     return new Response(JSON.stringify(result.error.body), { status: result.error.status })
 }
 
+// M8: shared ceiling for BOTH provider fetches, matching the client's own withTimeout(...,30000)
+// UI-visible window (aiFunctions.tsx) — this timer bounds Edge Function wall-clock/provider-cost
+// exposure for a hung provider, it does not change user-visible latency (the client's race already
+// governs that independently).
+const PROVIDER_TIMEOUT_MS = 30000
+
+// True for the AbortError a fetch()/res.json() rejects with when `signal` fires — either the
+// PROVIDER_TIMEOUT_MS ceiling or the client disconnecting/cancelling (req.signal). Checked
+// structurally (not `instanceof`) since which concrete error type Deno's fetch rejects with is
+// not being relied upon here.
+function isAbortError(err: unknown): boolean {
+    return typeof err === 'object' && err !== null && (err as { name?: unknown }).name === 'AbortError'
+}
+
+// Shared catch-block body for both provider calls below: normalizes an AbortError (the
+// PROVIDER_TIMEOUT_MS ceiling or a genuine client cancel) into the existing 504 CallResult
+// shape instead of an uncaught exception; any other error rethrows unchanged (M8).
+function toTimeoutResult(err: unknown): CallResult {
+    if (isAbortError(err)) return { error: { status: 504, body: { error: 'timeout' } } }
+    throw err
+}
+
 const OPENAI_VISION_MODEL = () => Deno.env.get('OPENAI_VISION_MODEL') ?? 'gpt-5.4-mini'
 
 // Per-user/day caps (audit C1) — env-configurable, safe defaults sized for normal logging
@@ -106,30 +128,37 @@ async function consumeQuota(supabase: ReturnType<typeof createClient>, userId: s
 }
 
 // --- OpenAI (Chat Completions) ---
-async function callOpenAI(messages: unknown, model: string, label: string): Promise<CallResult> {
+async function callOpenAI(messages: unknown, model: string, label: string, signal: AbortSignal): Promise<CallResult> {
     const apiKey = Deno.env.get('OPENAI_API_KEY')
     if (!apiKey) return { error: { status: 500, body: { error: 'OpenAI not configured' } } }
 
-    const res = await fetch(CHAT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-        body: JSON.stringify({ model, response_format: { type: 'json_object' }, messages }),
-    })
-    if (!res.ok) return { error: { status: 502, body: { error: `OpenAI: ${res.status}` } } }
+    try {
+        const res = await fetch(CHAT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+            body: JSON.stringify({ model, response_format: { type: 'json_object' }, messages }),
+            signal,
+        })
+        if (!res.ok) return { error: { status: 502, body: { error: `OpenAI: ${res.status}` } } }
 
-    const data = await res.json()
-    console.log('[ai] openai', label, JSON.stringify(data?.usage))
-    const message = data?.choices?.[0]?.message
-    if (message?.refusal) return { error: { status: 422, body: { error: 'refused', message: message.refusal } } }
-    const content = message?.content as string | null | undefined
-    if (!content) {
-        console.error('[fetchOpenAI] openai missing content', JSON.stringify(data))
-        return { error: { status: 502, body: { error: 'Invalid response' } } }
+        const data = await res.json()
+        console.log('[ai] openai', label, JSON.stringify(data?.usage))
+        const message = data?.choices?.[0]?.message
+        if (message?.refusal) return { error: { status: 422, body: { error: 'refused', message: message.refusal } } }
+        const content = message?.content as string | null | undefined
+        if (!content) {
+            console.error('[fetchOpenAI] openai missing content', JSON.stringify(data))
+            return { error: { status: 502, body: { error: 'Invalid response' } } }
+        }
+        return { content }
+    } catch (err) {
+        // `signal` firing cuts off fetch() OR the res.json() body read, armed for the full
+        // lifecycle (not just headers) — see toTimeoutResult (M8).
+        return toTimeoutResult(err)
     }
-    return { content }
 }
 
-function callOpenAIVision(prompt: string, base64DataUrl: string, mode: string): Promise<CallResult> {
+function callOpenAIVision(prompt: string, base64DataUrl: string, mode: string, signal: AbortSignal): Promise<CallResult> {
     return callOpenAI(
         [
             {
@@ -143,11 +172,12 @@ function callOpenAIVision(prompt: string, base64DataUrl: string, mode: string): 
         ],
         OPENAI_VISION_MODEL(),
         `vision:${mode}`,
+        signal,
     )
 }
 
 // --- Gemini (generateContent) ---
-async function callGeminiVision(prompt: string, base64DataUrl: string, mode: string): Promise<CallResult> {
+async function callGeminiVision(prompt: string, base64DataUrl: string, mode: string, signal: AbortSignal): Promise<CallResult> {
     const apiKey = Deno.env.get('GEMINI_API_KEY')
     if (!apiKey) return { error: { status: 500, body: { error: 'Gemini not configured' } } }
     const model = Deno.env.get('GEMINI_MODEL') ?? 'gemini-2.5-flash'
@@ -155,28 +185,34 @@ async function callGeminiVision(prompt: string, base64DataUrl: string, mode: str
     const rawBase64 = base64DataUrl.replace(/^data:image\/\w+;base64,/, '')
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`
 
-    const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: 'image/jpeg', data: rawBase64 } }] }],
-            generationConfig: { responseMimeType: 'application/json' },
-        }),
-    })
-    if (!res.ok) return { error: { status: 502, body: { error: `Gemini: ${res.status}` } } }
+    try {
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: 'image/jpeg', data: rawBase64 } }] }],
+                generationConfig: { responseMimeType: 'application/json' },
+            }),
+            signal,
+        })
+        if (!res.ok) return { error: { status: 502, body: { error: `Gemini: ${res.status}` } } }
 
-    const data = await res.json()
-    console.log('[ai] gemini', `vision:${mode}`, JSON.stringify(data?.usageMetadata))
-    if (data?.promptFeedback?.blockReason) {
-        return { error: { status: 422, body: { error: 'refused', message: data.promptFeedback.blockReason } } }
+        const data = await res.json()
+        console.log('[ai] gemini', `vision:${mode}`, JSON.stringify(data?.usageMetadata))
+        if (data?.promptFeedback?.blockReason) {
+            return { error: { status: 422, body: { error: 'refused', message: data.promptFeedback.blockReason } } }
+        }
+        const candidate = data?.candidates?.[0]
+        const content = candidate?.content?.parts?.[0]?.text as string | null | undefined
+        if (!content || (candidate?.finishReason && candidate.finishReason !== 'STOP')) {
+            console.error('[fetchOpenAI] gemini missing/blocked content', JSON.stringify(data))
+            return { error: { status: 502, body: { error: 'Invalid response' } } }
+        }
+        return { content }
+    } catch (err) {
+        // Same normalization as callOpenAI's catch above — see toTimeoutResult (M8).
+        return toTimeoutResult(err)
     }
-    const candidate = data?.candidates?.[0]
-    const content = candidate?.content?.parts?.[0]?.text as string | null | undefined
-    if (!content || (candidate?.finishReason && candidate.finishReason !== 'STOP')) {
-        console.error('[fetchOpenAI] gemini missing/blocked content', JSON.stringify(data))
-        return { error: { status: 502, body: { error: 'Invalid response' } } }
-    }
-    return { content }
 }
 
 serve(async (req: Request) => {
@@ -202,6 +238,12 @@ serve(async (req: Request) => {
         return new Response(null, { status: 400 })
     }
 
+    // M8: one merged signal per request, reused for whichever provider call runs below — fires on
+    // EITHER req.signal (the client disconnecting/cancelling, e.g. the analyze modal dismissed) OR
+    // the PROVIDER_TIMEOUT_MS ceiling (a hung/slow provider), and stays armed for the full fetch
+    // lifecycle (headers + body read), not just until headers arrive.
+    const signal = AbortSignal.any([req.signal, AbortSignal.timeout(PROVIDER_TIMEOUT_MS)])
+
     // Vision: pick provider (per-request override → VISION_PROVIDER env → openai default).
     if (body.type === 'vision' && body.base64Image) {
         // Quota gate BEFORE the paid call. Charged pre-flight, so a subsequent refusal (422)
@@ -216,8 +258,8 @@ serve(async (req: Request) => {
             body.provider === 'gemini' || body.provider === 'openai' ? body.provider : (Deno.env.get('VISION_PROVIDER') ?? 'openai')
         const result =
             provider === 'gemini'
-                ? await callGeminiVision(prompt, body.base64Image, mode)
-                : await callOpenAIVision(prompt, body.base64Image, mode)
+                ? await callGeminiVision(prompt, body.base64Image, mode, signal)
+                : await callOpenAIVision(prompt, body.base64Image, mode, signal)
         return toResponse(result)
     }
 
@@ -233,6 +275,7 @@ serve(async (req: Request) => {
             ],
             OPENAI_VISION_MODEL(),
             'text',
+            signal,
         )
         return toResponse(result)
     }

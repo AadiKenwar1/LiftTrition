@@ -207,6 +207,24 @@ After the rollback, EVERY remaining pending issue was gated against `docs/PRODUC
 
 ---
 
+## M8 — DONE — `fix(DONE/M8)` — 2026-07-20
+
+**Finding (audit line 93):** the AI analyze path never aborts upstream calls — cancelling the analyze modal only set `canceledRef` to discard the result client-side while the fetch (and the Edge Function's OpenAI/Gemini calls) ran to completion and billed; a hung provider had no server-side deadline.
+
+**Fix (root cause), two coordinated halves:** (client) `lib/openAI/openAI.ts` callEdgeFunction now takes an OPTIONAL AbortSignal and passes it into its fetch; the modal's `abortControllerRef` (fresh per analyze attempt, `.abort()` fired in `beforeRemove`) threads through handleAnalyzeAndAddPhoto → analyzeAndAddPhoto → runPhotoAnalysis → askOpenAIVision → callEdgeFunction, so cancelling actually aborts the in-flight request. (Edge Function, Deno) `fetchOpenAI/index.ts` builds one `AbortSignal.any([req.signal, AbortSignal.timeout(30000)])` per request and passes it into BOTH provider fetches, each try/catch-normalizing AbortError into the existing 504 CallResult shape (armed for the whole fetch lifecycle incl. the body read). An `isAbortError()` filter keeps intentional cancels out of Sentry (they'd otherwise read as 'edge-openai' failures). The client `withTimeout(30000)` race and analyzePhoto's `canceledRef` alert-guard are untouched.
+
+**file_review:** one simplify edit — deduped the identical AbortError-normalization catch bodies in the Edge Function (callOpenAI + callGeminiVision) into a shared `toTimeoutResult()` helper. Verified the signal chain, optional params, guard preservation, and 504-normalization by reading + 135 tests green.
+
+**wide_review:** no edits. Every changed signature took `signal` as an OPTIONAL last param — all call sites safe (analyzeText / AiTest / addNutritionModal correctly omit it), tsc clean. `foodDB.ts`'s separate `callEdgeFunction` (different endpoint) untouched. `isAbortError` silences only intentional aborts; real network/5xx/504/body-read failures still Sentry-captured (H4 contract intact). Fresh controller per attempt confirmed (a retried scan never reuses an aborted signal).
+
+**verify:** tsc **0**, jest **756/756** (748 + 8 new). GREEN. (The Deno Edge Function is excluded from tsc/jest — validated by reading; see OPS.)
+
+**Accepted residual (documented, per adjudication):** a non-streaming provider may still finish/bill after the abort fires — closing that needs a streaming migration, out of scope.
+
+**OPS (human):** deploy the updated `fetchOpenAI` Edge Function; verify the deployed Deno runtime supports `AbortSignal.any` / `AbortSignal.timeout` before relying on them; run the Deno-side tests (never-resolving fetch → 504; fast fetch unaffected; client-abort exits clean) and a manual mid-scan cancel to confirm via Edge Function logs the invocation stops.
+
+---
+
 ## H9 — DONE — `fix(DONE/H9)` — 2026-07-20
 
 **Finding:** ingredient-row quantities were persisted via `sanitizeMacro` (1-decimal round): 0.25 servings → 0.3 (+20%). Stored entry totals were computed from the raw value, so items stopped reconciling with totals, and merely opening `editEntry` + tapping Save silently rewrote the meal's macros with no user edit.

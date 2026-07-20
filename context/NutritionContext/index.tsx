@@ -125,8 +125,8 @@ export const NutritionProvider = ({ children }: PropsWithChildren) => {
         }
     }, [userID, reloadFromDisk])
 
-    const handleAnalyzeAndAddPhoto = useCallback(async (photoUri: string, userIDParam: string, mode: ScanMode = 'meal', shouldCommit?: () => boolean) => {
-        const entry = await analyzeAndAddPhoto(photoUri, userIDParam, setNutritionData, selectedDate, mode, shouldCommit);
+    const handleAnalyzeAndAddPhoto = useCallback(async (photoUri: string, userIDParam: string, mode: ScanMode = 'meal', shouldCommit?: () => boolean, signal?: AbortSignal) => {
+        const entry = await analyzeAndAddPhoto(photoUri, userIDParam, setNutritionData, selectedDate, mode, shouldCommit, signal);
         if (!entry || !userIDParam) return;
         try {
             await upsertNutritionEntry(entry);
