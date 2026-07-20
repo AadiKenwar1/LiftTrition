@@ -42,7 +42,7 @@ export function BillingProvider({ children }: { children: React.ReactNode }) {
     // Initialize billing for user (runs when auth / user changes)
     useEffect(() => {
         let cancelled = false
-        let listener: { remove?: () => void } | undefined
+        let listener: ((info: CustomerInfo) => void) | undefined
         let timeoutId: ReturnType<typeof setTimeout> | undefined
 
         async function initializeBilling() {
@@ -102,16 +102,17 @@ export function BillingProvider({ children }: { children: React.ReactNode }) {
         void (async () => {
             await initializeBilling()
             if (!cancelled && user?.id) {
-                listener = Purchases.addCustomerInfoUpdateListener((info) => {
+                listener = (info) => {
                     if (!cancelled) setCustomerInfo(info)
-                })
+                }
+                Purchases.addCustomerInfoUpdateListener(listener)
             }
         })()
 
         return () => {
             cancelled = true
             if (timeoutId) clearTimeout(timeoutId)
-            listener?.remove?.()
+            if (listener) Purchases.removeCustomerInfoUpdateListener(listener)
         }
     }, [authLoading, user?.id])
 
