@@ -187,3 +187,27 @@ One block per issue, appended as the pipeline runs. Newest at the bottom.
 **verify:** Jest 6/10 = baseline, +21 new tests (723 total). tsc 4 = baseline (0 in editEntry after repair). GREEN.
 
 **FOLLOW-UP (launch-relevant, same bug class, OUT of H15's scope — its own issue):** wide_review found **3 more unguarded mutation-then-`router.back()` modals** that double-write/double-pop on a fast double-tap: `app/nutritionScreens/updateBWModal.tsx:63` (weigh-in), `app/settingsScreens/adjustMeasurements.tsx:25`, `app/settingsScreens/adjustTraining.tsx:34` (non-custom path). Each needs the identical `useSubmitOnce` wrap. Also systemic-but-milder: every onboarding step commits via `OnboardingScaffold` `onNext` without a guard (double-*push*, forward-nav) — one guard on the scaffold Next button covers all. `paywall.tsx` (the real onboarding-complete commit) is already guarded.
+
+---
+
+## M23 — AUTHORED — `fix(AUTHORED/M23)` — 2026-07-20  ✅ LAST LAUNCH-BLOCKER
+
+**Finding (App Review 2.3.1 accuracy):** three purchase-adjacent screens (`login.tsx`, `paywall.tsx`, `subscription.tsx`) hardcoded a fabricated "★★★★★ 5.0" rating for an app with no released version to have earned it — an App Store rejection risk. The audit flags it twice as launch-gating (Go/No-Go NO-GO reasons + Top-5 pre-submission). *(Reconciliation note: Medium issues have no per-ID `###` header in the audit — the finding lives in the summary sections, verified in-scope, not a deleted issue.)*
+
+**Fix (root cause):** deleted the `ratingRow` block (+ dead `ratingRow`/`ratingText`/`stars` styles and login's now-unused `Star` import + stale JSDoc) from all three screens. No placeholder, no spacing hack (the CTA's existing `marginBottom` carries the gap). Added a `__DEV__`-only `RatingRemovalTest` DevHub page (this ui-ux launch-blocker was promoted for the DevHub gate).
+
+**implement (pipeline-implementer-fresh):** the deletions + DevHub page; left the separate `#FFD93D` duplicated-star-color finding untouched (correct scope).
+
+**file_review:** deduped the preview page (two identical CTA+trust blocks → a `.map()`); grep-confirmed zero `5.0`/`★`/rating-style references remain and the `Star` import removal is clean.
+
+**wide_review:** no edits. Whole-repo sweep confirmed the 3 screens were the ONLY shipped surfaces with a fabricated rating; routing + layout intact.
+
+**verify:** Jest 6/10 = baseline (no new tests — a static-block deletion), tsc 4 = baseline (new devTest files clean). GREEN.
+
+**FOLLOW-UP (dev-only, surfaced by wide_review, NOT a 2.3.1 risk today):** the fabricated rating survives in `__DEV__`-only design mockups under `components/devTest/onboarding/versions/` (login V3/V4/Wordmark/ValueProp/Monogram; paywall V3/V4/Refined; intro V3/Refined). Metro strips these from production, so no App Review risk — but they're the design source-twins of the shipped rows: **whoever later promotes a login/paywall variant into the real onboarding flow must strip its rating row first.**
+
+---
+
+## 🎉 MILESTONE — all 10 launch-blockers done (2026-07-20)
+
+C1, C3, C4, H1, H2, H3, H4, H9, H15, M23 — every `[LAUNCH-BLOCKER]` issue implemented, root-caused, double-reviewed, verified at baseline, and atomically committed. Remaining 52 issues are non-blockers (post-launch track), continuing in severity order starting at H5. The release OPS checklist (C1 migration + caps, H1 RevenueCat secret, H2 migration deploy-ordering, H4 app-env) and the follow-up backlog live above.

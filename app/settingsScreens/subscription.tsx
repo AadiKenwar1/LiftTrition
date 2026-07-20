@@ -139,11 +139,6 @@ export default function SubscriptionScreen() {
                     </LinearGradient>
                 </TouchableOpacity>
 
-                <View style={styles.ratingRow}>
-                    <Text style={styles.stars}>★★★★★</Text>
-                    <Text style={styles.ratingText}>5.0</Text>
-                </View>
-
                 <View style={styles.trust}>
                     <Text style={styles.trustLine}>Cancel anytime · billed securely through Apple</Text>
                     <Text style={styles.trustLine}>Your data is never sold or shared</Text>
@@ -193,9 +188,6 @@ function makeStyles(colors: Colors) {
         cta: { height: 58, borderRadius: radius.cardLg, overflow: 'hidden', marginBottom: 18 },
         ctaGradient: { flex: 1, justifyContent: 'center', alignItems: 'center' },
         ctaText: { fontFamily: fonts.semibold, fontSize: 17, color: '#fff', letterSpacing: -0.3 },
-        ratingRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 12 },
-        stars: { fontSize: 15, color: '#FFD93D', letterSpacing: 1 },
-        ratingText: { fontFamily: fonts.semibold, fontSize: 14, color: colors.text },
         trust: { alignItems: 'center', gap: 4, marginBottom: 18 },
         trustLine: { fontFamily: fonts.medium, fontSize: 12, color: colors.textMuted, textAlign: 'center', letterSpacing: 0.2 },
         links: { alignItems: 'center', gap: 12, marginBottom: 18 },

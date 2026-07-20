@@ -243,6 +243,7 @@ function StackLayout() {
                     <Stack.Screen name="devTest/foodRow" options={{ headerShown: true, title: 'Food Row', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/entryRow" options={{ headerShown: true, title: 'Entry Rows', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/notifications" options={{ headerShown: true, title: 'Notifications', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="devTest/ratingRemoval" options={{ headerShown: true, title: 'Rating Row Removal', headerBackTitle: 'Back' }} />
                 </Stack.Protected>
             </Stack>
             <GoalPromptHost />

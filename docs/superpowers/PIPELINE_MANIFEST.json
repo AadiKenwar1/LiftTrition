@@ -18,7 +18,7 @@
     { "id": "H4",  "bucket": "DONE",     "severity": "High",     "launchBlocker": true,  "briefStart": 295,  "briefEnd": 371,  "status": "done" },
     { "id": "H9",  "bucket": "DONE",     "severity": "High",     "launchBlocker": true,  "briefStart": 575,  "briefEnd": 620,  "status": "done" },
     { "id": "H15", "bucket": "MERGED",   "severity": "High",     "launchBlocker": true,  "briefStart": 818,  "briefEnd": 875,  "status": "done" },
-    { "id": "M23", "bucket": "AUTHORED", "severity": "Medium",   "launchBlocker": true,  "briefStart": 1807, "briefEnd": 1830, "status": "pending" },
+    { "id": "M23", "bucket": "AUTHORED", "severity": "Medium",   "launchBlocker": true,  "briefStart": 1807, "briefEnd": 1830, "status": "done" },
     { "id": "H5",  "bucket": "DONE",     "severity": "High",     "launchBlocker": false, "briefStart": 372,  "briefEnd": 426,  "status": "pending" },
     { "id": "H6",  "bucket": "MERGED",   "severity": "High",     "launchBlocker": false, "briefStart": 427,  "briefEnd": 452,  "status": "pending" },
     { "id": "H8",  "bucket": "DONE",     "severity": "High",     "launchBlocker": false, "briefStart": 516,  "briefEnd": 574,  "status": "pending" },
