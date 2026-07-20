@@ -89,6 +89,6 @@ boundaries via `ScheduleWakeup`; the user never manually resumes.
 
 ## Known baseline failures
 
-(Recorded at pre-flight; failures below pre-date the pipeline and don't block commits.)
-
-- _none recorded yet — pre-flight fills this in_
+Recorded in **`docs/superpowers/PIPELINE_BASELINE.md`** (8 Jest suites / 67 tests + 27
+tsc errors, snapshotted at commit `1d51d47`). Verify green = nothing failing beyond that
+list. A fix that clears baseline entries updates that file in its own commit.
