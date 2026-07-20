@@ -169,6 +169,22 @@ One block per issue, appended as the pipeline runs. Newest at the bottom.
 
 ---
 
+## SCOPE-GATING PASS — full audit reconciliation of the remaining 46 issues — 2026-07-20
+
+After the rollback, EVERY remaining pending issue was gated against `docs/PRODUCTION_READINESS_AUDIT.md` (grep by target file + symptom — Medium/Low items are prose bullets with no id numbers). Of 46: **29 are genuine audit line-items → kept pending**, **15 have no audit line-item → excluded**, **1 is in-audit but OPS → needs-human (M6)**, **1 was already fixed → done (L14)**.
+
+**Excluded (no audit line-item):** M3 (migration ledger — only trace is excluded C2's deploy-checklist; pure-OPS) · M4 (env-crash/entry-point + eas env) · M5 (Sentry environment/tracesSampleRate; H4 already removed the dead enableInExpoDevelopment) · M11 (settings 1s getUploadQueueStats poll) · M13 (addExerciseModal fuse-search debounce; food-search debounce is audit-clean, line 178) · M17 (NutritionContext store entry/saved-meal duplication) · M20 (RevenueCat offerings `any` / row-mapper non-null type holes) · M25 (modal swipe-to-dismiss discard guard) · M26 (visible Cancel control on analyzing modal) · L1 (placeholder brief, no defect) · L2 (adjustNutrition1 maintain resets goalPace) · L18 (foodDB cache unbounded growth) · L23 (week-stepper chevron opacity) · L27 (PHONE_MAX_WIDTH comment / no-op clamp) · L30 (settings sync-line wedge escalation).
+
+**M6 (OTA, audit line 89) → needs-human:** genuinely in the audit, but installing expo-updates + EAS update setup is a post-release operational decision, not verifiable in-repo — see OPS CHECKLIST.
+
+**L14 (body-weight 0-seed, audit line 129) → done:** superseded by H10 (0cb9dba) — the leading-0 seed was fixed when the 4-copy graph walk was consolidated into buildDailySeries.
+
+**In-scope, to implement (29):** M7, M8, M9 (likely premise-stale — resize pipeline already exists), M10, M12, M14, M15, M16, M21, M22, M27 (feedback only — the audit's own dev-note keeps the duplicate-name logic as-is), M28, M29, M30, M31, M32; L3, L12, L13, L16, L17, L19, L21, L24 (brief defers the Android-Alert item), L25, L26, L28, L29, L31.
+
+**OPS CHECKLIST (add):** M6 — decide/set up OTA (expo-updates + `eas update:configure` + `runtimeVersion`) as a post-launch operational task.
+
+---
+
 ## H9 — DONE — `fix(DONE/H9)` — 2026-07-20
 
 **Finding:** ingredient-row quantities were persisted via `sanitizeMacro` (1-decimal round): 0.25 servings → 0.3 (+20%). Stored entry totals were computed from the raw value, so items stopped reconciling with totals, and merely opening `editEntry` + tapping Save silently rewrote the meal's macros with no user edit.
