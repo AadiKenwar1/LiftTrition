@@ -42,11 +42,20 @@ hard limit stops the run, the user re-prompts and the loop picks up from git sta
    `fix(*/<ID>):` commit in `git log --oneline`.
    **None left → finalize:** write the run summary to the run log (done count,
    needs-human list, ops checklist), report, STOP.
-3. **Load context:**
-   - Brief: `Read docs/PRODUCTION_READINESS_FIXES.txt` offset=`briefStart`,
-     limit=`briefEnd - briefStart + 1`.
-   - Audit entry: grep `docs/PRODUCTION_READINESS_AUDIT.md` for `<ID>.` and read that
-     section (M/L issues may be table rows, not `###` headers — pass whatever it says).
+3. **Load context + SCOPE GATE (the audit is the sole authority):**
+   - Audit entry: grep `docs/PRODUCTION_READINESS_AUDIT.md` for this issue's CONTENT — its
+     target file path(s) + symptom keywords. Criticals/Highs are `### C#/H#` sections;
+     **Medium/Low items are prose bullets with NO id number** — match by file + symptom,
+     never by `<ID>` (there is no "M3." in the audit to grep for).
+   - **GATE:** if nothing in the audit is a live line-item for this issue (no Critical/High
+     `###` section, no 🟡 Medium / ⚪ Low bullet — or its only trace is a "What checked out
+     clean" mention or a Go/No-Go verdict aside), it is OUT OF SCOPE. Do NOT dispatch an
+     implementer. Set the manifest row `status:"excluded"` + a `"note"`, add the id to the
+     `excluded` array, append a one-line run-log block, and
+     `git commit -m "chore(pipeline): <ID> excluded (not in audit)"`, then loop to step 2.
+     (This is exactly how M1/M2/M23 should have been handled.)
+   - Brief (only once the GATE passes): `Read docs/PRODUCTION_READINESS_FIXES.txt`
+     offset=`briefStart`, limit=`briefEnd - briefStart + 1`.
 4. **Implement** — dispatch by bucket (`run_in_background:false`, wait for the result):
    - `MERGED` → **pipeline-judgmental-implementer** (judge merged brief, then implement).
    - `DONE` → **pipeline-implementer-done** (execute the vetted brief).
@@ -55,6 +64,10 @@ hard limit stops the run, the user re-prompts and the loop picks up from git sta
      verify & commit; you only edit." **State the symptom and the claim to verify — never
      assert the diagnosis** ("X is a bug, fix it"). Tell the agent to reproduce any claimed
      failure first and to change nothing (report "premise stale") if it is already green.
+   - **Belt-and-suspenders scope check:** if the implementer returns `"inAudit": false` (its
+     own STEP 0 gate fired despite the step-3 GATE), treat the issue as OUT OF SCOPE exactly
+     as step 3 — mark it `excluded` + `note`, commit the manifest/run-log update, and loop;
+     do NOT re-dispatch and do NOT keep any edits.
 5. **file_review** → dispatch **pipeline-file-review** with issueId, audit entry, and the
    `git diff` + `git status --short` (so it sees new untracked files too).
 6. **wide_review** → dispatch **pipeline-wide-review** with issueId and the current diff.
@@ -101,8 +114,16 @@ hard limit stops the run, the user re-prompts and the loop picks up from git sta
 - **Local commits only — never push, branch, or PR.**
 - **Agents invoke no skills.** Sole exception: `pipeline-file-review` runs the `simplify`
   skill. The driver (main session) may use skills; dispatched agents may not.
-- **Excluded forever:** C2, H7, H11, H12, H13 (deleted from the audit). Not in the
-  manifest; never implement them even if a brief mentions them.
+- **The audit is the SOLE scope authority — grep it before every issue.** Both the driver
+  (step 3 GATE) and the implementer agent (its STEP 0 gate) independently confirm the issue
+  is a live line-item in `docs/PRODUCTION_READINESS_AUDIT.md` before ANY code changes. No
+  audit home → mark `status:"excluded"`, commit, skip. A brief existing is NOT scope — the
+  brief set was written from an older, larger finding list that the user has since trimmed;
+  only the current audit counts.
+- **Excluded forever:** C2, H7, H11, H12, H13 (deleted from the audit pre-implementation),
+  plus M1, M2, M23 (implemented then ROLLED BACK 2026-07-20 — no audit line-item; M23's
+  '5.0' rating is a REAL earned App Store rating and was restored). Never implement any of
+  them even if a brief mentions them.
 - **Ops steps are never executed by agents:** no deploying migrations, no password
   rotation, no `eas.json` submit config, no external dashboards. Do the code part; record
   the ops step in the run log's OPS CHECKLIST. Standing items: C1's `ai_usage_quota.sql`

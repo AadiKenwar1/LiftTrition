@@ -12,6 +12,23 @@ implement it. MERGED issues are the highest-blast-radius, cross-file changes in 
 
 You are handed: `issueId`, the audit entry, the merged brief, and the target files.
 
+## STEP 0 — Audit-scope gate (HARD — do this FIRST, before judging or touching code)
+`docs/PRODUCTION_READINESS_AUDIT.md` is the SOLE scope authority. The merged brief may
+describe a real problem that is NOT in the audit — the briefs were written from an older,
+larger finding set, and the user has since trimmed the audit. Implementing an issue with no
+audit home is scope-creep and gets rolled back (M1/M2/M23 already were).
+1. **Grep the audit for THIS issue's own content** — its target file path(s) and the
+   specific symptom, e.g. `grep -n "Connector" docs/PRODUCTION_READINESS_AUDIT.md`, then the
+   symptom keywords. Criticals/Highs have `### C#/H#` headers; **Medium/Low items are prose
+   bullets with NO id number**, so match by FILE REFERENCE + symptom, never by id.
+2. A genuine live line-item (a Critical/High `###` section, or a bullet in the 🟡 Medium /
+   ⚪ Low lists) covering this issue → **proceed** to Phase 1.
+3. **No such line-item** — nothing in the audit covers it, or its only trace is a "What
+   checked out clean" mention or a Go/No-Go verdict aside (NOT a severity line-item) →
+   **STOP. Do not judge, change no code.** Return, verbatim:
+   `{"issueId": "...", "inAudit": false, "filesTouched": [], "testsAdded": [], "adjudication": [], "notes": "not a line-item in PRODUCTION_READINESS_AUDIT — out of scope; not implemented"}`
+   When you cannot clearly find it, treat that as out-of-scope and STOP — never implement on a hunch.
+
 ## Phase 1 — Judge (adjudicate the merged brief)
 - Read the brief's open questions, before-merge findings, and cross-domain conflicts.
   Rule on each against the CURRENT code using this rubric, higher rule always wins:
@@ -56,5 +73,6 @@ You are handed: `issueId`, the audit entry, the merged brief, and the target fil
 - Do NOT run the full verify gate (`test:ci`) or commit — the driver does that. You SHOULD
   run the single targeted test/check you're working on (`npx jest <one file>` / `npx tsc
   --noEmit`), both to reproduce the failure first and to confirm your edit resolves it.
-- Your final message is ONLY this JSON, nothing else:
-  `{"issueId": "...", "filesTouched": ["..."], "testsAdded": ["..."], "adjudication": [{"finding": "...", "ruling": "...", "ruleApplied": "..."}], "notes": "..."}`
+- Your final message is ONLY this JSON, nothing else (set `"inAudit": true`; if the STEP 0
+  gate failed you already returned the `"inAudit": false` shape and stopped):
+  `{"issueId": "...", "inAudit": true, "filesTouched": ["..."], "testsAdded": ["..."], "adjudication": [{"finding": "...", "ruling": "...", "ruleApplied": "..."}], "notes": "..."}`

@@ -152,6 +152,23 @@ One block per issue, appended as the pipeline runs. Newest at the bottom.
 
 ---
 
+## SCOPE CORRECTION — rollback of M1 / M2 / M23 (not in the audit) — 2026-07-20
+
+**Trigger:** the user caught the pipeline implementing issues that are NOT line-items in `docs/PRODUCTION_READINESS_AUDIT.md` (the sole scope authority), M23 cited by name. **Root cause:** the manifest was built from `PRODUCTION_READINESS_FIXES.txt` — an older, larger finding set — and only C2/H7/H11/H12/H13 were excluded; it was never fully reconciled against the trimmed audit. The audit's Medium/Low items are prose bullets with NO id numbers, so brief→audit mapping is by file+symptom, and three issues slipped through.
+
+**Audit sweep (every implemented commit re-checked against the audit):** all Criticals (C1/C3/C4) and all Highs (H1/H2/H3/H4/H5/H6/H8/H9/H10/H15) are genuine `###` line-items → **kept**. Only three orphans — exactly the ones the user flagged:
+- **M23** (revert `b7926f5`): removed a '5.0' star rating from login/paywall/subscription. NOT an audit severity line-item (only a Go/No-Go verdict aside). The rating is **REAL** — earned on a prior App Store release, not fabricated — so the removal was doubly wrong. **Restored everywhere.**
+- **M1** (revert `aec38b8`): flush dirty settings before the sign-out wipe. NO audit line-item — the audit lists the sign-out flush gate as CLEAN (line 180).
+- **M2** (uncommitted changes discarded): backup/DR runbook + meal-photo Storage upload + bucket migration. NO audit line-item — audit line 94 is a different photo-**resize** perf issue, not upload durability.
+
+**Rollback mechanics:** M1 reverted (was HEAD, clean); M23 reverted (code clean — proving no later commit touched those files; manifest/run-log conflict resolved by keeping current); M2's 5 tracked files `git restore`d + 2 untracked artifacts (`docs/runbooks/`, `lib/supabase/migrations/nutrition_photos_bucket.sql`) deleted. Manifest: M1/M2/M23 → `status:"excluded"` + notes, added to the `excluded` array.
+
+**Machinery hardened so this can't recur — an audit-scope GATE:** STEP 0 in all three implementer agents (grep the audit for the issue's file+symptom; no live line-item → return `"inAudit": false`, change nothing); runbook step-3 driver GATE + a belt-and-suspenders step-4 check + two new invariants (the driver greps the audit before dispatch; no audit home → mark `excluded`, commit, skip). A brief existing is no longer treated as scope — only the current audit is.
+
+**verify (post-rollback):** tsc **0**, jest **744/744** green (744 vs the pre-rollback 755 because reverting M1 removed its tests).
+
+---
+
 ## H9 — DONE — `fix(DONE/H9)` — 2026-07-20
 
 **Finding:** ingredient-row quantities were persisted via `sanitizeMacro` (1-decimal round): 0.25 servings → 0.3 (+20%). Stored entry totals were computed from the raw value, so items stopped reconciling with totals, and merely opening `editEntry` + tapping Save silently rewrote the meal's macros with no user edit.

@@ -11,6 +11,24 @@ plan exists yet, so you must DESIGN the fix before you write it.
 
 You are handed: `issueId`, the audit entry, the author-only brief, and the target files.
 
+## STEP 0 — Audit-scope gate (HARD — do this FIRST, before touching any code)
+`docs/PRODUCTION_READINESS_AUDIT.md` is the SOLE scope authority. Your brief may describe a
+real problem that is NOT in the audit — the briefs were written from an older, larger
+finding set, and the user has since trimmed the audit. Implementing an issue with no audit
+home is scope-creep and gets rolled back (M1/M2/M23 already were). The brief is only a hint;
+the audit decides whether this issue exists at all.
+1. **Grep the audit for THIS issue's own content** — its target file path(s) and the
+   specific symptom, e.g. `grep -n "cameraScreen" docs/PRODUCTION_READINESS_AUDIT.md`, then
+   the symptom keywords. Criticals/Highs have `### C#/H#` headers; **Medium/Low items are
+   prose bullets with NO id number**, so match by FILE REFERENCE + symptom, never by id.
+2. A genuine live line-item (a Critical/High `###` section, or a bullet in the 🟡 Medium /
+   ⚪ Low lists) covering this issue → **proceed**.
+3. **No such line-item** — nothing in the audit covers it, or its only trace is a "What
+   checked out clean" mention or a Go/No-Go verdict aside (NOT a severity line-item) →
+   **STOP. Change no code, add no tests.** Return, verbatim:
+   `{"issueId": "...", "inAudit": false, "filesTouched": [], "testsAdded": [], "notes": "not a line-item in PRODUCTION_READINESS_AUDIT — out of scope; not implemented"}`
+   When you cannot clearly find it, treat that as out-of-scope and STOP — never implement on a hunch.
+
 ## How you work
 - **Reproduce before you fix — the premise is NOT trusted.** Before changing any code to
   resolve a claimed failure (a failing test, a tsc error, a brief/audit claim), run that
@@ -53,6 +71,7 @@ You are handed: `issueId`, the audit entry, the author-only brief, and the targe
 - Do NOT run the full verify gate (`test:ci`) or commit — the driver does that. You SHOULD
   run the single targeted test/check you're working on (`npx jest <one file>` / `npx tsc
   --noEmit`), both to reproduce the failure first and to confirm your edit resolves it.
-- Your final message is ONLY this JSON, nothing else:
-  `{"issueId": "...", "filesTouched": ["..."], "testsAdded": ["..."], "notes": "..."}`
+- Your final message is ONLY this JSON, nothing else (set `"inAudit": true`; if the STEP 0
+  gate failed you already returned the `"inAudit": false` shape and stopped):
+  `{"issueId": "...", "inAudit": true, "filesTouched": ["..."], "testsAdded": ["..."], "notes": "..."}`
   (`notes` = one line on the design decision you made.)
