@@ -17,6 +17,10 @@ Two ordered phases. NEVER let phase 2 undo phase 1.
   audit.
 
 ## Phase 2 — Correctness (primary)
+- **Reproduce before you "fix" — don't trust a claim.** Before changing anything you or the
+  diff flags as broken, confirm it actually reproduces (run the targeted test / trace the
+  real code path). If it doesn't reproduce, leave it and note it — never edit correct code
+  to satisfy a claim.
 - Does the diff actually resolve the audit finding at its ROOT CAUSE — or does it just
   bandaid the symptom (swallow the error, special-case the repro, hide the broken
   state)? A symptom-patch is a correctness failure: fix it into the durable version.
@@ -24,15 +28,27 @@ Two ordered phases. NEVER let phase 2 undo phase 1.
   tokens; `getDateKey`; `react-native-uuid`; persistence via `powerSync.execute()` /
   `writeTransaction()`)?
 - Are the edge cases the audit / brief named handled? Fix any gaps directly.
+- **Sound to a user AND to the code** — read the final diff as a skeptical user and a
+  skeptical maintainer: (a) does every user-facing string (alert copy, label, message)
+  match what the code actually does — an error saying "must be 1–10" while the guard accepts
+  0 is a bug; (b) is the change internally consistent; (c) does it do ONLY what the finding
+  required, with no unrelated behavior change smuggled in. This sits ABOVE the tests — a
+  diff can pass tsc and jest and still be incoherent here.
 - If simplification in phase 1 changed behavior or dropped an edge case, revert that part —
   correctness wins.
 
 ## Rules
 - Do NOT hunt cross-file blast radius — that is wide_review's job.
+- **Tests are evidence, not the goal.** Never change product code just to green a test; if
+  code and test disagree, diagnose which is wrong (often the test — it may pin brittle detail
+  like an exact string). You may fix/delete a wrong/brittle test with the reason in `notes`,
+  never to hide a real regression.
 - The **only** skill you may invoke is `simplify` (the code-simplification skill). Do NOT
   invoke any superpowers skill (brainstorming, test-driven-development, systematic-debugging,
   writing-plans, using-superpowers, …) or any other skill.
-- Do NOT run the verify gate (`test:ci` / `tsc`) and do NOT commit — the driver does that.
+- Do NOT run the full verify gate (`test:ci`) or commit — the driver does that. You SHOULD
+  run the single targeted check relevant to a finding to confirm it's real before fixing it,
+  and to confirm your edit holds.
 - Your final message is ONLY this JSON, nothing else:
   `{"issueId": "...", "changed": true, "findings": ["..."], "notes": "..."}`
   (`changed` = whether you edited anything; `findings` = what you fixed or flagged.)

@@ -51,19 +51,29 @@ hard limit stops the run, the user re-prompts and the loop picks up from git sta
    - `MERGED` → **pipeline-judgmental-implementer** (judge merged brief, then implement).
    - `DONE` → **pipeline-implementer-done** (execute the vetted brief).
    - `AUTHORED` / `DRAFT` → **pipeline-implementer-fresh** (design from audit, brief as hint).
-   - Prompt = issueId + bucket + audit entry + brief + "the driver runs verify & commit;
-     you only edit."
+   - Prompt = issueId + bucket + audit entry + brief + CURRENT baseline + "the driver runs
+     verify & commit; you only edit." **State the symptom and the claim to verify — never
+     assert the diagnosis** ("X is a bug, fix it"). Tell the agent to reproduce any claimed
+     failure first and to change nothing (report "premise stale") if it is already green.
 5. **file_review** → dispatch **pipeline-file-review** with issueId, audit entry, and the
    `git diff` + `git status --short` (so it sees new untracked files too).
 6. **wide_review** → dispatch **pipeline-wide-review** with issueId and the current diff.
    **Always runs — never skipped**, no matter how local the change looks.
-7. **Verify (scripted, no agent):** `npm run test:ci` then `npx tsc --noEmit`. Judge green
-   against the baseline (see below).
-   - Green → step 8.
-   - Red (new failure beyond baseline) → re-dispatch the SAME implementer ONCE with the
-     exact failure output + "repair the root cause; do not weaken/delete tests to pass."
-     Re-verify. Still red → `git add -A && git stash`, set `status:"needs-human"`, log the
-     error, `git commit -m "chore(pipeline): <ID> needs-human"`, go to step 9.
+7. **Verify (scripted, no agent) — tsc is the gate, jest is a tripwire:**
+   - **`npx tsc --noEmit` — HARD GATE.** Any tsc error beyond the baseline (matched by
+     file+code+symbol) must be fixed before commit. tsc red = stop.
+   - **`npm run test:ci` (jest) — ADVISORY tripwire, not a correctness oracle.** The suite is
+     uneven: a green run does not prove correctness, and a red test is not an automatic block.
+     Compare to the baseline's known-red list:
+     - Was-green-now-red = a real signal → investigate. If the fix broke real behavior, repair
+       it. If the fix correctly changed behavior that a brittle test pinned (e.g. an exact
+       alert string), fix the TEST and record why in the run-log block.
+     - Still-red on the known-red list = pre-existing, not this issue's problem.
+   - Correctness rides on the brief + the two reviews, never on a green checkmark.
+   - If a tsc error (or a genuine behavior regression) survives ONE repair re-dispatch of the
+     SAME implementer (given the exact output + "repair the root cause; never weaken a test to
+     hide a regression"), then `git add -A && git stash`, set `status:"needs-human"`, log it,
+     `git commit -m "chore(pipeline): <ID> needs-human"`, and loop (step 9).
 8. **Commit:** set manifest row `status:"done"` AND add a `"summary"` field to that row —
    1–2 sentences stating what was fixed and why it mattered (the user's at-a-glance
    ledger; concrete, no agent/process narration). Append the run-log block, then
@@ -82,10 +92,15 @@ hard limit stops the run, the user re-prompts and the loop picks up from git sta
   no `ScheduleWakeup`, no per-issue pause.
 - **Root cause only** — a fix that suppresses a symptom while the cause survives fails at
   every stage (implementer, both reviews, and repair bounces).
-- **Never commit red** (beyond the known baseline). Never weaken a test to pass.
+- **Reproduce before fixing.** Every agent confirms a claimed failure is real before
+  editing; a claim that does not reproduce means the baseline is stale, not that code needs
+  changing. The driver never asserts a diagnosis in a dispatch prompt.
+- **tsc is the gate; jest is a tripwire.** Never commit a NEW tsc error or a genuine
+  behavior regression beyond baseline. Never weaken or delete a test to hide a regression —
+  but a genuinely wrong/brittle test may be corrected, with the reason logged.
 - **Local commits only — never push, branch, or PR.**
-- **Agents invoke no skills.** Sole exception: `pipeline-file-review` runs
-  `code-simplifier`. The driver (main session) may use skills; dispatched agents may not.
+- **Agents invoke no skills.** Sole exception: `pipeline-file-review` runs the `simplify`
+  skill. The driver (main session) may use skills; dispatched agents may not.
 - **Excluded forever:** C2, H7, H11, H12, H13 (deleted from the audit). Not in the
   manifest; never implement them even if a brief mentions them.
 - **Ops steps are never executed by agents:** no deploying migrations, no password
@@ -96,6 +111,7 @@ hard limit stops the run, the user re-prompts and the loop picks up from git sta
 ## Known baseline failures
 
 Recorded in **`docs/superpowers/PIPELINE_BASELINE.md`** (kept current — it has a
-changelog). Verify green = nothing failing beyond that list, matching tsc errors by
-file+code+symbol (not line/count). A fix that clears or shifts baseline entries updates
-that file in its own commit.
+changelog). tsc green = no error beyond that list, matched by file+code+symbol (not
+line/count). The jest known-red list is advisory context — it lets the driver tell a NEW
+red test (investigate) from a pre-existing one (ignore). A fix that clears or shifts
+baseline entries updates that file in its own commit.

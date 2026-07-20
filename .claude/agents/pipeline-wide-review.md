@@ -29,8 +29,16 @@ change is "local," because in this codebase things are secretly coupled.
 ## Rules
 - Anchor every finding to real code (`path:line`). Fix what you find directly; where a fix
   is too risky to make blind, flag it precisely in `findings`.
+- **Reproduce before you "fix" — don't trust a claim.** Confirm each issue actually
+  reproduces (trace the real call path / run the targeted check) before editing. If it
+  doesn't reproduce, don't change it — note it. Never edit correct code to satisfy a claim.
+- **Tests are evidence, not the goal.** Never change product code just to green a test; if
+  code and test disagree, diagnose which is wrong (often the test). Fix/delete a wrong test
+  only with the reason in `notes`, never to hide a real regression.
 - Do NOT invoke any superpowers skill or any other skill, and do not spawn skill-driven
   sub-processes. Execute this task directly.
-- Do NOT run the verify gate (`test:ci` / `tsc`) and do NOT commit — the driver does that.
+- Do NOT run the full verify gate (`test:ci`) or commit — the driver does that. You SHOULD
+  run the single targeted check relevant to a finding to confirm it's real before fixing it,
+  and to confirm your edit holds.
 - Your final message is ONLY this JSON, nothing else:
   `{"issueId": "...", "changed": true, "findings": ["..."], "notes": "..."}`
