@@ -9,6 +9,7 @@ import { isUploadFlushError, UploadFlushNotConnectedError } from '@/lib/powersyn
 import { calculateAge } from '@/lib/utils/dateHelper'
 import { inchesToFeetInches, lbsToKg, weightUnitLabel } from '@/lib/utils/unitConversions'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
+import * as Sentry from '@sentry/react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { LogOut, Pencil, Trash2 } from 'lucide-react-native'
@@ -87,6 +88,9 @@ export default function ProfileScreen() {
                     } catch (error: unknown) {
                         if (isUploadFlushError(error)) {
                             const offline = error instanceof UploadFlushNotConnectedError
+                            // Lead-up trail only — this fires before the user's Force/Cancel choice,
+                            // and Cancel means no data was lost, so it isn't a capturable failure yet.
+                            Sentry.addBreadcrumb({ category: 'sign-out', level: 'info', message: offline ? 'sign_out_offline' : 'sign_out_still_syncing' })
                             const title = offline ? "You're offline" : 'Still syncing'
                             const message = offline ? 'Sign out anyway? Unsynced data will be lost.' : "We're still uploading your data. You can wait and try again, or force sign out (unsynced data may be lost)."
                             Alert.alert(title, message, [
@@ -107,6 +111,9 @@ export default function ProfileScreen() {
                                 },
                             ])
                         } else {
+                            // Genuinely unexpected sign-out failure (e.g. supabase.auth.signOut error,
+                            // disconnectAndClearPowerSync failing on the normal path) — real ops signal.
+                            Sentry.captureException(error, { tags: { area: 'sign-out-failure' } })
                             Alert.alert('Error', error instanceof Error ? error.message : 'Failed to sign out')
                         }
                     } finally {

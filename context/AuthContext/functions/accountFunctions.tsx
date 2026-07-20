@@ -4,6 +4,7 @@ import { flushUploadsOrThrow } from '@/lib/powersync/FlushUploads'
 import { disconnectAndClearPowerSync } from '@/lib/powersync/orchestrator'
 import { supabase } from '@/lib/supabase/client'
 import { clearUserStorage } from '@/lib/utils/userStorage'
+import * as Sentry from '@sentry/react-native'
 
 export async function deleteAccount(): Promise<void> {
     const { data: { session } } = await supabase.auth.getSession()
@@ -47,9 +48,18 @@ export async function signOut(): Promise<void> {
  * Intended to be called only after explicit user confirmation.
  */
 export async function forceSignOut(): Promise<void> {
-    const userID = await currentUserID()
-    await clearLocalSession()
-    if (userID) await clearUserStorage(userID)
+    // Deliberate, non-throwing data-loss action confirmed by the user — recorded as a message since
+    // there is no exception object for this control-flow path. Its own possible failure (below) is
+    // a separate, genuinely unexpected funnel and is captured/rethrown unchanged.
+    Sentry.captureMessage('force_sign_out_data_loss', { level: 'warning', tags: { area: 'force-sign-out-data-loss' } })
+    try {
+        const userID = await currentUserID()
+        await clearLocalSession()
+        if (userID) await clearUserStorage(userID)
+    } catch (e) {
+        Sentry.captureException(e, { tags: { area: 'force-sign-out-failed' } })
+        throw e
+    }
 }
 
 /**
@@ -87,7 +97,12 @@ export async function clearLocalSession(): Promise<void> {
     try {
         await disconnectAndClearPowerSync()
     } catch (e) {
+        // Sole capture site for this swallowed path (reached only via deleteAccount/forceSignOut):
+        // signOut() calls disconnectAndClearPowerSync directly and lets a failure propagate to
+        // profile.tsx's catch-all, which captures it there instead — capturing in both places would
+        // double-count the same underlying error.
         console.warn('clearLocalSession: PowerSync clear failed', e)
+        Sentry.captureException(e, { tags: { area: 'powersync-disconnect-clear', reason: 'local_session_clear' } })
     }
 
     clearFoodDBCaches()

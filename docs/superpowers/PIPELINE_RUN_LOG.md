@@ -127,3 +127,25 @@ One block per issue, appended as the pipeline runs. Newest at the bottom.
 **FOLLOW-UPS (pre-existing, NOT introduced by H3, logged not fixed):**
 1. `forceSignOut` isn't purely network-free: `removeLocalAuthSession` calls `supabase.auth.signOut({scope:'local'})`, which still POSTs `/logout?scope=local` when a token is present — on a reachable-but-dead backend the escape can block up to the fetch timeout (~60s) before the local-removal fallback. Bounded/self-healing (never infinite), shared auth code also used by `deleteAccount`. Fix = call `_removeSession()` first for the force path so the escape is instant.
 2. The guard's dep is the `session` OBJECT, so a token refresh (new object, same user) re-runs the loader → momentary `loading` → remount of the Settings/Workout/Nutrition provider subtree (data reload + in-memory reset like `NutritionContext.selectedDate`). Load-bearing (it's what makes the twins safe), but a candidate to key on `user.id` instead.
+
+---
+
+## H4 — DONE — `fix(DONE/H4)` — 2026-07-20
+
+**Finding:** production observability near-zero — only 3 Sentry capture sites, no `setUser`, no environment tag. The real data-loss funnels (connect failure, sync wedge, flush-timeout forced sign-out, AI/edge failures, route crashes) emit no telemetry, so C3/H2-class bugs would be invisible in prod.
+
+**Fix (root cause):** additive telemetry — one capture per genuine failure funnel (connect / kick / disconnect-clear / sign-out-failure / force-sign-out[+its own failure] / edge-openai / edge-fooddb / route-crash) + `setUser({id})` + `environment`, with intentionally-swallowed benign paths left uncaptured. 13 prod/config files + 6 test files (3 new). Notably the brief predated C1/H1/C4 commits — the implementer handled the drift (openAI.ts/foodDB.ts's `callEdgeFunction` post-429/403 mapping; the no-longer-empty `openAI.test.ts`; C4's `_layout.tsx` `Stack.Screen`) and left the expected 429/403/refused user-message throws uncaptured (only genuine failures captured). Bonus: removed the invalid `enableInExpoDevelopment` option → cleared a baseline tsc error.
+
+**file_review:** fixed TWO real gaps — (1) the explicit capture sites missed `res.json()`/`res.text()` failures on a 200 body (added a third site); (2) a **genuine double-capture** the adjudication itself introduced — `disconnectAndClearPowerSync` capturing *plus* `profile.tsx`'s new sign-out-failure catch both firing on the `signOut()` path. Reworked: `disconnectAndClearPowerSync` state-only, capture moved to `clearLocalSession`'s swallow site.
+
+**wide_review:** no edits. Exhaustively traced the sign-out capture topology (failure-origin → site → count table) and **confirmed exactly one capture per funnel** — the key subtlety being `clearLocalSession` captures *and swallows* (`console.warn`, no rethrow), so `forceSignOut`'s catch never double-fires. Verified edge rework, `@sentry` test-mock coverage (no `test:ci` break), one-shot ErrorBoundary, and `{id}`-only (no PII).
+
+**repair (1 bounce):** tsc flagged 2 type errors in the new `SyncWatchdog.test.tsx` (a non-tuple array spread into zero-arg mocks); fixed at the root (call the zero-arg mocks with no args), no production change.
+
+**verify:** Jest 6/10 = baseline, +22 new tests (689 total). tsc **4** = new baseline (H4 cleared the `enableInExpoDevelopment` error). GREEN.
+
+**OPS CHECKLIST (human):** set `EXPO_PUBLIC_APP_ENV` per EAS profile (else `environment` falls back to `__DEV__`-derived) — coordinate with H5. Source-map upload for readable stack traces is H5's scope.
+
+**FOLLOW-UPS (surfaced by wide_review, out of H4's adjudicated funnel scope, logged not fixed):**
+1. `profile.tsx handleDeleteAccount` (the twin of `handleSignOut`) has NO capture in its catch — delete-account failures are user-alerted but emit zero Sentry event. Trivial add (`captureException area:'delete-account-failure'` at the catch) with no double-capture risk. Own follow-up.
+2. Pre-existing micro-gap: on the `!res.ok` path, `await res.text()` runs outside the try/catch, so an error-response body failing mid-read yields no capture. Extremely rare, not introduced by H4.

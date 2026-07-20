@@ -1,6 +1,7 @@
 import { disconnectPowerSync, ensurePowerSyncConnected } from '@/lib/powersync/orchestrator'
 import { supabase } from '@/lib/supabase/client'
 import { Session, User } from '@supabase/supabase-js'
+import * as Sentry from '@sentry/react-native'
 import { createContext, PropsWithChildren, useContext, useEffect, useState } from 'react'
 import { deleteAccount, signOut } from './functions/accountFunctions'
 import { signInWithApple } from './functions/authFunctions'
@@ -47,14 +48,22 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
             return
         }
 
+        // Sole capture site for connect failures — orchestrator's ensurePowerSyncConnected stays
+        // state-only so this is the only place a real (non-swallowed) connect failure is reported.
         void ensurePowerSyncConnected('auth_session').catch((e) => {
-            console.warn('[AuthContext] PowerSync ensureConnected failed', e)
+            Sentry.captureException(e, { tags: { area: 'powersync-connect', reason: 'auth_session' } })
         })
 
         return () => {
             void disconnectPowerSync('auth_effect_cleanup')
         }
     }, [loading, session?.user?.id])
+
+    // Attribute every Sentry event to the signed-in user (or clear it on sign-out) from one place,
+    // covering initial load, sign-in, token refresh, and sign-out alike.
+    useEffect(() => {
+        Sentry.setUser(user ? { id: user.id } : null)
+    }, [user])
 
     return (
         <AuthContext.Provider

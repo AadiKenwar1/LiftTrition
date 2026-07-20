@@ -17,7 +17,7 @@ import { DarkTheme, DefaultTheme, ThemeProvider as NavigationThemeProvider } fro
 import * as Sentry from '@sentry/react-native'
 import { Asset } from 'expo-asset'
 import { useFonts } from 'expo-font'
-import { Stack } from 'expo-router'
+import { ErrorBoundary as ExpoErrorBoundary, Stack, type ErrorBoundaryProps } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
 import React, { type PropsWithChildren, useCallback, useEffect, useState } from 'react'
 import { StyleSheet, View } from 'react-native'
@@ -47,9 +47,17 @@ function AppColumn({ children }: PropsWithChildren) {
     )
 }
 
-// Catch any errors thrown by the Layout component.
+// Catch any errors thrown by the Layout component: report once to Sentry via a one-shot effect
+// keyed on the error reference (never in the render body, which would re-fire on every re-render),
+// then defer to expo-router's own default error UI with the same {error, retry} props.
+function CapturedErrorBoundary({ error, retry }: ErrorBoundaryProps) {
+    useEffect(() => {
+        Sentry.captureException(error, { tags: { area: 'route-crash' } })
+    }, [error])
+    return <ExpoErrorBoundary error={error} retry={retry} />
+}
 
-export { ErrorBoundary } from 'expo-router'
+export { CapturedErrorBoundary as ErrorBoundary }
 
 // Anchor the stack's initial route so deep-links/reloads keep a back button present.
 export const unstable_settings = { initialRouteName: '(tabs)' }
@@ -61,7 +69,7 @@ assertRequiredEnv()
 
 Sentry.init({
     dsn: ENV.SENTRY_DSN,
-    enableInExpoDevelopment: false,
+    environment: ENV.APP_ENV ?? (__DEV__ ? 'development' : 'production'),
 })
 
 export default Sentry.wrap(function RootLayout() {

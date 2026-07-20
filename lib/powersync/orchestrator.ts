@@ -1,5 +1,6 @@
 import { Connector } from '@/lib/powersync/Connector'
 import { powerSync } from '@/lib/powersync/system'
+import * as Sentry from '@sentry/react-native'
 import { AppState } from 'react-native'
 
 /** Who requested a PowerSync connection change (for logging / dev tools). */
@@ -100,6 +101,10 @@ export async function disconnectAndClearPowerSync(): Promise<void> {
             await powerSync.disconnectAndClear()
         })
     } catch (e: unknown) {
+        // State-only, like ensurePowerSyncConnected. Unlike kickPowerSync (one caller), this has two
+        // callers that terminate the same rethrown error differently — signOut() propagates it to
+        // profile.tsx's catch-all (which captures it) while clearLocalSession() swallows it locally
+        // (and captures it there) — so capturing here too would double-count the signOut() path.
         const message = e instanceof Error ? e.message : 'unknown_error'
         orchestratorState = { ...orchestratorState, lastError: message }
         throw e
@@ -134,6 +139,9 @@ export async function kickPowerSync(reason: 'watchdog_disconnected' | 'watchdog_
         })
         return 'ok'
     } catch (e: unknown) {
+        // Sole capture site for kick failures — its one caller (SyncWatchdog) only breadcrumbs,
+        // so capture here while the raw Error is still in scope (before it becomes lastError: string).
+        Sentry.captureException(e, { tags: { area: 'powersync-kick' } })
         const message = e instanceof Error ? e.message : 'unknown_error'
         orchestratorState = { ...orchestratorState, lastError: message }
         return 'error'

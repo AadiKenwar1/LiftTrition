@@ -8,6 +8,7 @@ export const ENV = {
     REVENUECAT_API_KEY_IOS: process.env.EXPO_PUBLIC_REVENUECAT_API_KEY_IOS,
     REVENUECAT_API_KEY_ANDROID: process.env.EXPO_PUBLIC_REVENUECAT_API_KEY_ANDROID,
     SENTRY_DSN: process.env.EXPO_PUBLIC_SENTRY_DSN,
+    APP_ENV: process.env.EXPO_PUBLIC_APP_ENV,
 } as const
 
 // The app is unusable without these three; fail at startup with a nameable

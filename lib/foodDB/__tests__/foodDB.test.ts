@@ -7,6 +7,7 @@
 // that a 429 resolves getFoodSearchResults to [] (it now rejects with a friendly message).
 
 import { supabase } from '@/lib/supabase/client'
+import * as Sentry from '@sentry/react-native'
 import { clearFoodDBCaches, FOOD_SEARCH_PREMIUM_MESSAGE, getFoodDetails, getFoodItem, getFoodSearchResults } from '../foodDB'
 
 // jest.mock calls are hoisted above imports, so this reliably beats the real
@@ -22,6 +23,10 @@ jest.mock('@/lib/supabase/client', () => ({
         },
     },
 }))
+
+// foodDB.ts now imports @sentry/react-native at module scope (H4) — required so this file's
+// require('../foodDB') resolves to a mock instead of the real, untransformed package.
+jest.mock('@sentry/react-native', () => ({ captureException: jest.fn(), addBreadcrumb: jest.fn() }))
 
 const mockFetch = jest.fn()
 global.fetch = mockFetch as unknown as typeof fetch
@@ -81,7 +86,7 @@ describe('getFoodSearchResults', () => {
         expect(mockFetch).toHaveBeenCalledTimes(1)
     })
 
-    it('rejects with the friendly daily-limit message on a 429, without reading the response body', async () => {
+    it('rejects with the friendly daily-limit message on a 429, without reading the response body, and never captures (working-as-designed limit)', async () => {
         mockFetch.mockResolvedValue({
             ok: false,
             status: 429,
@@ -92,9 +97,10 @@ describe('getFoodSearchResults', () => {
 
         // Supersedes the previous (already-stale) expectation that a 429 resolved to [].
         await expect(getFoodSearchResults('ratelimit')).rejects.toThrow('Daily search limit reached. Try again tomorrow.')
+        expect(Sentry.captureException).not.toHaveBeenCalled()
     })
 
-    it('rejects with the friendly premium message on a 403, without reading the response body', async () => {
+    it('rejects with the friendly premium message on a 403, without reading the response body, and never captures (working-as-designed limit)', async () => {
         mockFetch.mockResolvedValue({
             ok: false,
             status: 403,
@@ -104,12 +110,43 @@ describe('getFoodSearchResults', () => {
         })
 
         await expect(getFoodSearchResults('premiumgate')).rejects.toThrow(FOOD_SEARCH_PREMIUM_MESSAGE)
+        expect(Sentry.captureException).not.toHaveBeenCalled()
     })
 
-    it('rethrows a non-429 edge function error with the raw status and body (surfaced by foodDBModal, swallowed by enrichBrandedItem)', async () => {
+    it('rethrows a non-429 edge function error with the raw status and body (surfaced by foodDBModal, swallowed by enrichBrandedItem), and captures it exactly once', async () => {
         mockFetch.mockResolvedValue({ ok: false, status: 500, text: async () => 'boom' })
 
         await expect(getFoodSearchResults('error')).rejects.toThrow('Edge function error: 500 - boom')
+
+        expect(Sentry.captureException).toHaveBeenCalledTimes(1)
+        const [captured, ctx] = (Sentry.captureException as jest.Mock).mock.calls[0]
+        expect((captured as Error).message).toBe('Edge function error: 500 - boom')
+        expect(ctx).toEqual({ tags: { area: 'edge-fooddb' } })
+    })
+
+    it('captures a network/fetch rejection exactly once, tagged edge-fooddb, then rethrows', async () => {
+        const networkError = new Error('network down')
+        mockFetch.mockRejectedValue(networkError)
+
+        await expect(getFoodSearchResults('offline')).rejects.toThrow('network down')
+
+        expect(Sentry.captureException).toHaveBeenCalledTimes(1)
+        expect(Sentry.captureException).toHaveBeenCalledWith(networkError, { tags: { area: 'edge-fooddb' } })
+    })
+
+    it('captures exactly once, tagged edge-fooddb, when a 200 response body is not valid JSON (an edge-function bug), then rethrows', async () => {
+        const parseError = new Error('Unexpected token in JSON')
+        mockFetch.mockResolvedValue({
+            ok: true,
+            json: jest.fn(async () => {
+                throw parseError
+            }),
+        })
+
+        await expect(getFoodSearchResults('badjson')).rejects.toThrow('Unexpected token in JSON')
+
+        expect(Sentry.captureException).toHaveBeenCalledTimes(1)
+        expect(Sentry.captureException).toHaveBeenCalledWith(parseError, { tags: { area: 'edge-fooddb' } })
     })
 })
 
@@ -133,16 +170,20 @@ describe('getFoodDetails', () => {
         expect(mockFetch).toHaveBeenCalledWith(EDGE_URL, expect.objectContaining({ body: JSON.stringify({ type: 'details', foodId: '123' }) }))
     })
 
-    it('resolves to null on a 429 (documented degraded path: no quota message surfaced at this call site)', async () => {
+    it('resolves to null on a 429 (documented degraded path: no quota message surfaced at this call site), and never captures', async () => {
         mockFetch.mockResolvedValue({ ok: false, status: 429, text: async () => '{"error":"quota_exceeded"}' })
 
         expect(await getFoodDetails({ description: 'Rice', fdcId: '789' })).toBeNull()
+        expect(Sentry.captureException).not.toHaveBeenCalled()
     })
 
-    it('resolves to null on a network failure', async () => {
+    it('resolves to null on a network failure, but still captures it once via the shared callEdgeFunction helper', async () => {
         mockFetch.mockRejectedValue(new Error('network down'))
 
         expect(await getFoodDetails({ description: 'Rice', fdcId: 'net-fail' })).toBeNull()
+
+        expect(Sentry.captureException).toHaveBeenCalledTimes(1)
+        expect(Sentry.captureException).toHaveBeenCalledWith(new Error('network down'), { tags: { area: 'edge-fooddb' } })
     })
 })
 

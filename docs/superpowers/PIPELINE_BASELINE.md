@@ -21,6 +21,9 @@ green. Never add a *new* file/symbol without a `needs-human` escalation.
   Deno-can't-resolve tsc class (23 baseline + 22 new) is **eliminated** → **tsc now 5
   app-surface errors** only. Jest unchanged (6 suites / 10 tests). The Deno functions are
   now validated only manually / by `deno` — never by this gate.
+- `2026-07-20` after **H4**: removed the invalid `enableInExpoDevelopment` option from
+  `Sentry.init` (`app/_layout.tsx`) while wiring the environment tag → the `app/_layout.tsx`
+  TS2353 error is **cleared** → **tsc now 4 app-surface errors**. Jest unchanged (6/10).
 
 ## Jest — 6 failing suites / 10 failing tests
 
@@ -46,10 +49,9 @@ green. Never add a *new* file/symbol without a `needs-human` escalation.
 **`context/WorkoutContext/functions/__tests__/logFunctions.test.ts`** (1)
 - Log Functions addLog Edge Cases should handle zero reps
 
-## tsc --noEmit — 5 errors (all app-surface; Deno dir now excluded)
+## tsc --noEmit — 4 errors (all app-surface; Deno dir excluded)
 
-App/test code (5) — real, in-surface:
-- `app/_layout.tsx` — TS2353 `enableInExpoDevelopment` not in `ReactNativeOptions`
+App/test code (4) — real, in-surface:
 - `components/devTest/DevStatsModal.tsx` — TS2345 EffectCallback returning `() => boolean`
 - `context/BillingContext/index.tsx` — TS2322 `void` not assignable to `{ remove?: ... }`
 - `context/NutritionContext/functions/__tests__/crudFunctions.test.ts` — TS2345 Mock vs Dispatch<SetStateAction>

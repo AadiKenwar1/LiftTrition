@@ -7,6 +7,7 @@ import {
 } from '@/lib/powersync/orchestrator'
 import { powerSync } from '@/lib/powersync/system'
 import { setWatchdogStatus } from '@/lib/powersync/watchdogStatus'
+import * as Sentry from '@sentry/react-native'
 import { useEffect } from 'react'
 import { AppState } from 'react-native'
 
@@ -72,6 +73,9 @@ export function SyncWatchdog() {
 
             if (outcome === 'error') {
                 const { lastError } = getPowerSyncOrchestratorState()
+                // Breadcrumb only — kickPowerSync's own catch already captured this failure once;
+                // capturing it again here would double-count the same underlying error.
+                Sentry.addBreadcrumb({ category: 'powersync', level: 'warning', message: `watchdog_kick_error:${reason}`, data: { lastError } })
                 setWatchdogStatus({
                     enabled: true,
                     lastCheckAt: new Date(),

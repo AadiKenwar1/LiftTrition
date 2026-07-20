@@ -1,5 +1,6 @@
 import { ENV } from '@/lib/env'
 import { supabase } from '@/lib/supabase/client'
+import * as Sentry from '@sentry/react-native'
 import { CacheEntry, FoodDetails, FoodItem, FoodSearchResult } from './types'
 
 const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000 // 1 week
@@ -36,32 +37,54 @@ async function callEdgeFunction<T>(body: { type: 'search'; query: string } | { t
     } = await supabase.auth.getSession()
     if (!session) throw new Error('Not authenticated')
 
-    const res = await fetch(EDGE_FN_URL, {
-        method: 'POST',
-        headers: {
-            Authorization: `Bearer ${session.access_token}`,
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
-    })
+    let res: Response
+    try {
+        res = await fetch(EDGE_FN_URL, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${session.access_token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(body),
+        })
+    } catch (e) {
+        // Offline/DNS/TLS failures never reach the edge function at all — captured once here so
+        // both callers (getFoodSearchResults' rethrow and getFoodDetails' swallow-to-null) are covered.
+        Sentry.captureException(e, { tags: { area: 'edge-fooddb' } })
+        throw e
+    }
 
     if (!res.ok) {
         // Daily quota hit (audit C1) — checked first, and without reading the body, so the
         // upstream/edge response is never touched let alone leaked into the thrown message.
+        // Working-as-designed limit, not an ops failure — left uncaptured (would just be noise).
         if (res.status === 429) {
             throw new Error(FOOD_SEARCH_QUOTA_MESSAGE)
         }
         // Server-side premium gate (audit H1) fails closed to 403 — mapped before the body is read
         // (like the 429 above) so the raw "premium_required" edge body never leaks into a thrown
         // message. getFoodDetails swallows this to null; foodDBModal surfaces the copy on search.
+        // Also left uncaptured — same working-as-designed reasoning as the 429 above.
         if (res.status === 403) {
             throw new Error(FOOD_SEARCH_PREMIUM_MESSAGE)
         }
         const text = await res.text()
-        throw new Error(`Edge function error: ${res.status} - ${text}`)
+        // Unmapped/5xx edge failure — genuinely unexpected; captured once here so both callers
+        // (search's rethrow and details' swallow-to-null) are covered from this one shared site.
+        const err = new Error(`Edge function error: ${res.status} - ${text}`)
+        Sentry.captureException(err, { tags: { area: 'edge-fooddb' } })
+        throw err
     }
 
-    return res.json()
+    try {
+        return (await res.json()) as T
+    } catch (e) {
+        // A 2xx response whose body isn't valid JSON is a genuine edge-function bug, not a
+        // client/network fault — captured once here, the last throwing step in this function, so
+        // both callers (search's rethrow and details' swallow-to-null) are covered.
+        Sentry.captureException(e, { tags: { area: 'edge-fooddb' } })
+        throw e
+    }
 }
 
 export async function getFoodSearchResults(query: string): Promise<FoodSearchResult[]> {

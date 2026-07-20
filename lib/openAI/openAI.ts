@@ -4,6 +4,7 @@
 import { ENV } from '@/lib/env';
 import type { ScanMode } from '@/lib/openAI/mealImage';
 import { supabase } from '@/lib/supabase/client';
+import * as Sentry from '@sentry/react-native';
 
 export type VisionProvider = 'openai' | 'gemini'
 
@@ -19,25 +20,35 @@ async function callEdgeFunction(
     } = await supabase.auth.getSession()
     if (!session) throw new Error('Not authenticated')
 
-    const res = await fetch(EDGE_FN_URL, {
-        method: 'POST',
-        headers: {
-            Authorization: `Bearer ${session.access_token}`,
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
-    })
+    let res: Response
+    try {
+        res = await fetch(EDGE_FN_URL, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${session.access_token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(body),
+        })
+    } catch (e) {
+        // Offline/DNS/TLS failures never reach the edge function at all, so without this the most
+        // common real-world trigger for this funnel would stay invisible to ops.
+        Sentry.captureException(e, { tags: { area: 'edge-openai' } })
+        throw e
+    }
 
     if (!res.ok) {
         // Daily quota hit (audit C1) — checked first, and without reading the body, so the
         // upstream/edge response is never touched let alone leaked into the thrown message.
+        // Working-as-designed limit, not an ops failure — left uncaptured (would just be noise).
         if (res.status === 429) {
             throw new Error('Daily scan limit reached. Try again tomorrow, or add this meal manually.')
         }
         // Server-side premium gate (audit H1) fails closed to 403 — even for a paying user during
         // a RevenueCat REST outage/rate-limit. Mapped here (before the body is read, like the 429
         // above) so a subscriber sees a neutral retry message instead of the raw "premium_required"
-        // edge body leaking verbatim into the analyzing/add-nutrition alert.
+        // edge body leaking verbatim into the analyzing/add-nutrition alert. Also left uncaptured —
+        // same working-as-designed reasoning as the 429 above.
         if (res.status === 403) {
             throw new Error("Couldn't verify your subscription. Please try again in a moment.")
         }
@@ -53,10 +64,23 @@ async function callEdgeFunction(
                 'Could not analyze this photo. Try a clearer picture of your food, or add a manual entry.',
             )
         }
-        throw new Error(`Edge function error: ${res.status} - ${text}`)
+        // Unmapped/5xx edge failure — genuinely unexpected, so ops needs to see it even though the
+        // thrown message above is already what the user sees (this is ops-side aggregation, not the
+        // fix for a user-invisible failure).
+        const err = new Error(`Edge function error: ${res.status} - ${text}`)
+        Sentry.captureException(err, { tags: { area: 'edge-openai' } })
+        throw err
     }
 
-    return res.text()
+    try {
+        return await res.text()
+    } catch (e) {
+        // A 2xx response whose body stream fails mid-read (e.g. a dropped connection during the
+        // ~30s vision call) is a genuine failure — captured once here, the last throwing step in
+        // this function.
+        Sentry.captureException(e, { tags: { area: 'edge-openai' } })
+        throw e
+    }
 }
 
 export async function askOpenAI(_question: string): Promise<string> {

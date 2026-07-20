@@ -1,8 +1,12 @@
 // openAI.test.ts
 // Covers the fetchOpenAI edge-function boundary: success passthrough, the refusal (422)
-// mapping, and the daily-quota (429) mapping added for audit C1.
+// mapping, and the daily-quota (429) mapping added for audit C1, plus the H4 Sentry telemetry:
+// network/fetch rejections, unmapped/5xx edge failures, and a 200 whose body stream fails mid-read
+// are each captured exactly once, while the friendly, working-as-designed refused/429/403
+// outcomes stay uncaptured.
 
 import { supabase } from '@/lib/supabase/client'
+import * as Sentry from '@sentry/react-native'
 import { askOpenAIText, askOpenAIVision } from '../openAI'
 
 // jest.mock calls are hoisted above imports, so this reliably beats the real
@@ -18,6 +22,10 @@ jest.mock('@/lib/supabase/client', () => ({
         },
     },
 }))
+
+// openAI.ts imports @sentry/react-native at module scope (H4) — mock it, matching the
+// established convention (connector.test.ts, persistErrors.test.ts).
+jest.mock('@sentry/react-native', () => ({ captureException: jest.fn(), addBreadcrumb: jest.fn() }))
 
 const mockFetch = jest.fn()
 global.fetch = mockFetch as unknown as typeof fetch
@@ -47,7 +55,7 @@ describe('askOpenAIVision', () => {
         )
     })
 
-    it('rejects with the friendly daily-limit message on a 429, without reading the response body', async () => {
+    it('rejects with the friendly daily-limit message on a 429, without reading the response body, and never captures (working-as-designed limit)', async () => {
         mockFetch.mockResolvedValue({
             ok: false,
             status: 429,
@@ -59,9 +67,10 @@ describe('askOpenAIVision', () => {
         await expect(askOpenAIVision('data:image/jpeg;base64,abc', 'meal')).rejects.toThrow(
             'Daily scan limit reached. Try again tomorrow, or add this meal manually.',
         )
+        expect(Sentry.captureException).not.toHaveBeenCalled()
     })
 
-    it('rejects with a friendly subscription message on a 403, without reading the response body', async () => {
+    it('rejects with a friendly subscription message on a 403, without reading the response body, and never captures (working-as-designed limit)', async () => {
         mockFetch.mockResolvedValue({
             ok: false,
             status: 403,
@@ -73,9 +82,10 @@ describe('askOpenAIVision', () => {
         await expect(askOpenAIVision('data:image/jpeg;base64,abc', 'meal')).rejects.toThrow(
             "Couldn't verify your subscription. Please try again in a moment.",
         )
+        expect(Sentry.captureException).not.toHaveBeenCalled()
     })
 
-    it('still maps a refusal (422) to the existing friendly message', async () => {
+    it('still maps a refusal (422) to the existing friendly message, and never captures it', async () => {
         mockFetch.mockResolvedValue({
             ok: false,
             status: 422,
@@ -85,12 +95,43 @@ describe('askOpenAIVision', () => {
         await expect(askOpenAIVision('data:image/jpeg;base64,abc', 'item')).rejects.toThrow(
             'Could not analyze this photo. Try a clearer picture of your food, or add a manual entry.',
         )
+        expect(Sentry.captureException).not.toHaveBeenCalled()
     })
 
-    it('surfaces a generic error for other failure statuses', async () => {
+    it('surfaces a generic error for other failure statuses, and captures it exactly once, tagged edge-openai', async () => {
         mockFetch.mockResolvedValue({ ok: false, status: 500, text: async () => 'OpenAI: 500' })
 
         await expect(askOpenAIVision('data:image/jpeg;base64,abc')).rejects.toThrow('Edge function error: 500 - OpenAI: 500')
+
+        expect(Sentry.captureException).toHaveBeenCalledTimes(1)
+        const [captured, ctx] = (Sentry.captureException as jest.Mock).mock.calls[0]
+        expect((captured as Error).message).toBe('Edge function error: 500 - OpenAI: 500')
+        expect(ctx).toEqual({ tags: { area: 'edge-openai' } })
+    })
+
+    it('captures a network/fetch rejection exactly once, tagged edge-openai, then rethrows the same error', async () => {
+        const networkError = new Error('Network request failed')
+        mockFetch.mockRejectedValue(networkError)
+
+        await expect(askOpenAIVision('data:image/jpeg;base64,abc')).rejects.toThrow('Network request failed')
+
+        expect(Sentry.captureException).toHaveBeenCalledTimes(1)
+        expect(Sentry.captureException).toHaveBeenCalledWith(networkError, { tags: { area: 'edge-openai' } })
+    })
+
+    it('captures exactly once, tagged edge-openai, when a 200 response body stream fails mid-read, then rethrows', async () => {
+        const streamError = new Error('Network connection lost')
+        mockFetch.mockResolvedValue({
+            ok: true,
+            text: jest.fn(async () => {
+                throw streamError
+            }),
+        })
+
+        await expect(askOpenAIVision('data:image/jpeg;base64,abc')).rejects.toThrow('Network connection lost')
+
+        expect(Sentry.captureException).toHaveBeenCalledTimes(1)
+        expect(Sentry.captureException).toHaveBeenCalledWith(streamError, { tags: { area: 'edge-openai' } })
     })
 
     it('throws "Not authenticated" and never calls fetch when there is no session', async () => {
@@ -98,6 +139,7 @@ describe('askOpenAIVision', () => {
 
         await expect(askOpenAIVision('data:image/jpeg;base64,abc')).rejects.toThrow('Not authenticated')
         expect(mockFetch).not.toHaveBeenCalled()
+        expect(Sentry.captureException).not.toHaveBeenCalled()
     })
 })
 

@@ -2,6 +2,7 @@ import { flushUploadsOrThrow } from '@/lib/powersync/FlushUploads'
 import { disconnectAndClearPowerSync } from '@/lib/powersync/orchestrator'
 import { supabase } from '@/lib/supabase/client'
 import { clearUserStorage } from '@/lib/utils/userStorage'
+import * as Sentry from '@sentry/react-native'
 import { clearLocalSession, deleteAccount, forceSignOut, signOut } from '../accountFunctions'
 
 jest.mock('@/lib/supabase/client', () => ({
@@ -29,6 +30,13 @@ jest.mock('@/lib/powersync/FlushUploads', () => ({
 
 jest.mock('@/lib/utils/userStorage', () => ({
     clearUserStorage: jest.fn(),
+}))
+
+// accountFunctions.tsx now imports @sentry/react-native at module scope (H4) — mock it, matching
+// the established convention (connector.test.ts, persistErrors.test.ts).
+jest.mock('@sentry/react-native', () => ({
+    captureMessage: jest.fn(),
+    captureException: jest.fn(),
 }))
 
 const mockFetch = jest.fn()
@@ -146,9 +154,30 @@ describe('signOut', () => {
         expect(disconnectAndClearPowerSync).not.toHaveBeenCalled()
         expect(clearUserStorage).not.toHaveBeenCalled()
     })
+
+    it('propagates a disconnectAndClearPowerSync failure unchanged, without capturing it here — profile.tsx owns that capture, so double-capturing here would double-count the same error', async () => {
+        const error = new Error('disk full')
+        ;(disconnectAndClearPowerSync as jest.Mock).mockRejectedValue(error)
+
+        await expect(signOut()).rejects.toBe(error)
+
+        expect(clearUserStorage).not.toHaveBeenCalled()
+        expect(Sentry.captureException).not.toHaveBeenCalled()
+    })
 })
 
 describe('forceSignOut', () => {
+    it('reports the data-loss event via captureMessage before starting teardown, and never captureException on the normal path', async () => {
+        await forceSignOut()
+
+        expect(Sentry.captureMessage).toHaveBeenCalledTimes(1)
+        expect(Sentry.captureMessage).toHaveBeenCalledWith('force_sign_out_data_loss', {
+            level: 'warning',
+            tags: { area: 'force-sign-out-data-loss' },
+        })
+        expect(Sentry.captureException).not.toHaveBeenCalled()
+    })
+
     it("completes local cleanup and clears the user's storage even when the auth sign-out rejects", async () => {
         ;(supabase.auth.signOut as jest.Mock).mockRejectedValue(new Error('network dead'))
 
@@ -157,9 +186,10 @@ describe('forceSignOut', () => {
         expect(mockRemoveSession).toHaveBeenCalledTimes(1)
         expect(disconnectAndClearPowerSync).toHaveBeenCalledTimes(1)
         expect(clearUserStorage).toHaveBeenCalledWith('user-123')
+        expect(Sentry.captureException).not.toHaveBeenCalled()
     })
 
-    it('skips every teardown step when the session cannot be removed', async () => {
+    it('skips every teardown step when the session cannot be removed, and captures its own failure before rethrowing', async () => {
         ;(supabase.auth.signOut as jest.Mock).mockRejectedValue(new TypeError('Network request failed'))
         delete authMock._removeSession
 
@@ -167,6 +197,15 @@ describe('forceSignOut', () => {
 
         expect(disconnectAndClearPowerSync).not.toHaveBeenCalled()
         expect(clearUserStorage).not.toHaveBeenCalled()
+
+        // The entry-point message still fires (it's unconditional), and the body's own failure is
+        // captured separately, tagged force-sign-out-failed, before the original error is rethrown.
+        expect(Sentry.captureMessage).toHaveBeenCalledTimes(1)
+        expect(Sentry.captureException).toHaveBeenCalledTimes(1)
+        const [captured, ctx] = (Sentry.captureException as jest.Mock).mock.calls[0]
+        expect(captured).toBeInstanceOf(Error)
+        expect((captured as Error).message).toContain('Could not sign out on this device')
+        expect(ctx).toEqual({ tags: { area: 'force-sign-out-failed' } })
     })
 })
 
@@ -203,5 +242,17 @@ describe('clearLocalSession', () => {
         await expect(clearLocalSession()).rejects.toThrow('Could not sign out on this device')
 
         expect(disconnectAndClearPowerSync).not.toHaveBeenCalled()
+    })
+
+    it('swallows a disconnectAndClearPowerSync failure (still resolves) but captures it exactly once — the deleteAccount/forceSignOut path has no other capturer', async () => {
+        const error = new Error('disk full')
+        ;(disconnectAndClearPowerSync as jest.Mock).mockRejectedValue(error)
+
+        await expect(clearLocalSession()).resolves.toBeUndefined()
+
+        expect(Sentry.captureException).toHaveBeenCalledTimes(1)
+        expect(Sentry.captureException).toHaveBeenCalledWith(error, {
+            tags: { area: 'powersync-disconnect-clear', reason: 'local_session_clear' },
+        })
     })
 })
