@@ -3,14 +3,14 @@ import { useAuth } from '@/context/AuthContext'
 import { fonts, logoForScheme, radius, useColorScheme, useColors, useSetColorScheme, type Colors } from '@/context/ThemeContext'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { Image } from 'expo-image'
-import { Moon, Sun } from 'lucide-react-native'
+import { Moon, Star, Sun } from 'lucide-react-native'
 import { useMemo, useState } from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 /**
  * Login — the brand opener and auth gate (shown when there's no session). Scheme-aware logo, wordmark,
- * theme toggle, and the Apple button that runs the real signInWithApple(); on success the
+ * honest ★★★★★ 5.0, theme toggle, and the Apple button that runs the real signInWithApple(); on success the
  * route guard reveals the onboarding flow.
  */
 export default function LoginScreen() {
@@ -47,6 +47,12 @@ export default function LoginScreen() {
                 <Image source={logo} style={styles.mark} contentFit="contain" priority="high" />
                 <Text style={styles.appName}>PLATES</Text>
                 <Text style={styles.tagline}>Track your plates in the gym and kitchen.</Text>
+                <View style={styles.ratingRow}>
+                    {Array.from({ length: 5 }).map((_, i) => (
+                        <Star key={i} size={14} color="#FFD93D" fill="#FFD93D" strokeWidth={0} />
+                    ))}
+                    <Text style={styles.ratingText}>5.0</Text>
+                </View>
             </View>
 
             <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) + 24 }]}>
@@ -77,6 +83,8 @@ function makeStyles(colors: Colors) {
         mark: { width: 184, height: 184, marginBottom: 8 },
         appName: { fontFamily: fonts.extrabold, fontSize: 44, color: colors.text, letterSpacing: -1.6, textAlign: 'center' },
         tagline: { fontFamily: fonts.regular, fontSize: 16, color: colors.textSecondary, textAlign: 'center', lineHeight: 23, marginTop: 6, marginBottom: 16, paddingHorizontal: 16 },
+        ratingRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+        ratingText: { fontFamily: fonts.semibold, fontSize: 13, color: colors.textSecondary, marginLeft: 6 },
         footer: { gap: 14 },
         appleButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', height: 56, borderRadius: radius.cardLg, backgroundColor: colors.text },
         appleText: { fontFamily: fonts.semibold, fontSize: 17, color: colors.background, letterSpacing: -0.3 },

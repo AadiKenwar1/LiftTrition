@@ -53,7 +53,6 @@ const GROUPS: { title: string; items: { label: string; route: string }[] }[] = [
             { label: 'Combine — Staged meal name', route: '/devTest/combine' },
             { label: 'Food Row — Search preview', route: '/devTest/foodRow' },
             { label: 'Entry Rows — Brand subtitle', route: '/devTest/entryRow' },
-            { label: 'Rating Row Removal (M23)', route: '/devTest/ratingRemoval' },
         ],
     },
     {
