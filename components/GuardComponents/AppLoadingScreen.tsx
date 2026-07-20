@@ -7,13 +7,14 @@ type Props = {
     message?: string
     loadFailed?: boolean
     onRetry?: () => void
+    onSignOut?: () => void
 }
 
 const MARK_AREA = 148
 const OUTER_ORBIT = 144
 const INNER_ORBIT = 116
 
-export function AppLoadingScreen({ message = 'Loading your profile...', loadFailed = false, onRetry }: Props) {
+export function AppLoadingScreen({ message = 'Loading your profile...', loadFailed = false, onRetry, onSignOut }: Props) {
     const colors = useColors()
     const logo = useLogo()
     const styles = useMemo(() => makeStyles(colors), [colors])
@@ -91,9 +92,30 @@ export function AppLoadingScreen({ message = 'Loading your profile...', loadFail
                 {display}
             </Animated.Text>
             {loadFailed && onRetry && (
-                <Animated.View style={{ opacity: messageIn, transform: [{ translateY: messageRise }] }}>
-                    <TouchableOpacity onPress={onRetry} activeOpacity={0.7} hitSlop={10}>
+                <Animated.View style={[styles.linkRow, { opacity: messageIn, transform: [{ translateY: messageRise }] }]}>
+                    <TouchableOpacity
+                        onPress={onRetry}
+                        activeOpacity={0.7}
+                        hitSlop={8}
+                        accessibilityRole="button"
+                        accessibilityLabel="Retry"
+                        style={styles.linkTap}
+                    >
                         <Text style={[styles.message, styles.retryLink]}>Tap to retry</Text>
+                    </TouchableOpacity>
+                </Animated.View>
+            )}
+            {loadFailed && onSignOut && (
+                <Animated.View style={[styles.linkRow, { opacity: messageIn, transform: [{ translateY: messageRise }] }]}>
+                    <TouchableOpacity
+                        onPress={onSignOut}
+                        activeOpacity={0.7}
+                        hitSlop={8}
+                        accessibilityRole="button"
+                        accessibilityLabel="Sign out"
+                        style={styles.linkTap}
+                    >
+                        <Text style={[styles.message, styles.signOutLink]}>Sign out</Text>
                     </TouchableOpacity>
                 </Animated.View>
             )}
@@ -161,9 +183,21 @@ function makeStyles(colors: Colors) {
             letterSpacing: 1.6,
             textTransform: 'uppercase',
         },
+        linkRow: {
+            marginTop: 4,
+        },
+        // >=44pt tap target (Apple minimum) even though the label line is ~12.5pt.
+        linkTap: {
+            minHeight: 44,
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingHorizontal: 16,
+        },
         retryLink: {
             color: colors.workout,
-            marginTop: 12,
+        },
+        signOutLink: {
+            color: colors.textSecondary,
         },
     })
 }

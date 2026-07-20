@@ -105,3 +105,25 @@ One block per issue, appended as the pipeline runs. Newest at the bottom.
 **OPS CHECKLIST (human — DEPLOY ORDERING, now safety-critical):** the widened dead-letter set converts "retry-forever wedge" into "bounded single-row drop" for un-applied additive migrations. Apply these in Supabase **before/with** the build that ships H2, or brand-bearing ingredient rows / settings-flag writes will silently dead-letter: `ingredient_brand.sql` (brand col), `settings_goal_intent_flags.sql` (macros_customized / goal_overshoot_acknowledged), `nutrition_calories_real.sql`. (This is the intended trade-off — the fix is the safety net, deploy-order discipline is the real guard.)
 
 **FOLLOW-UP (pre-existing, NOT introduced by H2, logged not fixed):** PATCH ops on check-then-insert tables route through `updateRecord` by `id` only (`Connector.ts:232`); after a cross-device natural-key collision the loser's local `id` ≠ the surviving server row's `id`, so a later edit PATCHes 0 rows silently. Affects `weight_progress` and now `user_exercises` (`settings` has a session-lookup workaround). Own fix = route these tables' PATCH through natural-key resolution.
+
+---
+
+## H3 — MERGED — `fix(MERGED/H3)` — 2026-07-20  ⚠ post-hoc review target
+
+**Finding:** the audit's strongest hotspot (3 agents converged). `await powerSync.waitForFirstSync()` never rejects on network failure, and the retry UI only renders on rejection — so a fresh install / first sign-in with PowerSync unreachable is hard-stuck on "Syncing data…" forever, with no timeout, no retry that re-attempts the connection, and no sign-out escape. Returning users unaffected (persisted first-sync flag).
+
+**Phase 1 — judge (consolidated, un-adjudicated brief):** upheld all decisions against live code + the SDK types. Key rulings: (i) the SDK abort contract (verified in `AbstractPowerSyncDatabase.d.ts:194-206`: `waitForFirstSync(signal)` RESOLVES on abort, never rejects) + a post-resolve `hasSynced` check is correct and leak-free — a `Promise.race` against a rejecting timer would abandon the SDK's internal wait/listener on every offline retry; (ii) escape must use `forceSignOut` not `signOut()` (the latter's `flushUploadsOrThrow` would hang on the same unreachable backend; a first-sync-blocked device has no local writes to lose); (iii) `ensurePowerSyncConnected` in the loader is idempotent/mutex-serialized and is what makes retry a real recovery; (iv) the 3 other bare `waitForFirstSync` calls (Settings/Nutrition/Workout context loaders) are intentionally left — they're children of the guard, unreachable during the hang.
+
+**Fix (root cause):** new `lib/powersync/waitForFirstSync.ts` (`waitForFirstSyncOrThrow`, `FIRST_SYNC_TIMEOUT_MS=30_000`, `FirstSyncTimeoutError`); `PowerSyncGuard` now `ensurePowerSyncConnected('auth_session')` → helper → `handleEscape`(confirm → `forceSignOut`) + `onSignOut`; `AppLoadingScreen` gains an optional, additive sign-out link (a11y roles/labels + ≥44pt targets on both links). Augmented `LoadingScreenTest` DevHub page. +3 test suites (11 tests).
+
+**file_review:** two quality edits — replaced the hand-rolled `Alert.alert` with the existing `confirmDelete` helper (DRY, `confirmText:'Sign out'`, behavior-identical, test still passes) and fixed copy-paste drift (missing `linkRow` gap between the two links). Verified the abort contract against the SDK source.
+
+**wide_review:** no edits. Confirmed the twin `waitForFirstSync` sites can't hang (providers strictly inside the guard; any session change re-gates), the route guard cleanly returns to login after `forceSignOut`, and double-`ensurePowerSyncConnected` is mutex-safe. Two pre-existing follow-ups surfaced (below).
+
+**repair (1 bounce):** tsc flagged 4 type errors in the new `PowerSyncGuard.test.tsx` (over-constrained mock generics + a `string` passed to `FirstSyncTimeoutError(timeoutMs:number)`). Fixed at the root (typed the mock param; passed `30000`) — no production change; tests stay green.
+
+**verify:** Jest 6/10 = baseline, all 3 new suites pass (667 total, +11). tsc 5 = app-surface baseline (0 in H3 files) after the repair. GREEN.
+
+**FOLLOW-UPS (pre-existing, NOT introduced by H3, logged not fixed):**
+1. `forceSignOut` isn't purely network-free: `removeLocalAuthSession` calls `supabase.auth.signOut({scope:'local'})`, which still POSTs `/logout?scope=local` when a token is present — on a reachable-but-dead backend the escape can block up to the fetch timeout (~60s) before the local-removal fallback. Bounded/self-healing (never infinite), shared auth code also used by `deleteAccount`. Fix = call `_removeSession()` first for the force path so the escape is instant.
+2. The guard's dep is the `session` OBJECT, so a token refresh (new object, same user) re-runs the loader → momentary `loading` → remount of the Settings/Workout/Nutrition provider subtree (data reload + in-memory reset like `NutritionContext.selectedDate`). Load-bearing (it's what makes the twins safe), but a candidate to key on `user.id` instead.
