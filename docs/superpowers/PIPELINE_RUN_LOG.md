@@ -290,21 +290,3 @@ C1, C3, C4, H1, H2, H3, H4, H9, H15, M23 — every `[LAUNCH-BLOCKER]` issue impl
 **verify:** tsc **0 errors**, jest **72 suites / 744 tests** (71/732 + graphSeries suite + bodyweight regression test), 0 failures. graphFunctions/volumeFunctions unchanged & green. GREEN.
 
 **FOLLOW-UP (real, out of H10's leading-zero scope — its own issue):** wide_review found body-weight seeds with `earliestWeight` (the earliest-EVER weigh-in), which is correct only when ≤1 weigh-in predates the 365-day window. A long-tenured user with ≥2 weigh-ins older than a year should seed the leading days from the MOST-RECENT weigh-in on/before window-start, not the earliest-ever — otherwise the 1-year "Change" is skewed by the inter-weigh-in drift. Strictly better than the pre-fix leading-0 (no regression), and matches the single-pre-window-entry 400-day test, so accepted for H10. The correct fix computes the initial carry from the latest entry ≤ startDate INSIDE buildDailySeries (startDate isn't known to the caller), changing the helper's seeding contract — needs its own test, hence a separate follow-up.
-
----
-
-## M1 — DONE — `fix(DONE/M1)` — 2026-07-20
-
-**Finding:** sign-out drains only the PowerSync UPLOAD queue (`flushUploadsOrThrow`) before wiping SQLite. A settings edit still in-memory-dirty at that moment (mid-flight upsert, in backoff retry, or C3-wedged) never reached SQLite, so it isn't in the upload queue — the flush returns empty and the wipe silently discards it.
-
-**Fix (root cause):** force any dirty in-memory settings to SQLite BEFORE the upload-queue flush, and abort sign-out (no wipe) if that write fails. New `lib/powersync/pendingWrites.ts` (registerPendingFlush/flushPendingLocalWrites, wrapping failures in `PendingWritesFlushError extends UploadFlushError`); `signOut()` awaits `flushPendingLocalWrites()` immediately before `flushUploadsOrThrow`; SettingsContext registers (mount-once, unregister on unmount) an UNCONDITIONAL, ref-based flusher — `settingsRef`/`loadedRef`/`userIDRef` kept current every render, `upsertSettings` called with no persistDirty gate. The unconditional/ref design is the adjudicated core: a mount-once closure gating on `persistDirty` (plain useState) would read its creation-time value forever and no-op in exactly the dirty/backoff cases the bug names.
-
-**implement (pipeline-implementer-done):** reproduced against current (post-H3/H4/H6) code first — only line numbers had drifted, no design drift. Left C3's persistSavingRef machinery (bypassed by construction), deleteAccount, forceSignOut, and profile.tsx's error copy untouched per adjudication.
-
-**file_review:** one DRY edit (dropped a duplicated fallback-message literal in pendingWrites.ts). Empirically PROVED the new stale-closure regression test isn't vacuous: reintroduced the persistDirty-gated design → 3 of 4 tests failed → reverted. Verified the flusher is unconditional/ref-based, signOut ordering + abort, and the error subclass.
-
-**wide_review:** no edits. Confirmed SettingsProvider is the SOLE registrant and its remount (via PowerSyncGuard swapping children on session→null, not the route guard) cleanly re-registers (Set.delete-safe, no leak / no double-flusher); deleteAccount/forceSignOut correctly skip; the error lands in profile.tsx's `isUploadFlushError` escape-hatch branch; the no-race claim holds (upsertSettings calls writeTransaction synchronously, FIFO write-lock, monotonic state). Structural-twin sweep: Nutrition/Workout persist every mutation immediately (no deferred dirty state at sign-out), so correctly need no flusher.
-
-**verify:** tsc **0 errors**, jest **74 suites / 755 tests** (72/744 + 2 suites/11 tests), 0 failures. GREEN.
-
-**FOLLOW-UP (out of scope, flagged):** the workout-note debounce (`notesModal.tsx`, 600ms + unmount flush) is a smaller deferred-persist window, but it only holds dirty state while the modal is mounted — unreachable from the profile→sign-out path — so it's a low-risk follow-up, not an M1 gap. Optional low-priority polish: profile.tsx renders a `PendingWritesFlushError` (a LOCAL write failure) through the generic "Still syncing" upload copy; the escape-hatch behavior is unaffected, so the bespoke-copy fix is deferred.

@@ -1,6 +1,5 @@
 import { useAuth } from '@/context/AuthContext'
 import { powerSync } from '@/lib/powersync/system'
-import { registerPendingFlush } from '@/lib/powersync/pendingWrites'
 import { useAsyncLoad } from '@/lib/hooks/useAsyncLoad'
 import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useRef, useState, type SetStateAction } from 'react'
 import { loadSettingsAndBw, upsertSettings, upsertWeightForDate } from './database/powersyncStore'
@@ -60,15 +59,6 @@ export const SettingsProvider = ({ children }: PropsWithChildren) => {
     // userID is read through a ref to keep this referentially stable.
     const userIDRef = useRef(userID)
     userIDRef.current = userID
-
-    // settings/loaded mirrored into refs (assigned every render, alongside userIDRef) so the
-    // sign-out pending-writes flusher registered once below (mount effect) never reads a stale
-    // React-state snapshot from its creation-time closure — see the registerPendingFlush effect
-    // further down this provider. loadedRef is assigned once `loaded` is computed below.
-    const settingsRef = useRef(settings)
-    settingsRef.current = settings
-    const loadedRef = useRef(false)
-
     const reloadFromDisk = useCallback(async () => {
         const uid = userIDRef.current
         if (!uid) return
@@ -158,7 +148,6 @@ export const SettingsProvider = ({ children }: PropsWithChildren) => {
 
     const loaded = loadStatus === 'ready'
     const loadFailed = loadStatus === 'error'
-    loadedRef.current = loaded
 
     // Save settings row to PowerSync only after real mutations (persistDirty), not after cold-load hydration.
     // bwProgress is excluded — individual weight entries are persisted directly in handleUpdateBw.
@@ -217,26 +206,6 @@ export const SettingsProvider = ({ children }: PropsWithChildren) => {
             }
         }
     }, [settings, loaded, userID, persistDirty, persistRetryNonce, reloadFromDisk])
-
-    // Sign-out safety net (registered once at mount, unregistered on unmount): forces the latest
-    // in-memory settings to SQLite so sign-out's upload-queue flush never misses a change that
-    // hasn't landed yet (mid-flight upsert, backoff retry, or a stuck persistSavingRef). Deliberately
-    // UNCONDITIONAL — no persistDirty / persistDirtyDuringSaveRef gate. Both are plain useState, and
-    // this closure is created once at mount, so gating on them here would read their creation-time
-    // values forever and silently no-op in exactly the dirty/backoff cases this exists to cover.
-    // Reads userIDRef/settingsRef/loadedRef (kept current every render, above) instead of the state
-    // directly. upsertSettings is documented as always exactly one local DB op, so calling it
-    // unconditionally is cheap; PowerSync's writeTransaction/writeLock already serializes writes in
-    // FIFO call order, so an older in-flight save from the effect above is guaranteed to commit
-    // before this one, and the freshest data always lands last — no extra coordination needed.
-    useEffect(() => {
-        const unregister = registerPendingFlush(async () => {
-            if (loadedRef.current && userIDRef.current) {
-                await upsertSettings(userIDRef.current, settingsRef.current)
-            }
-        })
-        return unregister
-    }, [])
 
     // The final onboarding commit is the one write we must not fire-and-forget:
     // if it's lost, the route guard drops the user back into onboarding on next

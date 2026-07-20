@@ -18,14 +18,6 @@ export class UploadFlushNotConnectedError extends UploadFlushError {
     }
 }
 
-/** Thrown when flushing dirty in-memory state (e.g. SettingsContext) to local SQLite fails before sign-out. */
-export class PendingWritesFlushError extends UploadFlushError {
-    readonly name = 'PendingWritesFlushError'
-    constructor(message = 'Failed to flush pending local writes.') {
-        super(message)
-    }
-}
-
 export function isUploadFlushError(e: unknown): e is UploadFlushError {
     return e instanceof UploadFlushError
 }
