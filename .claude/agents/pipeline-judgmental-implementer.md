@@ -33,6 +33,11 @@ You are handed: `issueId`, the audit entry, the merged brief, and the target fil
   affected copy, or state in `notes` why a copy is intentionally left different.
 - **Testing where necessary:** add regression tests for the correctness-critical paths
   the brief names, in the repo's colocated `__tests__/` style.
+- **Test files are type-checked by `tsc`, not just run by jest** — make your mocks
+  type-check: a `jest.fn(() => x)` factory infers a ZERO-arg call signature (don't spread
+  a non-tuple `unknown[]` into it or call it with args unless you type the params); match
+  a mocked function/constructor's REAL parameter types (pass a number where it wants a
+  number). A test that passes under jest but errors under `tsc` fails the gate.
 
 ## Rules
 - Implement against CURRENT code only.
