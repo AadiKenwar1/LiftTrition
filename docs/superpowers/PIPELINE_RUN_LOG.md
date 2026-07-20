@@ -149,3 +149,21 @@ One block per issue, appended as the pipeline runs. Newest at the bottom.
 **FOLLOW-UPS (surfaced by wide_review, out of H4's adjudicated funnel scope, logged not fixed):**
 1. `profile.tsx handleDeleteAccount` (the twin of `handleSignOut`) has NO capture in its catch — delete-account failures are user-alerted but emit zero Sentry event. Trivial add (`captureException area:'delete-account-failure'` at the catch) with no double-capture risk. Own follow-up.
 2. Pre-existing micro-gap: on the `!res.ok` path, `await res.text()` runs outside the try/catch, so an error-response body failing mid-read yields no capture. Extremely rare, not introduced by H4.
+
+---
+
+## H9 — DONE — `fix(DONE/H9)` — 2026-07-20
+
+**Finding:** ingredient-row quantities were persisted via `sanitizeMacro` (1-decimal round): 0.25 servings → 0.3 (+20%). Stored entry totals were computed from the raw value, so items stopped reconciling with totals, and merely opening `editEntry` + tapping Save silently rewrote the meal's macros with no user edit.
+
+**Adjudication extended the fix:** the SAME defect existed on a SECOND axis — per-unit macros (`protein/carbs/fats/calories`) were also `sanitizeMacro`-rounded at the same two call sites while `sumItems` re-consumed the raw values, so a whole-number quantity ≥2 with a 2-decimal macro (the norm for foodDB/FatSecret data, e.g. 29.55) silently rewrote the total on a no-op Save. Fixing only quantity would leave the common case broken.
+
+**Fix (root cause, both axes):** `lib/utils/number.ts` gains `sanitizeQuantity` (fallback 1, preserves explicit 0) + `sanitizeExactMacro` (fallback 0), both full-precision via a shared `preserveFinite(n, fallback)`. `powersyncStore.ts:191` (entries) + `:232` (saved) now store quantity via `sanitizeQuantity` and all four macros via `sanitizeExactMacro`. Entry-level total columns still round via `sanitizeMacro` (display) — untouched. No schema change (SQLite REAL already stores arbitrary precision); legacy rows stop drifting further (backfill out of scope).
+
+**implement (pipeline-implementer-done):** both axes/both call sites + 3 tests, verified failing pre-fix (reverted → `Expected 0.25 Received 0.3` on the real INSERT path).
+
+**file_review:** deduped the OLD/NEW transform literals in `items.test.ts`; **proactively ran a scoped tsc and fixed a TS2502** (self-referential `tx: typeof tx`) in the new mock helper before it could fail the gate; re-confirmed non-vacuousness.
+
+**wide_review:** fixed a **real H9-caused display regression** — `editEntry.tsx`'s `toDraft` rendered per-item values via raw `String()`, so an H9-preserved float artifact (e.g. `0.30000000000000004` from chained `scaleItems`) would show as noise in the edit inputs. Added a render-site `toInputString` (rounds display to 6 decimals; does NOT touch the stored value, so H9 isn't reintroduced). Confirmed only 191/232 persist item rows, no double-round, no equality/dedup or mixed-precision-assertion regression.
+
+**verify:** Jest 6/10 = baseline, +13 new tests (702 total), `editEntry.test.tsx` still green. tsc 4 = baseline. GREEN.

@@ -21,6 +21,17 @@ const MACROS: { field: MacroField; short: string; unit: string }[] = [
     { field: 'fats', short: 'F', unit: 'g' },
 ]
 
+// Render an item value as an editable draft string, stripping floating-point
+// noise. Per-item quantity/macros now persist at FULL precision (H9), so a value
+// that picked up FP artifacts before it was stored (e.g. a quantity scaled twice:
+// 3 × 0.1 = 0.30000000000000004) would otherwise surface raw in the input after a
+// reload. Rounding to 6 decimals collapses only that noise — legitimate values
+// (0.25, 29.55, integer 195) are preserved with no trailing zeros — and it does
+// NOT re-round the stored value (the persist layer keeps full precision).
+function toInputString(n: number): string {
+    return String(Math.round(n * 1e6) / 1e6)
+}
+
 // Snapshot an item into an editable draft row; brand visibility is gated once at seed time.
 function toDraft(item: Item): DraftItem {
     return {
@@ -28,11 +39,11 @@ function toDraft(item: Item): DraftItem {
         name: item.name,
         brand: item.brand ?? null,
         hasBrand: !!item.brand?.trim(),
-        calories: String(item.calories ?? 0),
-        protein: String(item.protein ?? 0),
-        carbs: String(item.carbs ?? 0),
-        fats: String(item.fats ?? 0),
-        quantity: String(item.quantity ?? 1),
+        calories: toInputString(item.calories ?? 0),
+        protein: toInputString(item.protein ?? 0),
+        carbs: toInputString(item.carbs ?? 0),
+        fats: toInputString(item.fats ?? 0),
+        quantity: toInputString(item.quantity ?? 1),
     }
 }
 

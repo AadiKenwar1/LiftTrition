@@ -1,8 +1,9 @@
 jest.mock('@/lib/powersync/system', () => ({ powerSync: { getAll: jest.fn(), writeTransaction: jest.fn(), execute: jest.fn() } }))
 
-import { nutritionEntryToRow, rowToNutritionEntry, rowToSavedNutritionEntry, savedNutritionEntryToRow } from '../powersyncStore'
+import { powerSync } from '@/lib/powersync/system'
+import { nutritionEntryToRow, rowToNutritionEntry, rowToSavedNutritionEntry, savedNutritionEntryToRow, upsertNutritionEntry, upsertSavedNutritionEntry } from '../powersyncStore'
 import type { NutritionEntryIngredientRecord, NutritionEntryRecord, SavedNutritionEntryIngredientRecord, SavedNutritionEntryRecord } from '@/lib/powersync/AppSchema'
-import { NutritionEntry } from '../../types'
+import { Item, NutritionEntry } from '../../types'
 
 function makeEntry(overrides: Partial<NutritionEntry> = {}): NutritionEntry {
     return {
@@ -126,5 +127,48 @@ describe('brand round-trip', () => {
     it('maps a legacy saved ingredient row without brand to null', () => {
         const entry = rowToSavedNutritionEntry(savedRow, [savedIngredientRow({ brand: null })])
         expect(entry.items[0].brand).toBeNull()
+    })
+})
+
+// Wires powerSync.writeTransaction to run its callback against a mock `tx`
+// with no existing row (INSERT branch), and returns that tx so a test can
+// inspect the exact bind-params passed to tx.execute.
+function mockInsertTransaction() {
+    const tx = { getAll: jest.fn().mockResolvedValue([]), execute: jest.fn().mockResolvedValue(undefined) }
+    // Param labeled `mockTx` (not `tx`) so its `typeof tx` annotation isn't self-referential.
+    ;(powerSync.writeTransaction as jest.Mock).mockImplementation(async (fn: (mockTx: typeof tx) => Promise<void>) => {
+        await fn(tx)
+    })
+    return tx
+}
+
+describe('upsertNutritionEntry / upsertSavedNutritionEntry ingredient insert (H9)', () => {
+    // Real foodDB/FatSecret shape: a fractional quantity and 2-decimal
+    // per-unit macros (mirrors popularFoods.ts Chicken Breast protein 29.55).
+    const fractionalItem: Item = { name: 'Chicken Breast', brand: null, quantity: 0.25, protein: 29.55, carbs: 12.34, fats: 7.72, calories: 195 }
+
+    it('stores ingredient quantity and per-unit macros at full precision', async () => {
+        const tx = mockInsertTransaction()
+        await upsertNutritionEntry(makeEntry({ items: [fractionalItem] }))
+
+        const insertCall = tx.execute.mock.calls.find((call) => String(call[0]).includes('INSERT INTO nutrition_entry_ingredients'))
+        expect(insertCall).toBeDefined()
+        const bindParams = insertCall![1]
+        // [entry.id, name, brand, quantity, protein, carbs, fats, calories]
+        expect(bindParams[3]).toBe(0.25) // not sanitizeMacro's 0.3
+        expect(bindParams[4]).toBe(29.55) // not sanitizeMacro's 29.6
+        expect(bindParams[5]).toBe(12.34) // not sanitizeMacro's 12.3
+    })
+
+    it('stores saved-entry ingredient quantity and per-unit macros at full precision', async () => {
+        const tx = mockInsertTransaction()
+        await upsertSavedNutritionEntry(makeEntry({ items: [fractionalItem] }))
+
+        const insertCall = tx.execute.mock.calls.find((call) => String(call[0]).includes('INSERT INTO saved_nutrition_entry_ingredients'))
+        expect(insertCall).toBeDefined()
+        const bindParams = insertCall![1]
+        expect(bindParams[3]).toBe(0.25)
+        expect(bindParams[4]).toBe(29.55)
+        expect(bindParams[5]).toBe(12.34)
     })
 })

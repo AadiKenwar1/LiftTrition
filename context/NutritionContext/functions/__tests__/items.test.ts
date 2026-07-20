@@ -1,3 +1,4 @@
+import { sanitizeExactMacro, sanitizeMacro, sanitizeQuantity } from '@/lib/utils/number';
 import { Item } from '../../types';
 import { scaleItems, sumItems } from '../items';
 
@@ -106,4 +107,58 @@ describe('scaleItems', () => {
     expect(scaled[0].brand).toBeUndefined()
     expect(scaled[1].brand).toBe('Fage')
   })
+});
+
+// H9 regression: the ingredient-row persist transform must reconcile with the
+// entry total sumItems computed from the raw item, on BOTH the quantity axis
+// and the per-unit-macro axis (real foodDB/FatSecret data carries 2 decimals,
+// e.g. Chicken Breast protein 29.55 — see lib/foodDB/popularFoods.ts).
+describe('item persist-transform reconciliation (quantity + per-unit macros)', () => {
+  // Simulates the pre-fix powersyncStore.ts:191/232 insert args (sanitizeMacro on every axis).
+  const applyOldTransform = (raw: Item): Item => ({
+    ...raw,
+    quantity: sanitizeMacro(raw.quantity),
+    protein: sanitizeMacro(raw.protein),
+    carbs: sanitizeMacro(raw.carbs),
+    fats: sanitizeMacro(raw.fats),
+    calories: sanitizeMacro(raw.calories),
+  });
+
+  // Simulates the fixed insert args (full-precision quantity + per-unit macros).
+  const applyNewTransform = (raw: Item): Item => ({
+    ...raw,
+    quantity: sanitizeQuantity(raw.quantity),
+    protein: sanitizeExactMacro(raw.protein),
+    carbs: sanitizeExactMacro(raw.carbs),
+    fats: sanitizeExactMacro(raw.fats),
+    calories: sanitizeExactMacro(raw.calories),
+  });
+
+  // Mirrors popularFoods.ts Chicken Breast at a realistic multi-serving quantity.
+  const rawItem = item({ quantity: 2, protein: 29.55, carbs: 0, fats: 7.72, calories: 195 });
+
+  test('OLD transform (sanitizeMacro on quantity AND macros) diverges from the raw total', () => {
+    const rawTotal = sumItems([rawItem]);
+    // A reload + no-op Save (applyEdits -> sumItems) of the persisted item.
+    const resavedTotal = sumItems([applyOldTransform(rawItem)]);
+    // protein 29.55 -> sanitizeMacro -> 29.6; 29.6 * 2 = 59.2, not the raw 59.1:
+    // a no-op Save silently rewrites the total with no user edit.
+    expect(resavedTotal).not.toEqual(rawTotal);
+    expect(resavedTotal.protein).toBe(59.2);
+    expect(rawTotal.protein).toBe(59.1);
+  });
+
+  test('NEW transform (sanitizeQuantity + sanitizeExactMacro) reconciles exactly', () => {
+    const rawTotal = sumItems([rawItem]);
+    const resavedTotal = sumItems([applyNewTransform(rawItem)]);
+    expect(resavedTotal).toEqual(rawTotal);
+  });
+
+  test('also reconciles for a fractional quantity (0.25 servings)', () => {
+    const fractionalItem = item({ quantity: 0.25, protein: 29.55, carbs: 0, fats: 7.72, calories: 195 });
+    const rawTotal = sumItems([fractionalItem]);
+
+    expect(sumItems([applyOldTransform(fractionalItem)])).not.toEqual(rawTotal); // quantity 0.25 -> 0.3 (+20%)
+    expect(sumItems([applyNewTransform(fractionalItem)])).toEqual(rawTotal);
+  });
 });

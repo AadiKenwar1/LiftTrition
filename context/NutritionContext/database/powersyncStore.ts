@@ -3,7 +3,7 @@ import { powerSync } from '@/lib/powersync/system'
 import { throwIfLoadFailureArmed } from '@/lib/devtools/forceLoadFailure'
 import { throwIfSaveFailureArmed } from '@/lib/devtools/forceSaveFailure'
 import { getDateKey, parseDateKey } from '@/lib/utils/dateHelper'
-import { sanitizeInt, sanitizeMacro } from '@/lib/utils/number'
+import { sanitizeExactMacro, sanitizeInt, sanitizeMacro, sanitizeQuantity } from '@/lib/utils/number'
 import { NutritionEntry } from '../types'
 
 // Item = the DB's "ingredient" row. Table/column names keep the legacy
@@ -188,7 +188,7 @@ export async function upsertNutritionEntry(entry: NutritionEntry): Promise<void>
                 `INSERT INTO nutrition_entry_ingredients (
                    id, nutrition_entry_id, name, brand, quantity, protein, carbs, fats, calories, created_at
                  ) VALUES (uuid(), ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))`,
-                [entry.id, item.name, item.brand ?? null, sanitizeMacro(item.quantity), sanitizeMacro(item.protein), sanitizeMacro(item.carbs), sanitizeMacro(item.fats), sanitizeMacro(item.calories)],
+                [entry.id, item.name, item.brand ?? null, sanitizeQuantity(item.quantity), sanitizeExactMacro(item.protein), sanitizeExactMacro(item.carbs), sanitizeExactMacro(item.fats), sanitizeExactMacro(item.calories)],
             )
         }
     })
@@ -229,7 +229,7 @@ export async function upsertSavedNutritionEntry(entry: NutritionEntry): Promise<
                 `INSERT INTO saved_nutrition_entry_ingredients (
                    id, saved_nutrition_entry_id, name, brand, quantity, protein, carbs, fats, calories, created_at
                  ) VALUES (uuid(), ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))`,
-                [entry.id, item.name, item.brand ?? null, sanitizeMacro(item.quantity), sanitizeMacro(item.protein), sanitizeMacro(item.carbs), sanitizeMacro(item.fats), sanitizeMacro(item.calories)],
+                [entry.id, item.name, item.brand ?? null, sanitizeQuantity(item.quantity), sanitizeExactMacro(item.protein), sanitizeExactMacro(item.carbs), sanitizeExactMacro(item.fats), sanitizeExactMacro(item.calories)],
             )
         }
     })
