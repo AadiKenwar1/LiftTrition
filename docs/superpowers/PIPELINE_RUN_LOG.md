@@ -185,6 +185,28 @@ After the rollback, EVERY remaining pending issue was gated against `docs/PRODUC
 
 ---
 
+## M7 — DONE — `fix(DONE/M7)` — 2026-07-20
+
+**Finding (audit line 90):** the Supabase session (access JWT + long-lived, bearer-equivalent refresh token) persisted in plaintext AsyncStorage — liftable via jailbreak / unencrypted backup / forensic extraction. expo-secure-store was never a dependency.
+
+**Fix (root cause):** new `lib/supabase/secureStorage.ts` — a Supabase-compatible Keychain-backed adapter (AFTER_FIRST_UNLOCK) that chunks values across `<key>.<n>` + a `<key>.count` meta (SecureStore's ~2048B cap), clears the prior chunk set on overwrite (no orphaned rotated-token fragments), and writes `.count` LAST so a mid-write crash fails safe into "no session" (re-login) not a corrupt blob. `client.ts` branches `Platform.OS` (Keychain on native, AsyncStorage on web) and folds a REQUIRED one-time legacy-session migration INTO getItem (which GoTrue awaits during init, so it can't race): on a Keychain miss it copies the legacy plaintext session into the Keychain, deletes the plaintext, and returns it — existing users keep their session, fresh installs no-op. + expo-secure-store dependency, a global jest.setup.js mock, and secureStorage.test.ts (round-trip / chunking / cleanup / overwrite-shrink).
+
+**file_review:** one simplify edit — parallelized setItem's chunk-write loop (`for await` → `Promise.all`, matching the file's own deleteChunks/getItem fan-out) while preserving the count-written-last invariant. Independently reproduced the migration across 4 scenarios (upgrade preserves session, fresh no-op, already-migrated, signed-out) — the mass-logout gate holds.
+
+**wide_review:** no edits. All 8 `supabase/client` importers use GoTrue's storage-agnostic in-memory API; none touch the auth-token key directly. Sign-out/delete route through removeItem (all chunks cleared, no residue). Web keeps AsyncStorage (expo-secure-store ships a web shim, never called). jest.setup.js mock covers all 314 client-reachable tests; the one newly-routed suite (orchestrator via Connector→client) passes. `@types/react-test-renderer` devDep is legit (clears a pre-existing TS7016 in two unsuppressed test files).
+
+**Install side-effects handled:** `npx expo install expo-secure-store` auto-added an app.json plugin entry + reformatted the file (adjudication ruled the plugin unnecessary) — reverted app.json to byte-identical; and pruned an untracked `@types/react-test-renderer` (tsc 0→9) — re-added as a proper devDependency (tsc back to 0), a durable improvement.
+
+**verify:** tsc **0**, jest **748/748** (744 + 4 new). GREEN.
+
+**FOLLOW-UPS (flagged by reviews, not fixed — outside M7's scope):**
+1. `CHUNK_SIZE=2000` slices by JS string `.length` (UTF-16 units), not UTF-8 bytes — a session with enough multi-byte chars (non-ASCII Apple ID name in `user_metadata`) near a chunk boundary could exceed SecureStore's ~2048-byte cap. Robustness follow-up.
+2. The migration getItem early-returns on a Keychain hit, so if the first migration's `AsyncStorage.removeItem` failed AFTER the Keychain `setItem` succeeded, the legacy plaintext would linger (never retried). Rare, no data-loss/logout impact.
+
+**OPS (human):** on a real EAS build, verify an over-the-top upgrade preserves the session (or forces one clean re-login) and that no `sb-*-auth-token` remains in plaintext AsyncStorage; separately confirm `expo start --web` still authenticates.
+
+---
+
 ## H9 — DONE — `fix(DONE/H9)` — 2026-07-20
 
 **Finding:** ingredient-row quantities were persisted via `sanitizeMacro` (1-decimal round): 0.25 servings → 0.3 (+20%). Stored entry totals were computed from the raw value, so items stopped reconciling with totals, and merely opening `editEntry` + tapping Save silently rewrote the meal's macros with no user edit.
