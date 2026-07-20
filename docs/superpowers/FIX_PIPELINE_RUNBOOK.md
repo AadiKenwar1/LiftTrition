@@ -10,22 +10,20 @@ implement → file_review → wide_review → verify → one atomic local commit
 fixes only — never bandaid a symptom. The run self-persists across usage-limit/session
 boundaries; the user never manually resumes.
 
-## How self-continuation works (READ THIS — it's easy to get wrong)
+## How continuation works (READ THIS — the model changed)
 
-`ScheduleWakeup` **ends the turn immediately** — nothing after it runs. Therefore it is
-the **LAST action of every turn**, called only *after* the current issue is committed.
-The cadence is **one issue per turn**:
+**Run the loop inline. No `ScheduleWakeup`.** The driver processes issues back-to-back in
+one continuous run: finish an issue (implement → review → verify → **commit**), then loop
+straight to the next pending issue. Keep going until the manifest is exhausted.
 
-> recover → pick issue → implement → review → verify → commit → **ScheduleWakeup → turn ends**
-> …the scheduled wake fires the next turn, which does the next issue.
+> recover → pick issue → implement → review → verify → **commit** → loop to next issue → … → done
 
-Do **not** schedule at the start of a turn (that ends the turn before any work). Do
-**not** try to "keep working after scheduling" — you can't. One issue, then schedule.
-
-State lives entirely in `git log` + the manifest `status`, never in conversation
-context — so each turn is independent and a compaction/limit costs nothing but the one
-in-flight (uncommitted) issue. Keeping to one issue per turn also keeps driver context
-lean (only that issue's agent summaries), which is what makes the run survivable.
+Each issue is committed **before** the next one starts, so an interruption (usage limit,
+compaction) costs at most the one in-flight uncommitted issue. State lives entirely in
+`git log` + the manifest `status`, never in conversation context — so a resume (even after
+compaction or a limit reset) just re-reads this file, the manifest, and `git log`, and
+continues from the first pending issue with no commit. **Do not schedule a wakeup**; if a
+hard limit stops the run, the user re-prompts and the loop picks up from git state.
 
 ## State model (resume truth)
 
@@ -35,7 +33,7 @@ lean (only that issue's agent summaries), which is what makes the run survivable
 - `docs/superpowers/PIPELINE_RUN_LOG.md` — one appended block per issue (summary,
   findings, discovered ops steps, failures).
 
-## Wake procedure (one issue, then schedule)
+## Loop procedure (repeat per issue until the manifest is exhausted)
 
 1. **Recover:** `git status --short`. If dirty, a prior wake died mid-issue:
    `git add -A && git stash` (parks partial work — preserved, not deleted), then treat
@@ -43,7 +41,7 @@ lean (only that issue's agent summaries), which is what makes the run survivable
 2. **Pick next issue:** first manifest row with `status:"pending"` whose id has no
    `fix(*/<ID>):` commit in `git log --oneline`.
    **None left → finalize:** write the run summary to the run log (done count,
-   needs-human list, ops checklist), call `ScheduleWakeup` with `stop:true`, report, STOP.
+   needs-human list, ops checklist), report, STOP.
 3. **Load context:**
    - Brief: `Read docs/PRODUCTION_READINESS_FIXES.txt` offset=`briefStart`,
      limit=`briefEnd - briefStart + 1`.
@@ -71,20 +69,17 @@ lean (only that issue's agent summaries), which is what makes the run survivable
    ledger; concrete, no agent/process narration). Append the run-log block, then
    `git add -A && git commit -m "fix(<BUCKET>/<ID>): <one-line summary>"`. MERGED ids keep
    the `MERGED/` prefix — the user post-hoc reviews those 6 commits.
-9. **Schedule the next turn (LAST action — ends the turn):**
-   `ScheduleWakeup(delaySeconds:60, prompt:<standing prompt below>, reason:"fix pipeline: next issue")`.
-   60s gives near-continuous cadence while guaranteeing a pending wake between turns. At a
-   usage limit the fired wake simply can't proceed and reschedules; when the window resets
-   it continues. **Do nothing after this call.**
+9. **Loop:** go straight back to step 2 for the next pending issue. Do not pause, do not
+   schedule anything. Continue until step 2 finds no pending issue and finalizes.
 
-## Standing re-entry prompt (verbatim, for every ScheduleWakeup)
+## Resume prompt (if a hard limit or compaction interrupts the run)
 
-> Continue the production-readiness fix pipeline: read docs/superpowers/FIX_PIPELINE_RUNBOOK.md and follow its Wake procedure from step 1.
+> Continue the production-readiness fix pipeline: read docs/superpowers/FIX_PIPELINE_RUNBOOK.md and follow its Loop procedure from step 1.
 
 ## Invariants
 
-- **One issue per turn**, committed before the next starts. `ScheduleWakeup` is the last
-  action, never the first.
+- **Each issue committed before the next starts.** The loop runs inline, back-to-back —
+  no `ScheduleWakeup`, no per-issue pause.
 - **Root cause only** — a fix that suppresses a symptom while the cause survives fails at
   every stage (implementer, both reviews, and repair bounces).
 - **Never commit red** (beyond the known baseline). Never weaken a test to pass.
