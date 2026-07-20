@@ -111,14 +111,13 @@ describe('Log Functions', () => {
                 expect(result[0].weight).toBe(0)
             })
 
-            test('should handle zero reps', () => {
+            test('should not add log when reps is zero (validation)', () => {
                 const { setter, getState, setState } = createMockSetter<Log>()
                 setState([])
 
                 addLog('workout-1', 'exercise-1', 'user-1', 100, 0, 8, new Date(), setter)
 
-                const result = getState()
-                expect(result[0].reps).toBe(0)
+                expect(getState()).toHaveLength(0)
             })
 
             test('should handle zero RPE', () => {
