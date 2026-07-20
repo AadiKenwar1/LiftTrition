@@ -85,3 +85,23 @@ One block per issue, appended as the pipeline runs. Newest at the bottom.
 - Edge Functions are no longer in the jest/tsc gate — validate with `deno check` / manual smoke.
 
 **Known accepted tradeoff (documented):** a per-call RC REST gate means a photo scan fans out to ~11 entitlement lookups; under an RC outage a premium user's branded enrichment silently degrades to the vision estimate (bounded, still returns a result). Webhook-synced entitlements table is the deferred follow-up if RC rate-limits prove material.
+
+---
+
+## H2 — MERGED — `fix(MERGED/H2)` — 2026-07-20  ⚠ post-hoc review target
+
+**Finding:** `lib/powersync/Connector.ts` poison-row handling wrong both ways: (a) only SQLSTATE 22/23 dead-lettered, so any other permanent error (class-42 RLS/schema-drift, PGRST204/205) retried FOREVER → whole upload queue wedged → forced-sign-out = total-queue data loss; (b) `user_exercises` (server `UNIQUE(user_id,name)`) wasn't self-healing, so a 23505 silently dropped a cross-device custom exercise.
+
+**Phase 1 — judge (this was a consolidated but UN-adjudicated brief):** the judgmental implementer ruled on all 6 decision points (adopt the `/^(22|23|42)/`+PGRST204/205 classifier with correct transient carve-outs; adopt the `CONFLICT_KEYS` map-driven consolidation; uphold rejecting the telemetry-only dissent; uphold deferring wedge-telemetry to H4; accept the bounded-loss trade-off). Two sharp corrections: (i) the derived-set design *structurally* enforces the classifier/branch invariant (can't add a natural-key table to one without the other), dissolving the brief's commit-coupling worry; (ii) the brief's "existing PUT/PATCH tests as behavior guards" was wrong — those are the pre-existing baseline failures (mocks lack `.select`), so it added 4 properly-mocked settings/weight_progress guards instead.
+
+**Fix (root cause):** one `Connector.ts` change — broaden `isNonRetryableUploadError` (dead-letter 22/23/42 + PGRST204/205; keep PGRST301 + 08/40/53/57/58 + codeless errors retrying) and replace the hand-duplicated `settings`/`weight_progress` branches + `SELF_HEALING_CONFLICT_TABLES` literal with `CONFLICT_KEYS = {settings:[user_id], weight_progress:[user_id,date], user_exercises:[user_id,name]}`, the set derived from it, and one generic natural-key check-then-update-else-insert. +18 tests.
+
+**file_review:** simplified (collapsed two duplicated `.eq()`-chaining loops into one `filterByConflictKeys` closure); empirically verified behavior preservation (swapped pre-fix code), both classifier directions, the `.every(k=>record[k])` guard vs old truthy checks, and that new tests fail on old code.
+
+**wide_review:** no edits. **`CONFLICT_KEYS` is complete** — the only 3 schema `UNIQUE` constraints are all covered, so no other table has the silent-drop bug. Verified `user_exercises` write path end-to-end, sole-implementation, and queue-advance semantics.
+
+**verify:** Jest 6/10 = baseline (connector's 3 failures are the exact pre-existing ones), +18 new tests pass (656 total). tsc 5 = app-surface baseline (0 in powersync). GREEN.
+
+**OPS CHECKLIST (human — DEPLOY ORDERING, now safety-critical):** the widened dead-letter set converts "retry-forever wedge" into "bounded single-row drop" for un-applied additive migrations. Apply these in Supabase **before/with** the build that ships H2, or brand-bearing ingredient rows / settings-flag writes will silently dead-letter: `ingredient_brand.sql` (brand col), `settings_goal_intent_flags.sql` (macros_customized / goal_overshoot_acknowledged), `nutrition_calories_real.sql`. (This is the intended trade-off — the fix is the safety net, deploy-order discipline is the real guard.)
+
+**FOLLOW-UP (pre-existing, NOT introduced by H2, logged not fixed):** PATCH ops on check-then-insert tables route through `updateRecord` by `id` only (`Connector.ts:232`); after a cross-device natural-key collision the loser's local `id` ≠ the surviving server row's `id`, so a later edit PATCHes 0 rows silently. Affects `weight_progress` and now `user_exercises` (`settings` has a session-lookup workaround). Own fix = route these tables' PATCH through natural-key resolution.

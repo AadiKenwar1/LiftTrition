@@ -42,6 +42,24 @@ const mockDatabase = {
     getNextCrudTransaction: jest.fn(),
 } as unknown as AbstractPowerSyncDatabase
 
+// Build a Supabase-client stub for one natural-key conflict table: select(...).eq(...).single()
+// resolves to `existing`, while update/insert/upsert record their args and report no error.
+function mockConflictTable(existing: { id: string } | null) {
+    const single = jest.fn().mockResolvedValue({ data: existing })
+    const selectBuilder: any = { single }
+    selectBuilder.eq = jest.fn(() => selectBuilder)
+    const select = jest.fn(() => selectBuilder)
+
+    const updateBuilder: any = { error: null }
+    updateBuilder.eq = jest.fn(() => updateBuilder)
+    const update = jest.fn(() => updateBuilder)
+
+    const insert = jest.fn().mockReturnValue({ error: null })
+    const upsert = jest.fn().mockReturnValue({ error: null })
+
+    return { from: { select, update, insert, upsert }, select, selectBuilder, update, updateBuilder, insert, upsert }
+}
+
 describe('Connector', () => {
     let connector: Connector
 
@@ -413,6 +431,235 @@ describe('Connector', () => {
             await expect(connector.uploadData(mockDatabase)).rejects.toEqual(mockError)
             expect(mockTransaction.complete).not.toHaveBeenCalled()
             expect(Sentry.captureException).not.toHaveBeenCalled()
+        })
+
+        // ---- H2(a): every permanent rejection class must dead-letter, not wedge the queue forever ----
+        it.each([
+            ['42501 insufficient_privilege (RLS denial)', '42501'],
+            ['42P01 undefined_table', '42P01'],
+            ['42703 undefined_column (schema drift, ingredient_brand scenario)', '42703'],
+            ['PGRST204 schema-cache column miss', 'PGRST204'],
+            ['PGRST205 schema-cache table miss', 'PGRST205'],
+        ])('should dead-letter and complete on permanent error %s', async (_label, code) => {
+            const mockTransaction = {
+                crud: [
+                    { op: UpdateType.DELETE, table: 'workouts', id: 'test-id-1', opData: {} },
+                ],
+                complete: jest.fn().mockResolvedValue(undefined),
+            }
+
+            ;(mockDatabase.getNextCrudTransaction as jest.Mock).mockResolvedValue(mockTransaction)
+
+            const mockError = { message: `permanent ${code}`, code }
+            const mockEq = jest.fn().mockReturnValue({ error: mockError })
+            ;(supabase.from as jest.Mock).mockReturnValue({ delete: jest.fn().mockReturnValue({ eq: mockEq }) })
+
+            await connector.uploadData(mockDatabase)
+
+            expect(Sentry.captureException).toHaveBeenCalledTimes(1)
+            expect(Sentry.captureException).toHaveBeenCalledWith(
+                mockError,
+                {
+                    tags: { area: 'powersync-dead-letter' },
+                    extra: { table: 'workouts', opType: UpdateType.DELETE, opId: 'test-id-1' },
+                }
+            )
+            expect(mockTransaction.complete).toHaveBeenCalledTimes(1)
+        })
+
+        // ---- H2(a) boundary: transient classes must keep re-throwing so PowerSync retries ----
+        it.each([
+            ['40001 serialization_failure', '40001'],
+            ['40P01 deadlock_detected', '40P01'],
+            ['08006 connection_failure', '08006'],
+            ['53300 too_many_connections', '53300'],
+            ['57014 query_canceled', '57014'],
+            ['58030 io_error', '58030'],
+        ])('should rethrow without completing on transient error %s', async (_label, code) => {
+            const mockTransaction = {
+                crud: [
+                    { op: UpdateType.DELETE, table: 'workouts', id: 'test-id-1', opData: {} },
+                ],
+                complete: jest.fn(),
+            }
+
+            ;(mockDatabase.getNextCrudTransaction as jest.Mock).mockResolvedValue(mockTransaction)
+
+            const mockError = { message: `transient ${code}`, code }
+            const mockEq = jest.fn().mockReturnValue({ error: mockError })
+            ;(supabase.from as jest.Mock).mockReturnValue({ delete: jest.fn().mockReturnValue({ eq: mockEq }) })
+
+            await expect(connector.uploadData(mockDatabase)).rejects.toEqual(mockError)
+            expect(mockTransaction.complete).not.toHaveBeenCalled()
+            expect(Sentry.captureException).not.toHaveBeenCalled()
+        })
+
+        // ---- H2(b): user_exercises has UNIQUE(user_id,name), so its 23505 must self-heal, not drop ----
+        it('should rethrow (self-heal) and not complete transaction on 23505 for the user_exercises table', async () => {
+            const mockTransaction = {
+                crud: [
+                    { op: UpdateType.DELETE, table: 'user_exercises', id: 'test-id-1', opData: {} },
+                ],
+                complete: jest.fn(),
+            }
+
+            ;(mockDatabase.getNextCrudTransaction as jest.Mock).mockResolvedValue(mockTransaction)
+
+            const mockError = { message: 'duplicate key value violates unique constraint', code: '23505' }
+            const mockEq = jest.fn().mockReturnValue({ error: mockError })
+            ;(supabase.from as jest.Mock).mockReturnValue({ delete: jest.fn().mockReturnValue({ eq: mockEq }) })
+
+            await expect(connector.uploadData(mockDatabase)).rejects.toEqual(mockError)
+            expect(mockTransaction.complete).not.toHaveBeenCalled()
+            expect(Sentry.captureException).not.toHaveBeenCalled()
+        })
+
+        // ---- H2(b): user_exercises PUT now takes the natural-key (user_id,name) conflict path ----
+        it('createRecord: user_exercises PUT updates by (user_id, name) when a server row exists (id stripped)', async () => {
+            const mockTransaction = {
+                crud: [
+                    {
+                        op: UpdateType.PUT,
+                        table: 'user_exercises',
+                        id: 'local-uuid',
+                        opData: { user_id: 'user-1', name: 'My Curl', accessory_muscles: '["forearms"]' },
+                    },
+                ],
+                complete: jest.fn().mockResolvedValue(undefined),
+            }
+
+            ;(mockDatabase.getNextCrudTransaction as jest.Mock).mockResolvedValue(mockTransaction)
+
+            const m = mockConflictTable({ id: 'server-uuid' })
+            ;(supabase.from as jest.Mock).mockReturnValue(m.from)
+
+            await connector.uploadData(mockDatabase)
+
+            expect(supabase.from).toHaveBeenCalledWith('user_exercises')
+            expect(m.select).toHaveBeenCalledWith('id')
+            expect(m.selectBuilder.eq).toHaveBeenCalledWith('user_id', 'user-1')
+            expect(m.selectBuilder.eq).toHaveBeenCalledWith('name', 'My Curl')
+            // id stripped; accessory_muscles converted from JSON string to array by prepareRecordForSupabase
+            expect(m.update).toHaveBeenCalledWith({ user_id: 'user-1', name: 'My Curl', accessory_muscles: ['forearms'] })
+            expect(m.updateBuilder.eq).toHaveBeenCalledWith('user_id', 'user-1')
+            expect(m.updateBuilder.eq).toHaveBeenCalledWith('name', 'My Curl')
+            expect(m.insert).not.toHaveBeenCalled()
+            expect(mockTransaction.complete).toHaveBeenCalledTimes(1)
+        })
+
+        it('createRecord: user_exercises PUT inserts (with id) when no server row exists', async () => {
+            const mockTransaction = {
+                crud: [
+                    {
+                        op: UpdateType.PUT,
+                        table: 'user_exercises',
+                        id: 'local-uuid',
+                        opData: { user_id: 'user-1', name: 'My Curl', accessory_muscles: '["forearms"]' },
+                    },
+                ],
+                complete: jest.fn().mockResolvedValue(undefined),
+            }
+
+            ;(mockDatabase.getNextCrudTransaction as jest.Mock).mockResolvedValue(mockTransaction)
+
+            const m = mockConflictTable(null)
+            ;(supabase.from as jest.Mock).mockReturnValue(m.from)
+
+            await connector.uploadData(mockDatabase)
+
+            expect(m.selectBuilder.eq).toHaveBeenCalledWith('user_id', 'user-1')
+            expect(m.selectBuilder.eq).toHaveBeenCalledWith('name', 'My Curl')
+            expect(m.insert).toHaveBeenCalledWith({ id: 'local-uuid', user_id: 'user-1', name: 'My Curl', accessory_muscles: ['forearms'] })
+            expect(m.update).not.toHaveBeenCalled()
+            expect(mockTransaction.complete).toHaveBeenCalledTimes(1)
+        })
+
+        // ---- Behavior-preservation guards: settings/weight_progress conflict path unchanged post-refactor ----
+        it('createRecord: settings PUT updates by user_id when a row exists (id stripped)', async () => {
+            const mockTransaction = {
+                crud: [
+                    { op: UpdateType.PUT, table: 'settings', id: 'local-uuid', opData: { user_id: 'user-1', body_weight: 70.5 } },
+                ],
+                complete: jest.fn().mockResolvedValue(undefined),
+            }
+
+            ;(mockDatabase.getNextCrudTransaction as jest.Mock).mockResolvedValue(mockTransaction)
+
+            const m = mockConflictTable({ id: 'server-uuid' })
+            ;(supabase.from as jest.Mock).mockReturnValue(m.from)
+
+            await connector.uploadData(mockDatabase)
+
+            expect(m.select).toHaveBeenCalledWith('id')
+            expect(m.selectBuilder.eq).toHaveBeenCalledWith('user_id', 'user-1')
+            expect(m.update).toHaveBeenCalledWith({ user_id: 'user-1', body_weight: 70.5 })
+            expect(m.updateBuilder.eq).toHaveBeenCalledWith('user_id', 'user-1')
+            expect(m.insert).not.toHaveBeenCalled()
+            expect(mockTransaction.complete).toHaveBeenCalledTimes(1)
+        })
+
+        it('createRecord: settings PUT inserts (with id) when no row exists', async () => {
+            const mockTransaction = {
+                crud: [
+                    { op: UpdateType.PUT, table: 'settings', id: 'local-uuid', opData: { user_id: 'user-1', body_weight: 70.5 } },
+                ],
+                complete: jest.fn().mockResolvedValue(undefined),
+            }
+
+            ;(mockDatabase.getNextCrudTransaction as jest.Mock).mockResolvedValue(mockTransaction)
+
+            const m = mockConflictTable(null)
+            ;(supabase.from as jest.Mock).mockReturnValue(m.from)
+
+            await connector.uploadData(mockDatabase)
+
+            expect(m.insert).toHaveBeenCalledWith({ id: 'local-uuid', user_id: 'user-1', body_weight: 70.5 })
+            expect(m.update).not.toHaveBeenCalled()
+            expect(mockTransaction.complete).toHaveBeenCalledTimes(1)
+        })
+
+        it('createRecord: weight_progress PUT updates by (user_id, date) when a row exists (id stripped)', async () => {
+            const mockTransaction = {
+                crud: [
+                    { op: UpdateType.PUT, table: 'weight_progress', id: 'local-uuid', opData: { user_id: 'user-1', date: '2026-07-20', weight: 70.5 } },
+                ],
+                complete: jest.fn().mockResolvedValue(undefined),
+            }
+
+            ;(mockDatabase.getNextCrudTransaction as jest.Mock).mockResolvedValue(mockTransaction)
+
+            const m = mockConflictTable({ id: 'server-uuid' })
+            ;(supabase.from as jest.Mock).mockReturnValue(m.from)
+
+            await connector.uploadData(mockDatabase)
+
+            expect(m.selectBuilder.eq).toHaveBeenCalledWith('user_id', 'user-1')
+            expect(m.selectBuilder.eq).toHaveBeenCalledWith('date', '2026-07-20')
+            expect(m.update).toHaveBeenCalledWith({ user_id: 'user-1', date: '2026-07-20', weight: 70.5 })
+            expect(m.updateBuilder.eq).toHaveBeenCalledWith('user_id', 'user-1')
+            expect(m.updateBuilder.eq).toHaveBeenCalledWith('date', '2026-07-20')
+            expect(m.insert).not.toHaveBeenCalled()
+            expect(mockTransaction.complete).toHaveBeenCalledTimes(1)
+        })
+
+        it('createRecord: weight_progress PUT inserts (with id) when no row exists', async () => {
+            const mockTransaction = {
+                crud: [
+                    { op: UpdateType.PUT, table: 'weight_progress', id: 'local-uuid', opData: { user_id: 'user-1', date: '2026-07-20', weight: 70.5 } },
+                ],
+                complete: jest.fn().mockResolvedValue(undefined),
+            }
+
+            ;(mockDatabase.getNextCrudTransaction as jest.Mock).mockResolvedValue(mockTransaction)
+
+            const m = mockConflictTable(null)
+            ;(supabase.from as jest.Mock).mockReturnValue(m.from)
+
+            await connector.uploadData(mockDatabase)
+
+            expect(m.insert).toHaveBeenCalledWith({ id: 'local-uuid', user_id: 'user-1', date: '2026-07-20', weight: 70.5 })
+            expect(m.update).not.toHaveBeenCalled()
+            expect(mockTransaction.complete).toHaveBeenCalledTimes(1)
         })
     })
 })

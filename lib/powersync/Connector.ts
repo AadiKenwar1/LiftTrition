@@ -3,18 +3,35 @@ import { supabase } from '@/lib/supabase/client';
 import { AbstractPowerSyncDatabase, PowerSyncBackendConnector, UpdateType } from '@powersync/react-native';
 import * as Sentry from '@sentry/react-native';
 
-// settings and weight_progress use check-then-insert (select existing -> update, else insert).
-// Two devices racing can both pass the check; the loser gets a 23505 unique violation that
-// heals itself if retried (the retry takes the "existing -> update" branch). So on these two
-// tables 23505 must stay retryable, unlike everywhere else it's dead-lettered.
-const SELF_HEALING_CONFLICT_TABLES = new Set(['settings', 'weight_progress']);
+// Natural-key UNIQUE constraints per table (columns other than the primary key `id`).
+// These tables use check-then-insert (select existing -> update, else insert) because PowerSync
+// mints a fresh id per device, so a primary-key upsert can't resolve a same-natural-key collision.
+// Two devices racing can both pass the check; the loser gets a 23505 that heals itself on retry
+// (the retry takes the "existing -> update" branch), so on these tables 23505 must stay retryable.
+// SELF_HEALING_CONFLICT_TABLES is DERIVED from this map so a natural-key table can never be added
+// to the conflict branch without also being made self-healing (and vice versa) - the drift that
+// left user_exercises silently dropping cross-device duplicate-named custom exercises.
+const CONFLICT_KEYS: Record<string, string[]> = {
+  settings: ['user_id'],
+  weight_progress: ['user_id', 'date'],
+  user_exercises: ['user_id', 'name'],
+};
+const SELF_HEALING_CONFLICT_TABLES = new Set(Object.keys(CONFLICT_KEYS));
 
-// Postgres SQLSTATE classes 22 (data exception) and 23 (integrity constraint violation) are
-// permanent rejections - retrying the same op will never succeed, so these are dead-lettered
-// instead of blocking the rest of the upload queue forever.
+// Classify a Supabase upload rejection as permanently non-retryable (dead-letter) vs transient (retry).
+// Permanent: SQLSTATE classes 22 (data exception), 23 (integrity constraint) and 42 (access rule /
+// undefined table / undefined column - RLS denial + schema drift), plus PostgREST schema-cache
+// misses PGRST204/PGRST205. Everything else must keep re-throwing so PowerSync retries: JWT-expired
+// (PGRST301), connection/serialization/resource classes 08/40/53/57/58, and codeless network errors
+// (non-string code). Dead-lettering permanent errors stops one poison row from wedging the entire
+// upload queue forever (which times out sign-out and forces total-queue data loss).
 function isNonRetryableUploadError(error: unknown, table: string): boolean {
   const code = (error as { code?: unknown })?.code;
-  if (typeof code !== 'string' || !/^2[23]/.test(code)) {
+  if (typeof code !== 'string') {
+    return false;
+  }
+  const isPermanent = /^(22|23|42)/.test(code) || code === 'PGRST204' || code === 'PGRST205';
+  if (!isPermanent) {
     return false;
   }
   if (code === '23505' && SELF_HEALING_CONFLICT_TABLES.has(table)) {
@@ -121,61 +138,32 @@ export class Connector implements PowerSyncBackendConnector {
     await transaction.complete();
   }
 
+  // Create a record in Supabase, resolving natural-key conflicts (CONFLICT_KEYS) before the generic PK upsert.
   private async createRecord(table: string, record: any) {
-    // Handle tables with unique constraints on non-primary-key columns
-    // These tables need special handling because PowerSync generates new IDs
-    // but Supabase has unique constraints on other columns
-    
-    if (table === 'settings' && record.user_id) {
-      // Settings has UNIQUE constraint on user_id
-      const { data: existing } = await supabase
-        .from(table)
-        .select('id')
-        .eq('user_id', record.user_id)
-        .single();
-      
+    // Tables with a natural-key UNIQUE constraint can't rely on a primary-key upsert: PowerSync
+    // mints a fresh id per device, so two devices creating the "same" row produce different ids.
+    // Select the existing row by its natural key, then update it (discarding the local id) if it
+    // exists, else insert. Every other table uses the generic PK upsert below. Driven by
+    // CONFLICT_KEYS so settings, weight_progress, and user_exercises share one code path.
+    const conflictKeys = CONFLICT_KEYS[table];
+    if (conflictKeys && conflictKeys.every((key) => record[key])) {
+      // Chain one .eq() filter per conflict-key column onto a query builder.
+      const filterByConflictKeys = (query: any) => conflictKeys.reduce((q, key) => q.eq(key, record[key]), query);
+
+      const { data: existing } = await filterByConflictKeys(supabase.from(table).select('id')).single();
+
       if (existing) {
-        // Update existing record (ignore the new id from PowerSync, use existing id)
+        // Update existing record (ignore the new id from PowerSync, use the existing row's id)
         const { id, ...updateData } = record;
-        const { error } = await supabase
-          .from(table)
-          .update(updateData)
-          .eq('user_id', record.user_id);
-        
+        const { error } = await filterByConflictKeys(supabase.from(table).update(updateData));
+
         if (error) throw error;
       } else {
         // Insert new record
         const { error } = await supabase
           .from(table)
           .insert(record);
-        
-        if (error) throw error;
-      }
-    } else if (table === 'weight_progress' && record.user_id && record.date) {
-      // Weight progress has UNIQUE constraint on (user_id, date)
-      const { data: existing } = await supabase
-        .from(table)
-        .select('id')
-        .eq('user_id', record.user_id)
-        .eq('date', record.date)
-        .single();
-      
-      if (existing) {
-        // Update existing record
-        const { id, ...updateData } = record;
-        const { error } = await supabase
-          .from(table)
-          .update(updateData)
-          .eq('user_id', record.user_id)
-          .eq('date', record.date);
-        
-        if (error) throw error;
-      } else {
-        // Insert new record
-        const { error } = await supabase
-          .from(table)
-          .insert(record);
-        
+
         if (error) throw error;
       }
     } else {
@@ -183,7 +171,7 @@ export class Connector implements PowerSyncBackendConnector {
       const { error } = await supabase
         .from(table)
         .upsert(record);
-      
+
       if (error) throw error;
     }
   }
