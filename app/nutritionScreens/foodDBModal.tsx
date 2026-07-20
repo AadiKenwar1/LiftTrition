@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext'
 import { useBilling } from '@/context/BillingContext'
 import { useNutrition } from '@/context/NutritionContext'
 import { buildEntryFromItems, foodItemToItem, resolveCombinedName } from '@/context/NutritionContext/functions/entryBuilders'
+import { sumItems } from '@/context/NutritionContext/functions/items'
 import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { FOOD_SEARCH_PREMIUM_MESSAGE, FOOD_SEARCH_QUOTA_MESSAGE, getFoodItem, getFoodSearchResults } from '@/lib/foodDB/foodDB'
 import { parseFoodDescription } from '@/lib/foodDB/parseFoodDescription'
@@ -266,6 +267,8 @@ export default function FoodDBModal() {
                         <StagedSection label="Added" count={addedItems.length} color={colors.nutrition} combineItems={combineItems} onCombineItemsChange={setCombineItems} combineName={combineName} onCombineNameChange={onCombineNameChange}>
                             {addedItems.map((item) => {
                                 const q = item.quantity || 1
+                                // Route the staged preview through sumItems (single owner of item math) so it can't drift from the committed totals' rounding.
+                                const totals = sumItems([foodItemToItem(item, q)])
                                 return (
                                     <View key={item.id} style={styles.stagedRow}>
                                         <View style={styles.stagedInfo}>
@@ -277,16 +280,16 @@ export default function FoodDBModal() {
                                             </Text>
                                             <View style={styles.macroRow}>
                                                 <View style={styles.macroPill}>
-                                                    <Text style={styles.macroPillText}>{Math.round(item.calories * q)} kcal</Text>
+                                                    <Text style={styles.macroPillText}>{totals.calories} kcal</Text>
                                                 </View>
                                                 <View style={styles.macroPill}>
-                                                    <Text style={styles.macroPillText}>{Math.round(item.fats * q * 10) / 10}g F</Text>
+                                                    <Text style={styles.macroPillText}>{totals.fats}g F</Text>
                                                 </View>
                                                 <View style={styles.macroPill}>
-                                                    <Text style={styles.macroPillText}>{Math.round(item.carbs * q * 10) / 10}g C</Text>
+                                                    <Text style={styles.macroPillText}>{totals.carbs}g C</Text>
                                                 </View>
                                                 <View style={styles.macroPill}>
-                                                    <Text style={styles.macroPillText}>{Math.round(item.protein * q * 10) / 10}g P</Text>
+                                                    <Text style={styles.macroPillText}>{totals.protein}g P</Text>
                                                 </View>
                                             </View>
                                         </View>

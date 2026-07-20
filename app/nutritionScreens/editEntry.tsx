@@ -3,6 +3,7 @@ import { applyEdits, itemsForEntry } from '@/context/NutritionContext/functions/
 import { sumItems } from '@/context/NutritionContext/functions/items'
 import { Item, NutritionEntry } from '@/context/NutritionContext/types'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
+import { useSubmitOnce } from '@/lib/hooks/useSubmitOnce'
 import { parseNumericInput } from '@/lib/utils/number'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useLocalSearchParams, useRouter } from 'expo-router'
@@ -65,6 +66,21 @@ function qtyValue(s: string): number {
     return parseNumericInput(s) ?? 1
 }
 
+// Parse the serialized entry route param into an entry, or null when it's malformed — a corrupt/deep-linked param must back out, not red-screen the app.
+function parseEntryParam(entryStr: string): NutritionEntry | null {
+    try {
+        const raw = JSON.parse(entryStr)
+        return {
+            ...raw,
+            date: new Date(raw.date),
+            createdAt: new Date(raw.createdAt),
+            updatedAt: new Date(raw.updatedAt),
+        }
+    } catch {
+        return null
+    }
+}
+
 // Full-screen editor for an existing nutrition entry and its items.
 export default function EditEntry() {
     const router = useRouter()
@@ -72,6 +88,7 @@ export default function EditEntry() {
     const { handleEditNutrition } = useNutrition()
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
+    const [guardSubmit, submitting] = useSubmitOnce()
 
     const entryStr = typeof entryParam === 'string' ? entryParam : entryParam?.[0]
     if (!entryStr) {
@@ -79,17 +96,20 @@ export default function EditEntry() {
         return null
     }
 
-    const raw = JSON.parse(entryStr)
-    const parsedEntry: NutritionEntry = {
-        ...raw,
-        date: new Date(raw.date),
-        createdAt: new Date(raw.createdAt),
-        updatedAt: new Date(raw.updatedAt),
+    const parsedEntry = parseEntryParam(entryStr)
+    if (!parsedEntry) {
+        router.back()
+        return null
     }
 
-    const [name, setName] = useState(parsedEntry.name)
+    // Non-null alias for the post-guard body. TS control-flow narrowing from the
+    // null check above does NOT reach into the hoisted handleSave declaration, so
+    // bind a const whose DECLARED type is non-null for its closure to capture.
+    const entry = parsedEntry
+
+    const [name, setName] = useState(entry.name)
     const [focused, setFocused] = useState<string | null>(null)
-    const [rows, setRows] = useState<DraftItem[]>(() => itemsForEntry(parsedEntry).map(toDraft))
+    const [rows, setRows] = useState<DraftItem[]>(() => itemsForEntry(entry).map(toDraft))
 
     const totals = sumItems(rows.map(toItem))
 
@@ -126,10 +146,12 @@ export default function EditEntry() {
         setRows((prev) => prev.filter((r) => r.key !== key))
     }
 
-    // Persist edits and close the editor.
+    // Persist edits and close the editor; the guard drops a double-tap during the close animation (avoids a double write / double pop).
     function handleSave() {
-        handleEditNutrition(parsedEntry.id, applyEdits(parsedEntry, name, rows.map(toItem)))
-        router.back()
+        guardSubmit(() => {
+            handleEditNutrition(entry.id, applyEdits(entry, name, rows.map(toItem)))
+            router.back()
+        })()
     }
 
     return (
@@ -253,7 +275,7 @@ export default function EditEntry() {
                     </View>
                 </View>
 
-                <TouchableOpacity onPress={handleSave} activeOpacity={0.85} style={styles.saveWrap}>
+                <TouchableOpacity onPress={handleSave} disabled={submitting} activeOpacity={0.85} style={[styles.saveWrap, submitting && styles.saveDisabled]}>
                     <LinearGradient colors={colors.nutritionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.save}>
                         <Text style={styles.saveText}>Save changes</Text>
                     </LinearGradient>
@@ -300,6 +322,7 @@ function makeStyles(colors: Colors) {
         totalLabel: { fontSize: 11, color: colors.nutrition, textTransform: 'uppercase', letterSpacing: 0.5, marginTop: 18, marginBottom: 8, marginLeft: 2, fontFamily: fonts.semibold },
         totalCard: { borderColor: colors.nutrition },
         saveWrap: { borderRadius: 12, overflow: 'hidden', marginTop: 20, shadowColor: colors.nutrition, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.35, shadowRadius: 8, elevation: 6 },
+        saveDisabled: { opacity: 0.4 },
         save: { paddingVertical: 16, alignItems: 'center', justifyContent: 'center' },
         saveText: { fontSize: 16, color: '#FFF', letterSpacing: -0.4, fontFamily: fonts.semibold },
     })

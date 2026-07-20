@@ -1,6 +1,7 @@
 import { useAuth } from '@/context/AuthContext'
 import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { useWorkout } from '@/context/WorkoutContext'
+import { isWorkoutNameTaken } from '@/context/WorkoutContext/functions/nameCheck'
 import { useSubmitOnce } from '@/lib/hooks/useSubmitOnce'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
@@ -24,7 +25,7 @@ export default function AddWorkoutModal() {
 
     const handleCreateWorkout = () => {
         const trimmed = workoutName.trim()
-        const alreadyExists = workouts.some((w) => !w.archived && w.name.trim().toLowerCase() === trimmed.toLowerCase())
+        const alreadyExists = isWorkoutNameTaken(workouts, trimmed)
         if (alreadyExists) {
             // Stays on screen — don't consume the submit guard, so the user can fix the name and retry.
             Alert.alert('Workout Name Taken', `A workout named '${trimmed}' already exists. Please choose a different name.`)

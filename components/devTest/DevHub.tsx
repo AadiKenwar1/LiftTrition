@@ -45,6 +45,7 @@ const GROUPS: { title: string; items: { label: string; route: string }[] }[] = [
             { label: 'Goal Reached — UI (Issue 8)', route: '/devTest/goalReached' },
             { label: 'Goal Reached — Logic Sim (Issue 8)', route: '/devTest/goalReachedSim' },
             { label: 'Edit Entry — Unified editor', route: '/devTest/editEntry' },
+            { label: 'Rename Workout — Double-tap guard', route: '/devTest/renameModal' },
             { label: 'Color Hue Review', route: '/devTest/colorHue' },
             { label: 'Number Parsing (F1)', route: '/devTest/numberParsing' },
             { label: 'Log History — delete (Issues 9+12)', route: '/devTest/logHistory' },

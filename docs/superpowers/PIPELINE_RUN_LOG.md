@@ -167,3 +167,23 @@ One block per issue, appended as the pipeline runs. Newest at the bottom.
 **wide_review:** fixed a **real H9-caused display regression** — `editEntry.tsx`'s `toDraft` rendered per-item values via raw `String()`, so an H9-preserved float artifact (e.g. `0.30000000000000004` from chained `scaleItems`) would show as noise in the edit inputs. Added a render-site `toInputString` (rounds display to 6 decimals; does NOT touch the stored value, so H9 isn't reintroduced). Confirmed only 191/232 persist item rows, no double-round, no equality/dedup or mixed-precision-assertion regression.
 
 **verify:** Jest 6/10 = baseline, +13 new tests (702 total), `editEntry.test.tsx` still green. tsc 4 = baseline. GREEN.
+
+---
+
+## H15 — MERGED — `fix(MERGED/H15)` — 2026-07-20  ⚠ post-hoc review target
+
+**Finding:** "add/edit" modal twins hardened one side only: `addWorkoutModal` got `useSubmitOnce`, its ~95%-identical `renameModal` didn't (double-tap → double rename + double `router.back` pop); `editEntry`'s Save was likewise unguarded, and its route-param `JSON.parse` was unguarded (red-screen crash on a malformed/deep-linked param); the staged macro pills in `foodDBModal`/`savedNutritionModal` hand-rolled item math against the "single owner of rounding" contract in `items.ts`; the workout duplicate-name check was tripled.
+
+**Phase 1 — judge (consolidated, un-adjudicated, flagged authored-while-classifier-down):** the judgmental implementer **caught a real defect in the brief's safety-critical claim.** The brief said the saved-meal pill swap to `sumItems(scaleItems(itemsForEntry(s),q))` reproduces the current display exactly and that `q·round(x) == round(q·x)` — FALSE for multi-item meals at fractional q (it re-sums unrounded per-item macros: 376 vs 378 kcal, 35.1 vs 35.3 g P at q=2.5). Reconciled to route the pill through `sumItems` over a single item carrying the entry's already-rounded stored totals scaled by q — pixel-identical today AND single-owner routing. Upheld: Tier-1/Tier-2 split (defer the 200-line state-machine extraction), guard ordering (name-taken Alert before `guardSubmit` so a rejected name doesn't consume the lock), the `parseEntryParam` crash guard, and `isWorkoutNameTaken` verbatim parity.
+
+**Fix (root cause, Tier-1):** `useSubmitOnce` on `renameModal` + `editEntry` commit paths; `parseEntryParam` try/catch (`router.back()` on malformed JSON); both staged pills routed through `sumItems`; `isWorkoutNameTaken` extracted to `context/WorkoutContext/functions/nameCheck.ts` (both call sites migrated). + DevHub scaffolding (RenameModalTest + stub + `_layout` Stack.Screen + DevHub entry; EditEntryTest gained a corrupt-JSON scenario) + 4 test suites (24 tests). All file drift handled (editEntry H9, foodDBModal C1/H1, `_layout` C4/H4).
+
+**file_review:** no edits; hand-computed the saved-meal pill parity (`Math.round(151·2.5)=378` matches old vs the brief's 377), verified guards/hook-order/name-check parity and that all prior fixes are intact.
+
+**wide_review:** no edits. Verified H15 internals (pill fields un-transposed, second-tap is a true no-op, `useSubmitOnce` reset sound). **Twin sweep found 3 MORE unhardened commit paths** (below).
+
+**repair (1 bounce):** tsc flagged a null-narrowing gap — `parseEntryParam` returns `NutritionEntry | null` and TS doesn't carry the component-body guard's narrowing into `handleSave`'s closure. Fixed at the root (`const entry = parsedEntry` after the guard, used in the closure), no type weakening.
+
+**verify:** Jest 6/10 = baseline, +21 new tests (723 total). tsc 4 = baseline (0 in editEntry after repair). GREEN.
+
+**FOLLOW-UP (launch-relevant, same bug class, OUT of H15's scope — its own issue):** wide_review found **3 more unguarded mutation-then-`router.back()` modals** that double-write/double-pop on a fast double-tap: `app/nutritionScreens/updateBWModal.tsx:63` (weigh-in), `app/settingsScreens/adjustMeasurements.tsx:25`, `app/settingsScreens/adjustTraining.tsx:34` (non-custom path). Each needs the identical `useSubmitOnce` wrap. Also systemic-but-milder: every onboarding step commits via `OnboardingScaffold` `onNext` without a guard (double-*push*, forward-nav) — one guard on the scaffold Next button covers all. `paywall.tsx` (the real onboarding-complete commit) is already guarded.

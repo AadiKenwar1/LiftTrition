@@ -222,6 +222,7 @@ function StackLayout() {
                     <Stack.Screen name="devTest/colorHue" options={{ headerShown: true, title: 'Color Hue Review', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/numberParsing" options={{ headerShown: true, title: 'Number Parsing', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/editEntry" options={{ headerShown: true, title: 'Edit Entry — Test', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="devTest/renameModal" options={{ headerShown: true, title: 'Rename — Double-tap', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/suggestSet" options={{ headerShown: true, title: 'Suggest Set', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/addNutrition" options={{ headerShown: true, title: 'Add Nutrition', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/addNutritionVariant" options={{ ...modalPresentation, headerShown: false }} />

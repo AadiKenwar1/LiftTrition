@@ -1,9 +1,10 @@
 import { ThemeProvider } from '@/context/ThemeContext'
-import { Text, TextInput } from 'react-native'
+import { Text, TextInput, TouchableOpacity } from 'react-native'
 import { act, create } from 'react-test-renderer'
 
 // Router params/actions are injected per-test via these mutable fns
 const mockBack = jest.fn()
+const mockEditNutrition = jest.fn()
 let mockParams: { entry?: string } = {}
 
 jest.mock('expo-router', () => ({
@@ -12,7 +13,7 @@ jest.mock('expo-router', () => ({
 }))
 
 jest.mock('@/context/NutritionContext', () => ({
-    useNutrition: () => ({ handleEditNutrition: jest.fn() }),
+    useNutrition: () => ({ handleEditNutrition: mockEditNutrition }),
 }))
 
 // Build a serialized entry param the way the app passes it through the router
@@ -78,5 +79,24 @@ describe('EditEntry', () => {
         const tree = renderScreen(entryParam([{ name: 'Banana', brand: null, ...baseMacros }], 'My Snack'))
         const nameNodes = tree.root.findAllByType(Text).filter((n: { props: { children?: unknown; numberOfLines?: number } }) => n.props.children === 'My Snack' && n.props.numberOfLines === 2)
         expect(nameNodes).toHaveLength(1)
+    })
+
+    it('saves + pops exactly once on a rapid double-tap of Save', async () => {
+        const tree = renderScreen(entryParam([{ name: 'Banana', brand: null, ...baseMacros }], 'My Snack'))
+        // The Save CTA is the only TouchableOpacity with activeOpacity 0.85.
+        const saveBtn = tree.root.findAllByType(TouchableOpacity).find((n: { props: { activeOpacity?: number } }) => n.props.activeOpacity === 0.85)!
+
+        await act(async () => {
+            saveBtn.props.onPress()
+            saveBtn.props.onPress()
+        })
+
+        expect(mockEditNutrition).toHaveBeenCalledTimes(1)
+        expect(mockBack).toHaveBeenCalledTimes(1)
+    })
+
+    it('backs out without crashing on a malformed entry param', () => {
+        expect(() => renderScreen('not-json')).not.toThrow()
+        expect(mockBack).toHaveBeenCalled()
     })
 })

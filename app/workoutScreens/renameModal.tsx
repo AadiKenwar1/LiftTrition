@@ -1,5 +1,7 @@
 import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { useWorkout } from '@/context/WorkoutContext'
+import { isWorkoutNameTaken } from '@/context/WorkoutContext/functions/nameCheck'
+import { useSubmitOnce } from '@/lib/hooks/useSubmitOnce'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { Pencil } from 'lucide-react-native'
@@ -21,6 +23,7 @@ export default function RenameModal() {
 
     const [workoutName, setWorkoutName] = useState(workout?.name || '')
     const [isFocused, setIsFocused] = useState(false)
+    const [guardSubmit, submitting] = useSubmitOnce()
 
     // Update name when workout changes
     useEffect(() => {
@@ -32,15 +35,16 @@ export default function RenameModal() {
     const handleRename = () => {
         const trimmed = workoutName.trim()
         if (!trimmed) return
-        const alreadyExists = workouts.some(
-            (w) => !w.archived && w.id !== workoutId && w.name.trim().toLowerCase() === trimmed.toLowerCase()
-        )
-        if (alreadyExists) {
+        if (isWorkoutNameTaken(workouts, trimmed, workoutId)) {
+            // Stays on screen — don't consume the submit guard, so the user can fix the name and retry.
             Alert.alert('Workout Name Taken', `A workout named '${trimmed}' already exists. Please choose a different name.`)
             return
         }
-        handleRenameWorkout(workoutId, trimmed)
-        router.back()
+        // Guard only the commit path (it navigates away): a double-tap during the close animation is ignored.
+        guardSubmit(() => {
+            handleRenameWorkout(workoutId, trimmed)
+            router.back()
+        })()
     }
 
     const isValid = workoutName.trim()
@@ -80,7 +84,7 @@ export default function RenameModal() {
                 </View>
 
                 {/* Rename Button */}
-                <TouchableOpacity onPress={handleRename} disabled={!isValid} activeOpacity={0.8} style={styles.renameButtonTouchable}>
+                <TouchableOpacity onPress={handleRename} disabled={!isValid || submitting} activeOpacity={0.8} style={styles.renameButtonTouchable}>
                     <LinearGradient colors={!isValid ? [colors.disabled, colors.disabled] : colors.workoutGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.renameButton}>
                         <Text style={styles.renameButtonText}>Rename</Text>
                     </LinearGradient>

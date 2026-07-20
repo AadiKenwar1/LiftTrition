@@ -42,18 +42,27 @@ export default function EditEntryTest() {
         router.push(editEntryHref({ ...entry, id: uuid.v4() as string, userId: userID }) as never)
     }
 
+    // Push the editor with a deliberately corrupt entry param to exercise the JSON.parse guard (should back out cleanly, not crash).
+    function openMalformed() {
+        router.push({ pathname: '/nutritionScreens/editEntry', params: { entry: 'not-json' } } as never)
+    }
+
     return (
         <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
             <Field label="Theme">
                 <Segmented value={isDark ? 'dark' : 'light'} onChange={(v) => setColorScheme(v as 'light' | 'dark')} options={[{ label: 'Light', value: 'light' }, { label: 'Dark', value: 'dark' }]} />
             </Field>
-            <Text style={styles.hint}>Also verify: clear the meal name and save (single item → item name; multi → “Unnamed Entry”); remove items down to the “at least one” guard; edit a brand. ⚠️ Save writes a REAL entry to today’s log — delete it afterward.</Text>
+            <Text style={styles.hint}>Also verify: clear the meal name and save (single item → item name; multi → “Unnamed Entry”); remove items down to the “at least one” guard; edit a brand; rapid double-tap “Save changes” → exactly one write + one pop. ⚠️ Save writes a REAL entry to today’s log — delete it afterward.</Text>
             {SCENARIOS.map((s) => (
                 <TouchableOpacity key={s.label} style={styles.row} activeOpacity={0.6} onPress={() => open(s.entry)}>
                     <Text style={styles.rowLabel}>{s.label}</Text>
                     <ChevronRight size={20} color={colors.chevron} strokeWidth={2} />
                 </TouchableOpacity>
             ))}
+            <TouchableOpacity style={styles.row} activeOpacity={0.6} onPress={openMalformed}>
+                <Text style={styles.rowLabel}>Malformed entry param (corrupt JSON)</Text>
+                <ChevronRight size={20} color={colors.chevron} strokeWidth={2} />
+            </TouchableOpacity>
         </ScrollView>
     )
 }
