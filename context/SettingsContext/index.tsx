@@ -150,18 +150,13 @@ export const SettingsProvider = ({ children }: PropsWithChildren) => {
         if (persistSavingRef.current) return
 
         let cancelled = false
+        let scheduledBackoff = false
         persistSavingRef.current = true
         void (async () => {
             try {
                 await upsertSettings(userID, settings)
                 if (cancelled) return
                 persistRetryCountRef.current = 0
-                if (persistDirtyDuringSaveRef.current) {
-                    persistDirtyDuringSaveRef.current = false
-                    persistSavingRef.current = false
-                    setPersistDirty(true)
-                    return
-                }
                 setPersistDirty(false)
             } catch (e) {
                 if (cancelled) return
@@ -177,8 +172,24 @@ export const SettingsProvider = ({ children }: PropsWithChildren) => {
                 }
                 // Back off instead of hot-looping: 1s, 2s, 4s… capped at 30s.
                 persistRetryTimerRef.current = setTimeout(() => setPersistRetryNonce((n) => n + 1), persistBackoffMs(attempt))
+                scheduledBackoff = true
             } finally {
-                if (!cancelled) persistSavingRef.current = false
+                // Release the mutex unconditionally. A cancelled run's re-run already bailed
+                // at the guard above (persistSavingRef still held), so a conditional release
+                // here would wedge the mutex true forever and strand every later mutation in
+                // persistDirtyDuringSaveRef, which nothing would ever consume again.
+                persistSavingRef.current = false
+                // Re-fire the loop for a mutation that landed mid-save. Skip the bump when a
+                // backoff retry is already pending (non-cancelled failure path): bumping the
+                // nonce would re-run the effect, whose cleanup clears the just-scheduled
+                // persistRetryTimerRef and forces an immediate retry, defeating the 1s/2s/4s
+                // backoff. Only re-arm where NO backoff is pending: success-with-dirty, or a
+                // cancelled run whose re-run bailed at the mutex.
+                if (persistDirtyDuringSaveRef.current && !scheduledBackoff) {
+                    persistDirtyDuringSaveRef.current = false
+                    setPersistDirty(true)
+                    setPersistRetryNonce((n) => n + 1)
+                }
             }
         })()
         return () => {

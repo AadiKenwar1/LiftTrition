@@ -10,7 +10,7 @@
   "buckets": { "DONE": 36, "MERGED": 6, "AUTHORED": 11, "DRAFT": 9, "total": 62 },
   "issues": [
     { "id": "C1",  "bucket": "DONE",     "severity": "Critical", "launchBlocker": true,  "briefStart": 9,    "briefEnd": 57,   "status": "done" },
-    { "id": "C3",  "bucket": "DONE",     "severity": "Critical", "launchBlocker": true,  "briefStart": 86,   "briefEnd": 142,  "status": "pending" },
+    { "id": "C3",  "bucket": "DONE",     "severity": "Critical", "launchBlocker": true,  "briefStart": 86,   "briefEnd": 142,  "status": "done" },
     { "id": "C4",  "bucket": "AUTHORED", "severity": "Critical", "launchBlocker": true,  "briefStart": 143,  "briefEnd": 162,  "status": "pending" },
     { "id": "H1",  "bucket": "DONE",     "severity": "High",     "launchBlocker": true,  "briefStart": 163,  "briefEnd": 201,  "status": "pending" },
     { "id": "H2",  "bucket": "MERGED",   "severity": "High",     "launchBlocker": true,  "briefStart": 202,  "briefEnd": 243,  "status": "pending" },
