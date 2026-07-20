@@ -20,9 +20,6 @@ Per-agent tally — security-cost: 1C/2H/3M/6L · logic-correctness: 1C/2H/5M/9L
 `lib/supabase/functions/fetchOpenAI/index.ts:162-206` · `lib/supabase/functions/fetchFoodDB/index.ts:47-98`
 Both handlers do exactly one auth check, then call OpenAI/Gemini/FatSecret with **no rate limit, quota, or usage cap** (grep for rate/limit/quota/429 across the functions returns nothing). Any free Apple-Sign-In account can script the vision endpoint in a loop — and label mode forces `detail: 'high'`, the most expensive path (`fetchOpenAI/index.ts:120`). Client-side guards (`useSubmitOnce`, 30s timeout) are irrelevant because the function is callable directly. *(security-cost)*
 
-### C2. Pending `nutrition_calories_real.sql` migration — active data-loss window
-`lib/supabase/migrations/nutrition_calories_real.sql` · `lib/powersync/AppSchema.ts:62,93` · `lib/powersync/Connector.ts:15-24,108-117`
-The client schema declares calories as REAL and writes decimal values, but production Postgres still has INTEGER columns until the migration runs. A decimal upload → SQLSTATE-22 error → the Connector **dead-letters it**: the entry silently ceases to exist server-side (lost on reinstall/second device). Found independently by both infra-reliability and logic-correctness. Nothing in the repo enforces deploy order — **must run in Supabase before/with release.** *(infra + logic)*
 
 ### C3. Settings persistence can permanently wedge for the whole session
 `context/SettingsContext/index.tsx:148-191`
@@ -62,9 +59,6 @@ Exactly 3 Sentry capture sites exist; zero breadcrumbs, zero `Sentry.setUser`. R
 `context/SettingsContext/index.tsx:216-234,122` · `context/WorkoutContext/index.tsx:477-514` · `context/AuthContext/index.tsx:60-69`
 Settings, Workout, and Auth pass fresh inline value objects; a repo-wide grep finds **zero** `React.memo`. Every settings mutation adds two extra full-consumer render passes via the `persistDirty` flip; any auth token refresh ripples through everything. Nutrition (`index.tsx:149`), Billing, and Theme are correctly memoized — which is structure's point: the scaffolding is triplicated and hardening landed in only one copy. `handleGetBodyWeightProgressData` (no `useCallback`) also defeats the progress-chart memo (`app/(tabs)/progress.tsx:77-81`). *(performance + structure, same lines)*
 
-### H7. Entire user history hydrated into context at startup — no date bounds, no pagination
-`context/WorkoutContext/database/powersyncStore.ts:80-83` · `context/NutritionContext/database/powersyncStore.ts:114-149`
-`SELECT * FROM logs WHERE user_id = ?` and the nutrition equivalent load everything, with 2-3 `Date` allocations per row — paid on every cold start, every user change, and **every failed write** via `reloadFromDisk`. A 2-year daily user carries ~10k logs + ~3k entries in RAM permanently. Startup also serializes 4 `getAll`s per loader and blocks first paint on all four contexts including billing (15s worst case). SQLite indexes are fine (`lib/powersync/AppSchema.ts:50,68,83,157-162`) — the cost is entirely JS-side hydration. **This is the security-cost × performance overlap: both agents independently cited the same two queries.** *(performance + security-cost)*
 
 ### H8. Hottest interactions rescan full history with Intl-backed `getDateKey` per row
 `lib/utils/dateHelper.ts:25-27` · `app/workoutScreens/logsModal.tsx:56-68,120-126` · `context/WorkoutContext/functions/progressionFunctions.ts:50-76` · `context/WorkoutContext/index.tsx:399-402` · `app/(tabs)/progress.tsx:77-86` · `app/nutritionScreens/nutritionScreen.tsx:26-31` · `components/NutritionComponents/DailyIntakeCard.tsx:42`
@@ -78,17 +72,6 @@ Ingredient inserts run quantities through `sanitizeMacro` (1 decimal): 0.25 serv
 `context/NutritionContext/functions/graphFunctions.tsx:24-82` · `context/WorkoutContext/functions/volumeFunctions.tsx:9-57,64-107` · `context/SettingsContext/functions/bodyWeightFunctions.tsx:74-122`
 Identical "bucket by dateKey → track earliest → walk back N days" scaffolding, already drifted: volume rounds, macros don't; body-weight fills gaps with last-known-weight and parses keys ad hoc (`bodyWeightFunctions.tsx:85`, bypassing `parseDateKey`); `hasData` semantics differ. Logic independently found live bugs in these copies: leading-zero backfill corrupts the "Change" stat (`components/GraphComponents/GraphStats.tsx:36-38`) and a 31-point off-by-one in the default branch (`lib/utils/dateHelper.ts:243-246`). **This is the code-structure × logic-correctness overlap, confirmed with concrete instances.** A DST/date fix applied to one copy will silently miss the others. *(structure + logic)*
 
-### H11. Home-screen bodies are unguarded deep-linkable routes
-`app/(tabs)/index.tsx:1-2` · `app/_layout.tsx:159-236,162-173`
-`nutritionScreen`/`workoutScreen` live under `app/` so Expo Router auto-registers them as routes, but neither is inside any `Stack.Protected` group — reachable by deep link pre-auth/pre-paywall (renders with empty contexts). Related: the onboarding tier guard doesn't require a session (`!settings.onboardingComplete` is true while signed out), and 33 devTest routes are registered in the production navigator (`app/_layout.tsx:203-235`). Screen bodies belong in `components/`. *(structure + logic)*
-
-### H12. VoiceOver-unusable: 25 `accessibilityLabel` occurrences in 14 files, app-wide
-`components/NeutralComponents/Fab.tsx:93-97` · `components/NeutralComponents/ModeSwitcher.tsx:30-41` · `components/NutritionComponents/Entry.tsx:43-47` · `components/WorkoutComponents/Log.tsx:52-56` · `components/WorkoutComponents/LogHistoryList.tsx:64-66` · `app/workoutScreens/archiveModal.tsx:63-79` · more
-Unlabeled: the FAB and all five actions, the workout/nutrition mode switcher (no label, no selected state), the entry edit pencil (the *only* path to edit/save/delete an entry), set-delete trash, archive restore/delete, staged-item remove, flash toggle, theme toggle, the loading-screen retry link (no role). Core logging flows cannot be completed with a screen reader. Good in-repo templates: `cameraScreen.tsx:195-241`, `progress.tsx`. *(ui-ux)*
-
-### H13. Dark-mode primary CTAs fail contrast — and dark is the default scheme
-`context/ThemeContext/colors.ts:87-97,105`
-The palette's own comment documents white-on-`#00BD48` at ~2.2-3.5:1, below even the 3:1 large-text floor. Covers every nutrition-mode primary action ("Add meal", "Use Photo", "Add N Items", "Save changes", FAB actions). Deepen the CTA fill only (keep neon for chart/icon accents, as light mode already does) or switch CTA text to dark ink. *(ui-ux)*
 
 ### H14. Checked-in `BYPASSRLS` role with placeholder password — verify rotation
 `lib/supabase/migrations/powersync_setup.sql:15,33`
@@ -102,12 +85,7 @@ addWorkoutModal got `useSubmitOnce`; its ~95%-identical twin renameModal didn't 
 
 ## 🟡 Medium
 
-### Data safety & backend
-- **Sign-out flush doesn't cover unpersisted React-side settings** — `context/AuthContext/functions/accountFunctions.tsx:30-43`, `lib/powersync/FlushUploads.ts:44-74` — the flush gates the PowerSync queue, then `disconnectAndClear` wipes SQLite; a settings change still in the retry loop (or wedged per C3) is destroyed silently. Gate sign-out on `persistDirty === false` or force a final upsert. *(logic)*
-- **No backup/DR story** — `lib/powersync/orchestrator.ts:100`, `lib/openAI/mealImage.ts:35-40` — Supabase loss syncs *down* over the local replica (no re-upload path; sign-out actively destroys the local copy). Recovery depends entirely on Supabase PITR, which nothing configures or documents. Meal `photo_uri` points at a purgeable device cache dir — "synced" photo entries render broken after any restore/second device. *(infra)*
-- **Migrations hand-applied, no ledger** — `lib/supabase/migrations/` (non-standard path, no CLI project) — eight loose SQL files applied via dashboard; `schema.sql:60` already shows post-migration state while prod is pre-migration, so the reference schema is aspirational. Edge functions live outside the CLI layout and can silently drift from deployed copies. *(infra)*
-- **Missing env vars crash pre-Sentry; no env separation** — `app/_layout.tsx:60-65`, `eas.json` — `assertRequiredEnv()` throws at module scope before `Sentry.init`; eas.json has no env blocks in any profile, so preview/production separation is invisible and unverifiable from the repo. *(infra)*
-- **Sentry config gaps** — `app/_layout.tsx:62-65` — no `environment`/release separation (preview and App Store builds share one stream), no tracing, and `SENTRY_AUTH_TOKEN` isn't referenced anywhere so source-map upload/symbolication is unverified. *(infra)*
+
 - **No OTA update path** — `expo-updates` not installed, no `updates`/`runtimeVersion` in app.json — every hotfix is a full review cycle; materially extends any incident window given C2/H2. *(infra)*
 - **Session tokens in AsyncStorage, not SecureStore** — `lib/supabase/client.ts:10-15` — access + long-lived refresh token unencrypted at rest; consider `expo-secure-store` as the auth storage adapter. *(security)*
 
@@ -115,27 +93,20 @@ addWorkoutModal got `useSubmitOnce`; its ~95%-identical twin renameModal didn't 
 - **Edge functions never abort upstream calls** — `lib/supabase/functions/fetchOpenAI/index.ts:93-97,138-145` — no `AbortController`; the provider call completes and bills even after the client's 30s timeout gives up. *(security)*
 - **AI photos upload full-size** — `app/nutritionScreens/cameraScreen.tsx:100-102,130-134`, `context/NutritionContext/functions/aiFunctions.tsx:91-93` — no dimension cap; ~3-5MB base64 allocated on the JS thread per shot. A ~1024px resize cuts payloads ~10×. *(performance)*
 - **`downsample` is dead code; chart remount jank** — `lib/utils/downsample.ts` (only importer is its own test), `components/GraphComponents/Graph1.tsx:39,47-51,74-103,117` — 1Y range feeds up to 365 raw points into a chart that rebuilds an O(n) key string per render, recomputes scale unmemoized, remounts on key change, and imposes a deliberate 200ms spinner per remount. *(performance)*
-- **Settings tab polls SQLite every second forever** — `app/(tabs)/settings.tsx:29-47` — `getUploadQueueStats()` on a 1s interval with no focus gating; tabs stay mounted, so it runs for the rest of the session. Dual-flagged (performance + structure); belongs behind a slower/event-driven hook. *(performance + structure)*
 - **Upload queue drains one HTTP round-trip per op** — `lib/powersync/Connector.ts:88-121,129-180` — sequential awaits with extra pre-SELECTs for settings/weight_progress; a drag-reorder queues N order-bump ops (`workout powersyncStore.ts:159-169,262-272`); multi-day offline backlogs drain at RTT-per-op and stress the sign-out flush gate. *(performance)*
-- **12MB / 1,318 statically-required exercise PNGs; un-debounced exercise search** — `context/WorkoutContext/exerciseLibrary/dataV2/imageMap.ts`, `app/workoutScreens/addExerciseModal.tsx:39-50` — Fuse runs per keystroke over 1,318 items (`threshold 0.4, ignoreLocation`) with no debounce; food search is properly debounced 700ms (`foodDBModal.tsx:73-90`). *(performance)*
 
 ### Logic & structure
 - **`useToday` never rolls past midnight while foregrounded** — `lib/hooks/useToday.ts:8-17` — recomputed only on AppState transitions; streaks, "Today" labels, `selectedDate`, and grouping are stale until a background/foreground cycle. New entries still get the correct write-time date. *(logic)*
 - **Zero tests on persistence state machines** — `context/SettingsContext/index.tsx:148-191` (the loop containing C3), `lib/powersync/orchestrator.ts:23-30,113-141`, `context/WorkoutContext/database/powersyncStore.ts:117-312` (312 lines, zero tests while both sibling stores are tested), `lib/onboarding/steps.ts:10-16` (maintain-skips-pace numbering untested), `lib/utils/__tests__/unitConversions.test.ts` (only `weightUnitLabel` tested; round-trip drift unverified), `macroCalculation.test.ts` (metric branch untested). *(logic + structure)*
 - **Two write paths per context; fault injection covers ~half** — `context/WorkoutContext/index.tsx:94-98,211-264,327,354` — delete/archive handlers embed raw `writeTransaction` SQL in providers while inserts go through the database layer; `throwIfSaveFailureArmed` exists only on some store functions, so the error-path harness can't exercise the inline paths. *(structure)*
-- **Nutrition store duplicates mapping/upsert/load blocks in-file 2-4×** — `context/NutritionContext/database/powersyncStore.ts:27-35/76-84, 163-194/205-235, 114-132/134-149` — a column addition must land in up to 4 places or entry and saved-meal behavior silently diverge. *(structure)*
 - **Dead code cluster** — `lib/utils/dateDeserialization.ts` (zero importers), `getVolumeData` (`volumeFunctions.tsx:9` — tested, never called in production), `upsertExercise` (`workout powersyncStore.ts:238` — only reference is an unused import), `loadNutritionData`'s `hasData` return never consumed, empty legacy `exerciseLibrary/data/` dir. *(structure)*
 - **5 unused dependencies** — `package.json` — `base-64` (+types), `jsonwebtoken` (Node crypto lib that shouldn't ship in an RN client), `react-native-draggable-flatlist` (superseded), `react-native-inner-shadow`, `expo-web-browser`. *(structure + security)*
-- **Type erosion clusters** — `context/BillingContext/types.ts:4` (RevenueCat `offerings: any` throughout — an SDK upgrade breaking `offerings.current.monthly` fails at runtime in the paywall) · ~19 non-null assertions on PowerSync row parsing (`nutrition powersyncStore.ts:16-18,65-67,77`; `workout powersyncStore.ts:16-18,30-33,47-50`) propagate nulls into typed state instead of validating. *(structure)*
 - **`lib/` imports upward from `context/`** — `lib/hooks/useNotificationScheduler.ts:1`, `lib/hooks/useCombineName.ts:1`, `lib/notifications/scheduler.ts:1`, `builders.ts:1` — layering inversion; these can't be reused or tested below the context layer. *(structure)*
 - **33 devTest routes registered in the production navigator** — `app/_layout.tsx:203-235` — the guarded-require pattern keeps component code out of the bundle (verified), but the route table, titles, and deep-linkable null-rendering screens ship. *(structure)*
 
 ### UX & App Review
-- **Fabricated "★★★★★ 5.0" rating on login and both paywalls** — `app/authScreens/login.tsx:50-55`, `app/onboardingScreens/paywall.tsx:165-168`, `app/settingsScreens/subscription.tsx:142-145` — hardcoded five-star claim for an unreleased app on a purchase screen; App Review 2.3.1 rejection risk. **Treat as a pre-submission blocker.** *(ui-ux)*
 - **Default/unused camera + mic purpose strings** — `app.json:48-54` — `expo-camera` isn't in the plugins array, so prebuild applies generic defaults, including an `NSMicrophoneUsageDescription` for a mic the app never uses. Review-friction risk. *(infra)*
-- **Swipe-dismiss silently discards staged work** — `app/_layout.tsx:37-40`, `foodDBModal.tsx:43`, `addExerciseModal.tsx:28`, `editEntry.tsx:74` — no `beforeRemove` dirty-guard anywhere except the purchase screen; one accidental down-swipe loses minutes of meal-building. *(ui-ux)*
-- **No visible Cancel during the up-to-30s AI analyze** — `app/nutritionScreens/analyzingModal.tsx:31-36,121-165` — cancel exists only as an undiscoverable swipe gesture. *(ui-ux)*
-- **"Save" meal gives zero feedback, no duplicate guard** — `app/nutritionScreens/nutritionScreen.tsx:44-48` — silent success; re-taps mint "name (2)" copies. *(ui-ux)*
+- **"Save" meal gives zero feedback, no duplicate guard** — `app/nutritionScreens/nutritionScreen.tsx:44-48` — silent success; re-taps mint "name (2)" copies. *(ui-ux)* *Dev note teh dupliacte name logic we have right now is fine
 - **Notifications toggle dead-ends after OS-level revoke** — `app/settingsScreens/notifications.tsx:39-51` — `showDenied` keys on the wrong state; tapping the switch does visibly nothing and never hints at Settings. *(ui-ux)*
 - **Fixed heights clip at large Dynamic Type** — `components/WorkoutComponents/Log.tsx:27,78`, `OnboardingScaffold.tsx:77-79`, `logsModal.tsx:364-405`, `progress.tsx:350` — font scaling is on but rows/CTAs hardcode heights; use minHeight or `maxFontSizeMultiplier`. *(ui-ux)*
 - **Account deletion gets one generic confirm** — `app/settingsScreens/profile.tsx:120-138` — same one-tap Alert weight as deleting one set; no second stage, no note that the App Store subscription doesn't auto-cancel. *(ui-ux)*
@@ -147,13 +118,9 @@ addWorkoutModal got `useSubmitOnce`; its ~95%-identical twin renameModal didn't 
 ## ⚪ Low
 
 - Default `height: 175` is metric but `unitSystem: 'imperial'` — a NULL-height row hydrates as 175 *inches* → `heightCm = 444` → absurd BMR/targets — `context/SettingsContext/defaults.ts:12,15`, `macroCalculation.tsx:30`. *(logic)*
-- Maintain path in the adjust wizard overwrites `goalPace` with 0 ("0.0 lbs/week" in profile; `weeksToGoal`'s `pace ≤ 0 → 1` fallback is unit-ambiguous) — `adjustNutrition1.tsx:38`, `adjustNutrition4.tsx:53`, `lib/utils/goalMath.ts:6`. *(logic)*
 - Settings PATCH silently dropped when no server row exists (op marked done, no capture) — `lib/powersync/Connector.ts:220-224`. Dual-flagged. *(infra + logic)*
 - Unbounded manual "Try Again" retries on analyze, each a fresh paid vision call — `analyzingModal.tsx:96-104`. *(security)*
 - Raw upstream error bodies surfaced in user Alerts — `lib/openAI/openAI.ts:44`, `lib/foodDB/foodDB.ts:38-39`. *(security)*
-- Live `SENTRY_AUTH_TOKEN` in gitignored `.env.local` — never committed; rotate if the working copy is ever shared. *(security)*
-- `npm audit --omit=dev`: 33 vulns, all in Expo/Metro build tooling, not the shipped bundle; real fix requires the Expo SDK bump. *(security)*
-- Leftover `enableInExpoDevelopment` (a `sentry-expo` option, no-op in this SDK) — dev-client sessions with a DSN report into prod Sentry — `app/_layout.tsx:64`. *(infra)*
 - Jest `transformIgnorePatterns` references dead `sentry-expo`, drops `@sentry/react-native` from the whitelist — `package.json:83`. *(infra)*
 - `apiKey === 'NULL'` string sentinel in billing implies placeholder-text env hygiene — `context/BillingContext/index.tsx:36`. *(infra)*
 - `eas.json` `submit.production` is empty — submission not reproducible from the repo. *(infra)*
@@ -163,19 +130,15 @@ addWorkoutModal got `useSubmitOnce`; its ~95%-identical twin renameModal didn't 
 - "Last 30 days" builders return 31 points in the default branch (currently unrendered paths) — `dateHelper.ts:243-246`. *(logic)*
 - ProgressWheel animates its number via per-frame `setState` (~60 renders/s per calorie change) — `components/GraphComponents/ProgressWheel.tsx:67-81`. *(performance)*
 - Self-defeating memos from fresh-array deps; archive image map built over all exercises — `exerciseScreen.tsx:29-40`, `archiveModal.tsx:33-41`. *(performance)*
-- Food search results render via `.map()` in a ScrollView (bounded ~50 by API page size); foodDB in-memory cache unbounded per key (7-day TTL) — `foodDBModal.tsx:219,316-332`, `lib/foodDB/foodDB.ts:49-66`. *(performance)*
 - Static exercise lib copied into React state and re-spread wholesale on custom-exercise changes; fatigue handlers have zero production callers — `context/WorkoutContext/index.tsx:41,370-380,409-416`. *(performance)*
 - 109 hardcoded `borderRadius` literals despite the `radius` token set; `'#FFD93D'` star color duplicated verbatim — `addWorkoutModal.tsx:153,166,178`, `paywall.tsx:230`, `subscription.tsx:197`. *(structure)*
 - Entry vs SavedEntry near-duplicate cards with cosmetic drift ("kcal" vs "calories", token vs hardcoded radii) — `Entry.tsx:38-41,161-184` vs `SavedEntry.tsx:33-57,140-167`. *(structure)*
 - devTest preview re-derives item math without the `?? 1`/rounding contract; ~11 devTest comments cite the deleted RESTYLE_PLAN doc. *(structure)*
-- Disabled "next week" chevron styled at 0.7 opacity (reads as enabled) — `progress.tsx:233,239`. *(ui-ux)*
 - Row option menus exceed Android's 3-button Alert limit (latent; iOS-first) — `workoutScreen.tsx:40-67`, `nutritionScreen.tsx:38-58`. *(ui-ux)*
 - Archive modal: "Click" vs "Tap" copy; mismatched restore (54pt) vs delete (36pt) button pair — `archiveModal.tsx:112,239-258`. *(ui-ux)*
 - Exercise screen header can render "undefined" — `exerciseScreen.tsx:42`. *(ui-ux)*
-- AppColumn "phone-width" clamp is 1000pt (comment claims ~Pro Max); moot while `supportsTablet: false` — `app/_layout.tsx:30-34`. *(ui-ux)*
 - Fatigue still surfaced in settings copy despite the de-emphasis decision — `adjustTraining.tsx:42`, `settings.tsx:103`. *(ui-ux)*
 - Nutrition adjust wizard `push`es back to settings, leaving the wizard stack in history — `adjustNutrition4.tsx:61`. *(ui-ux)*
-- Stuck upload queue shows only a passive "Syncing N changes..." line forever; SyncWatchdog never escalates to the user — `settings.tsx:49-53`. *(ui-ux)*
 - Post-purchase onboarding-commit failure leaves "Maybe later" as the mislabeled retry path for a paying user — `paywall.tsx:59-66,76`. *(ui-ux)*
 
 ---
