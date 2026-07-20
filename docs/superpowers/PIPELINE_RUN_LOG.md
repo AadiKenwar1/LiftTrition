@@ -42,3 +42,21 @@ One block per issue, appended as the pipeline runs. Newest at the bottom.
 **verify:** Jest 6/10 = baseline, +2 new C3 tests pass (635 total). tsc 28 = baseline (0 in SettingsContext). GREEN.
 
 **KNOWN MINOR FOLLOW-UP (non-blocking, logged not fixed):** on the give-up-after-`SETTINGS_ALERT_AFTER`-failures path the catch returns before setting `scheduledBackoff`, so an Object.is-equal mid-save mutation can trigger the finally re-arm → one extra doomed `upsertSettings` + possible duplicate Sentry + extra `reloadFromDisk` racing the rollback. Self-correcting (idempotent, `persistDirty` ends false, no loop); reachable only via an extremely narrow interleaving on an already-failing-DB path. Clean fix = a `rolledBack` local mirroring `scheduledBackoff` to skip the re-arm on the give-up path — deferred because it's an uncovered error path (no test exercises ≥N failures) where a blind edit is riskier than the Sentry-noise it removes.
+
+---
+
+## C4 — AUTHORED — `fix(AUTHORED/C4)` — 2026-07-20
+
+**Finding:** the nutrition-entry Options-menu Delete called `handleDeleteNutrition` directly — no confirm, no undo — while every sibling delete flow confirms. One mis-tap permanently destroyed the entry (drift, not design).
+
+**Fix (root cause):** wrapped the Delete `onPress` in the shared `confirmDelete` helper, matching the exact sibling call shape (names the entry, destructive style, `onConfirm` → `handleDeleteNutrition`). No signature change.
+
+**implement (pipeline-implementer-fresh, Opus):** core fix + the DevHub preview this ui-ux issue was promoted for (`NutritionEntryMenuTest.tsx` + `__DEV__` route stub + `app/_layout.tsx` Stack entry + `DevHub.tsx` GROUPS entry) + a regression test. Correctly adapted the brief (registered the route in `app/_layout.tsx` since the brief's `app/devTest/_layout.tsx` doesn't exist).
+
+**file_review (pipeline-file-review):** no edits; verified the sibling call shape, the production-cost guard (test component reached only via `__DEV__` require), and the regression test fails pre-fix. `simplify` skill resolved cleanly (name fix worked).
+
+**wide_review (pipeline-wide-review):** no edits. **Full twin sweep: every persistent destructive delete in the app now confirms** — no remaining unconfirmed path. In-memory staging removals correctly don't confirm. Routing + production-cost verified.
+
+**verify:** Jest 6/10 = baseline, +1 new C4 test (636 total). tsc 28 = baseline (no new errors in any C4 file). GREEN.
+
+**FOLLOW-UP (not C4, logged not fixed):** `handleDeleteUserExercise` (`context/WorkoutContext/index.tsx:350,512`; `types.ts:94`) is exported but has zero UI call sites — dead code; prune or wire later.

@@ -229,6 +229,7 @@ function StackLayout() {
                     <Stack.Screen name="devTest/goalReached" options={{ headerShown: true, title: 'Goal Reached — UI', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/goalReachedSim" options={{ headerShown: true, title: 'Goal Reached — Logic', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/logHistory" options={{ headerShown: true, title: 'Log History', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="devTest/nutritionEntryMenu" options={{ headerShown: true, title: 'Nutrition Entry — Delete', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/combine" options={{ headerShown: true, title: 'Combine', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/foodRow" options={{ headerShown: true, title: 'Food Row', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/entryRow" options={{ headerShown: true, title: 'Entry Rows', headerBackTitle: 'Back' }} />

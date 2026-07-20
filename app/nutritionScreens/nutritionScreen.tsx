@@ -7,6 +7,7 @@ import { entrySubtitle } from '@/context/NutritionContext/functions/entryBuilder
 import { NutritionEntry } from '@/context/NutritionContext/types'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { useToday } from '@/lib/hooks/useToday'
+import { confirmDelete } from '@/lib/utils/confirmDelete'
 import { formatDate, getDateKey } from '@/lib/utils/dateHelper'
 import { useRouter } from 'expo-router'
 import { Calendar, RotateCcw, Utensils } from 'lucide-react-native'
@@ -49,7 +50,7 @@ export default function NutritionScreen() {
             {
                 text: 'Delete',
                 style: 'destructive',
-                onPress: () => handleDeleteNutrition(nutritionEntry.id),
+                onPress: () => confirmDelete({ title: `Delete ${nutritionEntry.name}?`, message: 'This nutrition entry will be permanently removed. This cannot be undone.', onConfirm: () => handleDeleteNutrition(nutritionEntry.id) }),
             },
             {
                 text: 'Cancel',

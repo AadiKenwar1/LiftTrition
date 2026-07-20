@@ -48,6 +48,7 @@ const GROUPS: { title: string; items: { label: string; route: string }[] }[] = [
             { label: 'Color Hue Review', route: '/devTest/colorHue' },
             { label: 'Number Parsing (F1)', route: '/devTest/numberParsing' },
             { label: 'Log History — delete (Issues 9+12)', route: '/devTest/logHistory' },
+            { label: 'Nutrition Entry — delete confirm (Issue C4)', route: '/devTest/nutritionEntryMenu' },
             { label: 'Combine — Staged meal name', route: '/devTest/combine' },
             { label: 'Food Row — Search preview', route: '/devTest/foodRow' },
             { label: 'Entry Rows — Brand subtitle', route: '/devTest/entryRow' },
