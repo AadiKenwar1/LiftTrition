@@ -10,6 +10,12 @@ const EDGE_FN_URL = `${ENV.SUPABASE_URL}/functions/v1/fetchFoodDB`
 // failure and surface this copy, instead of a misleading "check your connection" message.
 export const FOOD_SEARCH_QUOTA_MESSAGE = 'Daily search limit reached. Try again tomorrow.'
 
+// Friendly, user-facing message thrown when the server-side premium gate (audit H1) fails closed
+// to a 403 — including for a paying subscriber during a RevenueCat REST outage. Exported so
+// foodDBModal can surface it (and distinguish it from a generic connection error), mirroring the
+// quota message above so neither path ever formats the raw "premium_required" edge body.
+export const FOOD_SEARCH_PREMIUM_MESSAGE = "Couldn't verify your subscription. Please try again in a moment."
+
 const searchCache: Record<string, CacheEntry<FoodSearchResult[]>> = {}
 const detailsCache: Record<string, CacheEntry<FoodDetails>> = {}
 
@@ -44,6 +50,12 @@ async function callEdgeFunction<T>(body: { type: 'search'; query: string } | { t
         // upstream/edge response is never touched let alone leaked into the thrown message.
         if (res.status === 429) {
             throw new Error(FOOD_SEARCH_QUOTA_MESSAGE)
+        }
+        // Server-side premium gate (audit H1) fails closed to 403 — mapped before the body is read
+        // (like the 429 above) so the raw "premium_required" edge body never leaks into a thrown
+        // message. getFoodDetails swallows this to null; foodDBModal surfaces the copy on search.
+        if (res.status === 403) {
+            throw new Error(FOOD_SEARCH_PREMIUM_MESSAGE)
         }
         const text = await res.text()
         throw new Error(`Edge function error: ${res.status} - ${text}`)

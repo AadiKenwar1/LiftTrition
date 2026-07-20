@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 import { encode } from "https://deno.land/std@0.168.0/encoding/base64.ts"
+import { hasPremiumEntitlement } from "../_shared/entitlement.ts"
 
 //Note that you have to turn off "Verify JWT with legacy secret" in the Supabase project settings for this to work.
 
@@ -76,6 +77,12 @@ serve(async (req: Request) => {
   )
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return new Response(null, { status: 401 })
+
+  // Server-side premium gate (audit H1) — must pass before any quota is consumed or any
+  // paid provider is called; the client's hasPremium check is UX-only and never trusted.
+  if (!(await hasPremiumEntitlement(user.id))) {
+    return new Response(JSON.stringify({ error: "premium_required" }), { status: 403, headers: { "Content-Type": "application/json" } })
+  }
 
   let body: { type: string; query?: string; foodId?: string }
   try { body = await req.json() } catch { return new Response(null, { status: 400 }) }

@@ -14,6 +14,13 @@ green. Never add a *new* file/symbol without a `needs-human` escalation.
   and `lib/openAI/__tests__/openAI.test.ts` (was suite-level) → **6 suites / 10 tests**.
   C1 added 3 `Deno.env.get()` cap reads to the two Edge Functions → **+3 `Cannot find name
   'Deno'`** errors in already-baselined files (28 tsc total). Same class, still baseline.
+- `2026-07-20` after **H1**: added a new Deno test (`entitlement.test.ts`) that jest's
+  default glob would run and fail on. Excluded `lib/supabase/functions/**` from **jest**
+  (`package.json testPathIgnorePatterns`, by the implementer) AND from **tsconfig**
+  (`exclude`, by the driver — no app code imports that dir, verified). Effect: the entire
+  Deno-can't-resolve tsc class (23 baseline + 22 new) is **eliminated** → **tsc now 5
+  app-surface errors** only. Jest unchanged (6 suites / 10 tests). The Deno functions are
+  now validated only manually / by `deno` — never by this gate.
 
 ## Jest — 6 failing suites / 10 failing tests
 
@@ -39,7 +46,7 @@ green. Never add a *new* file/symbol without a `needs-human` escalation.
 **`context/WorkoutContext/functions/__tests__/logFunctions.test.ts`** (1)
 - Log Functions addLog Edge Cases should handle zero reps
 
-## tsc --noEmit — 28 errors (match by file + code + symbol, not line/count)
+## tsc --noEmit — 5 errors (all app-surface; Deno dir now excluded)
 
 App/test code (5) — real, in-surface:
 - `app/_layout.tsx` — TS2353 `enableInExpoDevelopment` not in `ReactNativeOptions`
@@ -48,10 +55,7 @@ App/test code (5) — real, in-surface:
 - `context/NutritionContext/functions/__tests__/crudFunctions.test.ts` — TS2345 Mock vs Dispatch<SetStateAction>
 - `context/WorkoutContext/functions/__tests__/graphFunctions.test.ts` — TS2353 `name` not in `Partial<Log>`
 
-Deno Edge Functions (23) — whole class unresolvable under the RN tsconfig (Deno modules +
-`Deno` global). H5's fix (exclude `lib/supabase/functions/**` from the app tsconfig) clears
-ALL of these at once; until then every `Deno`/`https://…` reference in these three files is
-baseline, regardless of count:
-- `lib/supabase/functions/deleteAccount/index.ts` — TS2307 (Deno/esm imports) + TS2304 `Deno`
-- `lib/supabase/functions/fetchFoodDB/index.ts` — TS2307 (Deno/esm imports) + TS2304 `Deno`
-- `lib/supabase/functions/fetchOpenAI/index.ts` — TS2307 (Deno/esm imports) + TS2304 `Deno`
+> `lib/supabase/functions/**` (the Deno Edge Functions + their `_shared/` + Deno tests) is
+> now excluded from tsconfig (and jest), so the former 23-error Deno-can't-resolve class no
+> longer appears. Any new tsc error there is invisible to this gate by design — validate
+> Edge Functions with `deno check` / manual smoke tests, not this gate.

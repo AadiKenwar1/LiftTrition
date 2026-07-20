@@ -34,6 +34,13 @@ async function callEdgeFunction(
         if (res.status === 429) {
             throw new Error('Daily scan limit reached. Try again tomorrow, or add this meal manually.')
         }
+        // Server-side premium gate (audit H1) fails closed to 403 — even for a paying user during
+        // a RevenueCat REST outage/rate-limit. Mapped here (before the body is read, like the 429
+        // above) so a subscriber sees a neutral retry message instead of the raw "premium_required"
+        // edge body leaking verbatim into the analyzing/add-nutrition alert.
+        if (res.status === 403) {
+            throw new Error("Couldn't verify your subscription. Please try again in a moment.")
+        }
         const text = await res.text()
         let parsed: { error?: string } | null = null
         try {

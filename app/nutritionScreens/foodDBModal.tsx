@@ -6,7 +6,7 @@ import { useBilling } from '@/context/BillingContext'
 import { useNutrition } from '@/context/NutritionContext'
 import { buildEntryFromItems, foodItemToItem, resolveCombinedName } from '@/context/NutritionContext/functions/entryBuilders'
 import { fonts, useColors, type Colors } from '@/context/ThemeContext'
-import { FOOD_SEARCH_QUOTA_MESSAGE, getFoodItem, getFoodSearchResults } from '@/lib/foodDB/foodDB'
+import { FOOD_SEARCH_PREMIUM_MESSAGE, FOOD_SEARCH_QUOTA_MESSAGE, getFoodItem, getFoodSearchResults } from '@/lib/foodDB/foodDB'
 import { parseFoodDescription } from '@/lib/foodDB/parseFoodDescription'
 import { POPULAR_FOODS, type PopularFood } from '@/lib/foodDB/popularFoods'
 import { FoodItem, FoodSearchResult } from '@/lib/foodDB/types'
@@ -80,11 +80,12 @@ export default function FoodDBModal() {
                 setSearchResults(await getFoodSearchResults(q))
             } catch (error) {
                 setSearchResults([])
-                // Surface the daily-quota message (audit C1) verbatim so a cap hit reads as
-                // "limit reached", not a misleading connection error; keep the connection copy
-                // for genuine network/edge failures.
+                // Surface the daily-quota (audit C1) and premium-gate (audit H1) messages verbatim
+                // so a cap hit reads as "limit reached" and a fail-closed 403 reads as a subscription
+                // retry — not a misleading connection error; keep the connection copy for genuine
+                // network/edge failures.
                 const message =
-                    error instanceof Error && error.message === FOOD_SEARCH_QUOTA_MESSAGE ?
+                    error instanceof Error && (error.message === FOOD_SEARCH_QUOTA_MESSAGE || error.message === FOOD_SEARCH_PREMIUM_MESSAGE) ?
                         error.message
                     :   'Unable to search the food database. Check your connection and try again.'
                 Alert.alert('Search Failed', message)

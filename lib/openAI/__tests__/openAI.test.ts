@@ -61,6 +61,20 @@ describe('askOpenAIVision', () => {
         )
     })
 
+    it('rejects with a friendly subscription message on a 403, without reading the response body', async () => {
+        mockFetch.mockResolvedValue({
+            ok: false,
+            status: 403,
+            text: jest.fn(async () => {
+                throw new Error('should not read the body on a 403 (would leak the upstream response)')
+            }),
+        })
+
+        await expect(askOpenAIVision('data:image/jpeg;base64,abc', 'meal')).rejects.toThrow(
+            "Couldn't verify your subscription. Please try again in a moment.",
+        )
+    })
+
     it('still maps a refusal (422) to the existing friendly message', async () => {
         mockFetch.mockResolvedValue({
             ok: false,

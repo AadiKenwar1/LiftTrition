@@ -60,3 +60,28 @@ One block per issue, appended as the pipeline runs. Newest at the bottom.
 **verify:** Jest 6/10 = baseline, +1 new C4 test (636 total). tsc 28 = baseline (no new errors in any C4 file). GREEN.
 
 **FOLLOW-UP (not C4, logged not fixed):** `handleDeleteUserExercise` (`context/WorkoutContext/index.tsx:350,512`; `types.ts:94`) is exported but has zero UI call sites — dead code; prune or wire later.
+
+---
+
+## H1 — DONE — `fix(DONE/H1)` — 2026-07-20
+
+**Finding:** premium was enforced only client-side (`if (!hasPremium)`); the two paid Edge Functions never checked entitlement, so any free account (or a curl with a valid JWT) got AI scan/macros/food-search free — the enabler that made C1 exploitable.
+
+**Fix (root cause):** new shared `lib/supabase/functions/_shared/entitlement.ts` — `hasPremiumEntitlement(userId)` via RevenueCat REST (`/v1/subscribers/{id}`), fail-closed on every error/timeout/missing-key, 4s AbortController. Both functions now return **403 `premium_required`** after auth and **before** C1's quota gate (auth→premium→quota→paid), covering all branches. `ENTITLEMENT_ID='LiftTrition Pro'` verified against the client.
+
+**implement (pipeline-implementer-done):** the helper + gate + a Deno unit test. Caught that the new Deno test would be swept into `test:ci` and fail → added `testPathIgnorePatterns` for `lib/supabase/functions/` in `package.json`.
+
+**file_review (pipeline-file-review):** no edits; traced fail-closed on every branch, gate ordering, `AbortController` leak-free (timer cleared in `finally`), and the `package.json` exclusion correctness.
+
+**wide_review (pipeline-wide-review):** fixed a **real regression** — the fail-closed 403 leaked `Edge function error: 403 - {"error":"premium_required"}` verbatim to *paying* users during an RC blip. Mapped 403 → "Couldn't verify your subscription…" in `openAI.ts` (before `res.text()`, mirroring C1's 429), hardened `foodDB.ts` + `foodDBModal.tsx` + the dev twin `FoodDBModalPreview.tsx`, added 403 tests. Confirmed no ungated paid twin (only these 2 functions make paid calls).
+
+**driver (verify-gate hygiene):** H1 added new Deno files under `lib/supabase/functions/`, which tsc still compiled (+22 Deno errors). Since no app code imports that dir (verified), excluded `lib/supabase/functions` from **tsconfig** — the tsc twin of the implementer's jest exclusion. This eliminated the entire Deno-can't-resolve tsc class (23 baseline + 22 new): **tsc 50→5** (all app-surface baseline). Baseline doc updated.
+
+**verify:** Jest 6/10 = baseline, +2 new 403 tests (638 total), Deno test excluded. tsc 5 = app-surface baseline (Deno dir excluded). GREEN.
+
+**OPS CHECKLIST (human — HARD release gate):**
+- `supabase secrets set REVENUECAT_SECRET_API_KEY=<RC v1 REST secret>` **before** the release build. If unset, `hasPremiumEntitlement` fails closed and **every** premium user gets 403 on every AI/foodDB call. Document alongside `OPENAI_API_KEY` / `FATSECRET_*`.
+- Release smoke test: curl both functions with a free-account JWT ⇒ 403 (no upstream usage); with a premium/sandbox JWT ⇒ 200.
+- Edge Functions are no longer in the jest/tsc gate — validate with `deno check` / manual smoke.
+
+**Known accepted tradeoff (documented):** a per-call RC REST gate means a photo scan fans out to ~11 entitlement lookups; under an RC outage a premium user's branded enrichment silently degrades to the vision estimate (bounded, still returns a result). Webhook-synced entitlements table is the deferred follow-up if RC rate-limits prove material.

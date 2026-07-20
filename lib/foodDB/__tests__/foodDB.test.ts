@@ -7,7 +7,7 @@
 // that a 429 resolves getFoodSearchResults to [] (it now rejects with a friendly message).
 
 import { supabase } from '@/lib/supabase/client'
-import { clearFoodDBCaches, getFoodDetails, getFoodItem, getFoodSearchResults } from '../foodDB'
+import { clearFoodDBCaches, FOOD_SEARCH_PREMIUM_MESSAGE, getFoodDetails, getFoodItem, getFoodSearchResults } from '../foodDB'
 
 // jest.mock calls are hoisted above imports, so this reliably beats the real
 // @/lib/env module's process.env snapshot-at-import-time behavior.
@@ -92,6 +92,18 @@ describe('getFoodSearchResults', () => {
 
         // Supersedes the previous (already-stale) expectation that a 429 resolved to [].
         await expect(getFoodSearchResults('ratelimit')).rejects.toThrow('Daily search limit reached. Try again tomorrow.')
+    })
+
+    it('rejects with the friendly premium message on a 403, without reading the response body', async () => {
+        mockFetch.mockResolvedValue({
+            ok: false,
+            status: 403,
+            text: jest.fn(async () => {
+                throw new Error('should not read the body on a 403 (would leak the upstream response)')
+            }),
+        })
+
+        await expect(getFoodSearchResults('premiumgate')).rejects.toThrow(FOOD_SEARCH_PREMIUM_MESSAGE)
     })
 
     it('rethrows a non-429 edge function error with the raw status and body (surfaced by foodDBModal, swallowed by enrichBrandedItem)', async () => {
