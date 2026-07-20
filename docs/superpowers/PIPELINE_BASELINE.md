@@ -49,13 +49,17 @@ green. Never add a *new* file/symbol without a `needs-human` escalation.
 **`context/WorkoutContext/functions/__tests__/logFunctions.test.ts`** (1)
 - Log Functions addLog Edge Cases should handle zero reps
 
-## tsc --noEmit — 4 errors (all app-surface; Deno dir excluded)
+## tsc --noEmit — 3 errors (all app-surface; Deno dir excluded)
 
-App/test code (4) — real, in-surface:
+App/test code (3) — real, in-surface:
 - `components/devTest/DevStatsModal.tsx` — TS2345 EffectCallback returning `() => boolean`
-- `context/BillingContext/index.tsx` — TS2322 `void` not assignable to `{ remove?: ... }`
 - `context/NutritionContext/functions/__tests__/crudFunctions.test.ts` — TS2345 Mock vs Dispatch<SetStateAction>
 - `context/WorkoutContext/functions/__tests__/graphFunctions.test.ts` — TS2353 `name` not in `Partial<Log>`
+
+> `2026-07-20`: the BillingContext TS2322 was cleared by the listener-leak fix — the exact
+> H5 PART-B BillingContext item, applied by an H5 implementer dispatch that was interrupted
+> mid-run (its one surviving edit; verified correct, tests green, kept). H5 must not redo
+> it. Baseline 4 → **3**.
 
 > `lib/supabase/functions/**` (the Deno Edge Functions + their `_shared/` + Deno tests) is
 > now excluded from tsconfig (and jest), so the former 23-error Deno-can't-resolve class no
