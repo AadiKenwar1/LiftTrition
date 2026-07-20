@@ -1,4 +1,5 @@
 import { flushUploadsOrThrow } from '@/lib/powersync/FlushUploads'
+import { flushPendingLocalWrites } from '@/lib/powersync/pendingWrites'
 import { disconnectAndClearPowerSync } from '@/lib/powersync/orchestrator'
 import { supabase } from '@/lib/supabase/client'
 import { clearUserStorage } from '@/lib/utils/userStorage'
@@ -26,6 +27,10 @@ jest.mock('@/lib/powersync/orchestrator', () => ({
 
 jest.mock('@/lib/powersync/FlushUploads', () => ({
     flushUploadsOrThrow: jest.fn(),
+}))
+
+jest.mock('@/lib/powersync/pendingWrites', () => ({
+    flushPendingLocalWrites: jest.fn(),
 }))
 
 jest.mock('@/lib/utils/userStorage', () => ({
@@ -60,6 +65,7 @@ beforeEach(() => {
     ;(disconnectAndClearPowerSync as jest.Mock).mockResolvedValue(undefined)
     ;(clearUserStorage as jest.Mock).mockResolvedValue(undefined)
     ;(flushUploadsOrThrow as jest.Mock).mockResolvedValue(undefined)
+    ;(flushPendingLocalWrites as jest.Mock).mockResolvedValue(undefined)
     mockFetch.mockResolvedValue({ ok: true, json: async () => ({ success: true }) })
 })
 
@@ -128,13 +134,38 @@ describe('deleteAccount', () => {
 })
 
 describe('signOut', () => {
-    it("drains uploads, signs out, then clears the departing user's storage", async () => {
+    it("flushes pending local writes, drains uploads, signs out, then clears the departing user's storage", async () => {
         await signOut()
 
+        expect(flushPendingLocalWrites).toHaveBeenCalledTimes(1)
         expect(flushUploadsOrThrow).toHaveBeenCalledTimes(1)
         expect(supabase.auth.signOut).toHaveBeenCalledTimes(1)
         expect(disconnectAndClearPowerSync).toHaveBeenCalledTimes(1)
         expect(clearUserStorage).toHaveBeenCalledWith('user-123')
+    })
+
+    it('flushes pending local writes before draining the upload queue and before any teardown', async () => {
+        await signOut()
+
+        const pendingOrder = (flushPendingLocalWrites as jest.Mock).mock.invocationCallOrder[0]
+        const flushOrder = (flushUploadsOrThrow as jest.Mock).mock.invocationCallOrder[0]
+        const authOrder = (supabase.auth.signOut as jest.Mock).mock.invocationCallOrder[0]
+        const disconnectOrder = (disconnectAndClearPowerSync as jest.Mock).mock.invocationCallOrder[0]
+
+        expect(pendingOrder).toBeLessThan(flushOrder)
+        expect(pendingOrder).toBeLessThan(authOrder)
+        expect(pendingOrder).toBeLessThan(disconnectOrder)
+    })
+
+    it('aborts sign-out without draining uploads or tearing anything down when a pending local write fails', async () => {
+        ;(flushPendingLocalWrites as jest.Mock).mockRejectedValue(new Error('settings write failed'))
+
+        await expect(signOut()).rejects.toThrow('settings write failed')
+
+        expect(flushUploadsOrThrow).not.toHaveBeenCalled()
+        expect(supabase.auth.signOut).not.toHaveBeenCalled()
+        expect(disconnectAndClearPowerSync).not.toHaveBeenCalled()
+        expect(clearUserStorage).not.toHaveBeenCalled()
     })
 
     it('throws and skips teardown when the upload flush cannot drain', async () => {

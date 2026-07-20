@@ -1,6 +1,7 @@
 import { ENV } from '@/lib/env'
 import { clearFoodDBCaches } from '@/lib/foodDB/foodDB'
 import { flushUploadsOrThrow } from '@/lib/powersync/FlushUploads'
+import { flushPendingLocalWrites } from '@/lib/powersync/pendingWrites'
 import { disconnectAndClearPowerSync } from '@/lib/powersync/orchestrator'
 import { supabase } from '@/lib/supabase/client'
 import { clearUserStorage } from '@/lib/utils/userStorage'
@@ -29,8 +30,11 @@ export async function deleteAccount(): Promise<void> {
 }
 
 export async function signOut(): Promise<void> {
-    // Require a connected PowerSync client, then wait for all pending uploads to drain (Gate C)
-    // before signing out and clearing local data.
+    // Force any dirty in-memory state (e.g. SettingsContext) down to local SQLite first (Gate B) —
+    // otherwise a change that never reached SQLite would be invisible to the upload-queue flush
+    // below and get silently discarded by the wipe. Then require a connected PowerSync client and
+    // wait for all pending uploads to drain (Gate C) before signing out and clearing local data.
+    await flushPendingLocalWrites()
     await flushUploadsOrThrow({ timeoutMs: 60_000 })
 
     const userID = await currentUserID()
