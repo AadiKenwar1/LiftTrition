@@ -2,6 +2,7 @@ import EditHeightModal from '@/components/NeutralComponents/EditHeightModal'
 import EditMacroGoalModal, { type MacroGoalKind } from '@/components/NutritionComponents/EditMacroGoalModal'
 import { useAuth } from '@/context/AuthContext'
 import { forceSignOut } from '@/context/AuthContext/functions/accountFunctions'
+import { useBilling } from '@/context/BillingContext'
 import { useSettings } from '@/context/SettingsContext'
 import { withRegeneratedTargets } from '@/context/SettingsContext/functions/bodyWeightFunctions'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
@@ -13,7 +14,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { LogOut, Pencil, Trash2 } from 'lucide-react-native'
 import { useMemo, useState } from 'react'
-import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, Linking, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View, type AlertButton } from 'react-native'
 
 export default function ProfileScreen() {
     const [signOutLoading, setSignOutLoading] = useState(false)
@@ -22,6 +23,7 @@ export default function ProfileScreen() {
     const SHOW_APPLE_ACCOUNT = false
 
     const { user, signOut, deleteAccount } = useAuth()
+    const { hasPremium } = useBilling()
     const { settings, setSettings } = useSettings()
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
@@ -77,24 +79,49 @@ export default function ProfileScreen() {
     // Shared confirm + offline/force-fallback flow (also used by onboarding's sign-out escape).
     const handleSignOut = () => confirmSignOut({ loading: signOutLoading, setLoading: setSignOutLoading, signOut, forceSignOut })
 
+    // Two-stage delete confirm: stage 1 discloses irreversibility (+ subscription non-cancellation
+    // for premium users, with a shortcut to manage it) before stage 2's unconditional final confirm.
     const handleDeleteAccount = () => {
-        Alert.alert('Delete Account', 'Are you sure? This cannot be undone. All your data will be permanently deleted.', [
-            { text: 'Cancel', style: 'cancel' },
-            {
-                text: 'Delete',
-                style: 'destructive',
-                onPress: async () => {
-                    setDeleteLoading(true)
-                    try {
-                        await deleteAccount()
-                    } catch (e) {
-                        Alert.alert('Error', e instanceof Error ? e.message : 'Failed to delete account.')
-                    } finally {
-                        setDeleteLoading(false)
-                    }
-                },
-            },
-        ])
+        const message = "This permanently deletes your account and all your data and can't be undone." + (hasPremium ? ' Deleting your account does not cancel your subscription.' : '')
+
+        const buttons: AlertButton[] = [{ text: 'Cancel', style: 'cancel' }]
+        if (hasPremium) {
+            buttons.push({
+                text: 'Manage Subscription',
+                onPress: () =>
+                    Linking.openURL(
+                        Platform.select({
+                            ios: 'https://apps.apple.com/account/subscriptions',
+                            android: 'https://play.google.com/store/account/subscriptions',
+                            default: 'https://apps.apple.com/account/subscriptions',
+                        }),
+                    ),
+            })
+        }
+        buttons.push({
+            text: 'Continue',
+            style: 'destructive',
+            onPress: () =>
+                Alert.alert('Are you absolutely sure?', "This can't be undone. Your account and all data will be permanently deleted.", [
+                    { text: 'Cancel', style: 'cancel' },
+                    {
+                        text: 'Delete Account',
+                        style: 'destructive',
+                        onPress: async () => {
+                            setDeleteLoading(true)
+                            try {
+                                await deleteAccount()
+                            } catch (e) {
+                                Alert.alert('Error', e instanceof Error ? e.message : 'Failed to delete account.')
+                            } finally {
+                                setDeleteLoading(false)
+                            }
+                        },
+                    },
+                ]),
+        })
+
+        Alert.alert('Delete Account', message, buttons)
     }
 
     return (
