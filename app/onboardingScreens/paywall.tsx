@@ -54,6 +54,11 @@ export default function OnboardingPaywall() {
 
     const selectedPackage = plan === 'monthly' ? monthlyPackage : annualPackage
 
+    // A paying user whose post-purchase onboarding-commit fails is stranded here with the CTA disabled
+    // ("Subscription Active"), so this footer button becomes their only way in. For them it's a retry
+    // into the app ("Continue"), not the free-user "Maybe later" dismissal the label otherwise implies.
+    const finishLabel = hasPremium ? 'Continue' : 'Maybe later'
+
     // Only navigate once the onboarding commit has actually landed on disk —
     // otherwise a silent save failure sends the user right back into onboarding.
     const finishOnboarding = async () => {
@@ -190,7 +195,7 @@ export default function OnboardingPaywall() {
                     <Text style={styles.backText}>Back</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.laterButton, (purchasing || restoring) && styles.footerDisabled]} onPress={finishOnboarding} disabled={purchasing || restoring} activeOpacity={0.8}>
-                    <Text style={styles.laterText}>Maybe later</Text>
+                    <Text style={hasPremium ? styles.continueText : styles.laterText}>{finishLabel}</Text>
                 </TouchableOpacity>
             </View>
 
@@ -241,5 +246,6 @@ function makeStyles(colors: Colors) {
         backText: { fontFamily: fonts.semibold, fontSize: 17, color: colors.textSecondary },
         laterButton: { flex: 1, height: 58, borderRadius: radius.cardLg, backgroundColor: colors.surface, justifyContent: 'center', alignItems: 'center', borderWidth: StyleSheet.hairlineWidth, borderColor: colors.hairline },
         laterText: { fontFamily: fonts.semibold, fontSize: 16, color: colors.textSecondary },
+        continueText: { fontFamily: fonts.semibold, fontSize: 16, color: colors.text },
     })
 }
