@@ -63,8 +63,11 @@ describe('fatigueFunctions', () => {
             const lib = mockLib(1.0)
 
             // Two sets in-window: heavy + light. The 30-day 1RM reference should be based on the heavy set.
-            const heavy = mockLog({ id: 'heavy', exerciseID: 'ex-1', date: new Date('2026-01-31'), weight: 100, reps: 5, rpe: 7 })
-            const light = mockLog({ id: 'light', exerciseID: 'ex-1', date: new Date('2026-01-31'), weight: 50, reps: 5, rpe: 7 })
+            // Dates use the local date-time form (T12:00:00) so the log lands on the same LOCAL day as the
+            // mocked clock; the bare '2026-01-31' form parses as UTC midnight = the prior local day, which the
+            // deterministic start-of-day fatigue window (correctly) excludes from a 1-day window.
+            const heavy = mockLog({ id: 'heavy', exerciseID: 'ex-1', date: new Date('2026-01-31T12:00:00'), weight: 100, reps: 5, rpe: 7 })
+            const light = mockLog({ id: 'light', exerciseID: 'ex-1', date: new Date('2026-01-31T12:00:00'), weight: 50, reps: 5, rpe: 7 })
             const logs: Log[] = [heavy, light]
 
             const pct = calculateFatiguePercentage(1, logs, exercises, lib, 'moderate', BW, EMPTY_BW_PROGRESS)
@@ -126,7 +129,7 @@ describe('fatigueFunctions', () => {
                 },
             }
 
-            const log = mockLog({ exerciseID: 'ex-1', weight: 0, reps: 10, rpe: 7 })
+            const log = mockLog({ exerciseID: 'ex-1', date: new Date('2026-01-31T12:00:00'), weight: 0, reps: 10, rpe: 7 })
             const pct = calculateFatiguePercentage(1, [log], exercises, lib, 'moderate', BW, EMPTY_BW_PROGRESS)
 
             expect(pct).toBeGreaterThan(0)
@@ -143,8 +146,8 @@ describe('fatigueFunctions', () => {
                 },
             }
 
-            const unweighted = mockLog({ id: 'bw', exerciseID: 'ex-1', weight: 0, reps: 5, rpe: 7 })
-            const weighted = mockLog({ id: 'belt', exerciseID: 'ex-1', weight: 25, reps: 5, rpe: 7 })
+            const unweighted = mockLog({ id: 'bw', exerciseID: 'ex-1', date: new Date('2026-01-31T12:00:00'), weight: 0, reps: 5, rpe: 7 })
+            const weighted = mockLog({ id: 'belt', exerciseID: 'ex-1', date: new Date('2026-01-31T12:00:00'), weight: 25, reps: 5, rpe: 7 })
 
             const pctUnweighted = calculateFatiguePercentage(1, [unweighted], exercises, lib, 'moderate', BW, EMPTY_BW_PROGRESS)
             const pctWeighted = calculateFatiguePercentage(1, [weighted], exercises, lib, 'moderate', BW, EMPTY_BW_PROGRESS)
@@ -179,6 +182,47 @@ describe('fatigueFunctions', () => {
 
             // Using historical lighter BW for the old log produces less total fatigue
             expect(pctHistorical).toBeLessThan(pctCurrent)
+        })
+
+        describe('wall-clock boundary determinism', () => {
+            const NOW_DATE = '2026-02-15'
+            const exercises: Exercise[] = [mockExercise({ id: 'ex-1', name: 'Bench Press' })]
+            const lib = mockLib(1.0)
+
+            // Local-midnight-normalized log dates, mirroring parseDateKey's `new Date(y, m-1, d)`.
+            const todayLog = mockLog({ id: 'today', exerciseID: 'ex-1', date: new Date(2026, 1, 15), weight: 100, reps: 5, rpe: 7 })
+            const yesterdayLog = mockLog({ id: 'yesterday', exerciseID: 'ex-1', date: new Date(2026, 1, 14), weight: 100, reps: 5, rpe: 7 })
+
+            // Asserts numDays=1 boundary inclusion/exclusion at a mocked wall-clock time; returns the today-only percentage.
+            function assertBoundaryAt(systemTime: string): number {
+                jest.setSystemTime(new Date(systemTime))
+
+                const pctIncluded = calculateFatiguePercentage(1, [todayLog], exercises, lib, 'moderate', BW, EMPTY_BW_PROGRESS)
+                expect(pctIncluded).toBeGreaterThan(0)
+
+                const pctExcluded = calculateFatiguePercentage(1, [yesterdayLog], exercises, lib, 'moderate', BW, EMPTY_BW_PROGRESS)
+                expect(pctExcluded).toBe(0)
+
+                // No window widening: adding yesterday's (excluded) log must not inflate today's percentage.
+                const pctBoth = calculateFatiguePercentage(1, [todayLog, yesterdayLog], exercises, lib, 'moderate', BW, EMPTY_BW_PROGRESS)
+                expect(pctBoth).toBeCloseTo(pctIncluded, 6)
+
+                return pctIncluded
+            }
+
+            test('at 00:05, numDays=1 includes a log dated exactly today and excludes one dated exactly 1 day ago', () => {
+                assertBoundaryAt(`${NOW_DATE}T00:05:00`)
+            })
+
+            test('at 23:55, numDays=1 includes a log dated exactly today and excludes one dated exactly 1 day ago', () => {
+                assertBoundaryAt(`${NOW_DATE}T23:55:00`)
+            })
+
+            test('the today-only percentage is identical at 00:05 and 23:55 (no wall-clock drift)', () => {
+                const early = assertBoundaryAt(`${NOW_DATE}T00:05:00`)
+                const late = assertBoundaryAt(`${NOW_DATE}T23:55:00`)
+                expect(early).toBe(late)
+            })
         })
     })
 

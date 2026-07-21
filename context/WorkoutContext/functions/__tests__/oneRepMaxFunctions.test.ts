@@ -119,4 +119,43 @@ describe('oneRMMap', () => {
         const result = oneRMMap([mockExercise()], [log], 30)
         expect(result.get('Bench Press')).toBe(225)
     })
+
+    describe('wall-clock boundary determinism', () => {
+        const refDays = 30
+        // Local-midnight-normalized log dates, mirroring parseDateKey's `new Date(y, m-1, d)`.
+        const includedBoundaryLog = mockLog({ id: 'included', weight: 100, reps: 5, date: new Date(2026, 0, 2) }) // (refDays - 1) days before 2026-01-31
+        const excludedBoundaryLog = mockLog({ id: 'excluded', weight: 100, reps: 5, date: new Date(2026, 0, 1) }) // refDays days before 2026-01-31
+
+        afterEach(() => {
+            jest.useRealTimers()
+        })
+
+        // Asserts boundary inclusion/exclusion at a mocked wall-clock time; returns the included value for cross-time comparison.
+        function assertBoundaryAt(systemTime: string): number | undefined {
+            jest.useFakeTimers()
+            jest.setSystemTime(new Date(systemTime))
+
+            const includedResult = oneRMMap([mockExercise()], [includedBoundaryLog], refDays)
+            expect(includedResult.get('Bench Press')).toBeCloseTo(estimate1RM(100, 5), 5)
+
+            const excludedResult = oneRMMap([mockExercise()], [excludedBoundaryLog], refDays)
+            expect(excludedResult.has('Bench Press')).toBe(false)
+
+            return includedResult.get('Bench Press')
+        }
+
+        test('at 00:05, the (refDays-1)-days-ago log is included and the refDays-days-ago log is excluded', () => {
+            assertBoundaryAt('2026-01-31T00:05:00')
+        })
+
+        test('at 23:55, the (refDays-1)-days-ago log is included and the refDays-days-ago log is excluded', () => {
+            assertBoundaryAt('2026-01-31T23:55:00')
+        })
+
+        test('the (refDays-1)-days-ago value is identical at 00:05 and 23:55', () => {
+            const early = assertBoundaryAt('2026-01-31T00:05:00')
+            const late = assertBoundaryAt('2026-01-31T23:55:00')
+            expect(early).toBe(late)
+        })
+    })
 })

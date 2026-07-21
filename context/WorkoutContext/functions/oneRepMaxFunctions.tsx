@@ -20,8 +20,12 @@ export function estimate1RM(weight: number, reps: number): number {
  * Fatigue still scores recent sets and uses per-set estimate1RM as fallback.
  */
 export function oneRMMap(exercises: Exercise[], logs: Log[], refDays: number): Map<string, number> {
+    // Normalize the cutoff to local start-of-day using -(refDays - 1) so the boundary
+    // day is deterministically included/excluded regardless of wall-clock call time,
+    // preserving the refDays-day window (day 0 through day refDays-1 ago).
     const refCutoff = new Date()
-    refCutoff.setDate(refCutoff.getDate() - refDays)
+    refCutoff.setDate(refCutoff.getDate() - (refDays - 1))
+    refCutoff.setHours(0, 0, 0, 0)
 
     const idToName = new Map<string, string>()
     for (const e of exercises) {

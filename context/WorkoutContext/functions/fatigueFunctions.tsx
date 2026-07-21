@@ -209,8 +209,10 @@ export function calculateFatiguePercentage(numDays: number, logs: Log[], exercis
     const localRefByName = buildRefByName(logs, exercises, fullExerciseLib, 30, currentBodyWeight, bwProgress)
     const exerciseMap = new Map(exercises.map((exercise) => [exercise.id, exercise]))
 
-    const cutoffDate = new Date()
-    cutoffDate.setDate(cutoffDate.getDate() - numDays)
+    // Normalize to local start-of-day using -(numDays - 1) so the boundary day is
+    // deterministically included/excluded regardless of wall-clock call time, while
+    // preserving the numDays-day window that the dailyBudget*numDays divisor assumes.
+    const cutoffDate = addDays(getStartOfDay(new Date()), -(numDays - 1))
 
     let totalFatigue = 0
 
