@@ -58,7 +58,10 @@ export default function AdjustNutrition4Screen() {
             macrosCustomized: false,
             goalOvershootAcknowledged: false,
         })
-        router.push('/(tabs)/settings')
+        // Return to the Settings tab AND drop the whole adjustNutrition1-4 wizard from
+        // history — pushing would stack Settings on top of the finished wizard, letting a
+        // hardware/swipe back re-enter it. dismissTo pops back to the existing Settings screen.
+        router.dismissTo('/(tabs)/settings')
     }
 
     return (
