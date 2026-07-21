@@ -163,8 +163,8 @@ export default function LogsModal() {
                                             {isLogDateToday ?
                                                 <Calendar size={22} color={colors.workout} strokeWidth={2.5} />
                                             :   <>
-                                                    <Text style={styles.dateButtonMonth}>{selectedLogDate.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()}</Text>
-                                                    <Text style={styles.dateButtonDay}>{selectedLogDate.getDate()}</Text>
+                                                    <Text allowFontScaling={false} style={styles.dateButtonMonth}>{selectedLogDate.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()}</Text>
+                                                    <Text allowFontScaling={false} style={styles.dateButtonDay}>{selectedLogDate.getDate()}</Text>
                                                 </>
                                             }
                                         </TouchableOpacity>
@@ -192,7 +192,7 @@ export default function LogsModal() {
                                                 >
                                                     {showAddSuccess ?
                                                         <Check size={24} color="#FFF" strokeWidth={1.5} />
-                                                    :   <Text style={styles.addButtonText}>+</Text>}
+                                                    :   <Text allowFontScaling={false} style={styles.addButtonText}>+</Text>}
                                                 </LinearGradient>
                                             </Animated.View>
                                         </TouchableOpacity>

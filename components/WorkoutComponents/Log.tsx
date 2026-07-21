@@ -24,7 +24,7 @@ export default function Log({ text, subtitle, imgSource, showImageFallback = fal
     return (
         <TouchableOpacity onPress={onPress} onLongPress={onMenuPress} delayLongPress={300}>
             <View style={styles.outerwrapper}>
-                <View style={[styles.wrapper, { height: wrapperHeight }]}>
+                <View style={[styles.wrapper, { minHeight: wrapperHeight }]}>
                     <View style={styles.accentBar} />
                     <View style={styles.container}>
                         {(imgSource || showImageFallback) && (
@@ -76,7 +76,7 @@ function makeStyles(colors: Colors, isDark: boolean) {
                 },
         wrapper: {
             flexDirection: 'row',
-            height: 96,
+            minHeight: 96,
             marginVertical: 6,
             borderRadius: radius.card,
             overflow: 'hidden',

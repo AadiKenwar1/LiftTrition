@@ -75,6 +75,10 @@ const GROUPS: { title: string; items: { label: string; route: string }[] }[] = [
         title: 'Notifications',
         items: [{ label: 'Local Notifications', route: '/devTest/notifications' }],
     },
+    {
+        title: 'Accessibility',
+        items: [{ label: 'Dynamic Type — clipping (M29)', route: '/devTest/dynamicType' }],
+    },
 ]
 
 export default function DevHub() {
