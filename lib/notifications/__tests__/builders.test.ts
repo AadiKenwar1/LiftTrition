@@ -1,4 +1,4 @@
-import type { NutritionEntry, NutritionStreakState } from '@/context/NutritionContext/types'
+import type { NutritionEntry, NutritionStreakState } from '@/lib/nutrition/types'
 import {
     buildMealReminders,
     buildNotificationBatch,

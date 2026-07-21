@@ -1,4 +1,4 @@
-import type { NutritionEntry, NutritionStreakState } from '@/context/NutritionContext/types'
+import type { NutritionEntry, NutritionStreakState } from '@/lib/nutrition/types'
 import { addDays, getDateKey } from '@/lib/utils/dateHelper'
 import type { MealKey, NotificationPrefs, NotificationSpec } from './types'
 

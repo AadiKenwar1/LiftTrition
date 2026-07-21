@@ -11,7 +11,7 @@ import { FOOD_SEARCH_PREMIUM_MESSAGE, FOOD_SEARCH_QUOTA_MESSAGE, getFoodItem, ge
 import { parseFoodDescription } from '@/lib/foodDB/parseFoodDescription'
 import { POPULAR_FOODS, type PopularFood } from '@/lib/foodDB/popularFoods'
 import { FoodItem, FoodSearchResult } from '@/lib/foodDB/types'
-import { useCombineName } from '@/lib/hooks/useCombineName'
+import { useCombineName } from '@/context/NutritionContext/hooks/useCombineName'
 import { useSubmitOnce } from '@/lib/hooks/useSubmitOnce'
 import { parseNumericInput } from '@/lib/utils/number'
 import { LinearGradient } from 'expo-linear-gradient'

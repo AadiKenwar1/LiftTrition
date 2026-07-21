@@ -7,7 +7,7 @@ import { buildEntryFromItems, entrySubtitle, itemsForEntry, resolveCombinedName 
 import { scaleItems, sumItems } from '@/context/NutritionContext/functions/items'
 import { Item, NutritionEntry } from '@/context/NutritionContext/types'
 import { fonts, useColors, type Colors } from '@/context/ThemeContext'
-import { useCombineName } from '@/lib/hooks/useCombineName'
+import { useCombineName } from '@/context/NutritionContext/hooks/useCombineName'
 import { useSubmitOnce } from '@/lib/hooks/useSubmitOnce'
 import { confirmDelete } from '@/lib/utils/confirmDelete'
 import { parseNumericInput } from '@/lib/utils/number'
