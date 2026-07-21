@@ -525,3 +525,23 @@ C1, C3, C4, H1, H2, H3, H4, H9, H15, M23 — every `[LAUNCH-BLOCKER]` issue impl
 **Notable events:** (a) All Wave C implementers correctly re-located rotted anchors by logic (H6/L13/M31/H2/M12 had shifted lines since the briefs were written). (b) L3's createRecord raw-row-vs-CRUD-op shape corruption risk was flagged pre-review and audited GREEN by both reviewers. (c) Wave D (M21/M29/M30) dispatched immediately after this commit (3-way parallel, disjoint) — M29's devTest route registration deferred to the driver since root _layout.tsx is shared with M21.
 
 ---
+
+## Wave D — DONE — final 3-way parallel wave — 2026-07-21
+
+**Method:** Final wave (M21/M29/M30) — the last 3 in-scope audit issues. All disjoint EXCEPT root `app/_layout.tsx` (M21 repoints an import, M29 registers a devTest route), so ran 3-way parallel with M29's ONE route-registration line deferred to the driver. Tier: M21 wide_review (14-file refactor blast radius), M30 file_review (destructive-action UX, but deleteAccount() unchanged), M29 file_review (dimension-only + DevHub page). Two-stage commit to keep `_layout.tsx` attribution clean: gate A (tsc + scoped jest) -> commit M21 (import-only _layout) + M30 -> driver splices the `devTest/dynamicType` route -> gate B (tsc + FULL suite) -> commit M29 (route line + 7 files).
+
+**Issues (all audit-gated, committed):**
+- M21 (audit 104, be78edb) — lib->context layering: pure data shapes (Item/NutritionEntry/NutritionStreakState) moved DOWN to `lib/nutrition/types.ts` (context types.ts import-then-bare-re-export preserves ~12 importers); useCombineName + useNotificationScheduler moved UP to `context/NutritionContext/hooks/` (git tracked as 100% renames), 4 importers repointed. entryBuilders untouched. Wide review: no stragglers, no stale mocks, no cycle, deletion complete. 45 tests.
+- M29 (audit 111, 27c6f96) — Dynamic Type: Log row + onboarding/paywall CTAs height->minHeight (+padding) to grow with text; logsModal 50x50 chips cap font scaling instead; progress.tsx graphCard left fixed per adjudication (flex:1 chart collapse risk). New DynamicTypeTest DevHub page + route (driver-registered). File review: dimension parity exact, M31 sign-out row untouched, no getItemLayout to desync.
+- M30 (audit 112, ed8964d) — account-delete two-stage confirm + App-Store-subscription-not-cancelled disclosure (hasPremium-gated) + Manage Subscription deep link; delete body moved VERBATIM into stage 2 (git-diff confirmed char-identical), deleteAccount() unchanged. File review: all 9 checks pass.
+
+**Central verify gate:** Gate A tsc 0 + scoped jest 172/172 (16 suites); Gate B (final) tsc 0 + **FULL suite 845/845** (82 suites), no worker-leak warning. GREEN.
+
+**Follow-ups logged (NOT done):**
+- M30: the Manage-Subscription Platform.select/Linking.openURL block duplicates subscription.tsx's handleManage — the M30 adjudication explicitly blessed inline duplication over a shared helper, so this is sanctioned, not debt (noted for completeness).
+
+**Notable events:** (a) `app/_layout.tsx` is shared by M21 (import) + M29 (route) — resolved by a two-stage commit (M21 first with import-only, then driver-added the route line folded into M29's commit) since wholesale git-add can't split one file across two commits. (b) `context/BillingContext/index.tsx` flickered as modified mid-wave (user WIP) then reverted; M30 consumes its hasPremium and compiled clean at both gates. (c) All Wave D anchors had rotted (M31/L13/H6/H2/M12) — implementers re-located by logic.
+
+**PIPELINE COMPLETE:** all in-scope audit line-items resolved. Manifest has zero `pending`; remaining non-done are `excluded` (no audit line-item) + M6 (OTA update path, needs-human/OPS). User's addNutritionModal.tsx + notifications.tsx WIP preserved untouched across every wave.
+
+---
