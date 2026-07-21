@@ -31,6 +31,7 @@ jest.mock('@/lib/env', () => ({
 // Mock Sentry
 jest.mock('@sentry/react-native', () => ({
     captureException: jest.fn(),
+    captureMessage: jest.fn(),
 }))
 
 // Import types after mocking
@@ -58,6 +59,19 @@ function mockConflictTable(existing: { id: string } | null) {
     const upsert = jest.fn().mockReturnValue({ error: null })
 
     return { from: { select, update, insert, upsert }, select, selectBuilder, update, updateBuilder, insert, upsert }
+}
+
+// Build a select(...) stub whose id/user_id lookups (settings PATCH's two-step probe, via
+// .eq().maybeSingle()) and createRecord's own existence check (via .eq().single()) all resolve to
+// "no row found" - shared by the two L3 repair-path tests below, which differ only in what happens
+// after the miss.
+function mockAllSettingsLookupsMiss() {
+    const selectBuilder: any = {}
+    selectBuilder.eq = jest.fn(() => selectBuilder)
+    selectBuilder.maybeSingle = jest.fn().mockResolvedValue({ data: null })
+    selectBuilder.single = jest.fn().mockResolvedValue({ data: null })
+    const select = jest.fn(() => selectBuilder)
+    return { select, selectBuilder }
 }
 
 // Drain pending microtasks so chained .then()/.catch() hops inside the concurrency pool settle
@@ -225,6 +239,98 @@ describe('Connector', () => {
             expect(selectByIdBuilder.eq).toHaveBeenCalledWith('id', 'test-id-1')
             expect(mockUpdate).toHaveBeenCalledWith({ body_weight: 71.0 })
             expect(mockEq).toHaveBeenCalledWith('user_id', 'user-1')
+            expect(mockTransaction.complete).toHaveBeenCalledTimes(1)
+        })
+
+        // ---- L3: a settings PATCH that resolves no upstream row must repair, not silently drop ----
+        it('should repair the missing upstream row via createRecord when a settings PATCH finds no row by id or by session user_id', async () => {
+            const mockTransaction = {
+                crud: [
+                    {
+                        op: UpdateType.PATCH,
+                        table: 'settings',
+                        id: 'test-id-1',
+                        opData: { body_weight: 71.0 },
+                    },
+                ],
+                complete: jest.fn().mockResolvedValue(undefined),
+            }
+
+            // The full, authoritative local row PowerSync holds for this id (every column populated
+            // by upsertSettings) — unlike the partial PATCH diff in opData above.
+            const localRow = { id: 'test-id-1', user_id: 'user-1', body_weight: 71.0, height: 175 }
+            const db = {
+                getNextCrudTransaction: jest.fn().mockResolvedValue(mockTransaction),
+                getAll: jest.fn().mockResolvedValue([localRow]),
+            } as unknown as AbstractPowerSyncDatabase
+
+            // Session resolves so updateRecord can attempt the by-user_id lookup after the id miss.
+            ;(supabase.auth.getSession as jest.Mock).mockResolvedValue({
+                data: { session: { user: { id: 'user-1' } } },
+            })
+
+            // Both updateRecord lookups (by id, then by user_id) miss via maybeSingle; createRecord's
+            // existence check (select('id')...single()) also finds nothing, so it inserts localRow.
+            const { select } = mockAllSettingsLookupsMiss()
+            const insert = jest.fn().mockReturnValue({ error: null })
+            const updateBuilder: any = { error: null }
+            updateBuilder.eq = jest.fn(() => updateBuilder)
+            const update = jest.fn(() => updateBuilder)
+            ;(supabase.from as jest.Mock).mockReturnValue({ select, insert, update })
+
+            await connector.uploadData(db)
+
+            // The full local row was read from SQLite and handed to createRecord, which inserted it —
+            // repairing the dead-lettered upstream row instead of discarding the user's change.
+            expect(db.getAll).toHaveBeenCalledWith('SELECT * FROM settings WHERE id = ?', ['test-id-1'])
+            expect(insert).toHaveBeenCalledWith(localRow)
+            expect(Sentry.captureMessage).not.toHaveBeenCalled()
+            expect(mockTransaction.complete).toHaveBeenCalledTimes(1)
+        })
+
+        it('should captureMessage once and attempt no upstream write when a settings PATCH finds no upstream row and the local row is also gone', async () => {
+            const mockTransaction = {
+                crud: [
+                    {
+                        op: UpdateType.PATCH,
+                        table: 'settings',
+                        id: 'test-id-1',
+                        opData: { body_weight: 71.0 },
+                    },
+                ],
+                complete: jest.fn().mockResolvedValue(undefined),
+            }
+
+            // Local row deleted between queue and drain: getAll returns empty, so there is nothing to
+            // repair from — a genuine no-op that must still be surfaced via Sentry rather than vanish.
+            const db = {
+                getNextCrudTransaction: jest.fn().mockResolvedValue(mockTransaction),
+                getAll: jest.fn().mockResolvedValue([]),
+            } as unknown as AbstractPowerSyncDatabase
+
+            ;(supabase.auth.getSession as jest.Mock).mockResolvedValue({
+                data: { session: { user: { id: 'user-1' } } },
+            })
+
+            // Both lookups miss; createRecord must never run, so insert/update are present only to
+            // prove they are never called.
+            const { select } = mockAllSettingsLookupsMiss()
+            const insert = jest.fn().mockReturnValue({ error: null })
+            const update = jest.fn(() => ({ eq: jest.fn(() => ({ error: null })) }))
+            ;(supabase.from as jest.Mock).mockReturnValue({ select, insert, update })
+
+            await connector.uploadData(db)
+
+            expect(db.getAll).toHaveBeenCalledWith('SELECT * FROM settings WHERE id = ?', ['test-id-1'])
+            // Genuine no-op: no insert or update ever reached Supabase...
+            expect(insert).not.toHaveBeenCalled()
+            expect(update).not.toHaveBeenCalled()
+            // ...but the drop is now traceable instead of silent, tagged like every other dead-letter.
+            expect(Sentry.captureMessage).toHaveBeenCalledTimes(1)
+            expect(Sentry.captureMessage).toHaveBeenCalledWith(
+                expect.any(String),
+                { tags: { area: 'powersync-dead-letter' }, extra: { table: 'settings', opType: 'PATCH', opId: 'test-id-1' } }
+            )
             expect(mockTransaction.complete).toHaveBeenCalledTimes(1)
         })
 

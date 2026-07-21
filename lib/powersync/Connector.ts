@@ -1,5 +1,6 @@
 import { ENV } from '@/lib/env';
 import { supabase } from '@/lib/supabase/client';
+import type { SettingsRecord } from '@/lib/powersync/AppSchema';
 import { AbstractPowerSyncDatabase, CrudEntry, PowerSyncBackendConnector, UpdateType } from '@powersync/react-native';
 import * as Sentry from '@sentry/react-native';
 
@@ -182,10 +183,10 @@ export class Connector implements PowerSyncBackendConnector {
     for (const run of runs) {
       if (isForceSerialRun(run)) {
         for (const op of run) {
-          await this.processCrudOp(op);
+          await this.processCrudOp(op, database);
         }
       } else {
-        await this.processRunConcurrently(run);
+        await this.processRunConcurrently(run, database);
       }
     }
 
@@ -196,7 +197,7 @@ export class Connector implements PowerSyncBackendConnector {
   // Dispatch every op in a run through the bounded-concurrency pool: ops sharing the same row id
   // are chained to run strictly serially relative to each other (in original order), while
   // distinct-id ops may run at once, capped at MAX_CONCURRENT_UPLOAD_OPS in flight.
-  private async processRunConcurrently(run: CrudEntry[]): Promise<void> {
+  private async processRunConcurrently(run: CrudEntry[], database: AbstractPowerSyncDatabase): Promise<void> {
     const semaphore = new UploadSemaphore(MAX_CONCURRENT_UPLOAD_OPS);
     const lastByRowId = new Map<string, Promise<void>>();
 
@@ -207,7 +208,7 @@ export class Connector implements PowerSyncBackendConnector {
       const task = previousSameId.catch(() => {}).then(async () => {
         await semaphore.acquire();
         try {
-          await this.processCrudOp(op);
+          await this.processCrudOp(op, database);
         } finally {
           semaphore.release();
         }
@@ -221,9 +222,9 @@ export class Connector implements PowerSyncBackendConnector {
 
   // Execute a single CRUD op's existing single-row Supabase call, dead-lettering any permanent
   // (non-retryable) failure via isNonRetryableUploadError and rethrowing everything else so
-  // PowerSync retries the whole transaction. Byte-identical to the original per-op loop body -
-  // unaffected by whether the caller runs this serially or through the concurrency pool.
-  private async processCrudOp(op: CrudEntry): Promise<void> {
+  // PowerSync retries the whole transaction. The `database` handle is passed straight through to
+  // updateRecord, whose settings PATCH repair path reads the authoritative local row from SQLite.
+  private async processCrudOp(op: CrudEntry, database: AbstractPowerSyncDatabase): Promise<void> {
     const record = { ...op.opData, id: op.id };
     // Prepare record for Supabase (convert JSON arrays to PostgreSQL arrays)
     const preparedRecord = this.prepareRecordForSupabase(op.table, record);
@@ -236,7 +237,7 @@ export class Connector implements PowerSyncBackendConnector {
           break;
         case UpdateType.PATCH:
           // Update existing record in Supabase
-          await this.updateRecord(op.table, preparedRecord);
+          await this.updateRecord(op.table, preparedRecord, database);
           break;
         case UpdateType.DELETE:
           // Delete record from Supabase
@@ -293,7 +294,11 @@ export class Connector implements PowerSyncBackendConnector {
     }
   }
 
-  private async updateRecord(table: string, record: any) {
+  // Update an existing record in Supabase. For settings (unique on user_id; PATCH omits user_id)
+  // resolve the row by id, else by session user_id; if neither exists upstream, repair the missing
+  // row from the full local SQLite row via createRecord instead of silently dropping the change
+  // (`database` is threaded in solely for that local-row read). All other tables update by id.
+  private async updateRecord(table: string, record: any, database: AbstractPowerSyncDatabase) {
     const { id, ...updateData } = record;
     
     // Special handling for settings table (has unique constraint on user_id)
@@ -325,6 +330,23 @@ export class Connector implements PowerSyncBackendConnector {
           if (userSettings.data?.user_id) {
             user_id = userSettings.data.user_id;
           } else {
+            // No upstream settings row exists by id OR by session user_id. A bare return here
+            // would let uploadData mark this PATCH done and silently discard the change forever
+            // (and self-perpetuate: every later edit also queues as a PATCH that dies here). The
+            // partial PATCH diff can't be inserted directly (it omits NOT-NULL columns), but the
+            // local SQLite row for this id is fully populated - repair the missing upstream row
+            // from it through createRecord's existing select-then-insert-or-update path.
+            const localRows = await database.getAll<SettingsRecord>('SELECT * FROM settings WHERE id = ?', [id]);
+            if (localRows.length > 0) {
+              await this.createRecord(table, localRows[0]);
+              return;
+            }
+            // Local row is also gone (op stale - row deleted locally between queue and drain):
+            // a genuine no-op, but surface it via Sentry instead of vanishing untraced.
+            Sentry.captureMessage('Settings PATCH dropped: no upstream row and local row missing', {
+              tags: { area: 'powersync-dead-letter' },
+              extra: { table, opType: UpdateType.PATCH, opId: id },
+            });
             return;
           }
         } else {
