@@ -92,5 +92,26 @@ describe('useToday', () => {
             root.unmount()
         })
         expect(removeMock).toHaveBeenCalledTimes(1)
+        // The scheduled midnight timer must be cleared too, or it leaks and fires a
+        // setState-after-unmount.
+        expect(jest.getTimerCount()).toBe(0)
+    })
+
+    it('rolls over at midnight while foregrounded (no AppState event)', () => {
+        jest.setSystemTime(new Date(2026, 6, 13, 23, 59, 0))
+        const values: string[] = []
+        act(() => {
+            create(<Probe onRender={(v) => values.push(v)} />)
+        })
+        expect(values[values.length - 1]).toBe('2026-07-13')
+
+        // Move the clock past local midnight and run the scheduled timer forward —
+        // note no AppState listener is ever invoked in this test.
+        act(() => {
+            jest.setSystemTime(new Date(2026, 6, 14, 0, 0, 0))
+            jest.advanceTimersByTime(2 * 60 * 1000)
+        })
+
+        expect(values[values.length - 1]).toBe('2026-07-14')
     })
 })

@@ -275,6 +275,26 @@ After the rollback, EVERY remaining pending issue was gated against `docs/PRODUC
 
 ---
 
+## M14 — DONE — `fix(DONE/M14)` — 2026-07-20
+
+**Finding (audit line 99):** `useToday` recomputed the date key ONLY inside an AppState 'change' listener, so an app left foregrounded across local midnight never rolled over — streaks, week grouping, "Today" labels, and the nutrition `selectedDate` default stayed a day stale until a background/foreground cycle. (Write-time entry dates unaffected — they call `getDateKey(new Date())` directly.)
+
+**Fix (root cause):** added a self-rescheduling midnight `setTimeout` to the same effect — next local midnight via wall-clock construction (`new Date(y,m,d+1,0,0,0,0)`, DST-safe, +1s buffer), which on fire re-checks and reschedules. The AppState 'active' listener is kept unchanged as the iOS-timer-suspension catch-up. Cleanup clears BOTH `sub.remove()` and the timer. + a foregrounded-midnight-rollover regression test (fails pre-fix, confirmed via git-stash) and a `getTimerCount()===0` unmount-leak assertion.
+
+**file_review:** no edits. Verified DST-safe timing, recompute+reschedule, AppState listener byte-identical, dual cleanup, deps `[]`. Considered+rejected reusing `dateHelper.addDays()` (brief prescribes the literal construction; both DST-equivalent).
+
+**wide_review:** no edits. All `useToday` consumers pass the unchanged string return; only NutritionContext actively mutates on `todayKey` (the documented snap). Flagged a pre-existing divergent twin (follow-up #2).
+
+**Blast-radius fix (M14's timer exposed a latent test leak):** the new `setTimeout` made `DatePickerPopup.test.tsx` leak a real timer — it renders `DatePickerPopup → Calendar → useToday` (real, unmocked) and never unmounted, so the midnight timer's passive mount effect kept the Jest worker alive ("worker failed to exit gracefully"; pinpointed via `--detectOpenHandles` → `useToday.ts:25` deep in a react-test-renderer tree). Added `act(() => tree.unmount())` there so Calendar's cleanup clears the timer. Confirmed the SOLE leaker (full suite clean once fixed).
+
+**verify:** tsc **0**, jest **774/774**, **no worker-leak warning**. GREEN.
+
+**FOLLOW-UPS (documented, out of M14's scope):**
+1. **NutritionContext midnight-snap (UX):** `useEffect(() => setSelectedDate(new Date()), [todayKey])` now fires LIVE at foregrounded midnight, so a user viewing/editing a past-dated entry gets snapped to today mid-session. Accepted per adjudication; a narrow guard (only auto-follow today when the user hasn't navigated away) is a possible follow-up.
+2. **WorkoutContext week-boundary twin:** `trainedDaysThisWeek` (index.tsx:399-402) memos on `[logs]` only (captures `getWeekStart(new Date())` at compute time) while `progress.tsx`'s `weekStart` keys on `todayKey` and now rolls at midnight — so crossing Sat→Sun midnight foregrounded, the Sets bars advance while the ActivityBanner dots lag until the next log/foreground. Transient/self-healing. Durable fix: call `useToday()` in WorkoutContext and add `todayKey` to that memo's deps.
+
+---
+
 ## H9 — DONE — `fix(DONE/H9)` — 2026-07-20
 
 **Finding:** ingredient-row quantities were persisted via `sanitizeMacro` (1-decimal round): 0.25 servings → 0.3 (+20%). Stored entry totals were computed from the raw value, so items stopped reconciling with totals, and merely opening `editEntry` + tapping Save silently rewrote the meal's macros with no user edit.

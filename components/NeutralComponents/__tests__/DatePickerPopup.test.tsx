@@ -26,5 +26,8 @@ describe('DatePickerPopup', () => {
         act(() => confirm.props.onPress())
         expect(onConfirm).toHaveBeenCalledTimes(1)
         expect(getDateKey(onConfirm.mock.calls[0][0])).toBe('2020-05-10')
+        // Unmount so the embedded Calendar's useToday midnight timer is cleared; otherwise
+        // it leaks a real timer and the Jest worker can't exit gracefully.
+        act(() => tree.unmount())
     })
 })
