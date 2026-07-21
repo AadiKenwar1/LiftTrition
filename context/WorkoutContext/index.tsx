@@ -1,5 +1,5 @@
 import { useAuth } from '@/context/AuthContext'
-import { convertExerciseLibraryToList, exerciseLib } from '@/context/WorkoutContext/exerciseLibrary'
+import { convertExerciseLibraryToList, exerciseLib, exerciseLibAsList } from '@/context/WorkoutContext/exerciseLibrary'
 import { powerSync } from '@/lib/powersync/system'
 import { useAsyncLoad } from '@/lib/hooks/useAsyncLoad'
 import { lastExerciseKey } from '@/lib/utils/userStorage'
@@ -26,7 +26,7 @@ import {
 } from './database/powersyncStore'
 import { deleteUserExercise } from './functions/createExerciseFunctions'
 import { deleteExercise } from './functions/exerciseFunctions'
-import { calculateFatigueFactor, calculateFatiguePercentage, calculateFatigueSummary, getFatigueFeedback } from './functions/fatigueFunctions'
+import { calculateFatigueFactor } from './functions/fatigueFunctions'
 import { getOneRepMaxData } from './functions/graphFunctions'
 import { deleteLog as deleteLogFromState } from './functions/logFunctions'
 import { validateLog } from './functions/validator'
@@ -43,7 +43,6 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
     const [exercises, setExercisesState] = useState<Exercise[]>([])
     const [logs, setLogsState] = useState<Log[]>([])
     const [userExercises, setUserExercisesState] = useState<ExerciseLib>({})
-    const [fullExerciseLib, setFullExerciseLib] = useState<ExerciseLib>(exerciseLib)
     const [lastExercise, setLastExercise] = useState<string>('')
 
     const { userID } = useAuth()
@@ -339,18 +338,6 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
     // Read-only computation handlers
     // ------------------------------------------------------------------
 
-    const handleCalculateFatiguePercentage = useCallback(
-        (numDays: number, activityLevel: string, currentBodyWeight: number, bwProgress: Record<string, number>) =>
-            calculateFatiguePercentage(numDays, logs, exercises, fullExerciseLib, activityLevel, currentBodyWeight, bwProgress),
-        [logs, exercises, fullExerciseLib]
-    )
-
-    const handleGetFatigueSummary = useCallback(
-        (activityLevel: string, currentBodyWeight: number, bwProgress: Record<string, number>) =>
-            calculateFatigueSummary(logs, exercises, fullExerciseLib, activityLevel, currentBodyWeight, bwProgress),
-        [logs, exercises, fullExerciseLib]
-    )
-
     const handleGetOneRepMaxData = useCallback(
         (exerciseName: string) => getOneRepMaxData(exerciseName, exercises, logs),
         [exercises, logs]
@@ -374,18 +361,29 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
     )
 
     // ------------------------------------------------------------------
-    // Effects
+    // Derived exercise library
     // ------------------------------------------------------------------
 
-    // Merge base library with user exercises whenever userExercises changes
-    useEffect(() => {
-        setFullExerciseLib({ ...exerciseLib, ...userExercises })
-    }, [userExercises])
+    // Merge the static base library with the user's custom exercises. With no custom exercises
+    // (the common case) return the shared module object directly — a stable reference that keeps
+    // downstream memos and consumers from churning on every unrelated render.
+    const fullExerciseLib = useMemo<ExerciseLib>(
+        () => (Object.keys(userExercises).length === 0 ? exerciseLib : { ...exerciseLib, ...userExercises }),
+        [userExercises],
+    )
 
-    // Convert fullExerciseLib to list format for ScrollableList components
-    const fullExerciseLibAsList = useMemo(() => {
-        return convertExerciseLibraryToList(fullExerciseLib)
-    }, [fullExerciseLib])
+    // Convert fullExerciseLib to list format for ScrollableList components. fullExerciseLib
+    // already collapses to the shared exerciseLib reference in the no-custom-exercises case, so
+    // that same identity check tells us whether to reuse the precomputed list (identical content)
+    // instead of remapping every entry.
+    const fullExerciseLibAsList = useMemo(
+        () => (fullExerciseLib === exerciseLib ? exerciseLibAsList : convertExerciseLibraryToList(fullExerciseLib)),
+        [fullExerciseLib],
+    )
+
+    // ------------------------------------------------------------------
+    // Effects
+    // ------------------------------------------------------------------
 
     // Load lastExercise from AsyncStorage when user changes
     useEffect(() => {
@@ -447,7 +445,7 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
 
     // Memoized provider value: a stable reference so consumers re-render only when an exposed
     // field changes. Every handler is already useCallback-stable (re-keying only when its own
-    // userID / state-array inputs change); listing all 35 fields keeps the dep array exhaustive
+    // userID / state-array inputs change); listing all 32 fields keeps the dep array exhaustive
     // so no consumer can ever read a stale handler or value.
     const value = useMemo(
         () => ({
@@ -477,9 +475,6 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
             handleUpdateExerciseOrder,
             handleAddLog,
             handleDeleteLog,
-            handleCalculateFatiguePercentage,
-            handleGetFatigueSummary,
-            getFatigueFeedback,
             handleGetOneRepMaxData,
             handleGetSetsData,
             handleGetSetsForWeek,
@@ -514,9 +509,6 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
             handleUpdateExerciseOrder,
             handleAddLog,
             handleDeleteLog,
-            handleCalculateFatiguePercentage,
-            handleGetFatigueSummary,
-            getFatigueFeedback,
             handleGetOneRepMaxData,
             handleGetSetsData,
             handleGetSetsForWeek,
