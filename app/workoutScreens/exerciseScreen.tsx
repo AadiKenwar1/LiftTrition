@@ -40,7 +40,7 @@ export default function ExerciseScreen() {
         return map
     }, [fullExerciseLib, activeExercises])
 
-    useLayoutEffect(() => navigation.setOptions({ title: `${workout?.name}` }), [navigation, workout?.name])
+    useLayoutEffect(() => navigation.setOptions({ title: workout?.name ?? 'Exercises' }), [navigation, workout?.name])
 
     function handleEdit(exercise: Exercise) {
         Alert.alert(`${exercise.name}`, ``, [
