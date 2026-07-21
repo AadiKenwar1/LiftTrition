@@ -1,10 +1,14 @@
 import { fonts, useColors } from '@/context/ThemeContext'
 import { useSettings } from '@/context/SettingsContext'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { Animated, StyleSheet, Text, View } from 'react-native'
+import React, { useEffect, useMemo, useRef } from 'react'
+import { Animated, StyleSheet, TextInput, View } from 'react-native'
+import Reanimated, { cancelAnimation, Easing, useAnimatedProps, useSharedValue, withTiming } from 'react-native-reanimated'
 import Svg, { Circle, Defs, G, LinearGradient, Stop } from 'react-native-svg'
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle)
+// TextInput whose native `text` prop is driven on the UI thread, so the count-up number
+// updates each frame without a React re-render (the ReText pattern).
+const AnimatedTextInput = Reanimated.createAnimatedComponent(TextInput)
 
 function lerpHex(c1: string, c2: string, t: number): string {
     const r1 = parseInt(c1.slice(1, 3), 16)
@@ -51,32 +55,39 @@ export default function ProgressWheel({ percent = 0, size = 120, strokeWidth = 1
         ]
     }, [mode, colors])
 
-    // Animated values
+    // Arc fill: RN Animated value, native-driven (drives strokeDashoffset, never re-renders).
     const animatedValue = useRef(new Animated.Value(0)).current
-    const numberValue = useRef(new Animated.Value(0)).current
+    // Count-up number: Reanimated shared value animated on the UI thread — no per-frame setState.
+    // Seeded to the rounded target so first paint (before the effect below starts the count-up)
+    // already shows the right number, matching the native `defaultValue` seed below.
+    const initialPercent = Math.round(actualPercent)
+    const numberValue = useSharedValue(initialPercent)
 
-    const [displayPercent, setDisplayPercent] = useState<number>(Math.round(actualPercent))
+    // Push the formatted number to the label's native `text` prop from the UI thread, so the
+    // count-up updates without re-rendering the SVG/gradient tree each frame.
+    const numberProps = useAnimatedProps<{ text: string; defaultValue: string }>(() => {
+        const label = `${Math.round(numberValue.value)}%`
+        return { text: label, defaultValue: label }
+    })
 
     useEffect(() => {
-        Animated.timing(animatedValue, {
+        const arc = Animated.timing(animatedValue, {
             toValue: wheelPercent,
             duration: ANIMATION_DURATION,
             useNativeDriver: true,
-        }).start()
-
-        numberValue.setValue(displayPercent)
-        Animated.timing(numberValue, {
-            toValue: actualPercent,
-            duration: ANIMATION_DURATION,
-            useNativeDriver: true,
-        }).start()
-
-        const listener = numberValue.addListener(({ value }) => {
-            setDisplayPercent(Math.round(value))
         })
+        arc.start()
 
+        // Count the number up in lockstep with the arc: same duration and the same in-out ease
+        // that RN's Animated.timing uses by default, so the motion is visually identical.
+        numberValue.value = withTiming(actualPercent, { duration: ANIMATION_DURATION, easing: Easing.inOut(Easing.ease) })
+
+        // Cancel both animations on unmount / dep-change so a torn-down wheel leaves no running
+        // timer (prevents overlapping count-ups and keeps the jest worker from leaking the
+        // Reanimated timing handle).
         return () => {
-            numberValue.removeListener(listener)
+            arc.stop()
+            cancelAnimation(numberValue)
         }
     }, [actualPercent, wheelPercent])
 
@@ -131,7 +142,17 @@ export default function ProgressWheel({ percent = 0, size = 120, strokeWidth = 1
                 </G>
             </Svg>
 
-            <View style={styles.percentContainer}>{children ?? <Text style={[styles.percentText, { color: colors.text, fontSize }]}>{displayPercent}%</Text>}</View>
+            <View style={styles.percentContainer}>
+                {children ?? (
+                    <AnimatedTextInput
+                        editable={false}
+                        underlineColorAndroid="transparent"
+                        defaultValue={`${initialPercent}%`}
+                        animatedProps={numberProps}
+                        style={[styles.percentText, styles.percentInput, { color: colors.text, fontSize, width: size }]}
+                    />
+                )}
+            </View>
         </View>
     )
 }
@@ -149,5 +170,13 @@ const styles = StyleSheet.create({
     percentText: {
         letterSpacing: -1,
         fontFamily: fonts.bold,
+    },
+    // Neutralize TextInput chrome so the animated label reads exactly like the old <Text>:
+    // no default padding, centered across the wheel width, and never intercepting touches.
+    percentInput: {
+        padding: 0,
+        textAlign: 'center',
+        includeFontPadding: false,
+        pointerEvents: 'none',
     },
 })

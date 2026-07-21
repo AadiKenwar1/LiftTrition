@@ -45,5 +45,9 @@ describe('DailyIntakeCard', () => {
         expect(text).toContain(' / 250g')
         expect(text).toContain('130')
         expect(text).toContain(' / 160g')
+        // Unmount so the embedded ProgressWheel's Reanimated count-up timer is cancelled;
+        // otherwise the withTiming handle leaks a real timer and the jest worker can't exit
+        // gracefully (same teardown requirement as DatePickerPopup's useToday timer).
+        act(() => tree.unmount())
     })
 })
