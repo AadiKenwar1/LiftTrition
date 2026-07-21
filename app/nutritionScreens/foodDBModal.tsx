@@ -293,7 +293,7 @@ export default function FoodDBModal() {
                                                 </View>
                                             </View>
                                         </View>
-                                        <TouchableOpacity style={styles.removeButton} onPress={() => handleRemoveItem(item.id)} activeOpacity={0.5}>
+                                        <TouchableOpacity style={styles.removeButton} onPress={() => handleRemoveItem(item.id)} activeOpacity={0.5} hitSlop={8} accessibilityRole="button" accessibilityLabel="Remove item">
                                             <X size={14} color={colors.nutrition} strokeWidth={3} />
                                         </TouchableOpacity>
                                     </View>

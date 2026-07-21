@@ -156,7 +156,7 @@ export default function SavedNutritionModal() {
                                         </View>
                                     </View>
                                 </View>
-                                <TouchableOpacity style={styles.removeButton} onPress={() => handleRemoveStaged(row.lineId)} activeOpacity={0.5}>
+                                <TouchableOpacity style={styles.removeButton} onPress={() => handleRemoveStaged(row.lineId)} activeOpacity={0.5} hitSlop={8} accessibilityLabel="Remove item">
                                     <X size={14} color={colors.nutrition} strokeWidth={3} />
                                 </TouchableOpacity>
                             </View>

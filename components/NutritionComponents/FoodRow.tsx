@@ -42,7 +42,7 @@ export default function FoodRow({ name, brandName, servingSize, macros, onAdd, a
                     </View>
                 )}
             </View>
-            <TouchableOpacity style={[styles.addButton, disabled && styles.addButtonDisabled]} onPress={onAdd} activeOpacity={0.5} disabled={disabled}>
+            <TouchableOpacity style={[styles.addButton, disabled && styles.addButtonDisabled]} onPress={onAdd} activeOpacity={0.5} disabled={disabled} hitSlop={6} accessibilityLabel="Add food">
                 {loading ?
                     <ActivityIndicator size="small" color={colors.placeholder} />
                 :   <Plus size={18} color={added ? colors.placeholder : colors.nutrition} strokeWidth={2.5} />}

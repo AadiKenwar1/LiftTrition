@@ -211,7 +211,7 @@ export default function EditEntry() {
                             <View style={styles.servRow}>
                                 <Text style={styles.servLabel}>Servings</Text>
                                 <View style={styles.stepRow}>
-                                    <TouchableOpacity style={styles.stepBtn} onPress={() => stepQty(row.key, -0.5)} activeOpacity={0.6}>
+                                    <TouchableOpacity style={styles.stepBtn} onPress={() => stepQty(row.key, -0.5)} activeOpacity={0.6} hitSlop={{ top: 8, bottom: 8, left: 14, right: 2 }} accessibilityLabel="Decrease servings">
                                         <Minus size={13} color={colors.nutrition} strokeWidth={2.5} />
                                     </TouchableOpacity>
                                     <TextInput
@@ -223,7 +223,7 @@ export default function EditEntry() {
                                         placeholderTextColor={colors.placeholder}
                                         selectTextOnFocus
                                     />
-                                    <TouchableOpacity style={styles.stepBtn} onPress={() => stepQty(row.key, 0.5)} activeOpacity={0.6}>
+                                    <TouchableOpacity style={styles.stepBtn} onPress={() => stepQty(row.key, 0.5)} activeOpacity={0.6} hitSlop={{ top: 8, bottom: 8, left: 2, right: 14 }} accessibilityLabel="Increase servings">
                                         <Plus size={13} color={colors.nutrition} strokeWidth={2.5} />
                                     </TouchableOpacity>
                                 </View>

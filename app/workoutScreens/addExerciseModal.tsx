@@ -136,7 +136,7 @@ export default function AddExerciseModal() {
                         {selectedItems.map((item) => (
                             <View key={item.id} style={styles.chip}>
                                 <Text style={styles.chipText}>{item.title}</Text>
-                                <TouchableOpacity onPress={() => handleRemoveStaged(item.id)} activeOpacity={0.5} hitSlop={6} style={styles.chipRemove}>
+                                <TouchableOpacity onPress={() => handleRemoveStaged(item.id)} activeOpacity={0.5} hitSlop={{ top: 6, bottom: 6, left: 12, right: 14 }} style={styles.chipRemove} accessibilityLabel="Remove exercise">
                                     <X size={12} color={colors.workout} strokeWidth={3} />
                                 </TouchableOpacity>
                             </View>
