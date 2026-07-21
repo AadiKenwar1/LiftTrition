@@ -34,7 +34,7 @@ export default function SavedEntry({ name, calories, protein, carbs, fats, onAdd
                         {/* Calories - Full Width */}
                         <View style={styles.caloriesRow}>
                             <Text style={styles.caloriesValue}>{calories}</Text>
-                            <Text style={styles.caloriesLabel}>calories</Text>
+                            <Text style={styles.caloriesLabel}>kcal</Text>
                         </View>
 
                         {/* Macros Row */}
@@ -141,7 +141,7 @@ function makeStyles(colors: Colors) {
             flexDirection: 'row',
             alignItems: 'center',
             backgroundColor: colors.surfaceInset,
-            borderRadius: 10,
+            borderRadius: radius.macroCell,
             paddingVertical: 8,
             paddingHorizontal: 10,
             borderWidth: StyleSheet.hairlineWidth,
@@ -183,7 +183,7 @@ function makeStyles(colors: Colors) {
         iconCircle: {
             width: 36 * 1.5,
             height: 36 * 1.5,
-            borderRadius: 18 * 1.5,
+            borderRadius: radius.iconButton,
             backgroundColor: colors.nutrition + '22',
             justifyContent: 'center',
             alignItems: 'center',
@@ -193,7 +193,7 @@ function makeStyles(colors: Colors) {
         icon2Circle: {
             width: 36,
             height: 36,
-            borderRadius: 18,
+            borderRadius: radius.iconButton,
             backgroundColor: colors.destructive + '1F',
             justifyContent: 'center',
             alignItems: 'center',
