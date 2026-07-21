@@ -78,7 +78,7 @@ export default function ArchiveModal() {
                                     : confirmDelete({ title: `Delete ${item.name}?`, message: 'Deleting an exercise will delete all logs associated with it. This cannot be undone.', onConfirm: () => handleDeleteExercise(item.id) })
                             }>
                             <View style={[styles.iconCircle, styles.deleteIconCircle]}>
-                                <Trash size={20} color={colors.destructive} strokeWidth={2.5} />
+                                <Trash size={20 * 1.5} color={colors.destructive} strokeWidth={2.5} />
                             </View>
                         </TouchableOpacity>
                     </View>
@@ -113,7 +113,7 @@ export default function ArchiveModal() {
                 ListEmptyComponent={
                     <View style={styles.emptyContainer}>
                         <Text style={styles.emptyText}>No archived {logType} yet</Text>
-                        <Text style={styles.emptySubtext}>Click the pencil icon on a {logType.slice(0, -1)} for the option to archive it</Text>
+                        <Text style={styles.emptySubtext}>Tap the pencil icon on a {logType.slice(0, -1)} for the option to archive it</Text>
                     </View>
                 }
             />
@@ -250,10 +250,9 @@ function makeStyles(colors: Colors) {
             borderWidth: 1.5,
             borderColor: colors.workout + '80',
         },
+        // Composed on top of iconCircle (style={[iconCircle, deleteIconCircle]}); inherits its 54pt size so
+        // the delete circle matches the restore circle — only the destructive colors differ.
         deleteIconCircle: {
-            width: 36,
-            height: 36,
-            borderRadius: 18,
             justifyContent: 'center',
             alignItems: 'center',
             borderWidth: 1,
