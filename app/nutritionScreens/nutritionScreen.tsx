@@ -49,7 +49,16 @@ export default function NutritionScreen() {
             {
                 text: 'Save',
                 style: 'default',
-                onPress: () => handleSaveNutrition(nutritionEntry),
+                onPress: async () => {
+                    const result = await handleSaveNutrition(nutritionEntry)
+                    if (result === null) return // already alerted by validation or persist-failure handling
+                    const trimmedName = nutritionEntry.name.trim()
+                    if (result !== trimmedName) {
+                        Alert.alert('Saved a Copy', `A meal named "${trimmedName}" already exists, so this was saved as "${result}".`)
+                    } else {
+                        Alert.alert('Saved to Meals', `"${result}" was added to My Meals.`)
+                    }
+                },
             },
             {
                 text: 'Delete',

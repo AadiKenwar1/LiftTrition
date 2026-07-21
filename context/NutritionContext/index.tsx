@@ -12,7 +12,7 @@ import { getMacroDataForGraph, getMacroForWeek, getMacrosForDate, getNutritionSt
 import { NutritionContextInterface, NutritionEntry } from "./types";
 import uuid from 'react-native-uuid';
 
-function savedMealName(name: string, existing: { name: string }[]): string {
+export function savedMealName(name: string, existing: { name: string }[]): string {
     const base = name.trim()
     const taken = existing.map((e) => e.name.trim().toLowerCase())
     if (!taken.includes(base.toLowerCase())) return base
@@ -98,7 +98,12 @@ export const NutritionProvider = ({ children }: PropsWithChildren) => {
         }
     }, [userID, reloadFromDisk])
 
-    const handleSaveNutrition = useCallback(async (logEntry: NutritionEntry) => {
+    // Saves a logged entry into My Meals under a dedup-numbered name, awaiting the
+    // full path (including the async upsert) before resolving so the caller can give
+    // real feedback. Returns the final saved name on success, or null when the
+    // failure was already alerted elsewhere (validation failure or persist failure -
+    // reportPersistFailure shows its own alert and rolls back, so no caller alert).
+    const handleSaveNutrition = useCallback(async (logEntry: NutritionEntry): Promise<string | null> => {
         const now = new Date()
         const savedEntry: NutritionEntry = {
             ...logEntry,
@@ -109,11 +114,14 @@ export const NutritionProvider = ({ children }: PropsWithChildren) => {
         }
 
         const saved = saveNutrition(savedEntry, setSavedNutritionEntries);
-        if (!saved || !userID) return;
+        if (!saved) return null;
+        if (!userID) return savedEntry.name;
         try {
             await upsertSavedNutritionEntry(savedEntry);
+            return savedEntry.name;
         } catch (e) {
             reportPersistFailure('nutrition', e, { reload: reloadFromDisk });
+            return null;
         }
     }, [userID, savedNutritionEntries, reloadFromDisk])
 
