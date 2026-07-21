@@ -39,7 +39,7 @@ export default function AdjustTrainingScreen() {
         <View style={styles.container}>
             <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
                 <Text style={styles.titleText}>How active are you?</Text>
-                <Text style={styles.subtitleText}>This sets your daily calorie burn — saving updates your nutrition goals and fatigue budget.</Text>
+                <Text style={styles.subtitleText}>This sets your daily calorie burn — saving updates your nutrition goals.</Text>
 
                 <View style={styles.options}>
                     {FREQUENCIES.map((f, i) => (

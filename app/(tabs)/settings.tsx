@@ -106,7 +106,7 @@ export default function SettingsScreen() {
         {
             icon: FlaskConical,
             title: 'How It Works',
-            subtitle: 'The science behind your goals and fatigue score',
+            subtitle: 'The science behind your goals',
             onPress: () => router.push('/settingsScreens/howItWorks'),
         },
         {
