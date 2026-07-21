@@ -451,3 +451,29 @@ C1, C3, C4, H1, H2, H3, H4, H9, H15, M23 — every `[LAUNCH-BLOCKER]` issue impl
 **verify:** tsc **0 errors**, jest **72 suites / 744 tests** (71/732 + graphSeries suite + bodyweight regression test), 0 failures. graphFunctions/volumeFunctions unchanged & green. GREEN.
 
 **FOLLOW-UP (real, out of H10's leading-zero scope — its own issue):** wide_review found body-weight seeds with `earliestWeight` (the earliest-EVER weigh-in), which is correct only when ≤1 weigh-in predates the 365-day window. A long-tenured user with ≥2 weigh-ins older than a year should seed the leading days from the MOST-RECENT weigh-in on/before window-start, not the earliest-ever — otherwise the 1-year "Change" is skewed by the inter-weigh-in drift. Strictly better than the pre-fix leading-0 (no regression), and matches the single-pre-window-entry 400-day test, so accepted for H10. The correct fix computes the initial carry from the latest entry ≤ startDate INSIDE buildDailySeries (startDate isn't known to the caller), changing the helper's seeding contract — needs its own test, hence a separate follow-up.
+
+## Wave A + L28 — DONE — parallelized batch — 2026-07-20
+
+**Method (speed change per user directive):** switched from serial one-issue-at-a-time to PARALLEL implementers on DISJOINT files + tiered review. 5 implementers (M28, M32, L12, L16, L21) ran concurrently in the main tree (edit-only; no git/tsc/jest — driver verifies centrally); L28 done driver-direct. One combined verify gate + per-issue commits. Review tiered by blast radius: single file_review for logic (M28, L12, L16); driver-eyeball for mechanical/cosmetic (M32, L21, L28). Full jest deferred to end-of-run.
+
+**Issues (all audit-gated, committed):**
+- L28 (audit 140, 18b6384) — removed "fatigue budget"/"fatigue score" copy (adjustTraining + settings).
+- L21 (audit 135, 2b7d23d) — SavedEntry drift: "calories"->"kcal", 3 hardcoded radii -> tokens (iconButton=999 clamps to circle; macroCell=9 matches Entry). Entry already correct.
+- M32 (audit 114, a50a1f4) — hitSlop + a11y labels on 5 sub-44pt controls; additive only.
+- M28 (audit 110, d69cc39) — notif toggle dead-end: showDenied from live OS state + tap-time recheck + AppState refresh + props-only NotificationMasterCard.
+- L12 (audit 127, 025577e) — fatigue/1RM window -> local start-of-day, -(numDays-1); boundary tests at 00:05/23:55.
+- L16 (audit 131, 9de1dae) — ProgressWheel number -> Reanimated UI-thread count-up (no per-frame setState).
+
+**Reviews:** M28/L12/L16 file_review clean (M28 +2 simplifies, L16 +1 simplify, L12 none). M16 (90d113f, earlier) got full DUAL review; wide_review caught a latent providerMemo mock gap.
+
+**Central verify-gate catches (why it matters under lighter review):**
+1. L12 broke 3 pre-existing fatigue tests — synthetic `new Date('2026-01-31')` parses as UTC-midnight = prior LOCAL day (America/New_York), correctly excluded from the tightened 1-day window. Fixed test dates to `T12:00:00` local; reviewer independently confirmed the production change is correct and the dates genuinely needed fixing (not gaming).
+2. L16 leaked the jest worker (Reanimated withTiming timer). Single review verified the component but not consumer-test blast radius. Root-caused via stash-bisect to L16; fixed with a useEffect cancelAnimation cleanup + explicit unmount in DailyIntakeCard.test.tsx.
+
+**Follow-ups logged (NOT done):**
+- M28: promote local getPermissionState -> lib/notifications/permissions.ts + unit test + Dev Hub wiring (single-file parallel scope too tight for M28's 4-file brief).
+- L12: pre-existing bwProgress test has the same UTC-parse fragility (untouched buildRefByName path, out of scope).
+
+**Lessons:** (a) scope parallel implementers to their FULL disjoint file-set, not one file, when the brief legitimately spans files. (b) lighter single review must be backstopped by the central verify gate incl. clean-worker-exit — it caught both the L12 test breakage and the L16 timer leak.
+
+---
