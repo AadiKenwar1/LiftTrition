@@ -5,11 +5,10 @@ import { forceSignOut } from '@/context/AuthContext/functions/accountFunctions'
 import { useSettings } from '@/context/SettingsContext'
 import { withRegeneratedTargets } from '@/context/SettingsContext/functions/bodyWeightFunctions'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
-import { isUploadFlushError, UploadFlushNotConnectedError } from '@/lib/powersync/FlushUploads'
+import { confirmSignOut } from '@/lib/utils/confirmSignOut'
 import { calculateAge } from '@/lib/utils/dateHelper'
 import { inchesToFeetInches, lbsToKg, weightUnitLabel } from '@/lib/utils/unitConversions'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
-import * as Sentry from '@sentry/react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { LogOut, Pencil, Trash2 } from 'lucide-react-native'
@@ -75,54 +74,8 @@ export default function ProfileScreen() {
         return type.charAt(0).toUpperCase() + type.slice(1)
     }
 
-    const handleSignOut = async () => {
-        Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
-            { text: 'Cancel', style: 'cancel' },
-            {
-                text: 'Sign Out',
-                style: 'destructive',
-                onPress: async () => {
-                    setSignOutLoading(true)
-                    try {
-                        await signOut()
-                    } catch (error: unknown) {
-                        if (isUploadFlushError(error)) {
-                            const offline = error instanceof UploadFlushNotConnectedError
-                            // Lead-up trail only — this fires before the user's Force/Cancel choice,
-                            // and Cancel means no data was lost, so it isn't a capturable failure yet.
-                            Sentry.addBreadcrumb({ category: 'sign-out', level: 'info', message: offline ? 'sign_out_offline' : 'sign_out_still_syncing' })
-                            const title = offline ? "You're offline" : 'Still syncing'
-                            const message = offline ? 'Sign out anyway? Unsynced data will be lost.' : "We're still uploading your data. You can wait and try again, or force sign out (unsynced data may be lost)."
-                            Alert.alert(title, message, [
-                                { text: 'Cancel', style: 'cancel' },
-                                {
-                                    text: 'Force sign out',
-                                    style: 'destructive',
-                                    onPress: async () => {
-                                        setSignOutLoading(true)
-                                        try {
-                                            await forceSignOut()
-                                        } catch (e: unknown) {
-                                            Alert.alert('Error', e instanceof Error ? e.message : 'Failed to force sign out')
-                                        } finally {
-                                            setSignOutLoading(false)
-                                        }
-                                    },
-                                },
-                            ])
-                        } else {
-                            // Genuinely unexpected sign-out failure (e.g. supabase.auth.signOut error,
-                            // disconnectAndClearPowerSync failing on the normal path) — real ops signal.
-                            Sentry.captureException(error, { tags: { area: 'sign-out-failure' } })
-                            Alert.alert('Error', error instanceof Error ? error.message : 'Failed to sign out')
-                        }
-                    } finally {
-                        setSignOutLoading(false)
-                    }
-                },
-            },
-        ])
-    }
+    // Shared confirm + offline/force-fallback flow (also used by onboarding's sign-out escape).
+    const handleSignOut = () => confirmSignOut({ loading: signOutLoading, setLoading: setSignOutLoading, signOut, forceSignOut })
 
     const handleDeleteAccount = () => {
         Alert.alert('Delete Account', 'Are you sure? This cannot be undone. All your data will be permanently deleted.', [

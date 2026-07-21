@@ -50,11 +50,16 @@ describe('_layout.tsx dev-only route guarding (M22)', () => {
         expect(owningGroup!.guard).toContain('__DEV__')
     })
 
-    it('keeps the plain session-gated production group free of dev-only routes', () => {
-        const plainSessionGroup = groups.find((g) => g.guard.includes('!!session') && !g.guard.includes('__DEV__'))
-        expect(plainSessionGroup).toBeDefined()
-        expect(plainSessionGroup!.body).not.toMatch(/name="devTest\//)
-        expect(plainSessionGroup!.body).not.toContain('name="settingsScreens/devStatsModal"')
+    it('keeps the production (tabs) group free of dev-only routes', () => {
+        // Anchor on the (tabs) route the production landing group registers, NOT on a bare "!!session"
+        // guard match. Since M31 the onboarding group also carries "!!session" (guard is
+        // "!!session && !settings.onboardingComplete"), so a guard-string heuristic matches onboarding
+        // first and silently stops inspecting the (tabs) group this test exists to pin. The (tabs) route
+        // lives only in this group; the __DEV__ exclusion keeps it the production (non-dev) group.
+        const productionGroup = groups.find((g) => g.body.includes('name="(tabs)"') && !g.guard.includes('__DEV__'))
+        expect(productionGroup).toBeDefined()
+        expect(productionGroup!.body).not.toMatch(/name="devTest\//)
+        expect(productionGroup!.body).not.toContain('name="settingsScreens/devStatsModal"')
     })
 
     it('preserves dev-build gating: the __DEV__ group ANDs onto (not replaces) the session/context/onboarding preconditions', () => {

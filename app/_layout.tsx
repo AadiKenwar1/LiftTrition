@@ -167,7 +167,7 @@ function StackLayout() {
                 <Stack.Protected guard={!session}>
                     <Stack.Screen name="authScreens/login" options={{ headerShown: false }} />
                 </Stack.Protected>
-                <Stack.Protected guard={!settings.onboardingComplete}>
+                <Stack.Protected guard={!!session && !settings.onboardingComplete}>
                     <Stack.Screen name="onboardingScreens/goals" options={{ headerShown: false }} />
                     <Stack.Screen name="onboardingScreens/obstacles" options={{ headerShown: false }} />
                     <Stack.Screen name="onboardingScreens/aboutYou" options={{ headerShown: false }} />
