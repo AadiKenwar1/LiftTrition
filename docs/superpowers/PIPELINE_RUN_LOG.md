@@ -477,3 +477,27 @@ C1, C3, C4, H1, H2, H3, H4, H9, H15, M23 — every `[LAUNCH-BLOCKER]` issue impl
 **Lessons:** (a) scope parallel implementers to their FULL disjoint file-set, not one file, when the brief legitimately spans files. (b) lighter single review must be backstopped by the central verify gate incl. clean-worker-exit — it caught both the L12 test breakage and the L16 timer leak.
 
 ---
+
+## Wave B + L13 — DONE — parallelized batch — 2026-07-21
+
+**Method:** Continued parallel-implementers-on-disjoint-files + tiered review (user's "parallelize + tier reviews" directive). Wave B implementers (M22, M27, L17) + eyeball issues (L29, L31) ran the prior turn; this turn dispatched their reviews concurrently on disjoint files and PULLED L13 FORWARD (its files — `lib/notifications/*` — overlapped nothing in Wave B). Tier by blast radius: M22 DUAL (file + wide — routing semantics aren't covered by tsc/tests); M27/L17/L13 SINGLE file_review (isolated logic); L29/L31 driver-eyeball (one-line nav / copy). One combined verify gate (tsc + ~full jest) + per-issue commits staged by EXPLICIT PATH.
+
+**Issues (all audit-gated, committed):**
+- L29 (audit 141, c874686) — nutrition adjust wizard `router.push` -> `dismissTo('/(tabs)/settings')` so the finished wizard leaves history. Eyeball.
+- L31 (audit 142, f43444c) — paywall footer `hasPremium ? 'Continue' (primary) : 'Maybe later' (muted)` so a stranded paying user has a labeled retry; `finishOnboarding` unchanged. Eyeball.
+- M22 (audit 105, d64b6c0) — 35 `devTest/*` routes + `devStatsModal` moved into a `__DEV__`-gated `Stack.Protected` group (were in the plain session-gated group -> deep-linkable in prod); + structural guard test. Dual review.
+- M27 (audit 109, 13d908c) — Save-to-Meals now awaits + returns the final name (`Promise<string|null>`); alerts 'Saved to Meals' / 'Saved a Copy'; `null` = already-alerted validation/persist failure (no double alert). Dedup logic untouched per dev-note. Single review (+2 tests added).
+- L17 (audit 132, f94f754) — memoized `exerciseScreen.activeExercises`; scoped `archiveModal` image map to only the shown archived exercises. Single review.
+- L13 (audit 128, 1956994) — serialized `scheduleBatch` via a module-level `scheduleQueue` promise chain (cancel+schedule atomic per batch; `run.catch` unpoisons the chain, un-swallowed `return run` keeps Sentry visibility); + `invocationCallOrder` concurrency test. Pulled forward; implement (fresh) + single file_review.
+
+**Reviews:** M22 file_review clean (JSX balance 4/4, 1:1 route mapping, precondition parity, reproduced pre-fix bug via `git diff HEAD`). M22 wide_review clean (sole prod caller `settings.tsx:213-214` is `__DEV__`-gated; `app.json` linking references none; no missed dev route; stubs ship as `null`). M27 file_review: verified `saveNutrition`'s `!saved` path IS alerted (`validateNutritionEntry` -> `Alert.alert`), so `null` is never silent; added the 2 audit-required tests (multi-collision, case/whitespace). L17 file_review: confirmed `handleUpdateExerciseOrder` replaces `exercises` by reference (memo invalidates on reorder), `archiveModal` predicate byte-identical to the display filter. L13 file_review: empirically proved the new test non-vacuous (revert -> fail, restore -> pass); simplified the deferred-promise test setup to the repo idiom.
+
+**Central verify gate:** tsc **0 errors**; jest **835/835** (832 baseline + 2 M27 + 1 L13), 80 suites, **no worker-leak warning**. GREEN.
+
+**Follow-ups logged (NOT done):**
+- L13: `scheduler.ts`'s `scheduleQueue` chain duplicates the shape of `orchestrator.ts`'s private `mutexChain`/`enqueue` — a shared `lib/utils` serial-queue helper could dedupe both (would touch `orchestrator.ts`, out of L13 scope).
+- M22: `app/settingsScreens/adjustMeasurements.tsx` is a production screen not registered as a `Stack.Screen` (relies on expo-router auto-registration) — pre-existing, unrelated to M22.
+
+**Notable events:** (a) M22 wide_review's FIRST dispatch terminated without returning a result (transient death, not a clean finish — no completion notice) — re-ran foreground, clean. (b) Two unrelated working-tree changes appeared mid-wave (`addNutritionModal.tsx` regen-macros now overwrites; `notifications.tsx` DateTimePicker `themeVariant`/`accentColor`) = the user's own in-progress IDE edits; preserved untouched by staging EVERY commit by explicit path (never `git add -A`).
+
+---
