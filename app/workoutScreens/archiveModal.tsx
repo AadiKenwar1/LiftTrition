@@ -30,15 +30,19 @@ export default function ArchiveModal() {
             .sort((a, b) => a.order - b.order)
     }
 
+    // Image sources — resolved only for the archived exercises actually shown, not the whole exercise list
     const exerciseImageSources = useMemo(() => {
         const map: Record<string, number> = {}
+        if (logType !== 'exercises') return map
         for (const exercise of exercises) {
+            const shown = exercise.archived && (!workoutId || exercise.workoutID === workoutId)
+            if (!shown) continue
             const entry = fullExerciseLib[exercise.name]
             const filename = entry?.imgUrl?.split('/').pop()
             if (filename && IMAGE_MAP[filename]) map[exercise.name] = IMAGE_MAP[filename]
         }
         return map
-    }, [fullExerciseLib, exercises])
+    }, [fullExerciseLib, exercises, workoutId, logType])
 
     const renderItem = ({ item }: { item: any }) => {
         const imgSource = logType === 'exercises' ? exerciseImageSources[item.name] : undefined

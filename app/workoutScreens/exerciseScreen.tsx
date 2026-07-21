@@ -26,7 +26,8 @@ export default function ExerciseScreen() {
     const { workouts, exercises, handleUpdateExerciseOrder, handleArchiveExercise, handleDeleteExercise, fullExerciseLib } = useWorkout()
     const workout = workouts.find((w) => w.id === workoutId)
 
-    const activeExercises = exercises.filter((e) => e.workoutID === workoutId && !e.archived).sort((a, b) => a.order - b.order)
+    // Active (non-archived) exercises for this workout, ordered — memoized so the reference stays stable across renders
+    const activeExercises = useMemo(() => exercises.filter((e) => e.workoutID === workoutId && !e.archived).sort((a, b) => a.order - b.order), [exercises, workoutId])
 
     // Image sources — resolved for exercises in this workout
     const exerciseImageSources = useMemo(() => {
