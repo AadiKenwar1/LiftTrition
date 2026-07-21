@@ -501,3 +501,27 @@ C1, C3, C4, H1, H2, H3, H4, H9, H15, M23 — every `[LAUNCH-BLOCKER]` issue impl
 **Notable events:** (a) M22 wide_review's FIRST dispatch terminated without returning a result (transient death, not a clean finish — no completion notice) — re-ran foreground, clean. (b) Two unrelated working-tree changes appeared mid-wave (`addNutritionModal.tsx` regen-macros now overwrites; `notifications.tsx` DateTimePicker `themeVariant`/`accentColor`) = the user's own in-progress IDE edits; preserved untouched by staging EVERY commit by explicit path (never `git add -A`).
 
 ---
+
+## Wave C — DONE — parallelized 2-wave finish — 2026-07-21
+
+**Method:** User pushed to "finish fast" (workflow running 3 days). Kept parallel-implementers-on-disjoint-files + tiered review but stopped serializing the "careful lane": ran L3 + L19 implementers CONCURRENTLY with M31's dual review (all disjoint files), then one combined gate. M31/L3/L19 got agent review; L24/L25/L26 driver-eyeball. Per-issue commits staged by EXPLICIT PATH (user's addNutritionModal.tsx + notifications.tsx WIP stayed untouched throughout).
+
+**Issues (all audit-gated, committed):**
+- M31 (audit 113, b44110a) — onboarding sign-out escape: extracted `lib/utils/confirmSignOut.ts` (verbatim from profile.tsx's inline handleSignOut + double-tap guard), optional `onSignOut` on OnboardingScaffold wired on goals; onboarding route guard tightened to `!!session && !settings.onboardingComplete` (else login+onboarding double-match on sign-out). Re-anchored the M22 devTestRoutesGuarded test on the `(tabs)` route (both prod groups now carry `!!session`). DUAL review.
+- L3 (audit 121, 13a21d5) — settings PATCH silent-drop repair: replaced the bare `return` (which uploadData marked complete = silent data loss) with local-row-read -> existing `createRecord` repair, else `Sentry.captureMessage(area:'powersync-dead-letter')`; threaded `database` through the H2/M12 processCrudOp/processRunConcurrently hops (all private). DUAL review (file + wide/semantics).
+- L19 (audit 133, 50c6687) — WorkoutContext: static 1,317-entry lib moved from state+effect to useMemo returning the shared module ref when userExercises empty; 2 dead fatigue handlers + getFatigueFeedback removed from value/H6-dep-array/interface (35->32). SINGLE file_review.
+- L24 (audit 137, aee5679) — documented-deferral: >3-button Alerts (workout 5 / nutrition 4) exceed Android's limit but app is iOS-only; recorded risk + "shared bottom ActionSheet before Android" plan as call-site comments. Eyeball.
+- L25 (audit 138, 4035f3b) — archive delete icon inherits iconCircle's 54pt (was hardcoded 36) to match restore; Trash glyph 20*1.5; "Click"->"Tap" copy. Eyeball.
+- L26 (audit 139, 1b74eff) — exercise header title `workout?.name ?? 'Exercises'` (was bare template rendering literal "undefined"). Eyeball.
+
+**Reviews:** M31 file_review clean (confirmSignOut byte-faithful extraction, dropped imports dead, guard traced end-to-end); M31 wide_review clean + fixed the devTestRoutesGuarded heuristic (re-anchored on `(tabs)` body). L3 wide/semantics: createRecord-shape verdict MATCH (settings has NO JSON/array cols, raw `SELECT *` row == op.opData shape; natural-key branch = no dup row; repair queues no new CRUD op = runs once). L3 file_review: hardened the diff (typed `getAll<SettingsRecord>` over weak cast, `UpdateType.PATCH` literal, deduped test helper); found the brief's "broken PATCH test" premise STALE (already green at HEAD). L19 file_review: verified useMemo reference-stability + H6 dep-array symmetric drop (hand-counted 35->32), re-grepped zero callers; simplified fullExerciseLibAsList to branch on reference identity.
+
+**Central verify gate:** tsc **0 errors** (incl. clean compile of the two user WIP files); scoped jest **477/477** (32 suites: AuthContext/WorkoutContext/lib.utils/lib.powersync/app.__tests__), **no worker-leak warning**. GREEN.
+
+**Follow-ups logged (NOT done):**
+- L3 (RE-CONFIRMED, see run-log:107): `weight_progress` + `user_exercises` PATCH still route through updateRecord's generic by-id path with no natural-key fallback — same silent-drop class L3 fixed for settings; a cross-device natural-key collision (loser local id != server id) makes a later edit PATCH 0 rows. Both L3 reviews independently flagged. Own fix = route those tables' PATCH through natural-key resolution.
+- M31: onboarding "Sign out" link has no visual "Signing out…"/disabled state during the up-to-60s flush window (only the double-tap guard) — brief scoped this out; profile.tsx's button does show it.
+
+**Notable events:** (a) All Wave C implementers correctly re-located rotted anchors by logic (H6/L13/M31/H2/M12 had shifted lines since the briefs were written). (b) L3's createRecord raw-row-vs-CRUD-op shape corruption risk was flagged pre-review and audited GREEN by both reviewers. (c) Wave D (M21/M29/M30) dispatched immediately after this commit (3-way parallel, disjoint) — M29's devTest route registration deferred to the driver since root _layout.tsx is shared with M21.
+
+---
