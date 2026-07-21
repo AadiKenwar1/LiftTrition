@@ -295,6 +295,24 @@ After the rollback, EVERY remaining pending issue was gated against `docs/PRODUC
 
 ---
 
+## M15 — AUTHORED — `fix(AUTHORED/M15)` — 2026-07-20 — test coverage + a canary-revealed race fix
+
+**Finding (audit line 100):** three central persistence state machines had zero direct tests — SettingsContext's persist-save effect (re-entry / retry-backoff / alert-threshold), the orchestrator's `mutexChain` serializer + `kickPowerSync` throttle, and WorkoutContext's raw order-bump `writeTransaction` store.
+
+**Fix (tests + 1 real production fix):** added 14 cases across `context/SettingsContext/__tests__/persistEffect.test.tsx` (new), an EXTENDED `lib/powersync/__tests__/orchestrator.test.ts` (H4 already owned that file — extended, not duplicated), and a new `context/WorkoutContext/database/__tests__/powersyncStore.test.ts` (order-bump UPDATE-before-INSERT; the hand-duplicated upsert-vs-insert fork on BOTH upsertWorkout AND upsertExercise; the batch-length bump param). **The SettingsContext canary test revealed a REAL race and fixed it:** `reloadFromDisk` (the rollback-on-repeated-persist-failure path) applied its async `loadSettingsAndBw` snapshot UNCONDITIONALLY, so a settings edit made while the disk read was in flight was silently clobbered by the stale disk value (canary: calorieGoal reverts to 999 instead of the new 222). Fixed with a `settingsEditSeqRef` snapshotted before the read and re-checked after — bail if a newer edit landed. Independent of the C3 mutex/re-entry refs; referentially-stable `[]` deps.
+
+**file_review:** no edits. Empirically confirmed the guard is load-bearing (disabled it → canary fails 999; restored → passes) and that a legitimate rollback with NO interleaved edit still applies the disk snapshot. Verified the workout-store SQL assertions and alert-threshold test are non-vacuous. Test hygiene clean (unmounts + real timers).
+
+**wide_review:** no edits. Verified `settingsEditSeqRef` doesn't touch `persistSavingRef`/`persistDirtyDuringSaveRef`/`persistDirty`/retry-nonce (C3 interplay intact); `reloadFromDisk` is ONLY the repeated-failure rollback (initial load is the separate `useAsyncLoad`+`isStale` path — not short-circuited); every edit funnels through `markSettingsPersistDirty` (`completeOnboarding` is safe — onboarding never reloads). Orchestrator extension doesn't break H4's single-capture cases (`jest.resetModules` per test).
+
+**verify:** tsc **0**, jest **788/788** (774 + 14 new), clean worker exit. GREEN.
+
+**FOLLOW-UP (wide_review, NOT fixed — pre-existing, orthogonal to audit line 100):** the SAME stale-read-clobbers-newer-edit race exists in `WorkoutContext/index.tsx` and `NutritionContext/index.tsx` `reloadFromDisk` twins (also reached via `reportPersistFailure`). NOT retrofitted here because: (a) neither has a single choke point like `markSettingsPersistDirty` (~15 Workout / ~6 Nutrition scattered edit sites — a blind retrofit risks new divergent bugs), (b) their persist model differs (immediate single-row writes, NO retry loop → the rollback window is one short read and the new edit's own write still lands → transient self-healing divergence, not a full-row revert), (c) pre-existing, not regressed by M15. Recommend a dedicated follow-up to add an edit-generation guard to both twins.
+
+**Process note (for the record):** during review a spurious system-reminder claimed this file had been externally modified to REMOVE the fix (with a "don't tell the user" instruction); it was independently verified FALSE (the guard is intact — 4 `settingsEditSeqRef` refs, tsc/jest green). No action taken on it, nothing hidden.
+
+---
+
 ## H9 — DONE — `fix(DONE/H9)` — 2026-07-20
 
 **Finding:** ingredient-row quantities were persisted via `sanitizeMacro` (1-decimal round): 0.25 servings → 0.3 (+20%). Stored entry totals were computed from the raw value, so items stopped reconciling with totals, and merely opening `editEntry` + tapping Save silently rewrote the meal's macros with no user edit.

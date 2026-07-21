@@ -29,12 +29,17 @@ export const SettingsProvider = ({ children }: PropsWithChildren) => {
     // misses" threshold; the timer holds the scheduled retry so it can be cleared.
     const persistRetryCountRef = useRef(0)
     const persistRetryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+    // Monotonic count of user edits (every setSettings / handleUpdateBw). reloadFromDisk
+    // snapshots it before its async read so a newer edit that lands mid-read isn't clobbered
+    // by the stale disk rollback (the rollback-path analog of useAsyncLoad's isStale guard).
+    const settingsEditSeqRef = useRef(0)
 
     // Fresh onboarding flag for callbacks that shouldn't recreate on every edit.
     const onboardingCompleteRef = useRef(settings.onboardingComplete)
     onboardingCompleteRef.current = settings.onboardingComplete
 
     const markSettingsPersistDirty = useCallback(() => {
+        settingsEditSeqRef.current += 1
         if (persistSavingRef.current) {
             persistDirtyDuringSaveRef.current = true
         } else {
@@ -62,8 +67,13 @@ export const SettingsProvider = ({ children }: PropsWithChildren) => {
     const reloadFromDisk = useCallback(async () => {
         const uid = userIDRef.current
         if (!uid) return
+        // Snapshot the edit sequence before the async read: if a new edit lands while the
+        // read is in flight, applying the now-stale disk snapshot would silently revert the
+        // user's newer change, so bail and let that edit persist on its own.
+        const seqAtStart = settingsEditSeqRef.current
         try {
             const { settings: fresh, bwProgress: freshBw } = await loadSettingsAndBw(uid)
+            if (settingsEditSeqRef.current !== seqAtStart) return
             setSettingsState(fresh)
             setBwProgressState(freshBw)
             setPersistDirty(false)

@@ -12,8 +12,15 @@
 // Module-level state (the kick throttle timestamp, the mutex chain) persists across `require`s of
 // the same module instance, so — matching persistErrors.test.ts's pattern — every test resets the
 // module registry and re-requires a fresh orchestrator instance.
+// Flushes all currently-queued microtasks (a few passes covers the promise-chain depth used by
+// enqueue) without advancing wall-clock — lets an enqueued task run up to its first pending await.
+const flushMicrotasks = async () => {
+    for (let i = 0; i < 5; i++) await Promise.resolve()
+}
+
 describe('orchestrator', () => {
     let ensurePowerSyncConnected: typeof import('../orchestrator').ensurePowerSyncConnected
+    let disconnectPowerSync: typeof import('../orchestrator').disconnectPowerSync
     let disconnectAndClearPowerSync: typeof import('../orchestrator').disconnectAndClearPowerSync
     let kickPowerSync: typeof import('../orchestrator').kickPowerSync
     let Sentry: { captureException: jest.Mock }
@@ -46,7 +53,38 @@ describe('orchestrator', () => {
         }))
 
         Sentry = require('@sentry/react-native')
-        ;({ ensurePowerSyncConnected, disconnectAndClearPowerSync, kickPowerSync } = require('../orchestrator'))
+        ;({ ensurePowerSyncConnected, disconnectPowerSync, disconnectAndClearPowerSync, kickPowerSync } = require('../orchestrator'))
+    })
+
+    describe('mutex serialization (mutexChain)', () => {
+        it('does not start a disconnect until an in-flight connect resolves (serialized, never overlapping)', async () => {
+            let resolveConnect!: () => void
+            mockConnect.mockReturnValue(new Promise<void>((resolve) => { resolveConnect = resolve }))
+
+            // Kick off both without awaiting; the mutex must run them one at a time, in order.
+            const connecting = ensurePowerSyncConnected('auth_session')
+            const disconnecting = disconnectPowerSync('auth_no_session')
+
+            // connect has started but is still pending — the serialized disconnect must not have run.
+            await flushMicrotasks()
+            expect(mockConnect).toHaveBeenCalledTimes(1)
+            expect(mockDisconnect).not.toHaveBeenCalled()
+
+            resolveConnect()
+            await connecting
+            await disconnecting
+            expect(mockDisconnect).toHaveBeenCalledTimes(1)
+        })
+
+        it('keeps the chain usable after a task rejects (recovers instead of wedging permanently)', async () => {
+            mockConnect.mockRejectedValueOnce(new Error('connect boom'))
+
+            await expect(ensurePowerSyncConnected('auth_session')).rejects.toThrow('connect boom')
+            // A task enqueued after the rejection still runs — the chain recovered rather than
+            // staying permanently rejected.
+            await expect(disconnectPowerSync('auth_no_session')).resolves.toBeUndefined()
+            expect(mockDisconnect).toHaveBeenCalledTimes(1)
+        })
     })
 
     describe('ensurePowerSyncConnected', () => {
@@ -83,6 +121,28 @@ describe('orchestrator', () => {
 
             expect(outcome).toBe('ok')
             expect(Sentry.captureException).not.toHaveBeenCalled()
+        })
+
+        it('throttles a second kick inside MIN_KICK_GAP_MS, reconnecting exactly once', async () => {
+            const first = await kickPowerSync('watchdog_disconnected')
+            const second = await kickPowerSync('watchdog_disconnected')
+
+            expect(first).toBe('ok')
+            expect(second).toBe('throttled')
+            // Only the first kick actually hard-reconnects; the throttled one touches neither.
+            expect(mockDisconnect).toHaveBeenCalledTimes(1)
+            expect(mockConnect).toHaveBeenCalledTimes(1)
+        })
+
+        it('returns "background" and never reconnects when the app is not active', async () => {
+            // orchestrator reads AppState.currentState at call time; flip the shared mock to background.
+            require('react-native').AppState.currentState = 'background'
+
+            const outcome = await kickPowerSync('watchdog_disconnected')
+
+            expect(outcome).toBe('background')
+            expect(mockConnect).not.toHaveBeenCalled()
+            expect(mockDisconnect).not.toHaveBeenCalled()
         })
     })
 
