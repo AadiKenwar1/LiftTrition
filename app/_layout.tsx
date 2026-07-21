@@ -207,6 +207,10 @@ function StackLayout() {
                     <Stack.Screen name="settingsScreens/support" options={{ headerShown: true, title: 'Support', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="settingsScreens/howItWorks" options={{ headerShown: true, title: 'How It Works', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="settingsScreens/notifications" options={{ headerShown: true, title: 'Notifications', headerBackTitle: 'Back' }} />
+                </Stack.Protected>
+
+                {/* Dev-only preview + diagnostics routes: guarded so production builds can't deep-link into them; dev-build gating (session/onboarding/contexts) is preserved unchanged. */}
+                <Stack.Protected guard={__DEV__ && !!session && allContextsLoaded && settings.onboardingComplete}>
                     <Stack.Screen name="settingsScreens/devStatsModal" options={{ ...modalPresentation, headerShown: false }} />
                     <Stack.Screen name="devTest/index" options={{ headerShown: true, title: 'Dev Hub', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/lineChart" options={{ headerShown: true, title: 'Line Chart', headerBackTitle: 'Back' }} />
