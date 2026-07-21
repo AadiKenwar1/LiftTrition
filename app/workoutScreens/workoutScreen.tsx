@@ -37,6 +37,9 @@ export default function WorkoutScreen() {
     }
 
     function handleEdit(workout: Workout) {
+        // NOTE (Android-readiness, audit L24): this 5-button Alert exceeds Android's 3-button convention
+        // (only 3 would render). Latent today — the app is iOS-first (Apple Sign-In only). Migrate this and
+        // the nutrition row menu to a shared bottom ActionSheet before enabling Android.
         Alert.alert(`${workout.name}`, ``, [
             {
                 text: 'Rename',

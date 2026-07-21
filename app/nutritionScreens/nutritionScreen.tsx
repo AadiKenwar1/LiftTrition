@@ -40,6 +40,9 @@ export default function NutritionScreen() {
     const showYearInTitle = selectedDate.getFullYear() !== new Date().getFullYear()
 
     function handleEdit(nutritionEntry: NutritionEntry) {
+        // NOTE (Android-readiness, audit L24): this 4-button Alert exceeds Android's 3-button convention.
+        // Latent today — the app is iOS-first (Apple Sign-In only). Migrate to a shared bottom ActionSheet
+        // (together with the workout row menu) before enabling Android.
         Alert.alert(`Options for Nutrition Entry: ${nutritionEntry.name}`, ``, [
             {
                 text: 'Edit',
