@@ -18,15 +18,23 @@ export function initNotificationHandler(): void {
     })
 }
 
-// Clear all pending notifications, then schedule the given batch as one-shot DATE triggers.
-export async function scheduleBatch(specs: NotificationSpec[]): Promise<void> {
-    await Notifications.cancelAllScheduledNotificationsAsync()
-    for (const spec of specs) {
-        await Notifications.scheduleNotificationAsync({
-            content: spec.content,
-            trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: spec.date },
-        })
-    }
+// Serializes reschedules: each batch's cancel+schedule runs to completion before the next starts, so overlapping callers can't interleave and double-book.
+let scheduleQueue: Promise<void> = Promise.resolve()
+
+// Clear all pending notifications, then schedule the given batch as one-shot DATE triggers; serialized via scheduleQueue so concurrent calls never interleave.
+export function scheduleBatch(specs: NotificationSpec[]): Promise<void> {
+    const run = scheduleQueue.then(async () => {
+        await Notifications.cancelAllScheduledNotificationsAsync()
+        for (const spec of specs) {
+            await Notifications.scheduleNotificationAsync({
+                content: spec.content,
+                trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: spec.date },
+            })
+        }
+    })
+    // Chain the next batch off this one but swallow rejections here so one failed batch doesn't poison the queue; the caller still sees `run` reject.
+    scheduleQueue = run.catch(() => {})
+    return run
 }
 
 // Full reschedule pipeline: read prefs + permission, rebuild the batch, and reschedule; never throws.

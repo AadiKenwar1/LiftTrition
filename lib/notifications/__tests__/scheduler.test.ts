@@ -12,6 +12,7 @@ import type { NutritionStreakState } from '@/context/NutritionContext/types'
 import * as Sentry from '@sentry/react-native'
 import * as Notifications from 'expo-notifications'
 import { runNotificationReschedule, scheduleBatch } from '../scheduler'
+import type { NotificationSpec } from '../types'
 
 const mockCancel = Notifications.cancelAllScheduledNotificationsAsync as jest.Mock
 const mockSchedule = Notifications.scheduleNotificationAsync as jest.Mock
@@ -43,6 +44,37 @@ describe('scheduleBatch', () => {
         await scheduleBatch([])
         expect(mockCancel).toHaveBeenCalledTimes(1)
         expect(mockSchedule).not.toHaveBeenCalled()
+    })
+
+    it('serializes overlapping batches so cancel/schedule never interleave', async () => {
+        // Defer the FIRST cancelAll so batch B can try to start while batch A's critical section is mid-flight.
+        let resolveFirstCancel!: () => void
+        const firstCancel = new Promise<void>((resolve) => {
+            resolveFirstCancel = resolve
+        })
+        mockCancel.mockReturnValueOnce(firstCancel)
+
+        const specA: NotificationSpec = { content: { title: 'A', body: 'A' }, date: new Date(2026, 6, 18, 9, 0) }
+        const specB: NotificationSpec = { content: { title: 'B', body: 'B' }, date: new Date(2026, 6, 18, 10, 0) }
+
+        // Fire two overlapping reschedules without awaiting, then release the deferred cancel.
+        const pA = scheduleBatch([specA])
+        const pB = scheduleBatch([specB])
+        resolveFirstCancel()
+        await Promise.all([pA, pB])
+
+        // Batch B's cancelAll must not fire until every one of batch A's schedule calls has landed.
+        const secondCancelOrder = mockCancel.mock.invocationCallOrder[1]
+        const batchAScheduleOrders = mockSchedule.mock.calls
+            .map((call, i) => ({ title: call[0].content.title, order: mockSchedule.mock.invocationCallOrder[i] }))
+            .filter((c) => c.title === 'A')
+            .map((c) => c.order)
+
+        expect(mockCancel).toHaveBeenCalledTimes(2)
+        expect(batchAScheduleOrders).toHaveLength(1)
+        for (const order of batchAScheduleOrders) {
+            expect(order).toBeLessThan(secondCancelOrder)
+        }
     })
 })
 
