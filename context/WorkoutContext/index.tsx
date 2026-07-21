@@ -7,15 +7,20 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import uuid from 'react-native-uuid'
 import {
+    deleteExerciseCascade,
+    deleteLogRow,
+    deleteUserExerciseRow,
+    deleteWorkoutCascade,
     insertDuplicateWorkout,
     insertExerciseWithOrderBump,
     insertExercisesWithOrderBump,
     insertLog,
     insertWorkoutWithOrderBump,
     loadWorkoutData,
+    setExerciseArchived,
+    setWorkoutArchived,
     updateExerciseOrders,
     updateWorkoutOrders,
-    upsertExercise,
     upsertUserExercise,
     upsertWorkout,
 } from './database/powersyncStore'
@@ -91,11 +96,7 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
         deleteWorkout(id, setWorkoutsState, setExercisesState, setLogsState)
         if (userID) {
             try {
-                await powerSync.writeTransaction(async (tx) => {
-                    await tx.execute('DELETE FROM logs WHERE workout_id = ?', [id])
-                    await tx.execute('DELETE FROM exercises WHERE workout_id = ?', [id])
-                    await tx.execute('DELETE FROM workouts WHERE id = ?', [id])
-                })
+                await deleteWorkoutCascade(id)
             } catch (e) {
                 reportPersistFailure('workout', e, { reload: reloadFromDisk })
             }
@@ -106,15 +107,7 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
         archiveWorkout(id, archived, setWorkoutsState)
         if (!userID) return
         try {
-            await powerSync.writeTransaction(async (tx) => {
-                if (archived) {
-                    await tx.execute(`UPDATE workouts SET "order" = "order" + 1, updated_at = datetime('now') WHERE user_id = ? AND archived = 0`, [userID])
-                    await tx.execute(`UPDATE workouts SET archived = 0, "order" = 0, updated_at = datetime('now') WHERE id = ?`, [id])
-                } else {
-                    await tx.execute(`UPDATE workouts SET "order" = "order" + 1, updated_at = datetime('now') WHERE user_id = ? AND archived = 1 AND id != ?`, [userID, id])
-                    await tx.execute(`UPDATE workouts SET archived = 1, "order" = 0, updated_at = datetime('now') WHERE id = ?`, [id])
-                }
-            })
+            await setWorkoutArchived(id, userID, archived)
         } catch (e) {
             reportPersistFailure('workout', e, { reload: reloadFromDisk })
         }
@@ -208,10 +201,7 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
         deleteExercise(id, setExercisesState, setLogsState)
         if (userID) {
             try {
-                await powerSync.writeTransaction(async (tx) => {
-                    await tx.execute('DELETE FROM logs WHERE exercise_id = ?', [id])
-                    await tx.execute('DELETE FROM exercises WHERE id = ?', [id])
-                })
+                await deleteExerciseCascade(id)
             } catch (e) {
                 reportPersistFailure('workout', e, { reload: reloadFromDisk })
             }
@@ -229,16 +219,7 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
             }))
             if (userID) {
                 try {
-                    await powerSync.writeTransaction(async (tx) => {
-                        await tx.execute(
-                            `UPDATE exercises SET "order" = "order" + 1, updated_at = datetime('now') WHERE workout_id = ? AND archived = 0`,
-                            [workoutID]
-                        )
-                        await tx.execute(
-                            `UPDATE exercises SET archived = 0, "order" = 0, updated_at = datetime('now') WHERE id = ?`,
-                            [id]
-                        )
-                    })
+                    await setExerciseArchived(id, workoutID, archived)
                 } catch (e) {
                     reportPersistFailure('workout', e, { reload: reloadFromDisk })
                 }
@@ -252,16 +233,7 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
             }))
             if (userID) {
                 try {
-                    await powerSync.writeTransaction(async (tx) => {
-                        await tx.execute(
-                            `UPDATE exercises SET "order" = "order" + 1, updated_at = datetime('now') WHERE workout_id = ? AND archived = 1 AND id != ?`,
-                            [workoutID, id]
-                        )
-                        await tx.execute(
-                            `UPDATE exercises SET archived = 1, "order" = 0, updated_at = datetime('now') WHERE id = ?`,
-                            [id]
-                        )
-                    })
+                    await setExerciseArchived(id, workoutID, archived)
                 } catch (e) {
                     reportPersistFailure('workout', e, { reload: reloadFromDisk })
                 }
@@ -324,7 +296,7 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
         deleteLogFromState(id, setLogsState)
         if (userID) {
             try {
-                await powerSync.execute('DELETE FROM logs WHERE id = ?', [id])
+                await deleteLogRow(id)
             } catch (e) {
                 reportPersistFailure('workout', e, { reload: reloadFromDisk })
             }
@@ -351,7 +323,7 @@ export const WorkoutProvider = ({ children }: PropsWithChildren) => {
         deleteUserExercise(exerciseName, setUserExercisesState)
         if (userID) {
             try {
-                await powerSync.execute('DELETE FROM user_exercises WHERE user_id = ? AND name = ?', [userID, exerciseName])
+                await deleteUserExerciseRow(userID, exerciseName)
             } catch (e) {
                 reportPersistFailure('workout', e, { reload: reloadFromDisk })
             }

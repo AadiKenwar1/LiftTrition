@@ -133,6 +133,7 @@ export async function insertWorkoutWithOrderBump(workout: Workout): Promise<void
  * Upsert a single workout row (for rename, note, archive toggle, etc.).
  */
 export async function upsertWorkout(workout: Workout): Promise<void> {
+    if (__DEV__) await throwIfSaveFailureArmed('workout')
     await powerSync.writeTransaction(async (tx) => {
         const existing = await tx.getAll(
             'SELECT id FROM workouts WHERE id = ?', [workout.id]
@@ -157,6 +158,7 @@ export async function upsertWorkout(workout: Workout): Promise<void> {
  * Update order on a batch of workouts (drag-and-drop / archive unarchive order bumps).
  */
 export async function updateWorkoutOrders(workouts: Workout[]): Promise<void> {
+    if (__DEV__) await throwIfSaveFailureArmed('workout')
     if (workouts.length === 0) return;
     await powerSync.writeTransaction(async (tx) => {
         for (const w of workouts) {
@@ -173,6 +175,7 @@ export async function updateWorkoutOrders(workouts: Workout[]): Promise<void> {
  * Also bumps order on all active workouts for the user.
  */
 export async function insertDuplicateWorkout(workout: Workout, exercises: Exercise[]): Promise<void> {
+    if (__DEV__) await throwIfSaveFailureArmed('workout')
     await powerSync.writeTransaction(async (tx) => {
         await tx.execute(
             'UPDATE workouts SET "order" = "order" + 1, updated_at = datetime(\'now\') WHERE user_id = ? AND archived = 0',
@@ -191,6 +194,33 @@ export async function insertDuplicateWorkout(workout: Workout, exercises: Exerci
             );
         }
     });
+}
+
+// Delete a workout and cascade-delete its exercises and logs in one transaction.
+export async function deleteWorkoutCascade(id: string): Promise<void> {
+    if (__DEV__) await throwIfSaveFailureArmed('workout')
+    await powerSync.writeTransaction(async (tx) => {
+        await tx.execute('DELETE FROM logs WHERE workout_id = ?', [id])
+        await tx.execute('DELETE FROM exercises WHERE workout_id = ?', [id])
+        await tx.execute('DELETE FROM workouts WHERE id = ?', [id])
+    })
+}
+
+// Toggle a workout's archived state. NOTE: `archived` is the item's CURRENT state, not the
+// target state — archived=true means the workout IS currently archived, so this runs the
+// UNARCHIVE branch (SET archived = 0); archived=false means currently active, so this runs
+// the ARCHIVE branch (SET archived = 1). Confirmed by archiveWorkout's `archived: !archived`.
+export async function setWorkoutArchived(id: string, userID: string, archived: boolean): Promise<void> {
+    if (__DEV__) await throwIfSaveFailureArmed('workout')
+    await powerSync.writeTransaction(async (tx) => {
+        if (archived) {
+            await tx.execute(`UPDATE workouts SET "order" = "order" + 1, updated_at = datetime('now') WHERE user_id = ? AND archived = 0`, [userID])
+            await tx.execute(`UPDATE workouts SET archived = 0, "order" = 0, updated_at = datetime('now') WHERE id = ?`, [id])
+        } else {
+            await tx.execute(`UPDATE workouts SET "order" = "order" + 1, updated_at = datetime('now') WHERE user_id = ? AND archived = 1 AND id != ?`, [userID, id])
+            await tx.execute(`UPDATE workouts SET archived = 1, "order" = 0, updated_at = datetime('now') WHERE id = ?`, [id])
+        }
+    })
 }
 
 /**
@@ -215,6 +245,7 @@ export async function insertExerciseWithOrderBump(exercise: Exercise): Promise<v
  * Insert multiple new exercises in one transaction and bump sibling orders by the count.
  */
 export async function insertExercisesWithOrderBump(exercises: Exercise[]): Promise<void> {
+    if (__DEV__) await throwIfSaveFailureArmed('workout')
     if (exercises.length === 0) return
     const workoutID = exercises[0].workoutID
     await powerSync.writeTransaction(async (tx) => {
@@ -236,6 +267,7 @@ export async function insertExercisesWithOrderBump(exercises: Exercise[]): Promi
  * Upsert a single exercise row (for archive toggle, userMax update, etc.).
  */
 export async function upsertExercise(exercise: Exercise): Promise<void> {
+    if (__DEV__) await throwIfSaveFailureArmed('workout')
     await powerSync.writeTransaction(async (tx) => {
         const existing = await tx.getAll(
             'SELECT id FROM exercises WHERE id = ?', [exercise.id]
@@ -260,6 +292,7 @@ export async function upsertExercise(exercise: Exercise): Promise<void> {
  * Update order on a batch of exercises (drag-and-drop / archive-unarchive bumps).
  */
 export async function updateExerciseOrders(exercises: Exercise[]): Promise<void> {
+    if (__DEV__) await throwIfSaveFailureArmed('workout')
     if (exercises.length === 0) return;
     await powerSync.writeTransaction(async (tx) => {
         for (const ex of exercises) {
@@ -269,6 +302,44 @@ export async function updateExerciseOrders(exercises: Exercise[]): Promise<void>
             );
         }
     });
+}
+
+// Delete an exercise and cascade-delete its logs in one transaction.
+export async function deleteExerciseCascade(id: string): Promise<void> {
+    if (__DEV__) await throwIfSaveFailureArmed('workout')
+    await powerSync.writeTransaction(async (tx) => {
+        await tx.execute('DELETE FROM logs WHERE exercise_id = ?', [id])
+        await tx.execute('DELETE FROM exercises WHERE id = ?', [id])
+    })
+}
+
+// Toggle an exercise's archived state. NOTE: `archived` is the item's CURRENT state, not the
+// target state — archived=true means the exercise IS currently archived, so this runs the
+// UNARCHIVE branch (SET archived = 0); archived=false means currently active, so this runs
+// the ARCHIVE branch (SET archived = 1). Same semantics as setWorkoutArchived above.
+export async function setExerciseArchived(id: string, workoutID: string, archived: boolean): Promise<void> {
+    if (__DEV__) await throwIfSaveFailureArmed('workout')
+    await powerSync.writeTransaction(async (tx) => {
+        if (archived) {
+            await tx.execute(
+                `UPDATE exercises SET "order" = "order" + 1, updated_at = datetime('now') WHERE workout_id = ? AND archived = 0`,
+                [workoutID]
+            )
+            await tx.execute(
+                `UPDATE exercises SET archived = 0, "order" = 0, updated_at = datetime('now') WHERE id = ?`,
+                [id]
+            )
+        } else {
+            await tx.execute(
+                `UPDATE exercises SET "order" = "order" + 1, updated_at = datetime('now') WHERE workout_id = ? AND archived = 1 AND id != ?`,
+                [workoutID, id]
+            )
+            await tx.execute(
+                `UPDATE exercises SET archived = 1, "order" = 0, updated_at = datetime('now') WHERE id = ?`,
+                [id]
+            )
+        }
+    })
 }
 
 /**
@@ -286,10 +357,17 @@ export async function insertLog(log: Log): Promise<void> {
     );
 }
 
+// Delete a single log row.
+export async function deleteLogRow(id: string): Promise<void> {
+    if (__DEV__) await throwIfSaveFailureArmed('workout')
+    await powerSync.execute('DELETE FROM logs WHERE id = ?', [id])
+}
+
 /**
  * Upsert a single user_exercises row by (userId, name).
  */
 export async function upsertUserExercise(userId: string, name: string, entry: ExerciseLibraryEntry): Promise<void> {
+    if (__DEV__) await throwIfSaveFailureArmed('workout')
     await powerSync.writeTransaction(async (tx) => {
         const existing = await tx.getAll(
             'SELECT name FROM user_exercises WHERE user_id = ? AND name = ?', [userId, name]
@@ -309,4 +387,10 @@ export async function upsertUserExercise(userId: string, name: string, entry: Ex
             );
         }
     });
+}
+
+// Delete a single user_exercises row by (userID, name).
+export async function deleteUserExerciseRow(userID: string, name: string): Promise<void> {
+    if (__DEV__) await throwIfSaveFailureArmed('workout')
+    await powerSync.execute('DELETE FROM user_exercises WHERE user_id = ? AND name = ?', [userID, name])
 }

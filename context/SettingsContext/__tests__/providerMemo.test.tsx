@@ -65,6 +65,16 @@ jest.mock('@/context/WorkoutContext/database/powersyncStore', () => ({
     upsertExercise: jest.fn().mockResolvedValue(undefined),
     upsertUserExercise: jest.fn().mockResolvedValue(undefined),
     upsertWorkout: jest.fn().mockResolvedValue(undefined),
+    // M16: the 6 delete/archive fns relocated from index.tsx inline SQL into the store. The
+    // provider now imports these, so this hand-listed partial mock must enumerate them too —
+    // otherwise a future delete/archive test in this file calls undefined. The current 2 Workout
+    // tests (add-log + re-render) don't reach them, so they were silently absent before this.
+    deleteWorkoutCascade: jest.fn().mockResolvedValue(undefined),
+    deleteExerciseCascade: jest.fn().mockResolvedValue(undefined),
+    deleteLogRow: jest.fn().mockResolvedValue(undefined),
+    deleteUserExerciseRow: jest.fn().mockResolvedValue(undefined),
+    setWorkoutArchived: jest.fn().mockResolvedValue(undefined),
+    setExerciseArchived: jest.fn().mockResolvedValue(undefined),
 }))
 
 // Real-AuthProvider dependency mocks (only reached via the requireActual path below).
