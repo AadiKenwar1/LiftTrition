@@ -1,5 +1,5 @@
 import { useNutrition } from '@/context/NutritionContext'
-import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
+import { fonts, radius, useColorScheme, useColors, type Colors } from '@/context/ThemeContext'
 import { requestPermission } from '@/lib/notifications/permissions'
 import { loadNotificationPrefs, saveNotificationPrefs } from '@/lib/notifications/prefs'
 import { runNotificationReschedule } from '@/lib/notifications/scheduler'
@@ -28,6 +28,7 @@ async function getPermissionState(): Promise<{ granted: boolean; canAskAgain: bo
 // Notification preferences screen: master toggle, per-meal reminder times, and motivation toggles.
 export default function NotificationsScreen() {
     const colors = useColors()
+    const scheme = useColorScheme()
     const styles = useMemo(() => makeStyles(colors), [colors])
     const { nutritionData, nutritionStreak } = useNutrition()
     const [prefs, setPrefs] = useState<NotificationPrefs | null>(null)
@@ -112,6 +113,8 @@ export default function NotificationsScreen() {
                                         value={pickerValue}
                                         mode="time"
                                         display="compact"
+                                        themeVariant={scheme}
+                                        accentColor={colors.nutrition}
                                         onChange={(_, date) => {
                                             if (!date) return
                                             update({ ...prefs, meals: { ...prefs.meals, [meal]: { ...pref, hour: date.getHours(), minute: date.getMinutes() } } })

@@ -57,7 +57,8 @@ export default function AddNutritionModal() {
         router.back()
     }
 
-    // Generates all macros at once, filling only the fields the user hasn't already entered.
+    // Generates all macros at once, overwriting any existing values so re-generating after changing
+    // the food name reflects the new result (previous AI estimates would otherwise persist).
     const handleGenerateAllMacros = async () => {
         if (!hasPremium) {
             Keyboard.dismiss()
@@ -71,10 +72,10 @@ export default function AddNutritionModal() {
         setGenerating(true)
         try {
             const macros = await analyzeText(mealName.trim())
-            if (!calories.trim()) setCalories(macros.calories.toString())
-            if (!protein.trim()) setProtein(macros.protein.toString())
-            if (!carbs.trim()) setCarbs(macros.carbs.toString())
-            if (!fats.trim()) setFats(macros.fats.toString())
+            setCalories(macros.calories.toString())
+            setProtein(macros.protein.toString())
+            setCarbs(macros.carbs.toString())
+            setFats(macros.fats.toString())
             setAiFilled(true)
         } catch (error: unknown) {
             const message = (error instanceof Error ? error.message : null) ?? 'Unable to generate macros.'

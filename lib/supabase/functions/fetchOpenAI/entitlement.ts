@@ -2,6 +2,11 @@
 // fetchFoodDB call this before any paid provider call so premium is enforced in the Edge
 // Function itself, not just via the React Native client's local `hasPremium` UX guard —
 // a valid Supabase JWT alone must never be enough to reach a paid upstream call for free.
+//
+// DUPLICATED on purpose: an identical copy lives in ../fetchFoodDB/entitlement.ts so each
+// function folder is self-contained for dashboard copy-paste deploys (the dashboard editor
+// cannot reach a sibling _shared/ folder). Keep the code in both copies in sync when
+// editing; the canonical Deno tests live next to this copy (entitlement.test.ts).
 
 // Must match context/BillingContext/functions/billingFunctions.tsx's ENTITLEMENT_ID — the
 // RevenueCat entitlement identifier configured for LiftTrition Pro.

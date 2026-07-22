@@ -1,8 +1,0 @@
-{
-    "nodes": [
-        { "id": "PLATES", "label": "PLATES App", "type": "system", "summary": "Dual-mode React Native / Expo fitness tracker combining workout logging (progressive overload) and nutrition tracking (AI photo analysis). iOS-first with Apple Sign-In.", "source_file": "CLAUDE.md", "confidence": "EXTRACTED" },
-        { "id": "eas", "label": "EAS Build", "type": "external", "summary": "Cloud build pipeline; project has no ios/ or android/ folders so all native builds run on EAS.", "source_file": "CLAUDE.md", "confidence": "EXTRACTED" }
-    ],
-    "edges": [],
-    "hyperedges": []
-}

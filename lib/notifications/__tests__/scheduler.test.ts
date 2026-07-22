@@ -8,7 +8,7 @@ jest.mock('expo-notifications', () => ({
 }))
 jest.mock('@sentry/react-native', () => ({ captureException: jest.fn() }))
 
-import type { NutritionStreakState } from '@/lib/nutrition/types'
+import type { NutritionStreakState } from '@/context/NutritionContext/types'
 import * as Sentry from '@sentry/react-native'
 import * as Notifications from 'expo-notifications'
 import { runNotificationReschedule, scheduleBatch } from '../scheduler'

@@ -8,6 +8,12 @@
         "scheme": "app",
         "userInterfaceStyle": "automatic",
         "newArchEnabled": true,
+        "runtimeVersion": {
+            "policy": "fingerprint"
+        },
+        "updates": {
+            "url": "https://u.expo.dev/22572fc8-eb07-4d16-90bc-8ebd90b2a812"
+        },
         "ios": {
             "supportsTablet": false,
             "bundleIdentifier": "com.LiftTrition.App",

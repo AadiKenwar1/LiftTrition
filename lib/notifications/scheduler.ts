@@ -1,4 +1,4 @@
-import type { NutritionEntry, NutritionStreakState } from '@/lib/nutrition/types'
+import type { NutritionEntry, NutritionStreakState } from '@/context/NutritionContext/types'
 import * as Sentry from '@sentry/react-native'
 import * as Notifications from 'expo-notifications'
 import { buildNotificationBatch } from './builders'

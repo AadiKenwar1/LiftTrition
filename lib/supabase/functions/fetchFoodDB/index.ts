@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 import { encode } from "https://deno.land/std@0.168.0/encoding/base64.ts"
-import { hasPremiumEntitlement } from "../_shared/entitlement.ts"
+import { hasPremiumEntitlement } from "./entitlement.ts"
 
 //Note that you have to turn off "Verify JWT with legacy secret" in the Supabase project settings for this to work.
 

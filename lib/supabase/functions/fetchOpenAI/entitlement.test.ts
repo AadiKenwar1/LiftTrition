@@ -1,6 +1,7 @@
 // Deno unit tests for the shared server-side RevenueCat entitlement check (audit H1).
-// Run with: deno test --allow-env lib/supabase/functions/_shared/entitlement.test.ts
+// Run with: deno test --allow-env lib/supabase/functions/fetchOpenAI/entitlement.test.ts
 // (outside the jest-expo/tsc gate — these Edge Functions run on Deno, not Node.)
+// Covers the canonical copy here; ../fetchFoodDB/entitlement.ts is a byte-identical duplicate.
 import { assertEquals } from 'https://deno.land/std@0.168.0/testing/asserts.ts'
 import { ENTITLEMENT_ID, hasPremiumEntitlement } from './entitlement.ts'
 
