@@ -2,6 +2,7 @@ import StepProgress from '@/components/NeutralComponents/StepProgress'
 import { useSettings } from '@/context/SettingsContext'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { kgToLbs, lbsToKg } from '@/lib/utils/unitConversions'
+import { useScreenBottomPad } from '@/lib/hooks/useScreenBottomPad'
 import Slider from '@react-native-community/slider'
 import { router, useLocalSearchParams } from 'expo-router'
 import { Rabbit, Turtle } from 'lucide-react-native'
@@ -27,6 +28,7 @@ export default function AdjustNutrition2Screen() {
     const { settings } = useSettings()
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
+    const bottomPad = useScreenBottomPad(6)
     const params = useLocalSearchParams<{ height: string; weight: string; unitSystem: string; goal: string; targetWeight: string }>()
 
     const metric = params.unitSystem === 'metric'
@@ -51,7 +53,7 @@ export default function AdjustNutrition2Screen() {
     }
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { paddingBottom: bottomPad }]}>
             <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
                 <StepProgress current={1} total={4} accent={colors.text} />
                 <Text style={styles.titleText}>How fast do you want to get there?</Text>
@@ -84,7 +86,7 @@ export default function AdjustNutrition2Screen() {
 
 function makeStyles(colors: Colors) {
     return StyleSheet.create({
-        container: { flex: 1, backgroundColor: colors.background, paddingHorizontal: 24, paddingBottom: 40 },
+        container: { flex: 1, backgroundColor: colors.background, paddingHorizontal: 24 },
         scroll: { flex: 1 },
         scrollContent: { paddingTop: 16, paddingBottom: 16 },
         titleText: { fontFamily: fonts.extrabold, fontSize: 30, color: colors.text, letterSpacing: -0.8, lineHeight: 36, marginBottom: 8 },

@@ -5,7 +5,7 @@ import { Moon, Star, Sun } from 'lucide-react-native'
 import { useMemo } from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { useOnboardingFlow } from '../_shared/flowContext'
-import { useScreenTopPad } from '../_shared/useScreenTopPad'
+import { useScreenTopPad } from '@/lib/hooks/useScreenTopPad'
 
 /**
  * Dev-only V3 (black & white) Login — the real opener and brand moment (the app gates Apple Sign-In before

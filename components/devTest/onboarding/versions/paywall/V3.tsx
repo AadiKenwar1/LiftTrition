@@ -5,7 +5,7 @@ import { useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { useOnboardingFlow } from '../_shared/flowContext'
 import PressableScale from '../_shared/PressableScale'
-import { useScreenTopPad } from '../_shared/useScreenTopPad'
+import { useScreenTopPad } from '@/lib/hooks/useScreenTopPad'
 
 /**
  * Dev-only V3 (black & white) Paywall — neutral canvas, green accents, a green "go" CTA (the one place an

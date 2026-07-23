@@ -6,7 +6,7 @@ import { useMemo, useState } from 'react'
 import { Keyboard, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
 import CompactDatePicker from '../_shared/CompactDatePicker'
 import PressableScale from '../_shared/PressableScale'
-import { useScreenTopPad } from '../_shared/useScreenTopPad'
+import { useScreenTopPad } from '@/lib/hooks/useScreenTopPad'
 
 /**
  * Dev-only redesign preview (version of Onboarding 3): merges Sex + DOB + Height/Weight onto one screen

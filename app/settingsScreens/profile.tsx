@@ -9,6 +9,7 @@ import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { confirmSignOut } from '@/lib/utils/confirmSignOut'
 import { calculateAge } from '@/lib/utils/dateHelper'
 import { inchesToFeetInches, lbsToKg, weightUnitLabel } from '@/lib/utils/unitConversions'
+import { useScreenBottomPad } from '@/lib/hooks/useScreenBottomPad'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
@@ -27,6 +28,7 @@ export default function ProfileScreen() {
     const { settings, setSettings } = useSettings()
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
+    const bottomPad = useScreenBottomPad(6)
     const [editingKind, setEditingKind] = useState<MacroGoalKind | null>(null)
     const [editingHeight, setEditingHeight] = useState(false)
 
@@ -126,7 +128,7 @@ export default function ProfileScreen() {
 
     return (
         <View style={styles.container}>
-            <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+            <ScrollView style={styles.scrollView} contentContainerStyle={[styles.scrollContent, { paddingBottom: bottomPad }]} showsVerticalScrollIndicator={false}>
                 {/* Profile Icon */}
                 <View style={styles.profileIconContainer}>
                     <LinearGradient colors={[colors.workoutGradient[0], colors.nutritionGradient[1]]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.profileIcon}>
@@ -316,7 +318,7 @@ function makeStyles(colors: Colors) {
     return StyleSheet.create({
         container: { flex: 1, backgroundColor: colors.background },
         scrollView: { flex: 1 },
-        scrollContent: { paddingHorizontal: 20, paddingTop: 24, paddingBottom: 40 },
+        scrollContent: { paddingHorizontal: 20, paddingTop: 24 },
         profileIconContainer: { alignItems: 'center', marginBottom: 24 },
         profileIcon: { width: 100, height: 100, borderRadius: 50, justifyContent: 'center', alignItems: 'center' },
         section: { marginBottom: 24 },

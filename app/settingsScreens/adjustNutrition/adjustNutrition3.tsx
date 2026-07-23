@@ -3,6 +3,7 @@ import PressableScale from '@/components/NeutralComponents/PressableScale'
 import StepProgress from '@/components/NeutralComponents/StepProgress'
 import { useSettings } from '@/context/SettingsContext'
 import { fonts, macroColors, radius, useColors, type Colors } from '@/context/ThemeContext'
+import { useScreenBottomPad } from '@/lib/hooks/useScreenBottomPad'
 import { router, useLocalSearchParams } from 'expo-router'
 import { Beef, Droplet, Flame, Pencil, Wheat } from 'lucide-react-native'
 import { useEffect, useMemo, useState } from 'react'
@@ -26,6 +27,7 @@ export default function AdjustNutrition3Screen() {
     const { settings, calculateMacros } = useSettings()
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
+    const bottomPad = useScreenBottomPad(6)
     const [editingKind, setEditingKind] = useState<MacroGoalKind | null>(null)
     const params = useLocalSearchParams<{
         height: string
@@ -99,7 +101,7 @@ export default function AdjustNutrition3Screen() {
     ]
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { paddingBottom: bottomPad }]}>
             <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
                 <StepProgress current={params.goal === 'maintain' ? 1 : 2} total={params.goal === 'maintain' ? 3 : 4} accent={colors.text} />
                 <Text style={styles.titleText}>Your plan is ready</Text>
@@ -133,7 +135,7 @@ export default function AdjustNutrition3Screen() {
 
 function makeStyles(colors: Colors) {
     return StyleSheet.create({
-        container: { flex: 1, backgroundColor: colors.background, paddingHorizontal: 24, paddingBottom: 40 },
+        container: { flex: 1, backgroundColor: colors.background, paddingHorizontal: 24 },
         scroll: { flex: 1 },
         scrollContent: { paddingTop: 16, paddingBottom: 16 },
         titleText: { fontFamily: fonts.extrabold, fontSize: 30, color: colors.text, letterSpacing: -0.8, lineHeight: 36, marginBottom: 8 },

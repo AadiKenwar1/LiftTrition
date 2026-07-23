@@ -4,7 +4,7 @@ import { Moon, Star, Sun } from 'lucide-react-native'
 import { useMemo } from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { useOnboardingFlow } from '../_shared/flowContext'
-import { useScreenTopPad } from '../_shared/useScreenTopPad'
+import { useScreenTopPad } from '@/lib/hooks/useScreenTopPad'
 
 /**
  * Dev-only login variant — WORDMARK-led (no icon needed). The app name IS the brand moment: oversized

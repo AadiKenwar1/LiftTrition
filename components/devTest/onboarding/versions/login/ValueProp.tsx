@@ -4,7 +4,7 @@ import { Dumbbell, Moon, Sparkles, Star, Sun } from 'lucide-react-native'
 import { useMemo } from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { useOnboardingFlow } from '../_shared/flowContext'
-import { useScreenTopPad } from '../_shared/useScreenTopPad'
+import { useScreenTopPad } from '@/lib/hooks/useScreenTopPad'
 
 /**
  * Dev-only login variant — VALUE-led. The name is a small eyebrow; the hero is the promise, with two

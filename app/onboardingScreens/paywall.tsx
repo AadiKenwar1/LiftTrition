@@ -6,12 +6,13 @@ import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { useSubmitOnce } from '@/lib/hooks/useSubmitOnce'
 import { weeksToGoal } from '@/lib/utils/goalMath'
 import { lbsToKg, weightUnitLabel } from '@/lib/utils/unitConversions'
+import { useScreenTopPad } from '@/lib/hooks/useScreenTopPad'
+import { useScreenBottomPad } from '@/lib/hooks/useScreenBottomPad'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
 import { BarChart3, Database, Sparkles, Zap } from 'lucide-react-native'
 import { useMemo, useState } from 'react'
 import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 type Plan = 'monthly' | 'annual'
 /** Matches the RevenueCat product's intro period — keep in sync with the dashboard config. */
@@ -31,8 +32,8 @@ const FEATURES = [
 export default function OnboardingPaywall() {
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
-    const insets = useSafeAreaInsets()
-    const topPad = Math.max(insets.top, 12) + 16
+    const topPad = useScreenTopPad()
+    const bottomPad = useScreenBottomPad(6)
     const { settings, completeOnboarding } = useSettings()
     const { loading, hasPremium, monthlyPackage, annualPackage, priceInfo, annualPriceInfo, annualSavingsPercent, purchasePackage, restorePurchases, restoring, error } = useBilling()
     const [guardRestore] = useSubmitOnce()
@@ -108,7 +109,7 @@ export default function OnboardingPaywall() {
 
     if (loading) {
         return (
-            <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+            <View style={[styles.container, { justifyContent: 'center', alignItems: 'center', paddingBottom: bottomPad }]}>
                 <ActivityIndicator size="large" color={colors.workout} />
                 <Text style={styles.loadingText}>Loading subscription options…</Text>
             </View>
@@ -116,7 +117,7 @@ export default function OnboardingPaywall() {
     }
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { paddingBottom: bottomPad }]}>
             <ScrollView style={styles.scroll} contentContainerStyle={[styles.content, { paddingTop: topPad }]} showsVerticalScrollIndicator={false}>
                 <Text style={styles.eyebrow}>Your plan</Text>
                 <Text style={styles.title}>It's ready.</Text>
@@ -190,7 +191,7 @@ export default function OnboardingPaywall() {
                 </Text>
             </ScrollView>
 
-            <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 8) }]}>
+            <View style={styles.footer}>
                 <TouchableOpacity style={[styles.backButton, (purchasing || restoring) && styles.footerDisabled]} onPress={() => router.back()} disabled={purchasing || restoring} activeOpacity={0.8}>
                     <Text style={styles.backText}>Back</Text>
                 </TouchableOpacity>
@@ -206,7 +207,7 @@ export default function OnboardingPaywall() {
 
 function makeStyles(colors: Colors) {
     return StyleSheet.create({
-        container: { flex: 1, backgroundColor: colors.background, paddingHorizontal: 24, paddingBottom: 40 },
+        container: { flex: 1, backgroundColor: colors.background, paddingHorizontal: 24 },
         loadingText: { fontFamily: fonts.regular, fontSize: 15, color: colors.textSecondary, marginTop: 14 },
         scroll: { flex: 1 },
         content: { paddingBottom: 16 },

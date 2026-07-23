@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router'
 import { BarChart3, Database, Sparkles, Zap } from 'lucide-react-native'
 import { useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import { useScreenTopPad } from '../_shared/useScreenTopPad'
+import { useScreenTopPad } from '@/lib/hooks/useScreenTopPad'
 
 /**
  * Dev-only Refined Paywall — restyled per RESTYLE_PLAN (theme tokens, dark + light) with the strongest

@@ -3,6 +3,7 @@ import TermsAndPrivacyModal from '@/components/NeutralComponents/TermsAndPrivacy
 import { hasActiveEntitlement, useBilling } from '@/context/BillingContext'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { useSubmitOnce } from '@/lib/hooks/useSubmitOnce'
+import { useScreenBottomPad } from '@/lib/hooks/useScreenBottomPad'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useNavigation } from 'expo-router'
 import { BarChart3, Database, Sparkles, Zap } from 'lucide-react-native'
@@ -28,6 +29,7 @@ export default function SubscriptionScreen() {
     const navigation = useNavigation()
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
+    const bottomPad = useScreenBottomPad(6)
     const accent = colors.text
     const [termsVisible, setTermsVisible] = useState(false)
     const [plan, setPlan] = useState<Plan>('annual')
@@ -93,7 +95,7 @@ export default function SubscriptionScreen() {
 
     if (loading) {
         return (
-            <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+            <View style={[styles.container, { justifyContent: 'center', alignItems: 'center', paddingBottom: bottomPad }]}>
                 <ActivityIndicator size="large" color={colors.workout} />
                 <Text style={styles.loadingText}>Loading subscription options…</Text>
             </View>
@@ -101,7 +103,7 @@ export default function SubscriptionScreen() {
     }
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { paddingBottom: bottomPad }]}>
             <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
                 <Text style={styles.title}>Unlock Premium</Text>
                 <Text style={styles.subtitle}>AI food scan, the full food database, advanced charts, and more.</Text>
@@ -174,7 +176,7 @@ export default function SubscriptionScreen() {
 
 function makeStyles(colors: Colors) {
     return StyleSheet.create({
-        container: { flex: 1, backgroundColor: colors.background, paddingHorizontal: 24, paddingBottom: 40 },
+        container: { flex: 1, backgroundColor: colors.background, paddingHorizontal: 24 },
         loadingText: { fontFamily: fonts.regular, fontSize: 15, color: colors.textSecondary, marginTop: 14 },
         scroll: { flex: 1 },
         content: { paddingTop: 16, paddingBottom: 24 },

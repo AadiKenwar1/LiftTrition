@@ -11,6 +11,7 @@ import { useCombineName } from '@/context/NutritionContext/hooks/useCombineName'
 import { useSubmitOnce } from '@/lib/hooks/useSubmitOnce'
 import { confirmDelete } from '@/lib/utils/confirmDelete'
 import { parseNumericInput } from '@/lib/utils/number'
+import { useScreenBottomPad } from '@/lib/hooks/useScreenBottomPad'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { Bookmark, Check, X } from 'lucide-react-native'
@@ -30,6 +31,7 @@ export default function SavedNutritionModal() {
     const router = useRouter()
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
+    const bottomPad = useScreenBottomPad()
 
     const [guardSubmit, submitting] = useSubmitOnce()
     const [addedItems, setAddedItems] = useState<StagedSavedMeal[]>([])
@@ -228,7 +230,7 @@ export default function SavedNutritionModal() {
                         ListHeaderComponent={listHeader}
                         renderItem={({ item }) => <SavedEntry name={item.name} calories={item.calories} protein={item.protein} carbs={item.carbs} fats={item.fats} onAddPress={() => openQuantityModal(item)} onDeletePress={() => confirmUnsave(item)} subtitle={entrySubtitle(item.items)} />}
                         ListEmptyComponent={renderListEmpty}
-                        contentContainerStyle={[styles.listContent, savedNutritionEntries.length === 0 && styles.listContentEmpty]}
+                        contentContainerStyle={[styles.listContent, savedNutritionEntries.length === 0 && styles.listContentEmpty, { paddingBottom: bottomPad }]}
                         showsVerticalScrollIndicator={false}
                         keyboardShouldPersistTaps="handled"
                         keyboardDismissMode="on-drag"
@@ -237,7 +239,7 @@ export default function SavedNutritionModal() {
             </KeyboardAvoidingView>
 
             {addedItems.length > 0 && (
-                <View style={styles.addAllContainer}>
+                <View style={[styles.addAllContainer, { paddingBottom: bottomPad }]}>
                     <TouchableOpacity onPress={guardSubmit(handleAddAll)} disabled={submitting} activeOpacity={0.8} style={styles.addAllButtonTouchable}>
                         <LinearGradient colors={colors.nutritionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.addAllButton}>
                             <Text style={styles.addAllButtonText}>{combineItems && addedItems.length >= 2 ? 'Add 1 combined meal' : `Add ${addedItems.length} Item${addedItems.length > 1 ? 's' : ''}`}</Text>
@@ -278,7 +280,6 @@ function makeStyles(colors: Colors) {
         listContent: {
             paddingHorizontal: 24,
             paddingTop: 12,
-            paddingBottom: 24,
         },
         listContentEmpty: {
             flexGrow: 1,
@@ -417,7 +418,7 @@ function makeStyles(colors: Colors) {
         },
         addAllContainer: {
             paddingHorizontal: 24,
-            paddingVertical: 16,
+            paddingTop: 16,
             backgroundColor: colors.background,
             borderTopWidth: 1,
             borderTopColor: colors.hairline,
@@ -430,7 +431,6 @@ function makeStyles(colors: Colors) {
             shadowOpacity: 0.4,
             shadowRadius: 8,
             elevation: 8,
-            paddingBottom: 12,
         },
         addAllButton: {
             borderRadius: 12,

@@ -7,7 +7,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-nati
 import Animated, { FadeInDown } from 'react-native-reanimated'
 import PressableScale from '../_shared/PressableScale'
 import StepProgress from '../_shared/StepProgress'
-import { useScreenTopPad } from '../_shared/useScreenTopPad'
+import { useScreenTopPad } from '@/lib/hooks/useScreenTopPad'
 
 /** Dev-only Refined Gender screen — restyled per RESTYLE_PLAN (theme tokens, dark + light). Inert. */
 export default function GenderRefined() {

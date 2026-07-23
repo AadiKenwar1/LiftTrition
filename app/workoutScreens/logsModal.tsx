@@ -10,6 +10,7 @@ import { useToday } from '@/lib/hooks/useToday'
 import { addDays, formatDate, getDateKey, isDateAfterToday, sortByDateDesc } from '@/lib/utils/dateHelper'
 import { parseNumericInput } from '@/lib/utils/number'
 import { weightUnitLabel } from '@/lib/utils/unitConversions'
+import { useScreenBottomPad } from '@/lib/hooks/useScreenBottomPad'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useLocalSearchParams } from 'expo-router'
 import { BicepsFlexed, Calendar, Check, RotateCcw } from 'lucide-react-native'
@@ -24,6 +25,7 @@ export default function LogsModal() {
     const todayKey = useToday()
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
+    const bottomPad = useScreenBottomPad()
 
     const weightUnit = weightUnitLabel(settings.unitSystem)
     // Normalize params to strings
@@ -134,7 +136,7 @@ export default function LogsModal() {
                         <View style={styles.handle} />
                     </View>
 
-                    <View style={styles.content}>
+                    <View style={[styles.content, { paddingBottom: bottomPad }]}>
                         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
                             <View>
                                 <View style={styles.exerciseTitleRow}>
@@ -270,7 +272,6 @@ function makeStyles(colors: Colors) {
             flex: 1,
             paddingHorizontal: 24,
             paddingTop: 12,
-            paddingBottom: 32,
         },
         exerciseTitleRow: {
             flexDirection: 'row',

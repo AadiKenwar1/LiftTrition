@@ -14,6 +14,7 @@ import { FoodItem, FoodSearchResult } from '@/lib/foodDB/types'
 import { useCombineName } from '@/context/NutritionContext/hooks/useCombineName'
 import { useSubmitOnce } from '@/lib/hooks/useSubmitOnce'
 import { parseNumericInput } from '@/lib/utils/number'
+import { useScreenBottomPad } from '@/lib/hooks/useScreenBottomPad'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { Check, Database, X } from 'lucide-react-native'
@@ -32,6 +33,7 @@ export default function FoodDBModal() {
     const router = useRouter()
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
+    const bottomPad = useScreenBottomPad()
 
     const [guardSubmit, submitting] = useSubmitOnce()
     const [upsellVisible, setUpsellVisible] = useState(false)
@@ -352,7 +354,7 @@ export default function FoodDBModal() {
             </KeyboardAvoidingView>
 
             {addedItems.length > 0 && (
-                <View style={styles.addAllContainer}>
+                <View style={[styles.addAllContainer, { paddingBottom: bottomPad }]}>
                     <TouchableOpacity onPress={guardSubmit(handleAddAll)} disabled={submitting} activeOpacity={0.8} style={styles.addAllButtonTouchable}>
                         <LinearGradient colors={colors.nutritionGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.addAllButton}>
                             <Text style={styles.addAllButtonText}>
@@ -634,7 +636,7 @@ function makeStyles(colors: Colors) {
         },
         addAllContainer: {
             paddingHorizontal: 24,
-            paddingVertical: 16,
+            paddingTop: 16,
             backgroundColor: colors.background,
             borderTopWidth: 1,
             borderTopColor: colors.hairline,
@@ -650,7 +652,6 @@ function makeStyles(colors: Colors) {
             shadowOpacity: 0.4,
             shadowRadius: 8,
             elevation: 8,
-            paddingBottom: 20,
         },
         addAllButton: {
             borderRadius: 12,

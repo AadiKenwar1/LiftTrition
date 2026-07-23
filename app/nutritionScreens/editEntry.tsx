@@ -5,6 +5,7 @@ import { Item, NutritionEntry } from '@/context/NutritionContext/types'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { useSubmitOnce } from '@/lib/hooks/useSubmitOnce'
 import { parseNumericInput } from '@/lib/utils/number'
+import { useScreenBottomPad } from '@/lib/hooks/useScreenBottomPad'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { Minus, Plus, Trash2 } from 'lucide-react-native'
@@ -88,6 +89,7 @@ export default function EditEntry() {
     const { handleEditNutrition } = useNutrition()
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
+    const bottomPad = useScreenBottomPad(6)
     const [guardSubmit, submitting] = useSubmitOnce()
 
     const entryStr = typeof entryParam === 'string' ? entryParam : entryParam?.[0]
@@ -160,7 +162,7 @@ export default function EditEntry() {
                 <View style={styles.handle} />
             </View>
 
-            <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+            <ScrollView style={styles.scroll} contentContainerStyle={[styles.content, { paddingBottom: bottomPad }]} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
                 <Text style={styles.title}>Edit Entry</Text>
                 <Text style={styles.subtitle}>Adjust items — totals update as you type</Text>
 
@@ -292,7 +294,7 @@ function makeStyles(colors: Colors) {
         handleContainer: { alignItems: 'center', paddingTop: 12, paddingBottom: 8 },
         handle: { width: 40, height: 5, backgroundColor: colors.border, borderRadius: 3 },
         scroll: { flex: 1 },
-        content: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 40 },
+        content: { paddingHorizontal: 20, paddingTop: 8 },
         title: { fontSize: 26, color: colors.text, letterSpacing: -0.5, marginTop: 8, fontFamily: fonts.semibold },
         subtitle: { fontSize: 14, color: colors.labelMuted, marginTop: 4, marginBottom: 22, fontFamily: fonts.regular },
         fieldLabel: { fontSize: 12, color: colors.labelMuted, marginBottom: 6, marginLeft: 2, textTransform: 'uppercase', letterSpacing: 0.4, fontFamily: fonts.semibold },

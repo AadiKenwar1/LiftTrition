@@ -7,7 +7,7 @@ import { Keyboard, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, To
 import Animated, { FadeInDown } from 'react-native-reanimated'
 import PressableScale from '../_shared/PressableScale'
 import StepProgress from '../_shared/StepProgress'
-import { useScreenTopPad } from '../_shared/useScreenTopPad'
+import { useScreenTopPad } from '@/lib/hooks/useScreenTopPad'
 
 /** Dev-only Refined Goal screen — restyled per RESTYLE_PLAN (theme tokens, dark + light). Inert. */
 const UNIT_SYSTEM: 'imperial' | 'metric' = 'metric'

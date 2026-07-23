@@ -4,6 +4,7 @@ import { useSettings } from '@/context/SettingsContext'
 import { validateHeightWeight, validateTargetWeight } from '@/context/SettingsContext/functions/validator'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { weightUnitLabel } from '@/lib/utils/unitConversions'
+import { useScreenBottomPad } from '@/lib/hooks/useScreenBottomPad'
 import { router } from 'expo-router'
 import { useMemo, useState } from 'react'
 import { Keyboard, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
@@ -18,6 +19,7 @@ export default function AdjustNutrition1Screen() {
     const { settings } = useSettings()
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
+    const bottomPad = useScreenBottomPad(6)
 
     const [goal, setGoal] = useState<'lose' | 'gain' | 'maintain' | null>(settings.goalType)
     const [targetWeight, setTargetWeight] = useState(settings.goalWeight.toString())
@@ -43,7 +45,7 @@ export default function AdjustNutrition1Screen() {
     }
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { paddingBottom: bottomPad }]}>
             <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag" onScrollBeginDrag={Keyboard.dismiss}>
                 <StepProgress current={0} total={goal === 'maintain' ? 3 : 4} accent={colors.text} />
                 <Text style={styles.titleText}>What's your goal?</Text>
@@ -77,7 +79,7 @@ export default function AdjustNutrition1Screen() {
 
 function makeStyles(colors: Colors) {
     return StyleSheet.create({
-        container: { flex: 1, backgroundColor: colors.background, paddingHorizontal: 24, paddingBottom: 40 },
+        container: { flex: 1, backgroundColor: colors.background, paddingHorizontal: 24 },
         scroll: { flex: 1 },
         scrollContent: { paddingTop: 16, paddingBottom: 16 },
         titleText: { fontFamily: fonts.extrabold, fontSize: 30, color: colors.text, letterSpacing: -0.8, lineHeight: 36, marginBottom: 8 },

@@ -5,6 +5,7 @@ import { loadNotificationPrefs, saveNotificationPrefs } from '@/lib/notification
 import { runNotificationReschedule } from '@/lib/notifications/scheduler'
 import { type MealKey, type NotificationPrefs } from '@/lib/notifications/types'
 import { nextPermissionAction, openAppSettings } from '@/lib/utils/permissions'
+import { useScreenBottomPad } from '@/lib/hooks/useScreenBottomPad'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import * as Notifications from 'expo-notifications'
 import { useEffect, useMemo, useState } from 'react'
@@ -30,6 +31,7 @@ export default function NotificationsScreen() {
     const colors = useColors()
     const scheme = useColorScheme()
     const styles = useMemo(() => makeStyles(colors), [colors])
+    const bottomPad = useScreenBottomPad(6)
     const { nutritionData, nutritionStreak } = useNutrition()
     const [prefs, setPrefs] = useState<NotificationPrefs | null>(null)
     const [granted, setGranted] = useState(true)
@@ -90,7 +92,7 @@ export default function NotificationsScreen() {
     if (!prefs) return <View style={styles.screen} />
 
     return (
-        <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+        <ScrollView style={styles.screen} contentContainerStyle={[styles.content, { paddingBottom: bottomPad }]}>
             <NotificationMasterCard
                 enabled={prefs.enabled}
                 granted={granted}
@@ -197,7 +199,6 @@ function makeStyles(colors: Colors) {
         },
         content: {
             padding: 20,
-            paddingBottom: 40,
         },
         sectionTitle: {
             fontSize: 13,

@@ -1,6 +1,7 @@
 import { useAuth } from '@/context/AuthContext'
 import { useBilling } from '@/context/BillingContext'
 import { fonts, radius, useColors, useColorScheme, useSetColorScheme, type Colors } from '@/context/ThemeContext'
+import { useScreenTopPad } from '@/lib/hooks/useScreenTopPad'
 import { powerSync } from '@/lib/powersync/system'
 import { getPendingUploadEstimate } from '@/lib/powersync/uploadQueueStats'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -37,6 +38,7 @@ export default function SettingsScreen() {
     const colorScheme = useColorScheme()
     const setColorScheme = useSetColorScheme()
     const styles = useMemo(() => makeStyles(colors), [colors])
+    const topPad = useScreenTopPad()
     const [uploadPendingEstimate, setUploadPendingEstimate] = useState<number | null>(null)
 
     useEffect(() => {
@@ -142,7 +144,7 @@ export default function SettingsScreen() {
     return (
         <View style={styles.outerContainer}>
             <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-                <View style={styles.header}>
+                <View style={[styles.header, { paddingTop: topPad }]}>
                     <View style={styles.headerText}>
                         <Text style={styles.title}>Settings</Text>
                         <Text style={styles.lastUpdated}>{syncStatusLine}</Text>
@@ -235,7 +237,6 @@ function makeStyles(colors: Colors) {
             flexDirection: 'row',
             alignItems: 'flex-start',
             justifyContent: 'space-between',
-            paddingTop: 60,
             paddingBottom: 18,
             paddingHorizontal: 20,
         },

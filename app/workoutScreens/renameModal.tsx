@@ -2,6 +2,7 @@ import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { useWorkout } from '@/context/WorkoutContext'
 import { isWorkoutNameTaken } from '@/context/WorkoutContext/functions/nameCheck'
 import { useSubmitOnce } from '@/lib/hooks/useSubmitOnce'
+import { useScreenBottomPad } from '@/lib/hooks/useScreenBottomPad'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { Pencil } from 'lucide-react-native'
@@ -13,6 +14,7 @@ export default function RenameModal() {
     const router = useRouter()
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
+    const bottomPad = useScreenBottomPad()
     const params = useLocalSearchParams<{ workoutId: string }>()
 
     // Normalize params
@@ -56,7 +58,7 @@ export default function RenameModal() {
                 <View style={styles.handle} />
             </View>
 
-            <View style={styles.content}>
+            <View style={[styles.content, { paddingBottom: bottomPad }]}>
                 {/* Icon Section */}
                 <View style={styles.iconContainer}>
                     <View style={styles.iconCircle}>
@@ -118,7 +120,6 @@ function makeStyles(colors: Colors) {
             flex: 1,
             paddingHorizontal: 24,
             paddingTop: 12,
-            paddingBottom: 32,
         },
         iconContainer: {
             alignItems: 'center',

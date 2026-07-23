@@ -1,5 +1,6 @@
 import { radius, useColors, type Colors } from '@/context/ThemeContext'
 import { useSettings } from '@/context/SettingsContext'
+import { useScreenTopPad } from '@/lib/hooks/useScreenTopPad'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Dumbbell, Nut } from 'lucide-react-native'
 import React, { useMemo } from 'react'
@@ -7,11 +8,14 @@ import { Pressable, StyleSheet, TouchableOpacity, View } from 'react-native'
 
 const ICON_SIZE = 25
 const ICON_STROKE = 2.0
+// Breathing room between the safe-area edge and the mode pill, and between the pill and screen content.
+const BAR_GAP = 4
 
 export default function CustomHeader() {
     const { mode, setMode } = useSettings()
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
+    const topPad = useScreenTopPad(BAR_GAP)
 
     const renderModeButton = (isLift: boolean) => {
         const isActive = mode === isLift
@@ -43,7 +47,7 @@ export default function CustomHeader() {
     }
 
     return (
-        <View style={styles.header}>
+        <View style={[styles.header, { paddingTop: topPad }]}>
             <View style={styles.modeSelectorContainer}>
                 {renderModeButton(true)}
                 {renderModeButton(false)}
@@ -54,21 +58,21 @@ export default function CustomHeader() {
 
 function makeStyles(colors: Colors) {
     return StyleSheet.create({
+        // Self-sizing: bar height = safe-area topPad (applied inline) + pill + BAR_GAP. No fixed height —
+        // the pill's height is emergent from its padding and icon size, and a constant would clip it.
         header: {
-            height: 100,
             backgroundColor: colors.background,
             alignItems: 'center',
             justifyContent: 'center',
             flexDirection: 'row',
             paddingHorizontal: 10,
-            paddingTop: 10,
+            paddingBottom: BAR_GAP,
             zIndex: 100,
         },
         modeSelectorContainer: {
             flexDirection: 'row',
             justifyContent: 'center',
             alignItems: 'center',
-            marginTop: 30,
             backgroundColor: colors.toggleTrack,
             borderRadius: radius.toggle,
             borderWidth: StyleSheet.hairlineWidth,

@@ -6,7 +6,7 @@ import { useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { useOnboardingFlow } from '../_shared/flowContext'
 import PressableScale from '../_shared/PressableScale'
-import { useScreenTopPad } from '../_shared/useScreenTopPad'
+import { useScreenTopPad } from '@/lib/hooks/useScreenTopPad'
 
 /**
  * Dev-only V4 Paywall — hero beat 3 of 3: the blue (workoutGradient) CTA + selected-plan border form the

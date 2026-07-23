@@ -2,6 +2,7 @@ import { useAuth } from '@/context/AuthContext'
 import { useNutrition } from '@/context/NutritionContext'
 import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import type { ScanMode } from '@/lib/openAI/mealImage'
+import { useScreenBottomPad } from '@/lib/hooks/useScreenBottomPad'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router'
 import { Sparkles } from 'lucide-react-native'
@@ -16,6 +17,7 @@ export default function AnalyzingModal() {
     const navigation = useNavigation()
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
+    const bottomPad = useScreenBottomPad()
     const [progress] = useState(new Animated.Value(0))
     const [pulseAnim] = useState(new Animated.Value(1))
     const canceledRef = useRef(false)
@@ -136,7 +138,7 @@ export default function AnalyzingModal() {
             </View>
 
             {/* Content */}
-            <View style={styles.content}>
+            <View style={[styles.content, { paddingBottom: bottomPad }]}>
                 {/* Photo Preview */}
                 {photoUriStr && (
                     <View style={styles.photoContainer}>
@@ -201,7 +203,6 @@ function makeStyles(colors: Colors) {
             alignItems: 'center',
             paddingHorizontal: 24,
             paddingTop: 12,
-            paddingBottom: 32,
         },
         photoContainer: {
             width: '100%',

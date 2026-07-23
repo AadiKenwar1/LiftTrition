@@ -5,7 +5,7 @@ import { useEffect, useMemo } from 'react'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import Animated, { FadeInDown, useAnimatedProps, useReducedMotion, useSharedValue, withTiming } from 'react-native-reanimated'
 import Svg, { Circle, Defs, LinearGradient as SvgGradient, Path, Stop, Text as SvgText } from 'react-native-svg'
-import { useScreenTopPad } from '../_shared/useScreenTopPad'
+import { useScreenTopPad } from '@/lib/hooks/useScreenTopPad'
 
 /**
  * Dev-only redesign of the Summary step → the "goal projection" value moment before the paywall

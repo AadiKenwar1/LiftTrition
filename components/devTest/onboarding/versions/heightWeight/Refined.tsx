@@ -7,7 +7,7 @@ import { useMemo, useState } from 'react'
 import { Keyboard, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native'
 import PressableScale from '../_shared/PressableScale'
 import StepProgress from '../_shared/StepProgress'
-import { useScreenTopPad } from '../_shared/useScreenTopPad'
+import { useScreenTopPad } from '@/lib/hooks/useScreenTopPad'
 
 /** Dev-only Refined Height & Weight screen — restyled per RESTYLE_PLAN (theme tokens, dark + light). Inert. */
 export default function HeightWeightRefined() {

@@ -2,6 +2,7 @@ import ScanBackdrop from '@/components/NutritionComponents/ScanBackdrop'
 import PromptCard from '@/components/NeutralComponents/PromptCard'
 import { useBilling } from '@/context/BillingContext'
 import { fonts, useColors, type Colors } from '@/context/ThemeContext'
+import { useScreenBottomPad } from '@/lib/hooks/useScreenBottomPad'
 import { useSubmitOnce } from '@/lib/hooks/useSubmitOnce'
 import { processCameraCapture, processPickedImageUri, SCAN_FRAME, type ScanMode } from '@/lib/openAI/mealImage'
 import { nextPermissionAction, openAppSettings } from '@/lib/utils/permissions'
@@ -17,6 +18,7 @@ export default function CameraScreen() {
     const router = useRouter()
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
+    const bottomPad = useScreenBottomPad(6)
     const cameraRef = useRef<CameraView>(null)
     const [facing, setFacing] = useState<CameraType>('back')
     const [permission, requestPermission] = useCameraPermissions()
@@ -167,7 +169,7 @@ export default function CameraScreen() {
 
                 <Image source={{ uri: capturedPhoto }} style={styles.preview} resizeMode="contain" />
 
-                <View style={styles.previewActions}>
+                <View style={[styles.previewActions, { paddingBottom: bottomPad }]}>
                     <TouchableOpacity onPress={retakePhoto} style={styles.retakeButton} activeOpacity={0.5}>
                         <Text style={styles.retakeButtonText}>Retake</Text>
                     </TouchableOpacity>
@@ -226,7 +228,7 @@ export default function CameraScreen() {
                     </Text>
                 </View>
 
-                <View style={styles.controls}>
+                <View style={[styles.controls, { paddingBottom: bottomPad }]}>
                     <View style={styles.controlsInner}>
                         <TouchableOpacity onPress={pickFromLibrary} style={[styles.sideButton, pickingFromLibrary && styles.sideButtonDisabled]} activeOpacity={0.5} disabled={pickingFromLibrary} accessibilityLabel="Choose photo from library" accessibilityRole="button">
                             <Images size={26} color="#FFF" strokeWidth={2.5} />
@@ -386,7 +388,6 @@ function makeStyles(colors: Colors) {
             borderBottomRightRadius: 16,
         },
         controls: {
-            paddingBottom: Platform.OS === 'ios' ? 40 : 30,
             paddingHorizontal: 20,
         },
         controlsInner: {
@@ -435,7 +436,6 @@ function makeStyles(colors: Colors) {
             justifyContent: 'space-between',
             alignItems: 'center',
             paddingHorizontal: 20,
-            paddingBottom: Platform.OS === 'ios' ? 40 : 30,
             paddingTop: 20,
             gap: 12,
         },

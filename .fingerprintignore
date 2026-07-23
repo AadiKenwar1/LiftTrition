@@ -1,0 +1,6 @@
+## Exclude generated native dirs from @expo/fingerprint hashing.
+## This repo is CNG/managed (no committed ios/ or android/); EAS prebuild
+## generates ios/ in the cloud, which otherwise skews the build-side
+## fingerprint vs the local one (bareNativeDir mismatch).
+ios/**
+android/**

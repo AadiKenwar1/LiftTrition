@@ -4,7 +4,7 @@ import { StyleSheet, Text, TouchableOpacity, View, type StyleProp, type ViewStyl
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
 import { useOnboardingFlow } from './flowContext'
 import StepProgress from './StepProgress'
-import { useScreenTopPad } from './useScreenTopPad'
+import { useScreenTopPad } from '@/lib/hooks/useScreenTopPad'
 
 /**
  * Dev-only shared scaffold for the Version 3 (black & white) onboarding redesign. Every V3 screen uses

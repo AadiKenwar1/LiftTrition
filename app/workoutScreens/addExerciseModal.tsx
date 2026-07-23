@@ -7,6 +7,7 @@ import { EQUIPMENT_TYPES, MUSCLE_GROUPS } from '@/context/WorkoutContext/exercis
 import { IMAGE_MAP } from '@/context/WorkoutContext/exerciseLibrary/dataV2/imageMap'
 import { CreateExerciseData } from '@/context/WorkoutContext/types'
 import { useSubmitOnce } from '@/lib/hooks/useSubmitOnce'
+import { useScreenBottomPad } from '@/lib/hooks/useScreenBottomPad'
 import { Image } from 'expo-image'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import Fuse from 'fuse.js'
@@ -21,6 +22,7 @@ export default function AddExerciseModal() {
     const router = useRouter()
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
+    const bottomPad = useScreenBottomPad()
 
     const [guardSubmit, submitting] = useSubmitOnce()
 
@@ -228,7 +230,7 @@ export default function AddExerciseModal() {
                         ListHeaderComponent={listHeader}
                         renderItem={renderItem}
                         ListEmptyComponent={renderListEmpty}
-                        contentContainerStyle={styles.listContent}
+                        contentContainerStyle={[styles.listContent, { paddingBottom: bottomPad }]}
                         showsVerticalScrollIndicator={false}
                         keyboardShouldPersistTaps="handled"
                         keyboardDismissMode="on-drag"
@@ -238,7 +240,7 @@ export default function AddExerciseModal() {
             </KeyboardAvoidingView>
 
             {selectedItems.length > 0 && (
-                <View style={styles.addAllContainer}>
+                <View style={[styles.addAllContainer, { paddingBottom: bottomPad }]}>
                     <TouchableOpacity onPress={guardSubmit(handleAddAll)} disabled={submitting} activeOpacity={0.8} style={styles.addAllButton}>
                         <Text style={styles.addAllButtonText}>
                             Add {selectedItems.length} Exercise{selectedItems.length > 1 ? 's' : ''}
@@ -313,7 +315,7 @@ export default function AddExerciseModal() {
                                 </View>
                             </ScrollView>
 
-                            <View style={styles.sheetButtons}>
+                            <View style={[styles.sheetButtons, { paddingBottom: bottomPad }]}>
                                 <TouchableOpacity style={styles.sheetCancelButton} onPress={() => setShowCreateSheet(false)} activeOpacity={0.7}>
                                     <Text style={styles.sheetCancelText}>Cancel</Text>
                                 </TouchableOpacity>
@@ -357,7 +359,6 @@ function makeStyles(colors: Colors) {
         listContent: {
             paddingHorizontal: 24,
             paddingTop: 12,
-            paddingBottom: 24,
         },
         iconContainer: {
             alignItems: 'center',
@@ -574,7 +575,6 @@ function makeStyles(colors: Colors) {
         },
         addAllContainer: {
             paddingHorizontal: 24,
-            paddingBottom: Platform.OS === 'ios' ? 32 : 20,
             paddingTop: 12,
             backgroundColor: colors.background,
             borderTopWidth: 1,
@@ -708,7 +708,6 @@ function makeStyles(colors: Colors) {
             gap: 10,
             paddingHorizontal: 24,
             paddingTop: 12,
-            paddingBottom: Platform.OS === 'ios' ? 36 : 24,
             borderTopWidth: 1,
             borderTopColor: colors.hairline,
         },

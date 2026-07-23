@@ -1,9 +1,10 @@
 import StepProgress from '@/components/NeutralComponents/StepProgress'
 import { fonts, radius, spacing, useColors, type Colors } from '@/context/ThemeContext'
+import { useScreenBottomPad } from '@/lib/hooks/useScreenBottomPad'
+import { useScreenTopPad } from '@/lib/hooks/useScreenTopPad'
 import { useMemo, type ReactNode } from 'react'
 import { StyleSheet, Text, TouchableOpacity, View, type StyleProp, type ViewStyle } from 'react-native'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 /**
  * Production onboarding scaffold (port of the V4 dev `V4Screen`): neutral canvas, StepProgress dots +
@@ -33,8 +34,8 @@ export interface OnboardingScaffoldProps {
 export default function OnboardingScaffold({ step, total = 9, accent, title, subtitle, children, contentStyle, onBack, onNext, nextLabel = 'Next', nextDisabled = false, onBeforeNext, footer, onSignOut }: OnboardingScaffoldProps) {
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
-    const insets = useSafeAreaInsets()
-    const topPad = Math.max(insets.top, 12) + 16
+    const topPad = useScreenTopPad()
+    const bottomPad = useScreenBottomPad(6)
 
     const handleNext = () => {
         if (onBeforeNext != null && !onBeforeNext()) return
@@ -42,7 +43,7 @@ export default function OnboardingScaffold({ step, total = 9, accent, title, sub
     }
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { paddingBottom: bottomPad }]}>
             <KeyboardAwareScrollView style={styles.scroll} contentContainerStyle={[styles.content, { paddingTop: topPad }, contentStyle]} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" bottomOffset={24}>
                 {onSignOut != null && (
                     <View style={styles.signOutRow}>
@@ -77,7 +78,7 @@ export default function OnboardingScaffold({ step, total = 9, accent, title, sub
 
 function makeStyles(colors: Colors) {
     return StyleSheet.create({
-        container: { flex: 1, backgroundColor: colors.background, paddingHorizontal: 24, paddingBottom: 40 },
+        container: { flex: 1, backgroundColor: colors.background, paddingHorizontal: 24 },
         scroll: { flex: 1 },
         content: { paddingBottom: 16 },
         signOutRow: { flexDirection: 'row', justifyContent: 'flex-end', marginBottom: spacing.cardGap },

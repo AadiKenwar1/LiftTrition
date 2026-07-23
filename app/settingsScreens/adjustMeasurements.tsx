@@ -2,6 +2,7 @@ import { useSettings } from '@/context/SettingsContext'
 import { validateHeightWeight } from '@/context/SettingsContext/functions/validator'
 import { fonts, radius, useColors, useColorScheme, type Colors } from '@/context/ThemeContext'
 import { feetInchesToInches, inchesToFeetInches, weightUnitLabel } from '@/lib/utils/unitConversions'
+import { useScreenBottomPad } from '@/lib/hooks/useScreenBottomPad'
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5'
 import { LinearGradient } from 'expo-linear-gradient'
 import { router } from 'expo-router'
@@ -13,6 +14,7 @@ export default function AdjustMeasurementsScreen() {
     const colors = useColors()
     const isDark = useColorScheme() === 'dark'
     const styles = useMemo(() => makeStyles(colors), [colors])
+    const bottomPad = useScreenBottomPad(6)
     const unitSystem = settings.unitSystem
 
     // Imperial: initialise from stored total inches
@@ -39,7 +41,7 @@ export default function AdjustMeasurementsScreen() {
     return (
         <View style={styles.container}>
             <KeyboardAvoidingView style={styles.keyboardAvoiding} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-                <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'} showsVerticalScrollIndicator={false} onScrollBeginDrag={Keyboard.dismiss}>
+                <ScrollView style={styles.scroll} contentContainerStyle={[styles.scrollContent, { paddingBottom: bottomPad }]} keyboardShouldPersistTaps="handled" keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'} showsVerticalScrollIndicator={false} onScrollBeginDrag={Keyboard.dismiss}>
                     {/* Icon */}
                     <View style={styles.iconCircle}>
                         <FontAwesome5 name="pencil-ruler" size={65} color={colors.measurement} />
@@ -115,7 +117,6 @@ function makeStyles(colors: Colors) {
             width: '100%',
             paddingHorizontal: 20,
             paddingTop: 24,
-            paddingBottom: 40,
         },
         iconCircle: {
             width: 144,

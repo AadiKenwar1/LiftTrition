@@ -7,7 +7,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-nati
 import Animated, { FadeInDown } from 'react-native-reanimated'
 import PressableScale from '../_shared/PressableScale'
 import StepProgress from '../_shared/StepProgress'
-import { useScreenTopPad } from '../_shared/useScreenTopPad'
+import { useScreenTopPad } from '@/lib/hooks/useScreenTopPad'
 
 /**
  * Dev-only NEW step — "What's held you back?" multi-select. Builds commitment/consistency bias before

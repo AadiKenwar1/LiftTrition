@@ -2,14 +2,14 @@
     "expo": {
         "name": "PLATES",
         "slug": "App",
-        "version": "1.0.4",
+        "version": "1.0.5",
         "orientation": "portrait",
         "icon": "./assets/images/PlatesAppIcon.png",
         "scheme": "app",
         "userInterfaceStyle": "automatic",
         "newArchEnabled": true,
         "runtimeVersion": {
-            "policy": "fingerprint"
+            "policy": "appVersion"
         },
         "updates": {
             "url": "https://u.expo.dev/22572fc8-eb07-4d16-90bc-8ebd90b2a812"

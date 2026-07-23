@@ -2,6 +2,7 @@ import OptionCard from '@/components/NeutralComponents/OptionCard'
 import { useSettings } from '@/context/SettingsContext'
 import { withRegeneratedTargets } from '@/context/SettingsContext/functions/bodyWeightFunctions'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
+import { useScreenBottomPad } from '@/lib/hooks/useScreenBottomPad'
 import { router } from 'expo-router'
 import { useMemo, useState } from 'react'
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
@@ -20,6 +21,7 @@ export default function AdjustTrainingScreen() {
     const { settings, setSettings } = useSettings()
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
+    const bottomPad = useScreenBottomPad(6)
     const [selectedFrequency, setSelectedFrequency] = useState<ActivityLevel>(settings.activityLevel)
 
     function handleSave() {
@@ -36,7 +38,7 @@ export default function AdjustTrainingScreen() {
     }
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { paddingBottom: bottomPad }]}>
             <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
                 <Text style={styles.titleText}>How active are you?</Text>
                 <Text style={styles.subtitleText}>This sets your daily calorie burn — saving updates your nutrition goals.</Text>
@@ -59,7 +61,7 @@ export default function AdjustTrainingScreen() {
 
 function makeStyles(colors: Colors) {
     return StyleSheet.create({
-        container: { flex: 1, backgroundColor: colors.background, paddingHorizontal: 24, paddingBottom: 40 },
+        container: { flex: 1, backgroundColor: colors.background, paddingHorizontal: 24 },
         scroll: { flex: 1 },
         scrollContent: { paddingTop: 16, paddingBottom: 16 },
         titleText: { fontFamily: fonts.extrabold, fontSize: 30, color: colors.text, letterSpacing: -0.8, lineHeight: 36, marginBottom: 8 },

@@ -3,6 +3,7 @@ import { useWorkout } from '@/context/WorkoutContext'
 import { confirmDelete } from '@/lib/utils/confirmDelete'
 import { IMAGE_MAP } from '@/context/WorkoutContext/exerciseLibrary/dataV2/imageMap'
 import { Exercise, Workout } from '@/context/WorkoutContext/types'
+import { useScreenBottomPad } from '@/lib/hooks/useScreenBottomPad'
 import { Image } from 'expo-image'
 import { useLocalSearchParams } from 'expo-router'
 import { Archive, ArchiveRestore, Dumbbell, Trash } from 'lucide-react-native'
@@ -14,6 +15,7 @@ export default function ArchiveModal() {
     const params = useLocalSearchParams()
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
+    const bottomPad = useScreenBottomPad()
 
     // Normalize logType to a string (handle both string and string[] cases)
     const logType = typeof params.logType === 'string' ? params.logType : params.logType?.[0] || 'workouts'
@@ -108,7 +110,7 @@ export default function ArchiveModal() {
                 data={data}
                 renderItem={renderItem}
                 keyExtractor={(item) => item.id}
-                contentContainerStyle={styles.listContent}
+                contentContainerStyle={[styles.listContent, { paddingBottom: bottomPad }]}
                 showsVerticalScrollIndicator={false}
                 ListEmptyComponent={
                     <View style={styles.emptyContainer}>
@@ -175,7 +177,6 @@ function makeStyles(colors: Colors) {
         },
         listContent: {
             paddingHorizontal: 24,
-            paddingBottom: 24,
         },
         itemWrapper: {
             flexDirection: 'row',

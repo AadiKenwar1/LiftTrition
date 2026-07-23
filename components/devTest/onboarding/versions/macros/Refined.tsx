@@ -9,7 +9,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-nati
 import Animated, { FadeInDown } from 'react-native-reanimated'
 import PressableScale from '../_shared/PressableScale'
 import StepProgress from '../_shared/StepProgress'
-import { useScreenTopPad } from '../_shared/useScreenTopPad'
+import { useScreenTopPad } from '@/lib/hooks/useScreenTopPad'
 
 /** Dev-only Refined Macros (personalized plan) screen — restyled per RESTYLE_PLAN. Editable cells kept (ownership). Inert. */
 export default function MacrosRefined() {

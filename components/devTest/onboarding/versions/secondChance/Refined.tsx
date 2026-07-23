@@ -5,7 +5,7 @@ import { Clock, Gift } from 'lucide-react-native'
 import { useMemo } from 'react'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import Animated, { FadeInDown } from 'react-native-reanimated'
-import { useScreenTopPad } from '../_shared/useScreenTopPad'
+import { useScreenTopPad } from '@/lib/hooks/useScreenTopPad'
 
 /**
  * Dev-only NEW step shown to non-converters after they tap "Maybe later" on the paywall — a one-time 24h
