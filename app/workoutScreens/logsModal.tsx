@@ -1,13 +1,14 @@
 import DatePickerPopup from '@/components/NeutralComponents/DatePickerPopup'
 import LogHistoryList from '@/components/WorkoutComponents/LogHistoryList'
+import ProgressIndicator from '@/components/WorkoutComponents/ProgressIndicator'
 import { useAuth } from '@/context/AuthContext'
 import { useSettings } from '@/context/SettingsContext'
 import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { useWorkout } from '@/context/WorkoutContext'
-import { getDailyGoal, isGoalHitToday } from '@/context/WorkoutContext/functions/progressionFunctions'
+import { getIndicatorState, type ProgressionOptions } from '@/context/WorkoutContext/functions/progressionFunctions'
 import { Log } from '@/context/WorkoutContext/types'
 import { useToday } from '@/lib/hooks/useToday'
-import { addDays, formatDate, getDateKey, isDateAfterToday, sortByDateDesc } from '@/lib/utils/dateHelper'
+import { formatDate, getDateKey, isDateAfterToday, sortByDateDesc } from '@/lib/utils/dateHelper'
 import { parseNumericInput } from '@/lib/utils/number'
 import { weightUnitLabel } from '@/lib/utils/unitConversions'
 import { useScreenBottomPad } from '@/lib/hooks/useScreenBottomPad'
@@ -117,15 +118,24 @@ export default function LogsModal() {
 
     const isLogDateToday = todayKey === getDateKey(selectedLogDate)
 
-    const progressionOptions = useMemo(() => ({ weightUnit: weightUnit as 'lbs' | 'kg', isCompound }), [weightUnit, isCompound])
+    // Body weight and equipment drive bodyweight-aware scoring, so both belong in the deps —
+    // without them the suggestion goes stale when the profile weight or unit system changes.
+    const progressionOptions = useMemo<ProgressionOptions>(
+        () => ({
+            weightUnit: weightUnit as 'lbs' | 'kg',
+            isCompound,
+            equipment: fullExerciseLib[exerciseName]?.equipment,
+            bodyWeight: settings.bodyWeight,
+        }),
+        [weightUnit, isCompound, fullExerciseLib, exerciseName, settings.bodyWeight]
+    )
 
-    const dailyGoal = useMemo(() => getDailyGoal(logs, exerciseId, selectedLogDate, progressionOptions), [logs, exerciseId, selectedLogDate, progressionOptions])
-
-    const goalHitToday = useMemo(() => (dailyGoal ? isGoalHitToday(logs, exerciseId, selectedLogDate, dailyGoal) : false), [logs, exerciseId, selectedLogDate, dailyGoal])
-
-    const hasLogsOnSelectedDate = useMemo(() => exerciseLogs.some((log) => getDateKey(log.date) === getDateKey(selectedLogDate)), [exerciseLogs, selectedLogDate])
-
-    const nextGoal = useMemo(() => (goalHitToday || (!dailyGoal && hasLogsOnSelectedDate) ? getDailyGoal(logs, exerciseId, addDays(selectedLogDate, 1), progressionOptions) : null), [goalHitToday, dailyGoal, hasLogsOnSelectedDate, logs, exerciseId, selectedLogDate, progressionOptions])
+    // Which set to show and whether it belongs to today or the next session — resolved in one place
+    // by the engine, so the view never has to re-derive it.
+    const indicator = useMemo(
+        () => getIndicatorState(logs, exerciseId, selectedLogDate, progressionOptions),
+        [logs, exerciseId, selectedLogDate, progressionOptions]
+    )
 
     return (
         <>
@@ -200,28 +210,7 @@ export default function LogsModal() {
                                         </TouchableOpacity>
                                     </View>
 
-                                    {dailyGoal ?
-                                        goalHitToday && nextGoal ?
-                                            <>
-                                                <View style={styles.goalHitRow}>
-                                                    <Check size={14} color={colors.nutritionInk} strokeWidth={2.5} />
-                                                    <Text style={styles.goalHitText}>Goal hit!</Text>
-                                                </View>
-                                                <Text style={styles.goalHitNext}>
-                                                    <Text style={styles.goalLabel}>Next session: </Text>
-                                                    {nextGoal.weight} {weightUnit} × {nextGoal.reps}
-                                                </Text>
-                                            </>
-                                        :   <Text style={styles.goalText}>
-                                                <Text style={styles.goalLabel}>PLATES suggested set: </Text>
-                                                {dailyGoal.weight} {weightUnit} × {dailyGoal.reps}
-                                            </Text>
-                                    : nextGoal ?
-                                        <Text style={styles.goalText}>
-                                            <Text style={styles.goalLabel}>Next session: </Text>
-                                            {nextGoal.weight} {weightUnit} × {nextGoal.reps}
-                                        </Text>
-                                    :   <Text style={styles.emptyGoalText}>Log a set to see your next progression goal</Text>}
+                                    <ProgressIndicator {...indicator} weightUnit={weightUnit as 'lbs' | 'kg'} />
                                 </View>
                             </View>
                         </TouchableWithoutFeedback>
@@ -285,47 +274,6 @@ function makeStyles(colors: Colors) {
             letterSpacing: -0.5,
             fontFamily: fonts.semibold,
             flexShrink: 1,
-        },
-        goalText: {
-            marginTop: 12,
-            fontSize: 13,
-            color: colors.labelMuted,
-            textAlign: 'center',
-            fontFamily: fonts.medium,
-            letterSpacing: -0.2,
-        },
-        goalLabel: {
-            color: colors.workout,
-            fontFamily: fonts.semibold,
-        },
-        emptyGoalText: {
-            marginTop: 12,
-            fontSize: 13,
-            color: colors.textMuted,
-            textAlign: 'center',
-            fontFamily: fonts.medium,
-            letterSpacing: -0.2,
-        },
-        goalHitRow: {
-            marginTop: 12,
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 5,
-        },
-        goalHitText: {
-            fontSize: 13,
-            color: colors.nutritionInk,
-            fontFamily: fonts.semibold,
-            letterSpacing: -0.2,
-        },
-        goalHitNext: {
-            marginTop: 3,
-            fontSize: 13,
-            color: colors.labelMuted,
-            textAlign: 'center',
-            fontFamily: fonts.medium,
-            letterSpacing: -0.2,
         },
         inputSection: {
             marginBottom: 20,

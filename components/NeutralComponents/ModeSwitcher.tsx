@@ -1,56 +1,44 @@
-import { radius, useColors, type Colors } from '@/context/ThemeContext'
+import { useColors, type Colors } from '@/context/ThemeContext'
 import { useSettings } from '@/context/SettingsContext'
 import { useScreenTopPad } from '@/lib/hooks/useScreenTopPad'
-import { LinearGradient } from 'expo-linear-gradient'
-import { Dumbbell, Nut } from 'lucide-react-native'
+import { Dumbbell, Nut, UtensilsCrossed } from 'lucide-react-native'
 import React, { useMemo } from 'react'
-import { Pressable, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { Pressable, StyleSheet, View } from 'react-native'
 
 const ICON_SIZE = 25
-const ICON_STROKE = 2.0
-// Breathing room between the safe-area edge and the mode pill, and between the pill and screen content.
-const BAR_GAP = 4
+const ICON_STROKE = 2
+// Breathing room between the safe-area edge and the tab icons.
+const BAR_GAP = 0
 
-export default function CustomHeader() {
+// Top-nav mode switcher: a full-width bar of two tabs (Workout / Nutrition), the active one tinted its mode
+// accent with an underline beneath it, sitting on the elevated navBar surface with a bottom divider.
+export default function ModeSwitcher() {
     const { mode, setMode } = useSettings()
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
     const topPad = useScreenTopPad(BAR_GAP)
 
-    const renderModeButton = (isLift: boolean) => {
-        const isActive = mode === isLift
-        const gradientColors = isLift ? colors.workoutGradient : colors.nutritionGradient
-        const Icon = isLift ? Dumbbell : Nut
-        const iconColor = isActive ? '#FFFFFF' : colors.tabInactive
-
-        const labelContent = (
-            <View style={styles.modeLabelRow}>
-                <Icon size={ICON_SIZE} color={iconColor} strokeWidth={ICON_STROKE} style={isLift ? styles.dumbbellIcon : undefined} />
-            </View>
-        )
-
-        if (isActive) {
-            return (
-                <Pressable style={[styles.modeButton, styles.activeModeButton]} onPress={() => setMode(isLift)}>
-                    <LinearGradient colors={gradientColors} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.gradientButton}>
-                        {labelContent}
-                    </LinearGradient>
-                </Pressable>
-            )
-        }
+    const renderTab = (isLift: boolean) => {
+        const active = mode === isLift
+        const accent = isLift ? colors.workout : colors.nutrition
+        const Icon = isLift ? Dumbbell : UtensilsCrossed
+        const tint = active ? accent : colors.tabInactive
 
         return (
-            <TouchableOpacity style={[styles.modeButton, styles.inactiveModeButton]} onPress={() => setMode(isLift)} activeOpacity={0.5}>
-                {labelContent}
-            </TouchableOpacity>
+            <Pressable style={styles.tab} onPress={() => setMode(isLift)}>
+                <View style={styles.tabInner}>
+                    <Icon size={ICON_SIZE} color={tint} strokeWidth={ICON_STROKE} style={isLift ? styles.dumbbellIcon : undefined} />
+                </View>
+                <View style={[styles.underline, { backgroundColor: active ? accent : 'transparent' }]} />
+            </Pressable>
         )
     }
 
     return (
         <View style={[styles.header, { paddingTop: topPad }]}>
-            <View style={styles.modeSelectorContainer}>
-                {renderModeButton(true)}
-                {renderModeButton(false)}
+            <View style={styles.row}>
+                {renderTab(true)}
+                {renderTab(false)}
             </View>
         </View>
     )
@@ -58,57 +46,33 @@ export default function CustomHeader() {
 
 function makeStyles(colors: Colors) {
     return StyleSheet.create({
-        // Self-sizing: bar height = safe-area topPad (applied inline) + pill + BAR_GAP. No fixed height —
-        // the pill's height is emergent from its padding and icon size, and a constant would clip it.
+        // Edge-to-edge nav bar: elevated surface + bottom divider so it reads as top-of-screen chrome. The
+        // underline sits tight to the divider (tab-indicator look), so no paddingBottom/paddingHorizontal.
         header: {
-            backgroundColor: colors.background,
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexDirection: 'row',
-            paddingHorizontal: 10,
-            paddingBottom: BAR_GAP,
+            backgroundColor: colors.navBar,
+            borderBottomWidth: StyleSheet.hairlineWidth,
+            borderBottomColor: colors.divider,
             zIndex: 100,
         },
-        modeSelectorContainer: {
+        row: {
             flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
-            backgroundColor: colors.toggleTrack,
-            borderRadius: radius.toggle,
-            borderWidth: StyleSheet.hairlineWidth,
-            borderColor: colors.hairline,
-            gap: 4,
-            padding: 4,
         },
-        modeButton: {
+        tab: {
             flex: 1,
-            borderRadius: radius.toggleInner,
-            overflow: 'hidden',
-            minHeight: 42,
-        },
-        activeModeButton: {
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 3 },
-            shadowOpacity: 0.25,
-            shadowRadius: 9,
-            elevation: 4,
-        },
-        inactiveModeButton: {
-            backgroundColor: 'transparent',
-            paddingVertical: 12,
             alignItems: 'center',
-            justifyContent: 'center',
         },
-        gradientButton: {
-            paddingVertical: 12,
-            alignItems: 'center',
-            justifyContent: 'center',
-        },
-        modeLabelRow: {
+        tabInner: {
             flexDirection: 'row',
             alignItems: 'center',
-            justifyContent: 'center',
-            gap: 6,
+            gap: 8,
+            paddingTop:8,
+            paddingBottom:8
+        },
+        underline: {
+            height: 3,
+            width: '55%',
+            borderTopLeftRadius: 3,
+            borderTopRightRadius: 3,
         },
         dumbbellIcon: {
             transform: [{ rotate: '45deg' }],

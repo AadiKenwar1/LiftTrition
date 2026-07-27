@@ -98,11 +98,10 @@ export default function LogHistoryList({ logs, weightUnit, lastAddedLogId, onDel
 
 function makeStyles(colors: Colors) {
     return StyleSheet.create({
+        // No top padding: the gap above the list is owned entirely by whatever renders above it,
+        // so the spacing can't silently double the way it did when both sides reserved their own.
         logsSection: {
             flex: 1,
-            paddingTop: 16,
-            borderTopWidth: 1,
-            borderTopColor: colors.hairline,
         },
         logsFlatList: {
             flex: 1,

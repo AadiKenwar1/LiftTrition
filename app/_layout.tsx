@@ -223,6 +223,8 @@ function StackLayout() {
                     <Stack.Screen name="devTest/aiTest" options={{ headerShown: true, title: 'AI Test', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/scanCancel" options={{ headerShown: true, title: 'Scan Cancel', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/activityBanner" options={{ headerShown: true, title: 'Activity Banner', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="devTest/modeHeader" options={{ headerShown: true, title: 'Mode Headers', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="devTest/modeHeaderLive" options={{ headerShown: false, gestureEnabled: true }} />
                     <Stack.Screen name="devTest/colorHue" options={{ headerShown: true, title: 'Color Hue Review', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/numberParsing" options={{ headerShown: true, title: 'Number Parsing', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/editEntry" options={{ headerShown: true, title: 'Edit Entry — Test', headerBackTitle: 'Back' }} />

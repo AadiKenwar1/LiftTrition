@@ -31,11 +31,16 @@ const GROUPS: { title: string; items: { label: string; route: string }[] }[] = [
     {
         title: 'Components',
         items: [
+            { label: 'Mode Header — top-bar variations', route: '/devTest/modeHeader' },
+            { label: 'Mode Header — live on real screens', route: '/devTest/modeHeaderLive' },
             { label: 'Activity Banner', route: '/devTest/activityBanner' },
             { label: 'App Loading Screen', route: '/devTest/loadingScreen' },
             { label: 'Loading Retry (F6b)', route: '/devTest/loadingRetry' },
             { label: 'Spinner Lab', route: '/devTest/spinnerLab' },
             { label: 'Suggest Set', route: '/devTest/suggestSet' },
+            { label: 'Progress Indicator — variants (all states)', route: '/devTest/progressIndicator' },
+            { label: 'Progress Indicator — inline riffs (round 2)', route: '/devTest/progressInline' },
+            { label: 'Progress Indicator — centered, no check (round 3)', route: '/devTest/progressCentered' },
             { label: 'Calendar', route: '/devTest/calendar' },
             { label: 'Date Sheet', route: '/devTest/dateSheet' },
             { label: 'Add Nutrition Modal', route: '/devTest/addNutrition' },
@@ -54,6 +59,10 @@ const GROUPS: { title: string; items: { label: string; route: string }[] }[] = [
             { label: 'Food Row — Search preview', route: '/devTest/foodRow' },
             { label: 'Entry Rows — Brand subtitle', route: '/devTest/entryRow' },
         ],
+    },
+    {
+        title: 'Progression',
+        items: [{ label: 'Progression Lab — V2 engine + all scenarios', route: '/devTest/progressionLab' }],
     },
     {
         title: 'Mockups (App Store)',

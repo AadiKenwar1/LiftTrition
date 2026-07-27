@@ -4,6 +4,7 @@ export type Colors = {
     surface: string
     surfaceInset: string
     toggleTrack: string
+    navBar: string
     // Lines
     border: string
     hairline: string

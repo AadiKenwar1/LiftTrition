@@ -159,7 +159,7 @@ export default function Graph1({ mode, data, selectedRange, goal, formatValue, s
                 yAxis={[
                     {
                         font,
-                        tickValues: yScaleInfo.ticks,
+                        tickValues: [...new Set(yScaleInfo.ticks)],
                         labelOffset: 8,
                         labelColor: colors.textSecondary,
                         formatYLabel: (value) => `${value}`,

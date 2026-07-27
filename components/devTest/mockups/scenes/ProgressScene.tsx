@@ -5,7 +5,8 @@ import GraphStats from '@/components/GraphComponents/GraphStats'
 import { fonts, radius, useColorScheme, useColors, type Colors } from '@/context/ThemeContext'
 import { ChevronDown, ChevronLeft, ChevronRight, Pencil } from 'lucide-react-native'
 import { useMemo, useState } from 'react'
-import { ScrollView, StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Field, Segmented } from '../../DevControls'
 import MockupShell from '../MockupShell'
 import { BAR_HIGHLIGHT_INDEX, BODYWEIGHT_TREND, BW_GOAL, CALORIE_GOAL, CALORIES_WEEK, NUTRITION_STREAK, SETS_WEEK, STRENGTH_TREND, TRAINED_DAYS } from '../mockData'
@@ -14,11 +15,17 @@ import { BAR_HIGHLIGHT_INDEX, BODYWEIGHT_TREND, BW_GOAL, CALORIE_GOAL, CALORIES_
  * App Store mockup: the progress screen with idealized data, recomposed from the real
  * chart primitives (layout mirrors app/(tabs)/progress.tsx; chrome like pickers and
  * week paging is rendered static since the data is canned).
+ *
+ * Unlike the shipped screen this one never scrolls: the cards drop the fixed 400pt height
+ * and flex to fill the viewport, and the card chrome is a couple of points tighter, so a
+ * screenshot captures the banner and both graphs whole. The graph components themselves
+ * are untouched — they already flex to whatever height their container gives them.
  */
 export default function ProgressScene({ initialLift }: { initialLift: boolean }) {
     const [mode, setMode] = useState(initialLift)
     const colors = useColors()
     const isDark = useColorScheme() === 'dark'
+    const insets = useSafeAreaInsets()
     const styles = useMemo(() => makeStyles(colors, isDark), [colors, isDark])
     const accent = mode ? colors.workout : colors.nutrition
 
@@ -52,7 +59,9 @@ export default function ProgressScene({ initialLift }: { initialLift: boolean })
 
     return (
         <MockupShell padTop controls={controls}>
-            <ScrollView contentContainerStyle={styles.container} style={styles.scroll}>
+            {/* The bottom card already carries a 10pt margin, so only the remainder of the
+                home-indicator inset is added below it. */}
+            <View style={[styles.container, { paddingBottom: Math.max(insets.bottom - 10, 2) }]}>
                 <ActivityBanner mode={mode} trainedDays={TRAINED_DAYS} nutritionStreak={NUTRITION_STREAK} />
 
                 <View style={styles.graphCard}>
@@ -114,20 +123,19 @@ export default function ProgressScene({ initialLift }: { initialLift: boolean })
                     </View>
                     <GraphStats graphType={mode ? 'sets' : 'calories'} data={bottomData} unitSystem="imperial" mode={mode} goal={bottomGoal} />
                 </View>
-            </ScrollView>
+            </View>
         </MockupShell>
     )
 }
 
 function makeStyles(colors: Colors, isDark: boolean) {
     return StyleSheet.create({
-        scroll: {
+        // Non-scrolling: the banner takes its natural height and the two cards split
+        // what's left, so the whole screen is always fully visible in a screenshot.
+        container: {
             flex: 1,
             backgroundColor: colors.background,
-        },
-        container: {
-            paddingTop: 10,
-            paddingBottom: 60,
+            paddingTop: 8,
             paddingHorizontal: 15,
             width: '100%',
         },
@@ -136,7 +144,7 @@ function makeStyles(colors: Colors, isDark: boolean) {
             alignItems: 'flex-start',
             justifyContent: 'space-between',
             gap: 10,
-            marginBottom: 8,
+            marginBottom: 4,
         },
         headerLeft: {
             flex: 1,
@@ -147,16 +155,16 @@ function makeStyles(colors: Colors, isDark: boolean) {
             alignItems: 'center',
             justifyContent: 'center',
             gap: 8,
-            marginTop: 6,
+            marginTop: 2,
             marginBottom: 2,
         },
         rangeChip: {
-            paddingVertical: 7,
-            paddingHorizontal: 16,
+            paddingVertical: 5,
+            paddingHorizontal: 14,
             borderRadius: radius.chip,
         },
         rangeChipText: {
-            fontSize: 13,
+            fontSize: 12.5,
             letterSpacing: -0.2,
             fontFamily: fonts.semibold,
         },
@@ -168,16 +176,16 @@ function makeStyles(colors: Colors, isDark: boolean) {
             maxWidth: '100%',
         },
         cardTitle: {
-            fontSize: 20,
+            fontSize: 18,
             color: colors.text,
             letterSpacing: -0.4,
             fontFamily: fonts.extrabold,
             flexShrink: 1,
         },
         cardSubtitle: {
-            fontSize: 13,
+            fontSize: 12.5,
             color: colors.textSecondary,
-            marginTop: 2,
+            marginTop: 1,
             fontFamily: fonts.medium,
         },
         updateBtn: {
@@ -186,24 +194,26 @@ function makeStyles(colors: Colors, isDark: boolean) {
             gap: 5,
             backgroundColor: colors.nutrition + '22',
             borderRadius: radius.chip,
-            paddingHorizontal: 11,
-            paddingVertical: 6,
+            paddingHorizontal: 10,
+            paddingVertical: 5,
         },
         updateBtnText: {
-            fontSize: 13,
+            fontSize: 12.5,
             color: colors.nutrition,
             fontFamily: fonts.semibold,
             letterSpacing: -0.2,
         },
+        // No fixed height (the shipped screen's 400) — each card claims an equal share of
+        // the leftover space, which is what keeps both charts on one screen.
         graphCard: {
             width: '100%',
-            height: 400,
+            flex: 1,
             backgroundColor: colors.surface,
             borderRadius: radius.cardLg,
             borderWidth: StyleSheet.hairlineWidth,
             borderColor: colors.hairline,
-            marginBottom: 15,
-            padding: 15,
+            marginBottom: 10,
+            padding: 13,
             alignSelf: 'stretch',
             ...(isDark ?
                 {}
@@ -223,14 +233,15 @@ function makeStyles(colors: Colors, isDark: boolean) {
             alignItems: 'center',
             justifyContent: 'center',
             gap: 8,
-            marginBottom: 10,
+            marginTop: 2,
+            marginBottom: 4,
         },
         weekStepperArrow: {
-            padding: 4,
+            padding: 2,
         },
         weekStepperLabel: {
             textAlign: 'center',
-            fontSize: 14,
+            fontSize: 13.5,
             color: colors.text,
             letterSpacing: -0.2,
             fontFamily: fonts.semibold,

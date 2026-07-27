@@ -15,6 +15,9 @@ export const palettes = {
         // nested inside white cards AND as quiet grouping panels on the background.
         surfaceInset: '#E9EBF0',
         toggleTrack: '#ECEEF2',
+        // Elevated top-nav surface (ModeSwitcher bar) — a touch lighter than the page so the bar reads as
+        // raised chrome. Light needs more lift toward white than surfaceInset to not look like a flat gray band.
+        navBar: '#F0F1F4',
         // Lines — strengthened so card edges, dividers, and gridlines are actually visible
         border: '#CBCED7',
         hairline: '#CFD2DB',
@@ -60,6 +63,9 @@ export const palettes = {
         surface: '#1A1B1E',
         surfaceInset: '#141517',
         toggleTrack: '#1A1B1E',
+        // Elevated top-nav surface (ModeSwitcher bar) — a subtle lift off the near-black background
+        // (matches surfaceInset), enough to read as raised chrome without a hard edge.
+        navBar: '#141517',
         // Lines
         border: '#2a2a2a',
         hairline: 'rgba(255,255,255,0.06)',
