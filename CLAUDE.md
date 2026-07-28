@@ -43,7 +43,7 @@ app/                    Expo Router screens (file = route)
   authScreens/          login (Apple Sign-In only)
   onboardingScreens/    goals → obstacles → aboutYou → activity → goal → pace →
                         timeline → plan → projection → paywall
-                        (skip-aware step numbering lives in lib/onboarding/)
+                        (skip-aware step numbering lives in lib/utils/onboardingSteps.ts)
   nutritionScreens/     nutrition modals (add, saved, foodDB, camera, analyzing, editEntry…)
   workoutScreens/       workout modals (addWorkout, exercises, logs, notes, archive…)
   settingsScreens/      profile, subscription, adjustTraining, adjustNutrition/…, notifications
@@ -70,15 +70,15 @@ lib/
   openAI/               vision + text calls via Supabase Edge Function
   foodDB/               FatSecret search via Edge Function, in-memory cache
   notifications/        local-notification builders, permissions, prefs, scheduler
-  utils/                dateHelper, unitConversions, goalMath, downsample, confirmDelete…
+  utils/                dateHelper, unitConversions, goalMath, onboardingSteps, downsample,
+                        confirmDelete…
   hooks/                useDebouncedSave, useSubmitOnce, useToday, useAsyncLoad
   devtools/             __DEV__ failure-injection toggles (forceLoadFailure,
                         forceSaveFailure, forceFreeMode)
   env.ts                the only home for EXPO_PUBLIC_* env vars
-  onboarding/           skip-aware onboarding step numbering
 ```
 
-Tests live in `__tests__/` folders colocated with the code they test. Jest ignores `lib/supabase/functions/` (Deno Edge Function code, not app code).
+Tests live in `__tests__/` folders colocated with the code they test. Jest ignores `lib/supabase/functions/` (Deno Edge Function code, not app code). See Testing below for layout and documentation rules.
 
 ## Architecture
 
@@ -101,14 +101,29 @@ Tests live in `__tests__/` folders colocated with the code they test. Jest ignor
 
 ## Key Conventions
 
-- **Comments:** one-line comment above every named function, and above any non-obvious block; skip inline arrow callbacks.
+- **Comments:** one-line comment above every named function, and above any non-obvious block; skip inline arrow callbacks. Comments cite only code — a comment may name a file, symbol, or behaviour, never a doc, ticket, session, or milestone. If the reasoning came from a doc, restate the reasoning inline, in one line like every other comment.
 - **Components:** function components only; consume contexts via their hooks (`useWorkout()`, `useNutrition()`, `useSettings()`, `useBilling()`, `useAuth()`).
+- **Logic placement:** logic functions live in `lib/utils`, never in `components/` or `app/`. A function may live beside a component only if it returns UI.
 - **Styling:** `StyleSheet.create()` for static styles, or a `makeStyles(colors)` + `useMemo` pattern for theme-reactive ones. Never hardcode colors/fonts/radii — pull from `@/context/ThemeContext`:
   - `useColors()` — scheme-aware palette (reacts to dark/light toggle)
   - `fonts` / `type` — typography (the `FONT_FAMILY` constant in typography.ts flips Poppins↔Archivo app-wide)
   - `radius` / `spacing` / `motion` / `macroColors` — scheme-independent tokens
 - **Navigation:** modals use `presentation: 'modal'` with swipe-to-dismiss; pushed screens use the native OS back chevron (`headerBackButtonDisplayMode: 'minimal'`) — don't add custom `headerLeft` back buttons (iOS 26 Liquid Glass mis-centers custom JS views).
 - **Errors:** route crashes are reported to Sentry once via the exported `ErrorBoundary` in `_layout.tsx`, then fall through to expo-router's default error UI.
+
+## Testing
+
+**Test cases come before implementation.** Derive the cases from the request, write them first, then implement against them. If it isn't clear what cases the request calls for, stop and ask — never invent filler cases to fill a quota.
+
+**Layout:** one test file per exported function, each holding 10 happy paths, 10 challenging/variety cases, 10 edge cases, and 10 miscellaneous cases. Each area additionally gets one system file that tests its functions together.
+
+**Documentation** lives at two levels, and they answer different questions:
+- `<module>/__tests__/README.md` — for whoever edits the module next: the harness, the fixtures, non-obvious cases, known gaps. Names test cases freely.
+- `tests/<area>.md` — for whoever needs to know what the app guarantees: proven behaviour in product language, plus what is knowingly unproven. Names no test cases.
+
+`tests/` holds documentation only — no test code. Conventions and the two templates live in `tests/README.md`.
+
+**Changing test cases means checking `tests/<area>.md`** in the same pass, and updating it whenever the proven behaviour moved.
 
 ## Dev Tooling
 

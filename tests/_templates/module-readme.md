@@ -1,0 +1,19 @@
+# <Module> tests
+
+## Harness
+
+<How cases are constructed — the shared setup, what its inputs mean, what it returns.
+Enough that someone can add a case without reading the whole file.>
+
+## Fixtures
+
+<Which shared builders these tests use, and any local overrides worth knowing about.>
+
+## Non-obvious cases
+
+- <A case whose expected value looks wrong until you know why — state the why.>
+- <A constant, cap, or ordering rule that specific cases depend on.>
+
+## Known gaps
+
+- <What this folder does not cover, and whether that's deliberate.>

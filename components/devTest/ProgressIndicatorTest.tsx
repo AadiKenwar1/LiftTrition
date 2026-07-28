@@ -25,17 +25,17 @@ type ScenarioKey = 'mid' | 'cap' | 'heavy' | 'redirect' | 'bodyweight' | 'metric
 
 const SCENARIOS: Record<ScenarioKey, { goal: DailyGoal; options: ProgressionOptions }> = {
     // Mid-ladder: the everyday case, climbing reps at a fixed weight.
-    mid: { goal: { weight: 190, reps: 8 }, options: { weightUnit: 'lbs', isCompound: true } },
+    mid: { goal: { weight: 190, reps: 8 }, options: { weightUnit: 'lbs' } },
     // At the rep cap: hitting this goal triggers the weight jump (reps reset to 8).
-    cap: { goal: { weight: 185, reps: REP_CAP }, options: { weightUnit: 'lbs', isCompound: true } },
+    cap: { goal: { weight: 185, reps: REP_CAP }, options: { weightUnit: 'lbs' } },
     // Wide numbers, to check layout when the weight is three digits.
-    heavy: { goal: { weight: 225, reps: 9 }, options: { weightUnit: 'lbs', isCompound: true } },
+    heavy: { goal: { weight: 225, reps: 9 }, options: { weightUnit: 'lbs' } },
     // Post-redirect: a failed jump walked the goal below the reset (tests the sub-8 rep ladder).
-    redirect: { goal: { weight: 190, reps: 6 }, options: { weightUnit: 'lbs', isCompound: true } },
+    redirect: { goal: { weight: 190, reps: 6 }, options: { weightUnit: 'lbs' } },
     // Bodyweight: no external load, so the weight axis must not render a bare "0".
-    bodyweight: { goal: { weight: 0, reps: 11 }, options: { weightUnit: 'lbs', isCompound: false } },
-    // Metric isolation: 1.25 kg increments and a two-character unit.
-    metric: { goal: { weight: 60, reps: 10 }, options: { weightUnit: 'kg', isCompound: false } },
+    bodyweight: { goal: { weight: 0, reps: 11 }, options: { weightUnit: 'lbs' } },
+    // Metric: 2.5 kg increments and a two-character unit.
+    metric: { goal: { weight: 60, reps: 10 }, options: { weightUnit: 'kg' } },
 }
 
 const STATES: { label: string; value: ProgressState }[] = [

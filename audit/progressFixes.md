@@ -1,5 +1,12 @@
 # progressFixes — working notes on progression logic
 
+> **SUPERSEDED — design-history only, do not review against this.** The engine shipped
+> 2026-07-27 and several rules below were deleted or reversed on the way (seed, redirect,
+> tolerance band, sharing the Epley cap with the graph). Current truth, in order of authority:
+> `context/WorkoutContext/functions/__tests__/progressionFunctions.test.ts` (pinned behavior),
+> `context/WorkoutContext/functions/progressionFunctions.ts` (implementation),
+> `audit/progressFixes-scenarios.md` (intent + traces).
+
 _Living doc for the progression redesign discussion. Updated as decisions land. Nothing coded yet._
 _Last updated: 2026-07-25 (rev 16 — added Implementation summary (file-by-file change list) and NEW UI workstream: extract the logsModal goal text into a dedicated progress-indicator component, variants prototyped in Dev Hub first. Rev 15: graph question closed permanently (dip shows, sawtooth teaches itself). Full traces: `progressFixes-scenarios.md`)_
 

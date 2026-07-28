@@ -15,7 +15,8 @@ import {
 
 const EX = 'ex-1'
 const TODAY = new Date(2026, 6, 25)
-const LBS: ProgressionOptions = { weightUnit: 'lbs', isCompound: true, equipment: 'Barbell', bodyWeight: 180 }
+const LBS: ProgressionOptions = { weightUnit: 'lbs', equipment: 'Barbell', bodyWeight: 180 }
+const KGS: ProgressionOptions = { ...LBS, weightUnit: 'kg' }
 
 function mockLog(overrides: Partial<Log> = {}): Log {
     return {
@@ -81,6 +82,9 @@ const CASES: [string, SetSpec[], string, GradeReason | null, Partial<Progression
     ['9 · failed weight jump',                  [[6, 185, 12], [3, 190, 5]],                '190 × 6',   null],
     ['10 · genuinely getting weaker',           [[6, 190, 8], [3, 190, 7]],                 '190 × 8',   null],
     ['11 · deliberate deload, nudges once',     [[6, 225, 10], [3, 185, 8]],                '225 × 11',  null],
+    // Rep credit stops at 12 inside the hold comparison too — uncapped, 185×20 scores 308 vs 285
+    // and a back-off day would steal the bar.
+    ['11b · back-off volume day, the cap holds the bar', [[6, 225, 8], [3, 185, 20]],       '225 × 9',   null],
     ['12 · max double plus working sets',       [[3, 200, 2], [3, 185, 10]],                '185 × 11',  null],
     ['13 · heavier than planned, fewer reps',   [[6, 185, 12], [3, 195, 5]],                '195 × 6',   null],
     ['14 · two-plus weeks off',                 [[15, 190, 8]],                             'stale',     null],
@@ -107,7 +111,7 @@ const CASES: [string, SetSpec[], string, GradeReason | null, Partial<Progression
     ['E11 · only the last two sessions count',  [[6, 190, 8], [4, 135, 10], [3, 135, 10]],  '135 × 11',  null],
     ['E12 · belt plus bodyweight',              [[3, 0, 15], [3, 5, 3], [0, 0, 15]],        '5 × 4',     'outWorked', { equipment: 'Bodyweight' }],
     ['E13 · exactly 14 days out',               [[14, 190, 8]],                             '190 × 9',   null],
-    ['E14 · isolation lift, 2.5 lb jumps',      [[3, 40, 12]],                              '42.5 × 8',  null, { isCompound: false }],
+    ['E14 · light dumbbell, 2.5 lb step',       [[3, 20, 12]],                              '22.5 × 8',  null],
     ['E15 · kilograms, 2.5 kg jumps',           [[3, 100, 12]],                             '102.5 × 8', null, { weightUnit: 'kg' }],
     // The 2-rep fallback is all-or-nothing across the window, so a doubles-only DAY is skipped
     // outright whenever real working sets exist anywhere else in range.
@@ -121,8 +125,29 @@ const CASES: [string, SetSpec[], string, GradeReason | null, Partial<Progression
     // rule takes it. Two reps down is a real drop and stays a miss.
     ['30 · heavier bar, one rep fewer',                       [[3, 195, 8], [0, 200, 7]],              '195 × 9', 'heavierBar'],
     ['30b · heavier bar, two reps fewer',                     [[3, 195, 8], [0, 200, 6]],              '195 × 9', 'miss'],
+    // Scores by estimated max, not tonnage: 125×12 moves more total pounds than 185×8 (1,500 vs
+    // 1,480) but estimates 175 vs 234. External-review scenario — must stay a miss.
+    ['31 · modest drop, more tonnage — still a miss',         [[3, 185, 8], [0, 125, 12]],             '185 × 9', 'miss'],
+    ['31b · …and the hold keeps the bar next session',        [[6, 185, 8], [3, 125, 12]],             '185 × 9', null],
     ['E16 · bodyweight continues onto added weight',           [[3, 5, 8]],                             '5 × 9',   null, { equipment: 'Bodyweight' }],
-    ['E17 · kilogram isolation, 1.25 kg jumps',                [[3, 20, 12]],                           '21.25 × 8', null, { weightUnit: 'kg', isCompound: false }],
+    ['E17 · kilos at the boundary, 2.5 kg step',              [[3, 20, 12]],                           '22.5 × 8', null, { weightUnit: 'kg' }],
+    ['E18 · light kilos, 2 kg step',                          [[3, 10, 12]],                           '12 × 8',   null, { weightUnit: 'kg' }],
+    // A bad day at the SAME weight can't be held, because the hold needs the older session to be
+    // strictly heavier (scenario 4b depends on that). So a rep crash drops the bar where the same
+    // sickness at a lighter weight would have been shrugged off — soft for exactly one session,
+    // the mirror of #11's pushy-for-exactly-one-session.
+    ['32 · equal-weight crash gets no hold',                  [[6, 225, 10], [3, 225, 3]],             '225 × 4',  null],
+    // …and one rep lower puts the day under the working-set floor, so it vanishes entirely and the
+    // bar is untouched. Same sickness, seven reps of difference in the ask.
+    ['32b · one rep lower and the whole day vanishes',        [[6, 225, 10], [3, 225, 2]],             '225 × 11', null],
+    ['32c · one ordinary session undoes the crash',           [[3, 225, 3], [0, 225, 8]],              '225 × 4',  'suggestedSet'],
+    // The jump lands on a real dumbbell now, so falling a rep short of it is the interesting case:
+    // out-working the bar still carries the session.
+    ['33 · one rep short of the jump still out-works the bar', [[3, 30, 12], [0, 35, 7]],              '35 × 8',   'outWorked'],
+    // Jump day: 190×8 estimates 240.62 against the 185×12 bar's 258.93, so ONLY the suggestedSet
+    // branch can pass it. That branch is first and unconditional precisely for this.
+    ['34 · the jump-day set counts despite scoring lower',    [[3, 185, 12], [0, 190, 8]],             '190 × 8',  'suggestedSet'],
+    ['34b · …and the ladder moves the bar to 190 on weight',  [[6, 185, 12], [3, 190, 8]],             '190 × 9',  null],
 ]
 
 describe('scenario matrix', () => {
@@ -146,13 +171,36 @@ describe('applyProgression', () => {
         expect(applyProgression(185, 15, LBS)).toEqual({ weight: 190, reps: 11 })
     })
 
-    test('uses a 2.5 lb increment for isolation lifts', () => {
-        expect(applyProgression(40, 12, { ...LBS, isCompound: false })).toEqual({ weight: 42.5, reps: 8 })
+    test('lb step widens from 2.5 to 5 at the 25 lb boundary', () => {
+        expect(applyProgression(20, 12, LBS).weight).toBe(22.5)
+        expect(applyProgression(22.5, 12, LBS).weight).toBe(25)
+        expect(applyProgression(25, 12, LBS).weight).toBe(30)
+        expect(applyProgression(185, 12, LBS).weight).toBe(190)
     })
 
-    test('uses 2.5 kg for compound and 1.25 kg for isolation', () => {
-        expect(applyProgression(100, 12, { ...LBS, weightUnit: 'kg' })).toEqual({ weight: 102.5, reps: 8 })
-        expect(applyProgression(20, 12, { ...LBS, weightUnit: 'kg', isCompound: false })).toEqual({ weight: 21.25, reps: 8 })
+    test('kg step widens from 2 to 2.5 at the 20 kg boundary', () => {
+        expect(applyProgression(10, 12, KGS).weight).toBe(12)
+        expect(applyProgression(18, 12, KGS).weight).toBe(20)
+        expect(applyProgression(20, 12, KGS).weight).toBe(22.5)
+        expect(applyProgression(100, 12, KGS).weight).toBe(102.5)
+    })
+
+    /**
+     * The old compound/isolation split asked for half a plate per side — 1.25 lb, or 0.625 kg,
+     * neither of which is a plate — and for dumbbells like 32.5 lb that no rack carries. Every jump
+     * now lands on something a gym can actually produce. An empty bar is 45 lb / 20 kg, so a
+     * barbell is always in the upper tier and always gets a whole pair.
+     */
+    test('never names a weight the gym cannot make', () => {
+        expect(applyProgression(65, 12, LBS).weight).toBe(70) // was 67.5 — 11.25 lb per side
+        expect(applyProgression(30, 12, LBS).weight).toBe(35) // was 32.5 — not on any rack
+        expect(applyProgression(60, 12, KGS).weight).toBe(62.5) // 1.25 kg per side, the standard plate
+    })
+
+    test('holds float drift over repeated kg steps', () => {
+        let weight = 10
+        for (let i = 0; i < 6; i++) weight = applyProgression(weight, 12, KGS).weight
+        expect(weight).toBe(22.5)
     })
 })
 
@@ -239,6 +287,18 @@ describe('gradeSet', () => {
         expect(gradeSet({ weight: 190, reps: 8 }, goal, anchor, LBS)).toBe('suggestedSet')
     })
 
+    /**
+     * The reason suggestedSet is first and unconditional. On jump day the set we ask for is weaker
+     * on paper than the one that earned it — 190×8 estimates 240.62 against 185×12's 258.93 — so
+     * every other branch rejects it and only "you did what we asked" can pass it. Reordering these
+     * branches, or making this one consult the score, silently breaks every weight jump.
+     */
+    test('counts the jump-day set even though it scores below the bar', () => {
+        const capped = mockLog({ weight: 185, reps: 12 })
+        expect(score(190, 8, LBS)).toBeLessThan(score(185, 12, LBS))
+        expect(gradeSet({ weight: 190, reps: 8 }, { weight: 190, reps: 8 }, capped, LBS)).toBe('suggestedSet')
+    })
+
     test('counts more reps on the same bar even past the formula cap', () => {
         const capped = mockLog({ weight: 170, reps: 12 })
         expect(gradeSet({ weight: 170, reps: 13 }, { weight: 175, reps: 8 }, capped, LBS)).toBe('moreRepsSameBar')
@@ -263,9 +323,16 @@ describe('gradeSet', () => {
         expect(gradeSet({ weight: 200, reps: 5 }, { weight: 200, reps: 8 }, highRep, LBS)).toBe('miss')
     })
 
-    test('does not let a heavier max single count against a doubles bar', () => {
+    // No rep floor on grading — only on anchoring. Epley scores 200×2 at 213.3 thanks to its
+    // reps === 1 special case, so it would call this a miss; below ~3 reps the formula is the less
+    // trustworthy signal, and a single can't become the bar anyway.
+    test('counts a heavier single against a doubles bar', () => {
         const doubles = mockLog({ weight: 200, reps: 2 })
-        expect(gradeSet({ weight: 205, reps: 1 }, { weight: 200, reps: 3 }, doubles, LBS)).toBe('miss')
+        expect(gradeSet({ weight: 205, reps: 1 }, { weight: 200, reps: 3 }, doubles, LBS)).toBe('heavierBar')
+    })
+
+    test('still rejects a heavier single against a working-set bar', () => {
+        expect(gradeSet({ weight: 225, reps: 1 }, goal, anchor, LBS)).toBe('miss')
     })
 
     test('rejects an exact repeat — a tie is not a beat', () => {

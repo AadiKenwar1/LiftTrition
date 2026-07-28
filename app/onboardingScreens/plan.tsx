@@ -3,7 +3,7 @@ import OnboardingScaffold from '@/components/NeutralComponents/OnboardingScaffol
 import PressableScale from '@/components/NeutralComponents/PressableScale'
 import { useSettings } from '@/context/SettingsContext'
 import { fonts, macroColors, radius, useColors, type Colors } from '@/context/ThemeContext'
-import { onboardingStep } from '@/lib/onboarding/steps'
+import { onboardingStep } from '@/lib/utils/onboardingSteps'
 import { router } from 'expo-router'
 import { Beef, Droplet, Flame, Pencil, Wheat } from 'lucide-react-native'
 import { useMemo, useState } from 'react'

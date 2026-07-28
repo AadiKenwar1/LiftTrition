@@ -2,7 +2,7 @@ import OnboardingScaffold from '@/components/NeutralComponents/OnboardingScaffol
 import OptionCard from '@/components/NeutralComponents/OptionCard'
 import { useSettings } from '@/context/SettingsContext'
 import { useColors } from '@/context/ThemeContext'
-import { onboardingStep } from '@/lib/onboarding/steps'
+import { onboardingStep } from '@/lib/utils/onboardingSteps'
 import { router } from 'expo-router'
 import { useState } from 'react'
 import { View } from 'react-native'

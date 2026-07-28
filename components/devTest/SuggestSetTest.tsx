@@ -1,5 +1,5 @@
 import { fonts, useColors, useColorScheme, useSetColorScheme, type Colors } from '@/context/ThemeContext'
-import { applyProgression, type DailyGoal, type ProgressionOptions } from '@/context/WorkoutContext/functions/progressionFunctions'
+import { applyProgression, getWeightIncrement, type DailyGoal, type ProgressionOptions } from '@/context/WorkoutContext/functions/progressionFunctions'
 import { useMemo, useState, type ComponentType } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 import { Field, Segmented } from './DevControls'
@@ -8,10 +8,10 @@ import { VariantChipGhost, VariantColdStart, VariantRepLadder, VariantRevealSwap
 type ScenarioKey = 'mid' | 'cap' | 'heavy' | 'bodyweight'
 
 const SCENARIOS: Record<ScenarioKey, { today: DailyGoal; options: ProgressionOptions }> = {
-    mid: { today: { weight: 100, reps: 10 }, options: { weightUnit: 'lbs', isCompound: true } },
-    cap: { today: { weight: 100, reps: 12 }, options: { weightUnit: 'lbs', isCompound: true } },
-    heavy: { today: { weight: 225, reps: 9 }, options: { weightUnit: 'lbs', isCompound: true } },
-    bodyweight: { today: { weight: 0, reps: 12 }, options: { weightUnit: 'lbs', isCompound: false } },
+    mid: { today: { weight: 100, reps: 10 }, options: { weightUnit: 'lbs' } },
+    cap: { today: { weight: 100, reps: 12 }, options: { weightUnit: 'lbs' } },
+    heavy: { today: { weight: 225, reps: 9 }, options: { weightUnit: 'lbs' } },
+    bodyweight: { today: { weight: 0, reps: 12 }, options: { weightUnit: 'lbs' } },
 }
 
 const VARIANTS: { name: string; Comp: ComponentType<SuggestSetData> }[] = [
@@ -35,7 +35,7 @@ export default function SuggestSetTest() {
     const dayRolled = stateKey === 'nextDay'
     const today = dayRolled ? applyProgression(base.weight, base.reps, options) : base
     const next = applyProgression(today.weight, today.reps, options)
-    const increment = options.isCompound ? 5 : 2.5
+    const increment = getWeightIncrement(today.weight, options)
     const data: SuggestSetData = { today, next, weightUnit: options.weightUnit, increment, goalHit: stateKey === 'hit', dayRolled }
 
     return (

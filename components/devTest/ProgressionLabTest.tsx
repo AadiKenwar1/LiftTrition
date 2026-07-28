@@ -36,14 +36,13 @@ type Scenario = {
     expect: string
     expectGrade?: GradeReason
     unit?: 'lbs' | 'kg'
-    isCompound?: boolean
     equipment?: string
 }
 
 const SCENARIOS: Scenario[] = [
     { id: '1', title: 'Normal week-to-week progress', sets: [{ daysAgo: 3, weight: 185, reps: 8 }], expect: '185 × 9' },
     { id: '2', title: 'Hit 12 reps — the weight goes up', sets: [{ daysAgo: 3, weight: 185, reps: 12 }], expect: '190 × 8' },
-    { id: '3', title: 'The 195×7 bug that started all this', sets: [{ daysAgo: 3, weight: 190, reps: 7 }, { daysAgo: 0, weight: 195, reps: 7 }], expect: '190 × 8', expectGrade: 'outWorked' },
+    { id: '3', title: 'The 195×7 bug that started all this', sets: [{ daysAgo: 3, weight: 190, reps: 7 }, { daysAgo: 0, weight: 195, reps: 7 }], expect: '190 × 8', expectGrade: 'heavierBar' },
     { id: '4', title: 'Lighter, more reps — still stronger', sets: [{ daysAgo: 3, weight: 190, reps: 7 }, { daysAgo: 0, weight: 185, reps: 10 }], expect: '190 × 8', expectGrade: 'outWorked' },
     { id: '4b', title: '…and next session the app follows you', sets: [{ daysAgo: 6, weight: 190, reps: 7 }, { daysAgo: 3, weight: 185, reps: 10 }], expect: '185 × 11' },
     { id: '5', title: 'You log your warmups', sets: [{ daysAgo: 3, weight: 135, reps: 10 }, { daysAgo: 3, weight: 155, reps: 8 }, { daysAgo: 3, weight: 190, reps: 8 }], expect: '190 × 9' },
@@ -79,8 +78,10 @@ const SCENARIOS: Scenario[] = [
     { id: 'E11', title: 'Only the last two sessions count', sets: [{ daysAgo: 6, weight: 190, reps: 8 }, { daysAgo: 4, weight: 135, reps: 10 }, { daysAgo: 3, weight: 135, reps: 10 }], expect: '135 × 11' },
     { id: 'E12', title: 'Belt plus bodyweight — clumsy hint, right celebration', sets: [{ daysAgo: 3, weight: 0, reps: 15 }, { daysAgo: 3, weight: 5, reps: 3 }, { daysAgo: 0, weight: 0, reps: 15 }], expect: '5 × 4', expectGrade: 'outWorked', equipment: 'Bodyweight' },
     { id: 'E13', title: 'Exactly 14 days out — still coached', sets: [{ daysAgo: 14, weight: 190, reps: 8 }], expect: '190 × 9' },
-    { id: 'E14', title: 'Isolation lift — 2.5 lb jumps', sets: [{ daysAgo: 3, weight: 40, reps: 12 }], expect: '42.5 × 8', isCompound: false },
+    { id: 'E14', title: 'Light dumbbell — 2.5 lb steps below the 25 lb boundary', sets: [{ daysAgo: 3, weight: 20, reps: 12 }], expect: '22.5 × 8' },
     { id: 'E15', title: 'Kilograms — 2.5 kg jumps', sets: [{ daysAgo: 3, weight: 100, reps: 12 }], expect: '102.5 × 8', unit: 'kg' },
+    { id: 'E16', title: 'At the boundary — the step widens to 5 lb', sets: [{ daysAgo: 3, weight: 25, reps: 12 }], expect: '30 × 8' },
+    { id: 'E17', title: 'Light kilos — 2 kg steps below the 20 kg boundary', sets: [{ daysAgo: 3, weight: 10, reps: 12 }], expect: '12 × 8', unit: 'kg' },
 ]
 
 const STATUS_LABEL: Record<string, string> = { firstTime: 'first time', stale: 'been a while', lowReps: 'low reps' }
@@ -144,7 +145,6 @@ function explainBar(state: ProgressionState, today: Date): string {
 function evaluate(scenario: Scenario, base: Date): { actual: string; reason: GradeReason | null; pass: boolean } {
     const options: ProgressionOptions = {
         weightUnit: scenario.unit ?? 'lbs',
-        isCompound: scenario.isCompound ?? true,
         equipment: scenario.equipment ?? 'Barbell',
         bodyWeight: 180,
     }
@@ -179,7 +179,6 @@ export default function ProgressionLabTest() {
     const [elapsed, setElapsed] = useState(0)
     const [entries, setEntries] = useState<Entry[]>(() => SCENARIOS[0].sets.map((s) => ({ date: addDays(new Date(), -s.daysAgo), weight: s.weight, reps: s.reps })))
     const [unit, setUnit] = useState<'lbs' | 'kg'>('lbs')
-    const [isCompound, setIsCompound] = useState(true)
     const [equipment, setEquipment] = useState('Barbell')
     const [showInternals, setShowInternals] = useState(false)
 
@@ -190,8 +189,8 @@ export default function ProgressionLabTest() {
     const scenario = SCENARIOS.find((s) => s.id === scenarioId) ?? SCENARIOS[0]
 
     const options: ProgressionOptions = useMemo(
-        () => ({ weightUnit: unit, isCompound, equipment, bodyWeight: 180 }),
-        [unit, isCompound, equipment]
+        () => ({ weightUnit: unit, equipment, bodyWeight: 180 }),
+        [unit, equipment]
     )
 
     const logs = useMemo(() => toLogs(entries), [entries])
@@ -211,7 +210,6 @@ export default function ProgressionLabTest() {
         setElapsed(0)
         setEntries(s.sets.map((spec) => ({ date: addDays(base, -spec.daysAgo), weight: spec.weight, reps: spec.reps })))
         setUnit(s.unit ?? 'lbs')
-        setIsCompound(s.isCompound ?? true)
         setEquipment(s.equipment ?? 'Barbell')
         setMode('play')
     }
@@ -290,7 +288,7 @@ export default function ProgressionLabTest() {
                     <Text style={styles.scenarioTitle}>{scenario.title}</Text>
                     <Text style={styles.hint}>
                         {equipment === 'Bodyweight' ? 'Bodyweight · ' : ''}
-                        {isCompound ? 'Compound' : 'Isolation'} · {unit}
+                        {unit}
                         {elapsed > 0 ? ` · ${elapsed} days into the block` : ''}
                     </Text>
 
@@ -410,8 +408,6 @@ export default function ProgressionLabTest() {
                             <View style={styles.toggleRow}>
                                 <Toggle label="lbs" active={unit === 'lbs'} onPress={() => setUnit('lbs')} />
                                 <Toggle label="kg" active={unit === 'kg'} onPress={() => setUnit('kg')} />
-                                <Toggle label="Compound" active={isCompound} onPress={() => setIsCompound(true)} />
-                                <Toggle label="Isolation" active={!isCompound} onPress={() => setIsCompound(false)} />
                                 <Toggle label="Barbell" active={equipment === 'Barbell'} onPress={() => setEquipment('Barbell')} />
                                 <Toggle label="Bodyweight" active={equipment === 'Bodyweight'} onPress={() => setEquipment('Bodyweight')} />
                             </View>

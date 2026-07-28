@@ -34,7 +34,6 @@ export default function LogsModal() {
     const exerciseId = typeof params.exerciseId === 'string' ? params.exerciseId : params.exerciseId?.[0] || ''
     const exerciseName = typeof params.exerciseName === 'string' ? params.exerciseName : params.exerciseName?.[0] || 'Log'
     const isBodyweight = fullExerciseLib[exerciseName]?.equipment === 'Bodyweight'
-    const isCompound = fullExerciseLib[exerciseName]?.isCompound ?? true
     const weightLabel = isBodyweight ? `Added weight (${weightUnit})` : `Weight (${weightUnit})`
     const weightPlaceholder = '0'
 
@@ -123,11 +122,10 @@ export default function LogsModal() {
     const progressionOptions = useMemo<ProgressionOptions>(
         () => ({
             weightUnit: weightUnit as 'lbs' | 'kg',
-            isCompound,
             equipment: fullExerciseLib[exerciseName]?.equipment,
             bodyWeight: settings.bodyWeight,
         }),
-        [weightUnit, isCompound, fullExerciseLib, exerciseName, settings.bodyWeight]
+        [weightUnit, fullExerciseLib, exerciseName, settings.bodyWeight]
     )
 
     // Which set to show and whether it belongs to today or the next session — resolved in one place

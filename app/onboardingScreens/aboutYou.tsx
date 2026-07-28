@@ -6,7 +6,7 @@ import { validateHeightWeight } from '@/context/SettingsContext/functions/valida
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { calculateAge } from '@/lib/utils/dateHelper'
 import { cmToInches, feetInchesToInches, inchesToCm, inchesToFeetInches, kgToLbs, lbsToKg, weightUnitLabel } from '@/lib/utils/unitConversions'
-import { onboardingStep } from '@/lib/onboarding/steps'
+import { onboardingStep } from '@/lib/utils/onboardingSteps'
 import { router } from 'expo-router'
 import { ShieldCheck } from 'lucide-react-native'
 import { useMemo, useState } from 'react'

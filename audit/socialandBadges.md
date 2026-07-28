@@ -83,7 +83,7 @@ to the app before the social graph exists; friends tab after.
   goals question at screen 2, with name-aware copy ("What are your goals, Aadi?"), as do
   plan/projection/paywall. Display name only — NOT a unique handle; no uniqueness
   check/backend. Existing users get a one-time "add your name" prompt on first profile
-  visit. Mechanics: skip-aware step numbering in `lib/onboarding/` absorbs the inserted
+  visit. Mechanics: skip-aware step numbering in `lib/utils/onboardingSteps.ts` absorbs the inserted
   step; iterate via the dev-hub onboarding harness (onboardingFlow/Page/Preview).
 - **Phase 3 — profile screen refactor:** settings tab becomes the Profile/"You" tab.
   Identity header up top (name now exists from Phase 2), Adjust Nutrition + Adjust Training
@@ -180,7 +180,7 @@ Design the checkpoint BEFORE the pruning feature ships.
   that's the goals-screen refactor: shed its intro framing, become purely the goals
   question (now screen 2), with name-aware copy ("What are your goals, Aadi?").
   Plan/projection/paywall copy also becomes name-aware.
-- Mechanics: skip-aware step numbering in `lib/onboarding/` absorbs inserted steps;
+- Mechanics: skip-aware step numbering in `lib/utils/onboardingSteps.ts` absorbs inserted steps;
   iterate the screen in the dev-hub onboarding harness.
 
 ## Profile widgets (not badges — no earn condition)

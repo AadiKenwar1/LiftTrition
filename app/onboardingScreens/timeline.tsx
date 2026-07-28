@@ -1,7 +1,7 @@
 import OnboardingScaffold from '@/components/NeutralComponents/OnboardingScaffold'
 import { useSettings } from '@/context/SettingsContext'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
-import { onboardingStep } from '@/lib/onboarding/steps'
+import { onboardingStep } from '@/lib/utils/onboardingSteps'
 import { router } from 'expo-router'
 import { useMemo } from 'react'
 import { StyleSheet, Text, View } from 'react-native'

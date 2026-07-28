@@ -42,7 +42,6 @@ export type DailyGoal = {
 
 export type ProgressionOptions = {
     weightUnit: 'lbs' | 'kg'
-    isCompound: boolean
     /** From the exercise library entry. 'Bodyweight' switches on body-weight-aware scoring. */
     equipment?: string
     /** Profile body weight, only read for Bodyweight equipment. */
@@ -65,16 +64,32 @@ export type ProgressionState = {
 /** Which rule counted the set. 'miss' means none of them did. */
 export type GradeReason = 'suggestedSet' | 'moreRepsSameBar' | 'heavierBar' | 'outWorked' | 'miss'
 
-// Smallest plate jump we will ever prescribe. These are plate pairs, not unit conversions — an lb
-// gym has 2.5 lb plates where a kg gym has 1.25 kg ones, so the increments differ by equipment.
-function getWeightIncrement(options: ProgressionOptions): number {
-    if (options.weightUnit === 'kg') {
-        return options.isCompound ? 2.5 : 1.25
-    }
-    return options.isCompound ? 5 : 2.5
+/**
+ * Jump sizes, keyed by how heavy the lift already is rather than by the exercise.
+ *
+ * Racks and plate trees change step size as they get heavier: lb dumbbells run in 2.5s up to about
+ * 25 lb and in 5s above, kg dumbbells in 2s up to about 20 kg and 2.5s above. Following the weight
+ * therefore names a number the gym can actually make, which following compound-vs-isolation did
+ * not — that split asked for half a plate per side (1.25 lb, or 0.625 kg) and for dumbbells like
+ * 32.5 lb that no rack carries.
+ *
+ * An empty bar is 45 lb / 20 kg, so a barbell always lands at or above the boundary and always gets
+ * a whole plate pair. The finer step below it can only ever apply to dumbbells and stacks.
+ */
+const INCREMENTS = {
+    lbs: { boundary: 25, below: 2.5, atOrAbove: 5 },
+    kg: { boundary: 20, below: 2, atOrAbove: 2.5 },
+} as const
+
+// Smallest jump we will ever prescribe from this weight. Tiered on the load actually being moved,
+// not the number logged, so a weighted pull-up is treated as the ~180 lb lift it is rather than as
+// a 0 lb one — otherwise a lifter adding their first belt plate would climb in 2.5s forever.
+export function getWeightIncrement(weight: number, options: ProgressionOptions): number {
+    const tier = INCREMENTS[options.weightUnit]
+    return effectiveWeight(weight, options) < tier.boundary ? tier.below : tier.atOrAbove
 }
 
-// Trims float drift from repeated increments (1.25 + 1.25 + … in kg).
+// Trims float drift from repeated increments (2 + 2 + 2.5 + … in kg).
 function roundWeight(weight: number): number {
     return Math.round(weight * 100) / 100
 }
@@ -111,7 +126,7 @@ export function applyProgression(weight: number, reps: number, options: Progress
         return { weight, reps: reps + 1 }
     }
     return {
-        weight: roundWeight(weight + getWeightIncrement(options)),
+        weight: roundWeight(weight + getWeightIncrement(weight, options)),
         reps: reps - (REP_CAP - REP_RESET),
     }
 }
@@ -181,7 +196,12 @@ export function getDailyGoal(logs: Log[], exerciseId: string, selectedDate: Date
  * bar, 200×7 falls 0.13% short. Nobody perceives that, and refusing to credit added weight is the
  * same defect the whole rewrite set out to fix. It's deliberately relative to the anchor's reps
  * rather than an absolute floor — "5+ reps and heavier" would credit 200×5 against a 195×12 bar,
- * a 14% regression. It also requires a working set, so a heavier max single can't sneak through.
+ * a 14% regression.
+ *
+ * Note there is no rep floor on grading, only on anchoring: a 205×1 counts against a 200×2 bar.
+ * That is the case Epley handles worst — its `reps === 1` branch makes 1→2 a 6.66% step where every
+ * other rep is under 3% — so "heavier bar, one rep off" is the more trustworthy signal down there,
+ * and a single can never become the bar regardless.
  *
  * Strict `>` on the last branch, with no tolerance band: the reference is a set the user actually
  * performed, so blanket slack would forgive real regression and compound session over session.
@@ -189,7 +209,7 @@ export function getDailyGoal(logs: Log[], exerciseId: string, selectedDate: Date
 export function gradeSet(log: Pick<Log, 'weight' | 'reps'>, goal: DailyGoal, anchor: Log, options: ProgressionOptions): GradeReason {
     if (log.weight >= goal.weight && log.reps >= goal.reps) return 'suggestedSet'
     if (log.weight >= anchor.weight && log.reps > anchor.reps) return 'moreRepsSameBar'
-    if (log.weight > anchor.weight && log.reps >= MIN_REPS && log.reps >= anchor.reps - 1) return 'heavierBar'
+    if (log.weight > anchor.weight && log.reps >= anchor.reps - 1) return 'heavierBar'
     if (score(log.weight, log.reps, options) > score(anchor.weight, anchor.reps, options)) return 'outWorked'
     return 'miss'
 }

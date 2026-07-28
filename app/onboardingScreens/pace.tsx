@@ -2,7 +2,7 @@ import OnboardingScaffold from '@/components/NeutralComponents/OnboardingScaffol
 import { useSettings } from '@/context/SettingsContext'
 import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { kgToLbs } from '@/lib/utils/unitConversions'
-import { onboardingStep } from '@/lib/onboarding/steps'
+import { onboardingStep } from '@/lib/utils/onboardingSteps'
 import Slider from '@react-native-community/slider'
 import { router } from 'expo-router'
 import { Rabbit, Turtle } from 'lucide-react-native'
