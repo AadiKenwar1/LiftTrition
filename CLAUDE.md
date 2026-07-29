@@ -103,7 +103,7 @@ Tests live in `__tests__/` folders colocated with the code they test. Jest ignor
 
 - **Comments:** one-line comment above every named function, and above any non-obvious block; skip inline arrow callbacks. Comments cite only code — a comment may name a file, symbol, or behaviour, never a doc, ticket, session, or milestone. If the reasoning came from a doc, restate the reasoning inline, in one line like every other comment.
 - **Components:** function components only; consume contexts via their hooks (`useWorkout()`, `useNutrition()`, `useSettings()`, `useBilling()`, `useAuth()`).
-- **Logic placement:** logic functions live in `lib/utils`, never in `components/` or `app/`. A function may live beside a component only if it returns UI.
+- **Logic placement:** a function that doesn't return UI never lives in a screen or component file. Domain-owned logic goes in that domain's `context/<Domain>/functions/`; cross-domain logic goes in `lib/utils`. The cross-domain test: would two or more contexts import it? Yes → `lib/utils`. Only one → that context.
 - **Styling:** `StyleSheet.create()` for static styles, or a `makeStyles(colors)` + `useMemo` pattern for theme-reactive ones. Never hardcode colors/fonts/radii — pull from `@/context/ThemeContext`:
   - `useColors()` — scheme-aware palette (reacts to dark/light toggle)
   - `fonts` / `type` — typography (the `FONT_FAMILY` constant in typography.ts flips Poppins↔Archivo app-wide)
@@ -115,15 +115,23 @@ Tests live in `__tests__/` folders colocated with the code they test. Jest ignor
 
 **Test cases come before implementation.** Derive the cases from the request, write them first, then implement against them. If it isn't clear what cases the request calls for, stop and ask — never invent filler cases to fill a quota.
 
-**Layout:** one test file per exported function, each holding 10 happy paths, 10 challenging/variety cases, 10 edge cases, and 10 miscellaneous cases. Each area additionally gets one system file that tests its functions together.
+**Never derive an expectation by running the function.** That turns a bug into a specification. A test that would still pass if the function were wrong is not a test.
+
+**Coverage is set by the kind of logic, not by a fixed count.** Six kinds: business rules, formulas, validation & parsing, state & concurrency, persistence & integration, presentation. Business rules get the full 10 happy / 10 challenging / 10 edge / 10 miscellaneous scenario matrix. The other five each have their own bar and their own way of deriving cases — protocols in `tests/README.md`.
+
+**Layout:** one test file per exported function. Each area additionally gets one system file that tests its functions together.
+
+**Areas** are the folders exactly one level inside `lib/` and `context/`, plus `shell` for `app/_layout.tsx` — fourteen, listed in `tests/README.md`. UI folders are not areas; their guarantees are stated in the domain area they serve.
 
 **Documentation** lives at two levels, and they answer different questions:
-- `<module>/__tests__/README.md` — for whoever edits the module next: the harness, the fixtures, non-obvious cases, known gaps. Names test cases freely.
+- `<module>/__tests__/README.md` — for whoever edits the module next: the harness, the fixtures, the logic kind and its bar, non-obvious cases, known gaps. Names test cases freely.
 - `tests/<area>.md` — for whoever needs to know what the app guarantees: proven behaviour in product language, plus what is knowingly unproven. Names no test cases.
 
-`tests/` holds documentation only — no test code. Conventions and the two templates live in `tests/README.md`.
+`tests/` holds documentation only — no test code. Conventions, the area list, the logic kinds and the two templates live in `tests/README.md`.
 
 **Changing test cases means checking `tests/<area>.md`** in the same pass, and updating it whenever the proven behaviour moved.
+
+**Dev code is exempt** — `app/devTest/`, `components/devTest/`, `lib/devtools/`. Their `__DEV__` guards are statically false in production, so the bundler strips the code entirely and there is nothing shipped to guarantee. Tests that already exist there stay; no new ones are owed.
 
 ## Dev Tooling
 

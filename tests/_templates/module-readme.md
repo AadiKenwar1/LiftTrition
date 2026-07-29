@@ -1,5 +1,11 @@
 # <Module> tests
 
+## Logic kind
+
+<One of: business rules · formulas · validation & parsing · state & concurrency ·
+persistence & integration · presentation. Name the bar that kind sets, and say so if
+different functions here fall under different kinds.>
+
 ## Harness
 
 <How cases are constructed — the shared setup, what its inputs mean, what it returns.

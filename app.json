@@ -12,7 +12,12 @@
             "policy": "appVersion"
         },
         "updates": {
-            "url": "https://u.expo.dev/22572fc8-eb07-4d16-90bc-8ebd90b2a812"
+            "url": "https://u.expo.dev/22572fc8-eb07-4d16-90bc-8ebd90b2a812",
+            "assetPatternsToBeBundled": [
+                "assets/**/*",
+                "node_modules/@expo-google-fonts/**/*.ttf",
+                "node_modules/@expo/vector-icons/**/*.ttf"
+            ]
         },
         "ios": {
             "supportsTablet": false,
