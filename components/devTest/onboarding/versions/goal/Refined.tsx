@@ -87,7 +87,7 @@ function makeStyles(colors: Colors) {
         stepIndicator: { flexDirection: 'row', gap: 6, marginBottom: 28 },
         stepDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.ringTrack },
         navFooter: { paddingHorizontal: 25, paddingBottom: 50 },
-        iconCircle: { width: 144, height: 144, borderRadius: 72, backgroundColor: colors.surface, justifyContent: 'center', alignItems: 'center', borderWidth: 2, marginBottom: 12 },
+        iconCircle: { width: 144, height: 144, borderRadius: 72, backgroundColor: colors.iconCircleBg, justifyContent: 'center', alignItems: 'center', borderWidth: 2, marginBottom: 12 },
         titleText: { fontFamily: fonts.extrabold, fontSize: 28, color: colors.text, letterSpacing: -0.5, marginBottom: 4, textAlign: 'center' },
         subtitleText: { fontFamily: fonts.regular, fontSize: 16, color: colors.textSecondary, textAlign: 'center', letterSpacing: 0.2, marginBottom: 24, paddingHorizontal: 8, lineHeight: 22 },
         goalContainer: { flexDirection: 'row', width: '100%', gap: 10, marginBottom: 24 },

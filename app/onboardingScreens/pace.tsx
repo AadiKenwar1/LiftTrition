@@ -1,5 +1,8 @@
+import LowCalorieWarning from '@/components/NutritionComponents/LowCalorieWarning'
+import PaceCalorieReadout from '@/components/NutritionComponents/PaceCalorieReadout'
 import OnboardingScaffold from '@/components/NeutralComponents/OnboardingScaffold'
 import { useSettings } from '@/context/SettingsContext'
+import { calculateCalorieTarget, PACE_CEILING } from '@/context/SettingsContext/functions/macroCalculation'
 import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { kgToLbs } from '@/lib/utils/unitConversions'
 import { onboardingStep } from '@/lib/utils/onboardingSteps'
@@ -14,9 +17,10 @@ import Animated, { FadeInDown } from 'react-native-reanimated'
  * Onboarding — pace (green slider). Displayed in the user's unit but STORED as lb/week (macroCalculation
  * assumes lbs); metric converts via kgToLbs before persisting goalPace. Only reached on lose/gain.
  */
+// max is PACE_CEILING in each unit system (kg side floored to its own 0.1 step, 2 lb → 0.9 kg).
 const RANGES = {
-    metric: { min: 0.1, max: 1.5, def: 0.5, unit: 'kg' },
-    imperial: { min: 0.1, max: 3, def: 1, unit: 'lbs' },
+    metric: { min: 0.1, max: 0.9, def: 0.5, unit: 'kg' },
+    imperial: { min: 0.1, max: PACE_CEILING, def: 1, unit: 'lbs' },
 } as const
 
 const paceLabel = (v: number, max: number) => {
@@ -33,9 +37,15 @@ export default function OnboardingPace() {
     const [pace, setPace] = useState<number>(r.def)
     const { current, total } = onboardingStep('pace', settings.goalType)
 
+    // Live cost of the pace under the thumb. Everything maintenanceCalories needs is already saved by
+    // the time this screen renders — activity.tsx, goal.tsx and aboutYou.tsx each setSettings before
+    // navigating — so only goalPace is stale, and the slider value overrides it. Same function the
+    // plan screen runs, so the number quoted here is the number committed there.
+    const { maintenance, target } = calculateCalorieTarget({ ...settings, goalPace: metric ? kgToLbs(pace) : pace }, !metric)
+
     function handleNext() {
         setSettings({ ...settings, goalPace: metric ? kgToLbs(pace) : pace })
-        router.push('/onboardingScreens/timeline')
+        router.push('/onboardingScreens/plan')
     }
 
     return (
@@ -54,6 +64,9 @@ export default function OnboardingPace() {
                 <Text style={styles.rangeText}>{r.min} {r.unit}</Text>
                 <Text style={styles.rangeText}>{r.max} {r.unit}</Text>
             </View>
+
+            <PaceCalorieReadout target={target} maintenance={maintenance} goalType={settings.goalType} style={styles.readout} />
+            <LowCalorieWarning calories={target} gender={settings.gender} align="center" style={styles.warning} />
         </OnboardingScaffold>
     )
 }
@@ -67,5 +80,7 @@ function makeStyles(colors: Colors) {
         slider: { flex: 1, height: 40 },
         range: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 4, marginTop: 4 },
         rangeText: { fontFamily: fonts.medium, fontSize: 13, color: colors.textMuted, letterSpacing: 0.2 },
+        readout: { marginTop: 22 },
+        warning: { marginTop: 12 },
     })
 }

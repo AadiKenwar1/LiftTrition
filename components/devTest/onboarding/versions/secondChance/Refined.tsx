@@ -67,7 +67,7 @@ function makeStyles(colors: Colors) {
         topGradient: { position: 'absolute', top: 0, left: 0, right: 0, height: 240 },
         scroll: { flex: 1 },
         scrollContent: { alignItems: 'center', paddingBottom: 16 },
-        iconCircle: { width: 120, height: 120, borderRadius: 60, backgroundColor: colors.surface, justifyContent: 'center', alignItems: 'center', borderWidth: 2, marginBottom: 20 },
+        iconCircle: { width: 120, height: 120, borderRadius: 60, backgroundColor: colors.iconCircleBg, justifyContent: 'center', alignItems: 'center', borderWidth: 2, marginBottom: 20 },
         titleText: { fontFamily: fonts.extrabold, fontSize: 28, color: colors.text, letterSpacing: -0.5, marginBottom: 8, textAlign: 'center' },
         subtitleText: { fontFamily: fonts.regular, fontSize: 15, color: colors.textSecondary, textAlign: 'center', lineHeight: 21, letterSpacing: 0.2, marginBottom: 24, paddingHorizontal: 8 },
         offerCard: { width: '100%', backgroundColor: colors.surface, borderRadius: radius.cardLg, padding: 20, borderWidth: 2, borderColor: colors.workout, alignItems: 'center', gap: 6, marginBottom: 16 },

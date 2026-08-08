@@ -1,12 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { ACCENT_SETS, useAccentPreview } from '@/lib/devtools/accentPreview'
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type PropsWithChildren } from 'react'
-import { useColorScheme as useSystemColorScheme } from 'react-native'
+import { Appearance, Platform, useColorScheme as useSystemColorScheme } from 'react-native'
 import { logoForScheme } from './assets'
 import { defaultThemePreference, getColors, isThemePreference, resolveColorScheme } from './colors'
 import type { ColorScheme, Colors, ThemeContextValue, ThemePreference } from './types'
 
 export { brandAssets, logoForScheme } from './assets'
-export { defaultThemePreference, getColors, isColorScheme, isThemePreference, palettes, resolveColorScheme } from './colors'
+export { defaultThemePreference, getColors, isColorScheme, isThemePreference, palettes, resolveColorScheme, withAlpha } from './colors'
 export { FONT_FAMILY, fonts, type } from './typography'
 export { macroColors, motion, radius, spacing } from './tokens'
 export type { ColorScheme, Colors, ThemeContextValue, ThemePreference } from './types'
@@ -39,6 +40,19 @@ export function ThemeProvider({ children }: PropsWithChildren) {
         })
     }, [])
 
+    /**
+     * Mirror the preference onto the native iOS windows. UIKit surfaces that are presented outside the
+     * React view hierarchy — the `display="compact"` DateTimePicker's calendar popover, alerts, action
+     * sheets, keyboards — read the window's UIUserInterfaceStyle, not any per-view override, so without
+     * this they follow the phone while the app renders its own theme. 'system' clears the override so
+     * `useSystemColorScheme` above keeps observing the real OS value. iOS only: on Android the same call
+     * is AppCompatDelegate.setDefaultNightMode, which recreates the activity.
+     */
+    useEffect(() => {
+        if (Platform.OS !== 'ios') return
+        Appearance.setColorScheme(themePreference === 'system' ? null : themePreference)
+    }, [themePreference])
+
     // Set the theme preference and persist it to AsyncStorage
     const setThemePreference = useCallback((pref: ThemePreference) => {
         setThemePreferenceState(pref)
@@ -48,8 +62,12 @@ export function ThemeProvider({ children }: PropsWithChildren) {
     // Resolve the preference against the live OS appearance
     const colorScheme = resolveColorScheme(themePreference, systemScheme)
 
-    // Get colors for the resolved scheme
-    const colors = useMemo(() => getColors(colorScheme), [colorScheme])
+    // Get colors for the resolved scheme, with the dev-only accent candidate set patched over it
+    const accentSet = useAccentPreview()
+    const colors = useMemo(() => {
+        const base = getColors(colorScheme)
+        return __DEV__ && accentSet !== 'off' ? { ...base, ...ACCENT_SETS[accentSet][colorScheme] } : base
+    }, [colorScheme, accentSet])
 
     // Create the context value (setColorScheme stores an explicit scheme, permanently overriding 'system')
     const value = useMemo(

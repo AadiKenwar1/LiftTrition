@@ -1,11 +1,11 @@
-export type OnboardingKey = 'goals' | 'obstacles' | 'aboutYou' | 'activity' | 'goal' | 'pace' | 'timeline' | 'plan' | 'projection'
+export type OnboardingKey = 'goals' | 'obstacles' | 'activity' | 'goal' | 'aboutYou' | 'pace' | 'plan' | 'projection'
 
-const NUMBERED: OnboardingKey[] = ['goals', 'obstacles', 'aboutYou', 'activity', 'goal', 'pace', 'timeline', 'plan', 'projection']
+const NUMBERED: OnboardingKey[] = ['goals', 'obstacles', 'activity', 'goal', 'aboutYou', 'pace', 'plan', 'projection']
 
 /**
  * Contiguous, skip-aware progress numbering for the onboarding dots. Pace is only meaningful when losing/
  * gaining, so on the maintain path it's skipped — but only from the goal decision onward, so pre-goal screens
- * always show the full 9 (the user hasn't committed to maintain yet). Returns a 0-based `current` + `total`.
+ * always show the full 8 (the user hasn't committed to maintain yet). Returns a 0-based `current` + `total`.
  */
 export function onboardingStep(key: OnboardingKey, goalType: 'lose' | 'gain' | 'maintain'): { current: number; total: number } {
     const goalIdx = NUMBERED.indexOf('goal')

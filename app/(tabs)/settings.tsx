@@ -4,6 +4,7 @@ import { fonts, radius, useColors, useColorScheme, useSetColorScheme, type Color
 import { useScreenTopPad } from '@/lib/hooks/useScreenTopPad'
 import { powerSync } from '@/lib/powersync/system'
 import { getPendingUploadEstimate } from '@/lib/powersync/uploadQueueStats'
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { Bell, ChevronRight, CreditCard, Dumbbell, FileText, FlaskConical, HelpCircle, Moon, Sun, Utensils, Wrench } from 'lucide-react-native'
@@ -15,19 +16,6 @@ interface SettingsOption {
     title: string
     subtitle?: string
     onPress: () => void
-}
-
-// Uppercase avatar initials: up to two from the display name, else the email's first letter
-function getInitials(fullName: string | undefined, email: string): string {
-    if (fullName) {
-        return fullName
-            .split(/\s+/)
-            .map((w) => w[0])
-            .slice(0, 2)
-            .join('')
-            .toUpperCase()
-    }
-    return (email[0] || 'U').toUpperCase()
 }
 
 export default function SettingsScreen() {
@@ -69,7 +57,6 @@ export default function SettingsScreen() {
 
     const fullName = (user?.user_metadata?.full_name as string | undefined)?.trim()
     const email = user?.email ?? ''
-    const initials = getInitials(fullName, email)
     const isDark = colorScheme === 'dark'
 
     // Grouped per section (rendered by map) — never reference rows by array index; a removed row used to
@@ -164,7 +151,7 @@ export default function SettingsScreen() {
                 <TouchableOpacity onPress={() => router.push('/settingsScreens/profile')}>
                     <View style={styles.profileCard}>
                         <LinearGradient colors={[colors.workout, colors.nutrition]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.avatar}>
-                            <Text style={styles.avatarText}>{initials}</Text>
+                            <MaterialCommunityIcons name="account" size={26} color="#fff" />
                         </LinearGradient>
                         <View style={styles.profileText}>
                             <Text style={styles.profileName} numberOfLines={1}>
@@ -285,11 +272,6 @@ function makeStyles(colors: Colors) {
             justifyContent: 'center',
             alignItems: 'center',
             marginRight: 14,
-        },
-        avatarText: {
-            fontSize: 20,
-            color: '#FFFFFF',
-            fontFamily: fonts.extrabold,
         },
         profileText: {
             flex: 1,

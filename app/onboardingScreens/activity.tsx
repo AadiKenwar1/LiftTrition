@@ -9,7 +9,10 @@ import { View } from 'react-native'
 
 type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'active' | 'gymrat'
 
-/** Onboarding — activity level (blue selected). Persists activityLevel (feeds TDEE + fatigue budget). */
+/**
+ * Onboarding — activity level (blue selected). Persists activityLevel (feeds TDEE + fatigue budget). Last of
+ * the three tap-only screens, so the flow asks nothing typed until the goal screen that follows it.
+ */
 const FREQUENCIES: { id: ActivityLevel; label: string; sub: string }[] = [
     { id: 'sedentary', label: 'Sedentary', sub: 'Little to no exercise' },
     { id: 'light', label: 'Light', sub: 'Light exercise 1-3 days a week' },
@@ -31,7 +34,7 @@ export default function OnboardingActivity() {
     }
 
     return (
-        <OnboardingScaffold step={current} total={total} title="How active are you?" subtitle="This sets your daily calorie burn so your targets are realistic." accent={colors.text} nextDisabled={selected == null} onBack={() => router.back()} onNext={handleNext}>
+        <OnboardingScaffold step={current} total={total} title="How often do you train?" subtitle="We use this to estimate how many calories you burn in a day." accent={colors.text} nextDisabled={selected == null} onBack={() => router.back()} onNext={handleNext}>
             <View style={{ gap: 10 }}>
                 {FREQUENCIES.map((f, i) => (
                     <OptionCard key={f.id} index={i} label={f.label} sublabel={f.sub} accent={colors.workout} selected={selected === f.id} onPress={() => setSelected(f.id)} />

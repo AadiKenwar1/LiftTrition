@@ -1,11 +1,11 @@
 import type { ColorScheme, Colors, ThemePreference } from './types'
 
-// Accent FILLS (buttons): LIGHT stays deep and clears white text at AA (~4.5:1+). DARK uses the neon
-// brand accents (`nutrition` #00BD48, `workout` #2f80ed) for BOTH solid buttons and gradients so every
-// CTA matches — a DELIBERATE vibrancy override (like the measurement amber): white text/icons on the
-// neon green run ~2.2–3.5:1, below AA, chosen for the energetic look. Blue runs ~3.9:1 (icon/large-text ok).
-// `*Ink` tokens are the readable-text counterparts for small accent text/links on a background, where
-// the neon fails AA; links/labels use these per-theme inks instead.
+// Accents: green and blue are matched per scheme in BOTH CIE L* and OKLCH chroma (light L* 42,
+// dark L* 60 — the lightness where the two hues hold equal maximum sRGB chroma), so the two halves
+// of the app read at one intensity. Every accent token clears AA (4.5:1) as small text on all three
+// surfaces it lands on, which is why each `*Ink` token now equals its fill — the split is kept only
+// so existing `colors.*Ink` call sites keep working. White text on the dark CTA fills is ~3.2:1,
+// large-text/icon only (same trade as measurementGradient's dark label).
 export const palettes = {
     light: {
         // Surfaces — deeper cool-slate canvas so white cards clearly lift off the page
@@ -17,7 +17,10 @@ export const palettes = {
         toggleTrack: '#ECEEF2',
         // Elevated top-nav surface (ModeSwitcher bar) — a touch lighter than the page so the bar reads as
         // raised chrome. Light needs more lift toward white than surfaceInset to not look like a flat gray band.
-        navBar: '#F0F1F4',
+        navBar: '#D8DDE7',
+        // Big hero icon circles (modal headers, empty states). Currently equals `surface`; kept as its
+        // own token so the circles can be tuned without moving every card in the app.
+        iconCircleBg: '#E9EBF0',
         // Lines — strengthened so card edges, dividers, and gridlines are actually visible
         border: '#CBCED7',
         hairline: '#CFD2DB',
@@ -35,23 +38,23 @@ export const palettes = {
         // Data-viz / controls
         ringTrack: '#D0D3DC',
         chevron: '#B8B9C1',
-        iconChipBg: 'rgba(47,128,237,0.10)',
-        // Brand (nutritionInk = green for numerals; matches the unified accent below)
-        nutritionInk: '#158440',
-        // AA-contrast blue for small accent text/links on light surfaces (deepened from the fill accent)
-        workoutInk: '#1A57B0',
+        // Tint derived from this scheme's own `workout` blue below
+        iconChipBg: 'rgba(44,99,173,0.10)',
+        // Inks equal the fills — every accent clears AA as small text, so no deepened variant is needed
+        nutritionInk: '#0D7331',
+        workoutInk: '#2C63AD',
         // Amber for "off-target" stat tone (AA-contrast on light surface)
         warning: '#9C5D00',
-        // Accents — unified with the gradient fills below (deep enough to carry white at AA); identical in light + dark
-        workout: '#2570D8',
-        // Hue-matched to the dark accent's 143° (was 120° pure green) so light/dark read as one
-        // green at two intensities, same as workout — same ~4.77:1 white-text contrast as before.
-        nutrition: '#158440',
+        // Accents — L* 42 is the 4.5:1 ceiling against `background`, the darkest light surface; green
+        // binds the shared chroma (0.133), so the blue desaturates to sit at the same intensity
+        workout: '#2C63AD',
+        nutrition: '#0D7331',
         // Measurement gold (light) — deep gold so the icon reads on the white surface and white Save text holds; pairs with the bright dark-mode gold below.
         measurement: '#A16207',
-        // Gradient fills for CTAs/Fab/ModeSwitcher; top stop == accent so buttons match icons/borders.
-        workoutGradient: ['#2570D8', '#2064C8'] as const,
-        nutritionGradient: ['#158440', '#0F7B38'] as const,
+        // Gradient fills for CTAs/Fab/ModeSwitcher; top stop == accent, bottom stop 6 L* deeper at the
+        // same hue, chroma clamped to what that lightness holds in sRGB.
+        workoutGradient: ['#2C63AD', '#1D549D'] as const,
+        nutritionGradient: ['#0D7331', '#016327'] as const,
         // Deep-gold CTA fill (light) — white Save text reads on this deep gold.
         measurementGradient: ['#A16207', '#854D0E'] as const,
         // Destructive — deepened on light so red text/icons clear AA on light surfaces
@@ -66,6 +69,9 @@ export const palettes = {
         // Elevated top-nav surface (ModeSwitcher bar) — a subtle lift off the near-black background
         // (matches surfaceInset), enough to read as raised chrome without a hard edge.
         navBar: '#141517',
+        // Big hero icon circles (modal headers, empty states). Currently equals `surface`; kept as its
+        // own token so the circles can be tuned without moving every card in the app.
+        iconCircleBg: '#1A1B1E',
         // Lines
         border: '#2a2a2a',
         hairline: 'rgba(255,255,255,0.06)',
@@ -83,24 +89,23 @@ export const palettes = {
         // Data-viz / controls
         ringTrack: '#26272B',
         chevron: '#5C5C64',
-        iconChipBg: 'rgba(47,128,237,0.16)',
-        // Brand (nutritionInk = green for numerals; matches the unified accent below)
-        nutritionInk: '#00BD48',
-        // AA-contrast blue for small accent text/links on the dark background (lightened from the fill accent)
-        workoutInk: '#4D9BFF',
+        // Tint derived from this scheme's own `workout` blue below
+        iconChipBg: 'rgba(66,144,251,0.16)',
+        // Inks equal the fills — every accent clears AA as small text, so no lightened variant is needed
+        nutritionInk: '#0FA749',
+        workoutInk: '#4290FB',
         // Amber for "off-target" stat tone
         warning: '#FFB020',
-        // Accents — vivid neon on dark. Used for charts/graphs/icons/borders (fully legible there) AND as
-        // the solid + gradient CTA fills, so every button matches (white text on neon is a documented AA override).
-        workout: '#2f80ed',
-        nutrition: '#00BD48',
+        // Accents — L* 60 is where green and blue hold equal maximum sRGB chroma (~0.18); both clear AA
+        // as text on every dark surface. White on these fills is ~3.2:1 (large-text/icon only).
+        workout: '#4290FB',
+        nutrition: '#0FA749',
         // Measurement gold (dark) — bright golden yellow, vivid on dark for the icon/border. Its CTA uses DARK text (white can't sit on bright yellow) — a deliberate vibrant choice.
         measurement: '#FBBF24',
-        // Button gradients (CTAs/Fab/ModeSwitcher) — neon on dark to match the solid accent buttons (top stop ==
-        // accent, deepening subtly so the gradient reads as one cohesive neon green). White text on the neon green
-        // is ~2.2–3.5:1 (below AA) — a deliberate vibrancy override; blue is ~3.9:1 (icon/large-text ok).
-        workoutGradient: ['#2f80ed', '#2064C8'] as const,
-        nutritionGradient: ['#00BD48', '#009A3B'] as const,
+        // Button gradients (CTAs/Fab/ModeSwitcher) — top stop == accent, bottom stop subtly deeper at
+        // the same hue so the gradient reads as one cohesive fill.
+        workoutGradient: ['#4290FB', '#3180E9'] as const,
+        nutritionGradient: ['#0FA749', '#039540'] as const,
         // Bright-gold CTA fill (dark) — paired with DARK Save-button text (white can't sit on bright yellow).
         measurementGradient: ['#FBBF24', '#F59E0B'] as const,
         // Destructive — bright red reads fine on the dark background
@@ -129,4 +134,18 @@ export function isThemePreference(value: string | null | undefined): value is Th
 export function resolveColorScheme(preference: ThemePreference, osScheme: ColorScheme | null | undefined): ColorScheme {
     if (preference !== 'system') return preference
     return osScheme ?? 'dark'
+}
+
+/**
+ * A palette color at a given alpha — for accent washes (tinted fills behind an accent icon or label).
+ * Every accent above is opaque 6-digit hex, so a straight channel split covers the real call sites;
+ * anything else (the already-translucent `hairline`/`divider`/`iconChipBg` values) is returned
+ * untouched rather than wrapped a second time into an unparseable string.
+ */
+export function withAlpha(color: string, alpha: number): string {
+    if (!/^#[0-9a-fA-F]{6}$/.test(color)) return color
+    const r = parseInt(color.slice(1, 3), 16)
+    const g = parseInt(color.slice(3, 5), 16)
+    const b = parseInt(color.slice(5, 7), 16)
+    return `rgba(${r},${g},${b},${alpha})`
 }

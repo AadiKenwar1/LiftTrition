@@ -1,3 +1,4 @@
+import EmptyStateCta from '@/components/NeutralComponents/EmptyStateCta'
 import DraggableList, { DraggableListRenderParams } from '@/components/WorkoutComponents/DraggableList'
 import Log from '@/components/WorkoutComponents/Log'
 import { useAuth } from '@/context/AuthContext'
@@ -6,7 +7,7 @@ import { useWorkout } from '@/context/WorkoutContext'
 import { Workout } from '@/context/WorkoutContext/types'
 import { confirmDelete } from '@/lib/utils/confirmDelete'
 import { useRouter } from 'expo-router'
-import { Dumbbell } from 'lucide-react-native'
+import { BicepsFlexed } from 'lucide-react-native'
 import { useMemo } from 'react'
 import { Alert, StyleSheet, Text, View } from 'react-native'
 
@@ -80,13 +81,9 @@ export default function WorkoutScreen() {
         <View style={styles.container}>
             {
                 activeWorkouts.length === 0 ?
-                    // Empty State
+                    // Empty State — the hero circle is the add button; the ⋮ FAB stays as the second path
                     <View style={styles.emptyContainer}>
-                        <View style={styles.emptyIconCircle}>
-                            <Dumbbell size={56} color={colors.workout} strokeWidth={2} />
-                        </View>
-                        <Text style={styles.emptyTitle}>No Workouts Yet</Text>
-                        <Text style={styles.emptySubtitle}>Tap the ⋮ button to create your first workout</Text>
+                        <EmptyStateCta Icon={BicepsFlexed} accent={colors.workout} title="No Workouts Yet" ctaLabel="Add your first workout" onPress={() => router.push('/workoutScreens/addWorkoutModal')} />
                     </View>
                     // Draggable List
                 :   <DraggableList data={activeWorkouts} renderItem={renderItem} keyExtractor={(item) => item.id} onDragEnd={handleUpdateWorkoutOrder} ListHeaderComponent={listHeader} contentContainerStyle={{ paddingTop: 16 }} />
@@ -123,32 +120,6 @@ function makeStyles(colors: Colors) {
             alignItems: 'center',
             paddingHorizontal: 40,
             marginBottom: 50,
-        },
-        emptyIconCircle: {
-            width: 120,
-            height: 120,
-            borderRadius: 60,
-            backgroundColor: colors.surface,
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginBottom: 24,
-            borderWidth: 2,
-            borderColor: colors.workout,
-        },
-        emptyTitle: {
-            fontSize: 26,
-            color: colors.text,
-            marginBottom: 12,
-            textAlign: 'center',
-            letterSpacing: -0.5,
-            fontFamily: fonts.extrabold,
-        },
-        emptySubtitle: {
-            fontSize: 15,
-            color: colors.labelMuted,
-            textAlign: 'center',
-            lineHeight: 22,
-            fontFamily: fonts.regular,
         },
     })
 }

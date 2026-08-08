@@ -1,16 +1,16 @@
 import GoalProjectionChart from '@/components/NutritionComponents/GoalProjectionChart'
 import StepProgress from '@/components/NeutralComponents/StepProgress'
 import { useSettings } from '@/context/SettingsContext'
+import { projectGoal } from '@/context/SettingsContext/functions/goalProjection'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
-import { weeksToGoal } from '@/lib/utils/goalMath'
-import { lbsToKg, weightUnitLabel } from '@/lib/utils/unitConversions'
+import { weightUnitLabel } from '@/lib/utils/unitConversions'
 import { useScreenBottomPad } from '@/lib/hooks/useScreenBottomPad'
 import { router, useLocalSearchParams } from 'expo-router'
 import { useMemo } from 'react'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 export default function AdjustNutrition4Screen() {
-    const { settings, setSettings } = useSettings()
+    const { settings, setSettings, handleUpdateBw } = useSettings()
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
     const bottomPad = useScreenBottomPad(6)
@@ -25,26 +25,43 @@ export default function AdjustNutrition4Screen() {
         proteinGoal: string
         carbsGoal: string
         fatsGoal: string
+        macrosCustomized?: string
     }>()
 
-    const metric = params.unitSystem === 'metric'
     const unit = weightUnitLabel(settings.unitSystem)
     const variant = (params.goal === 'maintain' ? 'maintain' : params.goal === 'gain' ? 'gain' : 'lose') as 'lose' | 'gain' | 'maintain'
     const current = Number(params.weight) || 0
     const goalWeight = Number(params.targetWeight) || 0
 
-    // goalPace param is lb/week (storage unit); convert to the display unit for the weeks estimate.
-    const paceDisplay = metric ? lbsToKg(Number(params.goalPace) || 0) : Number(params.goalPace) || 0
-    const weeks = weeksToGoal(variant, current, goalWeight, paceDisplay)
-    const targetDate = useMemo(() => {
-        const d = new Date()
-        d.setDate(d.getDate() + weeks * 7)
-        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-    }, [weeks])
+    // The quoted date derives from the calories actually leaving step 3 — hand-edits included — never from
+    // the slider position the params also carry. projectGoal needs the body facts the params never carry
+    // (gender, birthDate, activityLevel), so the pre-commit wizard state merges over saved settings, the
+    // adjustNutrition3 pattern. A wrong-direction plan comes back weeks null / "—" instead of a fake date.
+    const merged = useMemo(
+        () => ({
+            ...settings,
+            height: Number(params.height),
+            bodyWeight: Number(params.weight),
+            unitSystem: params.unitSystem as 'imperial' | 'metric',
+            goalType: variant,
+            goalWeight,
+        }),
+        [params, settings, variant, goalWeight]
+    )
+    const { weeks, targetDate } = projectGoal(merged, Number(params.calorieGoal) || 0)
 
     const handleSave = () => {
-        // Wizard completion is an explicit regeneration: hand-tuned macros are replaced
-        // by choice, and a fresh goal re-arms the goal-reached prompt.
+        // Weight is editable on step 1, so a changed one is a weigh-in and has to reach the body-weight log
+        // and the weight chart, not just settings.bodyWeight. It runs BEFORE the commit and its own settings
+        // work is then discarded: computeBwUpdate only touches bodyWeight, the four macro targets and
+        // goalOvershootAcknowledged, and the commit below writes every one of them explicitly, so the saved
+        // settings are byte-identical either way. What survives is the logged entry, the Supabase weight row,
+        // and the post-commit goal-reached check. Skipped when the weight is unchanged so simply re-running
+        // the wizard doesn't stamp a redundant entry on today.
+        if (current !== settings.bodyWeight) handleUpdateBw(current)
+        // Wizard completion is an explicit regeneration by default — a fresh goal re-arms the
+        // goal-reached prompt — but a card hand-edited on step 3 gets the same protection
+        // profile.tsx gives the identical modal, so the next weigh-in can't silently discard it.
         setSettings({
             ...settings,
             height: Number(params.height),
@@ -57,7 +74,7 @@ export default function AdjustNutrition4Screen() {
             proteinGoal: Number(params.proteinGoal),
             carbsGoal: Number(params.carbsGoal),
             fatsGoal: Number(params.fatsGoal),
-            macrosCustomized: false,
+            macrosCustomized: params.macrosCustomized === 'true',
             goalOvershootAcknowledged: false,
         })
         // Return to the Settings tab AND drop the whole adjustNutrition1-4 wizard from
@@ -70,11 +87,13 @@ export default function AdjustNutrition4Screen() {
         <View style={[styles.container, { paddingBottom: bottomPad }]}>
             <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
                 <StepProgress current={variant === 'maintain' ? 2 : 3} total={variant === 'maintain' ? 3 : 4} accent={colors.text} />
-                <Text style={styles.titleText}>{variant === 'maintain' ? 'Same weight, stronger body' : `You'll reach ${goalWeight} ${unit}`}</Text>
+                <Text style={styles.titleText}>{variant === 'maintain' ? 'Same weight, stronger body' : weeks != null ? `You'll reach ${goalWeight} ${unit}` : `About your ${goalWeight} ${unit} goal`}</Text>
                 <Text style={styles.subtitleText}>
                     {variant === 'maintain' ?
-                        `Eating at maintenance holds you at ${current} ${unit} while training drives your strength up — that's recomp.`
-                    :   `by ${targetDate} — about ${weeks} weeks at your pace.`}
+                        `Eating at maintenance holds you at ${current} ${unit} while training drives your strength up.`
+                    : weeks != null ?
+                        `by ${targetDate} — about ${weeks} weeks at your pace.`
+                    :   `At these calories you won't ${variant === 'gain' ? 'gain' : 'lose'} weight — the plan sits ${variant === 'gain' ? 'at or below' : 'at or above'} your maintenance.`}
                 </Text>
 
                 <View style={styles.chartCard}>
@@ -99,7 +118,7 @@ export default function AdjustNutrition4Screen() {
                                 <Text style={styles.statLabel}>to goal</Text>
                             </View>
                             <View style={styles.statCard}>
-                                <Text style={[styles.statValue, { color: colors.nutrition }]}>{weeks} wk</Text>
+                                <Text style={[styles.statValue, { color: colors.nutrition }]}>{weeks != null ? `${weeks} wk` : '—'}</Text>
                                 <Text style={styles.statLabel}>estimated</Text>
                             </View>
                         </>

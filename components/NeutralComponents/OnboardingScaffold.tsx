@@ -11,8 +11,9 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-controller'
  * "Step N of M" eyebrow, big title/subtitle, and a footer (Back + neutral primary CTA). The onboarding
  * routes are headerless, so this owns the safe-area top pad. `step` is 0-based; omit it (and `total`) on
  * screens without progress. `onBeforeNext` runs on Next — return false (after an Alert) to stay put.
- * `onSignOut` is presentation-only (no auth import here) — when provided it renders a right-aligned
- * "Sign out" row above the StepProgress dots/eyebrow; omitted by default so every other call site is unchanged.
+ * `onSignOut` is presentation-only (no auth import here) — when provided it renders a "Sign out" button
+ * right-aligned on the SAME row as the StepProgress dots, so the escape costs no vertical space above the
+ * title; omitted by default, and that row then holds the dots alone exactly as before.
  */
 export interface OnboardingScaffoldProps {
     step?: number
@@ -45,14 +46,18 @@ export default function OnboardingScaffold({ step, total = 9, accent, title, sub
     return (
         <View style={[styles.container, { paddingBottom: bottomPad }]}>
             <KeyboardAwareScrollView style={styles.scroll} contentContainerStyle={[styles.content, { paddingTop: topPad }, contentStyle]} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" bottomOffset={24}>
-                {onSignOut != null && (
-                    <View style={styles.signOutRow}>
-                        <TouchableOpacity style={styles.signOutButton} onPress={onSignOut} activeOpacity={0.6} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }} accessibilityRole="button" accessibilityLabel="Sign out">
-                            <Text style={styles.signOutText}>Sign out</Text>
-                        </TouchableOpacity>
+                {(step != null || onSignOut != null) && (
+                    <View style={styles.headerRow}>
+                        {step != null ?
+                            <StepProgress current={step} total={total} accent={accent ?? colors.text} style={styles.progressInline} />
+                        :   <View />}
+                        {onSignOut != null && (
+                            <TouchableOpacity style={styles.signOutButton} onPress={onSignOut} activeOpacity={0.6} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }} accessibilityRole="button" accessibilityLabel="Sign out">
+                                <Text style={styles.signOutText}>Sign out</Text>
+                            </TouchableOpacity>
+                        )}
                     </View>
                 )}
-                {step != null && <StepProgress current={step} total={total} accent={accent ?? colors.text} />}
                 {step != null && <Text style={styles.eyebrow}>Step {step + 1} of {total}</Text>}
                 <Text style={styles.title}>{title}</Text>
                 {subtitle != null && <Text style={styles.subtitle}>{subtitle}</Text>}
@@ -81,8 +86,11 @@ function makeStyles(colors: Colors) {
         container: { flex: 1, backgroundColor: colors.background, paddingHorizontal: 24 },
         scroll: { flex: 1 },
         content: { paddingBottom: 16 },
-        signOutRow: { flexDirection: 'row', justifyContent: 'flex-end', marginBottom: spacing.cardGap },
-        signOutButton: { paddingVertical: 8, paddingHorizontal: spacing.cardGap },
+        headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28 },
+        // The dots' own bottom margin is cancelled so they centre against the button; headerRow owns the gap.
+        progressInline: { marginBottom: 0 },
+        // Left-only padding keeps the label flush with the content edge; hitSlop supplies the touch target.
+        signOutButton: { paddingVertical: 8, paddingLeft: spacing.cardGap },
         signOutText: { fontFamily: fonts.semibold, fontSize: 15, color: colors.textSecondary, letterSpacing: -0.2 },
         eyebrow: { fontFamily: fonts.semibold, fontSize: 13, letterSpacing: 0.6, textTransform: 'uppercase', color: colors.textMuted, marginBottom: 8 },
         title: { fontFamily: fonts.extrabold, fontSize: 30, color: colors.text, letterSpacing: -0.8, lineHeight: 36, marginBottom: 8 },

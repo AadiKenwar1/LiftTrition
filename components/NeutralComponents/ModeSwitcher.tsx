@@ -6,7 +6,7 @@ import React, { useMemo } from 'react'
 import { Pressable, StyleSheet, View } from 'react-native'
 
 const ICON_SIZE = 25
-const ICON_STROKE = 2
+const ICON_STROKE = 2.5
 // Breathing room between the safe-area edge and the tab icons.
 const BAR_GAP = 0
 
@@ -53,6 +53,12 @@ function makeStyles(colors: Colors) {
             borderBottomWidth: StyleSheet.hairlineWidth,
             borderBottomColor: colors.divider,
             zIndex: 100,
+            // Soft drop shadow under the bar so it reads as raised chrome over the page.
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 3 },
+            shadowRadius: 6,
+            shadowOpacity: 0.12,
+            elevation: 6,
         },
         row: {
             flexDirection: 'row',
@@ -65,8 +71,8 @@ function makeStyles(colors: Colors) {
             flexDirection: 'row',
             alignItems: 'center',
             gap: 8,
-            paddingTop:8,
-            paddingBottom:8
+            paddingTop:12,
+            paddingBottom:12
         },
         underline: {
             height: 3,

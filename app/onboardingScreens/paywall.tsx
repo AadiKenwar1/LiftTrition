@@ -1,11 +1,11 @@
 import PressableScale from '@/components/NeutralComponents/PressableScale'
 import TermsAndPrivacyModal from '@/components/NeutralComponents/TermsAndPrivacyModal'
-import { hasActiveEntitlement, useBilling } from '@/context/BillingContext'
+import { BILLING_IDENTITY_ERROR_MESSAGE, hasActiveEntitlement, useBilling } from '@/context/BillingContext'
 import { useSettings } from '@/context/SettingsContext'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
+import { projectGoal } from '@/context/SettingsContext/functions/goalProjection'
 import { useSubmitOnce } from '@/lib/hooks/useSubmitOnce'
-import { weeksToGoal } from '@/lib/utils/goalMath'
-import { lbsToKg, weightUnitLabel } from '@/lib/utils/unitConversions'
+import { weightUnitLabel } from '@/lib/utils/unitConversions'
 import { useScreenTopPad } from '@/lib/hooks/useScreenTopPad'
 import { useScreenBottomPad } from '@/lib/hooks/useScreenBottomPad'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -16,7 +16,7 @@ import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TouchableOpacit
 
 type Plan = 'monthly' | 'annual'
 /** Matches the RevenueCat product's intro period — keep in sync with the dashboard config. */
-const TRIAL = 3
+const TRIAL = 14
 const FEATURES = [
     { Icon: Database, label: 'Food DB' },
     { Icon: BarChart3, label: 'Charts' },
@@ -35,23 +35,21 @@ export default function OnboardingPaywall() {
     const topPad = useScreenTopPad()
     const bottomPad = useScreenBottomPad(6)
     const { settings, completeOnboarding } = useSettings()
-    const { loading, hasPremium, monthlyPackage, annualPackage, priceInfo, annualPriceInfo, annualSavingsPercent, purchasePackage, restorePurchases, restoring, error } = useBilling()
+    const { loading, hasPremium, identityReady, monthlyPackage, annualPackage, priceInfo, annualPriceInfo, annualSavingsPercent, purchasePackage, restorePurchases, restoring, error } = useBilling()
     const [guardRestore] = useSubmitOnce()
     const accent = colors.text
     const [plan, setPlan] = useState<Plan>('annual')
     const [purchasing, setPurchasing] = useState(false)
     const [termsVisible, setTermsVisible] = useState(false)
 
-    const metric = settings.unitSystem === 'metric'
     const unit = weightUnitLabel(settings.unitSystem)
-    const paceDisplay = metric ? lbsToKg(settings.goalPace) : settings.goalPace
-    const weeks = weeksToGoal(settings.goalType, settings.bodyWeight, settings.goalWeight, paceDisplay)
-    const targetDate = useMemo(() => {
-        const d = new Date()
-        d.setDate(d.getDate() + weeks * 7)
-        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-    }, [weeks])
-    const goalLine = settings.goalType === 'maintain' ? `Maintain ${settings.goalWeight} ${unit}` : `${settings.goalWeight} ${unit} by ${targetDate}`
+    // Date derives from the committed calorie target (projectGoal), matching projection.tsx; a plan
+    // with no deficit/surplus names the goal without promising a date.
+    const { weeks, targetDate } = projectGoal(settings, settings.calorieGoal)
+    const goalLine =
+        settings.goalType === 'maintain' ? `Maintain ${settings.goalWeight} ${unit}`
+        : weeks != null ? `${settings.goalWeight} ${unit} by ${targetDate}`
+        : `${settings.goalWeight} ${unit} goal`
 
     const selectedPackage = plan === 'monthly' ? monthlyPackage : annualPackage
 
@@ -65,17 +63,15 @@ export default function OnboardingPaywall() {
     const finishOnboarding = async () => {
         const saved = await completeOnboarding()
         if (!saved) {
-            Alert.alert("Couldn't finish setup", 'We couldn’t save your profile. Please check your connection and try again.')
+            Alert.alert("Couldn't finish setup", "We couldn't save your profile. Please check your connection and try again.")
             return
         }
         router.replace('/(tabs)')
     }
 
     const handleSubscribe = async () => {
-        if (!selectedPackage) {
-            Alert.alert('Error', 'Subscription package not available. Please try again later.')
-            return
-        }
+        // Unreachable in practice (the CTA is disabled without a package) — kept for type narrowing
+        if (!selectedPackage) return
         setPurchasing(true)
         try {
             await purchasePackage(selectedPackage)
@@ -121,7 +117,7 @@ export default function OnboardingPaywall() {
             <ScrollView style={styles.scroll} contentContainerStyle={[styles.content, { paddingTop: topPad }]} showsVerticalScrollIndicator={false}>
                 <Text style={styles.eyebrow}>Your plan</Text>
                 <Text style={styles.title}>It's ready.</Text>
-                <Text style={styles.subtitle}>Your daily targets, workouts, and food tracking — tailored to your goal.</Text>
+                <Text style={styles.subtitle}>Your targets are saved. Premium unlocks the rest.</Text>
 
                 <View style={styles.planCard}>
                     <View style={styles.planRow}>
@@ -160,7 +156,10 @@ export default function OnboardingPaywall() {
 
                 {error && <Text style={styles.errorText}>{error.message}</Text>}
 
-                <TouchableOpacity style={styles.cta} onPress={handleSubscribe} activeOpacity={0.85} disabled={!selectedPackage || purchasing || restoring || hasPremium}>
+                {/* Explains the disabled CTA in every not-purchasable state, including identity proven but packages never loaded */}
+                {!hasPremium && (!identityReady || !selectedPackage) && <Text style={styles.setupNote}>{BILLING_IDENTITY_ERROR_MESSAGE}</Text>}
+
+                <TouchableOpacity style={styles.cta} onPress={handleSubscribe} activeOpacity={0.85} disabled={!selectedPackage || purchasing || restoring || hasPremium || !identityReady}>
                     <LinearGradient colors={colors.workoutGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.ctaGradient}>
                         {purchasing ?
                             <ActivityIndicator size="small" color="#fff" />
@@ -174,11 +173,11 @@ export default function OnboardingPaywall() {
                 </View>
 
                 <View style={styles.trust}>
-                    <Text style={styles.trustLine}>Cancel anytime · billed securely through Apple</Text>
-                    <Text style={styles.trustLine}>Your data is never sold or shared</Text>
+                    <Text style={styles.trustLine}>Cancel anytime. Apple handles the billing.</Text>
+                    <Text style={styles.trustLine}>We never sell or share your data.</Text>
                 </View>
 
-                <TouchableOpacity onPress={handleRestore} disabled={purchasing || restoring} activeOpacity={0.5} style={[styles.restore, (purchasing || restoring) && styles.footerDisabled]}>
+                <TouchableOpacity onPress={handleRestore} disabled={purchasing || restoring || !identityReady} activeOpacity={0.5} style={[styles.restore, (purchasing || restoring || !identityReady) && styles.footerDisabled]}>
                     <Text style={styles.restoreText}>Restore Purchases</Text>
                 </TouchableOpacity>
 
@@ -229,6 +228,7 @@ function makeStyles(colors: Colors) {
         priceNote: { fontFamily: fonts.medium, fontSize: 12, color: colors.textSecondary },
         badge: { fontFamily: fonts.semibold, fontSize: 11, marginTop: 4 },
         errorText: { fontFamily: fonts.regular, fontSize: 13, color: colors.destructive, textAlign: 'center', marginBottom: 10 },
+        setupNote: { fontFamily: fonts.medium, fontSize: 12, color: colors.textMuted, textAlign: 'center', marginBottom: 10 },
         cta: { minHeight: 58, borderRadius: radius.cardLg, overflow: 'hidden', marginBottom: 18 },
         ctaGradient: { flex: 1, justifyContent: 'center', alignItems: 'center' },
         ctaText: { fontFamily: fonts.semibold, fontSize: 17, color: '#fff', letterSpacing: -0.3 },

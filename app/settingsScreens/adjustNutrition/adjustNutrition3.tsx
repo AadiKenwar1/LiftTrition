@@ -1,7 +1,10 @@
 import EditMacroGoalModal, { type MacroGoalKind } from '@/components/NutritionComponents/EditMacroGoalModal'
+import LowCalorieWarning from '@/components/NutritionComponents/LowCalorieWarning'
+import WontReachGoalWarning from '@/components/NutritionComponents/WontReachGoalWarning'
 import PressableScale from '@/components/NeutralComponents/PressableScale'
 import StepProgress from '@/components/NeutralComponents/StepProgress'
 import { useSettings } from '@/context/SettingsContext'
+import { calculateCalorieTarget, macrosWereEdited } from '@/context/SettingsContext/functions/macroCalculation'
 import { fonts, macroColors, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { useScreenBottomPad } from '@/lib/hooks/useScreenBottomPad'
 import { router, useLocalSearchParams } from 'expo-router'
@@ -48,7 +51,10 @@ export default function AdjustNutrition3Screen() {
             goalWeight: Number(params.targetWeight),
             goalPace: params.goalPace ? Number(params.goalPace) : 0,
         }
-        return calculateMacros(tempSettings, params.unitSystem === 'imperial')
+        const isImperial = params.unitSystem === 'imperial'
+        // maintenance rides along for the direction warning — calculateMacros returns only the target, and
+        // it has to be the burn for the wizard's not-yet-saved body, not the saved one.
+        return { ...calculateMacros(tempSettings, isImperial), maintenance: calculateCalorieTarget(tempSettings, isImperial).maintenance }
     }, [params, settings, calculateMacros])
 
     const [macroGoals, setMacroGoals] = useState(() => ({
@@ -76,6 +82,11 @@ export default function AdjustNutrition3Screen() {
     }
 
     const handleNext = () => {
+        // True only when a card was hand-edited away from the formula's own output, so a straight
+        // walk-through (no pencil taps) still regenerates on the next weigh-in, matching the "explicit
+        // regeneration" the wizard commit already promises — only a real hand-edit needs the same
+        // macrosCustomized protection profile.tsx gives the identical modal.
+        const isCustomized = macrosWereEdited(macroGoals, calculatedMacros)
         router.push({
             pathname: '/settingsScreens/adjustNutrition/adjustNutrition4',
             params: {
@@ -89,6 +100,7 @@ export default function AdjustNutrition3Screen() {
                 proteinGoal: macroGoals.proteinGoal.toString(),
                 carbsGoal: macroGoals.carbsGoal.toString(),
                 fatsGoal: macroGoals.fatsGoal.toString(),
+                macrosCustomized: isCustomized.toString(),
             },
         })
     }
@@ -119,6 +131,9 @@ export default function AdjustNutrition3Screen() {
                         </Animated.View>
                     ))}
                 </View>
+                {/* Both read the editable state, not calculatedMacros, so a calorie number typed into the modal is warned about too. Goal and units come from the params the wizard is carrying, so a goal changed on step 1 is judged against the new one. */}
+                <LowCalorieWarning calories={macroGoals.calorieGoal} gender={settings.gender} style={styles.warning} />
+                <WontReachGoalWarning calories={macroGoals.calorieGoal} maintenance={calculatedMacros.maintenance} goalType={params.goal as 'lose' | 'gain' | 'maintain'} unitSystem={params.unitSystem as 'imperial' | 'metric'} style={styles.warning} />
                 <Text style={styles.note}>Updating body weight will automatically update nutrition goals.</Text>
             </ScrollView>
 
@@ -146,6 +161,7 @@ function makeStyles(colors: Colors) {
         pencil: { position: 'absolute', top: 12, right: 12 },
         cardLabel: { fontFamily: fonts.semibold, fontSize: 13, letterSpacing: -0.2, marginTop: 2 },
         cardValue: { fontFamily: fonts.extrabold, fontSize: 26, color: colors.text, letterSpacing: -0.5 },
+        warning: { marginTop: 16 },
         note: { fontFamily: fonts.medium, fontSize: 12, color: colors.textMuted, textAlign: 'center', letterSpacing: 0.2, marginTop: 18 },
         footer: { paddingTop: 12 },
         nextButton: { width: '100%', height: 58, borderRadius: radius.cardLg, backgroundColor: colors.text, justifyContent: 'center', alignItems: 'center' },

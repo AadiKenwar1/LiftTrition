@@ -31,7 +31,7 @@ jest.mock('@sentry/react-native', () => ({ captureException: jest.fn(), addBread
 const mockFetch = jest.fn()
 global.fetch = mockFetch as unknown as typeof fetch
 
-const EDGE_URL = 'https://test.supabase.co/functions/v1/fetchFoodDB'
+const EDGE_URL = 'https://test.supabase.co/functions/v1/fetchfooddb'
 
 beforeEach(() => {
     jest.clearAllMocks()

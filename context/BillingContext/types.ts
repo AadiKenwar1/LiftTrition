@@ -7,6 +7,9 @@ export interface BillingContextInterface {
     loaded: boolean
     restoring: boolean
     error: Error | null
+    // True only while the RevenueCat SDK is proven to be acting as the signed-in user;
+    // purchase/restore CTAs disable on false.
+    identityReady: boolean
     purchasePackage: (pkg: PurchasesPackage) => Promise<CustomerInfo>
     restorePurchases: () => Promise<CustomerInfo>
     hasPremium: boolean

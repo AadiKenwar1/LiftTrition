@@ -6,22 +6,38 @@ const MIN_HEIGHT_METRIC = 60
 const MIN_WEIGHT_IMPERIAL = 50
 const MIN_WEIGHT_METRIC = 20
 
-export function validateHeightWeight(height: number, weight: number, unitSystem: 'imperial' | 'metric'): boolean {
-    if (!Number.isFinite(height) || !Number.isFinite(weight)) {
+// Height alone, for screens that collect it without a weight to pair it against.
+export function validateHeight(height: number, unitSystem: 'imperial' | 'metric'): boolean {
+    if (!Number.isFinite(height)) {
         Alert.alert('Invalid Input', 'Please enter a valid number.', [{ text: 'OK' }])
         return false
     }
     const minH = unitSystem === 'imperial' ? MIN_HEIGHT_IMPERIAL : MIN_HEIGHT_METRIC
-    const minW = unitSystem === 'imperial' ? MIN_WEIGHT_IMPERIAL : MIN_WEIGHT_METRIC
     if (height < minH) {
         Alert.alert('Invalid Input', `Height must be at least ${minH} ${unitSystem === 'imperial' ? 'inches' : 'cm'}`, [{ text: 'OK' }])
         return false
     }
+    return true
+}
+
+// Weight alone, for screens that ask for it before any height exists.
+export function validateWeight(weight: number, unitSystem: 'imperial' | 'metric'): boolean {
+    if (!Number.isFinite(weight)) {
+        Alert.alert('Invalid Input', 'Please enter a valid number.', [{ text: 'OK' }])
+        return false
+    }
+    const minW = unitSystem === 'imperial' ? MIN_WEIGHT_IMPERIAL : MIN_WEIGHT_METRIC
     if (weight < minW) {
         Alert.alert('Invalid Input', `Weight must be at least ${minW} ${weightUnitLabel(unitSystem)}`, [{ text: 'OK' }])
         return false
     }
     return true
+}
+
+// Both, for screens that edit them together. The && short-circuits, so height is still reported before
+// weight and at most one Alert fires.
+export function validateHeightWeight(height: number, weight: number, unitSystem: 'imperial' | 'metric'): boolean {
+    return validateHeight(height, unitSystem) && validateWeight(weight, unitSystem)
 }
 
 export function validateTargetWeight(targetWeight: number, currentWeight: number, goal: 'lose' | 'gain' | 'maintain' | null, unitSystem: 'imperial' | 'metric'): boolean {

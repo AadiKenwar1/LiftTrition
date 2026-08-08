@@ -26,7 +26,7 @@ export const spacing = {
 } as const
 
 export const motion = {
-    imageFade: 200,
+    imageFade: 100,
 } as const
 
 /**

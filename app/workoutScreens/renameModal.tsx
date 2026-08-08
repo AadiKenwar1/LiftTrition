@@ -129,7 +129,7 @@ function makeStyles(colors: Colors) {
             width: 144,
             height: 144,
             borderRadius: 72,
-            backgroundColor: colors.surface,
+            backgroundColor: colors.iconCircleBg,
             justifyContent: 'center',
             alignItems: 'center',
             borderWidth: 2,

@@ -29,7 +29,7 @@ Fourteen areas:
 | `notifications.md` | `lib/notifications` | reminder scheduling, permissions, prefs |
 | `fooddb.md` | `lib/foodDB` | food search, quota, caching |
 | `openai.md` | `lib/openAI` | photo analysis, image sizing, cancellation |
-| `hooks.md` | `lib/hooks` | debounce, submit-once, async load, today |
+| `hooks.md` | `lib/hooks` | debounce, submit-once, async load, today, OTA updates |
 | `workoutcontext.md` | `context/WorkoutContext` | progression, fatigue, volume, 1RM, logs |
 | `nutritioncontext.md` | `context/NutritionContext` | entries, saved meals, AI flow, macros |
 | `settingscontext.md` | `context/SettingsContext` | profile, targets, body weight, goal-reached |
@@ -187,7 +187,7 @@ SQL, network, third-party SDKs, the OS.
 
 Strings, colours and positions produced for display.
 
-*`weightUnitLabel`, `goalReachedBannerCopy`, `formatDateShort`, `getInitials`, `niceScale`, `targetTone`*
+*`weightUnitLabel`, `goalReachedBannerCopy`, `formatDateShort`, `niceScale`, `targetTone`*
 
 - **Where the answer comes from:** the rendered output as designed.
 - **Deriving cases:** the branches that change the output.

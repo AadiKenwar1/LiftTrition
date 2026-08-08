@@ -5,5 +5,23 @@
         "source.sortMembers": "explicit"
     },
     "deno.enable": false,
-    "deno.enablePaths": ["lib/supabase/functions"]
+    "deno.enablePaths": ["lib/supabase/functions"],
+
+    "explorer.fileNesting.enabled": true,
+    "explorer.fileNesting.expand": false,
+    "explorer.fileNesting.patterns": {
+        "package.json": "package-lock.json, yarn.lock, deno.lock, jest.setup.js, .gitignore, .npmrc",
+        "app.json": "eas.json, metro.config.js, babel.config.js",
+        "tsconfig.json": "tsconfig.*.json, expo-env.d.ts",
+        ".env": ".env.*",
+        "CLAUDE.md": "TOSandPrivacy.txt, README.md, LICENSE",
+        "*.ts": "${capture}.js, ${capture}.d.ts",
+        "*.tsx": "${capture}.ts"
+    },
+
+    "files.exclude": {
+        "**/node_modules": true,
+        "**/.expo": true,
+        "**/coverage": true
+    }
 }

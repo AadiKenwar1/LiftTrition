@@ -116,7 +116,7 @@ function makeStyles(colors: Colors) {
         scrollContent: { alignItems: 'center', paddingBottom: 16 },
         stepIndicator: { flexDirection: 'row', gap: 6, marginBottom: 28 },
         stepDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.ringTrack },
-        iconCircle: { width: 144, height: 144, borderRadius: 72, backgroundColor: colors.surface, justifyContent: 'center', alignItems: 'center', borderWidth: 1.5, marginBottom: 12 },
+        iconCircle: { width: 144, height: 144, borderRadius: 72, backgroundColor: colors.iconCircleBg, justifyContent: 'center', alignItems: 'center', borderWidth: 1.5, marginBottom: 12 },
         titleText: { fontFamily: fonts.extrabold, fontSize: 22, color: colors.text, letterSpacing: -0.5, marginBottom: 4, textAlign: 'center' },
         subtitleText: { fontFamily: fonts.regular, fontSize: 16, color: colors.textSecondary, textAlign: 'center', lineHeight: 22, letterSpacing: 0.2, marginBottom: 24, paddingHorizontal: 8 },
         toggleContainer: { flexDirection: 'row', width: '100%', gap: 12, marginBottom: 24 },

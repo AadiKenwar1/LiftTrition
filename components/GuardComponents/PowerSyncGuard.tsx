@@ -19,12 +19,15 @@ export function PowerSyncGuard({ children }: Props) {
     // timeout/failure surfaces the retry + sign-out affordances instead of hanging
     // on "Syncing data..." forever. ensurePowerSyncConnected is what makes retry
     // actually re-connect (it's mutex-serialized and no-ops when already connected).
+    // Keyed on the user id, not the session object: Supabase hands back a new session object on
+    // every token refresh, and re-running the loader re-closes the gate, unmounting the whole
+    // provider subtree (Settings/Billing/Workout/Nutrition) mid-session.
     const { status, retry } = useAsyncLoad(async () => {
         if (!session) return
         if (__DEV__) await throwIfLoadFailureArmed('powersync')
         await ensurePowerSyncConnected('auth_session')
         await waitForFirstSyncOrThrow(FIRST_SYNC_TIMEOUT_MS)
-    }, [session, authLoading])
+    }, [session?.user?.id, authLoading])
 
     // Escape hatch when first sync can't complete: confirm, then force sign-out.
     // forceSignOut (not signOut) skips the upload flush, which would itself hang on

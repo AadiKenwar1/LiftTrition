@@ -5,7 +5,7 @@ import { isWorkoutNameTaken } from '@/context/WorkoutContext/functions/nameCheck
 import { useSubmitOnce } from '@/lib/hooks/useSubmitOnce'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
-import { Dumbbell } from 'lucide-react-native'
+import { Dumbbell, BicepsFlexed } from 'lucide-react-native'
 import { useMemo, useState } from 'react'
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -49,7 +49,7 @@ export default function AddWorkoutModal() {
                 {/* Icon Section */}
                 <View style={styles.iconContainer}>
                     <View style={styles.iconCircle}>
-                        <Dumbbell size={72} color={colors.workout} strokeWidth={2} />
+                        <BicepsFlexed size={72} color={colors.workout} strokeWidth={2} />
                     </View>
                 </View>
 
@@ -124,7 +124,7 @@ function makeStyles(colors: Colors) {
             width: 144,
             height: 144,
             borderRadius: 72,
-            backgroundColor: colors.surface,
+            backgroundColor: colors.iconCircleBg,
             justifyContent: 'center',
             alignItems: 'center',
             borderWidth: 2,

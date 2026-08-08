@@ -9,6 +9,7 @@ import { SettingsProvider, useSettings } from '@/context/SettingsContext'
 import { brandAssets, fonts, ThemeProvider, useColors, useColorScheme } from '@/context/ThemeContext'
 import { useWorkout, WorkoutProvider } from '@/context/WorkoutContext'
 import { assertRequiredEnv, ENV } from '@/lib/env'
+import { useOTAUpdates } from '@/lib/hooks/useOTAUpdates'
 import { useNotificationScheduler } from '@/context/NutritionContext/hooks/useNotificationScheduler'
 import { Archivo_400Regular, Archivo_500Medium, Archivo_600SemiBold, Archivo_700Bold, Archivo_800ExtraBold } from '@expo-google-fonts/archivo'
 import { Poppins_100Thin, Poppins_100Thin_Italic, Poppins_200ExtraLight, Poppins_200ExtraLight_Italic, Poppins_300Light, Poppins_300Light_Italic, Poppins_400Regular, Poppins_400Regular_Italic, Poppins_500Medium, Poppins_500Medium_Italic, Poppins_600SemiBold, Poppins_600SemiBold_Italic, Poppins_700Bold, Poppins_700Bold_Italic, Poppins_800ExtraBold, Poppins_800ExtraBold_Italic, Poppins_900Black, Poppins_900Black_Italic } from '@expo-google-fonts/poppins'
@@ -73,6 +74,8 @@ Sentry.init({
 })
 
 export default Sentry.wrap(function RootLayout() {
+    // Above every guard/provider so OTA fixes still apply if the app hangs on a loading screen.
+    useOTAUpdates()
     const [logoLoaded, setLogoLoaded] = useState(false)
     const [loaded, error] = useFonts({
         SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
@@ -170,11 +173,10 @@ function StackLayout() {
                 <Stack.Protected guard={!!session && !settings.onboardingComplete}>
                     <Stack.Screen name="onboardingScreens/goals" options={{ headerShown: false }} />
                     <Stack.Screen name="onboardingScreens/obstacles" options={{ headerShown: false }} />
-                    <Stack.Screen name="onboardingScreens/aboutYou" options={{ headerShown: false }} />
                     <Stack.Screen name="onboardingScreens/activity" options={{ headerShown: false }} />
                     <Stack.Screen name="onboardingScreens/goal" options={{ headerShown: false }} />
+                    <Stack.Screen name="onboardingScreens/aboutYou" options={{ headerShown: false }} />
                     <Stack.Screen name="onboardingScreens/pace" options={{ headerShown: false }} />
-                    <Stack.Screen name="onboardingScreens/timeline" options={{ headerShown: false }} />
                     <Stack.Screen name="onboardingScreens/plan" options={{ headerShown: false }} />
                     <Stack.Screen name="onboardingScreens/projection" options={{ headerShown: false }} />
                     <Stack.Screen name="onboardingScreens/paywall" options={{ headerShown: false }} />
@@ -243,6 +245,12 @@ function StackLayout() {
                     <Stack.Screen name="devTest/mockup" options={{ headerShown: false, gestureEnabled: true }} />
                     <Stack.Screen name="devTest/goalReached" options={{ headerShown: true, title: 'Goal Reached — UI', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/goalReachedSim" options={{ headerShown: true, title: 'Goal Reached — Logic', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="devTest/paceFlow" options={{ headerShown: true, title: 'Pace Flow', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="devTest/paceWizard/adjustTraining" options={{ headerShown: true, title: '', headerBackTitle: 'Back', headerShadowVisible: false }} />
+                    <Stack.Screen name="devTest/paceWizard/adjustNutrition1" options={{ headerShown: true, title: '', headerBackTitle: 'Back', headerShadowVisible: false }} />
+                    <Stack.Screen name="devTest/paceWizard/adjustNutrition2" options={{ headerShown: true, title: '', headerBackTitle: 'Back', headerShadowVisible: false }} />
+                    <Stack.Screen name="devTest/paceWizard/adjustNutrition3" options={{ headerShown: true, title: '', headerBackTitle: 'Back', headerShadowVisible: false }} />
+                    <Stack.Screen name="devTest/paceWizard/adjustNutrition4" options={{ headerShown: true, title: '', headerBackTitle: 'Back', headerShadowVisible: false }} />
                     <Stack.Screen name="devTest/logHistory" options={{ headerShown: true, title: 'Log History', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/nutritionEntryMenu" options={{ headerShown: true, title: 'Nutrition Entry — Delete', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/combine" options={{ headerShown: true, title: 'Combine', headerBackTitle: 'Back' }} />
@@ -250,6 +258,8 @@ function StackLayout() {
                     <Stack.Screen name="devTest/entryRow" options={{ headerShown: true, title: 'Entry Rows', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/notifications" options={{ headerShown: true, title: 'Notifications', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/dynamicType" options={{ headerShown: true, title: 'Dynamic Type', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="devTest/accentContrast" options={{ headerShown: true, title: 'Accent Contrast', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="devTest/emptyStateCta" options={{ headerShown: true, title: 'Empty-state CTA', headerBackTitle: 'Back' }} />
                 </Stack.Protected>
             </Stack>
             <GoalPromptHost />

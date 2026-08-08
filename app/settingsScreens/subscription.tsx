@@ -1,18 +1,18 @@
 import PressableScale from '@/components/NeutralComponents/PressableScale'
 import TermsAndPrivacyModal from '@/components/NeutralComponents/TermsAndPrivacyModal'
-import { hasActiveEntitlement, useBilling } from '@/context/BillingContext'
+import { BILLING_IDENTITY_ERROR_MESSAGE, hasActiveEntitlement, useBilling } from '@/context/BillingContext'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { useSubmitOnce } from '@/lib/hooks/useSubmitOnce'
 import { useScreenBottomPad } from '@/lib/hooks/useScreenBottomPad'
+import { usePreventRemove } from '@react-navigation/native'
 import { LinearGradient } from 'expo-linear-gradient'
-import { useNavigation } from 'expo-router'
 import { BarChart3, Database, Sparkles, Zap } from 'lucide-react-native'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { ActivityIndicator, Alert, Linking, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 type Plan = 'monthly' | 'annual'
 /** Matches the RevenueCat product's intro period — keep in sync with the dashboard config + the onboarding paywall. */
-const TRIAL = 3
+const TRIAL = 14
 const FEATURES = [
     { Icon: Database, label: 'Food DB' },
     { Icon: BarChart3, label: 'Charts' },
@@ -22,11 +22,10 @@ const FEATURES = [
 
 /**
  * Subscription (Settings) — the V4 paywall look, but a standalone settings screen (not the onboarding flow):
- * purchase success shows an Alert (no navigation), a beforeRemove guard blocks leaving mid-purchase, and it
+ * purchase success shows an Alert (no navigation), usePreventRemove holds the screen mid-purchase, and it
  * keeps Manage-subscription + the already-premium state. Blue funnel = selected plan + CTA.
  */
 export default function SubscriptionScreen() {
-    const navigation = useNavigation()
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
     const bottomPad = useScreenBottomPad(6)
@@ -34,25 +33,19 @@ export default function SubscriptionScreen() {
     const [termsVisible, setTermsVisible] = useState(false)
     const [plan, setPlan] = useState<Plan>('annual')
     const [purchasing, setPurchasing] = useState(false)
-    const { loading, hasPremium, monthlyPackage, annualPackage, priceInfo, annualPriceInfo, annualSavingsPercent, purchasePackage, restorePurchases, restoring, error } = useBilling()
+    const { loading, hasPremium, identityReady, monthlyPackage, annualPackage, priceInfo, annualPriceInfo, annualSavingsPercent, purchasePackage, restorePurchases, restoring, error } = useBilling()
     const [guardRestore] = useSubmitOnce()
 
-    // Block leaving (header back, swipe, hardware back) while a purchase or restore is in progress.
-    useEffect(() => {
-        const unsubscribe = navigation.addListener('beforeRemove', (e: any) => {
-            if (!purchasing && !restoring) return
-            e.preventDefault()
-        })
-        return unsubscribe
-    }, [navigation, purchasing, restoring])
+    // Hold the screen while money is in flight. usePreventRemove publishes the intent to the
+    // native stack ahead of time (preventNativeDismiss), so UIKit cancels the pop itself —
+    // a beforeRemove listener cannot do this: UIKit pops before any JS runs.
+    usePreventRemove(purchasing || restoring, () => {})
 
     const selectedPackage = plan === 'monthly' ? monthlyPackage : annualPackage
 
     const handleSubscribe = async () => {
-        if (!selectedPackage) {
-            Alert.alert('Error', 'Subscription package not available. Please try again later.')
-            return
-        }
+        // Unreachable in practice (the CTA is disabled without a package) — kept for type narrowing
+        if (!selectedPackage) return
         setPurchasing(true)
         try {
             await purchasePackage(selectedPackage)
@@ -133,7 +126,10 @@ export default function SubscriptionScreen() {
 
                 {error && <Text style={styles.errorText}>{error.message}</Text>}
 
-                <TouchableOpacity style={styles.cta} onPress={handleSubscribe} activeOpacity={0.85} disabled={!selectedPackage || purchasing || restoring || hasPremium}>
+                {/* Explains the disabled CTA in every not-purchasable state, including identity proven but packages never loaded */}
+                {!hasPremium && (!identityReady || !selectedPackage) && <Text style={styles.setupNote}>{BILLING_IDENTITY_ERROR_MESSAGE}</Text>}
+
+                <TouchableOpacity style={styles.cta} onPress={handleSubscribe} activeOpacity={0.85} disabled={!selectedPackage || purchasing || restoring || hasPremium || !identityReady}>
                     <LinearGradient colors={colors.workoutGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.ctaGradient}>
                         {purchasing ?
                             <ActivityIndicator size="small" color="#fff" />
@@ -152,7 +148,7 @@ export default function SubscriptionScreen() {
                 </View>
 
                 <View style={styles.links}>
-                    <TouchableOpacity onPress={handleRestore} disabled={purchasing || restoring} activeOpacity={0.5} style={(purchasing || restoring) && { opacity: 0.5 }}>
+                    <TouchableOpacity onPress={handleRestore} disabled={purchasing || restoring || !identityReady} activeOpacity={0.5} style={(purchasing || restoring || !identityReady) && { opacity: 0.5 }}>
                         <Text style={styles.linkText}>Restore Purchases</Text>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={handleManage} disabled={purchasing || restoring} activeOpacity={0.5} style={(purchasing || restoring) && { opacity: 0.5 }}>
@@ -192,6 +188,7 @@ function makeStyles(colors: Colors) {
         priceNote: { fontFamily: fonts.medium, fontSize: 12, color: colors.textSecondary },
         badge: { fontFamily: fonts.semibold, fontSize: 11, marginTop: 4 },
         errorText: { fontFamily: fonts.regular, fontSize: 13, color: colors.destructive, textAlign: 'center', marginBottom: 10 },
+        setupNote: { fontFamily: fonts.medium, fontSize: 12, color: colors.textMuted, textAlign: 'center', marginBottom: 10 },
         cta: { height: 58, borderRadius: radius.cardLg, overflow: 'hidden', marginBottom: 18 },
         ctaGradient: { flex: 1, justifyContent: 'center', alignItems: 'center' },
         ctaText: { fontFamily: fonts.semibold, fontSize: 17, color: '#fff', letterSpacing: -0.3 },

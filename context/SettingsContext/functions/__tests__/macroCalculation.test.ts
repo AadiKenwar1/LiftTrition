@@ -1,4 +1,4 @@
-import { calculateMacros } from '../macroCalculation'
+import { calculateCalorieTarget, calculateMacros } from '../macroCalculation'
 import type { Settings } from '../../types'
 
 function makeSettings(overrides: Partial<Settings> = {}): Settings {
@@ -55,27 +55,48 @@ describe('calculateMacros maintenance anchor', () => {
     })
 })
 
-describe('calculateMacros calorie floor', () => {
-    // Small, older, sedentary user on an aggressive cut whose raw TDEE lands well below the 1200 floor.
-    const subFloor = makeSettings({
+// Mid-month, ~6 months back, minus the age — calculateAge runs on the wall clock, so an absolute
+// birthDate would silently age the fixture every year and rot the hand-computed expectation below.
+function birthDateForAge(age: number): Date {
+    const d = new Date()
+    d.setDate(15)
+    d.setMonth(d.getMonth() - 6)
+    d.setFullYear(d.getFullYear() - age)
+    return d
+}
+
+describe('calculateMacros states the target it computed', () => {
+    // Metric so the arithmetic is exact by hand — F 65y · 150cm · 45kg · sedentary:
+    // BMR = 450 + 937.5 − 325 − 161 = 901.5, × 1.2 = 1081.8. A 1 lb/wk cut takes 500 off → 581.8.
+    const subMinimum = makeSettings({
         gender: 'female',
-        birthDate: new Date(1960, 0, 1),
-        height: 60,
-        bodyWeight: 100,
+        birthDate: birthDateForAge(65),
+        height: 150,
+        bodyWeight: 45,
+        unitSystem: 'metric',
         activityLevel: 'sedentary',
         goalType: 'lose',
-        goalWeight: 90,
+        goalWeight: 40,
         goalPace: 1,
     })
 
-    test('clamps calResult up to the 1200 floor for women', () => {
-        expect(calculateMacros(subFloor, true).calResult).toBe(1200)
+    test('a sub-minimum target is stated raw — nothing is clamped up to 1200', () => {
+        expect(calculateMacros(subMinimum, false).calResult).toBe(582)
     })
 
-    test('macros reconcile with the clamped calorie target, not the raw TDEE', () => {
-        const { calResult, proteinGrams, fatGrams, carbGrams } = calculateMacros(subFloor, true)
+    test('macros reconcile with that stated target', () => {
+        const { calResult, proteinGrams, fatGrams, carbGrams } = calculateMacros(subMinimum, false)
         const macroCalories = proteinGrams * 4 + fatGrams * 9 + carbGrams * 4
         // Within rounding slack of the three integer-rounded macro grams.
         expect(Math.abs(macroCalories - calResult)).toBeLessThanOrEqual(15)
+    })
+
+    test('calResult is calculateCalorieTarget.target — one number, two entry points', () => {
+        // The guarantee the pace slider's readout depends on: what it quotes is what the plan screen
+        // commits. Proven across all three goals rather than on the cut alone.
+        for (const goalType of ['lose', 'maintain', 'gain'] as const) {
+            const s = makeSettings({ goalType, goalPace: 0.7 })
+            expect(calculateMacros(s, true).calResult).toBe(calculateCalorieTarget(s, true).target)
+        }
     })
 })

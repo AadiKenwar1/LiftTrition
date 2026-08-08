@@ -71,7 +71,7 @@ function makeStyles(colors: Colors) {
         topGradient: { position: 'absolute', top: 0, left: 0, right: 0, height: 200 },
         scroll: { flex: 1 },
         scrollContent: { flexGrow: 1, width: '100%', alignItems: 'center', paddingHorizontal: 25, justifyContent: 'center' },
-        iconCircle: { width: 144, height: 144, borderRadius: 72, backgroundColor: colors.surface, justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: colors.border, marginBottom: 8, overflow: 'hidden' },
+        iconCircle: { width: 144, height: 144, borderRadius: 72, backgroundColor: colors.iconCircleBg, justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: colors.border, marginBottom: 8, overflow: 'hidden' },
         logoImage: { width: '85%', height: '85%' },
         appName: { fontFamily: fonts.extrabold, fontSize: 40, color: colors.text, letterSpacing: -1.2, textAlign: 'center' },
         tagline: { fontFamily: fonts.regular, fontSize: 15, color: colors.textSecondary, textAlign: 'center', lineHeight: 22, letterSpacing: 0.1, marginTop: 4, marginBottom: 10, paddingHorizontal: 8 },

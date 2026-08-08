@@ -31,7 +31,8 @@ export default function AdjustMeasurementsScreen() {
 
         // Height first, then the weigh-in: handleUpdateBw's functional updater sees the
         // queued height and regenerates targets itself (respecting macrosCustomized).
-        // Any goal-reached prompt is raised by handleUpdateBw and shown by the global
+        // Any goal-reached prompt is decided by the provider's post-commit weigh-in effect
+        // (reading the settings this save just committed) and shown by the global
         // GoalPromptHost after this screen closes.
         setSettings({ ...settings, height: totalHeight })
         handleUpdateBw(Number(weight))
@@ -122,7 +123,7 @@ function makeStyles(colors: Colors) {
             width: 144,
             height: 144,
             borderRadius: 72,
-            backgroundColor: colors.surface,
+            backgroundColor: colors.iconCircleBg,
             justifyContent: 'center',
             alignItems: 'center',
             borderWidth: 2,

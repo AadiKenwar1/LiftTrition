@@ -14,9 +14,10 @@ import V4Screen from '../_shared/V4Screen'
  * choice, and the label buckets are derived from the actual slider range so every label (Slow→Very fast)
  * is reachable — no dead "Extreme". Inert.
  */
+// max is the shipped PACE_CEILING in each unit system (kg side floored to its own 0.1 step, 2 lb → 0.9 kg).
 const RANGES = {
-    metric: { min: 0.1, max: 1.5, step: 0.1, def: 0.5, unit: 'kg' },
-    imperial: { min: 0.1, max: 3, step: 0.1, def: 1, unit: 'lb' },
+    metric: { min: 0.1, max: 0.9, step: 0.1, def: 0.5, unit: 'kg' },
+    imperial: { min: 0.1, max: 2, step: 0.1, def: 1, unit: 'lb' },
 } as const
 
 const paceLabel = (v: number, max: number) => {

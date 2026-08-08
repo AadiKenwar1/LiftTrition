@@ -70,12 +70,82 @@ import ObstaclesV4 from './versions/obstacles/V4'
 import PaceV4 from './versions/pace/V4'
 import PaywallV4 from './versions/paywall/V4'
 import ResultsTimelineV4 from './versions/resultsTimeline/V4'
+// V5 · Reordered flow — V4's visual language (it reuses V4Screen unchanged), resequenced around two ideas:
+// commit the user to a goal as early as possible, and never show a number before the thing it depends on.
+// Order: goals → obstacles → activity → goal+weight → about you → pace → plan → PROJECTION → paywall.
+//  · Activity moves to step 3, so three tap screens run before the first keyboard and the goal ask lands on a
+//    run of easy yeses instead of opening the flow cold.
+//  · Weight + goal weight merge into the eating-phase screen at step 4, so the delta sits in one frame and
+//    validateTargetWeight checks against a weight the user just typed. Unit toggle + privacy line move with
+//    them; the phase options are the only thing on screen until one is picked.
+//  · About You drops to sex + DOB + height — exactly the calorie inputs step 4 doesn't collect — and its
+//    subtitle names that, so step 5 reads as pricing the goal rather than as another cold form.
+//  · Pace follows About You, so every input the calorie math needs exists before a rate is chosen.
+//  · Projection is LAST (step 8). An earlier V5 pass ran it at step 6 on the theory that weeks-to-goal needs
+//    only weight/goal/pace; it does arithmetically, but the date is a claim about what eating the plan produces,
+//    so it now lands after the plan screen rather than before it.
+//  · Results Timeline is CUT — generic week-1/2/4/8 flavor is filler next to a real projection.
+// Wiring the earlier versions left dangling: pace is written to the flow so the projection's "at your pace" is
+// true, and the paywall shares the projection's weeksToGoal date. Goals + obstacles are written to the flow too
+// but nothing reads them back — no screen quotes an earlier answer, and nothing in V5 recommends, preselects or
+// badges an option. Net 8 numbered steps (7 on maintain), down from 9. The pace slider is still V4's uncapped
+// 0.1–3 — see PaceV5's header.
+import AboutYouV5 from './versions/birthday/AboutYouV5'
+import ActivityV5 from './versions/activity/V5'
+import GoalMotivationV5 from './versions/goalMotivation/V5'
+import GoalProjectionV5 from './versions/goalProjection/V5'
+import GoalV5 from './versions/goal/V5'
+// V5a/b/c — one-screen layout candidates for the goal step. V5's version scrolls on smaller phones and the
+// keyboard covers the weight fields; these compete to fit the same content in one view and differ ONLY in
+// layout (shared state lives in _shared/useGoalDraft).
+import GoalV5a from './versions/goal/V5a'
+import GoalV5b from './versions/goal/V5b'
+import GoalV5c from './versions/goal/V5c'
+import MacrosV5 from './versions/macros/V5'
+import ObstaclesV5 from './versions/obstacles/V5'
+import PaceV5 from './versions/pace/V5'
+import PaywallV5 from './versions/paywall/V5'
+// V6 · Copy pass — V5's screens with the writing changed and nothing else, read as someone who knows a few gym
+// terms and nothing about the app. Six subtitles hinged on the same em dash construction, four of them in the
+// identical "[instruction] — [we'll do X]" shape, and the paywall's stacked three of those habits in one
+// sentence. Beyond that: About You's title named nothing, so the subtitle carried the whole justification for
+// three personal questions; Activity claimed to SET a burn one tap can only estimate; the plan screen's footnote
+// gave a Settings path a first-time user has never seen. Step 1 keeps V5's claim that the plan is built around
+// the goals picked — nothing reads them back, and it stays as flavour on purpose — while step 2 drops the same
+// promise, since an obstacle is the least actionable answer here. Goal and pace needed no change, so v6 points
+// at their v5 components rather than forking files that would differ by nothing.
+import ActivityV6 from './versions/activity/V6'
+import AboutYouV6 from './versions/birthday/AboutYouV6'
+import GoalMotivationV6 from './versions/goalMotivation/V6'
+import GoalProjectionV6 from './versions/goalProjection/V6'
+import MacrosV6 from './versions/macros/V6'
+import ObstaclesV6 from './versions/obstacles/V6'
+import PaywallV6 from './versions/paywall/V6'
+// Rating ask — a NEW step rather than a redesign, so it gets its own row at its flow position (after the
+// projection, before the paywall). New in v6: it doesn't exist in the earlier versions and those rows are
+// frozen. Three visual candidates share shared.ts's single hand-off; only the 'v6' one plays in the flow.
+import RatingV6 from './versions/rating/V6'
+import RatingTile from './versions/rating/Tile'
+import RatingBigStar from './versions/rating/BigStar'
+import RatingAutoPrompt from './versions/rating/AutoPrompt'
+import RatingSocialProof from './versions/rating/SocialProof'
+import RatingPlanRecap from './versions/rating/PlanRecap'
+import RatingTwoAnswer from './versions/rating/TwoAnswer'
+import RatingLogoHalo from './versions/rating/LogoHalo'
+import RatingHaloArc from './versions/rating/HaloArc'
+import RatingHaloScatter from './versions/rating/HaloScatter'
+import RatingHaloRow from './versions/rating/HaloRow'
+import RatingQuiet from './versions/rating/Quiet'
+import RatingCard from './versions/rating/Card'
+import RatingStoreRow from './versions/rating/StoreRow'
+import RatingGradientHero from './versions/rating/GradientHero'
 
 /**
  * Dev-only registry — the single list that drives the Dev Hub "Onboarding" section, each step's
  * versions sub-page, and the full-screen preview. ONE row per FLOW STEP, ordered to match the intended
  * flow, so you can click Onboarding 1→N to walk it. Reworked designs are VERSIONS under a step's row;
  * genuinely NEW steps are new rows at their flow position. The real onboarding screens are never touched.
+ * Row order is the v1/v3/v4 sequence; v5 resequences the same rows and declares its own order in FlowRunner.
  *
  * Each step now carries up to three redesigns: "Refined" (themed dark/light), the merged/new pieces,
  * and "V3 · Black & white" — the neutral B&W direction (no gradient wash, no icon-circle, big typographic
@@ -100,6 +170,10 @@ export interface OnboardingPage {
 
 const V3 = (Component: ComponentType): OnboardingVersion => ({ id: 'v3', label: 'V3 · Black & white', Component })
 const V4 = (Component: ComponentType): OnboardingVersion => ({ id: 'v4', label: 'V4 · Neutral + hero color', Component })
+const V5 = (Component: ComponentType): OnboardingVersion => ({ id: 'v5', label: 'V5 · Reordered flow', Component })
+const V6 = (Component: ComponentType): OnboardingVersion => ({ id: 'v6', label: 'V6 · Copy pass', Component })
+/** V6 rows whose copy the pass left alone: same component as v5, labelled so the reuse is deliberate rather than a gap. */
+const V6Same = (Component: ComponentType): OnboardingVersion => ({ id: 'v6', label: 'V6 · Copy pass (unchanged from V5)', Component })
 
 /**
  * KNOWN ISSUES — V3 flow polish (from review 2026-07-01). V4 (id 'v4' / "Walk the V4 flow") fixes ALL of
@@ -121,20 +195,21 @@ const V4 = (Component: ComponentType): OnboardingVersion => ({ id: 'v4', label: 
  */
 
 export const PAGES: OnboardingPage[] = [
-    { key: 'login', label: 'Login (opener)', screen: 'Login · sign in', versions: [V3(LoginV3), V4(LoginV4), { id: 'wordmark', label: 'Wordmark', Component: LoginWordmark }, { id: 'monogram', label: 'Monogram tile', Component: LoginMonogram }, { id: 'valueprop', label: 'Value-led', Component: LoginValueProp }] },
-    { key: 'goalMotivation', label: 'Onboarding 1', screen: 'Goal & Motivation (new)', versions: [{ id: 'v1', label: 'Version 1', Component: GoalMotivation }, V3(GoalMotivationV3), V4(GoalMotivationV4)] },
-    { key: 'obstacles', label: 'Onboarding 2', screen: 'Obstacles (new)', versions: [{ id: 'v1', label: 'Version 1', Component: Obstacles }, V3(ObstaclesV3), V4(ObstaclesV4)] },
+    { key: 'login', label: 'Login (opener)', screen: 'Login · sign in', versions: [V3(LoginV3), V4(LoginV4), { id: 'v5', label: 'V5 · Reordered flow (unchanged from V4)', Component: LoginV4 }, { id: 'v6', label: 'V6 · Copy pass (unchanged from V4)', Component: LoginV4 }, { id: 'wordmark', label: 'Wordmark', Component: LoginWordmark }, { id: 'monogram', label: 'Monogram tile', Component: LoginMonogram }, { id: 'valueprop', label: 'Value-led', Component: LoginValueProp }] },
+    { key: 'goalMotivation', label: 'Onboarding 1', screen: 'Goal & Motivation (new)', versions: [{ id: 'v1', label: 'Version 1', Component: GoalMotivation }, V3(GoalMotivationV3), V4(GoalMotivationV4), V5(GoalMotivationV5), V6(GoalMotivationV6)] },
+    { key: 'obstacles', label: 'Onboarding 2', screen: 'Obstacles (new)', versions: [{ id: 'v1', label: 'Version 1', Component: Obstacles }, V3(ObstaclesV3), V4(ObstaclesV4), V5(ObstaclesV5), V6(ObstaclesV6)] },
     { key: 'intro', label: 'Onboarding 3', screen: 'Intro', versions: [{ id: 'v1', label: 'Version 1', Component: IntroV1 }, { id: 'refined', label: 'Refined', Component: IntroRefined }, V3(IntroV3)] },
     { key: 'preboard', label: 'Onboarding 4', screen: 'Preboard', versions: [{ id: 'v1', label: 'Version 1', Component: PreboardV1 }, { id: 'refined', label: 'Refined', Component: PreboardRefined }, V3(PreboardV3)] },
-    { key: 'birthday', label: 'Onboarding 5', screen: 'About You (body details)', versions: [{ id: 'v1', label: 'Version 1', Component: BirthdayV1 }, { id: 'aboutYou', label: 'About You (merged, restyled)', Component: AboutYou }, V3(AboutYouV3), V4(AboutYouV4)] },
+    { key: 'birthday', label: 'Onboarding 5', screen: 'About You (body details)', versions: [{ id: 'v1', label: 'Version 1', Component: BirthdayV1 }, { id: 'aboutYou', label: 'About You (merged, restyled)', Component: AboutYou }, V3(AboutYouV3), V4(AboutYouV4), V5(AboutYouV5), V6(AboutYouV6)] },
     { key: 'gender', label: 'Onboarding 5a', screen: 'Gender (unmerged alt)', versions: [{ id: 'v1', label: 'Version 1', Component: GenderV1 }, { id: 'refined', label: 'Refined', Component: GenderRefined }, V3(GenderV3)] },
     { key: 'heightWeight', label: 'Onboarding 5b', screen: 'Height & Weight (unmerged alt)', versions: [{ id: 'v1', label: 'Version 1', Component: HeightWeightV1 }, { id: 'refined', label: 'Refined', Component: HeightWeightRefined }, V3(HeightWeightV3)] },
-    { key: 'activity', label: 'Onboarding 6', screen: 'Activity', versions: [{ id: 'v1', label: 'Version 1', Component: ActivityV1 }, { id: 'refined', label: 'Refined', Component: ActivityRefined }, V3(ActivityV3), V4(ActivityV4)] },
-    { key: 'goal', label: 'Onboarding 7', screen: 'Body-Weight Goal', versions: [{ id: 'v1', label: 'Version 1', Component: GoalV1 }, { id: 'refined', label: 'Refined', Component: GoalRefined }, V3(GoalV3), V4(GoalV4)] },
-    { key: 'pace', label: 'Onboarding 8', screen: 'Pace', versions: [{ id: 'v1', label: 'Version 1', Component: PaceV1 }, { id: 'refined', label: 'Refined', Component: PaceRefined }, V3(PaceV3), V4(PaceV4)] },
+    { key: 'activity', label: 'Onboarding 6', screen: 'Activity', versions: [{ id: 'v1', label: 'Version 1', Component: ActivityV1 }, { id: 'refined', label: 'Refined', Component: ActivityRefined }, V3(ActivityV3), V4(ActivityV4), V5(ActivityV5), V6(ActivityV6)] },
+    { key: 'goal', label: 'Onboarding 7', screen: 'Body-Weight Goal', versions: [{ id: 'v1', label: 'Version 1', Component: GoalV1 }, { id: 'refined', label: 'Refined', Component: GoalRefined }, V3(GoalV3), V4(GoalV4), V5(GoalV5), { id: 'v5a', label: 'V5a · One screen — tiles + paired weights', Component: GoalV5a }, { id: 'v5b', label: 'V5b · One screen — segmented + form rows', Component: GoalV5b }, { id: 'v5c', label: 'V5c · One screen — cards kept, weights paired', Component: GoalV5c }, { id: 'v6', label: 'V6 · Copy pass (V5a layout, copy unchanged)', Component: GoalV5a }] },
+    { key: 'pace', label: 'Onboarding 8', screen: 'Pace', versions: [{ id: 'v1', label: 'Version 1', Component: PaceV1 }, { id: 'refined', label: 'Refined', Component: PaceRefined }, V3(PaceV3), V4(PaceV4), V5(PaceV5), V6Same(PaceV5)] },
     { key: 'resultsTimeline', label: 'Onboarding 9', screen: 'Results Timeline (new)', versions: [{ id: 'v1', label: 'Version 1', Component: ResultsTimeline }, V3(ResultsTimelineV3), V4(ResultsTimelineV4)] },
-    { key: 'macros', label: 'Onboarding 10', screen: 'Macros', versions: [{ id: 'v1', label: 'Version 1', Component: MacrosV1 }, { id: 'refined', label: 'Refined', Component: MacrosRefined }, V3(MacrosV3), V4(MacrosV4)] },
-    { key: 'summary', label: 'Onboarding 11', screen: 'Goal Projection', versions: [{ id: 'v1', label: 'Version 1', Component: SummaryV1 }, { id: 'projection', label: 'Goal Projection (signature)', Component: GoalProjectionRefined }, V3(GoalProjectionV3), V4(GoalProjectionV4)] },
-    { key: 'paywall', label: 'Onboarding 12', screen: 'Paywall', versions: [{ id: 'v1', label: 'Version 1', Component: PaywallV1 }, { id: 'refined', label: 'Refined · 7-day trial', Component: PaywallRefined }, { id: 'refined14', label: 'Refined · 14-day trial', Component: PaywallRefined14 }, V3(PaywallV3), V4(PaywallV4)] },
+    { key: 'macros', label: 'Onboarding 10', screen: 'Macros', versions: [{ id: 'v1', label: 'Version 1', Component: MacrosV1 }, { id: 'refined', label: 'Refined', Component: MacrosRefined }, V3(MacrosV3), V4(MacrosV4), V5(MacrosV5), V6(MacrosV6)] },
+    { key: 'summary', label: 'Onboarding 11', screen: 'Goal Projection', versions: [{ id: 'v1', label: 'Version 1', Component: SummaryV1 }, { id: 'projection', label: 'Goal Projection (signature)', Component: GoalProjectionRefined }, V3(GoalProjectionV3), V4(GoalProjectionV4), V5(GoalProjectionV5), V6(GoalProjectionV6)] },
+    { key: 'rating', label: 'Onboarding 11a', screen: 'Rating ask (new)', versions: [{ id: 'v6', label: 'V6 · Store row (in flow)', Component: RatingStoreRow }, { id: 'quiet', label: 'Quiet · text link, no slabs', Component: RatingQuiet }, { id: 'card', label: 'Card · one grouped object', Component: RatingCard }, { id: 'gradientHero', label: 'Gradient hero · paywall language', Component: RatingGradientHero }, { id: 'logoHalo', label: 'Logo halo · ring', Component: RatingLogoHalo }, { id: 'haloArc', label: 'Logo halo · arc above', Component: RatingHaloArc }, { id: 'haloScatter', label: 'Logo halo · scattered', Component: RatingHaloScatter }, { id: 'haloRow', label: 'Logo halo · row beneath', Component: RatingHaloRow }, { id: 'starRow', label: 'Star row', Component: RatingV6 }, { id: 'tile', label: 'App tile', Component: RatingTile }, { id: 'bigStar', label: 'Big star', Component: RatingBigStar }, { id: 'autoPrompt', label: 'Auto-prompt · no button (HIG)', Component: RatingAutoPrompt }, { id: 'planRecap', label: 'Plan recap · effort anchor', Component: RatingPlanRecap }, { id: 'socialProof', label: 'Social proof · PLACEHOLDER numbers', Component: RatingSocialProof }, { id: 'twoAnswer', label: 'Two-answer · iOS only, ungated', Component: RatingTwoAnswer }] },
+    { key: 'paywall', label: 'Onboarding 12', screen: 'Paywall', versions: [{ id: 'v1', label: 'Version 1', Component: PaywallV1 }, { id: 'refined', label: 'Refined · 7-day trial', Component: PaywallRefined }, { id: 'refined14', label: 'Refined · 14-day trial', Component: PaywallRefined14 }, V3(PaywallV3), V4(PaywallV4), V5(PaywallV5), V6(PaywallV6)] },
     { key: 'secondChance', label: 'Onboarding 13', screen: 'Second-chance offer (new)', versions: [{ id: 'v1', label: 'Version 1', Component: SecondChance }, V3(SecondChanceV3)] },
 ]

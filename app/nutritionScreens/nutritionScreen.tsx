@@ -1,4 +1,5 @@
 import DatePickerPopup from '@/components/NeutralComponents/DatePickerPopup'
+import EmptyStateCta from '@/components/NeutralComponents/EmptyStateCta'
 import DailyIntakeCard from '@/components/NutritionComponents/DailyIntakeCard'
 import Entry from '@/components/NutritionComponents/Entry'
 import { useNutrition } from '@/context/NutritionContext'
@@ -105,13 +106,12 @@ export default function NutritionScreen() {
         </>
     )
 
+    // Only today gets the button: a past date is a record of what was eaten, not a day to start
     const listEmpty = (
         <View style={styles.emptyState}>
-            <View style={styles.emptyIconCircle}>
-                <Utensils size={56} color={colors.nutrition} strokeWidth={2} />
-            </View>
-            <Text style={styles.emptyText}>{isToday ? 'No Nutrition Logs Yet' : 'No Nutrition Logs Recorded'}</Text>
-            <Text style={styles.emptySubtext}>{isToday ? 'Tap the ⋮ button to add your first meal' : `No nutrition entries recorded for ${formatDate(selectedDate, showYearInTitle)}`}</Text>
+            {isToday ?
+                <EmptyStateCta Icon={Utensils} accent={colors.nutrition} title="No Nutrition Logs Yet" ctaLabel="Add your first meal" onPress={() => router.push('/nutritionScreens/addNutritionModal')} />
+            :   <EmptyStateCta Icon={Utensils} accent={colors.nutrition} title="No Nutrition Logs Recorded" subtitle={`No nutrition entries recorded for ${formatDate(selectedDate, showYearInTitle)}`} />}
         </View>
     )
 
@@ -217,32 +217,6 @@ function makeStyles(colors: Colors) {
             justifyContent: 'center',
             alignItems: 'center',
             paddingHorizontal: 40,
-        },
-        emptyIconCircle: {
-            width: 120,
-            height: 120,
-            borderRadius: 60,
-            backgroundColor: colors.surface,
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginBottom: 24,
-            borderWidth: 2,
-            borderColor: colors.nutrition,
-        },
-        emptyText: {
-            fontSize: 26,
-            color: colors.text,
-            marginBottom: 12,
-            textAlign: 'center',
-            letterSpacing: -0.5,
-            fontFamily: fonts.extrabold,
-        },
-        emptySubtext: {
-            fontSize: 15,
-            color: colors.labelMuted,
-            textAlign: 'center',
-            lineHeight: 22,
-            fontFamily: fonts.regular,
         },
     })
 }

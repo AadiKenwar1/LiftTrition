@@ -1,4 +1,5 @@
 import { useAuth } from '@/context/AuthContext'
+import { useBilling } from '@/context/BillingContext'
 import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { getKickThrottleRemainingMs, getPowerSyncOrchestratorState, type PowerSyncOrchestratorState } from '@/lib/powersync/orchestrator'
 import { powerSync } from '@/lib/powersync/system'
@@ -8,6 +9,7 @@ import { supabase } from '@/lib/supabase/client'
 import { formatDateTime } from '@/lib/utils/dateHelper'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
+import Purchases from 'react-native-purchases'
 
 type TokenServerCheck = 'idle' | 'checking' | 'valid' | 'invalid' | 'error'
 
@@ -40,6 +42,7 @@ function replicationFreshnessHint(connected: boolean, lastSyncedAt: Date | undef
 
 export default function DevStatsScreen() {
     const { session, loading: authLoading } = useAuth()
+    const { identityReady } = useBilling()
     const colors = useColors()
     const styles = useMemo(() => makeStyles(colors), [colors])
     const [lastSyncedAt, setLastSyncedAt] = useState<Date | undefined>(() => powerSync.currentStatus.lastSyncedAt)
@@ -54,6 +57,8 @@ export default function DevStatsScreen() {
     const [uploadQueueRaw, setUploadQueueRaw] = useState<string>('')
     const [uploadPollError, setUploadPollError] = useState<string | undefined>()
     const [uploadLastPolledAt, setUploadLastPolledAt] = useState<Date | undefined>()
+    const [rcAppUserId, setRcAppUserId] = useState<string | undefined>()
+    const [rcIdError, setRcIdError] = useState<string | undefined>()
 
     const refreshOrchestrator = useCallback(() => {
         setOrchestrator(getPowerSyncOrchestratorState())
@@ -145,6 +150,29 @@ export default function DevStatsScreen() {
         }
         void pollUploadQueue()
         const id = setInterval(() => void pollUploadQueue(), 1000)
+        return () => {
+            cancelled = true
+            clearInterval(id)
+        }
+    }, [])
+
+    // Poll the SDK's own answer so a divergence from the Supabase uid is visible live
+    useEffect(() => {
+        let cancelled = false
+        const pollRcIdentity = async () => {
+            try {
+                const appUserId = await Purchases.getAppUserID()
+                if (cancelled) return
+                setRcAppUserId(appUserId)
+                setRcIdError(undefined)
+            } catch (e: unknown) {
+                if (cancelled) return
+                setRcAppUserId(undefined)
+                setRcIdError(e instanceof Error ? e.message : String(e))
+            }
+        }
+        void pollRcIdentity()
+        const id = setInterval(() => void pollRcIdentity(), 5000)
         return () => {
             cancelled = true
             clearInterval(id)
@@ -251,6 +279,14 @@ export default function DevStatsScreen() {
                 {watchdog.lastKickAt ?
                     <Text style={[styles.line, styles.subtle]}>Watchdog last kick: {formatDateTime(watchdog.lastKickAt)}</Text>
                 :   null}
+
+                <Text style={[styles.line, styles.sectionLabel]}>RevenueCat identity</Text>
+                {rcIdError ?
+                    <Text style={[styles.line, styles.warn]}>RC app user id: unavailable (SDK not configured?) — {rcIdError}</Text>
+                :   <Text style={[styles.line, rcAppUserId && rcAppUserId === session?.user?.id ? styles.ok : styles.warn]}>RC app user id: {rcAppUserId ?? '—'}</Text>}
+                <Text style={[styles.line, styles.subtle]}>Supabase uid: {session?.user?.id ?? '—'}</Text>
+                <Text style={[styles.line, identityReady ? styles.ok : styles.warn]}>identityReady: {identityReady ? 'true' : 'false'}</Text>
+                <Text style={[styles.line, styles.subtle]}>Polled every 5s. On a mismatch the identity guard re-logs-in before any store call, and blocks the purchase if the ids still differ.</Text>
 
                 <Text style={[styles.line, styles.sectionLabel]}>Orchestrator</Text>
                 <Text style={[styles.line, styles.subtle]}>

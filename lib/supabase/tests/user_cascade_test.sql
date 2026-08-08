@@ -50,6 +50,10 @@ BEGIN
   VALUES (uid, wid, eid, CURRENT_DATE, 135, 5, 8);
   INSERT INTO support_requests (user_id, subject, message)
   VALUES (uid, 'cascade test', 'this row used to make account deletion impossible');
+  -- Service-role-only tables (RLS on, no policies): never client-visible, but they
+  -- carry auth.users FKs, so a non-cascading one would block deletion just the same.
+  INSERT INTO ai_usage (user_id, kind) VALUES (uid, 'vision');
+  INSERT INTO user_entitlements (user_id) VALUES (uid);
 
   -- 3) The deletion under test — same FK cascades auth.admin.deleteUser() triggers.
   DELETE FROM auth.users WHERE id = uid;
@@ -67,10 +71,12 @@ BEGIN
        + (SELECT count(*) FROM exercises WHERE user_id = uid)
        + (SELECT count(*) FROM logs WHERE user_id = uid)
        + (SELECT count(*) FROM support_requests WHERE user_id = uid)
+       + (SELECT count(*) FROM ai_usage WHERE user_id = uid)
+       + (SELECT count(*) FROM user_entitlements WHERE user_id = uid)
   INTO leftover;
   IF leftover > 0 THEN
     RAISE EXCEPTION 'FAIL: % row(s) survived account deletion', leftover;
   END IF;
 
-  RAISE NOTICE 'PASS: user and all rows across 12 tables deleted by a single auth.users delete';
+  RAISE NOTICE 'PASS: user and all rows across 14 tables deleted by a single auth.users delete';
 END $$;

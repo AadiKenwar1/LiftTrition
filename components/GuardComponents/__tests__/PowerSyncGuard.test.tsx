@@ -26,10 +26,11 @@ jest.mock('@/context/AuthContext/functions/accountFunctions', () => ({
     forceSignOut: (...args: unknown[]) => mockForceSignOut(...args),
 }))
 
-// Stable reference: a fresh object each render would change useAsyncLoad's [session] dep and re-run the loader forever.
-const mockAuthValue = { session: { user: { id: 'u1' } }, loading: false }
+// Reassignable so a test can swap in a fresh session object; the `mock` prefix is what
+// lets the hoisted jest.mock factory below close over it.
+let mockAuthState = { session: { user: { id: 'u1' } }, loading: false }
 jest.mock('@/context/AuthContext', () => ({
-    useAuth: () => mockAuthValue,
+    useAuth: () => mockAuthState,
 }))
 
 jest.mock('@/lib/devtools/forceLoadFailure', () => ({
@@ -68,6 +69,7 @@ async function renderGuard(): Promise<void> {
 beforeEach(() => {
     jest.clearAllMocks()
     warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
+    mockAuthState = { session: { user: { id: 'u1' } }, loading: false }
     mockEnsureConnected.mockResolvedValue(undefined)
 })
 
@@ -124,5 +126,27 @@ describe('PowerSyncGuard', () => {
 
         expect(mockForceSignOut).toHaveBeenCalledTimes(1)
         alertSpy.mockRestore()
+    })
+
+    it('does not re-run the first-sync gate when a token refresh replaces the session object', async () => {
+        mockWaitForFirstSyncOrThrow.mockResolvedValue(undefined)
+
+        await renderGuard()
+        expect(mockEnsureConnected).toHaveBeenCalledTimes(1)
+        expect(childrenRendered(tree.root)).toBe(true)
+
+        // Supabase hands back a new session object on every hourly token refresh; same user.
+        // Re-running the loader here unmounts the whole provider subtree mid-session.
+        mockAuthState = { session: { user: { id: 'u1' } }, loading: false }
+        await act(async () => {
+            tree.update(
+                <PowerSyncGuard>
+                    <View testID="app-content" />
+                </PowerSyncGuard>,
+            )
+        })
+
+        expect(mockEnsureConnected).toHaveBeenCalledTimes(1)
+        expect(childrenRendered(tree.root)).toBe(true)
     })
 })

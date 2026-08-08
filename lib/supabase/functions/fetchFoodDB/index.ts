@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 import { encode } from "https://deno.land/std@0.168.0/encoding/base64.ts"
-import { hasPremiumEntitlement } from "./entitlement.ts"
+import { hasPremiumEntitlement } from "../_shared/entitlement.ts"
 
 //Note that you have to turn off "Verify JWT with legacy secret" in the Supabase project settings for this to work.
 
@@ -78,6 +78,11 @@ serve(async (req: Request) => {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return new Response(null, { status: 401 })
 
+  // Quota runs under service-role (like fetchOpenAI), not the caller's JWT — the RPC's
+  // p_user_id is the server-verified id above, and metering must not depend on
+  // consume_ai_quota staying EXECUTE-granted to the authenticated role.
+  const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!)
+
   // Server-side premium gate (audit H1) — must pass before any quota is consumed or any
   // paid provider is called; the client's hasPremium check is UX-only and never trusted.
   if (!(await hasPremiumEntitlement(user.id))) {
@@ -88,7 +93,7 @@ serve(async (req: Request) => {
   try { body = await req.json() } catch { return new Response(null, { status: 400 }) }
 
   if (body.type === "search" && body.query?.trim()) {
-    const allowed = await consumeQuota(supabase, user.id, "foodsearch", FOODSEARCH_DAILY_LIMIT())
+    const allowed = await consumeQuota(admin, user.id, "foodsearch", FOODSEARCH_DAILY_LIMIT())
     if (!allowed) return new Response(JSON.stringify({ error: "quota_exceeded" }), { status: 429, headers: { "Content-Type": "application/json" } })
 
     const json = await fatSecretRequest("foods.search", { search_expression: body.query.trim() }) as { foods?: { food?: any[] } }
@@ -103,7 +108,7 @@ serve(async (req: Request) => {
   }
 
   if (body.type === "details" && body.foodId?.trim()) {
-    const allowed = await consumeQuota(supabase, user.id, "foodsearch", FOODSEARCH_DAILY_LIMIT())
+    const allowed = await consumeQuota(admin, user.id, "foodsearch", FOODSEARCH_DAILY_LIMIT())
     if (!allowed) return new Response(JSON.stringify({ error: "quota_exceeded" }), { status: 429, headers: { "Content-Type": "application/json" } })
 
     const json = await fatSecretRequest("food.get", { food_id: body.foodId.trim() }) as { food?: any }

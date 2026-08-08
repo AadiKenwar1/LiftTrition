@@ -10,12 +10,16 @@ import StepProgress from '../_shared/StepProgress'
 import { useScreenTopPad } from '@/lib/hooks/useScreenTopPad'
 
 /** Dev-only Refined Pace screen — restyled per RESTYLE_PLAN (theme tokens, dark + light). Inert. */
+// Buckets spread over the 0.2–2.0 track (2 lb/week is the shipped PACE_CEILING) so every label stays
+// reachable — the old 2.5 "Extreme" step sat above the cap and could never be selected.
+const PACE_MAX = 2.0
+
 const getPaceLabel = (value: number) => {
     if (value < 0.5) return 'Very Slow'
-    if (value < 1.0) return 'Slow'
-    if (value < 1.5) return 'Moderate'
-    if (value < 2.0) return 'Fast'
-    if (value < 2.5) return 'Very Fast'
+    if (value < 0.8) return 'Slow'
+    if (value < 1.1) return 'Moderate'
+    if (value < 1.4) return 'Fast'
+    if (value < 1.7) return 'Very Fast'
     return 'Extreme'
 }
 
@@ -48,13 +52,13 @@ export default function PaceRefined() {
 
                     <View style={styles.sliderRow}>
                         <Turtle size={24} color={colors.textMuted} strokeWidth={2} />
-                        <Slider style={styles.slider} minimumValue={0.2} maximumValue={3.0} step={0.1} value={goalPace} onValueChange={setGoalPace} minimumTrackTintColor={accent} maximumTrackTintColor={colors.ringTrack} thumbTintColor={accent} />
+                        <Slider style={styles.slider} minimumValue={0.2} maximumValue={PACE_MAX} step={0.1} value={goalPace} onValueChange={setGoalPace} minimumTrackTintColor={accent} maximumTrackTintColor={colors.ringTrack} thumbTintColor={accent} />
                         <Rabbit size={24} color={colors.textMuted} strokeWidth={2} />
                     </View>
 
                     <View style={styles.rangeLabels}>
                         <Text style={styles.rangeLabelText}>0.2</Text>
-                        <Text style={styles.rangeLabelText}>3.0</Text>
+                        <Text style={styles.rangeLabelText}>{PACE_MAX.toFixed(1)}</Text>
                     </View>
                 </View>
             </ScrollView>
@@ -80,7 +84,7 @@ function makeStyles(colors: Colors) {
         scrollContent: { alignItems: 'center', width: '100%', paddingBottom: 16 },
         stepIndicator: { flexDirection: 'row', gap: 6, marginBottom: 28 },
         stepDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.ringTrack },
-        iconCircle: { width: 144, height: 144, borderRadius: 72, backgroundColor: colors.surface, justifyContent: 'center', alignItems: 'center', borderWidth: 2, marginBottom: 12 },
+        iconCircle: { width: 144, height: 144, borderRadius: 72, backgroundColor: colors.iconCircleBg, justifyContent: 'center', alignItems: 'center', borderWidth: 2, marginBottom: 12 },
         titleText: { fontFamily: fonts.extrabold, fontSize: 24, color: colors.text, letterSpacing: -0.5, marginBottom: 4, textAlign: 'center' },
         subtitleText: { fontFamily: fonts.regular, fontSize: 16, color: colors.textSecondary, textAlign: 'center', letterSpacing: 0.2, marginBottom: 24, paddingHorizontal: 8, lineHeight: 22 },
         sliderContainer: { width: '100%', paddingHorizontal: 12, marginBottom: 24 },

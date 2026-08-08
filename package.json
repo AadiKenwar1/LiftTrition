@@ -10,7 +10,10 @@
     "test": "jest --watchAll",
     "test:watch": "jest --watch",
     "test:ci": "jest --ci",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "update-dev": "npx eas-cli update --branch development --platform all",
+    "update-preview": "npx eas-cli update --branch preview --platform all",
+    "update-production": "npx eas-cli update --branch production --platform all"
   },
   "dependencies": {
     "@expo-google-fonts/archivo": "^0.4.2",

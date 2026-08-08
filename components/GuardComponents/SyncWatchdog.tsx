@@ -149,7 +149,11 @@ export function SyncWatchdog() {
             sub.remove()
             clearInterval(id)
         }
-    }, [session, loading])
+        // Keyed on the user id, not the session object: Supabase hands back a new session object on
+        // every token refresh, and re-running would tear down the interval + AppState listener and
+        // fire an unscheduled check()/kick() hourly. The body only truth-checks `session`, which the
+        // id already carries (a Session always has a user), so sign-out and account switch still re-run.
+    }, [session?.user?.id, loading])
 
     return null
 }

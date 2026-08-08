@@ -1,0 +1,741 @@
+{
+  "generated_at": "2026-07-21T21:37:05-04:00",
+  "issues": [
+    {
+      "id": "crit-001",
+      "title": "Fabricated 5.0 star rating on login, paywall, and subscription screens",
+      "description": "All three screens render a hardcoded five-star row plus the literal text '5.0' above purchase CTAs. The app is pre-launch (v1.0.4, unreleased) so no App Store rating exists; the login screen's own doc comment even calls it 'honest'. Fabricated social proof on monetization screens is an App Review rejection risk under Guideline 2.3.1 (misleading users).",
+      "location": "app/authScreens/login.tsx:50-55; app/onboardingScreens/paywall.tsx:170-173; app/settingsScreens/subscription.tsx:142-145",
+      "found_by": [
+        "ui-ux"
+      ],
+      "severity": "critical",
+      "status": "open",
+      "suggested_fix": "Remove the rating rows from all three screens until real App Store ratings exist (then fetch/display the true value), or replace with verifiable feature claims. Deleting them also removes the hardcoded #FFD93D star color literals (see low-014)."
+    },
+    {
+      "id": "crit-002",
+      "title": "Pending nutrition_calories_real.sql migration silently drops decimal-calorie writes",
+      "description": "The client already treats calories as REAL end-to-end (AppSchema.ts:62; fractional sums via sumItems) and schema.sql:60 was pre-edited to REAL, but the live Postgres ALTER has not been applied (status tracked only in session memory). An integer-column rejection is SQLSTATE class 22, which isNonRetryableUploadError classifies as permanent, so the op is dead-lettered: captured to Sentry (table/opType/opId only, no payload) then discarded. Every decimal-calorie entry created before the ALTER runs is permanently dropped from sync and survives only in device SQLite.",
+      "location": "lib/supabase/migrations/nutrition_calories_real.sql:7-11; lib/powersync/AppSchema.ts:62; lib/powersync/Connector.ts:46-59,247-254; lib/supabase/migrations/schema.sql:60",
+      "found_by": [
+        "infra-reliability"
+      ],
+      "severity": "critical",
+      "status": "open",
+      "suggested_fix": "Operational launch-blocker: run the two ALTERs from nutrition_calories_real.sql in the Supabase SQL editor now, before the next build/submit; verify a fractional-calorie test entry syncs round-trip. Then add a deploy-order guard (migration ledger, see high-004) so client-schema-ahead-of-Postgres cannot recur."
+    },
+    {
+      "id": "high-001",
+      "title": "FatSecret single-result search response crashes edge function (500)",
+      "description": "const list = json?.foods?.food ?? [] then list.map(...). FatSecret's XML-to-JSON conversion returns foods.food as a single object (not an array) when exactly one food matches - the code already handles this exact quirk for servings.serving three lines down but not for search. A one-result search makes list.map throw a TypeError -> 500. The AI branded-enrichment path builds highly specific 'Brand Product' queries that plausibly return one result, then silently falls back to less-accurate vision estimates.",
+      "location": "lib/supabase/functions/fetchFoodDB/index.ts:94-101",
+      "found_by": [
+        "logic-correctness"
+      ],
+      "severity": "high",
+      "status": "open",
+      "suggested_fix": "Normalize: const raw = json?.foods?.food; const list = Array.isArray(raw) ? raw : raw ? [raw] : []. Add an edge-function unit test feeding a single-object foods.food payload and asserting a one-element result array."
+    },
+    {
+      "id": "high-002",
+      "title": "No OTA update path (expo-updates absent)",
+      "description": "The project has no expo-updates dependency, no updates block or runtimeVersion in app.json, and no channel on any eas.json profile. Any shipped JS bug can only be fixed via a new binary plus App Store review (~1-2 days of ongoing risk). OTA capability must be compiled into the binary: if v1 ships without it, v1 users can never be hot-fixed retroactively.",
+      "location": "package.json:15-68; app.json:1-78; eas.json:6-17",
+      "found_by": [
+        "infra-reliability"
+      ],
+      "severity": "high",
+      "status": "open",
+      "suggested_fix": "Before first production submit: npx expo install expo-updates, set runtimeVersion { policy: 'appVersion' } and the EAS update URL in app.json, add channel 'production'/'preview' to the matching eas.json profiles, rebuild, and document the eas update hotfix procedure in a runbook."
+    },
+    {
+      "id": "high-003",
+      "title": "Production sync outage is largely invisible in Sentry",
+      "description": "Three outage classes emit zero telemetry: (1) first-sync timeout (FirstSyncTimeoutError thrown but captured nowhere; useAsyncLoad failures only console.warn), (2) connected-but-not-syncing (the watchdog kicks every 10 min on stale_last_sync and if the kick succeeds no event/breadcrumb is sent), (3) upload retry loops (transient-class failures rethrow into PowerSync's internal retry forever with no breadcrumb; status upload/download errors observed only in the __DEV__ DevStatsModal). If PowerSync Cloud or sync rules break in production, the first signal is App Store reviews.",
+      "location": "lib/hooks/useAsyncLoad.ts:30-35; components/GuardComponents/PowerSyncGuard.tsx:22-27; lib/powersync/waitForFirstSync.ts:15-30; lib/powersync/orchestrator.ts:141-148; components/GuardComponents/SyncWatchdog.tsx:89-95; lib/powersync/Connector.ts:255",
+      "found_by": [
+        "infra-reliability"
+      ],
+      "severity": "high",
+      "status": "open",
+      "suggested_fix": "(a) In PowerSyncGuard wrap the loader so FirstSyncTimeoutError/connect failures get Sentry.captureException with tags { area: 'powersync-first-sync' } before rethrowing; (b) in SyncWatchdog.kick, on outcome 'ok' for stale_last_sync send one throttled captureMessage('watchdog_stale_kick'); (c) register a production status listener that breadcrumbs uploadError/downloadError transitions."
+    },
+    {
+      "id": "high-004",
+      "title": "No migration ledger - applied vs pending is unknowable from the repo",
+      "description": "Migrations are hand-applied SQL files with no timestamps/numbers, no applied-state record, and no Supabase CLI structure. schema.sql is mutated in place to reflect future state, so the repo actively misrepresents the live DB. The only record that nutrition_calories_real.sql is unapplied lives in a memory file, not the repo; the applied status of settings_goal_intent_flags.sql and ingredient_brand.sql (both of which would PGRST204-dead-letter writes if unapplied) is unknowable. Guarantees crit-002's silent-write-drop class recurs on the next column addition.",
+      "location": "lib/supabase/migrations/ (10 unnumbered files); powersync_setup.sql:6-9; nutrition_calories_real.sql:7-8; ingredient_brand.sql:3-5; settings_goal_intent_flags.sql:5-7",
+      "found_by": [
+        "infra-reliability"
+      ],
+      "severity": "high",
+      "status": "open",
+      "suggested_fix": "Adopt the Supabase CLI migration layout (timestamped files, db push records into supabase_migrations.schema_migrations), or minimally add lib/supabase/migrations/LEDGER.md (filename -> applied-date -> applied-by) updated in the same commit as each apply. Add a release-checklist line: apply migrations with deploy notes newer than last release before eas build."
+    },
+    {
+      "id": "high-005",
+      "title": "Camera permission ships the default purpose string (no NSCameraUsageDescription)",
+      "description": "expo-image-picker gets a custom photos purpose string, but expo-camera - the headline AI-scan feature - has no plugin config and no NSCameraUsageDescription anywhere (repo-wide grep returns zero matches). The build falls back to expo-camera's generic default. Apple rejects apps whose purpose strings do not explain why access is needed (Guideline 5.1.1); for a camera-centric premium feature this is a probable metadata rejection.",
+      "location": "app.json:11-17,52-58; consumed in app/nutritionScreens/cameraScreen.tsx:8",
+      "found_by": [
+        "ui-ux"
+      ],
+      "severity": "high",
+      "status": "open",
+      "suggested_fix": "Add the expo-camera plugin to app.json with a purpose string, e.g. cameraPermission: 'Allow PLATES to take photos of your meals for AI nutrition analysis.', and rebuild via EAS."
+    },
+    {
+      "id": "high-006",
+      "title": "Modal swipe-dismiss silently destroys staged/edited work; no Cancel control",
+      "description": "modalPresentation sets gestureEnabled: true on editEntry, addNutritionModal, foodDBModal, savedNutritionModal, addExerciseModal, none of which render an explicit Cancel/Close control - the undiscoverable downward swipe is the only way out and it discards silently. A user can edit every field of a meal, or stage several searched foods (each costing a search + details fetch + quantity dialog and a metered quota unit), then lose everything with one accidental swipe. Only analyzingModal and subscription register beforeRemove handlers.",
+      "location": "app/_layout.tsx:37-40; app/nutritionScreens/editEntry.tsx:110-155; app/nutritionScreens/addNutritionModal.tsx:26-37; app/nutritionScreens/foodDBModal.tsx:44; app/nutritionScreens/savedNutritionModal.tsx:35; app/workoutScreens/addExerciseModal.tsx:28",
+      "found_by": [
+        "ui-ux"
+      ],
+      "severity": "high",
+      "status": "open",
+      "suggested_fix": "On the dirty modals add a beforeRemove listener (pattern already in analyzingModal.tsx:36-42): when dirty, e.preventDefault() and show a 'Discard changes?' confirm (reuse confirmDelete with confirmText 'Discard'). Guard addNutritionModal only when hasContent."
+    },
+    {
+      "id": "high-007",
+      "title": "Core logging flows unusable with VoiceOver - icon-only buttons have no accessibilityLabel",
+      "description": "Every data-entry entry point (home FAB actions and toggle), the mode switcher, and every row-level edit/delete affordance (nutrition/workout edit pencils, saved-meal add/delete, archive restore/delete, exercise-screen FAB, log '+' button, edit-entry trash, camera flash toggle, login theme toggle) reads to VoiceOver as an unnamed 'button'. A VoiceOver user cannot add a workout, log a meal, or edit anything. The Fab's closed-menu children are opacity:0/pointerEvents:none but never removed from the accessibility tree. The team's own good pattern exists in cameraScreen.tsx.",
+      "location": "app/(tabs)/index.tsx:28-72; components/NeutralComponents/Fab.tsx:77-97; components/NeutralComponents/ModeSwitcher.tsx:30-42; components/NutritionComponents/Entry.tsx:43-47; components/WorkoutComponents/Log.tsx:52-56; components/NutritionComponents/SavedEntry.tsx:62-72; app/workoutScreens/archiveModal.tsx:67-83; app/workoutScreens/exerciseScreen.tsx:101-109; app/workoutScreens/logsModal.tsx:180-198; app/nutritionScreens/editEntry.tsx:196-198; app/nutritionScreens/cameraScreen.tsx:208-210; app/authScreens/login.tsx:41-43",
+      "found_by": [
+        "ui-ux"
+      ],
+      "severity": "high",
+      "status": "open",
+      "suggested_fix": "Add accessibilityRole='button' + accessibilityLabel to each listed touchable (copy the cameraScreen.tsx:231-241 pattern); on ModeSwitcher and the camera scan-mode toggle add accessibilityState={{ selected }}; on the Fab toggle add a label and set accessibilityElementsHidden/importantForAccessibility='no-hide-descendants' on the hidden children."
+    },
+    {
+      "id": "high-008",
+      "title": "Unbounded full-history hydration into JS memory at startup",
+      "description": "Both context loaders pull every historical row with no date bound, LIMIT, or pagination, held in React state for the process lifetime and gating first render. loadWorkoutData runs 4 serial getAlls including SELECT * FROM logs, mapping each row to 3-4 Date objects. loadNutritionData does SELECT * FROM nutrition_entries plus an IN(?,?,...) ingredients query with one placeholder per entry ever logged (hard-fails at SQLite's 32,766 bind-var cap ~32k entries). At 2 years: ~11k+ row objects, ~30-45k Date allocations on the startup path, several MB retained heap, and hundreds of ms to seconds added to the load gate - growing without bound. Every failed write also re-runs the entire load via reloadFromDisk.",
+      "location": "context/WorkoutContext/database/powersyncStore.ts:70-96; context/NutritionContext/database/powersyncStore.ts:114-152; gated by app/_layout.tsx:132,141-147",
+      "found_by": [
+        "performance"
+      ],
+      "severity": "high",
+      "status": "open",
+      "suggested_fix": "Window hydration: logs last ~90 days (covers all current consumers), older fetched on demand via the existing exercise_id/date indexes; nutrition last ~365 days (max graph range), page older on demand. Replace the ingredients IN() with a JOIN bounded by the same window. Run the 4 per-loader queries with Promise.all instead of serial awaits. Also shrinks the reloadFromDisk full-reload cost (perf's rollback-reload note)."
+    },
+    {
+      "id": "high-009",
+      "title": "Settings tab polls SQLite every 1 second forever, with no focus gating",
+      "description": "setInterval(() => void poll(), 1000) calls powerSync.getUploadQueueStats() (a SQLite read) plus a setState every second, cleaned up only on unmount. Tab screens stay mounted after first visit (no useIsFocused/useFocusEffect/freezeOnBlur anywhere in app/), so after the user opens Settings once this polls once per second for the rest of the session - including on other tabs - and prevents the JS thread from idling (battery cost). The status line it feeds isn't even visible off-tab. ~3,600 SQLite queries + timer wakeups per hour, all users, day one.",
+      "location": "app/(tabs)/settings.tsx:42-60; app/(tabs)/_layout.tsx:41-65",
+      "found_by": [
+        "performance"
+      ],
+      "severity": "high",
+      "status": "open",
+      "suggested_fix": "Gate the interval on focus (useFocusEffect / useIsFocused) and slow it to 2-5s; better, replace polling with powerSync.registerListener status callbacks (pattern already in DevStatsModal.tsx:96)."
+    },
+    {
+      "id": "high-010",
+      "title": "Exercise search runs un-debounced fuzzy search + unmemoized filter/sort over 1,317 items per keystroke",
+      "description": "Two offenders over the 1,317-entry library. addExerciseModal: the Fuse index is memoized but filteredExercises re-runs fuse.search(q) synchronously on every keystroke (threshold 0.4, ignoreLocation true = full-string scan of all titles + muscle strings) with no debounce, then swaps the FlatList data. ScrollableList (Progress tab exercise picker): filteredData is computed in the render body with no useMemo and no debounce - .filter + .sort whose comparator calls toLowerCase().indexOf twice per comparison (~13k comparisons, ~26k allocations per keystroke), re-running on every re-render not just query changes. Day-one typing jank in the two core pickers.",
+      "location": "app/workoutScreens/addExerciseModal.tsx:46-50; components/NeutralComponents/ScrollableList.tsx:45-51",
+      "found_by": [
+        "performance"
+      ],
+      "severity": "high",
+      "status": "open",
+      "suggested_fix": "Debounce the query ~200-300ms before searching (mirror foodDBModal.tsx:74-99), keeping raw input in separate state for instant echo. In ScrollableList wrap filter+sort in useMemo([data, searchQuery]) and precompute lowercase titles once."
+    },
+    {
+      "id": "high-011",
+      "title": "Screen bodies under app/ are live unguarded routes that bypass the auth/onboarding wall",
+      "description": "Expo Router auto-registers every file under app/ as a route. nutritionScreen.tsx, workoutScreen.tsx, and adjustMeasurements.tsx are registered in none of _layout.tsx's Stack.Protected groups, so app://nutritionScreens/nutritionScreen, app://workoutScreens/workoutScreen, and app://settingsScreens/adjustMeasurements are reachable with no session and mid-onboarding (scheme 'app' makes deep links live). The M22 route-guard test only pins devTest/* + devStatsModal, so this class is invisible to it. adjustMeasurements is additionally dead code (superseded by profile) that still mutates settings if reached.",
+      "location": "app/(tabs)/index.tsx:1-2; app/nutritionScreens/nutritionScreen.tsx:17; app/workoutScreens/workoutScreen.tsx:13; app/settingsScreens/adjustMeasurements.tsx:11; app/_layout.tsx:167-251; app.json:8",
+      "found_by": [
+        "code-structure"
+      ],
+      "severity": "high",
+      "status": "open",
+      "suggested_fix": "Move nutritionScreen.tsx and workoutScreen.tsx to components/ (they are components, not routes; imports move with them); delete adjustMeasurements.tsx. Extend the M22 test to assert every on-disk route under app/ (minus _layout, +not-found) is registered inside some Stack.Protected group."
+    },
+    {
+      "id": "high-012",
+      "title": "WorkoutContext ships untested inline handlers while tests pin dead, drifted duplicates",
+      "description": "The provider imports only deleteExercise/deleteLog from exerciseFunctions/logFunctions and re-implements addExercise/addExercises/archiveExercise/updateExerciseOrder/addLog inline. The dead exported copies have already drifted (dead addExercise bumps order on all siblings vs live only on !archived; dead archiveExercise leaves order untouched vs live sets order:0 and bumps archived siblings). exerciseFunctions.test.ts (554 lines) and logFunctions.test.ts (358 lines) pin the DEAD semantics; the live logic in the provider has no test. CI green validates code production never runs while the code users run is unpinned.",
+      "location": "context/WorkoutContext/functions/exerciseFunctions.tsx:6,11,51,78; context/WorkoutContext/functions/logFunctions.tsx:7; context/WorkoutContext/index.tsx:150-292",
+      "found_by": [
+        "code-structure"
+      ],
+      "severity": "high",
+      "status": "open",
+      "suggested_fix": "Single home = the function modules. Update the exported functions to the live inline semantics (archived-sibling filtering matches insertExerciseWithOrderBump's SQL archived=0 and is clearly intended), point all five handlers at them, and re-pin the two test files to the live semantics. Confirm live semantics are intended with logic-correctness before re-pinning."
+    },
+    {
+      "id": "med-001",
+      "title": "consume_ai_quota RPC callable by any authenticated user with an arbitrary p_user_id (cross-user quota DoS)",
+      "description": "The function is SECURITY DEFINER (bypasses deny-all RLS on ai_usage), takes p_user_id UUID as a plain parameter with no auth.uid() check, and grants EXECUTE to authenticated (needed so fetchFoodDB's forwarded-JWT client can call it). That grant equally lets any signed-in user POST /rest/v1/rpc/consume_ai_quota with any UUID and p_limit; every call unconditionally increments the target's daily counter. ~30 direct calls with a victim's UUID exhaust that paying user's vision quota for the day. Tempered by needing the victim's v4 UUID (not exposed in-app), but a genuine authz gap in a security-definer function reachable by every account.",
+      "location": "lib/supabase/migrations/ai_usage_quota.sql:40-57; consumers lib/supabase/functions/fetchOpenAI/index.ts:121-128; lib/supabase/functions/fetchFoodDB/index.ts:60-67",
+      "found_by": [
+        "security-cost"
+      ],
+      "severity": "medium",
+      "status": "open",
+      "suggested_fix": "Guard inside the function: allow only p_user_id = auth.uid() or the service_role JWT role; return false/raise otherwise. Alternative: revoke from authenticated and switch fetchFoodDB's RPC call to a service-role client, matching fetchOpenAI."
+    },
+    {
+      "id": "med-002",
+      "title": "Food-DB fetch has no timeout - server keeps billing and the client hangs behind an uncancelable overlay",
+      "description": "The client-side callEdgeFunction in foodDB.ts passes no signal and no timeout; tapping a search result opens an opaque full-screen 'Loading food details...' modal with no cancel affordance while getFoodItem awaits an untimed fetch - on a stalled connection the user is locked out of the whole modal indefinitely. Server-side, fetchFoodDB's FatSecret token and API fetches also have no timeout (contrast fetchOpenAI's AbortSignal.any + 30s timeout), so a hung endpoint keeps the edge invocation billing against Supabase wall-clock with no ceiling; enrichBrandedItem's client 15s race bounds the wait but does not abort the in-flight requests.",
+      "location": "lib/foodDB/foodDB.ts:42-49; app/nutritionScreens/foodDBModal.tsx:186-193; lib/supabase/functions/fetchFoodDB/index.ts:23-27,38-42",
+      "found_by": [
+        "security-cost",
+        "ui-ux"
+      ],
+      "severity": "medium",
+      "status": "open",
+      "suggested_fix": "Thread an AbortController/AbortSignal.timeout(15000) through foodDB.ts's callEdgeFunction so an abandoned search cancels and the existing 'Failed to Load' path fires; mirror fetchOpenAI by adding AbortSignal.timeout (merged with req.signal) to both fetches in fetchFoodDB. Optionally add a Cancel button to the loading overlay."
+    },
+    {
+      "id": "med-003",
+      "title": "AI text/vision input size is unbounded before the metered call, and no max_tokens is set",
+      "description": "The meal-name TextInput is multiline with no maxLength (repo-wide grep for maxLength in app/**/*.tsx returns zero hits). TEXT_USER(body.foodName) interpolates the raw string; there is no cap on foodName or base64Image size server-side, and max_tokens is not set on the completion. The daily quota caps call count (60 text / 30 vision) but not tokens-per-call, so a single request can carry a very large foodName or oversized image, inflating OpenAI input-token cost per call.",
+      "location": "app/nutritionScreens/addNutritionModal.tsx:74,103-113; lib/supabase/functions/fetchOpenAI/index.ts:139,267-281",
+      "found_by": [
+        "security-cost"
+      ],
+      "severity": "medium",
+      "status": "open",
+      "suggested_fix": "Add maxLength (e.g. 200) to the meal-name input; reject oversized foodName and base64Image server-side with a 400 before calling the provider; set a max_tokens on the chat completion (the JSON responses are small)."
+    },
+    {
+      "id": "med-004",
+      "title": "AI vision ingredients accepted with zero shape validation - stored items diverge from entry totals, then silently collapse on next edit",
+      "description": "The model's ingredients array is cast straight to Item[] with no per-field coercion. If the model emits a numeric string ('protein':'12', 'quantity':'2' - JSON mode does not guarantee number types), sumItems computes the correct total via * coercion so the entry passes validation and commits, but the persist layer's Number.isFinite('12')===false writes the item macro as 0 and quantity as 1. Stored entry total (correct) and item rows (zeroed) no longer reconcile; on the next open of editEntry after reload, applyEdits re-derives totals from items and silently collapses the meal's macros to 0. Negative per-item macros also pass (only aggregate checked).",
+      "location": "context/NutritionContext/functions/aiFunctions.tsx:98-100,119,125; lib/utils/number.ts:37-48; context/NutritionContext/database/powersyncStore.ts:186-193; context/NutritionContext/functions/validator.tsx:10-21",
+      "found_by": [
+        "logic-correctness"
+      ],
+      "severity": "medium",
+      "status": "open",
+      "suggested_fix": "Coerce/validate each ingredient at the parse boundary in runPhotoAnalysis before sumItems: Number(x.protein) etc with non-finite->0, quantity non-finite/<=0 ->1, clamp negatives to 0, String(x.name ?? ''). Add an aiFunctions test with string-typed macros/quantity asserting items round-trip with values matching the totals."
+    },
+    {
+      "id": "med-005",
+      "title": "Natural-key PATCH silently no-ops upstream when local row id differs from server row id; dead-letter events are unrecoverable",
+      "description": "The generic PATCH does update(...).eq('id', id) where a 0-row match returns success. For weight_progress/user_exercises the natural-key PUT updates the existing server row and discards the local id, so a second-device edit in the pre-checkpoint window uploads a PATCH for the local id, matches 0 upstream rows, returns no error, is marked complete, and is overwritten locally at the next checkpoint - a corrected weigh-in or custom-exercise edit silently reverts. The settings table has a repair path; the other two natural-key tables do not. Separately, dead-letter captures include only table/opType/opId (no opData), so a permanently-failed write is unrecoverable server-side and invisible to the user.",
+      "location": "lib/powersync/Connector.ts:271-278,370-376,249-252; settings-only repair at Connector.ts:301-368,339-343",
+      "found_by": [
+        "logic-correctness",
+        "infra-reliability"
+      ],
+      "severity": "medium",
+      "status": "open",
+      "suggested_fix": "For CONFLICT_KEYS tables, route PATCH through the natural key: read the full local row (as the settings repair already does) and update by (user_id,date)/(user_id,name), falling back to createRecord when no upstream row exists. Change both tables together with the FORCE_SERIAL_TABLES comment. Also include a size-capped opData snapshot in the dead-letter Sentry extra so ops can backfill. Add a connector test for PATCH-against-missing-upstream-row."
+    },
+    {
+      "id": "med-006",
+      "title": "trainedDaysThisWeek goes stale across the week rollover (memo missing the day dependency)",
+      "description": "useMemo(() => getSetsForWeek(logs, getWeekStart(new Date()))..., [logs]) calls getWeekStart(new Date()) inside but depends only on [logs]. If the app stays resident across Saturday->Sunday, the ActivityBanner keeps showing last week's trained-day dots and count until a log/exercise state change or relaunch. The codebase already knows the pattern - the nutrition streak memo and progress.tsx's own weekStart memo both include todayKey.",
+      "location": "context/WorkoutContext/index.tsx:356-361; consumer app/(tabs)/progress.tsx:148",
+      "found_by": [
+        "logic-correctness"
+      ],
+      "severity": "medium",
+      "status": "open",
+      "suggested_fix": "Consume useToday() in WorkoutProvider and add todayKey to this memo's deps (mirrors NutritionContext). Add a render test with fake timers crossing a Saturday->Sunday boundary asserting trainedDaysThisWeek resets."
+    },
+    {
+      "id": "med-007",
+      "title": "reloadFromDisk rollback can clobber a concurrent newer edit; triplicated across providers with the guard on only Settings",
+      "description": "Three near-identical silent-rollback copies. Only SettingsContext has the stale-edit guard (settingsEditSeqRef snapshot + bail check, its comment calling it 'the rollback-path analog of useAsyncLoad's isStale guard'). Workout and Nutrition copied the rollback but not the guard, so: write A fails -> reportPersistFailure fires reloadFromDisk -> disk read starts -> user submits entry B (optimistic state + its own upsert) -> disk read (snapshotted before B) resolves -> setState(diskSnapshot) removes B from the UI even though B's write succeeds on disk. A just-logged meal or set visibly disappears during a save-failure burst; reappears after restart, reading as random data loss. Code-structure flagged the duplication; logic-correctness flagged the same lines as the race.",
+      "location": "context/NutritionContext/index.tsx:59-68; context/WorkoutContext/index.tsx:56-68; guarded copy context/SettingsContext/index.tsx:67-84",
+      "found_by": [
+        "logic-correctness",
+        "code-structure"
+      ],
+      "severity": "medium",
+      "status": "open",
+      "suggested_fix": "Extract one useReloadFromDisk(loadFn, applyFn) helper (home lib/hooks/, beside useAsyncLoad) carrying the monotonic edit-seq guard, bumped in every mutating handler and snapshotted at reload start; consume it in all three providers. Pin with a test mirroring SettingsContext's rollback cases (failed add + reload + second add via deferred promises, asserting the second entry survives)."
+    },
+    {
+      "id": "med-008",
+      "title": "Upload-queue stats estimator fail-opens (?? 0) in the sign-out data-loss gate",
+      "description": "const raw = s.count ?? s.entryCount ?? s.entries ?? 0. If a PowerSync SDK upgrade renames the stats field (the file's own comment says field names vary by SDK version), an unrecognized shape reads as 'queue empty' -> flushUploadsOrThrow passes instantly -> disconnectAndClearPowerSync wipes local data with uploads still pending. Gate C is the only thing between sign-out and wiping unsynced writes; returning null (the existing 'unknown' signal) would make the flush time out and fail safe. Independently found by logic-correctness and infra-reliability.",
+      "location": "lib/powersync/uploadQueueStats.ts:8; consumers lib/powersync/FlushUploads.ts:60-65; context/AuthContext/functions/accountFunctions.tsx:31-44",
+      "found_by": [
+        "logic-correctness",
+        "infra-reliability"
+      ],
+      "severity": "medium",
+      "status": "open",
+      "suggested_fix": "Drop the ?? 0 default; return null when none of the known fields is a finite number (fail-closed: flush times out -> user gets the explicit force-sign-out consent flow). Add a unit test using the real installed SDK's getUploadQueueStats shape so an upgrade breaks CI instead of the gate."
+    },
+    {
+      "id": "med-009",
+      "title": "Context-load failure screen has retry but no sign-out escape",
+      "description": "StackLayout renders AppLoadingScreen with onRetry but no onSignOut. If settings/nutrition/workout loads fail persistently (e.g. a corrupt local row - exactly what forceLoadFailure simulates), the user is stuck in a retry loop with no way to sign out and recover, even though the component supports onSignOut and the sibling PowerSyncGuard already passes it.",
+      "location": "app/_layout.tsx:141-147; components/GuardComponents/AppLoadingScreen.tsx:10,108-121; pattern PowerSyncGuard.tsx:47-52",
+      "found_by": [
+        "ui-ux"
+      ],
+      "severity": "medium",
+      "status": "open",
+      "suggested_fix": "Pass an onSignOut handler from StackLayout mirroring PowerSyncGuard.handleEscape (confirm + forceSignOut), shown only when anyLoadFailed."
+    },
+    {
+      "id": "med-010",
+      "title": "Dark-mode nutrition CTAs run ~2.2-2.5:1 white-on-neon-green - below the 3:1 large-text floor",
+      "description": "In dark mode every nutrition-mode primary CTA is 16-17pt white semibold text on #00BD48 (~2.5:1 measured). The palette comment admits 'white text/icons on the neon green run ~2.2-3.5:1, below AA, chosen for the energetic look' - but it fails even the relaxed 3:1 large-text threshold, and these are the app's primary purchase-adjacent action buttons. Low-vision users cannot reliably read them.",
+      "location": "context/ThemeContext/colors.ts:3-6,93-97; surfaces addNutritionModal.tsx:181-183, foodDBModal.tsx:357-361, cameraScreen.tsx:176-178, savedNutritionModal.tsx:242-244, Fab.tsx:94",
+      "found_by": [
+        "ui-ux"
+      ],
+      "severity": "medium",
+      "status": "open",
+      "suggested_fix": "Darken the dark-mode nutritionGradient stops, or switch CTA text to the near-black background ink (as the palette already does for measurement gold), until >=3:1; verify in both schemes."
+    },
+    {
+      "id": "med-011",
+      "title": "Fixed-height buttons/inputs clip text at large Dynamic Type on screens the M29 fix missed",
+      "description": "Commit M29 converted the paywall and OnboardingScaffold to minHeight, but sibling screens still hard-code height around 17pt scalable text: profile sign-out/delete (height 56), subscription CTA (58), login Apple button (56), adjustTraining (58), adjustNutrition1 input wrapper (60) and CTA (58), adjustNutrition4 (130). At accessibility text sizes the labels ('Sign Out', 'Subscribe Now', 'Sign in with Apple', 'Save Changes') clip or overflow - on auth, billing, and account-deletion surfaces.",
+      "location": "app/settingsScreens/profile.tsx:333,335; app/settingsScreens/subscription.tsx:193; app/authScreens/login.tsx:89; app/settingsScreens/adjustTraining.tsx:69; app/settingsScreens/adjustNutrition/adjustNutrition1.tsx:87,91; app/settingsScreens/adjustNutrition/adjustNutrition4.tsx:130",
+      "found_by": [
+        "ui-ux"
+      ],
+      "severity": "medium",
+      "status": "open",
+      "suggested_fix": "Replace height: with minHeight: + vertical padding on the listed styles (pattern already applied in paywall.tsx); spot-check at the largest accessibility size via the existing devTest/dynamicType page."
+    },
+    {
+      "id": "med-012",
+      "title": "Selection controls don't expose selected state to assistive tech",
+      "description": "Selection is conveyed purely by border/background color; VoiceOver reads each option as a plain unnamed or stateless button, so users can't tell what's currently chosen in onboarding (OptionCard, used by all onboarding + adjust flows), the camera Meal/Item/Label scan-mode toggle, the support Support/Feature toggle, or exercise picker rows/chips. Onboarding and goal-setting become guesswork for screen-reader users.",
+      "location": "components/NeutralComponents/OptionCard.tsx:32-45; components/NeutralComponents/PressableScale.tsx:15-35; app/nutritionScreens/cameraScreen.tsx:195-206; app/settingsScreens/support.tsx:81-89; app/workoutScreens/addExerciseModal.tsx:190,271-311",
+      "found_by": [
+        "ui-ux"
+      ],
+      "severity": "medium",
+      "status": "open",
+      "suggested_fix": "Add accessibilityRole='button' (or radio/checkbox) plus accessibilityState={{ selected }} to OptionCard's PressableScale and the listed toggles - one change in OptionCard covers every onboarding/adjust screen."
+    },
+    {
+      "id": "med-013",
+      "title": "Disabled week-forward chevron renders at 0.7 opacity - reads as enabled",
+      "description": "On the default view (bottomWeekOffset===0) the 'Next week' arrow is disabled but drawn at opacity 0.7, nearly indistinguishable from enabled, while the matching 'Previous week' arrow correctly drops to 0.25. Tapping it does nothing with no feedback, so users repeatedly tap a dead control.",
+      "location": "app/(tabs)/progress.tsx:238-240 (vs prev arrow :232-234)",
+      "found_by": [
+        "ui-ux"
+      ],
+      "severity": "medium",
+      "status": "open",
+      "suggested_fix": "Use the same 0.25 disabled opacity for both arrows and add accessibilityState={{ disabled: !canGoNext }}."
+    },
+    {
+      "id": "med-014",
+      "title": "assertRequiredEnv() throws before Sentry.init - a misbuilt binary crash-loops at boot with zero telemetry",
+      "description": "Both run at module scope and the assertion throws first. A production build missing any of the three required EXPO_PUBLIC_* vars (e.g. EAS env misconfiguration on a new profile) hard-crashes on launch before Sentry exists - a startup crash loop invisible in Sentry and undiagnosable except by reproducing the build, the exact scenario env assertion was meant to make nameable.",
+      "location": "app/_layout.tsx:68,70-73; lib/env.ts:18-23",
+      "found_by": [
+        "infra-reliability"
+      ],
+      "severity": "medium",
+      "status": "open",
+      "suggested_fix": "Move Sentry.init above assertRequiredEnv() (init with dsn undefined is a safe no-op), and wrap the assert to capture the error with tags { area: 'env-misconfig' } then rethrow, so crash behavior is unchanged but reported when a DSN is present."
+    },
+    {
+      "id": "med-015",
+      "title": "No dev/preview/prod env separation in EAS; preview builds report Sentry environment 'production'",
+      "description": "All three build profiles are env-identical as far as the repo shows. EXPO_PUBLIC_APP_ENV is optional, and any non-dev-client build (preview is __DEV__===false) falls back to 'production' in Sentry; nothing pins preview to a non-prod Supabase/PowerSync. Internal-test crashes pollute the production Sentry environment, preview testing writes to the production database, and whether prod stack traces symbolicate depends on an EAS-side SENTRY_AUTH_TOKEN this repo cannot confirm exists.",
+      "location": "eas.json:6-17; app/_layout.tsx:72; app.json:60-66",
+      "found_by": [
+        "infra-reliability"
+      ],
+      "severity": "medium",
+      "status": "open",
+      "suggested_fix": "In eas.json set environment 'preview'/'production' per profile (or explicit EXPO_PUBLIC_APP_ENV env blocks), and on expo.dev confirm SENTRY_AUTH_TOKEN exists in the preview/production build environments. Verify a preview build shows environment:preview and has source maps attached."
+    },
+    {
+      "id": "med-016",
+      "title": "Meal photos live in purgeable cache storage; the synced photo_uri is a device-local dead path",
+      "description": "The stored URI is the ImageManipulator/ImagePicker cache output (no expo-file-system copy exists anywhere). iOS may purge Caches under storage pressure, Caches are excluded from device backups, and the absolute path is meaningless on any other device or after reinstall - yet it syncs upstream as if durable. Meal photo thumbnails silently vanish over time and never survive restore/device migration. Macros are extracted before persist so numeric data is safe - cosmetic-data loss only, but on the marquee AI-photo feature.",
+      "location": "context/NutritionContext/functions/aiFunctions.tsx:133; lib/openAI/mealImage.ts:38-88; context/NutritionContext/database/powersyncStore.ts:56",
+      "found_by": [
+        "infra-reliability"
+      ],
+      "severity": "medium",
+      "status": "open",
+      "suggested_fix": "After analysis succeeds, copy the processed JPEG into FileSystem.documentDirectory + 'mealPhotos/' + entry.id + '.jpg' and persist that URI (durable and backed up); render a placeholder when the file is missing (covers rows synced from other devices). Alternatively document the limitation and null out photo_uri before upload."
+    },
+    {
+      "id": "med-017",
+      "title": "No backup/DR runbook anywhere; recovery posture is undocumented",
+      "description": "Nothing documents Supabase backup tier/PITR or restore steps, the device-loss story for unsynced local writes, the PowerSync dashboard sync-rules restore procedure (the repo YAML is the only copy if the dashboard config is lost), or the powersync_role credential rotation path. Deploy knowledge survives only as SQL header comments and Claude memory files; the docs/ tree (including the prior readiness audit and pipeline runbook) is deleted per git status. Any real incident is recovered from memory under pressure, or not at all.",
+      "location": "repo root (no docs/ directory); knowledge in nutrition_calories_real.sql:7, ingredient_brand.sql:3-5, powersync_setup.sql:6-9,15,36; lib/powersync/sync-rules.yaml:1-5",
+      "found_by": [
+        "infra-reliability"
+      ],
+      "severity": "medium",
+      "status": "open",
+      "suggested_fix": "Add a committed docs/RUNBOOK.md covering: Supabase plan + backup/PITR window and restore path; migration ledger pointer; sync-rules redeploy-from-repo steps; powersync_role rotation; the release checklist (migrations -> sync rules -> eas build -> submit). One page is enough."
+    },
+    {
+      "id": "med-018",
+      "title": "CI: tests are advisory, no lint gate, builds are not CI-gated",
+      "description": "Only typecheck blocks merges. The test job is Test (advisory) with continue-on-error: true, so a red suite merges to main; there is no lint script; eas build is run by hand with no requirement that CI passed on the built commit; Edge Function deploys are entirely manual and untracked. Regressions in exactly the code this audit cares about (Connector dead-letter classification, FlushUploads - both with substantial suites) can ship in a production binary with tests failing.",
+      "location": ".github/workflows/ci.yml:33-40; package.json:5-13; lib/supabase/functions/ (no deploy automation)",
+      "found_by": [
+        "infra-reliability"
+      ],
+      "severity": "medium",
+      "status": "open",
+      "suggested_fix": "Remove continue-on-error: true once the suite is stabilized (or immediately scope a blocking job to lib/powersync + context/AuthContext); add expo lint as a script + CI step; add a tag-triggered workflow or habit so eas build --profile production only runs on a CI-green commit."
+    },
+    {
+      "id": "med-019",
+      "title": "Charts fully remount with a deliberate 200ms spinner on every data change; 365-point series fed raw while the downsampler sits unused",
+      "description": "Graph1 is remounted by the parent via key={topSig} on every new log/weigh-in and every range-chip tap; internally CartesianChart is also keyed by an O(n) per-point string join. Every mount runs a hard-coded 200ms ActivityIndicator delay, so each set logged or range switch blanks the chart for 200ms+ then rebuilds the whole Skia canvas. BarChart has the same gate. The 1Y body-weight range feeds a dense 365-point series straight to the chart, and lib/utils/downsample.ts (both functions) has zero production callers - only its own tests import it. The parent-level key also defeats Graph1's memoized internals.",
+      "location": "app/(tabs)/progress.tsx:99,206,244; components/GraphComponents/Graph1.tsx:44-59,116-127; components/GraphComponents/BarChart.tsx:47-61; lib/utils/downsample.ts",
+      "found_by": [
+        "performance"
+      ],
+      "severity": "medium",
+      "status": "open",
+      "suggested_fix": "Drop the parent key on Graph1/BarChart (the inner chartKey already forces the Skia repaint on data/color change), and remove or reduce the 200ms artificial delay to font-readiness only. For 1Y/6M ranges run the already-written downsampleDataPreserveEndpoints to ~60-90 points before passing to Graph1."
+    },
+    {
+      "id": "med-020",
+      "title": "Every data write re-renders the whole navigator shell and re-runs full-history transforms in always-mounted screens",
+      "description": "StackLayout subscribes to the full value of all four data contexts just to read loaded/loadFailed flags, and hosts useNotificationScheduler() which subscribes to nutritionData - so every log or meal added re-renders StackLayout and re-creates the entire Stack of ~60 Stack.Screen elements. Independently each write triggers full-history passes: trainedDaysThisWeek (getSetsForWeek over all logs), the always-mounted Progress tab recomputes getOneRepMaxData (O(n) filter+sort over all logs) and bottomData, nutritionStreak scans all entries, and handleAddLog copies the whole logs array. Multi-ms JS cost per write, scaling linearly with history.",
+      "location": "app/_layout.tsx:124-131,150-252; context/WorkoutContext/index.tsx:286,358-361; app/(tabs)/progress.tsx:77-86",
+      "found_by": [
+        "performance"
+      ],
+      "severity": "medium",
+      "status": "open",
+      "suggested_fix": "(1) Move useNotificationScheduler() into a tiny leaf component next to GoalPromptHost so it stops re-rendering the Stack; (2) memoize the <Stack> element on the values it actually reads (session, onboardingComplete, allContextsLoaded, colors); (3) enable freezeOnBlur on the tabs so blurred Progress/Settings skip re-render work until focused."
+    },
+    {
+      "id": "med-021",
+      "title": "DailyIntakeCard aggregates full nutrition history in its render body on every render",
+      "description": "const macros = handleGetMacrosForDate(date) runs unmemoized in the render body; getMacrosForDate reduces over the entire nutritionData array (2 getDateKey calls per entry) to sum one day. The card sits in the always-visible nutrition home header and re-renders on every useNutrition/useSettings change and every parent render, with nutritionScreen passing a fresh selectedDate identity. ~3k-entry scan per render at year two, several renders per interaction on the most-used screen.",
+      "location": "components/NutritionComponents/DailyIntakeCard.tsx:46; context/NutritionContext/functions/graphFunctions.tsx:6-22",
+      "found_by": [
+        "performance"
+      ],
+      "severity": "medium",
+      "status": "open",
+      "suggested_fix": "Wrap in useMemo(() => handleGetMacrosForDate(date), [handleGetMacrosForDate, getDateKey(date)]). Longer-term, a Map<dateKey, totals> built once per nutritionData change in the provider makes all per-day reads O(1)."
+    },
+    {
+      "id": "med-022",
+      "title": "offerings: any erodes typing through the entire billing surface",
+      "description": "RevenueCat's SDK exports PurchasesOffering/PurchasesOfferings (the file already imports PurchasesPackage from the same package), but offerings is any at the state, interface, and both selector functions - so offerings.current.availablePackages is unchecked everywhere. Paywall/subscription are revenue-critical; an SDK shape change or selector typo compiles clean and fails at runtime on the paywall.",
+      "location": "context/BillingContext/types.ts:4; context/BillingContext/index.tsx:19; context/BillingContext/functions/billingFunctions.tsx:13,24",
+      "found_by": [
+        "code-structure"
+      ],
+      "severity": "medium",
+      "status": "open",
+      "suggested_fix": "Type all four sites as PurchasesOfferings | null; no behavior change (callers already consume derived PurchasesPackage | null values, so blast radius is the four lines)."
+    },
+    {
+      "id": "med-023",
+      "title": "Purchase/restore flow duplicated across paywall vs subscription; leave-block hardening on only one twin",
+      "description": "Near-identical subscribe/restore bodies (package-missing alert, err.userCancelled early-out, message fallback) differ only in the success continuation (finishOnboarding vs success Alert). The purchase-in-progress navigation beforeRemove block exists only in the subscription copy. Both use catch (err: any). The next billing edge case (new RevenueCat error code) will land in one copy only.",
+      "location": "app/onboardingScreens/paywall.tsx:73-107; app/settingsScreens/subscription.tsx:39-83",
+      "found_by": [
+        "code-structure"
+      ],
+      "severity": "medium",
+      "status": "open",
+      "suggested_fix": "Extract useSubscribeFlow({ onPurchased, onRestored }) (home context/BillingContext/ or lib/hooks/) owning guard, error mapping, and typed catch (err: unknown); both screens pass their success continuation. Decide explicitly whether the onboarding paywall needs the leave-block and document it."
+    },
+    {
+      "id": "med-024",
+      "title": "Nutrition store: twin-table blocks duplicated 2x each, plus non-null-assertion row parsing",
+      "description": "Entry vs saved-entry mappers, serializers, load blocks, and upserts are copy-pasted with only the date/time columns as the intended difference; the shared item mapping/sanitizing exists twice per concern. row.id!/row.user_id!/row.name!/item.name! non-null assertions on nullable SELECT * columns mean a null name from a partially-synced row lands in string-typed state (renders blank/crash downstream) instead of being defaulted or filtered. Same assertion pattern in WorkoutContext's store. A sanitizer fix or column addition must be applied in 2-4 places.",
+      "location": "context/NutritionContext/database/powersyncStore.ts:12-104,114-149,159-236 (assertions :16-18,27,65-67,77,130,149); context/WorkoutContext/database/powersyncStore.ts:14-59",
+      "found_by": [
+        "code-structure"
+      ],
+      "severity": "medium",
+      "status": "open",
+      "suggested_fix": "Extract shared mapItemRows(items) and a parameterized upsert-ingredients helper (intended date/time differences stay explicit in two thin wrappers); replace ! with defaults or a skip-row filter like the entryIds filter((id): id is string => !!id) already does. Pin via the existing powersyncStore.test.ts. Overlaps logic-correctness on null-propagation."
+    },
+    {
+      "id": "med-025",
+      "title": "Dead-but-tested code and zero-importer files",
+      "description": "upsertExercise (its own test names it a 'duplicated copy of upsertWorkout'; mocked in providerMemo.test) has zero production callers; lib/utils/dateDeserialization.ts has zero importers, no test, and the file's only as-any casts; lib/utils/downsample.ts is imported only by its own test (still listed in CLAUDE.md); components/NeutralComponents/CustomHeader.tsx and components/NutritionComponents/bwCard.tsx (150 lines) have zero references; exerciseLibrary/data/ is an empty leftover directory. Dead-but-tested functions mislead maintainers into 'fixing' code production never runs (same disease as high-012).",
+      "location": "context/WorkoutContext/database/powersyncStore.ts:269; lib/utils/dateDeserialization.ts:22,31,67; lib/utils/downsample.ts; components/NeutralComponents/CustomHeader.tsx; components/NutritionComponents/bwCard.tsx; context/WorkoutContext/exerciseLibrary/data/",
+      "found_by": [
+        "code-structure"
+      ],
+      "severity": "medium",
+      "status": "open",
+      "suggested_fix": "Delete all of the above plus their orphan tests/mocks; remove the downsample mention from CLAUDE.md. (Note: downsample should instead be wired up per med-019 rather than deleted - decide which.)"
+    },
+    {
+      "id": "med-026",
+      "title": "Six unused dependencies in package.json",
+      "description": "jsonwebtoken (Node-only crypto lib that can't run in RN unshimmed; drags a Node crypto tree into a mobile app and is CVE-scanner surface), base-64 (+ @types/base-64), react-native-inner-shadow, react-native-draggable-flatlist (superseded by react-native-reorderable-list, the only drag lib actually imported), and expo-web-browser have zero references in source/configs/app.json/babel/metro. (expo-constants/expo-linking/expo-status-bar are also import-free but are expo-router install requirements - keep those.)",
+      "location": "package.json:28,46,48,53,55,71",
+      "found_by": [
+        "code-structure"
+      ],
+      "severity": "medium",
+      "status": "open",
+      "suggested_fix": "Remove the six (five deps + one devDep); run npm run test:ci + an EAS preview build to confirm."
+    },
+    {
+      "id": "med-027",
+      "title": "Wrong-direction type dependencies across layers",
+      "description": "exerciseLibrary/index.ts and WorkoutContext/types.ts value-import ScrollableListItem from a UI component module (provider layer -> UI component, pulling the component file into the context module graph); lib/notifications/builders.ts and scheduler.ts import types from context/NutritionContext/types (lib -> context, the residue M21 left behind). No runtime cycles exist, but the arrows contradict the documented 'types flow down' rule, metro won't tree-shake the component import, and neither module can be tested/reused without dragging its wrong-direction dependency.",
+      "location": "context/WorkoutContext/exerciseLibrary/index.ts:1; context/WorkoutContext/types.ts:58; lib/notifications/builders.ts:1; lib/notifications/scheduler.ts:1",
+      "found_by": [
+        "code-structure"
+      ],
+      "severity": "medium",
+      "status": "open",
+      "suggested_fix": "Move ScrollableListItem to a types-only module and make the two context imports import type; move NutritionEntry/NutritionStreakState (or a minimal projection) down into lib/notifications/types.ts and have context/NutritionContext/types.ts re-export/extend."
+    },
+    {
+      "id": "low-001",
+      "title": "powersync_setup.sql ships a placeholder replication password in a committed file",
+      "description": "CREATE ROLE powersync_role WITH REPLICATION BYPASSRLS LOGIN PASSWORD 'CHANGE_ME_TO_SECURE_PASSWORD'. The BYPASSRLS role is the one credential that can read every user's rows across the DB. No leak today (placeholder), but if someone runs the file verbatim the most privileged role gets a public, guessable password; nothing enforces the replacement.",
+      "location": "lib/supabase/migrations/powersync_setup.sql:15",
+      "found_by": [
+        "security-cost"
+      ],
+      "severity": "low",
+      "status": "open",
+      "suggested_fix": "Note in the file that the password must be generated out-of-band; consider PASSWORD NULL + a separate ALTER ROLE step so a verbatim run cannot create a usable weak credential."
+    },
+    {
+      "id": "low-002",
+      "title": "No client-side length cap on support-request free-text before insert",
+      "description": "subject/message are trimmed and non-empty-checked but have no maximum length client- or DB-side (subject TEXT, message TEXT, no length constraint). RLS is correct (insert-only, auth.uid()=user_id), so this is not an authz issue - a signed-in user can insert arbitrarily large rows, a minor storage/abuse vector.",
+      "location": "app/settingsScreens/support.tsx:44-49; lib/supabase/migrations/support_request.sql:2-9",
+      "found_by": [
+        "security-cost"
+      ],
+      "severity": "low",
+      "status": "open",
+      "suggested_fix": "Add a maxLength to the inputs and a CHECK (char_length(message) <= N) to the table."
+    },
+    {
+      "id": "low-003",
+      "title": "Debounced food search fires on every settled keystroke with no minimum query length",
+      "description": "The 700ms debounce is correct and premium-gated, but any non-empty trimmed query triggers a metered FatSecret call including single-character queries (results cached per-key for a week, which mitigates repeats). Minor over-calling of the metered endpoint; bounded by the 300/day quota so cost is capped - efficiency polish.",
+      "location": "app/nutritionScreens/foodDBModal.tsx:74-99",
+      "found_by": [
+        "security-cost"
+      ],
+      "severity": "low",
+      "status": "open",
+      "suggested_fix": "Require q.length >= 2 (or 3) before firing the search effect."
+    },
+    {
+      "id": "low-004",
+      "title": "validateLog passes NaN weight/reps/rpe straight into the DB",
+      "description": "validateLog uses only </<=/> comparisons, all false for NaN, so a NaN log validates. Today the sole caller pre-guards, but handleAddLog is the public context API; any future caller (or the exported addLog) inserts NaN into logs.weight/reps, which would poison e1RM/volume/progression math (getVolumeData's weight*reps emits NaN into a chart bucket). The 'Reps cannot be less than 0' copy is also wrong (condition is <= 0).",
+      "location": "context/WorkoutContext/functions/validator.tsx:4-23; write path context/WorkoutContext/index.tsx:262-292",
+      "found_by": [
+        "logic-correctness"
+      ],
+      "severity": "low",
+      "status": "open",
+      "suggested_fix": "Add Number.isFinite checks (and Number.isInteger(reps)) at the top of validateLog; fix the reps copy. Add validator.test.ts case validateLog(NaN, NaN, 0) === false."
+    },
+    {
+      "id": "low-005",
+      "title": "calculateStartDate boundary asymmetry and '30-day' windows rendering 31 points",
+      "description": "The three branches disagree at the exact boundary: onboarding exactly maxDays ago anchors to onboarding (31 points for a 30-day graph); earliest-entry exactly maxDays ago falls through to default (also 31); earliest-entry maxDays-1 ago gives 30. The default branch always plots maxDays+1 days. Cosmetic-to-minor stat skew (averages over '30 days' include a 31st day).",
+      "location": "lib/utils/dateHelper.ts:237,248,259-261; lib/utils/graphSeries.ts:39",
+      "found_by": [
+        "logic-correctness"
+      ],
+      "severity": "low",
+      "status": "open",
+      "suggested_fix": "Normalize both comparisons to < and subtract maxDays-1 in the default branch (or document 31-inclusive everywhere). Add boundary tests at exactly maxDays for both anchors asserting equal window lengths."
+    },
+    {
+      "id": "low-006",
+      "title": "Streak nudge scheduled for tomorrow can assert a streak that is already dead",
+      "description": "When the user hasn't logged today, n = streakThroughYesterday and the nudge fires tomorrow 9:00 claiming an 'N-day streak ... log a meal today to keep it going'. If the user never logs today (the case where the notification actually fires), the streak is broken by the time it displays - the number and claim are wrong. Reschedules on data change/foreground mask this only for active users.",
+      "location": "lib/notifications/builders.ts:59-67",
+      "found_by": [
+        "logic-correctness"
+      ],
+      "severity": "low",
+      "status": "open",
+      "suggested_fix": "Only schedule the tomorrow nudge from streakIncludingToday (i.e. when loggedToday), or reword the unlogged-today variant to 'Your N-day streak ends today' scheduled for today evening. Add a builders.test.ts case loggedToday=false, streakThroughYesterday=5 asserting no next-morning '5-day streak' spec."
+    },
+    {
+      "id": "low-007",
+      "title": "updated_at written in two formats - SQLite UTC datetime('now') vs JS ISO - parsed back as local time",
+      "description": "UPDATE branches use datetime('now') (UTC, zoneless 'YYYY-MM-DD HH:MM:SS') while INSERT branches use toISOString(). Read-back new Date(row.updated_at) treats the zoneless SQLite format as local, shifting timestamps by the UTC offset (engine-dependent parse). Nothing critical consumes them today, so this is hygiene - but a trap for any future conflict-resolution or 'last edited' UI.",
+      "location": "context/NutritionContext/database/powersyncStore.ts:36-37,57-58,171,190,212,231; context/WorkoutContext/database/powersyncStore.ts:121,144,166; context/SettingsContext/database/powersyncStore.ts:89,127",
+      "found_by": [
+        "logic-correctness"
+      ],
+      "severity": "low",
+      "status": "open",
+      "suggested_fix": "Standardize on ISO-from-JS for all timestamp writes (pass the value as a bound parameter like the INSERT branches already do)."
+    },
+    {
+      "id": "low-008",
+      "title": "Add/Edit nutrition modals dismiss even when validation rejects; negative macros enabled in the CTA",
+      "description": "macrosValid checks parseability only, so -5 enables the CTA; router.back() runs regardless of addNutrition's validation result. Typing a negative macro passes the UI gate; validateNutritionEntry then alerts and blocks the write (correct), but the modal has already closed - the user sees an error alert over the home screen and no entry, reading like a lost save.",
+      "location": "app/nutritionScreens/addNutritionModal.tsx:40-58; app/nutritionScreens/editEntry.tsx:150-155",
+      "found_by": [
+        "logic-correctness"
+      ],
+      "severity": "low",
+      "status": "open",
+      "suggested_fix": "Extend macrosValid with >= 0, and/or make the handlers check the boolean returned by addNutrition/editNutrition before router.back(). Add a render test asserting the CTA is disabled for -5."
+    },
+    {
+      "id": "low-009",
+      "title": "editEntry silently zeroes an unparseable typed macro on save",
+      "description": "toItem does parseNumericInput(draft.protein) ?? 0 (quantity ?? 1); a typo like '1..5' in a macro cell parses to null and is saved as 0 with no warning, masked live only while the row is visible.",
+      "location": "app/nutritionScreens/editEntry.tsx:52-62",
+      "found_by": [
+        "logic-correctness"
+      ],
+      "severity": "low",
+      "status": "open",
+      "suggested_fix": "Block save (or highlight the cell) when any populated draft field fails parseNumericInput. Add an editEntry test typing '1..5' into protein and asserting save is blocked rather than persisting 0."
+    },
+    {
+      "id": "low-010",
+      "title": "Splash screen never hides if the brand-logo asset load rejects",
+      "description": "Promise.all([Asset.loadAsync(...), ...]).then(...) has no .catch, and SplashScreen.hideAsync() is gated on loaded && logoLoaded. A rejected Asset.loadAsync leaves logoLoaded false forever; the app renders behind a native splash that never hides, with no retry, timeout, or telemetry. Rare (bundled assets) but the failure mode is a permanent boot hang.",
+      "location": "app/_layout.tsx:110-118",
+      "found_by": [
+        "infra-reliability"
+      ],
+      "severity": "low",
+      "status": "open",
+      "suggested_fix": "Append .catch(() => setLogoLoaded(true)) - the logo is cosmetic; degrade instead of hanging."
+    },
+    {
+      "id": "low-011",
+      "title": "Upload queue drains one Supabase round-trip per row (two for natural-key tables)",
+      "description": "uploadData issues one HTTP call per crud op; concurrency is sensibly bounded at 5 per same-(op,table) run, but there is no batch insert, settings/weight_progress runs are forced fully serial, and natural-key PUTs cost a SELECT + UPDATE/INSERT pair. A day of offline logging (~100 ops) drains in ~20 sequential waves - seconds on a slow link, mattering most at sign-out where flushUploadsOrThrow gates on the queue. Acceptable at launch.",
+      "location": "lib/powersync/Connector.ts:171-195,200-221,260-295",
+      "found_by": [
+        "performance"
+      ],
+      "severity": "low",
+      "status": "open",
+      "suggested_fix": "Post-launch, batch same-table PUT runs via a single upsert([...rows]) call (PostgREST supports array upserts) for the non-natural-key tables (logs, exercises, nutrition rows)."
+    },
+    {
+      "id": "low-012",
+      "title": "List rows are not memoized; renderItem closures re-created per render",
+      "description": "No React.memo anywhere in components; renderItem functions are inline/plain functions whose identity changes each render, so every parent re-render re-renders all visible rows. foodDBModal additionally renders search results and POPULAR_FOODS via .map inside a ScrollView (no virtualization). Bounded lists today (day view ~4-10 entries, ~10 visible rows, API-capped results) so cost is small - polish tier.",
+      "location": "app/nutritionScreens/nutritionScreen.tsx:122; components/NutritionComponents/Entry.tsx:18; components/WorkoutComponents/LogHistoryList.tsx:39-73; components/NeutralComponents/ScrollableList.tsx:53-94; app/nutritionScreens/foodDBModal.tsx:308-343",
+      "found_by": [
+        "performance"
+      ],
+      "severity": "low",
+      "status": "open",
+      "suggested_fix": "React.memo on Entry, FoodRow, and the ScrollableList row; hoist renderItem with useCallback. Convert foodDB results to a FlatList only if the API result cap ever rises."
+    },
+    {
+      "id": "low-013",
+      "title": "devTest preview twins of production modals have begun drifting",
+      "description": "AddNutritionModalPreview fills only empty macro fields (if (!calories.trim())) while production now deliberately overwrites all macros on re-generate; FoodDBModalPreview is a 402-line diff with a manual 'Kept in sync with the real foodDBModal' promise. Intentional forks (mocked AI, ?tier= param) but full-body copies of ~400-700-line production modals; one behavior divergence already exists. Dev-only (routes __DEV__-guarded), so no user impact - but the previews increasingly demo behavior production no longer has.",
+      "location": "components/devTest/AddNutritionModalPreview.tsx:66-71; components/devTest/FoodDBModalPreview.tsx:81-82",
+      "found_by": [
+        "code-structure"
+      ],
+      "severity": "low",
+      "status": "open",
+      "suggested_fix": "Either accept and label them as frozen snapshots (delete the 'kept in sync' comment) or refactor the shared body into a component parameterized by { hasPremium, onGenerate, onCommit } consumed by both."
+    },
+    {
+      "id": "low-014",
+      "title": "Modal chrome copy-pasted across all 12 modals; hardcoded colors vs token convention",
+      "description": "The handleContainer/handle/rounded-container drag-handle sheet chrome is repeated in 12 modals; brand-ish hex colors bypass ThemeContext tokens (#FFD93D x3, #FFF-on-gradient in ~15 files, one-off grays #1A1B1E/#16171A). CLAUDE.md says never hardcode colors. A chrome tweak (e.g. handle size for accessibility) needs 12 edits; #FFD93D is a de facto brand token that can drift per-screen.",
+      "location": "12 modals incl. app/workoutScreens/addExerciseModal.tsx:343, app/nutritionScreens/foodDBModal.tsx:392, app/nutritionScreens/editEntry.tsx:292; hex at app/authScreens/login.tsx:52, app/settingsScreens/subscription.tsx:197, app/onboardingScreens/paywall.tsx:235",
+      "found_by": [
+        "code-structure"
+      ],
+      "severity": "low",
+      "status": "open",
+      "suggested_fix": "Shared ModalSheet/modalChromeStyles(colors) in components/NeutralComponents/ adopted by the 12 modals; add accentGold (and an onGradient white) to ThemeContext/colors.ts and migrate the three #FFD93D sites."
+    },
+    {
+      "id": "low-015",
+      "title": "Inline exercise name checks with inconsistent matching rules; one unguarded submit CTA",
+      "description": "addExerciseModal does a case-insensitive but no-trim dup check at :59 (differs from isWorkoutNameTaken's trim+lower) and an exact-case 'name in fullExerciseLib' at :90 - two different uniqueness rules in one modal, so ' Bench Press' passes the dup check and 'bench press' collides with 'Bench Press' at the library layer but not vice versa. updateBWModal is the only submit-CTA modal without useSubmitOnce (double-tap fires handleUpdateBw twice; harmless today only because the weight row is an upsert keyed by user+date).",
+      "location": "app/workoutScreens/addExerciseModal.tsx:59,90; app/nutritionScreens/updateBWModal.tsx:63-77; context/WorkoutContext/functions/nameCheck.ts:5",
+      "found_by": [
+        "code-structure"
+      ],
+      "severity": "low",
+      "status": "open",
+      "suggested_fix": "Add isExerciseNameTaken/isLibraryNameTaken beside isWorkoutNameTaken in the shared nameCheck home and use them at both addExerciseModal sites; wrap updateBW's CTA in guardSubmit."
+    },
+    {
+      "id": "low-016",
+      "title": "Test gaps in otherwise strong coverage",
+      "description": "context/NutritionContext/hooks/ has no __tests__ - useNotificationScheduler (the wiring of the tested lib/notifications scheduler into app state - the decision layer of when/what to schedule from streak state) and useCombineName are unpinned even though builders/scheduler/prefs are. lib/utils/confirmDelete.ts is untested (its sibling confirmSignOut is).",
+      "location": "context/NutritionContext/hooks/useNotificationScheduler.ts; lib/utils/confirmDelete.ts",
+      "found_by": [
+        "code-structure"
+      ],
+      "severity": "low",
+      "status": "open",
+      "suggested_fix": "Add a hook test for useNotificationScheduler (mock lib/notifications) plus a small confirmDelete test."
+    },
+    {
+      "id": "low-017",
+      "title": "Naming mismatch: ModeSwitcher.tsx default-exports CustomHeader",
+      "description": "The file/component name mismatch is made worse by the (dead) CustomHeader.tsx sitting in the same folder. Grep/IDE confusion only.",
+      "location": "components/NeutralComponents/ModeSwitcher.tsx:11",
+      "found_by": [
+        "code-structure"
+      ],
+      "severity": "low",
+      "status": "open",
+      "suggested_fix": "Rename the function to ModeSwitcher when deleting the dead CustomHeader.tsx (see med-025)."
+    },
+    {
+      "id": "low-018",
+      "title": "'How It Works' promises a 'fatigue score' section that doesn't exist",
+      "description": "The subtitle references '...nutrition targets, fatigue score, and strength chart' but SECTIONS only renders Nutrition Goals + Strength chart - the de-emphasized fatigue feature. Users look for a feature the app no longer surfaces.",
+      "location": "app/settingsScreens/howItWorks.tsx:54 (vs SECTIONS :7-24)",
+      "found_by": [
+        "ui-ux"
+      ],
+      "severity": "low",
+      "status": "open",
+      "suggested_fix": "Drop 'fatigue score' from the subtitle."
+    },
+    {
+      "id": "low-019",
+      "title": "Submitting/disabled CTAs keep their fully-enabled look",
+      "description": "addNutritionModal disables the CTA on submitting but the dim style applies only for (!hasContent || !macrosValid), not submitting; subscription's CTA is disabled when hasPremium but renders as a full-brightness gradient labeled 'Subscription Active'. Buttons look tappable while inert - minor confusion / perceived unresponsiveness, drift from the disabled-state pattern used elsewhere (renameModal swaps to colors.disabled).",
+      "location": "app/nutritionScreens/addNutritionModal.tsx:180; app/settingsScreens/subscription.tsx:134-139",
+      "found_by": [
+        "ui-ux"
+      ],
+      "severity": "low",
+      "status": "open",
+      "suggested_fix": "Include submitting in the dim condition on addNutritionModal; render the already-subscribed state on subscription as a non-button (e.g. surface-colored badge)."
+    },
+    {
+      "id": "low-020",
+      "title": "Fab menu has no outside-tap dismissal",
+      "description": "With the menu open, tapping anywhere else scrolls/activates the underlying list instead of closing the menu; only re-tapping the FAB closes it. Mild annoyance; deviates from standard speed-dial behavior.",
+      "location": "components/NeutralComponents/Fab.tsx:65-98",
+      "found_by": [
+        "ui-ux"
+      ],
+      "severity": "low",
+      "status": "open",
+      "suggested_fix": "When open, render a full-screen transparent Pressable behind the items that closes the menu."
+    }
+  ]
+}

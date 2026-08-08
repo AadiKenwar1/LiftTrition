@@ -20,6 +20,14 @@ export function isGoalReached(s: Pick<Settings, 'goalType' | 'bodyWeight' | 'goa
     return false
 }
 
+// Prompt condition: at/past goal AND not muted by "Keep Going" (goalOvershootAcknowledged).
+// Exported so computeBwUpdate (deciding mid weigh-in) and SettingsProvider's post-commit
+// effect (deciding from settings already saved) apply the identical rule instead of each
+// restating it.
+export function shouldPromptGoalReached(s: Pick<Settings, 'goalType' | 'bodyWeight' | 'goalWeight' | 'goalOvershootAcknowledged'>): boolean {
+    return isGoalReached(s) && !s.goalOvershootAcknowledged
+}
+
 // Display band only — picks which banner sentence renders; it gates no behavior.
 export const GOAL_COPY_BAND = { imperial: 2, metric: 1 } as const
 
@@ -62,8 +70,7 @@ export function computeBwUpdate(
     // the goal asks again.
     const newSettings = !reached && base.goalOvershootAcknowledged ? { ...base, goalOvershootAcknowledged: false } : base
 
-    // Prompt condition = banner condition + "hasn't said stop asking".
-    const prompt: BwPrompt | null = reached && !newSettings.goalOvershootAcknowledged ? 'goalReached' : null
+    const prompt: BwPrompt | null = shouldPromptGoalReached(newSettings) ? 'goalReached' : null
 
     return { dateKey, newSettings, prompt }
 }

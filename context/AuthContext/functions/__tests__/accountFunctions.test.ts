@@ -125,6 +125,21 @@ describe('deleteAccount', () => {
         const clearOrder = (disconnectAndClearPowerSync as jest.Mock).mock.invocationCallOrder[0]
         expect(fetchOrder).toBeLessThan(clearOrder)
     })
+
+    // Supabase Edge Function slugs are case-sensitive, and the deployed slug is all-lowercase
+    // (supabase/config.toml [functions.deleteaccount]) — a camelCase URL here 404s instead of
+    // deleting the account, so pin the exact path and the bearer token it is sent with.
+    it('POSTs the session token to the lowercase deleteaccount slug', async () => {
+        await deleteAccount()
+
+        expect(mockFetch).toHaveBeenCalledWith(
+            'https://test.supabase.co/functions/v1/deleteaccount',
+            expect.objectContaining({
+                method: 'POST',
+                headers: expect.objectContaining({ Authorization: 'Bearer token-123' }),
+            }),
+        )
+    })
 })
 
 describe('signOut', () => {

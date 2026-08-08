@@ -42,11 +42,11 @@ export default function TermsAndPrivacyContent() {
                 <Text style={styles.lastUpdated}>Last updated: March 2025</Text>
             </View>
 
-            <Section title="1. Acceptance of Terms">By downloading, accessing, or using PLATES ("the App"), you agree to be bound by these Terms of Service and our Privacy Policy. If you do not agree, please do not use the App.</Section>
+            <Section title="1. Acceptance of Terms">By downloading, accessing, or using Plates ("the App"), you agree to be bound by these Terms of Service and our Privacy Policy. If you do not agree, please do not use the App.</Section>
 
             <Section title="2. Eligibility and Minimum Age">You must be at least 13 years old to use the App. If you are under 18, you should have your parent or guardian review these terms and help you create an account. By using the App, you represent that you meet these requirements.</Section>
 
-            <Section title="3. Description of Service">PLATES is a fitness and nutrition tracking app that helps you:</Section>
+            <Section title="3. Description of Service">Plates is a fitness and nutrition tracking app that helps you:</Section>
             <BulletList items={['Log and track workouts', 'Track nutrition and calories', 'Monitor body weight progress', 'Set and adjust nutrition goals based on your profile', 'Use AI to analyze food (premium)', 'Access a food database (premium)']} />
 
             <Section title="4. Account and Data">To use the App, you create an account via Apple Sign In. We collect and store:</Section>
@@ -88,7 +88,7 @@ function makeStyles(colors: Colors) {
             width: 72,
             height: 72,
             borderRadius: 36,
-            backgroundColor: colors.surface,
+            backgroundColor: colors.iconCircleBg,
             justifyContent: 'center',
             alignItems: 'center',
             marginBottom: 12,

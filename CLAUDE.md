@@ -41,9 +41,10 @@ Every `EXPO_PUBLIC_*` var is read only through `ENV` in `lib/env.ts`. Babel inli
 app/                    Expo Router screens (file = route)
   (tabs)/               index (home/logging), progress, settings
   authScreens/          login (Apple Sign-In only)
-  onboardingScreens/    goals → obstacles → aboutYou → activity → goal → pace →
-                        timeline → plan → projection → paywall
-                        (skip-aware step numbering lives in lib/utils/onboardingSteps.ts)
+  onboardingScreens/    goals → obstacles → activity → goal → aboutYou → pace →
+                        plan → projection → paywall
+                        (goal carries the weight numbers; maintain skips pace, aboutYou → plan.
+                         skip-aware step numbering lives in lib/utils/onboardingSteps.ts)
   nutritionScreens/     nutrition modals (add, saved, foodDB, camera, analyzing, editEntry…)
   workoutScreens/       workout modals (addWorkout, exercises, logs, notes, archive…)
   settingsScreens/      profile, subscription, adjustTraining, adjustNutrition/…, notifications

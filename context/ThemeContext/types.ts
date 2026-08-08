@@ -5,6 +5,7 @@ export type Colors = {
     surfaceInset: string
     toggleTrack: string
     navBar: string
+    iconCircleBg: string
     // Lines
     border: string
     hairline: string

@@ -1,7 +1,10 @@
 import EditMacroGoalModal, { type MacroGoalKind } from '@/components/NutritionComponents/EditMacroGoalModal'
+import LowCalorieWarning from '@/components/NutritionComponents/LowCalorieWarning'
+import WontReachGoalWarning from '@/components/NutritionComponents/WontReachGoalWarning'
 import OnboardingScaffold from '@/components/NeutralComponents/OnboardingScaffold'
 import PressableScale from '@/components/NeutralComponents/PressableScale'
 import { useSettings } from '@/context/SettingsContext'
+import { calculateCalorieTarget, macrosWereEdited } from '@/context/SettingsContext/functions/macroCalculation'
 import { fonts, macroColors, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { onboardingStep } from '@/lib/utils/onboardingSteps'
 import { router } from 'expo-router'
@@ -22,6 +25,9 @@ export default function OnboardingPlan() {
     const { current, total } = onboardingStep('plan', settings.goalType)
 
     const calc = useMemo(() => calculateMacros(settings, settings.unitSystem === 'imperial'), [settings, calculateMacros])
+    // The burn the edited calorie number is judged against. calculateMacros returns only the target, and
+    // the direction warning needs the maintenance behind it — the same figure the projection derives from.
+    const { maintenance } = useMemo(() => calculateCalorieTarget(settings, settings.unitSystem === 'imperial'), [settings])
     const [macros, setMacros] = useState({
         calorieGoal: Math.round(calc.calResult),
         proteinGoal: Math.round(calc.proteinGrams),
@@ -39,8 +45,12 @@ export default function OnboardingPlan() {
         else setMacros((m) => ({ ...m, fatsGoal: v }))
     }
 
+    // macrosCustomized is what stops the first weigh-in regenerating these targets over the top of a card
+    // the user typed here — profile.tsx sets it for the identical modal edit, and without it an onboarding
+    // hand-edit is silently reverted. Only a real edit earns it; a straight walk-through keeps tracking the
+    // body, so the flag is written on both paths rather than only when true.
     function handleNext() {
-        setSettings({ ...settings, ...macros })
+        setSettings({ ...settings, ...macros, macrosCustomized: macrosWereEdited(macros, calc) })
         router.push('/onboardingScreens/projection')
     }
 
@@ -53,7 +63,7 @@ export default function OnboardingPlan() {
 
     return (
         <View style={{ flex: 1 }}>
-            <OnboardingScaffold step={current} total={total} title="Your plan is ready" subtitle="Here are your daily targets — tap any to fine-tune it." accent={colors.text} onBack={() => router.back()} onNext={handleNext}>
+            <OnboardingScaffold step={current} total={total} title="Your plan is ready" subtitle="Here are your daily targets. Tap any one to change it." accent={colors.text} onBack={() => router.back()} onNext={handleNext}>
                 <View style={styles.grid}>
                     {CARDS.map(({ kind, Icon, color, label, value }, i) => (
                         <Animated.View key={kind} entering={FadeInDown.delay(i * 50).duration(280)} style={styles.cell}>
@@ -66,6 +76,9 @@ export default function OnboardingPlan() {
                         </Animated.View>
                     ))}
                 </View>
+                {/* Both read the editable state, not calc, so a calorie number typed into the modal is warned about too. */}
+                <LowCalorieWarning calories={macros.calorieGoal} gender={settings.gender} style={styles.warning} />
+                <WontReachGoalWarning calories={macros.calorieGoal} maintenance={maintenance} goalType={settings.goalType} unitSystem={settings.unitSystem} style={styles.warning} />
                 <Text style={styles.note}>You can change these anytime in settings.</Text>
             </OnboardingScaffold>
 
@@ -82,6 +95,7 @@ function makeStyles(colors: Colors) {
         pencil: { position: 'absolute', top: 12, right: 12 },
         cardLabel: { fontFamily: fonts.semibold, fontSize: 13, color: colors.text, letterSpacing: -0.2, marginTop: 2 },
         cardValue: { fontFamily: fonts.extrabold, fontSize: 26, color: colors.text, letterSpacing: -0.5 },
+        warning: { marginTop: 16 },
         note: { fontFamily: fonts.medium, fontSize: 12, color: colors.textMuted, textAlign: 'center', letterSpacing: 0.2, marginTop: 18 },
     })
 }

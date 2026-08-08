@@ -57,7 +57,7 @@ export default function GoalProjectionV4() {
             totalSteps={9}
             eyebrow="Step 9 of 9"
             title={maintain ? 'Same weight, stronger body' : `You'll reach ${goal} ${unit}`}
-            subtitle={maintain ? `Eating at maintenance holds you at ${current} ${unit} while training drives your strength up — that's recomp.` : `by ${targetDate} — about ${weeks} weeks at your pace.`}
+            subtitle={maintain ? `Eating at maintenance holds you at ${current} ${unit} while training drives your strength up.` : `by ${targetDate} — about ${weeks} weeks at your pace.`}
             accent={colors.text}
             onBack={() => router.back()}
             onNext={() => {}}

@@ -9,11 +9,11 @@
 import { act, create } from 'react-test-renderer'
 import React from 'react'
 
-// Stable reference: a fresh object each render would change SyncWatchdog's [session, loading]
-// deps and re-run the effect forever.
-const mockAuthValue: { session: unknown; loading: boolean } = { session: { user: { id: 'u1' } }, loading: false }
+// Reassignable so a test can swap in a fresh session object; the `mock` prefix is what
+// lets the hoisted jest.mock factory below close over it.
+let mockAuthState: { session: unknown; loading: boolean } = { session: { user: { id: 'u1' } }, loading: false }
 jest.mock('@/context/AuthContext', () => ({
-    useAuth: () => mockAuthValue,
+    useAuth: () => mockAuthState,
 }))
 
 const mockKickPowerSync = jest.fn()
@@ -75,6 +75,7 @@ beforeEach(() => {
     mockGetKickThrottleRemainingMs.mockReturnValue(0)
     mockGetPowerSyncOrchestratorState.mockReturnValue({})
     appStateListener = undefined
+    mockAuthState = { session: { user: { id: 'u1' } }, loading: false }
 })
 
 afterEach(() => {
@@ -128,5 +129,24 @@ describe('SyncWatchdog', () => {
         expect(mockEnsureConnected).toHaveBeenCalledWith('watchdog_resume')
         expect(Sentry.captureException).not.toHaveBeenCalled()
         expect(mockKickPowerSync).not.toHaveBeenCalled()
+    })
+
+    it('does not tear down and rebuild the monitor when a token refresh replaces the session object', async () => {
+        // Healthy at mount so the initial check() does not kick — any later kick would come
+        // from the effect re-running, which is exactly what this pins.
+        mockCurrentStatus.connected = true
+        mockCurrentStatus.lastSyncedAt = new Date()
+
+        await renderWatchdog()
+        expect(mockAddEventListener).toHaveBeenCalledTimes(1)
+
+        // Supabase hands back a new session object on every hourly token refresh; same user.
+        mockAuthState = { session: { user: { id: 'u1' } }, loading: false }
+        await act(async () => {
+            tree.update(React.createElement(SyncWatchdog))
+        })
+
+        expect(mockAddEventListener).toHaveBeenCalledTimes(1)
+        expect(mockRemove).not.toHaveBeenCalled()
     })
 })

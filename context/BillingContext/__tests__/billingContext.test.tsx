@@ -4,10 +4,19 @@
 import { act, create } from 'react-test-renderer'
 import Purchases from 'react-native-purchases'
 import { BillingProvider, useBilling } from '../index'
+import { resetSdkIdentityForTests } from '../functions/sdkIdentity'
 import { BillingContextInterface } from '../types'
 
 jest.mock('@/context/AuthContext', () => ({
     useAuth: () => ({ user: { id: 'user-1' }, loading: false }),
+}))
+
+// Fake keys so the provider's configure path runs under Jest (no .env is loaded)
+jest.mock('@/lib/env', () => ({
+    ENV: {
+        REVENUECAT_API_KEY_IOS: 'test-key-ios',
+        REVENUECAT_API_KEY_ANDROID: 'test-key-android',
+    },
 }))
 
 jest.mock('react-native-purchases', () => ({
@@ -15,8 +24,12 @@ jest.mock('react-native-purchases', () => ({
     default: {
         setLogLevel: jest.fn(),
         configure: jest.fn(),
+        enableAdServicesAttributionTokenCollection: jest.fn().mockResolvedValue(undefined),
         logIn: jest.fn().mockResolvedValue(undefined),
         logOut: jest.fn().mockResolvedValue(undefined),
+        // The restore wrappers verify identity before the store; the happy path needs the
+        // SDK to report the signed-in user.
+        getAppUserID: jest.fn().mockResolvedValue('user-1'),
         getOfferings: jest.fn().mockResolvedValue(null),
         getCustomerInfo: jest.fn().mockResolvedValue(null),
         restorePurchases: jest.fn(),
@@ -47,6 +60,8 @@ describe('BillingProvider restore', () => {
 
     beforeEach(() => {
         mockRestore.mockReset()
+        // Module-level SDK state outlives each case; every mount must start unconfigured
+        resetSdkIdentityForTests()
     })
 
     it('exposes restoring=false initially', async () => {

@@ -1,4 +1,4 @@
-import { applySwitchToMaintenance, computeBwUpdate, goalReachedBannerCopy, isGoalReached } from '../bodyWeightFunctions'
+import { applySwitchToMaintenance, computeBwUpdate, goalReachedBannerCopy, isGoalReached, shouldPromptGoalReached } from '../bodyWeightFunctions'
 import { calculateMacros } from '../macroCalculation'
 import type { Settings } from '../../types'
 
@@ -180,5 +180,11 @@ describe('computeBwUpdate (issue 8 rules)', () => {
         expect(isGoalReached({ goalType: 'gain', bodyWeight: 170, goalWeight: 170 })).toBe(true)
         expect(isGoalReached({ goalType: 'gain', bodyWeight: 169.9, goalWeight: 170 })).toBe(false)
         expect(isGoalReached({ goalType: 'maintain', bodyWeight: 170, goalWeight: 170 })).toBe(false)
+    })
+
+    test('shouldPromptGoalReached: reached and unmuted asks; muted or not reached does not', () => {
+        expect(shouldPromptGoalReached({ goalType: 'lose', bodyWeight: 170, goalWeight: 170, goalOvershootAcknowledged: false })).toBe(true)
+        expect(shouldPromptGoalReached({ goalType: 'lose', bodyWeight: 170, goalWeight: 170, goalOvershootAcknowledged: true })).toBe(false)
+        expect(shouldPromptGoalReached({ goalType: 'lose', bodyWeight: 175, goalWeight: 170, goalOvershootAcknowledged: false })).toBe(false)
     })
 })

@@ -1,5 +1,8 @@
+import LowCalorieWarning from '@/components/NutritionComponents/LowCalorieWarning'
+import PaceCalorieReadout from '@/components/NutritionComponents/PaceCalorieReadout'
 import StepProgress from '@/components/NeutralComponents/StepProgress'
 import { useSettings } from '@/context/SettingsContext'
+import { calculateCalorieTarget, PACE_CEILING } from '@/context/SettingsContext/functions/macroCalculation'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { kgToLbs, lbsToKg } from '@/lib/utils/unitConversions'
 import { useScreenBottomPad } from '@/lib/hooks/useScreenBottomPad'
@@ -14,9 +17,10 @@ import Animated, { FadeInDown } from 'react-native-reanimated'
  * Pace is DISPLAYED in the user's unit system but STORED in lb/week — macroCalculation.tsx assumes lbs
  * ((goalPace * 3500) / 7), so metric values are converted with kgToLbs before leaving this screen.
  */
+// max is PACE_CEILING in each unit system (kg side floored to its own 0.1 step, 2 lb → 0.9 kg).
 const RANGES = {
-    metric: { min: 0.1, max: 1.5, def: 0.5, unit: 'kg' },
-    imperial: { min: 0.1, max: 3, def: 1, unit: 'lbs' },
+    metric: { min: 0.1, max: 0.9, def: 0.5, unit: 'kg' },
+    imperial: { min: 0.1, max: PACE_CEILING, def: 1, unit: 'lbs' },
 } as const
 
 const paceLabel = (v: number, max: number) => {
@@ -37,6 +41,25 @@ export default function AdjustNutrition2Screen() {
         const displayPace = metric ? lbsToKg(settings.goalPace) : settings.goalPace
         return displayPace >= r.min && displayPace <= r.max ? displayPace : r.def
     })
+
+    // Pre-commit state: params carry the not-yet-saved height/weight/goal, settings supply the body
+    // facts the wizard never edits (gender, birthDate, activity) — the adjustNutrition3 merge pattern.
+    // goalPace is deliberately left out, because on this screen it is the live slider value below.
+    const merged = useMemo(
+        () => ({
+            ...settings,
+            height: Number(params.height),
+            bodyWeight: Number(params.weight),
+            unitSystem: params.unitSystem as 'imperial' | 'metric',
+            goalType: params.goal as 'lose' | 'gain' | 'maintain',
+            goalWeight: Number(params.targetWeight),
+        }),
+        [params, settings]
+    )
+
+    // The same function step 3 runs, over the same pre-commit body — so the number quoted under the
+    // slider is the number the next screen shows, including a weight the user just retyped on step 1.
+    const { maintenance, target } = calculateCalorieTarget({ ...merged, goalPace: metric ? kgToLbs(goalPace) : goalPace }, !metric)
 
     const handleNext = () => {
         router.push({
@@ -73,6 +96,9 @@ export default function AdjustNutrition2Screen() {
                     <Text style={styles.rangeText}>{r.min} {r.unit}</Text>
                     <Text style={styles.rangeText}>{r.max} {r.unit}</Text>
                 </View>
+
+                <PaceCalorieReadout target={target} maintenance={maintenance} goalType={merged.goalType} style={styles.readout} />
+                <LowCalorieWarning calories={target} gender={merged.gender} align="center" style={styles.warning} />
             </ScrollView>
 
             <View style={styles.footer}>
@@ -98,6 +124,8 @@ function makeStyles(colors: Colors) {
         slider: { flex: 1, height: 40 },
         range: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 4, marginTop: 4 },
         rangeText: { fontFamily: fonts.medium, fontSize: 13, color: colors.textMuted, letterSpacing: 0.2 },
+        readout: { marginTop: 22 },
+        warning: { marginTop: 12 },
         footer: { paddingTop: 12 },
         nextButton: { width: '100%', height: 58, borderRadius: radius.cardLg, backgroundColor: colors.text, justifyContent: 'center', alignItems: 'center' },
         nextText: { fontFamily: fonts.semibold, fontSize: 17, color: colors.background, letterSpacing: -0.3 },

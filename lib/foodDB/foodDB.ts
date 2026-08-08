@@ -4,7 +4,7 @@ import * as Sentry from '@sentry/react-native'
 import { CacheEntry, FoodDetails, FoodItem, FoodSearchResult } from './types'
 
 const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000 // 1 week
-const EDGE_FN_URL = `${ENV.SUPABASE_URL}/functions/v1/fetchFoodDB`
+const EDGE_FN_URL = `${ENV.SUPABASE_URL}/functions/v1/fetchfooddb`
 
 // Friendly, user-facing message thrown when the per-user daily food-DB quota (audit C1) is hit.
 // Exported so a caller (e.g. foodDBModal) can distinguish a quota block from a generic network

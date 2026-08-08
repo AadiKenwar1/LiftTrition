@@ -8,7 +8,7 @@ import * as Sentry from '@sentry/react-native';
 
 export type VisionProvider = 'openai' | 'gemini'
 
-const EDGE_FN_URL = `${ENV.SUPABASE_URL}/functions/v1/fetchOpenAI`
+const EDGE_FN_URL = `${ENV.SUPABASE_URL}/functions/v1/fetchopenai`
 
 // True for the AbortError a fetch()/body-read rejects with when `signal` fires — an intentional
 // client-side cancel (M8), not an ops-relevant failure, so it must never hit Sentry as noise.

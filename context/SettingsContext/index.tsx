@@ -4,7 +4,7 @@ import { useAsyncLoad } from '@/lib/hooks/useAsyncLoad'
 import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useRef, useState, type SetStateAction } from 'react'
 import { loadSettingsAndBw, upsertSettings, upsertWeightForDate } from './database/powersyncStore'
 import { persistBackoffMs, reportPersistFailure } from '@/lib/powersync/persistErrors'
-import { applySwitchToMaintenance, computeBwUpdate, getBodyWeightProgressData, type BwPrompt } from './functions/bodyWeightFunctions'
+import { applySwitchToMaintenance, computeBwUpdate, getBodyWeightProgressData, shouldPromptGoalReached, type BwPrompt } from './functions/bodyWeightFunctions'
 import { getDateKey } from '@/lib/utils/dateHelper'
 import { calculateMacros } from './functions/macroCalculation'
 import { Settings, SettingsContextInterface } from './types'
@@ -83,33 +83,30 @@ export const SettingsProvider = ({ children }: PropsWithChildren) => {
         }
     }, [])
 
-    // Pending goal-reached prompt, raised by handleUpdateBw and rendered once by
+    // Pending goal-reached prompt, raised by the weigh-in effect below and rendered once by
     // GoalPromptHost in the root layout — so every weigh-in entry point shows it
     // over whatever screen remains after its own sheet closes. Deliberately ephemeral
     // in-memory state: if the process dies, the progress-screen banner is the survivor.
     const [pendingGoalPrompt, setPendingGoalPrompt] = useState<BwPrompt | null>(null)
     const dismissGoalPrompt = useCallback(() => setPendingGoalPrompt(null), [])
+    // Monotonic weigh-in count. Deciding the goal prompt needs the settings the weigh-in SAVED, which only
+    // exist after the commit — this carries "that state change was a weigh-in" across to the effect below,
+    // so an unrelated settings edit or a cold load can't be mistaken for one.
+    const [weighInSeq, setWeighInSeq] = useState(0)
 
     // Handles a body weight update: updates state and directly persists only the two changed rows.
     // Uses functional updaters so it always builds from the latest state, even when called
-    // immediately after another setSettings (e.g. onboarding4 sets height then calls this).
-    // The goal prompt is recomputed from closure settings: cheap, pure, and its inputs
-    // (goal fields + previous weight) are never part of the same-tick setSettings that
-    // precedes this call.
+    // immediately after another setSettings (e.g. the onboarding goal screen commits goalType +
+    // goalWeight + bodyWeight, then calls this).
     const handleUpdateBw = useCallback(async (updatedWeight: number): Promise<void> => {
         if (updatedWeight <= 0) return
 
         const dateKey = getDateKey(new Date())
 
         setBwProgressState(prev => ({ ...prev, [dateKey]: updatedWeight }))
-        setSettingsState(prev => {
-            const result = computeBwUpdate(updatedWeight, prev)
-            return result ? result.newSettings : prev
-        })
+        setSettingsState(prev => computeBwUpdate(updatedWeight, prev)?.newSettings ?? prev)
         markSettingsPersistDirty()  // settings row persisted via persistDirty effect
-
-        const prompt = computeBwUpdate(updatedWeight, settings)?.prompt ?? null
-        if (prompt) setPendingGoalPrompt(prompt)
+        setWeighInSeq(n => n + 1)   // goal prompt decided post-commit by the effect below
 
         // Weight-row persist stays fire-and-forget so callers never wait on the DB write.
         if (userID) {
@@ -117,7 +114,19 @@ export const SettingsProvider = ({ children }: PropsWithChildren) => {
                 reportPersistFailure('settings', e, { reload: reloadFromDisk, severity: 'high', onboarding: onboardingCompleteRef.current === false })
             })
         }
-    }, [userID, settings, markSettingsPersistDirty, reloadFromDisk])
+    }, [userID, markSettingsPersistDirty, reloadFromDisk])
+
+    // Raises the goal prompt after a weigh-in commits, reading the settings that were actually saved —
+    // including goal fields written by the same setSettings that preceded handleUpdateBw. Applies
+    // shouldPromptGoalReached (the same rule computeBwUpdate uses for its own prompt) to fresh state
+    // instead of the prompt computeBwUpdate itself returned. Keyed on the counter alone so it fires
+    // once per weigh-in: keying it on `settings` would also fire on cold-load hydration, prompting
+    // anyone already sitting at their goal on every app launch.
+    useEffect(() => {
+        if (weighInSeq === 0) return
+        if (shouldPromptGoalReached(settings)) setPendingGoalPrompt('goalReached')
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [weighInSeq])
 
     // Consented goal-prompt actions (issue 8): the only two intent changes the app may
     // apply on the user's behalf, each a single explicit tap.

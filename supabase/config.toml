@@ -1,0 +1,59 @@
+# Supabase CLI config. Only Edge Function deploys go through the CLI; the database
+# schema is still applied manually via lib/supabase/migrations/ in the SQL editor.
+#
+# Function source lives in lib/supabase/functions/ (colocated with its Deno tests, and
+# ignored by Jest/tsc) — the entrypoint fields below point the CLI there instead of the
+# default supabase/functions/ layout. The bundler follows relative imports, so fetchopenai,
+# fetchfooddb and revenuecatwebhook share one lib/supabase/functions/_shared/entitlement.ts
+# instead of a copy each.
+#
+# Slugs are all-lowercase on purpose: the CLI lowercases these config keys anyway, and
+# the client URLs (lib/openAI/openAI.ts, lib/foodDB/foodDB.ts,
+# context/AuthContext/functions/accountFunctions.tsx) match them exactly — slugs are
+# case-sensitive. The legacy camelCase functions (fetchOpenAI, fetchFoodDB,
+# deleteAccount) still serve installs shipped before those URLs went lowercase.
+#
+# Do NOT delete them once the next build is cut. app.json sets runtimeVersion.policy =
+# "appVersion", so an eas update only reaches installs whose binary was built at that same
+# app version — an install on any earlier version can never receive the lowercase URLs and
+# keeps calling camelCase until the user takes an App Store update. Deleting the camelCase
+# functions before then 404s photo analysis (fetchOpenAI), food search (fetchFoodDB) and
+# account deletion (deleteAccount) on every such install. Gate the delete on store adoption
+# of the first lowercase-calling build, not on a build being cut.
+#
+# The camelCase copies are also no longer redeployable from this repo: each index.ts now
+# imports ../_shared/entitlement.ts (which the dashboard editor cannot resolve) and the CLI
+# lowercases the config keys below, so a camelCase slug cannot be targeted. They are frozen
+# on whatever code they last received — a hotfix for old installs means shipping a build.
+#
+# Legacy revenuecatWebhook is different — no build calls it, RevenueCat does, and the
+# dashboard webhook URL already points at the lowercase slug, so that one can go now.
+#
+# Deploy all:  supabase functions deploy        (run from App/)
+# Deploy one:  supabase functions deploy revenuecatwebhook
+# Secrets:     supabase secrets set REVENUECAT_SECRET_API_KEY=... REVENUECAT_WEBHOOK_AUTH=...
+
+project_id = "PLATES"
+
+# verify_jwt is false on every function on purpose. fetchopenai, fetchfooddb and
+# deleteaccount validate the caller's token themselves via supabase.auth.getUser()
+# (the platform-level check uses the legacy JWT secret and 401s valid clients — see
+# the note atop fetchOpenAI/index.ts and fetchFoodDB/index.ts); revenuecatwebhook is
+# called by RevenueCat with the dashboard-configured Authorization header, which
+# handler.ts checks against the REVENUECAT_WEBHOOK_AUTH secret.
+
+[functions.fetchopenai]
+entrypoint = "../lib/supabase/functions/fetchOpenAI/index.ts"
+verify_jwt = false
+
+[functions.fetchfooddb]
+entrypoint = "../lib/supabase/functions/fetchFoodDB/index.ts"
+verify_jwt = false
+
+[functions.deleteaccount]
+entrypoint = "../lib/supabase/functions/deleteAccount/index.ts"
+verify_jwt = false
+
+[functions.revenuecatwebhook]
+entrypoint = "../lib/supabase/functions/revenuecatWebhook/index.ts"
+verify_jwt = false

@@ -1,3 +1,4 @@
+import EmptyStateCta from '@/components/NeutralComponents/EmptyStateCta'
 import Fab from '@/components/NeutralComponents/Fab'
 import DraggableList, { DraggableListRenderParams } from '@/components/WorkoutComponents/DraggableList'
 import Log from '@/components/WorkoutComponents/Log'
@@ -88,12 +89,15 @@ export default function ExerciseScreen() {
     return (
         <View style={styles.container}>
             {activeExercises.length === 0 ?
+                // The hero circle is the add button — same destination as the FAB's + below
                 <View style={styles.emptyContainer}>
-                    <View style={styles.emptyIconCircle}>
-                        <Dumbbell size={56} color={colors.workout} strokeWidth={2} />
-                    </View>
-                    <Text style={styles.emptyTitle}>No Exercises Yet</Text>
-                    <Text style={styles.emptySubtitle}>Tap the ⋮ button to add your first exercise and start logging your sets</Text>
+                    <EmptyStateCta
+                        Icon={Dumbbell}
+                        accent={colors.workout}
+                        title="No Exercises Yet"
+                        ctaLabel="Add your first exercise"
+                        onPress={() => router.push({ pathname: '/workoutScreens/addExerciseModal', params: { workoutId: workoutId } })}
+                    />
                 </View>
             :   <DraggableList data={activeExercises} renderItem={renderItem} keyExtractor={(item) => item.id} onDragEnd={handleDragEnd} ListHeaderComponent={listHeader} contentContainerStyle={{ paddingTop: 8 }} />}
             <Fab>
@@ -141,33 +145,6 @@ function makeStyles(colors: Colors) {
             alignItems: 'center',
             paddingHorizontal: 40,
             marginBottom: 120,
-        },
-        emptyIconCircle: {
-            width: 120,
-            height: 120,
-            borderRadius: 60,
-            backgroundColor: colors.surface,
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginBottom: 24,
-            borderWidth: 3,
-            borderColor: colors.workout,
-        },
-        emptyTitle: {
-            fontSize: 28,
-            color: colors.text,
-            marginBottom: 12,
-            textAlign: 'center',
-            letterSpacing: -0.5,
-            fontFamily: fonts.semibold,
-        },
-        emptySubtitle: {
-            fontSize: 16,
-            color: colors.labelMuted,
-            textAlign: 'center',
-            lineHeight: 24,
-            letterSpacing: 0.2,
-            fontFamily: fonts.regular,
         },
         hintRow: {
             flexDirection: 'row',

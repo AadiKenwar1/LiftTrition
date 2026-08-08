@@ -46,7 +46,7 @@ describe('askOpenAIVision', () => {
 
         expect(result).toBe(rawBody)
         expect(mockFetch).toHaveBeenCalledWith(
-            'https://test.supabase.co/functions/v1/fetchOpenAI',
+            'https://test.supabase.co/functions/v1/fetchopenai',
             expect.objectContaining({
                 method: 'POST',
                 headers: expect.objectContaining({ Authorization: 'Bearer test-token', 'Content-Type': 'application/json' }),
@@ -154,7 +154,7 @@ describe('cancellation (M8)', () => {
         await askOpenAIVision('data:image/jpeg;base64,abc', 'meal', undefined, controller.signal)
 
         expect(mockFetch).toHaveBeenCalledWith(
-            'https://test.supabase.co/functions/v1/fetchOpenAI',
+            'https://test.supabase.co/functions/v1/fetchopenai',
             expect.objectContaining({ signal: controller.signal }),
         )
     })
@@ -198,7 +198,7 @@ describe('askOpenAIText', () => {
 
         expect(result).toBe(rawBody)
         expect(mockFetch).toHaveBeenCalledWith(
-            'https://test.supabase.co/functions/v1/fetchOpenAI',
+            'https://test.supabase.co/functions/v1/fetchopenai',
             expect.objectContaining({ body: JSON.stringify({ type: 'text', foodName: 'grilled chicken' }) }),
         )
     })

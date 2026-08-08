@@ -1,4 +1,4 @@
-import { fonts, radius, useColorScheme, useColors, type Colors } from '@/context/ThemeContext'
+import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import {
     getCalibrationMessage,
     type DailyGoal,
@@ -16,9 +16,10 @@ import { StyleSheet, Text, View } from 'react-native'
  * NEXT session's suggestion rather than the set that was just beaten, and conflating the two is
  * the single most confusing thing this component can do.
  *
- * No fills or plates in any state — the only thing marking a hit is an accented line above the
- * label. A hit and a first-day preview show the same numbers for the same reason (the selected day
- * is settled), so they differ by that one line and nothing else.
+ * The set's colour follows its label — today's target in the workout ink, a next-session set in
+ * the label's muted grey — so green appears only on the GOAL HIT line. A hit and a first-day
+ * preview show the same numbers for the same reason (the selected day is settled), and differ
+ * only by that line.
  */
 
 /** Mirrors `IndicatorState` from the engine, which resolves which session to show. */
@@ -38,7 +39,6 @@ const CALIBRATION_LABEL: Record<ProgressionStatus, string> = {
 
 export default function ProgressIndicator({ status, goal, view, weightUnit }: ProgressIndicatorProps) {
     const colors = useColors()
-    const isDark = useColorScheme() === 'dark'
     const styles = useMemo(() => makeStyles(colors), [colors])
 
     if (!goal) {
@@ -50,23 +50,24 @@ export default function ProgressIndicator({ status, goal, view, weightUnit }: Pr
         )
     }
 
-    // A 10% overlay of a bright ink on near-black separates about as much as 17% of a deep ink on
-    // light slate, so light takes the higher alpha to keep the two themes reading equally.
-    const wash = (view === 'hit' ? colors.nutritionInk : colors.workoutInk) + (isDark ? '1A' : '2B')
+    // Colour follows the label: today's target takes the workout Ink (the readable-text
+    // counterpart of the accent — the neon fill falls below AA), while a next-session set, hit or
+    // preview, matches the label's muted grey so green is reserved for the GOAL HIT line.
+    const ink = view === 'today' ? colors.workoutInk : colors.labelMuted
 
     return (
         <View style={styles.wrap}>
             {view === 'hit' && <Text style={[styles.caps, styles.capsHit]}>GOAL HIT!</Text>}
             <Text style={styles.caps}>{view === 'today' ? "TODAY'S SUGGESTED SET" : 'NEXT SESSION SUGGESTED SET'}</Text>
-            <View style={[styles.numbersRow, { backgroundColor: wash }]}>
+            <View style={styles.numbersRow}>
                 {/* Rendered raw. Only the goal reaches this component, so a 0 could be a bodyweight
                     set or a zero-weight log, and a label naming either would sometimes be wrong. */}
-                <Text style={styles.value}>{goal.weight}</Text>
-                <Text style={styles.unit}>{weightUnit}</Text>
-                <Text style={styles.times}>×</Text>
-                <Text style={styles.value}>{goal.reps}</Text>
+                <Text style={[styles.value, { color: ink }]}>{goal.weight}</Text>
+                <Text style={[styles.unit, { color: ink }]}>{weightUnit}</Text>
+                <Text style={[styles.times, { color: ink }]}>×</Text>
+                <Text style={[styles.value, { color: ink }]}>{goal.reps}</Text>
                 {/* Always plural: the rep floor puts the lowest goal this can render at 3. */}
-                <Text style={styles.unit}>reps</Text>
+                <Text style={[styles.unit, { color: ink }]}>reps</Text>
             </View>
         </View>
     )
@@ -97,34 +98,26 @@ function makeStyles(colors: Colors) {
             textAlign: 'center',
             letterSpacing: -0.2,
         },
-        // The wash hugs the numbers rather than spanning the block, so it reads as a plate under the
-        // set rather than a banner. Padding is what gives it that shape — the row is otherwise bare.
         numbersRow: {
             flexDirection: 'row',
             alignItems: 'baseline',
             gap: 3,
-            paddingVertical: 5,
-            paddingHorizontal: 14,
-            borderRadius: radius.chip,
         },
-        // Sized to match logWeight/logReps in LogHistoryList so the suggestion and the sets it is
-        // measured against read at the same scale. Still extrabold, which is what separates a
-        // suggestion from a logged set now that the size no longer does.
+        // Colour is applied at the call site — the whole line takes the accent ink, so these carry
+        // size and weight only. Sized to match logWeight/logReps in LogHistoryList so the suggestion
+        // and the sets it is measured against read at the same scale.
         value: {
             fontFamily: fonts.extrabold,
             fontSize: 17,
             letterSpacing: -0.5,
-            color: colors.text,
         },
         unit: {
             fontFamily: fonts.medium,
             fontSize: 12,
-            color: colors.labelMuted,
         },
         times: {
             fontFamily: fonts.medium,
             fontSize: 16,
-            color: colors.textMuted,
             marginHorizontal: 1,
         },
     })

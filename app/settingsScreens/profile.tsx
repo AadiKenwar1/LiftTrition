@@ -1,5 +1,6 @@
 import EditHeightModal from '@/components/NeutralComponents/EditHeightModal'
 import EditMacroGoalModal, { type MacroGoalKind } from '@/components/NutritionComponents/EditMacroGoalModal'
+import LowCalorieWarning from '@/components/NutritionComponents/LowCalorieWarning'
 import { useAuth } from '@/context/AuthContext'
 import { forceSignOut } from '@/context/AuthContext/functions/accountFunctions'
 import { useBilling } from '@/context/BillingContext'
@@ -293,6 +294,11 @@ export default function ProfileScreen() {
                             </View>
                         ))}
                     </View>
+                    {/* The third hand-editable calorie surface, alongside onboarding plan.tsx and adjustNutrition3.
+                        Nothing clamps calorieGoal for adequacy any more — neither EditMacroGoalModal's validateMacro
+                        (finite and non-negative only) nor withRegeneratedTargets' weigh-in recalc — so this is the one
+                        place a sub-minimum target is visible permanently and has to say so. */}
+                    <LowCalorieWarning calories={settings.calorieGoal} gender={settings.gender} style={styles.warning} />
                 </View>
 
                 {/* Action Buttons */}
@@ -330,6 +336,7 @@ function makeStyles(colors: Colors) {
         infoValue: { fontSize: 15, color: colors.text, letterSpacing: -0.5, fontFamily: fonts.semibold },
         userIdText: { maxWidth: '60%', fontFamily: 'monospace' },
         divider: { height: StyleSheet.hairlineWidth, backgroundColor: colors.divider },
+        warning: { marginTop: 12 },
         actionSection: { marginTop: 0, gap: 12 },
         buttonDisabled: { opacity: 0.6 },
         signOutButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '100%', height: 56, backgroundColor: colors.surface, borderRadius: radius.cardLg, gap: 10, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.hairline },

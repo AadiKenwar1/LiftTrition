@@ -49,6 +49,7 @@ const GROUPS: { title: string; items: { label: string; route: string }[] }[] = [
             { label: 'Add Nutrition — Teaser (icon + gate)', route: '/devTest/addNutritionTeaser' },
             { label: 'Goal Reached — UI (Issue 8)', route: '/devTest/goalReached' },
             { label: 'Goal Reached — Logic Sim (Issue 8)', route: '/devTest/goalReachedSim' },
+            { label: 'Pace Flow — persona-seeded wizard copy', route: '/devTest/paceFlow' },
             { label: 'Edit Entry — Unified editor', route: '/devTest/editEntry' },
             { label: 'Rename Workout — Double-tap guard', route: '/devTest/renameModal' },
             { label: 'Color Hue Review', route: '/devTest/colorHue' },
@@ -59,6 +60,10 @@ const GROUPS: { title: string; items: { label: string; route: string }[] }[] = [
             { label: 'Food Row — Search preview', route: '/devTest/foodRow' },
             { label: 'Entry Rows — Brand subtitle', route: '/devTest/entryRow' },
         ],
+    },
+    {
+        title: 'Empty States',
+        items: [{ label: 'Empty-state CTA — "Add your first…" riffs', route: '/devTest/emptyStateCta' }],
     },
     {
         title: 'Progression',
@@ -75,10 +80,18 @@ const GROUPS: { title: string; items: { label: string; route: string }[] }[] = [
     {
         title: 'Onboarding',
         items: [
+            { label: '▶  Walk the V6 flow', route: '/devTest/onboardingFlow?version=v6' },
+            { label: '▶  Walk the V5 flow', route: '/devTest/onboardingFlow?version=v5' },
             { label: '▶  Walk the V4 flow', route: '/devTest/onboardingFlow?version=v4' },
             { label: '▶  Walk the V3 flow', route: '/devTest/onboardingFlow?version=v3' },
-            ...ONBOARDING_PAGES.map((p, i) => ({ label: p.label, route: `/devTest/onboardingPage?page=${i}` })),
+            // The rating step keeps its registry row (the V6 flow plays it from there) but lives in the
+            // Dev Hub under its own "Rating Screen" group below, so it's skipped here.
+            ...ONBOARDING_PAGES.map((p, i) => ({ label: p.label, route: `/devTest/onboardingPage?page=${i}` })).filter((_, i) => ONBOARDING_PAGES[i].key !== 'rating'),
         ],
+    },
+    {
+        title: 'Rating Screen',
+        items: [{ label: 'ratingScreen — versions', route: '/devTest/ratingScreen' }],
     },
     {
         title: 'Notifications',
@@ -86,7 +99,10 @@ const GROUPS: { title: string; items: { label: string; route: string }[] }[] = [
     },
     {
         title: 'Accessibility',
-        items: [{ label: 'Dynamic Type — clipping (M29)', route: '/devTest/dynamicType' }],
+        items: [
+            { label: 'Dynamic Type — clipping (M29)', route: '/devTest/dynamicType' },
+            { label: 'Accent Contrast — AA candidate set', route: '/devTest/accentContrast' },
+        ],
     },
 ]
 

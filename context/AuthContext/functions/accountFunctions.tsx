@@ -12,7 +12,7 @@ export async function deleteAccount(): Promise<void> {
         throw new Error('You must be signed in to delete your account.')
     }
 
-    const res = await fetch(`${ENV.SUPABASE_URL}/functions/v1/deleteAccount`, {
+    const res = await fetch(`${ENV.SUPABASE_URL}/functions/v1/deleteaccount`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${session.access_token}` },
     })

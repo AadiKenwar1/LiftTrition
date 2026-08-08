@@ -1,8 +1,8 @@
 {
     "expo": {
-        "name": "PLATES",
+        "name": "Plates",
         "slug": "App",
-        "version": "1.0.5",
+        "version": "1.0.7",
         "orientation": "portrait",
         "icon": "./assets/images/PlatesAppIcon.png",
         "scheme": "app",
@@ -63,7 +63,7 @@
             [
                 "expo-image-picker",
                 {
-                    "photosPermission": "Allow PLATES to access your photos to log meals from your library.",
+                    "photosPermission": "Allow Plates to access your photos to log meals from your library.",
                     "microphonePermission": false
                 }
             ],

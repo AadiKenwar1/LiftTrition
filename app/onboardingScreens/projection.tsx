@@ -1,17 +1,19 @@
 import GoalProjectionChart from '@/components/NutritionComponents/GoalProjectionChart'
 import OnboardingScaffold from '@/components/NeutralComponents/OnboardingScaffold'
 import { useSettings } from '@/context/SettingsContext'
+import { projectGoal } from '@/context/SettingsContext/functions/goalProjection'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
-import { weeksToGoal } from '@/lib/utils/goalMath'
-import { lbsToKg, weightUnitLabel } from '@/lib/utils/unitConversions'
+import { weightUnitLabel } from '@/lib/utils/unitConversions'
 import { onboardingStep } from '@/lib/utils/onboardingSteps'
 import { router } from 'expo-router'
 import { useMemo } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 
 /**
- * Onboarding — goal projection (review). Chart + week estimate read the real committed settings, so the
- * estimate is accurate (goalPace is stored lb/week → converted to the display unit for the weeks math).
+ * Onboarding — goal projection (review). Weeks and date derive from the committed calorie target via
+ * projectGoal — never from the stored slider pace — so the estimate follows plan-screen hand-edits and
+ * whatever target the arithmetic produced (nothing clamps it for adequacy); a plan with no
+ * deficit/surplus renders "—" instead of a date.
  */
 export default function OnboardingProjection() {
     const colors = useColors()
@@ -19,25 +21,22 @@ export default function OnboardingProjection() {
     const { settings } = useSettings()
     const { current, total } = onboardingStep('projection', settings.goalType)
 
-    const metric = settings.unitSystem === 'metric'
     const unit = weightUnitLabel(settings.unitSystem)
     const variant = settings.goalType // 'lose' | 'gain' | 'maintain'
     const currentWeight = settings.bodyWeight
     const goalWeight = settings.goalWeight
-    const paceDisplay = metric ? lbsToKg(settings.goalPace) : settings.goalPace
-    const weeks = weeksToGoal(variant, currentWeight, goalWeight, paceDisplay)
-    const targetDate = useMemo(() => {
-        const d = new Date()
-        d.setDate(d.getDate() + weeks * 7)
-        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-    }, [weeks])
+    const { weeks, targetDate } = projectGoal(settings, settings.calorieGoal)
 
     return (
         <OnboardingScaffold
             step={current}
             total={total}
-            title={variant === 'maintain' ? 'Same weight, stronger body' : `You'll reach ${goalWeight} ${unit}`}
-            subtitle={variant === 'maintain' ? `Eating at maintenance holds you at ${currentWeight} ${unit} while training drives your strength up — that's recomp.` : `by ${targetDate} — about ${weeks} weeks at your pace.`}
+            title={variant === 'maintain' ? 'Same weight, stronger body' : weeks != null ? `You'll reach ${goalWeight} ${unit}` : `About your ${goalWeight} ${unit} goal`}
+            subtitle={
+                variant === 'maintain' ? `Eating at maintenance holds you at ${currentWeight} ${unit} while training drives your strength up. That's recomp.`
+                : weeks != null ? `About ${weeks} weeks at your pace. That puts you there by ${targetDate}.`
+                : `At these calories you won't ${variant === 'gain' ? 'gain' : 'lose'} weight — the plan sits ${variant === 'gain' ? 'at or below' : 'at or above'} your maintenance.`
+            }
             accent={colors.text}
             onBack={() => router.back()}
             onNext={() => router.push('/onboardingScreens/paywall')}
@@ -65,7 +64,7 @@ export default function OnboardingProjection() {
                             <Text style={styles.statLabel}>to goal</Text>
                         </View>
                         <View style={styles.statCard}>
-                            <Text style={[styles.statValue, { color: colors.nutrition }]}>{weeks} wk</Text>
+                            <Text style={[styles.statValue, { color: colors.nutrition }]}>{weeks != null ? `${weeks} wk` : '—'}</Text>
                             <Text style={styles.statLabel}>estimated</Text>
                         </View>
                     </>

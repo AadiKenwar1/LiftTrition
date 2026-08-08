@@ -72,7 +72,7 @@ function makeStyles(colors: Colors) {
         topGradient: { position: 'absolute', top: 0, left: 0, right: 0, height: 280 },
         scroll: { flex: 1 },
         scrollContent: { flexGrow: 1, width: '100%', alignItems: 'center', paddingHorizontal: 25, justifyContent: 'center' },
-        iconCircle: { width: 144, height: 144, borderRadius: 72, backgroundColor: colors.surface, justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: colors.border, marginBottom: 28 },
+        iconCircle: { width: 144, height: 144, borderRadius: 72, backgroundColor: colors.iconCircleBg, justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: colors.border, marginBottom: 28 },
         headlineText: { fontFamily: fonts.extrabold, fontSize: 36, color: colors.text, letterSpacing: -1, marginBottom: 14, lineHeight: 42, textAlign: 'center' },
         purposeText: { fontFamily: fonts.regular, fontSize: 15, color: colors.textSecondary, lineHeight: 23, letterSpacing: 0.1, marginBottom: 32, textAlign: 'center', paddingHorizontal: 8 },
         stepsRow: { flexDirection: 'row', width: '100%', gap: 10, marginBottom: 24 },

@@ -1,4 +1,4 @@
-import { fonts, radius, useColors, useColorScheme, type Colors } from '@/context/ThemeContext'
+import { fonts, radius, useColors, useColorScheme, withAlpha, type Colors } from '@/context/ThemeContext'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Dumbbell, Nut } from 'lucide-react-native'
 import React from 'react'
@@ -39,15 +39,6 @@ function getModes(colors: Colors): ModeMeta[] {
         { isLift: true, label: 'Workout', Icon: Dumbbell, gradient: colors.workoutGradient, accent: colors.workout, rotate: true },
         { isLift: false, label: 'Nutrition', Icon: Nut, gradient: colors.nutritionGradient, accent: colors.nutrition, rotate: false },
     ]
-}
-
-// Mix a #RRGGBB hex with an alpha channel (for soft accent tints).
-function withAlpha(hex: string, alpha: number): string {
-    const h = hex.replace('#', '')
-    const r = parseInt(h.slice(0, 2), 16)
-    const g = parseInt(h.slice(2, 4), 16)
-    const b = parseInt(h.slice(4, 6), 16)
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`
 }
 
 // Linear blend between two #RRGGBB hexes (t=0 → a, t=1 → b).

@@ -11,12 +11,16 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-nati
  */
 const ACCENT = '#22C922'
 
+// Buckets spread over the 0.2–2.0 track (2 lb/week is the shipped PACE_CEILING) so every label stays
+// reachable — the old 2.5 "Extreme" step sat above the cap and could never be selected.
+const PACE_MAX = 2.0
+
 const getPaceLabel = (value: number) => {
     if (value < 0.5) return 'Very Slow'
-    if (value < 1.0) return 'Slow'
-    if (value < 1.5) return 'Moderate'
-    if (value < 2.0) return 'Fast'
-    if (value < 2.5) return 'Very Fast'
+    if (value < 0.8) return 'Slow'
+    if (value < 1.1) return 'Moderate'
+    if (value < 1.4) return 'Fast'
+    if (value < 1.7) return 'Very Fast'
     return 'Extreme'
 }
 
@@ -49,13 +53,13 @@ export default function PaceV1() {
 
                     <View style={styles.sliderRow}>
                         <Turtle size={24} color="#666" strokeWidth={2} />
-                        <Slider style={styles.slider} minimumValue={0.2} maximumValue={3.0} step={0.1} value={goalPace} onValueChange={setGoalPace} minimumTrackTintColor={ACCENT} maximumTrackTintColor="#333" thumbTintColor={ACCENT} />
+                        <Slider style={styles.slider} minimumValue={0.2} maximumValue={PACE_MAX} step={0.1} value={goalPace} onValueChange={setGoalPace} minimumTrackTintColor={ACCENT} maximumTrackTintColor="#333" thumbTintColor={ACCENT} />
                         <Rabbit size={24} color="#666" strokeWidth={2} />
                     </View>
 
                     <View style={styles.rangeLabels}>
                         <Text style={styles.rangeLabelText}>0.2</Text>
-                        <Text style={styles.rangeLabelText}>3.0</Text>
+                        <Text style={styles.rangeLabelText}>{PACE_MAX.toFixed(1)}</Text>
                     </View>
                 </View>
             </ScrollView>

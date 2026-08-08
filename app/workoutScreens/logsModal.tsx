@@ -8,7 +8,7 @@ import { useWorkout } from '@/context/WorkoutContext'
 import { getIndicatorState, type ProgressionOptions } from '@/context/WorkoutContext/functions/progressionFunctions'
 import { Log } from '@/context/WorkoutContext/types'
 import { useToday } from '@/lib/hooks/useToday'
-import { formatDate, getDateKey, isDateAfterToday, sortByDateDesc } from '@/lib/utils/dateHelper'
+import { formatDate, getDateKey, isDateAfterToday, parseDateKey, sortByDateDesc } from '@/lib/utils/dateHelper'
 import { parseNumericInput } from '@/lib/utils/number'
 import { weightUnitLabel } from '@/lib/utils/unitConversions'
 import { useScreenBottomPad } from '@/lib/hooks/useScreenBottomPad'
@@ -129,10 +129,12 @@ export default function LogsModal() {
     )
 
     // Which set to show and whether it belongs to today or the next session — resolved in one place
-    // by the engine, so the view never has to re-derive it.
+    // by the engine, so the view never has to re-derive it. Always evaluated for today, never for
+    // selectedLogDate: backdating a log must not re-aim the indicator at the past day, which swapped
+    // the bar to old history and fired a goal-hit for a day the user was merely backfilling.
     const indicator = useMemo(
-        () => getIndicatorState(logs, exerciseId, selectedLogDate, progressionOptions),
-        [logs, exerciseId, selectedLogDate, progressionOptions]
+        () => getIndicatorState(logs, exerciseId, parseDateKey(todayKey), progressionOptions),
+        [logs, exerciseId, todayKey, progressionOptions]
     )
 
     return (

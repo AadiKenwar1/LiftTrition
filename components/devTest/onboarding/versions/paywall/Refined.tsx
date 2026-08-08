@@ -143,7 +143,7 @@ function makeStyles(colors: Colors) {
         topGradient: { position: 'absolute', top: 0, left: 0, right: 0, height: 220 },
         scroll: { flex: 1 },
         scrollContent: { alignItems: 'center', paddingBottom: 16 },
-        iconCircle: { width: 120, height: 120, borderRadius: 60, backgroundColor: colors.surface, justifyContent: 'center', alignItems: 'center', borderWidth: 2, marginBottom: 12 },
+        iconCircle: { width: 120, height: 120, borderRadius: 60, backgroundColor: colors.iconCircleBg, justifyContent: 'center', alignItems: 'center', borderWidth: 2, marginBottom: 12 },
         titleText: { fontFamily: fonts.extrabold, fontSize: 26, color: colors.text, letterSpacing: -0.5, marginBottom: 4, textAlign: 'center' },
         subtitleText: { fontFamily: fonts.regular, fontSize: 14, color: colors.textSecondary, textAlign: 'center', lineHeight: 20, letterSpacing: 0.2, marginBottom: 16, paddingHorizontal: 8 },
         planCard: { width: '100%', backgroundColor: colors.surface, borderRadius: radius.cardLg, paddingHorizontal: 16, paddingVertical: 12, borderWidth: StyleSheet.hairlineWidth, borderColor: colors.hairline, marginBottom: 14 },

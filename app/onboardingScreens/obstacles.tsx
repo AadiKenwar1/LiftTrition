@@ -25,7 +25,7 @@ export default function OnboardingObstacles() {
     const toggleNone = () => setSelected((s) => (s.includes('none') ? [] : ['none']))
 
     return (
-        <OnboardingScaffold step={current} total={total} title="What's held you back before?" subtitle="Pick anything that fits — we'll tailor your plan to get past it." nextDisabled={selected.length === 0} onBack={() => router.back()} onNext={() => router.push('/onboardingScreens/aboutYou')}>
+        <OnboardingScaffold step={current} total={total} title="What's held you back before?" subtitle="Pick anything that sounds familiar." nextDisabled={selected.length === 0} onBack={() => router.back()} onNext={() => router.push('/onboardingScreens/activity')}>
             <View style={{ gap: 12 }}>
                 {OBSTACLES.map((o, i) => (
                     <OptionCard key={o.id} index={i} icon={o.icon} label={o.label} accent={o.domain === 'workout' ? colors.workout : colors.nutrition} multiSelect selected={selected.includes(o.id)} onPress={() => toggle(o.id)} />

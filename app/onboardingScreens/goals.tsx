@@ -11,7 +11,7 @@ import { BicepsFlexed, Dumbbell, HeartPulse, Target, TrendingDown } from 'lucide
 import { useState } from 'react'
 import { View } from 'react-native'
 
-/** Onboarding — goals (flavor, not persisted). Domain color reveals on selection. Entry screen (no Back). */
+/** Onboarding — goals (flavor, not persisted; the subtitle's claim is aspirational). Domain color reveals on selection. Entry screen (no Back). */
 const GOALS = [
     { id: 'losefat', icon: TrendingDown, label: 'Lose fat', domain: 'nutrition' as const },
     { id: 'muscle', icon: BicepsFlexed, label: 'Build muscle', domain: 'workout' as const },
@@ -32,7 +32,7 @@ export default function OnboardingGoals() {
     const handleSignOut = () => confirmSignOut({ loading: signOutLoading, setLoading: setSignOutLoading, signOut, forceSignOut })
 
     return (
-        <OnboardingScaffold step={current} total={total} title="What are your goals?" subtitle="Pick all that apply — we'll build your whole plan around them." nextDisabled={selected.length === 0} onNext={() => router.push('/onboardingScreens/obstacles')} onSignOut={handleSignOut}>
+        <OnboardingScaffold step={current} total={total} title="What are your goals?" subtitle="Pick all that apply. We build your plan around them." nextDisabled={selected.length === 0} onNext={() => router.push('/onboardingScreens/obstacles')} onSignOut={handleSignOut}>
             <View style={{ gap: 12 }}>
                 {GOALS.map((g, i) => (
                     <OptionCard key={g.id} index={i} icon={g.icon} label={g.label} accent={g.domain === 'workout' ? colors.workout : colors.nutrition} multiSelect selected={selected.includes(g.id)} onPress={() => toggle(g.id)} />
