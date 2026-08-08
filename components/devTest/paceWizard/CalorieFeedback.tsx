@@ -21,7 +21,7 @@ type Props = {
     calories: number
     maintenance: number
     goalType: Settings['goalType']
-    /** This body's protein + fat + 50 g carbs cost — devFloorCalories at the caller's basis weight. */
+    /** This body's protein + fat cost — devFloorCalories at the caller's basis weight. */
     floorCalories: number
     /** The day's carb grams, when the caller has them; drives the 130 g warning. */
     carbGrams?: number

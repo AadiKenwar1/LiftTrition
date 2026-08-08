@@ -15,7 +15,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated'
 /**
  * Dev duplicate of app/settingsScreens/adjustNutrition/adjustNutrition2.tsx — see the step-1 copy's docblock
  * for the why and the sync rule. Deltas beyond the route target: the pace prototypes — a Cut slider capped
- * at devMaxPace (no position whose plan can't pay for protein, fat and 50 g of carbs exists), the initial
+ * at devMaxPace (no position whose plan can't pay for protein and fat exists), the initial
  * thumb clamped into that range, the live kcal readout and warnings under the slider fed by devCalorieTarget
  * and devSplitMacros, and a note naming the rule so a Cut user is told why the track ends where it does
  * instead of inferring it. The cap differs per body on purpose — it is the nutrition floor speaking, not a

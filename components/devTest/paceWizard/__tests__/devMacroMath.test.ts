@@ -41,23 +41,24 @@ function makeSettings(o: Partial<Settings> = {}): Settings {
 }
 
 describe('the burn and cap PaceFlowLauncher prints per persona', () => {
-    // cap = floor₀.₁((maintenance − (protein·4 + fat·9 + 200)) / 500) clamped to [0.1, 2.0], protein and
-    // fat at the cut rates (1.1 / 0.30 g per lb) on the BMI-30-capped basis. No launcher body reaches the
-    // BMI ceiling, so every basis here is the scale weight.
+    // cap = floor₀.₁((maintenance − (protein·4 + fat·9)) / 500) clamped to [0.1, 2.0], protein and fat at
+    // the cut rates (1.1 / 0.30 g per lb) on the BMI-30-capped basis. The floor is exactly what those two
+    // cost and carries no carb buffer, so the cap is the point past which carbs would go negative. No
+    // launcher body reaches the BMI ceiling, so every basis here is the scale weight.
     const personas = [
         { key: 'activeM150', gender: 'male' as const, age: 18, height: 69, bodyWeight: 150, activityLevel: 'active' as const, burn: 2917, cap: 2.0 },
-        { key: 'sedentaryF140', gender: 'female' as const, age: 18, height: 64, bodyWeight: 140, activityLevel: 'sedentary' as const, burn: 1680, cap: 0.9 },
+        { key: 'sedentaryF140', gender: 'female' as const, age: 18, height: 64, bodyWeight: 140, activityLevel: 'sedentary' as const, burn: 1680, cap: 1.3 },
         { key: 'moderateM170', gender: 'male' as const, age: 20, height: 71, bodyWeight: 170, activityLevel: 'moderate' as const, burn: 2795, cap: 2.0 },
-        { key: 'sedentaryM190', gender: 'male' as const, age: 22, height: 71, bodyWeight: 190, activityLevel: 'sedentary' as const, burn: 2261, cap: 1.4 },
+        { key: 'sedentaryM190', gender: 'male' as const, age: 22, height: 71, bodyWeight: 190, activityLevel: 'sedentary' as const, burn: 2261, cap: 1.8 },
         { key: 'gymRatM230', gender: 'male' as const, age: 25, height: 74, bodyWeight: 230, activityLevel: 'gymrat' as const, burn: 3986, cap: 2.0 },
-        { key: 'lightF120', gender: 'female' as const, age: 25, height: 62, bodyWeight: 120, activityLevel: 'light' as const, burn: 1709, cap: 1.3 },
-        { key: 'lightF170', gender: 'female' as const, age: 30, height: 66, bodyWeight: 170, activityLevel: 'light' as const, burn: 2073, cap: 1.3 },
-        { key: 'sedentaryF150', gender: 'female' as const, age: 30, height: 64, bodyWeight: 150, activityLevel: 'sedentary' as const, burn: 1662, cap: 0.7 },
+        { key: 'lightF120', gender: 'female' as const, age: 25, height: 62, bodyWeight: 120, activityLevel: 'light' as const, burn: 1709, cap: 1.7 },
+        { key: 'lightF170', gender: 'female' as const, age: 30, height: 66, bodyWeight: 170, activityLevel: 'light' as const, burn: 2073, cap: 1.7 },
+        { key: 'sedentaryF150', gender: 'female' as const, age: 30, height: 64, bodyWeight: 150, activityLevel: 'sedentary' as const, burn: 1662, cap: 1.1 },
         { key: 'moderateM200', gender: 'male' as const, age: 40, height: 70, bodyWeight: 200, activityLevel: 'moderate' as const, burn: 2826, cap: 2.0 },
-        { key: 'sedentaryM200', gender: 'male' as const, age: 40, height: 70, bodyWeight: 200, activityLevel: 'sedentary' as const, burn: 2188, cap: 1.1 },
-        { key: 'sedentaryF115', gender: 'female' as const, age: 45, height: 60, bodyWeight: 115, activityLevel: 'sedentary' as const, burn: 1306, cap: 0.5 },
-        { key: 'sedentaryM170', gender: 'male' as const, age: 55, height: 68, bodyWeight: 170, activityLevel: 'sedentary' as const, burn: 1897, cap: 0.9 },
-        { key: 'sedentaryF90', gender: 'female' as const, age: 70, height: 58, bodyWeight: 90, activityLevel: 'sedentary' as const, burn: 982, cap: 0.2 },
+        { key: 'sedentaryM200', gender: 'male' as const, age: 40, height: 70, bodyWeight: 200, activityLevel: 'sedentary' as const, burn: 2188, cap: 1.5 },
+        { key: 'sedentaryF115', gender: 'female' as const, age: 45, height: 60, bodyWeight: 115, activityLevel: 'sedentary' as const, burn: 1306, cap: 0.9 },
+        { key: 'sedentaryM170', gender: 'male' as const, age: 55, height: 68, bodyWeight: 170, activityLevel: 'sedentary' as const, burn: 1897, cap: 1.3 },
+        { key: 'sedentaryF90', gender: 'female' as const, age: 70, height: 58, bodyWeight: 90, activityLevel: 'sedentary' as const, burn: 982, cap: 0.6 },
     ]
 
     test.each(personas)('$key burns ≈$burn kcal and caps at $cap lb/wk', ({ gender, age, height, bodyWeight, activityLevel, burn, cap }) => {
@@ -66,23 +67,25 @@ describe('the burn and cap PaceFlowLauncher prints per persona', () => {
         expect(devMaxPace(s)).toBe(cap)
     })
 
-    test('a cut seeded at the ceiling still lands every persona at or above 50 g of carbs', () => {
+    test('a cut seeded at the ceiling still lands every persona at or above its own nutrition floor', () => {
         // The cap's whole contract: the launcher's Cut chip seeds 2.0, the clamp pulls it to each body's
-        // cap, and the carbs the split hands back can never dip under the buffer the cap priced in.
+        // cap, and the target that comes back still pays for protein and fat — which is the same statement
+        // as the carbs the split hands back never reaching the Math.max(0, …) clamp.
         for (const { gender, age, height, bodyWeight, activityLevel } of personas) {
             const s = makeSettings({ gender, birthDate: birthDateForAge(age), height, bodyWeight, activityLevel, goalType: 'lose', goalWeight: bodyWeight - 20, goalPace: 2 })
             const { target } = devCalorieTarget(s, true)
-            expect(devSplitMacros('lose', target, basisWeightKg(s, true)).carbGrams).toBeGreaterThanOrEqual(MIN_CARBS_G)
+            expect(target).toBeGreaterThanOrEqual(devFloorCalories('lose', basisWeightKg(s, true)))
         }
     })
 
-    test('the smallest body: cap 0.2 gives 882 kcal and a 99/27/61 split', () => {
-        // 90 lb, 4'10", 70, female, sedentary — burn 981.6. Floor: 99 g protein (396) + 27 g fat (243) +
-        // 200 = 839; spare 142.6 → 0.2. Target 981.6 − 100 = 882; carbs (882 − 396 − 243) / 4 = 60.75 → 61.
+    test('the smallest body: cap 0.6 gives 682 kcal and a 99/27/11 split', () => {
+        // 90 lb, 4'10", 70, female, sedentary — burn 981.6. Floor: 99 g protein (396) + 27 g fat (243) =
+        // 639; spare 342.6 → 0.6. Target 981.6 − 300 = 682; carbs (682 − 396 − 243) / 4 = 10.75 → 11 — the
+        // keto-low day the cap prices, and the figure the launcher's row prints.
         const s = makeSettings({ gender: 'female', birthDate: birthDateForAge(70), height: 58, bodyWeight: 90, activityLevel: 'sedentary', goalType: 'lose', goalWeight: 80, goalPace: 2 })
         const { target } = devCalorieTarget(s, true)
-        expect(target).toBe(882)
-        expect(devSplitMacros('lose', target, basisWeightKg(s, true))).toEqual({ proteinGrams: 99, fatGrams: 27, carbGrams: 61 })
+        expect(target).toBe(682)
+        expect(devSplitMacros('lose', target, basisWeightKg(s, true))).toEqual({ proteinGrams: 99, fatGrams: 27, carbGrams: 11 })
     })
 })
 
@@ -120,12 +123,14 @@ describe('a maintenance below the recommended daily minimum', () => {
         expect(devCalorieTarget(tiny, true).target).toBeLessThan(LOW_CALORIE_THRESHOLDS.female)
     })
 
-    test('the pace cap binds before the 800 line ever could', () => {
-        // Cut floor for 92 lb: 101 g protein (404) + 28 g fat (252) + 200 = 856; spare 167.5 → cap 0.3.
-        // A requested 0.5 clamps to 0.3, so the target is 1,023.5 − 150 = 874 — above 856, above 800,
-        // and the 800 fence never spoke.
-        expect(devMaxPace({ ...tiny, goalType: 'lose' })).toBe(0.3)
-        expect(devCalorieTarget({ ...tiny, goalType: 'lose', goalPace: 0.5 }, true).target).toBe(874)
+    test('the nutrition floor is the only thing that binds — a sub-800 target is stated, not clamped', () => {
+        // Cut floor for 92 lb: 101 g protein (404) + 28 g fat (252) = 656; spare 367.5 → cap 0.7. At the
+        // cap the target is 1,023.5 − 350 = 674 — clears 656 and sits well under 800, which is the design:
+        // the smallest bodies CAN reach a sub-800 plan and are told so in red rather than the number
+        // quietly moving. A requested 0.5 is under the cap, so nothing clamps it: 1,023.5 − 250 = 774.
+        expect(devMaxPace({ ...tiny, goalType: 'lose' })).toBe(0.7)
+        expect(devCalorieTarget({ ...tiny, goalType: 'lose', goalPace: 2 }, true).target).toBe(674)
+        expect(devCalorieTarget({ ...tiny, goalType: 'lose', goalPace: 0.5 }, true).target).toBe(774)
     })
 
     test('gain keeps its 1 kcal fence and the interface ceiling', () => {
@@ -230,20 +235,20 @@ describe('the priority split — protein, fat, carbs as the remainder', () => {
 })
 
 describe('the nutrition floor and the cap it prices', () => {
-    test('the floor is protein plus fat plus the 50 g carb buffer', () => {
-        // 68 kg cutting: 165 × 4 + 45 × 9 + 200 = 1,265. 200 lb of basis cutting: 220 × 4 + 60 × 9 +
-        // 200 = 1,620 — the moderateM200 persona's floor.
-        expect(devFloorCalories('lose', 68)).toBe(1265)
-        expect(devFloorCalories('lose', 200 / 2.20462)).toBe(1620)
+    test('the floor is exactly what protein and fat cost — no carb buffer sits on top', () => {
+        // 68 kg cutting: 165 × 4 + 45 × 9 = 1,065. 200 lb of basis cutting: 220 × 4 + 60 × 9 = 1,420 —
+        // the sedentaryM200 persona's floor.
+        expect(devFloorCalories('lose', 68)).toBe(1065)
+        expect(devFloorCalories('lose', 200 / 2.20462)).toBe(1420)
     })
 
     test('a target at the cap clears the floor; one step faster would not', () => {
-        // sedentaryM200: burn 2,188.3, floor 1,620 → spare 568.3 → cap 1.1. At 1.1 the target is 1,638
-        // (≥ 1,620); at 1.2 it would be 1,588 — under the floor, which is why 1.2 does not exist.
+        // sedentaryM200: burn 2,188.1, floor 1,420 → spare 768.1 → cap 1.5. At 1.5 the target is 1,438
+        // (≥ 1,420); at 1.6 it would be 1,388 — under the floor, which is why 1.6 does not exist.
         const s = makeSettings({ gender: 'male', birthDate: birthDateForAge(40), height: 70, bodyWeight: 200, activityLevel: 'sedentary', goalType: 'lose', goalWeight: 180, goalPace: 2 })
-        expect(devMaxPace(s)).toBe(1.1)
+        expect(devMaxPace(s)).toBe(1.5)
         const { target } = devCalorieTarget(s, true)
-        expect(target).toBe(1638)
+        expect(target).toBe(1438)
         expect(target).toBeGreaterThanOrEqual(devFloorCalories('lose', basisWeightKg(s, true)))
     })
 })

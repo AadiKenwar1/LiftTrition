@@ -24,6 +24,11 @@ It's iOS-only right now (Apple Sign-In is the only auth method), free to use for
 logging, with a **14-day free trial** and then a subscription for the AI and food-database
 features.
 
+| | |
+|:--:|:--:|
+| <img src="assets/images/mockups/Mockups-01.png" width="220" alt="Workouts list in workout mode" /> | <img src="assets/images/mockups/Mockups-02.png" width="220" alt="Nutrition tab with calorie ring and logged meals" /> |
+| The **Log** tab in workout mode — your workouts and their exercise counts. | The same tab in nutrition mode — calorie ring, macro bars, and the day's meals. |
+
 ---
 
 ## The shape of the app
@@ -89,6 +94,12 @@ The framing is *"beat last session,"* not coaching. Briefly:
 6. **Nothing is persisted.** It's recomputed from log history every time, so editing or
    back-filling a log recalculates cleanly and no stored goal can drift from reality.
 
+<img src="assets/images/mockups/Mockups-05.png" width="300" alt="Exercise list and the log sheet showing today's suggested set" />
+
+The log sheet on the right is rule 2 in the wild: last session was 225 × 8, so today's
+suggestion is **225 × 9** — one more rep at the same weight, with the full set history
+underneath it.
+
 There's a matching grader that decides whether the set you just logged beat the bar, with four
 ways to pass — it credits a heavier bar at one rep fewer, because estimated-max math scores
 200×7 as 0.13% short of 195×8 and no human perceives that as a failure.
@@ -107,6 +118,12 @@ Four ways to log. **Only manual entry is free**; the other three are Pro:
 | **Camera** | Pro | Photograph the food (see the three scan modes below) |
 | **Food database** | Pro | Search FatSecret for real per-serving data |
 | Saved meals | free | Re-log anything you've saved |
+
+<img src="assets/images/mockups/Mockups-06.png" width="300" alt="Camera capture and the AI text entry sheet" />
+
+The two AI paths: point the camera at the plate, or describe the meal and tap **Generate
+macros**. Either way the result lands in the same editable fields — every AI number is a
+starting point the user can tap and change before saving.
 
 **Three camera scan modes**, picked by the user in a segmented control:
 - `meal` — identify and count the visible foods on a plate
@@ -144,6 +161,14 @@ Two cards per mode, both Skia-rendered via `victory-native`:
 |---|---|---|
 | Workout | Estimated 1RM for a chosen exercise, last **7 / 14 / 21 logged lifts** | Sets per day, one week at a time |
 | Nutrition | Body weight over **1M / 3M / 6M / 1Y** with a goal line | Calories / protein / carbs / fats by week |
+
+| | |
+|:--:|:--:|
+| <img src="assets/images/mockups/Mockups-03.png" width="220" alt="Progress tab in workout mode: 1RM line chart and sets-per-day bars" /> | <img src="assets/images/mockups/Mockups-04.png" width="220" alt="Progress tab in nutrition mode: body weight line chart and calorie bars" /> |
+| Workout mode — estimated 1RM over the last 14 lifts, sets per day, and the trained-days banner. | Nutrition mode — body weight against the goal line, daily calories, and the streak banner. |
+
+> The marketing header on the first shot reads "Set Volume," but the chart underneath counts
+> **sets**, not volume — see [Not actually surfaced](#not-actually-surfaced).
 
 - **Scrub any chart** — press and drag to get a guideline, a tracking dot, and a readout pill
   with the exact value.
@@ -397,11 +422,6 @@ bar. [tests/README.md](tests/README.md) has the protocols and defines fourteen d
 areas, of which **five are written** so far.
 
 CI runs typecheck as a **blocking** gate, tests as advisory, plus CodeQL.
-
-**Currently red:** typecheck and `test:ci` both fail on
-`components/devTest/paceWizard/__tests__/devMacroMath.test.ts` — 14 cases plus a
-`Cannot find name 'MIN_CARBS_G'` type error, because the prototype dropped its carb buffer and
-the test wasn't updated. Dev-only code, but typecheck blocks merges.
 
 ---
 
