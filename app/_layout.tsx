@@ -207,7 +207,8 @@ function StackLayout() {
                     <Stack.Screen name="settingsScreens/adjustNutrition/adjustNutrition4" options={{ headerShown: true, title: '', headerBackTitle: 'Back', headerShadowVisible: false }} />
                     <Stack.Screen name="settingsScreens/termsAndPrivacy" options={{ headerShown: true, title: 'Terms & Privacy', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="settingsScreens/support" options={{ headerShown: true, title: 'Support', headerBackTitle: 'Back' }} />
-                    <Stack.Screen name="settingsScreens/howItWorks" options={{ headerShown: true, title: 'How It Works', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="settingsScreens/howNutritionIsCalculated" options={{ headerShown: true, title: 'Nutrition Math', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="settingsScreens/howGraphsWork" options={{ headerShown: true, title: 'How Graphs Work', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="settingsScreens/notifications" options={{ headerShown: true, title: 'Notifications', headerBackTitle: 'Back' }} />
                 </Stack.Protected>
 
@@ -228,6 +229,8 @@ function StackLayout() {
                     <Stack.Screen name="devTest/modeHeader" options={{ headerShown: true, title: 'Mode Headers', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/modeHeaderLive" options={{ headerShown: false, gestureEnabled: true }} />
                     <Stack.Screen name="devTest/colorHue" options={{ headerShown: true, title: 'Color Hue Review', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="devTest/infoPageStyle" options={{ headerShown: true, title: 'Info Page Styles', headerBackTitle: 'Back' }} />
+                    <Stack.Screen name="devTest/planInfoPopup" options={{ headerShown: true, title: 'Plan Info Popup', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/numberParsing" options={{ headerShown: true, title: 'Number Parsing', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/editEntry" options={{ headerShown: true, title: 'Edit Entry — Test', headerBackTitle: 'Back' }} />
                     <Stack.Screen name="devTest/renameModal" options={{ headerShown: true, title: 'Rename — Double-tap', headerBackTitle: 'Back' }} />

@@ -115,7 +115,7 @@ Four ways to log. **Only manual entry is free**; the other three are Pro:
 |---|---|---|
 | Manual | free | Type a name and the macros |
 | **AI text** | Pro | Describe a meal in plain text — "2 eggs, toast, orange juice" — and the model fills in the macros |
-| **Camera** | Pro | Photograph the food (see the three scan modes below) |
+| **Camera** | Pro | Photograph the food (see the two scan modes below) |
 | **Food database** | Pro | Search FatSecret for real per-serving data |
 | Saved meals | free | Re-log anything you've saved |
 
@@ -125,15 +125,21 @@ The two AI paths: point the camera at the plate, or describe the meal and tap **
 macros**. Either way the result lands in the same editable fields — every AI number is a
 starting point the user can tap and change before saving.
 
-**Three camera scan modes**, picked by the user in a segmented control:
-- `meal` — identify and count the visible foods on a plate
-- `item` — identify a packaged/branded product
+**Two camera scan modes**, picked by the user in a segmented control:
+- `meal` — any food photo: a plated meal or a packaged/branded product
 - `label` — read the printed Nutrition Facts panel directly
 
-*Unique logic:* when vision spots a **branded** item, the app re-queries FatSecret for that
-product and swaps in the real database macros over the model's guess. Capped at 5 items and 15
-seconds, skipped entirely in `label` mode (the label already *is* ground truth), and silently
-falls back to the vision estimate on any miss.
+Meal and item used to be separate tabs sending the same prompt, differing only in image
+handling. Making the user choose was a silent failure mode — a product shot on the default
+tab came through smaller and softer — so they merged into one Food tab. The edge function
+still accepts `item` as an alias of `meal` for app builds already in the wild.
+
+*Note:* a branded item's macros come straight from the vision model's own reading, same as
+everything else it detects — nothing cross-checks it against a database. An earlier version
+re-queried FatSecret by brand and overwrote the model's numbers with whichever branded result
+ranked first, with no check it was actually the same product; that could silently replace a
+correctly-read label value with a different item's macros, so it was removed rather than
+repaired. Manual food-database search (the **Food database** row above) is untouched.
 
 Also: **per-item editing** of any logged or AI-detected meal (edit each item's name, brand,
 servings, and all four macros; add and delete items, totals recompute), and **combining** staged
@@ -198,9 +204,9 @@ Two cards per mode, both Skia-rendered via `victory-native`:
 
 ### Settings and account
 
-Profile editing, subscription management, notification prefs, support requests, a "How It Works"
-explainer, terms/privacy, **live sync status** ("Syncing 3 changes…" / "Everything is up to
-date!"), and account deletion.
+Profile editing, subscription management, notification prefs, support requests, "How Nutrition is
+Calculated" and "How Graphs Work" explainers, terms/privacy, **live sync status** ("Syncing 3
+changes…" / "Everything is up to date!"), and account deletion.
 
 Theming follows the OS by default with a manual light/dark toggle — but **the toggle is one-way**:
 once tapped there's no UI path back to `system`.
@@ -210,8 +216,6 @@ once tapped there's no UI path back to `system`.
 Two complete, tested engines have **zero production call sites** — don't assume they're live:
 a **fatigue model** (`fatigueFunctions.tsx`) and **training volume** (`getVolumeData`). The
 Progress tab charts set counts, not volume, and no screen shows a fatigue number.
-[howItWorks.tsx:54](app/settingsScreens/howItWorks.tsx#L54) still promises users a "fatigue
-score" that doesn't exist.
 
 ---
 
@@ -269,13 +273,13 @@ that needs a secret:
 
 | Function | Does |
 |---|---|
-| `fetchOpenAI` | Vision + text nutrition estimation. OpenAI or Gemini, switchable per request |
+| `fetchOpenAI` | Vision + text nutrition estimation via OpenAI |
 | `fetchFoodDB` | FatSecret food search and lookup |
 | `deleteAccount` | Cascading account + data deletion |
 | `revenuecatWebhook` | Mirrors subscription state into `user_entitlements` |
 
 **Why it matters:** no third-party *secret* ever ships in the app bundle. `OPENAI_API_KEY`,
-`GEMINI_API_KEY`, `FATSECRET_*`, `REVENUECAT_SECRET_API_KEY` and the service-role key are
+`FATSECRET_*`, `REVENUECAT_SECRET_API_KEY` and the service-role key are
 `Deno.env` reads inside these functions only. The client only carries the Supabase anon key and
 the RevenueCat *public* SDK key, both designed for distribution.
 

@@ -117,11 +117,10 @@ export async function getFoodDetails(item: FoodSearchResult): Promise<FoodDetail
         }
         return details
     } catch {
-        // Known degraded path (audit C1): this swallows every edge error, including a 429
-        // "daily search limit reached". A cap hit while tapping a search result in foodDBModal
-        // therefore surfaces as a silent "no details" rather than a quota message — accepted to
-        // keep this call site's behavior (and enrichBrandedItem's silent-fallback contract)
-        // unchanged; not a hidden accident.
+        // Known degraded path: this swallows every edge error, including a 429 "daily search
+        // limit reached". A cap hit while tapping a search result in foodDBModal therefore
+        // surfaces as a silent "no details" rather than a quota message — deliberate, not a
+        // hidden accident.
         return null
     }
 }

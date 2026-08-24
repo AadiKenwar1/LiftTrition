@@ -45,13 +45,10 @@ async function fatSecretRequest(method: string, params: Record<string, string>):
   try { return JSON.parse(text) } catch { return null }
 }
 
-// Per-user/day cap (audit C1) — env-configurable, safe default. A single 'foodsearch' kind
-// covers both manual search (foodDBModal) and details lookups, including the up-to-5 search +
-// 5 details calls a photo/label scan makes via enrichBrandedItem (context/NutritionContext/
-// functions/aiFunctions.tsx, MAX_BRANDED_ENRICH=5). Sized generously (well above any realistic
-// manual-search volume) specifically so routine scanning cannot starve manual search — the
-// alternative (a separate 'enrich' kind) was rejected here to keep this a self-contained
-// Edge-Function-only change; see the ai_usage_quota.sql migration for the quota mechanics.
+// Per-user/day cap — env-configurable, safe default. A single 'foodsearch' kind covers both
+// manual search (foodDBModal) and its details lookups; photo scans no longer call in here at
+// all. Sized well above any realistic manual-search volume; see the ai_usage_quota.sql
+// migration for the quota mechanics.
 const FOODSEARCH_DAILY_LIMIT = () => Number(Deno.env.get("AI_FOODSEARCH_DAILY_LIMIT") ?? "300")
 
 // Atomically increments today's usage counter for (user, kind) and reports whether the caller

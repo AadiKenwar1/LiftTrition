@@ -6,8 +6,6 @@ import type { ScanMode } from '@/lib/openAI/mealImage';
 import { supabase } from '@/lib/supabase/client';
 import * as Sentry from '@sentry/react-native';
 
-export type VisionProvider = 'openai' | 'gemini'
-
 const EDGE_FN_URL = `${ENV.SUPABASE_URL}/functions/v1/fetchopenai`
 
 // True for the AbortError a fetch()/body-read rejects with when `signal` fires — an intentional
@@ -21,7 +19,7 @@ function isAbortError(e: unknown): boolean {
 async function callEdgeFunction(
     body:
         | { type: 'text'; foodName: string }
-        | { type: 'vision'; base64Image: string; mode: ScanMode; provider?: VisionProvider },
+        | { type: 'vision'; base64Image: string; mode: ScanMode },
     signal?: AbortSignal,
 ): Promise<string> {
     const {
@@ -103,8 +101,8 @@ export async function askOpenAI(_question: string): Promise<string> {
     throw new Error('Generic askOpenAI is not supported. Use askOpenAIText or askOpenAIVision for nutrition.')
 }
 
-export async function askOpenAIVision(base64Image: string, mode: ScanMode = 'meal', provider?: VisionProvider, signal?: AbortSignal): Promise<string> {
-    return callEdgeFunction({ type: 'vision', base64Image, mode, ...(provider ? { provider } : {}) }, signal)
+export async function askOpenAIVision(base64Image: string, mode: ScanMode = 'meal', signal?: AbortSignal): Promise<string> {
+    return callEdgeFunction({ type: 'vision', base64Image, mode }, signal)
 }
 
 export async function askOpenAIText(foodName: string, signal?: AbortSignal): Promise<string> {

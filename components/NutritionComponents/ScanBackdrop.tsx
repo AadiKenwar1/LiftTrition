@@ -1,7 +1,7 @@
 import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { SCAN_FRAME } from '@/lib/openAI/mealImage'
 import { LinearGradient } from 'expo-linear-gradient'
-import { FlipHorizontal, Images, Package, Tag, Utensils, Zap } from 'lucide-react-native'
+import { FlipHorizontal, Images, Tag, Utensils, Zap } from 'lucide-react-native'
 import { useMemo } from 'react'
 import { Platform, StyleSheet, Text, View } from 'react-native'
 
@@ -22,11 +22,7 @@ export default function ScanBackdrop() {
                 <View style={styles.modeToggle}>
                     <View style={[styles.modeButton, styles.modeButtonActive]}>
                         <Utensils size={14} color="#FFF" strokeWidth={2.5} />
-                        <Text style={[styles.modeButtonText, styles.modeButtonTextActive]}>Meal</Text>
-                    </View>
-                    <View style={styles.modeButton}>
-                        <Package size={14} color="#CCC" strokeWidth={2.5} />
-                        <Text style={styles.modeButtonText}>Item</Text>
+                        <Text style={[styles.modeButtonText, styles.modeButtonTextActive]}>Food</Text>
                     </View>
                     <View style={styles.modeButton}>
                         <Tag size={14} color="#CCC" strokeWidth={2.5} />
@@ -45,7 +41,7 @@ export default function ScanBackdrop() {
                     <View style={[styles.corner, styles.cornerBottomLeft]} />
                     <View style={[styles.corner, styles.cornerBottomRight]} />
                 </View>
-                <Text style={styles.frameHint}>Center your meal in frame</Text>
+                <Text style={styles.frameHint}>Center your food in frame</Text>
             </View>
 
             <View style={styles.controls}>

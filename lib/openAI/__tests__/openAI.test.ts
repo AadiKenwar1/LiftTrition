@@ -92,7 +92,7 @@ describe('askOpenAIVision', () => {
             text: async () => JSON.stringify({ error: 'refused', message: 'blocked by safety system' }),
         })
 
-        await expect(askOpenAIVision('data:image/jpeg;base64,abc', 'item')).rejects.toThrow(
+        await expect(askOpenAIVision('data:image/jpeg;base64,abc', 'meal')).rejects.toThrow(
             'Could not analyze this photo. Try a clearer picture of your food, or add a manual entry.',
         )
         expect(Sentry.captureException).not.toHaveBeenCalled()
@@ -151,7 +151,7 @@ describe('cancellation (M8)', () => {
         mockFetch.mockResolvedValue({ ok: true, text: async () => '{}' })
         const controller = new AbortController()
 
-        await askOpenAIVision('data:image/jpeg;base64,abc', 'meal', undefined, controller.signal)
+        await askOpenAIVision('data:image/jpeg;base64,abc', 'meal', controller.signal)
 
         expect(mockFetch).toHaveBeenCalledWith(
             'https://test.supabase.co/functions/v1/fetchopenai',

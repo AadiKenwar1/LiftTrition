@@ -17,11 +17,6 @@ jest.mock('@/lib/openAI/openAI', () => ({
     askOpenAIText: jest.fn(),
 }))
 
-jest.mock('@/lib/foodDB/foodDB', () => ({
-    getFoodSearchResults: jest.fn().mockResolvedValue([]),
-    getFoodItem: jest.fn(),
-}))
-
 jest.mock('react-native-uuid', () => ({
     __esModule: true,
     default: { v4: jest.fn(() => 'test-uuid') },
@@ -29,7 +24,6 @@ jest.mock('react-native-uuid', () => ({
 
 const mockVision = askOpenAIVision as jest.Mock
 
-// brand: null keeps every item un-branded → the FatSecret enrichment path is skipped.
 const VISION_JSON = JSON.stringify({
     name: 'Test Meal',
     ingredients: [{ name: 'Rice', brand: null, quantity: 1, protein: 5, carbs: 40, fats: 1, calories: 200 }],
@@ -102,6 +96,37 @@ describe('analyzeAndAddPhoto shouldCommit gate', () => {
     })
 })
 
+// Entry naming: a photo that finds exactly one branded item reads as a packaged-product scan
+// and takes the product's name; anything else keeps the model's top-level dish name.
+describe('analyzeAndAddPhoto entry naming', () => {
+    const BAR = { name: 'Protein bar', brand: 'Quest Bar', quantity: 1, protein: 20, carbs: 22, fats: 9, calories: 190 }
+    const RICE = { name: 'Rice', brand: null, quantity: 1, protein: 5, carbs: 40, fats: 1, calories: 200 }
+
+    // Runs one analysis against the given vision reply and returns the committed entry's name.
+    async function nameFor(reply: object): Promise<string> {
+        mockVision.mockResolvedValue(JSON.stringify(reply))
+        const { setter, entries } = makeSetter()
+        await analyzeAndAddPhoto('file://p.jpg', 'user-1', setter, new Date('2026-07-15'), 'meal', () => true)
+        return entries()[0].name
+    }
+
+    it('names the entry after the brand when the photo finds exactly one branded item', async () => {
+        expect(await nameFor({ name: 'Protein bar', ingredients: [BAR] })).toBe('Quest Bar')
+    })
+
+    it('keeps the dish name when a branded item sits among other foods', async () => {
+        expect(await nameFor({ name: 'Rice bowl with protein bar', ingredients: [BAR, RICE] })).toBe('Rice bowl with protein bar')
+    })
+
+    it('keeps the dish name for a single unbranded item', async () => {
+        expect(await nameFor({ name: 'Fried rice', ingredients: [RICE] })).toBe('Fried rice')
+    })
+
+    it('treats a whitespace-only brand as unbranded', async () => {
+        expect(await nameFor({ name: 'Mystery snack', ingredients: [{ ...BAR, brand: '   ' }] })).toBe('Mystery snack')
+    })
+})
+
 // M8: analyzeAndAddPhoto must thread an AbortSignal all the way down to askOpenAIVision so
 // cancelling the analyze modal actually aborts the in-flight edge-function request, not just
 // discards the result once it resolves (the previously-adjudicated hard-gate defect).
@@ -113,7 +138,7 @@ describe('analyzeAndAddPhoto signal propagation (M8)', () => {
 
         await analyzeAndAddPhoto('file://p.jpg', 'user-1', setter, new Date('2026-07-15'), 'meal', () => true, controller.signal)
 
-        expect(mockVision).toHaveBeenCalledWith('data:image/jpeg;base64,fake-base64', 'meal', undefined, controller.signal)
+        expect(mockVision).toHaveBeenCalledWith('data:image/jpeg;base64,fake-base64', 'meal', controller.signal)
     })
 
     it('calls askOpenAIVision with an undefined signal when none is passed (existing callers unchanged)', async () => {
@@ -122,6 +147,6 @@ describe('analyzeAndAddPhoto signal propagation (M8)', () => {
 
         await analyzeAndAddPhoto('file://p.jpg', 'user-1', setter, new Date('2026-07-15'))
 
-        expect(mockVision).toHaveBeenCalledWith('data:image/jpeg;base64,fake-base64', 'meal', undefined, undefined)
+        expect(mockVision).toHaveBeenCalledWith('data:image/jpeg;base64,fake-base64', 'meal', undefined)
     })
 })

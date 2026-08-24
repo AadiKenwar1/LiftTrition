@@ -45,16 +45,11 @@ jest.mock('@/lib/powersync/persistErrors', () => ({
 
 // aiFunctions.tsx is pulled in transitively (index.tsx imports analyzeAndAddPhoto). None of its
 // calls are exercised here, but its own top-level imports reach expo-file-system and the real
-// OpenAI/FatSecret edge-function clients (which construct a Supabase client from ENV at module
-// scope) unless stubbed - mirrors context/NutritionContext/functions/__tests__/aiFunctions.test.ts.
+// OpenAI edge-function client (which constructs a Supabase client from ENV at module scope)
+// unless stubbed - mirrors context/NutritionContext/functions/__tests__/aiFunctions.test.ts.
 jest.mock('@/lib/openAI/openAI', () => ({
     askOpenAIVision: jest.fn(),
     askOpenAIText: jest.fn(),
-}))
-
-jest.mock('@/lib/foodDB/foodDB', () => ({
-    getFoodSearchResults: jest.fn().mockResolvedValue([]),
-    getFoodItem: jest.fn(),
 }))
 
 jest.mock('expo-file-system', () => ({

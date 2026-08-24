@@ -1,0 +1,1000 @@
+{
+  "meta": {
+    "timestamp": "2026-08-20T01:55:33.841Z",
+    "model": "gpt-5.4-mini",
+    "bars": [
+      {
+        "pct": 5,
+        "gramFloor": 1,
+        "kcalFloor": 5
+      },
+      {
+        "pct": 10,
+        "gramFloor": 2,
+        "kcalFloor": 10
+      },
+      {
+        "pct": 25,
+        "gramFloor": 5,
+        "kcalFloor": 25
+      },
+      {
+        "pct": 50,
+        "gramFloor": 10,
+        "kcalFloor": 50
+      }
+    ],
+    "desiredPct": 10,
+    "args": {
+      "limit": 3,
+      "class": null,
+      "samples": 1,
+      "temperature": 0
+    },
+    "prompts": {
+      "food": "You identify foods in a photo for a food-logging app.\r\n\r\nFirst decide what the dish or product IS — what it would be called on a menu or shelf label. Set the top-level \"name\" to that. If it is a recognizable restaurant menu item or branded product, base your nutrition values on that item's known published nutrition — for a dish, scaled to the portion actually visible; for a packaged product, per ONE typical serving of that product, never the whole multi-serving package. Estimate purely from appearance only when the item is not recognizable.\r\n\r\nThen list ingredients. Every visible food, drink, or packaged product belongs to EXACTLY ONE ingredient line:\r\n- A composed item (sandwich, wrap, burger) is ONE ingredient that already includes everything inside it — never also list its components as separate ingredients.\r\n- Packaged/branded items are food too, never leave one out.\r\n\r\nFor each ingredient:\r\n- name = a short generic food name\r\n- brand = the product name exactly as printed on the packaging if this is a packaged product; null if unbranded or not clearly legible (never guess a brand)\r\n- quantity = the number of WHOLE units, not fragments — an item cut into halves or slices is quantity 1 (a sandwich shown as two halves is 1 sandwich). Use more than 1 only for genuinely separate items (each nugget, each bottle, each package); use 1 if not countable\r\n- grams = the estimated weight in grams of ONE unit, judged from its visible size\r\n- protein, carbs, fats (grams) and calories (kcal) = for that same ONE unit (or one typical serving of a packaged product, or the whole visible portion when quantity is 1) — derive them from your grams estimate, not from a generic serving/cup/100g. NEVER multiplied by quantity\r\n\r\nIf no food, drink, or food product is visible, respond with \"ingredients\": [] and a short \"name\" like \"No food visible\".\r\n\r\nRespond ONLY with JSON:\r\n{\"name\":string,\"ingredients\":[{\"name\":string,\"brand\":string|null,\"quantity\":number,\"grams\":number,\"protein\":number,\"carbs\":number,\"fats\":number,\"calories\":number}]}",
+      "label": "You are reading a Nutrition Facts label in the image. Read the printed values directly - do NOT estimate from appearance.\r\n\r\nRules:\r\n- Return exactly ONE ingredient with quantity 1, holding the values for one serving as printed on the label. Protein, carbs, fats in grams; calories in kcal.\r\n- If a product or food name is visible, use it as \"name\" and \"brand\". If not, use \"Scanned Label\" as the name and set brand to null.\r\n- If the nutrition numbers are readable, ALWAYS return them - a missing name is never a reason to return an empty list.\r\n- Respond with \"ingredients\": [] and a short \"name\" like \"No label detected\" ONLY if the numbers themselves are unreadable.\r\n\r\nRespond ONLY with JSON:\r\n{\"name\":string,\"ingredients\":[{\"name\":string,\"brand\":string|null,\"quantity\":number,\"protein\":number,\"carbs\":number,\"fats\":number,\"calories\":number}]}"
+    },
+    "node": "v24.19.0"
+  },
+  "summary": {
+    "clean": {
+      "meal": {
+        "n": 1,
+        "failures": {
+          "invalidJson": 0,
+          "noFood": 0,
+          "refusals": 0,
+          "callErrors": 0
+        },
+        "scoredRows": 1,
+        "fields": {
+          "calories": {
+            "medianAbsPct": 60.1,
+            "meanAbsPct": 60.1,
+            "p90AbsPct": 60.1,
+            "meanSignedPct": 60.1
+          },
+          "protein": {
+            "medianAbsPct": 129.7,
+            "meanAbsPct": 129.7,
+            "p90AbsPct": 129.7,
+            "meanSignedPct": 129.7
+          },
+          "carbs": {
+            "medianAbsPct": 91.3,
+            "meanAbsPct": 91.3,
+            "p90AbsPct": 91.3,
+            "meanSignedPct": 91.3
+          },
+          "fats": {
+            "medianAbsPct": 25.9,
+            "meanAbsPct": 25.9,
+            "p90AbsPct": 25.9,
+            "meanSignedPct": 25.9
+          }
+        },
+        "passCurve": {
+          "±5%": {
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fats": 0,
+            "all": 0
+          },
+          "±10%": {
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fats": 0,
+            "all": 0
+          },
+          "±25%": {
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fats": 0,
+            "all": 0
+          },
+          "±50%": {
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fats": 100,
+            "all": 0
+          }
+        },
+        "grams": {
+          "coveragePct": 100,
+          "medianAbsErrPct": null,
+          "comparableRows": 0,
+          "implausibleIngredients": 0
+        },
+        "medianIngredientCount": 8,
+        "medianPredictedAtwaterDevPct": 2.8,
+        "latencyMs": {
+          "p50": 4348,
+          "p95": 4348
+        },
+        "tokens": {
+          "prompt": 894,
+          "completion": 368
+        }
+      },
+      "product": {
+        "n": 1,
+        "failures": {
+          "invalidJson": 0,
+          "noFood": 0,
+          "refusals": 0,
+          "callErrors": 0
+        },
+        "scoredRows": 1,
+        "fields": {
+          "calories": {
+            "medianAbsPct": 17,
+            "meanAbsPct": 17,
+            "p90AbsPct": 17,
+            "meanSignedPct": -17
+          },
+          "protein": {
+            "medianAbsPct": 10,
+            "meanAbsPct": 10,
+            "p90AbsPct": 10,
+            "meanSignedPct": -10
+          },
+          "carbs": {
+            "medianAbsPct": 10,
+            "meanAbsPct": 10,
+            "p90AbsPct": 10,
+            "meanSignedPct": -10
+          },
+          "fats": {
+            "medianAbsPct": 33.3,
+            "meanAbsPct": 33.3,
+            "p90AbsPct": 33.3,
+            "meanSignedPct": -33.3
+          }
+        },
+        "passCurve": {
+          "±5%": {
+            "calories": 0,
+            "protein": 100,
+            "carbs": 0,
+            "fats": 0,
+            "all": 0
+          },
+          "±10%": {
+            "calories": 0,
+            "protein": 100,
+            "carbs": 100,
+            "fats": 0,
+            "all": 0
+          },
+          "±25%": {
+            "calories": 100,
+            "protein": 100,
+            "carbs": 100,
+            "fats": 0,
+            "all": 0
+          },
+          "±50%": {
+            "calories": 100,
+            "protein": 100,
+            "carbs": 100,
+            "fats": 100,
+            "all": 100
+          }
+        },
+        "recognitionRatePct": 100,
+        "grams": {
+          "coveragePct": 100,
+          "medianAbsErrPct": null,
+          "comparableRows": 0,
+          "implausibleIngredients": 0
+        },
+        "latencyMs": {
+          "p50": 2107,
+          "p95": 2107
+        },
+        "tokens": {
+          "prompt": 617,
+          "completion": 61
+        }
+      }
+    },
+    "all": {
+      "meal": {
+        "n": 1,
+        "failures": {
+          "invalidJson": 0,
+          "noFood": 0,
+          "refusals": 0,
+          "callErrors": 0
+        },
+        "scoredRows": 1,
+        "fields": {
+          "calories": {
+            "medianAbsPct": 60.1,
+            "meanAbsPct": 60.1,
+            "p90AbsPct": 60.1,
+            "meanSignedPct": 60.1
+          },
+          "protein": {
+            "medianAbsPct": 129.7,
+            "meanAbsPct": 129.7,
+            "p90AbsPct": 129.7,
+            "meanSignedPct": 129.7
+          },
+          "carbs": {
+            "medianAbsPct": 91.3,
+            "meanAbsPct": 91.3,
+            "p90AbsPct": 91.3,
+            "meanSignedPct": 91.3
+          },
+          "fats": {
+            "medianAbsPct": 25.9,
+            "meanAbsPct": 25.9,
+            "p90AbsPct": 25.9,
+            "meanSignedPct": 25.9
+          }
+        },
+        "passCurve": {
+          "±5%": {
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fats": 0,
+            "all": 0
+          },
+          "±10%": {
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fats": 0,
+            "all": 0
+          },
+          "±25%": {
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fats": 0,
+            "all": 0
+          },
+          "±50%": {
+            "calories": 0,
+            "protein": 0,
+            "carbs": 0,
+            "fats": 100,
+            "all": 0
+          }
+        },
+        "grams": {
+          "coveragePct": 100,
+          "medianAbsErrPct": null,
+          "comparableRows": 0,
+          "implausibleIngredients": 0
+        },
+        "medianIngredientCount": 8,
+        "medianPredictedAtwaterDevPct": 2.8,
+        "latencyMs": {
+          "p50": 4348,
+          "p95": 4348
+        },
+        "tokens": {
+          "prompt": 894,
+          "completion": 368
+        }
+      },
+      "product": {
+        "n": 1,
+        "failures": {
+          "invalidJson": 0,
+          "noFood": 0,
+          "refusals": 0,
+          "callErrors": 0
+        },
+        "scoredRows": 1,
+        "fields": {
+          "calories": {
+            "medianAbsPct": 17,
+            "meanAbsPct": 17,
+            "p90AbsPct": 17,
+            "meanSignedPct": -17
+          },
+          "protein": {
+            "medianAbsPct": 10,
+            "meanAbsPct": 10,
+            "p90AbsPct": 10,
+            "meanSignedPct": -10
+          },
+          "carbs": {
+            "medianAbsPct": 10,
+            "meanAbsPct": 10,
+            "p90AbsPct": 10,
+            "meanSignedPct": -10
+          },
+          "fats": {
+            "medianAbsPct": 33.3,
+            "meanAbsPct": 33.3,
+            "p90AbsPct": 33.3,
+            "meanSignedPct": -33.3
+          }
+        },
+        "passCurve": {
+          "±5%": {
+            "calories": 0,
+            "protein": 100,
+            "carbs": 0,
+            "fats": 0,
+            "all": 0
+          },
+          "±10%": {
+            "calories": 0,
+            "protein": 100,
+            "carbs": 100,
+            "fats": 0,
+            "all": 0
+          },
+          "±25%": {
+            "calories": 100,
+            "protein": 100,
+            "carbs": 100,
+            "fats": 0,
+            "all": 0
+          },
+          "±50%": {
+            "calories": 100,
+            "protein": 100,
+            "carbs": 100,
+            "fats": 100,
+            "all": 100
+          }
+        },
+        "recognitionRatePct": 100,
+        "grams": {
+          "coveragePct": 100,
+          "medianAbsErrPct": null,
+          "comparableRows": 0,
+          "implausibleIngredients": 0
+        },
+        "latencyMs": {
+          "p50": 2107,
+          "p95": 2107
+        },
+        "tokens": {
+          "prompt": 617,
+          "completion": 61
+        }
+      },
+      "label": {
+        "n": 1,
+        "failures": {
+          "invalidJson": 0,
+          "noFood": 0,
+          "refusals": 0,
+          "callErrors": 0
+        },
+        "scoredRows": 1,
+        "fields": {
+          "calories": {
+            "medianAbsPct": 0,
+            "meanAbsPct": 0,
+            "p90AbsPct": 0,
+            "meanSignedPct": 0
+          },
+          "protein": {
+            "medianAbsPct": 0,
+            "meanAbsPct": 0,
+            "p90AbsPct": 0,
+            "meanSignedPct": 0
+          },
+          "carbs": {
+            "medianAbsPct": 0,
+            "meanAbsPct": 0,
+            "p90AbsPct": 0,
+            "meanSignedPct": 0
+          },
+          "fats": {
+            "medianAbsPct": 0,
+            "meanAbsPct": 0,
+            "p90AbsPct": 0,
+            "meanSignedPct": 0
+          }
+        },
+        "passCurve": {
+          "±5%": {
+            "calories": 100,
+            "protein": 100,
+            "carbs": 100,
+            "fats": 100,
+            "all": 100
+          },
+          "±10%": {
+            "calories": 100,
+            "protein": 100,
+            "carbs": 100,
+            "fats": 100,
+            "all": 100
+          },
+          "±25%": {
+            "calories": 100,
+            "protein": 100,
+            "carbs": 100,
+            "fats": 100,
+            "all": 100
+          },
+          "±50%": {
+            "calories": 100,
+            "protein": 100,
+            "carbs": 100,
+            "fats": 100,
+            "all": 100
+          }
+        },
+        "labelContractViolations": 0,
+        "latencyMs": {
+          "p50": 2861,
+          "p95": 2861
+        },
+        "tokens": {
+          "prompt": 3197,
+          "completion": 50
+        }
+      }
+    }
+  },
+  "rows": [
+    {
+      "id": "meal-a1-01",
+      "class": "meal",
+      "mode": "meal",
+      "truth": {
+        "id": "meal-a1-01",
+        "class": "meal",
+        "image": "images/meals/meal-a1-01.png",
+        "name": "Harvest Bowl",
+        "brand_or_source": "Sweetgreen",
+        "source_url": "https://www.sweetgreen.com/menu",
+        "image_url": "https://images.ctfassets.net/eum7w7yri3zr/Br3EYlf6srQYhCXdvOfwt/65b582e0c488a871e36cda2ea5e52df3/SG_Web_Image_Bowl_Harvest.png?w=600&q=75",
+        "basis": "per_serving",
+        "serving_desc": "1 bowl",
+        "serving_size_g": null,
+        "calories": 740,
+        "protein_g": 32,
+        "carbs_g": 60,
+        "fat_g": 41,
+        "label_tier": "publisher",
+        "license": "proprietary-marketing-asset",
+        "barcode": null,
+        "region": null,
+        "notes": "Photo and official macros (Calories/Protein/Carbs/Fat) published in the same menu-item card on sweetgreen.com/menu. Menu category: Bowls. Roasted chicken, sweet potatoes, apples, goat cheese, roasted almonds, shredded kale, warm wild rice, balsamic vinaigrette. Atwater 737 kcal vs published 740 (0.4% dev).",
+        "corrected": false,
+        "width": 600,
+        "height": 600,
+        "format": "PNG",
+        "bytes": 653892,
+        "sha256": "fafaf781f7d16ada8f5131cac6d2ca3fd118dff2d3d785228b1887211868b146",
+        "atwater_deviation_pct": 0.4,
+        "verification": {
+          "verdict": "pass",
+          "reason": "Every visible component (chicken, sweet potato, apple, goat cheese, almonds, kale, wild rice, dressing) is named in the Harvest Bowl build and the 60 g carbs comfortably covers the visible wild rice + sweet potato + apple. Single bowl, no accompaniment outside the macro block.",
+          "details": {
+            "portions_visible": 1,
+            "depicts": "one square bowl, overhead: roasted chicken cubes, roasted sweet potato wedges, goat cheese crumbles, apple chunks, sliced almonds, shredded kale, warm wild rice, plus balsamic vinaigrette in a small inset ramekin",
+            "uncounted_sides": "none"
+          }
+        },
+        "is_clean": true
+      },
+      "response": {
+        "status": 200,
+        "latencyMs": 4348,
+        "usage": {
+          "prompt_tokens": 894,
+          "completion_tokens": 368,
+          "total_tokens": 1262,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "rawContent": "{\"name\":\"grain bowl with roasted vegetables, chicken, tofu, nuts, apple, and dressing\",\"ingredients\":[{\"name\":\"roasted sweet potato\",\"brand\":null,\"quantity\":1,\"grams\":180,\"protein\":3.2,\"carbs\":37.8,\"fats\":0.4,\"calories\":162},{\"name\":\"roasted chicken breast\",\"brand\":null,\"quantity\":1,\"grams\":120,\"protein\":37.2,\"carbs\":0,\"fats\":4.3,\"calories\":198},{\"name\":\"tofu\",\"brand\":null,\"quantity\":1,\"grams\":140,\"protein\":16.8,\"carbs\":4.2,\"fats\":8.4,\"calories\":126},{\"name\":\"mixed grains\",\"brand\":null,\"quantity\":1,\"grams\":220,\"protein\":7.7,\"carbs\":46.2,\"fats\":2.6,\"calories\":242},{\"name\":\"apple\",\"brand\":null,\"quantity\":1,\"grams\":90,\"protein\":0.3,\"carbs\":12.5,\"fats\":0.2,\"calories\":47},{\"name\":\"mixed nuts\",\"brand\":null,\"quantity\":1,\"grams\":35,\"protein\":6.5,\"carbs\":6.5,\"fats\":17.5,\"calories\":210},{\"name\":\"leafy greens\",\"brand\":null,\"quantity\":1,\"grams\":45,\"protein\":1.3,\"carbs\":1.6,\"fats\":0.2,\"calories\":10},{\"name\":\"dressing\",\"brand\":null,\"quantity\":1,\"grams\":55,\"protein\":0.5,\"carbs\":6.0,\"fats\":18.0,\"calories\":190}]}",
+        "retried": false
+      },
+      "parsed": {
+        "jsonValid": true,
+        "shapeErrors": [],
+        "name": "grain bowl with roasted vegetables, chicken, tofu, nuts, apple, and dressing",
+        "ingredients": [
+          {
+            "name": "roasted sweet potato",
+            "brand": null,
+            "quantity": 1,
+            "grams": 180,
+            "protein": 3.2,
+            "carbs": 37.8,
+            "fats": 0.4,
+            "calories": 162
+          },
+          {
+            "name": "roasted chicken breast",
+            "brand": null,
+            "quantity": 1,
+            "grams": 120,
+            "protein": 37.2,
+            "carbs": 0,
+            "fats": 4.3,
+            "calories": 198
+          },
+          {
+            "name": "tofu",
+            "brand": null,
+            "quantity": 1,
+            "grams": 140,
+            "protein": 16.8,
+            "carbs": 4.2,
+            "fats": 8.4,
+            "calories": 126
+          },
+          {
+            "name": "mixed grains",
+            "brand": null,
+            "quantity": 1,
+            "grams": 220,
+            "protein": 7.7,
+            "carbs": 46.2,
+            "fats": 2.6,
+            "calories": 242
+          },
+          {
+            "name": "apple",
+            "brand": null,
+            "quantity": 1,
+            "grams": 90,
+            "protein": 0.3,
+            "carbs": 12.5,
+            "fats": 0.2,
+            "calories": 47
+          },
+          {
+            "name": "mixed nuts",
+            "brand": null,
+            "quantity": 1,
+            "grams": 35,
+            "protein": 6.5,
+            "carbs": 6.5,
+            "fats": 17.5,
+            "calories": 210
+          },
+          {
+            "name": "leafy greens",
+            "brand": null,
+            "quantity": 1,
+            "grams": 45,
+            "protein": 1.3,
+            "carbs": 1.6,
+            "fats": 0.2,
+            "calories": 10
+          },
+          {
+            "name": "dressing",
+            "brand": null,
+            "quantity": 1,
+            "grams": 55,
+            "protein": 0.5,
+            "carbs": 6,
+            "fats": 18,
+            "calories": 190
+          }
+        ],
+        "totals": {
+          "calories": 1185,
+          "protein": 73.5,
+          "carbs": 114.8,
+          "fats": 51.6,
+          "grams": 885
+        },
+        "ingredientCount": 8,
+        "sawFood": true,
+        "labelContractOk": false,
+        "predictedAtwaterDevPct": 2.8,
+        "implausibleDensity": 0
+      },
+      "score": {
+        "scored": true,
+        "basisUsed": "per_serving",
+        "expected": {
+          "calories": 740,
+          "protein": 32,
+          "carbs": 60,
+          "fats": 41
+        },
+        "errors": {
+          "calories": {
+            "unitErr": 445,
+            "pctErr": 60.1
+          },
+          "protein": {
+            "unitErr": 41.5,
+            "pctErr": 129.7
+          },
+          "carbs": {
+            "unitErr": 54.8,
+            "pctErr": 91.3
+          },
+          "fats": {
+            "unitErr": 10.6,
+            "pctErr": 25.9
+          }
+        },
+        "passes": {
+          "5": {
+            "calories": false,
+            "protein": false,
+            "carbs": false,
+            "fats": false,
+            "all": false
+          },
+          "10": {
+            "calories": false,
+            "protein": false,
+            "carbs": false,
+            "fats": false,
+            "all": false
+          },
+          "25": {
+            "calories": false,
+            "protein": false,
+            "carbs": false,
+            "fats": false,
+            "all": false
+          },
+          "50": {
+            "calories": false,
+            "protein": false,
+            "carbs": false,
+            "fats": true,
+            "all": false
+          }
+        },
+        "recognition": null,
+        "grams": {
+          "predicted": 885,
+          "expected": null,
+          "errPct": null
+        }
+      }
+    },
+    {
+      "id": "product-off-01",
+      "class": "product",
+      "mode": "item",
+      "truth": {
+        "id": "product-off-01",
+        "class": "product",
+        "image": "images/products/product-off-01.jpg",
+        "name": "Nissin Demae Ramen Chicken Flavour",
+        "brand_or_source": "Nissin",
+        "source_url": "https://world.openfoodfacts.org/product/4897878140022",
+        "image_url": "https://images.openfoodfacts.org/images/products/489/787/814/0022/front_fr.3.400.jpg",
+        "basis": "per_100g",
+        "serving_desc": null,
+        "serving_size_g": null,
+        "calories": 470,
+        "protein_g": 10,
+        "carbs_g": 60,
+        "fat_g": 21,
+        "label_tier": "panel",
+        "license": "CC-BY-SA-3.0 (image) / ODbL (data), Open Food Facts",
+        "barcode": "4897878140022",
+        "region": "ca",
+        "notes": "atwater check 469 vs 470 kcal/100g",
+        "corrected": false,
+        "width": 400,
+        "height": 312,
+        "format": "JPEG",
+        "bytes": 33649,
+        "sha256": "29ebe52134d4c8fc8ed41cd2d4f8d53c1da1eaf9cbd825fd8fc2601f881b82e3",
+        "atwater_deviation_pct": 0.2,
+        "verification": {
+          "verdict": "pass",
+          "reason": "Front-of-pack shot; brand mark and both the product line and chicken flavour text are legible. Matches name and brand.",
+          "details": {
+            "depicts": "Green flow-wrap instant noodle packet, NISSIN logo top-left, 'NISSIN DEMAE RAMEN' banner across the top, large Chinese characters, and 'CHICKEN FLAVOUR / SAVEUR DE POULET' with a serving-suggestion photo of chicken pieces and bok choy",
+            "brand_visible": true
+          }
+        },
+        "is_clean": true
+      },
+      "response": {
+        "status": 200,
+        "latencyMs": 2107,
+        "usage": {
+          "prompt_tokens": 617,
+          "completion_tokens": 61,
+          "total_tokens": 678,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "rawContent": "{\"name\":\"Nissin Chicken Flavour Instant Noodles\",\"ingredients\":[{\"name\":\"instant noodles\",\"brand\":\"Nissin\",\"quantity\":1,\"grams\":85,\"protein\":9,\"carbs\":54,\"fats\":14,\"calories\":390}]}",
+        "retried": false
+      },
+      "parsed": {
+        "jsonValid": true,
+        "shapeErrors": [],
+        "name": "Nissin Chicken Flavour Instant Noodles",
+        "ingredients": [
+          {
+            "name": "instant noodles",
+            "brand": "Nissin",
+            "quantity": 1,
+            "grams": 85,
+            "protein": 9,
+            "carbs": 54,
+            "fats": 14,
+            "calories": 390
+          }
+        ],
+        "totals": {
+          "calories": 390,
+          "protein": 9,
+          "carbs": 54,
+          "fats": 14,
+          "grams": 85
+        },
+        "ingredientCount": 1,
+        "sawFood": true,
+        "labelContractOk": true,
+        "predictedAtwaterDevPct": 3.1,
+        "implausibleDensity": 0
+      },
+      "score": {
+        "scored": true,
+        "basisUsed": "per_100g",
+        "expected": {
+          "calories": 470,
+          "protein": 10,
+          "carbs": 60,
+          "fats": 21
+        },
+        "errors": {
+          "calories": {
+            "unitErr": -80,
+            "pctErr": -17
+          },
+          "protein": {
+            "unitErr": -1,
+            "pctErr": -10
+          },
+          "carbs": {
+            "unitErr": -6,
+            "pctErr": -10
+          },
+          "fats": {
+            "unitErr": -7,
+            "pctErr": -33.3
+          }
+        },
+        "passes": {
+          "5": {
+            "calories": false,
+            "protein": true,
+            "carbs": false,
+            "fats": false,
+            "all": false
+          },
+          "10": {
+            "calories": false,
+            "protein": true,
+            "carbs": true,
+            "fats": false,
+            "all": false
+          },
+          "25": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": false,
+            "all": false
+          },
+          "50": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          }
+        },
+        "recognition": {
+          "recognized": true,
+          "brandHits": [
+            "nissin"
+          ],
+          "nameHits": [
+            "nissin",
+            "chicken",
+            "flavour"
+          ]
+        },
+        "grams": {
+          "predicted": 85,
+          "expected": null,
+          "errPct": null
+        }
+      }
+    },
+    {
+      "id": "label-off-01",
+      "class": "label",
+      "mode": "label",
+      "truth": {
+        "id": "label-off-01",
+        "class": "label",
+        "image": "images/labels/label-off-01.jpg",
+        "name": "Biscuits à l'avoine morceaux de chocolat",
+        "brand_or_source": "Sarah Lee",
+        "source_url": "https://world.openfoodfacts.org/product/10533352",
+        "image_url": "https://images.openfoodfacts.org/images/products/10533352/nutrition_fr.10.full.jpg",
+        "basis": "per_100g",
+        "serving_desc": "50g",
+        "serving_size_g": 50,
+        "calories": 420,
+        "protein_g": 6,
+        "carbs_g": 64,
+        "fat_g": 16,
+        "label_tier": "panel",
+        "license": "CC-BY-SA-3.0 (image) / ODbL (data), Open Food Facts",
+        "barcode": "10533352",
+        "region": "ca",
+        "notes": "atwater check 212 vs 210 kcal/100g; CORRECTED from panel: pack declares 210kcal/P3/C32/F8 per 1 biscuit (50 g); OFF stored that per-serving column as per-100g (2x low). DB said 210/3/32/8.; OFF per-serving energy value dropped as implausible (DB said 105 kcal, 50.0g serving of a 420.0 kcal/100g product implies ~210)",
+        "corrected": true,
+        "width": 1621,
+        "height": 2700,
+        "format": "JPEG",
+        "bytes": 758273,
+        "sha256": "956aa8a9412edc4fe38b1ed8532ff420a71ff80362eceaa9931ea90d0f8773a5",
+        "atwater_deviation_pct": 1,
+        "verification": {
+          "verdict": "suspect",
+          "reason": "Canadian bilingual panel is fully legible but is declared 'pour 1 biscuit (50 g) / Per 1 cookie (50 g)' only: Calories 210, Fat 8 g, Carbohydrate 32 g, Protein 3 g. Serving size in grams is printed, so per-100g = 2x serving = 420 kcal / P6 / C64 / F16. The recorded per-100g values (210/3/32/8) are exactly the per-SERVING column, i.e. off by 2x (100%) on every macro. Row notes claim 'per-serving on pack: 105kcal P1.5 C16 F4', which is half of what the pack actually prints, corroborating that the per-100g basis was mis-keyed from the 50 g serving column.",
+          "details": {
+            "legible": true,
+            "panel_kcal_100g": 420,
+            "panel_protein_g": 6,
+            "panel_carbs_g": 64,
+            "panel_fat_g": 16
+          }
+        },
+        "is_clean": false
+      },
+      "response": {
+        "status": 200,
+        "latencyMs": 2861,
+        "usage": {
+          "prompt_tokens": 3197,
+          "completion_tokens": 50,
+          "total_tokens": 3247,
+          "prompt_tokens_details": {
+            "cached_tokens": 2304,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "rawContent": "{\"name\":\"Scanned Label\",\"ingredients\":[{\"name\":\"Scanned Label\",\"brand\":null,\"quantity\":1,\"protein\":3,\"carbs\":32,\"fats\":8,\"calories\":210}]}",
+        "retried": false
+      },
+      "parsed": {
+        "jsonValid": true,
+        "shapeErrors": [],
+        "name": "Scanned Label",
+        "ingredients": [
+          {
+            "name": "Scanned Label",
+            "brand": null,
+            "quantity": 1,
+            "protein": 3,
+            "carbs": 32,
+            "fats": 8,
+            "calories": 210
+          }
+        ],
+        "totals": {
+          "calories": 210,
+          "protein": 3,
+          "carbs": 32,
+          "fats": 8,
+          "grams": null
+        },
+        "ingredientCount": 1,
+        "sawFood": true,
+        "labelContractOk": true,
+        "predictedAtwaterDevPct": 1,
+        "implausibleDensity": 0
+      },
+      "score": {
+        "scored": true,
+        "basisUsed": "per_serving_scaled",
+        "expected": {
+          "calories": 210,
+          "protein": 3,
+          "carbs": 32,
+          "fats": 8
+        },
+        "errors": {
+          "calories": {
+            "unitErr": 0,
+            "pctErr": 0
+          },
+          "protein": {
+            "unitErr": 0,
+            "pctErr": 0
+          },
+          "carbs": {
+            "unitErr": 0,
+            "pctErr": 0
+          },
+          "fats": {
+            "unitErr": 0,
+            "pctErr": 0
+          }
+        },
+        "passes": {
+          "5": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "10": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "25": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "50": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          }
+        },
+        "recognition": null,
+        "grams": {
+          "predicted": null,
+          "expected": 50,
+          "errPct": null
+        }
+      }
+    }
+  ]
+}

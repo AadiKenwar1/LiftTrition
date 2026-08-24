@@ -1,0 +1,2569 @@
+{
+  "meta": {
+    "timestamp": "2026-08-20T15:27:27.636Z",
+    "model": "gpt-5.4-mini",
+    "bars": [
+      {
+        "pct": 5,
+        "gramFloor": 1,
+        "kcalFloor": 5
+      },
+      {
+        "pct": 10,
+        "gramFloor": 2,
+        "kcalFloor": 10
+      },
+      {
+        "pct": 25,
+        "gramFloor": 5,
+        "kcalFloor": 25
+      },
+      {
+        "pct": 50,
+        "gramFloor": 10,
+        "kcalFloor": 50
+      }
+    ],
+    "desiredPct": 10,
+    "args": {
+      "limit": null,
+      "class": "label",
+      "samples": 1,
+      "temperature": 0,
+      "imageRoot": "C:\\Users\\aadik\\AppData\\Local\\Temp\\claude\\c--Users-aadik-Downloads-PLATES\\0d77f61f-4aae-42a8-9731-e5ba3d6699c1\\scratchpad\\arm800"
+    },
+    "prompts": {
+      "food": "You identify foods in a photo for a food-logging app.\r\n\r\nFirst decide what the dish or product IS — what it would be called on a menu or shelf label. Set the top-level \"name\" to that. If it is a recognizable restaurant menu item or branded product, base your nutrition values on that item's known published nutrition — for a dish, scaled to the portion actually visible; for a packaged product, per ONE typical serving of that product, never the whole multi-serving package. Estimate purely from appearance only when the item is not recognizable.\r\n\r\nThen list ingredients. Every visible food, drink, or packaged product belongs to EXACTLY ONE ingredient line:\r\n- A composed item (sandwich, wrap, burger) is ONE ingredient that already includes everything inside it — never also list its components as separate ingredients.\r\n- Packaged/branded items are food too, never leave one out.\r\n\r\nFor each ingredient:\r\n- name = a short generic food name\r\n- brand = the product name exactly as printed on the packaging if this is a packaged product; null if unbranded or not clearly legible (never guess a brand)\r\n- quantity = the number of WHOLE units, not fragments — an item cut into halves or slices is quantity 1 (a sandwich shown as two halves is 1 sandwich). Use more than 1 only for genuinely separate items (each nugget, each bottle, each package); use 1 if not countable\r\n- grams = the estimated weight in grams of ONE unit, judged from its visible size\r\n- protein, carbs, fats (grams) and calories (kcal) = for that same ONE unit (or one typical serving of a packaged product, or the whole visible portion when quantity is 1) — derive them from your grams estimate, not from a generic serving/cup/100g. NEVER multiplied by quantity\r\n\r\nIf no food, drink, or food product is visible, respond with \"ingredients\": [] and a short \"name\" like \"No food visible\".\r\n\r\nRespond ONLY with JSON:\r\n{\"name\":string,\"ingredients\":[{\"name\":string,\"brand\":string|null,\"quantity\":number,\"grams\":number,\"protein\":number,\"carbs\":number,\"fats\":number,\"calories\":number}]}",
+      "label": "You are reading a Nutrition Facts label in the image. Read the printed values directly - do NOT estimate from appearance.\r\n\r\nRules:\r\n- Return exactly ONE ingredient with quantity 1, holding the values for one serving as printed on the label. Protein, carbs, fats in grams; calories in kcal.\r\n- If a product or food name is visible, use it as \"name\" and \"brand\". If not, use \"Scanned Label\" as the name and set brand to null.\r\n- If the nutrition numbers are readable, ALWAYS return them - a missing name is never a reason to return an empty list.\r\n- Respond with \"ingredients\": [] and a short \"name\" like \"No label detected\" ONLY if the numbers themselves are unreadable.\r\n\r\nRespond ONLY with JSON:\r\n{\"name\":string,\"ingredients\":[{\"name\":string,\"brand\":string|null,\"quantity\":number,\"protein\":number,\"carbs\":number,\"fats\":number,\"calories\":number}]}"
+    },
+    "node": "v24.19.0"
+  },
+  "summary": {
+    "clean": {
+      "label": {
+        "n": 11,
+        "failures": {
+          "invalidJson": 0,
+          "noFood": 0,
+          "refusals": 0,
+          "callErrors": 0
+        },
+        "scoredRows": 11,
+        "fields": {
+          "calories": {
+            "medianAbsPct": 0,
+            "meanAbsPct": 0.2,
+            "p90AbsPct": 0.7,
+            "meanSignedPct": 0.1
+          },
+          "protein": {
+            "medianAbsPct": 0,
+            "meanAbsPct": 0.3,
+            "p90AbsPct": 0,
+            "meanSignedPct": -0.3
+          },
+          "carbs": {
+            "medianAbsPct": 0,
+            "meanAbsPct": 0,
+            "p90AbsPct": 0,
+            "meanSignedPct": 0
+          },
+          "fats": {
+            "medianAbsPct": 0,
+            "meanAbsPct": 0,
+            "p90AbsPct": 0,
+            "meanSignedPct": 0
+          }
+        },
+        "passCurve": {
+          "±5%": {
+            "calories": 100,
+            "protein": 100,
+            "carbs": 100,
+            "fats": 100,
+            "all": 100
+          },
+          "±10%": {
+            "calories": 100,
+            "protein": 100,
+            "carbs": 100,
+            "fats": 100,
+            "all": 100
+          },
+          "±25%": {
+            "calories": 100,
+            "protein": 100,
+            "carbs": 100,
+            "fats": 100,
+            "all": 100
+          },
+          "±50%": {
+            "calories": 100,
+            "protein": 100,
+            "carbs": 100,
+            "fats": 100,
+            "all": 100
+          }
+        },
+        "labelContractViolations": 0,
+        "latencyMs": {
+          "p50": 983,
+          "p95": 2191
+        },
+        "tokens": {
+          "prompt": 10677,
+          "completion": 601
+        }
+      }
+    },
+    "all": {
+      "label": {
+        "n": 15,
+        "failures": {
+          "invalidJson": 0,
+          "noFood": 0,
+          "refusals": 0,
+          "callErrors": 0
+        },
+        "scoredRows": 15,
+        "fields": {
+          "calories": {
+            "medianAbsPct": 0,
+            "meanAbsPct": 0.3,
+            "p90AbsPct": 0.9,
+            "meanSignedPct": -0.1
+          },
+          "protein": {
+            "medianAbsPct": 0,
+            "meanAbsPct": 0.4,
+            "p90AbsPct": 2.9,
+            "meanSignedPct": 0
+          },
+          "carbs": {
+            "medianAbsPct": 0,
+            "meanAbsPct": 0.5,
+            "p90AbsPct": 0,
+            "meanSignedPct": -0.5
+          },
+          "fats": {
+            "medianAbsPct": 0,
+            "meanAbsPct": 0.3,
+            "p90AbsPct": 0,
+            "meanSignedPct": 0.3
+          }
+        },
+        "passCurve": {
+          "±5%": {
+            "calories": 100,
+            "protein": 100,
+            "carbs": 100,
+            "fats": 100,
+            "all": 100
+          },
+          "±10%": {
+            "calories": 100,
+            "protein": 100,
+            "carbs": 100,
+            "fats": 100,
+            "all": 100
+          },
+          "±25%": {
+            "calories": 100,
+            "protein": 100,
+            "carbs": 100,
+            "fats": 100,
+            "all": 100
+          },
+          "±50%": {
+            "calories": 100,
+            "protein": 100,
+            "carbs": 100,
+            "fats": 100,
+            "all": 100
+          }
+        },
+        "labelContractViolations": 0,
+        "latencyMs": {
+          "p50": 983,
+          "p95": 2427
+        },
+        "tokens": {
+          "prompt": 15272,
+          "completion": 809
+        }
+      }
+    }
+  },
+  "rows": [
+    {
+      "id": "label-off-01",
+      "class": "label",
+      "mode": "label",
+      "truth": {
+        "id": "label-off-01",
+        "class": "label",
+        "image": "images/labels/label-off-01.jpg",
+        "name": "Biscuits à l'avoine morceaux de chocolat",
+        "brand_or_source": "Sarah Lee",
+        "source_url": "https://world.openfoodfacts.org/product/10533352",
+        "image_url": "https://images.openfoodfacts.org/images/products/10533352/nutrition_fr.10.full.jpg",
+        "basis": "per_100g",
+        "serving_desc": "50g",
+        "serving_size_g": 50,
+        "calories": 420,
+        "protein_g": 6,
+        "carbs_g": 64,
+        "fat_g": 16,
+        "label_tier": "panel",
+        "license": "CC-BY-SA-3.0 (image) / ODbL (data), Open Food Facts",
+        "barcode": "10533352",
+        "region": "ca",
+        "notes": "atwater check 212 vs 210 kcal/100g; CORRECTED from panel: pack declares 210kcal/P3/C32/F8 per 1 biscuit (50 g); OFF stored that per-serving column as per-100g (2x low). DB said 210/3/32/8.; OFF per-serving energy value dropped as implausible (DB said 105 kcal, 50.0g serving of a 420.0 kcal/100g product implies ~210)",
+        "corrected": true,
+        "width": 1621,
+        "height": 2700,
+        "format": "JPEG",
+        "bytes": 758273,
+        "sha256": "956aa8a9412edc4fe38b1ed8532ff420a71ff80362eceaa9931ea90d0f8773a5",
+        "atwater_deviation_pct": 1,
+        "verification": {
+          "verdict": "suspect",
+          "reason": "Canadian bilingual panel is fully legible but is declared 'pour 1 biscuit (50 g) / Per 1 cookie (50 g)' only: Calories 210, Fat 8 g, Carbohydrate 32 g, Protein 3 g. Serving size in grams is printed, so per-100g = 2x serving = 420 kcal / P6 / C64 / F16. The recorded per-100g values (210/3/32/8) are exactly the per-SERVING column, i.e. off by 2x (100%) on every macro. Row notes claim 'per-serving on pack: 105kcal P1.5 C16 F4', which is half of what the pack actually prints, corroborating that the per-100g basis was mis-keyed from the 50 g serving column.",
+          "details": {
+            "legible": true,
+            "panel_kcal_100g": 420,
+            "panel_protein_g": 6,
+            "panel_carbs_g": 64,
+            "panel_fat_g": 16
+          }
+        },
+        "is_clean": false
+      },
+      "response": {
+        "status": 200,
+        "latencyMs": 2427,
+        "usage": {
+          "prompt_tokens": 1462,
+          "completion_tokens": 50,
+          "total_tokens": 1512,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "rawContent": "{\"name\":\"Scanned Label\",\"ingredients\":[{\"name\":\"Scanned Label\",\"brand\":null,\"quantity\":1,\"protein\":3,\"carbs\":32,\"fats\":8,\"calories\":210}]}",
+        "retried": false
+      },
+      "parsed": {
+        "jsonValid": true,
+        "shapeErrors": [],
+        "name": "Scanned Label",
+        "ingredients": [
+          {
+            "name": "Scanned Label",
+            "brand": null,
+            "quantity": 1,
+            "protein": 3,
+            "carbs": 32,
+            "fats": 8,
+            "calories": 210
+          }
+        ],
+        "totals": {
+          "calories": 210,
+          "protein": 3,
+          "carbs": 32,
+          "fats": 8,
+          "grams": null
+        },
+        "ingredientCount": 1,
+        "sawFood": true,
+        "labelContractOk": true,
+        "predictedAtwaterDevPct": 1,
+        "implausibleDensity": 0
+      },
+      "score": {
+        "scored": true,
+        "basisUsed": "per_serving_scaled",
+        "expected": {
+          "calories": 210,
+          "protein": 3,
+          "carbs": 32,
+          "fats": 8
+        },
+        "errors": {
+          "calories": {
+            "unitErr": 0,
+            "pctErr": 0
+          },
+          "protein": {
+            "unitErr": 0,
+            "pctErr": 0
+          },
+          "carbs": {
+            "unitErr": 0,
+            "pctErr": 0
+          },
+          "fats": {
+            "unitErr": 0,
+            "pctErr": 0
+          }
+        },
+        "passes": {
+          "5": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "10": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "25": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "50": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          }
+        },
+        "recognition": null,
+        "grams": {
+          "predicted": null,
+          "expected": 50,
+          "errPct": null
+        }
+      }
+    },
+    {
+      "id": "label-off-02",
+      "class": "label",
+      "mode": "label",
+      "truth": {
+        "id": "label-off-02",
+        "class": "label",
+        "image": "images/labels/label-off-02.jpg",
+        "name": "Snack frit passé au four",
+        "brand_or_source": "Vialatina",
+        "source_url": "https://world.openfoodfacts.org/product/8031993000571",
+        "image_url": "https://images.openfoodfacts.org/images/products/803/199/300/0571/nutrition_fr.15.full.jpg",
+        "basis": "per_100g",
+        "serving_desc": null,
+        "serving_size_g": null,
+        "calories": 503,
+        "protein_g": 9.8,
+        "carbs_g": 61,
+        "fat_g": 24,
+        "label_tier": "panel",
+        "license": "CC-BY-SA-3.0 (image) / ODbL (data), Open Food Facts",
+        "barcode": "8031993000571",
+        "region": "fr",
+        "notes": "atwater check 499 vs 503 kcal/100g",
+        "corrected": false,
+        "width": 470,
+        "height": 360,
+        "format": "JPEG",
+        "bytes": 31832,
+        "sha256": "abc4c51c98581c29fb71d16e352830bdbb4ee0c2e4a49e09c087ac7f235ced77",
+        "atwater_deviation_pct": 0.8,
+        "verification": {
+          "verdict": "pass",
+          "reason": "French panel headed 'Valeurs nutritives 100g' gives per-100g directly: 2109 kJ / 503 kcal, matieres grasses 24 g, glucides 61 g, proteines 9.8 g. All four recorded values match exactly (kJ check: 2109/4.184 = 504 kcal, consistent with the printed 503).",
+          "details": {
+            "legible": true,
+            "panel_kcal_100g": 503,
+            "panel_protein_g": 9.8,
+            "panel_carbs_g": 61,
+            "panel_fat_g": 24
+          }
+        },
+        "is_clean": true
+      },
+      "response": {
+        "status": 200,
+        "latencyMs": 2058,
+        "usage": {
+          "prompt_tokens": 418,
+          "completion_tokens": 52,
+          "total_tokens": 470,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "rawContent": "{\"name\":\"Scanned Label\",\"ingredients\":[{\"name\":\"Scanned Label\",\"brand\":null,\"quantity\":1,\"protein\":9.8,\"carbs\":61,\"fats\":24,\"calories\":503}]}",
+        "retried": false
+      },
+      "parsed": {
+        "jsonValid": true,
+        "shapeErrors": [],
+        "name": "Scanned Label",
+        "ingredients": [
+          {
+            "name": "Scanned Label",
+            "brand": null,
+            "quantity": 1,
+            "protein": 9.8,
+            "carbs": 61,
+            "fats": 24,
+            "calories": 503
+          }
+        ],
+        "totals": {
+          "calories": 503,
+          "protein": 9.8,
+          "carbs": 61,
+          "fats": 24,
+          "grams": null
+        },
+        "ingredientCount": 1,
+        "sawFood": true,
+        "labelContractOk": true,
+        "predictedAtwaterDevPct": 0.8,
+        "implausibleDensity": 0
+      },
+      "score": {
+        "scored": true,
+        "basisUsed": "per_100g",
+        "expected": {
+          "calories": 503,
+          "protein": 9.8,
+          "carbs": 61,
+          "fats": 24
+        },
+        "errors": {
+          "calories": {
+            "unitErr": 0,
+            "pctErr": 0
+          },
+          "protein": {
+            "unitErr": 0,
+            "pctErr": 0
+          },
+          "carbs": {
+            "unitErr": 0,
+            "pctErr": 0
+          },
+          "fats": {
+            "unitErr": 0,
+            "pctErr": 0
+          }
+        },
+        "passes": {
+          "5": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "10": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "25": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "50": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          }
+        },
+        "recognition": null,
+        "grams": {
+          "predicted": null,
+          "expected": null,
+          "errPct": null
+        }
+      }
+    },
+    {
+      "id": "label-off-03",
+      "class": "label",
+      "mode": "label",
+      "truth": {
+        "id": "label-off-03",
+        "class": "label",
+        "image": "images/labels/label-off-03.jpg",
+        "name": "Pecorino Romano PDO",
+        "brand_or_source": "Lovilio",
+        "source_url": "https://world.openfoodfacts.org/product/20053451",
+        "image_url": "https://images.openfoodfacts.org/images/products/20053451/nutrition_en.18.full.jpg",
+        "basis": "per_100g",
+        "serving_desc": null,
+        "serving_size_g": null,
+        "calories": 397,
+        "protein_g": 25,
+        "carbs_g": 0,
+        "fat_g": 33,
+        "label_tier": "panel",
+        "license": "CC-BY-SA-3.0 (image) / ODbL (data), Open Food Facts",
+        "barcode": "20053451",
+        "region": "uk",
+        "notes": "atwater check 397 vs 397 kcal/100g",
+        "corrected": false,
+        "width": 1675,
+        "height": 642,
+        "format": "JPEG",
+        "bytes": 75328,
+        "sha256": "f46e967be9506a75fd587451742a14f456cde956f7b5a9d011662099655dd3f2",
+        "atwater_deviation_pct": 0,
+        "verification": {
+          "verdict": "pass",
+          "reason": "UK Lidl panel with explicit 'per 100 g' column: 1646 kJ / 397 kcal, Fat 33.0 g, Carbohydrate <0.1 g, Protein 25.0 g, Salt 4.60 g. All recorded values match (carbs recorded 0.0 vs printed <0.1 g, within label rounding). Lovilio is Lidl's own cheese brand, so the Lidl-branded pack is consistent with the recorded name Pecorino Romano PDO.",
+          "details": {
+            "legible": true,
+            "panel_kcal_100g": 397,
+            "panel_protein_g": 25,
+            "panel_carbs_g": 0,
+            "panel_fat_g": 33
+          }
+        },
+        "is_clean": true
+      },
+      "response": {
+        "status": 200,
+        "latencyMs": 2050,
+        "usage": {
+          "prompt_tokens": 502,
+          "completion_tokens": 57,
+          "total_tokens": 559,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "rawContent": "{\"name\":\"Scanned Label\",\"ingredients\":[{\"name\":\"Scanned Label\",\"brand\":\"Lidl\",\"quantity\":1,\"protein\":25.0,\"carbs\":0.1,\"fats\":33.0,\"calories\":397}]}",
+        "retried": false
+      },
+      "parsed": {
+        "jsonValid": true,
+        "shapeErrors": [],
+        "name": "Scanned Label",
+        "ingredients": [
+          {
+            "name": "Scanned Label",
+            "brand": "Lidl",
+            "quantity": 1,
+            "protein": 25,
+            "carbs": 0.1,
+            "fats": 33,
+            "calories": 397
+          }
+        ],
+        "totals": {
+          "calories": 397,
+          "protein": 25,
+          "carbs": 0.1,
+          "fats": 33,
+          "grams": null
+        },
+        "ingredientCount": 1,
+        "sawFood": true,
+        "labelContractOk": true,
+        "predictedAtwaterDevPct": 0.1,
+        "implausibleDensity": 0
+      },
+      "score": {
+        "scored": true,
+        "basisUsed": "per_100g",
+        "expected": {
+          "calories": 397,
+          "protein": 25,
+          "carbs": 0,
+          "fats": 33
+        },
+        "errors": {
+          "calories": {
+            "unitErr": 0,
+            "pctErr": 0
+          },
+          "protein": {
+            "unitErr": 0,
+            "pctErr": 0
+          },
+          "carbs": {
+            "unitErr": 0.1,
+            "pctErr": null
+          },
+          "fats": {
+            "unitErr": 0,
+            "pctErr": 0
+          }
+        },
+        "passes": {
+          "5": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "10": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "25": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "50": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          }
+        },
+        "recognition": null,
+        "grams": {
+          "predicted": null,
+          "expected": null,
+          "errPct": null
+        }
+      }
+    },
+    {
+      "id": "label-off-04",
+      "class": "label",
+      "mode": "label",
+      "truth": {
+        "id": "label-off-04",
+        "class": "label",
+        "image": "images/labels/label-off-04.jpg",
+        "name": "Tropical Juice with kale",
+        "brand_or_source": "Marks & Spencer",
+        "source_url": "https://world.openfoodfacts.org/product/00976510",
+        "image_url": "https://images.openfoodfacts.org/images/products/00976510/nutrition_en.39.full.jpg",
+        "basis": "per_100g",
+        "serving_desc": "250 ml",
+        "serving_size_g": 250,
+        "calories": 48,
+        "protein_g": 0.3,
+        "carbs_g": 11.4,
+        "fat_g": 0.1,
+        "label_tier": "panel",
+        "license": "CC-BY-SA-3.0 (image) / ODbL (data), Open Food Facts",
+        "barcode": "00976510",
+        "region": "uk2",
+        "notes": "per-serving on pack: 120kcal P0.75 C28.5 F0.25; atwater check 48 vs 48 kcal/100g",
+        "corrected": false,
+        "width": 1985,
+        "height": 1035,
+        "format": "JPEG",
+        "bytes": 217738,
+        "sha256": "ff3e365c96a3d096ed5f8bb4d23ba3e37fb48170bcd3fda5b1e6b739dc608b2c",
+        "atwater_deviation_pct": 0.6,
+        "verification": {
+          "verdict": "pass",
+          "reason": "M&S bilingual paragraph-style panel states 'Typical values per 100ml': 203 kJ / 48 kcal, Fat <0.1 g, Carbohydrate 11.4 g (of which sugars 10.5 g), Fibre 0.5 g, Protein 0.3 g. All four recorded values match the printed figures. Minor note: basis printed is per 100 ml rather than per 100 g, which for a juice is near-equivalent (density ~1.05) but is not literally identical.",
+          "details": {
+            "legible": true,
+            "panel_kcal_100g": 48,
+            "panel_protein_g": 0.3,
+            "panel_carbs_g": 11.4,
+            "panel_fat_g": 0.1
+          }
+        },
+        "is_clean": true
+      },
+      "response": {
+        "status": 200,
+        "latencyMs": 983,
+        "usage": {
+          "prompt_tokens": 622,
+          "completion_tokens": 56,
+          "total_tokens": 678,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "rawContent": "{\"name\":\"Scanned Label\",\"ingredients\":[{\"name\":\"Scanned Label\",\"brand\":null,\"quantity\":1,\"protein\":0.3,\"carbs\":11.4,\"fats\":0.1,\"calories\":48}]}",
+        "retried": false
+      },
+      "parsed": {
+        "jsonValid": true,
+        "shapeErrors": [],
+        "name": "Scanned Label",
+        "ingredients": [
+          {
+            "name": "Scanned Label",
+            "brand": null,
+            "quantity": 1,
+            "protein": 0.3,
+            "carbs": 11.4,
+            "fats": 0.1,
+            "calories": 48
+          }
+        ],
+        "totals": {
+          "calories": 48,
+          "protein": 0.3,
+          "carbs": 11.4,
+          "fats": 0.1,
+          "grams": null
+        },
+        "ingredientCount": 1,
+        "sawFood": true,
+        "labelContractOk": true,
+        "predictedAtwaterDevPct": 0.6,
+        "implausibleDensity": 0
+      },
+      "score": {
+        "scored": true,
+        "basisUsed": "per_100g",
+        "expected": {
+          "calories": 48,
+          "protein": 0.3,
+          "carbs": 11.4,
+          "fats": 0.1
+        },
+        "errors": {
+          "calories": {
+            "unitErr": 0,
+            "pctErr": 0
+          },
+          "protein": {
+            "unitErr": 0,
+            "pctErr": 0
+          },
+          "carbs": {
+            "unitErr": 0,
+            "pctErr": 0
+          },
+          "fats": {
+            "unitErr": 0,
+            "pctErr": 0
+          }
+        },
+        "passes": {
+          "5": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "10": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "25": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "50": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          }
+        },
+        "recognition": null,
+        "grams": {
+          "predicted": null,
+          "expected": null,
+          "errPct": null
+        }
+      }
+    },
+    {
+      "id": "label-off-05",
+      "class": "label",
+      "mode": "label",
+      "truth": {
+        "id": "label-off-05",
+        "class": "label",
+        "image": "images/labels/label-off-05.jpg",
+        "name": "Grapeseed Oil",
+        "brand_or_source": "Star,   Star Fine Fo0ds  Inc.",
+        "source_url": "https://world.openfoodfacts.org/product/0073210001839",
+        "image_url": "https://images.openfoodfacts.org/images/products/007/321/000/1839/nutrition_en.8.full.jpg",
+        "basis": "per_100ml",
+        "serving_desc": "1 Tbsp (15 ml)",
+        "serving_size_g": 15,
+        "calories": 866.7,
+        "protein_g": 0,
+        "carbs_g": 0,
+        "fat_g": 93.3,
+        "label_tier": "panel",
+        "license": "CC-BY-SA-3.0 (image) / ODbL (data), Open Food Facts",
+        "barcode": "0073210001839",
+        "region": "us",
+        "notes": "per-serving on pack: 130kcal P0 C0 F14; atwater check 840 vs 867 kcal/100g; BASIS CORRECTED: US FDA panel is volumetric (1 tbsp / 15 mL). OFF scaled mL as g, so the figures are per 100 mL, not per 100 g. Values left as-is under the correct basis.",
+        "corrected": true,
+        "width": 497,
+        "height": 505,
+        "format": "JPEG",
+        "bytes": 47326,
+        "sha256": "536432049ffb7259ac306e17ee719cebbfecac39a97c6e27876393d4d0266aed",
+        "atwater_deviation_pct": 3.1,
+        "verification": {
+          "verdict": "suspect",
+          "reason": "US FDA panel is legible but per-serving only, and the serving is VOLUMETRIC: 'Serving size 1 tbsp (15mL)', 130 kcal, Total Fat 14 g, Total Carbohydrate 0 g, Protein 0 g. Scaling by volume gives 866.7 kcal and 93.3 g fat per 100 mL, which reproduces the recorded values exactly, so OFF treated 15 mL as 15 g. Per 100 GRAMS cannot be confirmed from the panel: using grapeseed oil density ~0.92 g/mL the serving is ~13.8 g, giving ~942 kcal and ~101 g fat per 100 g, which is physically impossible (>100 g fat per 100 g) and ~9% above the recorded figures. True per-100g for a pure oil is ~884 kcal / 100 g fat. The recorded numbers are therefore per 100 ml mislabelled as per_100g; the panel fields above are the volume-based reading, not a confirmed per-100g measurement.",
+          "details": {
+            "legible": true,
+            "panel_kcal_100g": 866.7,
+            "panel_protein_g": 0,
+            "panel_carbs_g": 0,
+            "panel_fat_g": 93.3
+          }
+        },
+        "is_clean": false
+      },
+      "response": {
+        "status": 200,
+        "latencyMs": 979,
+        "usage": {
+          "prompt_tokens": 509,
+          "completion_tokens": 50,
+          "total_tokens": 559,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "rawContent": "{\"name\":\"Scanned Label\",\"ingredients\":[{\"name\":\"Scanned Label\",\"brand\":null,\"quantity\":1,\"protein\":0,\"carbs\":0,\"fats\":14,\"calories\":130}]}",
+        "retried": false
+      },
+      "parsed": {
+        "jsonValid": true,
+        "shapeErrors": [],
+        "name": "Scanned Label",
+        "ingredients": [
+          {
+            "name": "Scanned Label",
+            "brand": null,
+            "quantity": 1,
+            "protein": 0,
+            "carbs": 0,
+            "fats": 14,
+            "calories": 130
+          }
+        ],
+        "totals": {
+          "calories": 130,
+          "protein": 0,
+          "carbs": 0,
+          "fats": 14,
+          "grams": null
+        },
+        "ingredientCount": 1,
+        "sawFood": true,
+        "labelContractOk": true,
+        "predictedAtwaterDevPct": 3.1,
+        "implausibleDensity": 0
+      },
+      "score": {
+        "scored": true,
+        "basisUsed": "per_serving_scaled",
+        "expected": {
+          "calories": 130,
+          "protein": 0,
+          "carbs": 0,
+          "fats": 14
+        },
+        "errors": {
+          "calories": {
+            "unitErr": 0,
+            "pctErr": 0
+          },
+          "protein": {
+            "unitErr": 0,
+            "pctErr": null
+          },
+          "carbs": {
+            "unitErr": 0,
+            "pctErr": null
+          },
+          "fats": {
+            "unitErr": 0,
+            "pctErr": 0
+          }
+        },
+        "passes": {
+          "5": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "10": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "25": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "50": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          }
+        },
+        "recognition": null,
+        "grams": {
+          "predicted": null,
+          "expected": 15,
+          "errPct": null
+        }
+      }
+    },
+    {
+      "id": "label-off-06",
+      "class": "label",
+      "mode": "label",
+      "truth": {
+        "id": "label-off-06",
+        "class": "label",
+        "image": "images/labels/label-off-06.jpg",
+        "name": "Frosted s'mores toaster pastries, frosted s'mores",
+        "brand_or_source": "Kellogg's",
+        "source_url": "https://world.openfoodfacts.org/product/0038000321108",
+        "image_url": "https://images.openfoodfacts.org/images/products/003/800/032/1108/nutrition_fr.10.full.jpg",
+        "basis": "per_100g",
+        "serving_desc": "1 Pastry (52 g)",
+        "serving_size_g": 52,
+        "calories": 385,
+        "protein_g": 5.8,
+        "carbs_g": 69.2,
+        "fat_g": 9.6,
+        "label_tier": "panel",
+        "license": "CC-BY-SA-3.0 (image) / ODbL (data), Open Food Facts",
+        "barcode": "0038000321108",
+        "region": "us2",
+        "notes": "per-serving on pack: 200kcal P3 C36 F5; atwater check 387 vs 385 kcal/100g",
+        "corrected": false,
+        "width": 1636,
+        "height": 3687,
+        "format": "JPEG",
+        "bytes": 1075873,
+        "sha256": "c9d732906678a44d74941dc19180dd91df49cff3c84af806d12fb6afa74c5291",
+        "atwater_deviation_pct": 0.4,
+        "verification": {
+          "verdict": "pass",
+          "reason": "US/Spanish bilingual FDA panel, per-serving only: 1 Pastry (52g) = 200 kcal, fat 5g, total carb 36g, protein 3g. Serving size in grams is printed, so converted x100/52: 384.6 kcal, P 5.77, C 69.2, F 9.6. Matches recorded 385/5.8/69.2/9.6 within <1%.",
+          "details": {
+            "legible": true,
+            "panel_kcal_100g": 384.6,
+            "panel_protein_g": 5.8,
+            "panel_carbs_g": 69.2,
+            "panel_fat_g": 9.6
+          }
+        },
+        "is_clean": true
+      },
+      "response": {
+        "status": 200,
+        "latencyMs": 2191,
+        "usage": {
+          "prompt_tokens": 1912,
+          "completion_tokens": 50,
+          "total_tokens": 1962,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "rawContent": "{\"name\":\"Scanned Label\",\"ingredients\":[{\"name\":\"Scanned Label\",\"brand\":null,\"quantity\":1,\"protein\":3,\"carbs\":36,\"fats\":5,\"calories\":200}]}",
+        "retried": false
+      },
+      "parsed": {
+        "jsonValid": true,
+        "shapeErrors": [],
+        "name": "Scanned Label",
+        "ingredients": [
+          {
+            "name": "Scanned Label",
+            "brand": null,
+            "quantity": 1,
+            "protein": 3,
+            "carbs": 36,
+            "fats": 5,
+            "calories": 200
+          }
+        ],
+        "totals": {
+          "calories": 200,
+          "protein": 3,
+          "carbs": 36,
+          "fats": 5,
+          "grams": null
+        },
+        "ingredientCount": 1,
+        "sawFood": true,
+        "labelContractOk": true,
+        "predictedAtwaterDevPct": 0.5,
+        "implausibleDensity": 0
+      },
+      "score": {
+        "scored": true,
+        "basisUsed": "per_serving_scaled",
+        "expected": {
+          "calories": 200.2,
+          "protein": 3,
+          "carbs": 36,
+          "fats": 5
+        },
+        "errors": {
+          "calories": {
+            "unitErr": -0.2,
+            "pctErr": -0.1
+          },
+          "protein": {
+            "unitErr": 0,
+            "pctErr": 0
+          },
+          "carbs": {
+            "unitErr": 0,
+            "pctErr": 0
+          },
+          "fats": {
+            "unitErr": 0,
+            "pctErr": 0
+          }
+        },
+        "passes": {
+          "5": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "10": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "25": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "50": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          }
+        },
+        "recognition": null,
+        "grams": {
+          "predicted": null,
+          "expected": 52,
+          "errPct": null
+        }
+      }
+    },
+    {
+      "id": "label-off-07",
+      "class": "label",
+      "mode": "label",
+      "truth": {
+        "id": "label-off-07",
+        "class": "label",
+        "image": "images/labels/label-off-07.jpg",
+        "name": "Brown lentils",
+        "brand_or_source": "Agro Fusion",
+        "source_url": "https://world.openfoodfacts.org/product/87260403",
+        "image_url": "https://images.openfoodfacts.org/images/products/87260403/nutrition_en.10.full.jpg",
+        "basis": "per_100g",
+        "serving_desc": "48g",
+        "serving_size_g": 48,
+        "calories": 354,
+        "protein_g": 27.1,
+        "carbs_g": 60.4,
+        "fat_g": 2.1,
+        "label_tier": "panel",
+        "license": "CC-BY-SA-3.0 (image) / ODbL (data), Open Food Facts",
+        "barcode": "87260403",
+        "region": "ca",
+        "notes": "atwater check 177 vs 170 kcal/100g; CORRECTED from panel: pack declares 170kcal/P13/C29/F1 per 1/4 cup (48 g); OFF stored that per-serving column as per-100g (2.08x low). DB said 170/13/29/1.; OFF per-serving energy value dropped as implausible (DB said 82 kcal, 48.0g serving of a 354.0 kcal/100g product implies ~170)",
+        "corrected": true,
+        "width": 2229,
+        "height": 3615,
+        "format": "JPEG",
+        "bytes": 1190758,
+        "sha256": "f613dd8943f8edbde974a58ca96d2386f53750d8cd1f5027f289289900fd65e4",
+        "atwater_deviation_pct": 4.2,
+        "verification": {
+          "verdict": "suspect",
+          "reason": "Canadian bilingual panel is per 1/4 cup (48 g): 170 kcal, fat 1g, carb 29g, fibre 15g, protein 13g. The recorded per-100g row (170/13/29/1) is byte-for-byte the PER-SERVING column, so the basis is mis-keyed: true per-100g is 354 kcal, P 27.1, C 60.4, F 2.1 (~2.08x higher, ~108% error). Dry brown lentils at ~350 kcal/100g corroborates the converted value, not the recorded one.",
+          "details": {
+            "legible": true,
+            "panel_kcal_100g": 354.2,
+            "panel_protein_g": 27.1,
+            "panel_carbs_g": 60.4,
+            "panel_fat_g": 2.1
+          }
+        },
+        "is_clean": false
+      },
+      "response": {
+        "status": 200,
+        "latencyMs": 738,
+        "usage": {
+          "prompt_tokens": 1432,
+          "completion_tokens": 50,
+          "total_tokens": 1482,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "rawContent": "{\"name\":\"Scanned Label\",\"ingredients\":[{\"name\":\"Scanned Label\",\"brand\":null,\"quantity\":1,\"protein\":13,\"carbs\":29,\"fats\":1,\"calories\":170}]}",
+        "retried": false
+      },
+      "parsed": {
+        "jsonValid": true,
+        "shapeErrors": [],
+        "name": "Scanned Label",
+        "ingredients": [
+          {
+            "name": "Scanned Label",
+            "brand": null,
+            "quantity": 1,
+            "protein": 13,
+            "carbs": 29,
+            "fats": 1,
+            "calories": 170
+          }
+        ],
+        "totals": {
+          "calories": 170,
+          "protein": 13,
+          "carbs": 29,
+          "fats": 1,
+          "grams": null
+        },
+        "ingredientCount": 1,
+        "sawFood": true,
+        "labelContractOk": true,
+        "predictedAtwaterDevPct": 4.1,
+        "implausibleDensity": 0
+      },
+      "score": {
+        "scored": true,
+        "basisUsed": "per_serving_scaled",
+        "expected": {
+          "calories": 169.9,
+          "protein": 13,
+          "carbs": 29,
+          "fats": 1
+        },
+        "errors": {
+          "calories": {
+            "unitErr": 0.1,
+            "pctErr": 0.1
+          },
+          "protein": {
+            "unitErr": 0,
+            "pctErr": 0
+          },
+          "carbs": {
+            "unitErr": 0,
+            "pctErr": 0
+          },
+          "fats": {
+            "unitErr": 0,
+            "pctErr": 0
+          }
+        },
+        "passes": {
+          "5": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "10": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "25": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "50": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          }
+        },
+        "recognition": null,
+        "grams": {
+          "predicted": null,
+          "expected": 48,
+          "errPct": null
+        }
+      }
+    },
+    {
+      "id": "label-off-08",
+      "class": "label",
+      "mode": "label",
+      "truth": {
+        "id": "label-off-08",
+        "class": "label",
+        "image": "images/labels/label-off-08.jpg",
+        "name": "Carottes râpées",
+        "brand_or_source": "LE PRIX GAGNANT !",
+        "source_url": "https://world.openfoodfacts.org/product/3263859478612",
+        "image_url": "https://images.openfoodfacts.org/images/products/326/385/947/8612/nutrition.6.full.jpg",
+        "basis": "per_100g",
+        "serving_desc": null,
+        "serving_size_g": null,
+        "calories": 82,
+        "protein_g": 0.9,
+        "carbs_g": 4.8,
+        "fat_g": 6.1,
+        "label_tier": "panel",
+        "license": "CC-BY-SA-3.0 (image) / ODbL (data), Open Food Facts",
+        "barcode": "3263859478612",
+        "region": "fr",
+        "notes": "atwater check 78 vs 82 kcal/100g",
+        "corrected": false,
+        "width": 564,
+        "height": 328,
+        "format": "JPEG",
+        "bytes": 71788,
+        "sha256": "0c3eb1ae7a67838039e137f6b3dad968af7dbcad718f28b774637ab17fd59ad2",
+        "atwater_deviation_pct": 5.2,
+        "verification": {
+          "verdict": "pass",
+          "reason": "French panel reads 340kJ-82kcal, matieres grasses 6,1 g, glucides 4,8 g, proteines 0,9 g. Exact match to recorded 82/0.9/4.8/6.1. kJ check: 340/4.184 = 81.3 ~ 82 kcal. Top of image crops the 'pour 100 g' header line, but all macro rows are fully visible and EU labelling is per-100g by default.",
+          "details": {
+            "legible": true,
+            "panel_kcal_100g": 82,
+            "panel_protein_g": 0.9,
+            "panel_carbs_g": 4.8,
+            "panel_fat_g": 6.1
+          }
+        },
+        "is_clean": true
+      },
+      "response": {
+        "status": 200,
+        "latencyMs": 716,
+        "usage": {
+          "prompt_tokens": 439,
+          "completion_tokens": 56,
+          "total_tokens": 495,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "rawContent": "{\"name\":\"Scanned Label\",\"ingredients\":[{\"name\":\"Scanned Label\",\"brand\":null,\"quantity\":1,\"protein\":0.9,\"carbs\":4.8,\"fats\":6.1,\"calories\":82}]}",
+        "retried": false
+      },
+      "parsed": {
+        "jsonValid": true,
+        "shapeErrors": [],
+        "name": "Scanned Label",
+        "ingredients": [
+          {
+            "name": "Scanned Label",
+            "brand": null,
+            "quantity": 1,
+            "protein": 0.9,
+            "carbs": 4.8,
+            "fats": 6.1,
+            "calories": 82
+          }
+        ],
+        "totals": {
+          "calories": 82,
+          "protein": 0.9,
+          "carbs": 4.8,
+          "fats": 6.1,
+          "grams": null
+        },
+        "ingredientCount": 1,
+        "sawFood": true,
+        "labelContractOk": true,
+        "predictedAtwaterDevPct": 5.2,
+        "implausibleDensity": 0
+      },
+      "score": {
+        "scored": true,
+        "basisUsed": "per_100g",
+        "expected": {
+          "calories": 82,
+          "protein": 0.9,
+          "carbs": 4.8,
+          "fats": 6.1
+        },
+        "errors": {
+          "calories": {
+            "unitErr": 0,
+            "pctErr": 0
+          },
+          "protein": {
+            "unitErr": 0,
+            "pctErr": 0
+          },
+          "carbs": {
+            "unitErr": 0,
+            "pctErr": 0
+          },
+          "fats": {
+            "unitErr": 0,
+            "pctErr": 0
+          }
+        },
+        "passes": {
+          "5": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "10": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "25": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "50": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          }
+        },
+        "recognition": null,
+        "grams": {
+          "predicted": null,
+          "expected": null,
+          "errPct": null
+        }
+      }
+    },
+    {
+      "id": "label-off-09",
+      "class": "label",
+      "mode": "label",
+      "truth": {
+        "id": "label-off-09",
+        "class": "label",
+        "image": "images/labels/label-off-09.jpg",
+        "name": "Chocolate & Vanilla Cheesecakes",
+        "brand_or_source": "Gü",
+        "source_url": "https://world.openfoodfacts.org/product/5060425281182",
+        "image_url": "https://images.openfoodfacts.org/images/products/506/042/528/1182/nutrition_en.22.full.jpg",
+        "basis": "per_100g",
+        "serving_desc": "78g",
+        "serving_size_g": 78,
+        "calories": 403,
+        "protein_g": 4.3,
+        "carbs_g": 36.3,
+        "fat_g": 26.4,
+        "label_tier": "panel",
+        "license": "CC-BY-SA-3.0 (image) / ODbL (data), Open Food Facts",
+        "barcode": "5060425281182",
+        "region": "uk",
+        "notes": "per-serving on pack: 314kcal P3.35 C28.3 F20.6; atwater check 400 vs 403 kcal/100g",
+        "corrected": false,
+        "width": 1883,
+        "height": 1700,
+        "format": "JPEG",
+        "bytes": 737584,
+        "sha256": "3ec93ffa8db39bb9130b0865b755725f58b5d38688b22bbd047f31b66d9e6da1",
+        "atwater_deviation_pct": 0.7,
+        "verification": {
+          "verdict": "pass",
+          "reason": "UK panel has an explicit per-100g column: 1681 kJ / 403 kcal, fat 26.4, carbohydrate 36.3, protein 4.3. Exact match to recorded values. Second column (78g ramekin: 314 kcal / 20.6 / 28.3 / 3.3) is consistent with the 100g column.",
+          "details": {
+            "legible": true,
+            "panel_kcal_100g": 403,
+            "panel_protein_g": 4.3,
+            "panel_carbs_g": 36.3,
+            "panel_fat_g": 26.4
+          }
+        },
+        "is_clean": true
+      },
+      "response": {
+        "status": 200,
+        "latencyMs": 836,
+        "usage": {
+          "prompt_tokens": 892,
+          "completion_tokens": 56,
+          "total_tokens": 948,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "rawContent": "{\"name\":\"Scanned Label\",\"ingredients\":[{\"name\":\"Scanned Label\",\"brand\":null,\"quantity\":1,\"protein\":3.3,\"carbs\":28.3,\"fats\":20.6,\"calories\":314}]}",
+        "retried": false
+      },
+      "parsed": {
+        "jsonValid": true,
+        "shapeErrors": [],
+        "name": "Scanned Label",
+        "ingredients": [
+          {
+            "name": "Scanned Label",
+            "brand": null,
+            "quantity": 1,
+            "protein": 3.3,
+            "carbs": 28.3,
+            "fats": 20.6,
+            "calories": 314
+          }
+        ],
+        "totals": {
+          "calories": 314,
+          "protein": 3.3,
+          "carbs": 28.3,
+          "fats": 20.6,
+          "grams": null
+        },
+        "ingredientCount": 1,
+        "sawFood": true,
+        "labelContractOk": true,
+        "predictedAtwaterDevPct": 0.7,
+        "implausibleDensity": 0
+      },
+      "score": {
+        "scored": true,
+        "basisUsed": "per_serving_scaled",
+        "expected": {
+          "calories": 314.3,
+          "protein": 3.4,
+          "carbs": 28.3,
+          "fats": 20.6
+        },
+        "errors": {
+          "calories": {
+            "unitErr": -0.3,
+            "pctErr": -0.1
+          },
+          "protein": {
+            "unitErr": -0.1,
+            "pctErr": -2.9
+          },
+          "carbs": {
+            "unitErr": 0,
+            "pctErr": 0
+          },
+          "fats": {
+            "unitErr": 0,
+            "pctErr": 0
+          }
+        },
+        "passes": {
+          "5": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "10": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "25": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "50": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          }
+        },
+        "recognition": null,
+        "grams": {
+          "predicted": null,
+          "expected": 78,
+          "errPct": null
+        }
+      }
+    },
+    {
+      "id": "label-off-11",
+      "class": "label",
+      "mode": "label",
+      "truth": {
+        "id": "label-off-11",
+        "class": "label",
+        "image": "images/labels/label-off-11.jpg",
+        "name": "Cheddar Jack Shredded Cheese",
+        "brand_or_source": "Giant",
+        "source_url": "https://world.openfoodfacts.org/product/0688267588839",
+        "image_url": "https://images.openfoodfacts.org/images/products/068/826/758/8839/nutrition_en.5.full.jpg",
+        "basis": "per_100g",
+        "serving_desc": "0.25 cup (28 g)",
+        "serving_size_g": 28,
+        "calories": 393,
+        "protein_g": 21.4,
+        "carbs_g": 3.6,
+        "fat_g": 32.1,
+        "label_tier": "panel",
+        "license": "CC-BY-SA-3.0 (image) / ODbL (data), Open Food Facts",
+        "barcode": "0688267588839",
+        "region": "us",
+        "notes": "per-serving on pack: 110kcal P6 C1 F9; atwater check 389 vs 393 kcal/100g",
+        "corrected": false,
+        "width": 1280,
+        "height": 1700,
+        "format": "JPEG",
+        "bytes": 306412,
+        "sha256": "31df82a84c02125a93312b1ef9dd8efc1d65acf35022c4d70931adf8105e7ea7",
+        "atwater_deviation_pct": 1,
+        "verification": {
+          "verdict": "pass",
+          "reason": "US FDA panel, per-serving only: 1/4 cup (28 g), 110 kcal, Total Fat 9 g, Total Carbohydrate 1 g, Protein 6 g. Serving size in grams is legible so converted x100/28: 392.9 kcal, 21.4 P, 3.6 C, 32.1 F -- matches recorded 393/21.4/3.6/32.1 to <0.1%. Product on pack (Giant/ADUSA finely shredded cheddar-Monterey Jack) matches name. Caveat: carbs derive from a 1 g rounded value, so 3.6 g/100g carries large rounding uncertainty, but it is what the panel implies.",
+          "details": {
+            "legible": true,
+            "panel_kcal_100g": 392.9,
+            "panel_protein_g": 21.4,
+            "panel_carbs_g": 3.6,
+            "panel_fat_g": 32.1
+          }
+        },
+        "is_clean": true
+      },
+      "response": {
+        "status": 200,
+        "latencyMs": 866,
+        "usage": {
+          "prompt_tokens": 1222,
+          "completion_tokens": 62,
+          "total_tokens": 1284,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "rawContent": "{\"name\":\"Finely Shredded Cheddar Jack Cheese\",\"ingredients\":[{\"name\":\"Finely Shredded Cheddar Jack Cheese\",\"brand\":null,\"quantity\":1,\"protein\":6,\"carbs\":1,\"fats\":9,\"calories\":110}]}",
+        "retried": false
+      },
+      "parsed": {
+        "jsonValid": true,
+        "shapeErrors": [],
+        "name": "Finely Shredded Cheddar Jack Cheese",
+        "ingredients": [
+          {
+            "name": "Finely Shredded Cheddar Jack Cheese",
+            "brand": null,
+            "quantity": 1,
+            "protein": 6,
+            "carbs": 1,
+            "fats": 9,
+            "calories": 110
+          }
+        ],
+        "totals": {
+          "calories": 110,
+          "protein": 6,
+          "carbs": 1,
+          "fats": 9,
+          "grams": null
+        },
+        "ingredientCount": 1,
+        "sawFood": true,
+        "labelContractOk": true,
+        "predictedAtwaterDevPct": 0.9,
+        "implausibleDensity": 0
+      },
+      "score": {
+        "scored": true,
+        "basisUsed": "per_serving_scaled",
+        "expected": {
+          "calories": 110,
+          "protein": 6,
+          "carbs": 1,
+          "fats": 9
+        },
+        "errors": {
+          "calories": {
+            "unitErr": 0,
+            "pctErr": 0
+          },
+          "protein": {
+            "unitErr": 0,
+            "pctErr": 0
+          },
+          "carbs": {
+            "unitErr": 0,
+            "pctErr": 0
+          },
+          "fats": {
+            "unitErr": 0,
+            "pctErr": 0
+          }
+        },
+        "passes": {
+          "5": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "10": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "25": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "50": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          }
+        },
+        "recognition": null,
+        "grams": {
+          "predicted": null,
+          "expected": 28,
+          "errPct": null
+        }
+      }
+    },
+    {
+      "id": "label-off-12",
+      "class": "label",
+      "mode": "label",
+      "truth": {
+        "id": "label-off-12",
+        "class": "label",
+        "image": "images/labels/label-off-12.jpg",
+        "name": "Milk chocolate, peanut butter cup miniatures",
+        "brand_or_source": "Hershey's",
+        "source_url": "https://world.openfoodfacts.org/product/0034000448609",
+        "image_url": "https://images.openfoodfacts.org/images/products/003/400/044/8609/nutrition.8.full.jpg",
+        "basis": "per_100g",
+        "serving_desc": "5 pieces (44 g)",
+        "serving_size_g": 44,
+        "calories": 500,
+        "protein_g": 9.1,
+        "carbs_g": 59.1,
+        "fat_g": 29.6,
+        "label_tier": "panel",
+        "license": "CC-BY-SA-3.0 (image) / ODbL (data), Open Food Facts",
+        "barcode": "0034000448609",
+        "region": "us2",
+        "notes": "atwater check 539 vs 500 kcal/100g; SERVING CORRECTED from panel: pack reads 'Serving Size 5 pieces (44 g)', row had '3 piece'. Per-100g macros verified correct against the panel.; OFF per-serving energy value dropped as implausible (DB said 130 kcal, 44.0g serving of a 500.0 kcal/100g product implies ~220)",
+        "corrected": true,
+        "width": 1322,
+        "height": 2905,
+        "format": "JPEG",
+        "bytes": 1557036,
+        "sha256": "d0d1f0aa983add3a99efcd083dfe8e419fc3ce333bc318c932784c51f0998211",
+        "atwater_deviation_pct": 7.8,
+        "verification": {
+          "verdict": "pass",
+          "reason": "Legacy US panel, per-serving only: 44 g, 220 kcal, Total Fat 13 g, Total Carbohydrate 26 g, Protein 4 g. Converted x100/44: 500.0 kcal, 9.1 P, 59.1 C, 29.5 F -- matches recorded 500/9.1/59.1/29.6 within 0.3%. Flag (outside the four graded fields): panel states 'Serving Size 5 pieces (44 g)' while the row records serving_desc '3 piece (44 g)', and the row's notes cite a per-serving 130 kcal P2 C16 F7 which is internally inconsistent with 44 g at 500 kcal/100g (it corresponds to a ~26 g serving). Macros pass; serving metadata is questionable.",
+          "details": {
+            "legible": true,
+            "panel_kcal_100g": 500,
+            "panel_protein_g": 9.1,
+            "panel_carbs_g": 59.1,
+            "panel_fat_g": 29.5
+          }
+        },
+        "is_clean": true
+      },
+      "response": {
+        "status": 200,
+        "latencyMs": 1240,
+        "usage": {
+          "prompt_tokens": 1852,
+          "completion_tokens": 50,
+          "total_tokens": 1902,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "rawContent": "{\"name\":\"Scanned Label\",\"ingredients\":[{\"name\":\"Scanned Label\",\"brand\":null,\"quantity\":1,\"protein\":4,\"carbs\":26,\"fats\":13,\"calories\":220}]}",
+        "retried": false
+      },
+      "parsed": {
+        "jsonValid": true,
+        "shapeErrors": [],
+        "name": "Scanned Label",
+        "ingredients": [
+          {
+            "name": "Scanned Label",
+            "brand": null,
+            "quantity": 1,
+            "protein": 4,
+            "carbs": 26,
+            "fats": 13,
+            "calories": 220
+          }
+        ],
+        "totals": {
+          "calories": 220,
+          "protein": 4,
+          "carbs": 26,
+          "fats": 13,
+          "grams": null
+        },
+        "ingredientCount": 1,
+        "sawFood": true,
+        "labelContractOk": true,
+        "predictedAtwaterDevPct": 7.7,
+        "implausibleDensity": 0
+      },
+      "score": {
+        "scored": true,
+        "basisUsed": "per_serving_scaled",
+        "expected": {
+          "calories": 220,
+          "protein": 4,
+          "carbs": 26,
+          "fats": 13
+        },
+        "errors": {
+          "calories": {
+            "unitErr": 0,
+            "pctErr": 0
+          },
+          "protein": {
+            "unitErr": 0,
+            "pctErr": 0
+          },
+          "carbs": {
+            "unitErr": 0,
+            "pctErr": 0
+          },
+          "fats": {
+            "unitErr": 0,
+            "pctErr": 0
+          }
+        },
+        "passes": {
+          "5": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "10": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "25": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "50": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          }
+        },
+        "recognition": null,
+        "grams": {
+          "predicted": null,
+          "expected": 44,
+          "errPct": null
+        }
+      }
+    },
+    {
+      "id": "label-off-13",
+      "class": "label",
+      "mode": "label",
+      "truth": {
+        "id": "label-off-13",
+        "class": "label",
+        "image": "images/labels/label-off-13.jpg",
+        "name": "Couscous mieux etre",
+        "brand_or_source": "Metro",
+        "source_url": "https://world.openfoodfacts.org/product/0059749901468",
+        "image_url": "https://images.openfoodfacts.org/images/products/005/974/990/1468/nutrition_fr.15.full.jpg",
+        "basis": "per_100g",
+        "serving_desc": null,
+        "serving_size_g": 45,
+        "calories": 311.1,
+        "protein_g": 13.3,
+        "carbs_g": 62.2,
+        "fat_g": 1.1,
+        "label_tier": "panel",
+        "license": "CC-BY-SA-3.0 (image) / ODbL (data), Open Food Facts",
+        "barcode": "0059749901468",
+        "region": "ca",
+        "notes": "atwater check 312 vs 311 kcal/100g; SERVING FILLED from panel: panel states 45 g; DB left it null.",
+        "corrected": true,
+        "width": 2402,
+        "height": 4032,
+        "format": "JPEG",
+        "bytes": 1406513,
+        "sha256": "2b6b4381fa6ff827e0f06b4dfdabb07b0af811e4243fa84b2f2d1605c3d96882",
+        "atwater_deviation_pct": 0.3,
+        "verification": {
+          "verdict": "pass",
+          "reason": "Canadian bilingual panel, per 1/4 cup (45 g): 140 Calories, Fat 0.5 g, Carbohydrate 28 g, Protein 6 g. Converted x100/45: 311.1 kcal, 13.3 P, 62.2 C, 1.1 F -- exact match to recorded 311.1/13.3/62.2/1.1. Ingredient 'Durum wheat semolina' is consistent with couscous. Minor note: row has serving_size_g null although the panel clearly states 45 g.",
+          "details": {
+            "legible": true,
+            "panel_kcal_100g": 311.1,
+            "panel_protein_g": 13.3,
+            "panel_carbs_g": 62.2,
+            "panel_fat_g": 1.1
+          }
+        },
+        "is_clean": true
+      },
+      "response": {
+        "status": 200,
+        "latencyMs": 850,
+        "usage": {
+          "prompt_tokens": 1462,
+          "completion_tokens": 52,
+          "total_tokens": 1514,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "rawContent": "{\"name\":\"Scanned Label\",\"ingredients\":[{\"name\":\"Scanned Label\",\"brand\":null,\"quantity\":1,\"protein\":6,\"carbs\":28,\"fats\":0.5,\"calories\":140}]}",
+        "retried": false
+      },
+      "parsed": {
+        "jsonValid": true,
+        "shapeErrors": [],
+        "name": "Scanned Label",
+        "ingredients": [
+          {
+            "name": "Scanned Label",
+            "brand": null,
+            "quantity": 1,
+            "protein": 6,
+            "carbs": 28,
+            "fats": 0.5,
+            "calories": 140
+          }
+        ],
+        "totals": {
+          "calories": 140,
+          "protein": 6,
+          "carbs": 28,
+          "fats": 0.5,
+          "grams": null
+        },
+        "ingredientCount": 1,
+        "sawFood": true,
+        "labelContractOk": true,
+        "predictedAtwaterDevPct": 0.4,
+        "implausibleDensity": 0
+      },
+      "score": {
+        "scored": true,
+        "basisUsed": "per_serving_scaled",
+        "expected": {
+          "calories": 140,
+          "protein": 6,
+          "carbs": 28,
+          "fats": 0.5
+        },
+        "errors": {
+          "calories": {
+            "unitErr": 0,
+            "pctErr": 0
+          },
+          "protein": {
+            "unitErr": 0,
+            "pctErr": 0
+          },
+          "carbs": {
+            "unitErr": 0,
+            "pctErr": 0
+          },
+          "fats": {
+            "unitErr": 0,
+            "pctErr": 0
+          }
+        },
+        "passes": {
+          "5": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "10": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "25": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "50": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          }
+        },
+        "recognition": null,
+        "grams": {
+          "predicted": null,
+          "expected": 45,
+          "errPct": null
+        }
+      }
+    },
+    {
+      "id": "label-off-15",
+      "class": "label",
+      "mode": "label",
+      "truth": {
+        "id": "label-off-15",
+        "class": "label",
+        "image": "images/labels/label-off-15.jpg",
+        "name": "Apricot yoghurt",
+        "brand_or_source": "Ferme des Peupliers",
+        "source_url": "https://world.openfoodfacts.org/product/3374270040453",
+        "image_url": "https://images.openfoodfacts.org/images/products/337/427/004/0453/nutrition_en.26.full.jpg",
+        "basis": "per_100g",
+        "serving_desc": null,
+        "serving_size_g": null,
+        "calories": 96.3,
+        "protein_g": 3.3,
+        "carbs_g": 15.3,
+        "fat_g": 2.4,
+        "label_tier": "panel",
+        "license": "CC-BY-SA-3.0 (image) / ODbL (data), Open Food Facts",
+        "barcode": "3374270040453",
+        "region": "uk",
+        "notes": "atwater check 96 vs 96 kcal/100g",
+        "corrected": false,
+        "width": 1885,
+        "height": 2450,
+        "format": "JPEG",
+        "bytes": 375808,
+        "sha256": "972b4704eb1151b2ab52250e420cc2c1c9287470206b2ed615b3efc4f046b4ab",
+        "atwater_deviation_pct": 0.3,
+        "verification": {
+          "verdict": "suspect",
+          "reason": "EU panel printed directly per 100 g and fully legible: 'Energie 394 kJ / 93.4 kcal, Matieres Grasses 2.5 g, dont acides gras satures 1.7 g, Glucides 14.3 g, dont sucres 13.6 g, Proteines 3.4 g, Sel 0.1 g' (394 kJ / 4.184 = 94.2 kcal, consistent). Carbs disagree: panel 14.3 vs recorded 15.3, a 7.0% gap (>5%) and a plausible mis-key. Energy 93.4 vs recorded 96.3 is 3.1% off, protein 3.4 vs 3.3 is 2.9% off, fat 2.5 vs 2.4 is 4.0% off -- each individually inside tolerance but all skewed the same direction, consistent with a different product revision. Product identity is fine (Au bon lait de Normandie apricot yoghurt, apricot puree 17%, FR 27-247-001 CE).",
+          "details": {
+            "legible": true,
+            "panel_kcal_100g": 93.4,
+            "panel_protein_g": 3.4,
+            "panel_carbs_g": 14.3,
+            "panel_fat_g": 2.5
+          }
+        },
+        "is_clean": false
+      },
+      "response": {
+        "status": 200,
+        "latencyMs": 1167,
+        "usage": {
+          "prompt_tokens": 1192,
+          "completion_tokens": 58,
+          "total_tokens": 1250,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "rawContent": "{\"name\":\"Scanned Label\",\"ingredients\":[{\"name\":\"Scanned Label\",\"brand\":null,\"quantity\":1,\"protein\":3.4,\"carbs\":14.3,\"fats\":2.5,\"calories\":93.4}]}",
+        "retried": false
+      },
+      "parsed": {
+        "jsonValid": true,
+        "shapeErrors": [],
+        "name": "Scanned Label",
+        "ingredients": [
+          {
+            "name": "Scanned Label",
+            "brand": null,
+            "quantity": 1,
+            "protein": 3.4,
+            "carbs": 14.3,
+            "fats": 2.5,
+            "calories": 93.4
+          }
+        ],
+        "totals": {
+          "calories": 93.4,
+          "protein": 3.4,
+          "carbs": 14.3,
+          "fats": 2.5,
+          "grams": null
+        },
+        "ingredientCount": 1,
+        "sawFood": true,
+        "labelContractOk": true,
+        "predictedAtwaterDevPct": 0.1,
+        "implausibleDensity": 0
+      },
+      "score": {
+        "scored": true,
+        "basisUsed": "per_100g",
+        "expected": {
+          "calories": 96.3,
+          "protein": 3.3,
+          "carbs": 15.3,
+          "fats": 2.4
+        },
+        "errors": {
+          "calories": {
+            "unitErr": -2.9,
+            "pctErr": -3
+          },
+          "protein": {
+            "unitErr": 0.1,
+            "pctErr": 3
+          },
+          "carbs": {
+            "unitErr": -1,
+            "pctErr": -6.5
+          },
+          "fats": {
+            "unitErr": 0.1,
+            "pctErr": 4.2
+          }
+        },
+        "passes": {
+          "5": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "10": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "25": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "50": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          }
+        },
+        "recognition": null,
+        "grams": {
+          "predicted": null,
+          "expected": null,
+          "errPct": null
+        }
+      }
+    },
+    {
+      "id": "label-off-16",
+      "class": "label",
+      "mode": "label",
+      "truth": {
+        "id": "label-off-16",
+        "class": "label",
+        "image": "images/labels/label-off-16.jpg",
+        "name": "Dark chocolate butter biscuits",
+        "brand_or_source": "Tesco",
+        "source_url": "https://world.openfoodfacts.org/product/5051277445525",
+        "image_url": "https://images.openfoodfacts.org/images/products/505/127/744/5525/nutrition_en.14.full.jpg",
+        "basis": "per_100g",
+        "serving_desc": "14g",
+        "serving_size_g": 14,
+        "calories": 511,
+        "protein_g": 6.9,
+        "carbs_g": 58.3,
+        "fat_g": 26.7,
+        "label_tier": "panel",
+        "license": "CC-BY-SA-3.0 (image) / ODbL (data), Open Food Facts",
+        "barcode": "5051277445525",
+        "region": "topup2",
+        "notes": "atwater check 501 vs 511 kcal/100g",
+        "corrected": false,
+        "width": 645,
+        "height": 425,
+        "format": "JPEG",
+        "bytes": 50064,
+        "sha256": "e5c095f68e32941e2ccaac1083266699ad561effa7fa8eef7db8449b656caca6",
+        "atwater_deviation_pct": 1.9,
+        "verification": {
+          "verdict": "pass",
+          "reason": "Tesco-style panel with explicit '100g contains' column plus a 'One biscuit (14g)' per-serving column. Per-100g reads 2136kJ/511kcal, fat 26.7g, carbohydrate 58.3g, protein 6.9g - exact match to recorded values on all four macros. Correct column used; no per-serving/per-100g basis error (the 14g column reads 299kJ/72kcal, 3.7g fat, 8.2g carb, 1.0g protein, which is not what was stored). serving_desc 14g matches panel.",
+          "details": {
+            "legible": true,
+            "panel_kcal_100g": 511,
+            "panel_protein_g": 6.9,
+            "panel_carbs_g": 58.3,
+            "panel_fat_g": 26.7
+          }
+        },
+        "is_clean": true
+      },
+      "response": {
+        "status": 200,
+        "latencyMs": 1197,
+        "usage": {
+          "prompt_tokens": 554,
+          "completion_tokens": 54,
+          "total_tokens": 608,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "rawContent": "{\"name\":\"Scanned Label\",\"ingredients\":[{\"name\":\"Scanned Label\",\"brand\":null,\"quantity\":1,\"protein\":1,\"carbs\":8.2,\"fats\":3.7,\"calories\":72}]}",
+        "retried": false
+      },
+      "parsed": {
+        "jsonValid": true,
+        "shapeErrors": [],
+        "name": "Scanned Label",
+        "ingredients": [
+          {
+            "name": "Scanned Label",
+            "brand": null,
+            "quantity": 1,
+            "protein": 1,
+            "carbs": 8.2,
+            "fats": 3.7,
+            "calories": 72
+          }
+        ],
+        "totals": {
+          "calories": 72,
+          "protein": 1,
+          "carbs": 8.2,
+          "fats": 3.7,
+          "grams": null
+        },
+        "ingredientCount": 1,
+        "sawFood": true,
+        "labelContractOk": true,
+        "predictedAtwaterDevPct": 2.6,
+        "implausibleDensity": 0
+      },
+      "score": {
+        "scored": true,
+        "basisUsed": "per_serving_scaled",
+        "expected": {
+          "calories": 71.5,
+          "protein": 1,
+          "carbs": 8.2,
+          "fats": 3.7
+        },
+        "errors": {
+          "calories": {
+            "unitErr": 0.5,
+            "pctErr": 0.7
+          },
+          "protein": {
+            "unitErr": 0,
+            "pctErr": 0
+          },
+          "carbs": {
+            "unitErr": 0,
+            "pctErr": 0
+          },
+          "fats": {
+            "unitErr": 0,
+            "pctErr": 0
+          }
+        },
+        "passes": {
+          "5": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "10": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "25": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "50": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          }
+        },
+        "recognition": null,
+        "grams": {
+          "predicted": null,
+          "expected": 14,
+          "errPct": null
+        }
+      }
+    },
+    {
+      "id": "label-off-17",
+      "class": "label",
+      "mode": "label",
+      "truth": {
+        "id": "label-off-17",
+        "class": "label",
+        "image": "images/labels/label-off-17.jpg",
+        "name": "Mcvitie's Dark Chocolate Digestive Thins",
+        "brand_or_source": "Mcvitie, United Biscuits",
+        "source_url": "https://world.openfoodfacts.org/product/5000168198392",
+        "image_url": "https://images.openfoodfacts.org/images/products/500/016/819/8392/nutrition_en.40.full.jpg",
+        "basis": "per_100g",
+        "serving_desc": "6g",
+        "serving_size_g": 6.2,
+        "calories": 512,
+        "protein_g": 6.4,
+        "carbs_g": 60.1,
+        "fat_g": 26.3,
+        "label_tier": "panel",
+        "license": "CC-BY-SA-3.0 (image) / ODbL (data), Open Food Facts",
+        "barcode": "5000168198392",
+        "region": "topup2",
+        "notes": "atwater check 503 vs 512 kcal/100g; SERVING CORRECTED from panel: declares 6.2 g per biscuit, DB said 6.0. Per-100g macros verified exact against the panel.",
+        "corrected": true,
+        "width": 2409,
+        "height": 1833,
+        "format": "JPEG",
+        "bytes": 764395,
+        "sha256": "e82e24374914582aa08cc357534c5017006aeafb1506e46e17e2c5598f592709",
+        "atwater_deviation_pct": 1.8,
+        "verification": {
+          "verdict": "pass",
+          "reason": "McVitie's Nutrition Information panel, two columns: PER 100g and PER BISCUIT (6.2g). Per-100g reads 2139kJ/512kcal, fat 26.3g, carbohydrate 60.1g, protein 6.4g - exact match to recorded values on all four macros. Correct column used (per-biscuit column is 133kJ/32kcal, 1.6g/3.7g/0.4g). Minor metadata nit only: row records serving_size_g 6.0 while panel declares 6.2g per biscuit; does not affect the per-100g figures.",
+          "details": {
+            "legible": true,
+            "panel_kcal_100g": 512,
+            "panel_protein_g": 6.4,
+            "panel_carbs_g": 60.1,
+            "panel_fat_g": 26.3
+          }
+        },
+        "is_clean": true
+      },
+      "response": {
+        "status": 200,
+        "latencyMs": 728,
+        "usage": {
+          "prompt_tokens": 802,
+          "completion_tokens": 56,
+          "total_tokens": 858,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "rawContent": "{\"name\":\"Scanned Label\",\"ingredients\":[{\"name\":\"Scanned Label\",\"brand\":null,\"quantity\":1,\"protein\":0.4,\"carbs\":3.7,\"fats\":1.6,\"calories\":32}]}",
+        "retried": false
+      },
+      "parsed": {
+        "jsonValid": true,
+        "shapeErrors": [],
+        "name": "Scanned Label",
+        "ingredients": [
+          {
+            "name": "Scanned Label",
+            "brand": null,
+            "quantity": 1,
+            "protein": 0.4,
+            "carbs": 3.7,
+            "fats": 1.6,
+            "calories": 32
+          }
+        ],
+        "totals": {
+          "calories": 32,
+          "protein": 0.4,
+          "carbs": 3.7,
+          "fats": 1.6,
+          "grams": null
+        },
+        "ingredientCount": 1,
+        "sawFood": true,
+        "labelContractOk": true,
+        "predictedAtwaterDevPct": 3.7,
+        "implausibleDensity": 0
+      },
+      "score": {
+        "scored": true,
+        "basisUsed": "per_serving_scaled",
+        "expected": {
+          "calories": 31.7,
+          "protein": 0.4,
+          "carbs": 3.7,
+          "fats": 1.6
+        },
+        "errors": {
+          "calories": {
+            "unitErr": 0.3,
+            "pctErr": 0.9
+          },
+          "protein": {
+            "unitErr": 0,
+            "pctErr": 0
+          },
+          "carbs": {
+            "unitErr": 0,
+            "pctErr": 0
+          },
+          "fats": {
+            "unitErr": 0,
+            "pctErr": 0
+          }
+        },
+        "passes": {
+          "5": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "10": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "25": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "50": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          }
+        },
+        "recognition": null,
+        "grams": {
+          "predicted": null,
+          "expected": 6.2,
+          "errPct": null
+        }
+      }
+    }
+  ]
+}

@@ -113,7 +113,7 @@ describe('getFoodSearchResults', () => {
         expect(Sentry.captureException).not.toHaveBeenCalled()
     })
 
-    it('rethrows a non-429 edge function error with the raw status and body (surfaced by foodDBModal, swallowed by enrichBrandedItem), and captures it exactly once', async () => {
+    it('rethrows a non-429 edge function error with the raw status and body (surfaced by foodDBModal), and captures it exactly once', async () => {
         mockFetch.mockResolvedValue({ ok: false, status: 500, text: async () => 'boom' })
 
         await expect(getFoodSearchResults('error')).rejects.toThrow('Edge function error: 500 - boom')

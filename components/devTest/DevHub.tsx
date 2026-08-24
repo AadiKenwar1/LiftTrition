@@ -53,6 +53,8 @@ const GROUPS: { title: string; items: { label: string; route: string }[] }[] = [
             { label: 'Edit Entry — Unified editor', route: '/devTest/editEntry' },
             { label: 'Rename Workout — Double-tap guard', route: '/devTest/renameModal' },
             { label: 'Color Hue Review', route: '/devTest/colorHue' },
+            { label: 'Info Page — style variants', route: '/devTest/infoPageStyle' },
+            { label: 'Plan — "How is this calculated?" popup', route: '/devTest/planInfoPopup' },
             { label: 'Number Parsing (F1)', route: '/devTest/numberParsing' },
             { label: 'Log History — delete (Issues 9+12)', route: '/devTest/logHistory' },
             { label: 'Nutrition Entry — delete confirm (Issue C4)', route: '/devTest/nutritionEntryMenu' },

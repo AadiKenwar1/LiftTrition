@@ -2,20 +2,15 @@
 // installed); suppress the missing-declaration error (test-only runtime dep).
 // @ts-ignore
 import { act, create } from 'react-test-renderer'
-import { Text, TouchableOpacity } from 'react-native'
-import { usePreventRemove } from '@react-navigation/native'
+import { Alert, Text, TouchableOpacity } from 'react-native'
 import { ThemeProvider } from '@/context/ThemeContext'
 import SubscriptionScreen from '../subscription'
 
 /**
- * The screen-level halves of the billing guarantees: the native back gesture is vetoed
- * while money is in flight (usePreventRemove wiring — the context cannot pin this), and
- * the purchase/restore CTAs disable until the store identity is proven.
+ * The screen-level halves of the billing guarantees: the purchase/restore CTAs disable until
+ * the store identity is proven, and a payment survives the screen closing under it. The screen
+ * holds no navigation lock, so leaving mid-purchase is reachable and must stay harmless.
  */
-
-jest.mock('@react-navigation/native', () => ({
-    usePreventRemove: jest.fn(),
-}))
 
 // identityGuard imports react-native-purchases at module scope; stub it so the real
 // message constant below can be required without the native module.
@@ -46,18 +41,10 @@ jest.mock('@/components/NeutralComponents/PressableScale', () => ({ children }: 
 jest.mock('@/components/NeutralComponents/TermsAndPrivacyModal', () => () => null)
 jest.mock('@/lib/hooks/useScreenBottomPad', () => ({ useScreenBottomPad: () => 0 }))
 
-const mockUsePreventRemove = usePreventRemove as jest.Mock
-
 const A_PACKAGE = { identifier: 'annual' }
 // Literal on purpose (not imported): pins the user-visible copy for every not-purchasable
 // state — identity unproven, packages missing, no RevenueCat key.
 const UNAVAILABLE_NOTE = "Purchases aren't available right now. Please try again later."
-
-// The hook runs on every render; only its latest call reflects the screen's current intent
-function lastPreventRemoveArg(): boolean {
-    const calls = mockUsePreventRemove.mock.calls
-    return calls[calls.length - 1][0]
-}
 
 // A promise whose settlement the test controls, to hold a purchase/restore in flight
 function deferred<T>() {
@@ -112,30 +99,29 @@ describe('SubscriptionScreen', () => {
         }
     })
 
-    it('holds the screen while a purchase is in flight and releases it after', async () => {
+    it('still reports success when a purchase settles after the screen has closed', async () => {
+        // Nothing vetoes the back button any more, so the payment can outlive the screen.
+        // purchasePackage settles against BillingProvider (which outlives it) and Alert is
+        // global, so closing mid-payment must neither cancel the purchase nor throw.
+        const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {})
         const purchase = deferred<Record<string, unknown>>()
         mockBillingState.purchasePackage = jest.fn().mockReturnValue(purchase.promise)
         const root = await mountScreen()
-        expect(lastPreventRemoveArg()).toBe(false)
 
-        const cta = findButtonByText(root, 'Subscribe Now')
         await act(async () => {
-            cta.props.onPress()
+            findButtonByText(root, 'Subscribe Now').props.onPress()
         })
-        expect(lastPreventRemoveArg()).toBe(true)
-
+        await act(async () => {
+            root.unmount()
+        })
         await act(async () => {
             purchase.resolve({})
             await Promise.resolve()
         })
-        expect(lastPreventRemoveArg()).toBe(false)
-    })
 
-    it('holds the screen while a restore is in flight', async () => {
-        mockBillingState.restoring = true
-        await mountScreen()
-
-        expect(lastPreventRemoveArg()).toBe(true)
+        expect(mockBillingState.purchasePackage).toHaveBeenCalledWith(A_PACKAGE)
+        expect(alertSpy).toHaveBeenCalledWith('Success', 'Your subscription is now active!')
+        alertSpy.mockRestore()
     })
 
     it('disables purchase and restore and shows the unavailable note until identity is proven', async () => {

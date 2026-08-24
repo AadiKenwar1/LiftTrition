@@ -1,3 +1,4 @@
+import HowNutritionIsCalculatedScreen from '@/app/settingsScreens/howNutritionIsCalculated'
 import EditMacroGoalModal, { type MacroGoalKind } from '@/components/NutritionComponents/EditMacroGoalModal'
 import LowCalorieWarning from '@/components/NutritionComponents/LowCalorieWarning'
 import WontReachGoalWarning from '@/components/NutritionComponents/WontReachGoalWarning'
@@ -10,7 +11,7 @@ import { onboardingStep } from '@/lib/utils/onboardingSteps'
 import { router } from 'expo-router'
 import { Beef, Droplet, Flame, Pencil, Wheat } from 'lucide-react-native'
 import { useMemo, useState } from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import { Modal, StyleSheet, Text, View } from 'react-native'
 import Animated, { FadeInDown } from 'react-native-reanimated'
 
 /**
@@ -35,6 +36,7 @@ export default function OnboardingPlan() {
         fatsGoal: Math.round(calc.fatGrams),
     })
     const [editingKind, setEditingKind] = useState<MacroGoalKind | null>(null)
+    const [sheetOpen, setSheetOpen] = useState(false)
 
     const initial = (k: MacroGoalKind) => (k === 'calories' ? macros.calorieGoal : k === 'protein' ? macros.proteinGoal : k === 'carbs' ? macros.carbsGoal : macros.fatsGoal)
     const save = (v: number) => {
@@ -79,10 +81,23 @@ export default function OnboardingPlan() {
                 {/* Both read the editable state, not calc, so a calorie number typed into the modal is warned about too. */}
                 <LowCalorieWarning calories={macros.calorieGoal} gender={settings.gender} style={styles.warning} />
                 <WontReachGoalWarning calories={macros.calorieGoal} maintenance={maintenance} goalType={settings.goalType} unitSystem={settings.unitSystem} style={styles.warning} />
+                <PressableScale onPress={() => setSheetOpen(true)}>
+                    <Text style={styles.link}>How are these calculated?</Text>
+                </PressableScale>
                 <Text style={styles.note}>You can change these anytime in settings.</Text>
             </OnboardingScaffold>
 
             <EditMacroGoalModal visible={editingKind != null} kind={editingKind} initialValue={editingKind != null ? initial(editingKind) : 0} onDismiss={() => setEditingKind(null)} onSave={save} />
+
+            {/* settingsScreens routes are guarded behind onboardingComplete, so the math screen is embedded in a sheet rather than pushed. */}
+            <Modal visible={sheetOpen} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setSheetOpen(false)}>
+                <View style={styles.sheet}>
+                    <View style={styles.handleContainer}>
+                        <View style={styles.handle} />
+                    </View>
+                    <HowNutritionIsCalculatedScreen />
+                </View>
+            </Modal>
         </View>
     )
 }
@@ -96,6 +111,10 @@ function makeStyles(colors: Colors) {
         cardLabel: { fontFamily: fonts.semibold, fontSize: 13, color: colors.text, letterSpacing: -0.2, marginTop: 2 },
         cardValue: { fontFamily: fonts.extrabold, fontSize: 26, color: colors.text, letterSpacing: -0.5 },
         warning: { marginTop: 16 },
+        link: { fontFamily: fonts.semibold, fontSize: 13.5, color: colors.nutrition, textAlign: 'center', marginTop: 18 },
         note: { fontFamily: fonts.medium, fontSize: 12, color: colors.textMuted, textAlign: 'center', letterSpacing: 0.2, marginTop: 18 },
+        sheet: { flex: 1, backgroundColor: colors.background },
+        handleContainer: { alignItems: 'center', paddingTop: 12, paddingBottom: 8 },
+        handle: { width: 40, height: 5, backgroundColor: colors.border, borderRadius: 3 },
     })
 }

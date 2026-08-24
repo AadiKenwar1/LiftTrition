@@ -1,9 +1,9 @@
 import { useAuth } from '@/context/AuthContext'
-import { runPhotoAnalysis, type EnrichmentSource } from '@/context/NutritionContext/functions/aiFunctions'
+import { runPhotoAnalysis } from '@/context/NutritionContext/functions/aiFunctions'
 import { NutritionEntry } from '@/context/NutritionContext/types'
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { processPickedImageUri, type ScanMode } from '@/lib/openAI/mealImage'
-import { askOpenAIText, type VisionProvider } from '@/lib/openAI/openAI'
+import { askOpenAIText } from '@/lib/openAI/openAI'
 import { Asset } from 'expo-asset'
 import * as ImagePicker from 'expo-image-picker'
 import { useMemo, useState } from 'react'
@@ -15,13 +15,13 @@ const TEXT_PRESETS = ['Chicken, Pasta, Broccoli', '2 oranges', 'Grilled chicken 
 // Dev-only bundled fixtures (stripped from production with this whole __DEV__ component).
 const SAMPLES: { label: string; mode: ScanMode; module: number }[] = [
     { label: 'Meal', mode: 'meal', module: require('../../assets/devTest/meal.jpg') },
-    { label: 'Branded', mode: 'item', module: require('../../assets/devTest/branded.jpg') },
+    { label: 'Branded', mode: 'meal', module: require('../../assets/devTest/branded.jpg') },
     { label: 'Label', mode: 'label', module: require('../../assets/devTest/label.jpg') },
 ]
 
 type Macros = { calories: number; protein: number; carbs: number; fats: number }
 type TextResult = { ms: number; raw?: string; macros?: Macros; allZero?: boolean; error?: string }
-type PhotoResult = { ms: number; provider: string; entry?: NutritionEntry; sources?: EnrichmentSource[]; rawItems?: NutritionEntry['items']; error?: string }
+type PhotoResult = { ms: number; entry?: NutritionEntry; error?: string }
 
 function parseMacros(raw: string): Macros | null {
     let c = raw.trim()
@@ -49,7 +49,6 @@ export default function AiTest() {
     const [textResult, setTextResult] = useState<TextResult | null>(null)
 
     const [scanMode, setScanMode] = useState<ScanMode>('meal')
-    const [providerSel, setProviderSel] = useState<'default' | VisionProvider>('default')
     const [selectedImage, setSelectedImage] = useState<string | null>(null)
     const [photoResult, setPhotoResult] = useState<PhotoResult | null>(null)
 
@@ -111,14 +110,13 @@ export default function AiTest() {
         setLoading(true)
         setPhotoResult(null)
         const start = Date.now()
-        const provider = providerSel === 'default' ? undefined : providerSel
         try {
             // Same production pipeline (mode-aware resize/quality) the real camera uses.
             const processed = await processPickedImageUri(selectedImage, scanMode)
-            const { entry, sources, rawItems } = await runPhotoAnalysis(processed, userID || 'dev-test', scanMode, provider)
-            setPhotoResult({ ms: Date.now() - start, provider: providerSel, entry, sources, rawItems })
+            const { entry } = await runPhotoAnalysis(processed, userID || 'dev-test', scanMode)
+            setPhotoResult({ ms: Date.now() - start, entry })
         } catch (error: any) {
-            setPhotoResult({ ms: Date.now() - start, provider: providerSel, error: error?.message ?? 'Failed' })
+            setPhotoResult({ ms: Date.now() - start, error: error?.message ?? 'Failed' })
         } finally {
             setLoading(false)
         }
@@ -166,10 +164,7 @@ export default function AiTest() {
                 ))}
             </Field>
             <Field label="Mode">
-                <Segmented<ScanMode> options={[{ label: 'Meal', value: 'meal' }, { label: 'Item', value: 'item' }, { label: 'Label', value: 'label' }]} value={scanMode} onChange={setScanMode} />
-            </Field>
-            <Field label="Provider (A/B)">
-                <Segmented<'default' | VisionProvider> options={[{ label: 'Default', value: 'default' }, { label: 'OpenAI', value: 'openai' }, { label: 'Gemini', value: 'gemini' }]} value={providerSel} onChange={setProviderSel} />
+                <Segmented<ScanMode> options={[{ label: 'Food', value: 'meal' }, { label: 'Label', value: 'label' }]} value={scanMode} onChange={setScanMode} />
             </Field>
             <View style={styles.pickRow}>
                 <TouchableOpacity style={styles.pickButton} onPress={pickImage} activeOpacity={0.6}>
@@ -185,7 +180,7 @@ export default function AiTest() {
             </TouchableOpacity>
             {photoResult && !loading && (
                 <View style={styles.resultBox}>
-                    <Text style={styles.resultMeta}>{photoResult.provider} · {photoResult.ms} ms</Text>
+                    <Text style={styles.resultMeta}>{photoResult.ms} ms</Text>
                     {photoResult.error ?
                         <Text style={styles.errorText}>{photoResult.error}</Text>
                     :   <>
@@ -193,20 +188,14 @@ export default function AiTest() {
                             <Text style={styles.resultText}>
                                 Total: {photoResult.entry?.calories} kcal · P {photoResult.entry?.protein}g · C {photoResult.entry?.carbs}g · F {photoResult.entry?.fats}g
                             </Text>
-                            {photoResult.entry?.items.map((item, i) => {
-                                const raw = photoResult.rawItems?.[i]
-                                const used = photoResult.sources?.[i] ?? 'vision'
-                                return (
-                                    <View key={i} style={styles.ingredientRow}>
-                                        <Text style={styles.ingredientName} numberOfLines={2}>
-                                            {item.quantity}× {item.brand || item.name}
-                                        </Text>
-                                        <Text style={styles.pathLine}>Path B (vision): {raw?.calories}kcal · P{raw?.protein} C{raw?.carbs} F{raw?.fats}</Text>
-                                        <Text style={styles.pathLine}>Path A (FatSecret): {used === 'fatsecret' ? `${item.calories}kcal · P${item.protein} C${item.carbs} F${item.fats}` : item.brand ? 'no match' : 'n/a (not branded)'}</Text>
-                                        <Text style={styles.sourceTag}>Used: {used}</Text>
-                                    </View>
-                                )
-                            })}
+                            {photoResult.entry?.items.map((item, i) => (
+                                <View key={i} style={styles.ingredientRow}>
+                                    <Text style={styles.ingredientName} numberOfLines={2}>
+                                        {item.quantity}× {item.brand || item.name}
+                                    </Text>
+                                    <Text style={styles.pathLine}>{item.calories}kcal · P{item.protein} C{item.carbs} F{item.fats}</Text>
+                                </View>
+                            ))}
                         </>
                     }
                 </View>
@@ -288,6 +277,5 @@ function makeStyles(colors: Colors) {
         ingredientRow: { marginTop: 10, paddingTop: 10, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.hairline },
         ingredientName: { fontFamily: fonts.semibold, fontSize: 13, color: colors.text },
         pathLine: { fontFamily: fonts.regular, fontSize: 12, color: colors.textSecondary, marginTop: 2 },
-        sourceTag: { fontFamily: fonts.medium, fontSize: 11, color: colors.nutrition, marginTop: 4 },
     })
 }

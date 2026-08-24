@@ -28,7 +28,7 @@ export default function AnalyzingModal() {
     // Normalize param (Expo Router can return string | string[] | undefined)
     const photoUriStr = typeof photoUri === 'string' ? photoUri : photoUri?.[0]
     const rawMode = typeof mode === 'string' ? mode : mode?.[0]
-    const modeStr: ScanMode = rawMode === 'label' ? 'label' : rawMode === 'item' ? 'item' : 'meal'
+    const modeStr: ScanMode = rawMode === 'label' ? 'label' : 'meal'
     const devFakeMsStr = typeof devFakeMs === 'string' ? devFakeMs : devFakeMs?.[0]
     const devFakeOutcomeStr = typeof devFakeOutcome === 'string' ? devFakeOutcome : devFakeOutcome?.[0]
 
@@ -155,8 +155,8 @@ export default function AnalyzingModal() {
                 </Animated.View>
 
                 {/* Status Text */}
-                <Text style={styles.title}>{modeStr === 'label' ? 'Reading Nutrition Label' : modeStr === 'item' ? 'Identifying Product' : 'Analyzing Your Meal'}</Text>
-                <Text style={styles.subtitle}>{modeStr === 'label' ? 'Our AI is reading the label values...' : modeStr === 'item' ? 'Our AI is identifying the product and its nutrition...' : 'Our AI is identifying items and calculating nutrition...'}</Text>
+                <Text style={styles.title}>{modeStr === 'label' ? 'Reading Nutrition Label' : 'Analyzing Your Food'}</Text>
+                <Text style={styles.subtitle}>{modeStr === 'label' ? 'Our AI is reading the label values...' : 'Our AI is identifying items and calculating nutrition...'}</Text>
 
                 {/* Progress Bar */}
                 <View style={styles.progressContainer}>

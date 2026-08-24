@@ -4,15 +4,15 @@ import { useBilling } from '@/context/BillingContext'
 import { fonts, useColors, type Colors } from '@/context/ThemeContext'
 import { useScreenBottomPad } from '@/lib/hooks/useScreenBottomPad'
 import { useSubmitOnce } from '@/lib/hooks/useSubmitOnce'
-import { processCameraCapture, processPickedImageUri, SCAN_FRAME, type ScanMode } from '@/lib/openAI/mealImage'
+import { getFrameSize, measureCaptureLayout, processCameraCapture, processPickedImageUri, type ScanMode } from '@/lib/openAI/mealImage'
 import { nextPermissionAction, openAppSettings } from '@/lib/utils/permissions'
 import { CameraType, CameraView, useCameraPermissions } from 'expo-camera'
 import * as ImagePicker from 'expo-image-picker'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
-import { Camera, FlipHorizontal, Images, Package, Settings, Sparkles, Tag, Utensils, Zap } from 'lucide-react-native'
+import { Camera, FlipHorizontal, Images, Settings, Sparkles, Tag, Utensils, Zap } from 'lucide-react-native'
 import { useMemo, useRef, useState } from 'react'
-import { Alert, Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, Image, Platform, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native'
 
 export default function CameraScreen() {
     const router = useRouter()
@@ -20,6 +20,9 @@ export default function CameraScreen() {
     const styles = useMemo(() => makeStyles(colors), [colors])
     const bottomPad = useScreenBottomPad(6)
     const cameraRef = useRef<CameraView>(null)
+    // Measured at shutter time so the capture crop lands exactly where the on-screen frame sat.
+    const previewRef = useRef<View>(null)
+    const frameRef = useRef<View>(null)
     const [facing, setFacing] = useState<CameraType>('back')
     const [permission, requestPermission] = useCameraPermissions()
     const { hasPremium } = useBilling()
@@ -33,6 +36,9 @@ export default function CameraScreen() {
     const [guardUsePhoto, usingPhoto, resetUsePhoto] = useSubmitOnce()
     const [scanKind, setScanKind] = useState<ScanMode>('meal')
     const scanMode: ScanMode = scanKind
+    // On-screen frame matches the mode's capture crop exactly — same getFrameSize the crop math uses.
+    const { width: windowWidth } = useWindowDimensions()
+    const frameSize = getFrameSize(windowWidth, scanKind)
 
     if (!hasPremium) {
         return (
@@ -44,7 +50,7 @@ export default function CameraScreen() {
                 <PromptCard
                     icon={Sparkles}
                     title="Scan Meals with AI"
-                    message="Snap a photo of any meal, item, or nutrition label and let AI log the macros for you. Upgrade to unlock scanning."
+                    message="Snap a photo of any food or nutrition label and let AI log the macros for you. Upgrade to unlock scanning."
                     ctaLabel="Upgrade to Scan"
                     onPress={() => router.replace('/settingsScreens/subscription')}
                     onGoBack={() => router.back()}
@@ -104,7 +110,8 @@ export default function CameraScreen() {
                 base64: false,
             })
             if (photo) {
-                const uri = await processCameraCapture(photo, scanMode)
+                const layout = await measureCaptureLayout(previewRef.current, frameRef.current)
+                const uri = await processCameraCapture(photo, scanMode, layout ?? undefined)
                 setCapturedPhoto(uri)
             }
         } catch {
@@ -185,22 +192,22 @@ export default function CameraScreen() {
     }
 
     return (
-        <View style={styles.cameraContainer}>
+        <View ref={previewRef} style={styles.cameraContainer}>
             <View style={styles.handleContainerAbsolute}>
                 <View style={styles.handle} />
             </View>
 
-            <CameraView ref={cameraRef} style={styles.camera} facing={facing} enableTorch={flashEnabled}>
+            {/* pictureSize "Photo" = the full-resolution photo pipeline; the default "High" captures low-res 1920x1080 video frames. */}
+            <CameraView ref={cameraRef} style={styles.camera} facing={facing} enableTorch={flashEnabled} pictureSize={Platform.OS === 'ios' ? 'Photo' : undefined} />
+
+            {/* Overlay is a sibling stacked on top — CameraView does not support children. */}
+            <View style={styles.overlay} pointerEvents="box-none">
                 <View style={styles.topBar}>
                     <View style={styles.spacer} />
                     <View style={styles.modeToggle}>
-                        <TouchableOpacity onPress={() => setScanKind('meal')} style={[styles.modeButton, scanKind === 'meal' && styles.modeButtonActive]} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel="Scan a meal">
+                        <TouchableOpacity onPress={() => setScanKind('meal')} style={[styles.modeButton, scanKind === 'meal' && styles.modeButtonActive]} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel="Scan food">
                             <Utensils size={14} color={scanKind === 'meal' ? '#FFF' : '#CCC'} strokeWidth={2.5} />
-                            <Text style={[styles.modeButtonText, scanKind === 'meal' && styles.modeButtonTextActive]}>Meal</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => setScanKind('item')} style={[styles.modeButton, scanKind === 'item' && styles.modeButtonActive]} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel="Scan a food or branded item">
-                            <Package size={14} color={scanKind === 'item' ? '#FFF' : '#CCC'} strokeWidth={2.5} />
-                            <Text style={[styles.modeButtonText, scanKind === 'item' && styles.modeButtonTextActive]}>Item</Text>
+                            <Text style={[styles.modeButtonText, scanKind === 'meal' && styles.modeButtonTextActive]}>Food</Text>
                         </TouchableOpacity>
                         <TouchableOpacity onPress={() => setScanKind('label')} style={[styles.modeButton, scanKind === 'label' && styles.modeButtonActive]} activeOpacity={0.7} accessibilityRole="button" accessibilityLabel="Scan a nutrition label">
                             <Tag size={14} color={scanKind === 'label' ? '#FFF' : '#CCC'} strokeWidth={2.5} />
@@ -213,18 +220,14 @@ export default function CameraScreen() {
                 </View>
 
                 <View style={styles.frameContainer}>
-                    <View style={styles.frame}>
+                    <View ref={frameRef} style={[styles.frame, { width: frameSize.width, height: frameSize.height }]}>
                         <View style={[styles.corner, styles.cornerTopLeft]} />
                         <View style={[styles.corner, styles.cornerTopRight]} />
                         <View style={[styles.corner, styles.cornerBottomLeft]} />
                         <View style={[styles.corner, styles.cornerBottomRight]} />
                     </View>
                     <Text style={styles.frameHint}>
-                        {scanKind === 'label' ?
-                            'Fit the nutrition label in frame'
-                        : scanKind === 'item' ?
-                            'Center the food or branded item in frame'
-                        :   'Center your meal in frame'}
+                        {scanKind === 'label' ? 'Fit the nutrition label in frame' : 'Center your food in frame'}
                     </Text>
                 </View>
 
@@ -243,7 +246,7 @@ export default function CameraScreen() {
                         </TouchableOpacity>
                     </View>
                 </View>
-            </CameraView>
+            </View>
         </View>
     )
 }
@@ -276,6 +279,10 @@ function makeStyles(colors: Colors) {
         },
         camera: {
             flex: 1,
+        },
+        // Covers the camera exactly; lays out topBar / frameContainer / controls in the same column the camera fills.
+        overlay: {
+            ...StyleSheet.absoluteFillObject,
         },
         topBar: {
             flexDirection: 'row',
@@ -344,10 +351,8 @@ function makeStyles(colors: Colors) {
             justifyContent: 'center',
             alignItems: 'center',
         },
+        // width/height come inline from getFrameSize(windowWidth, scanKind) — per-mode, not static.
         frame: {
-            width: `${SCAN_FRAME.widthPct * 100}%`,
-            maxWidth: SCAN_FRAME.maxWidth,
-            aspectRatio: SCAN_FRAME.aspectRatio,
             borderWidth: 2,
             borderColor: colors.nutrition + '80',
             borderRadius: 16,

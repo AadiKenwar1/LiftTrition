@@ -7,7 +7,7 @@ import { getPendingUploadEstimate } from '@/lib/powersync/uploadQueueStats'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
-import { Bell, ChevronRight, CreditCard, Dumbbell, FileText, FlaskConical, HelpCircle, Moon, Sun, Utensils, Wrench } from 'lucide-react-native'
+import { Bell, Calculator, ChevronRight, CreditCard, Dumbbell, FileText, FlaskConical, HelpCircle, LineChart, Moon, Sun, Utensils, Wrench } from 'lucide-react-native'
 import { useEffect, useMemo, useState } from 'react'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
@@ -93,10 +93,16 @@ export default function SettingsScreen() {
     ]
     const supportOptions: SettingsOption[] = [
         {
-            icon: FlaskConical,
-            title: 'How It Works',
-            subtitle: 'The science behind your goals',
-            onPress: () => router.push('/settingsScreens/howItWorks'),
+            icon: Calculator,
+            title: 'How Nutrition is Calculated',
+            subtitle: 'The math behind your calorie and macro goals',
+            onPress: () => router.push('/settingsScreens/howNutritionIsCalculated'),
+        },
+        {
+            icon: LineChart,
+            title: 'How Graphs Work',
+            subtitle: 'The math behind every progress chart',
+            onPress: () => router.push('/settingsScreens/howGraphsWork'),
         },
         {
             icon: HelpCircle,

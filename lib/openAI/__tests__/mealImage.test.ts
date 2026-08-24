@@ -4,8 +4,8 @@
 // M9). This pins the invariant so it stays true: every capture/pick path resizes to its mode's
 // width ceiling AND compresses at its mode's exact quality before base64 — pinning compress too
 // (not just width) closes the gap where a future compress bump would silently reinflate payload
-// past a width-only guard. Meal capture additionally crops to the on-screen frame before resizing;
-// item/label capture and all library picks do not crop (kept uncropped/high-res for OCR legibility).
+// past a width-only guard. Every capture additionally crops to its on-screen frame (label's is
+// narrower — LABEL_FRAME) before resizing; library picks do not crop (no frame exists for a pick).
 
 // Both mocks below are called through a wrapper arrow function (not assigned directly) so the
 // property reads the mockX variable at CALL time, not at jest.mock-factory-execution time — the
@@ -23,7 +23,8 @@ jest.mock('react-native', () => ({
 }))
 
 import * as ImageManipulator from 'expo-image-manipulator'
-import { processCameraCapture, processPickedImageUri } from '../mealImage'
+import type { View } from 'react-native'
+import { getFrameSize, measureCaptureLayout, processCameraCapture, processPickedImageUri } from '../mealImage'
 
 type ManipulateCall = [string, ImageManipulator.Action[], ImageManipulator.SaveOptions]
 
@@ -32,15 +33,25 @@ function resizeWidthOf(action: ImageManipulator.Action): number | undefined {
     return 'resize' in action ? action.resize.width : undefined
 }
 
-// True if the action is a crop step (only meal-mode capture crops, toward the on-screen frame).
+// True if the action is a crop step (every capture crops toward its on-screen frame).
 function isCrop(action: ImageManipulator.Action): boolean {
     return 'crop' in action
+}
+
+// Reads the crop rectangle width off a manipulateAsync action, or undefined if it isn't a crop step.
+function cropWidthOf(action: ImageManipulator.Action): number | undefined {
+    return 'crop' in action ? action.crop.width : undefined
+}
+
+// Reads the full crop rectangle off a manipulateAsync action, or undefined if it isn't a crop step.
+function cropOf(action: ImageManipulator.Action) {
+    return 'crop' in action ? action.crop : undefined
 }
 
 beforeEach(() => {
     jest.clearAllMocks()
     mockManipulateAsync.mockImplementation(async (uri: string) => ({ uri: `${uri}-processed`, width: 1, height: 1 }))
-    // Fixed viewport for processCameraCapture's meal-mode crop math — only that path reads Dimensions.
+    // Fixed viewport for processCameraCapture's meal/label crop math — only those paths read Dimensions.
     mockDimensionsGet.mockReturnValue({ width: 390, height: 844 })
 })
 
@@ -57,9 +68,8 @@ describe('processPickedImageUri (library picks)', () => {
         expect(saveOptions.format).toBe(ImageManipulator.SaveFormat.JPEG)
     })
 
-    // item and label share the same (non-meal) resize/compress path — see mealImage.ts's mode branch.
-    it.each(['item', 'label'] as const)('%s mode: resizes to width <=1400, compress 0.9, JPEG', async (mode) => {
-        await processPickedImageUri('file://pick.jpg', mode)
+    it('label mode: resizes to width <=1400, compress 0.9, JPEG', async () => {
+        await processPickedImageUri('file://pick.jpg', 'label')
 
         const [, actions, saveOptions] = mockManipulateAsync.mock.calls[0] as ManipulateCall
         expect(actions).toHaveLength(1)
@@ -85,17 +95,87 @@ describe('processCameraCapture (in-app camera)', () => {
         expect(saveOptions.format).toBe(ImageManipulator.SaveFormat.JPEG)
     })
 
-    // item and label share the same (non-meal, no-crop) path — see mealImage.ts's mode branch.
-    it.each(['item', 'label'] as const)('%s mode: emits [resize<=1400] compress 0.9, JPEG, no crop', async (mode) => {
-        await processCameraCapture(photo, mode)
+    it('label mode: emits [crop, resize<=1400] compress 0.9, JPEG', async () => {
+        await processCameraCapture(photo, 'label')
 
         expect(mockManipulateAsync).toHaveBeenCalledTimes(1)
         const [uri, actions, saveOptions] = mockManipulateAsync.mock.calls[0] as ManipulateCall
         expect(uri).toBe(photo.uri)
-        expect(actions).toHaveLength(1)
-        expect(actions.some(isCrop)).toBe(false)
-        expect(resizeWidthOf(actions[0])).toBeLessThanOrEqual(1400)
+        expect(actions).toHaveLength(2)
+        expect(isCrop(actions[0])).toBe(true)
+        expect(resizeWidthOf(actions[1])).toBeLessThanOrEqual(1400)
         expect(saveOptions.compress).toBe(0.9)
         expect(saveOptions.format).toBe(ImageManipulator.SaveFormat.JPEG)
+    })
+
+    // Pins LABEL_FRAME being narrower than SCAN_FRAME: same photo, label's crop rect is smaller.
+    it('label crop is narrower than meal crop', async () => {
+        await processCameraCapture(photo, 'meal')
+        await processCameraCapture(photo, 'label')
+
+        const [, mealActions] = mockManipulateAsync.mock.calls[0] as ManipulateCall
+        const [, labelActions] = mockManipulateAsync.mock.calls[1] as ManipulateCall
+        expect(cropWidthOf(labelActions[0])!).toBeLessThan(cropWidthOf(mealActions[0])!)
+    })
+
+    // Pins the measured-layout crop mapping. Hand-computed: photo 3000x4000 cover-fit in a 390x800
+    // preview gives pxPerPt = min(3000/390, 4000/800) = 5 and hides (3000-390*5)/2 = 525px per side
+    // horizontally (nothing vertically), so a frame at (39, 100) sized 312x446 crops the rect below.
+    it('crops exactly where the measured frame sat in the preview', async () => {
+        const layout = { previewWidth: 390, previewHeight: 800, frameLeft: 39, frameTop: 100, frameWidth: 312, frameHeight: 446 }
+        await processCameraCapture(photo, 'meal', layout)
+
+        const [, actions] = mockManipulateAsync.mock.calls[0] as ManipulateCall
+        expect(cropOf(actions[0])).toEqual({ originX: 525 + 39 * 5, originY: 100 * 5, width: 312 * 5, height: 446 * 5 })
+    })
+
+    // Pins that resize never upscales: a crop narrower than the mode's width ceiling keeps its
+    // natural width. Hand-computed: pxPerPt = min(3000/390, 4000/800) = 5, so a 214.5pt-wide
+    // label frame crops 214.5 * 5 = 1072.5px — under the 1400 ceiling, so resize stays 1072.5.
+    it('label capture never upscales past its crop width', async () => {
+        const layout = { previewWidth: 390, previewHeight: 800, frameLeft: 87.75, frameTop: 100, frameWidth: 214.5, frameHeight: 446 }
+        await processCameraCapture(photo, 'label', layout)
+
+        const [, actions] = mockManipulateAsync.mock.calls[0] as ManipulateCall
+        expect(resizeWidthOf(actions[1])).toBe(1072.5)
+    })
+
+    // Pins the label frame shape: narrower than meal but the exact same height (tall label strip).
+    it('label frame is narrower than meal frame at the same height', () => {
+        const meal = getFrameSize(390, 'meal')
+        const label = getFrameSize(390, 'label')
+        expect(label.width).toBeLessThan(meal.width)
+        expect(label.height).toBe(meal.height)
+    })
+})
+
+describe('measureCaptureLayout', () => {
+    // Minimal View-like stub whose measureInWindow reports the given rect synchronously.
+    function stubView(x: number, y: number, width: number, height: number): View {
+        return { measureInWindow: (cb: (x: number, y: number, width: number, height: number) => void) => cb(x, y, width, height) } as unknown as View
+    }
+
+    it('measures preview and frame into a preview-relative CaptureLayout', async () => {
+        const preview = stubView(10, 20, 390, 800)
+        const frame = stubView(49, 120, 312, 446)
+
+        expect(await measureCaptureLayout(preview, frame)).toEqual({
+            previewWidth: 390,
+            previewHeight: 800,
+            frameLeft: 39,
+            frameTop: 100,
+            frameWidth: 312,
+            frameHeight: 446,
+        })
+    })
+
+    // A view mid-layout can report 0x0 from measureInWindow; that must not reach processCameraCapture's
+    // crop math, where dividing by a 0 preview dimension produces an Infinity/NaN crop rect that bypasses
+    // expo-image-manipulator's bounds check (it only rejects positive out-of-range numbers, not NaN).
+    it.each([
+        ['preview', stubView(0, 0, 0, 0), stubView(49, 120, 312, 446)],
+        ['frame', stubView(10, 20, 390, 800), stubView(0, 0, 0, 0)],
+    ])('returns null when the %s view measures as 0x0', async (_label, preview, frame) => {
+        expect(await measureCaptureLayout(preview, frame)).toBeNull()
     })
 })

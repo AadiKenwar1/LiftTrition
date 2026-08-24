@@ -4,6 +4,18 @@
 **Method:** three parallel exploration passes (billing race surface, navigation architecture, premium-gate blast radius) + one design pass; every finding anchored to a `file:line` that was read.
 **Status:** findings verified · design locked · tests partially written (one deliberately red) · **implementation not started**
 
+> **Superseded 2026-08-20 — decision 2 (the back-block) reversed.** `usePreventRemove` was removed
+> from `subscription.tsx`. It set `preventNativeDismiss`, and on iOS 26 `react-native-screens`
+> 4.16.0 disables touch on the back chevron in `navigationBar:shouldPopItem:` and only restores it
+> in `didPopItem:` — which does not run when a dismiss is prevented. Tapping back during a purchase
+> therefore killed the chevron permanently, and with global `gestureEnabled:false` there was no other
+> way off the screen. The guard was also protecting little: `purchasePackage` settles against
+> `BillingProvider`, which outlives the screen, so leaving mid-payment still lands the entitlement.
+> The rest of this document (the identity race and its guard) still stands; passages specifically
+> about the back-block — §2 decision 2, §3 item 4's `usePreventRemove` bullet, §4.4's old cases 1–2,
+> §4.5's chevron-tap step, and §5's native-pop-cancellation gap — describe the reversed plan and are
+> superseded along with it.
+
 ---
 
 ## 1. The problem

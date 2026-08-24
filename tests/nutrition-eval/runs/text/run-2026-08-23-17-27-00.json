@@ -1,0 +1,909 @@
+{
+  "meta": {
+    "timestamp": "2026-08-23T17:27:00.188Z",
+    "model": "gpt-5.4",
+    "temperature": 0,
+    "bars": [
+      {
+        "pct": 5,
+        "gramFloor": 1,
+        "kcalFloor": 5
+      },
+      {
+        "pct": 10,
+        "gramFloor": 2,
+        "kcalFloor": 10
+      },
+      {
+        "pct": 25,
+        "gramFloor": 5,
+        "kcalFloor": 25
+      },
+      {
+        "pct": 50,
+        "gramFloor": 10,
+        "kcalFloor": 50
+      }
+    ],
+    "desiredPct": 25,
+    "args": {
+      "limit": 8,
+      "only": null
+    },
+    "prompts": {
+      "system": "You are a nutrition estimator for a food-logging app. The user's message lists one or more foods, possibly with quantities.\r\n\r\nRules:\r\n- Assume one typical single serving per food unless a quantity is given (for example: a chicken thigh ~85-115g cooked, pasta ~1 cup cooked). When a quantity is given, multiply that food by it.\r\n- Return ONE combined total for everything listed. Protein, carbs, and fats in grams; calories in kcal.\r\n- If you cannot recognize any food in the text, return 0 for every field.\r\n\r\nRespond ONLY with JSON in this exact format:\r\n{\"calories\":number,\"protein\":number,\"carbs\":number,\"fats\":number}",
+      "userTemplate": "Estimate the nutrition for: ${name}"
+    },
+    "node": "v24.19.0"
+  },
+  "summary": {
+    "probes": 8,
+    "contract": {
+      "invalidJson": 0,
+      "refusals": 0,
+      "callErrors": 0,
+      "negativeOrNonFinite": 0,
+      "quotedNumbers": 0,
+      "extraKeys": 0,
+      "atwater": {
+        "medianDevPct": 2.1,
+        "p90DevPct": 2.8,
+        "overLimit": 0
+      }
+    },
+    "truth": {
+      "restaurant": {
+        "n": 2,
+        "scoredRows": 2,
+        "fields": {
+          "calories": {
+            "medianAbsPct": 10.9,
+            "meanAbsPct": 7.8,
+            "p90AbsPct": 10.9,
+            "meanSignedPct": 3.1
+          },
+          "protein": {
+            "medianAbsPct": 25,
+            "meanAbsPct": 17.9,
+            "p90AbsPct": 25,
+            "meanSignedPct": -7.1
+          },
+          "carbs": {
+            "medianAbsPct": 10,
+            "meanAbsPct": 7.5,
+            "p90AbsPct": 10,
+            "meanSignedPct": 7.5
+          },
+          "fats": {
+            "medianAbsPct": 23.3,
+            "meanAbsPct": 14.1,
+            "p90AbsPct": 23.3,
+            "meanSignedPct": 9.2
+          }
+        },
+        "passCurve": {
+          "±5%": {
+            "calories": 50,
+            "protein": 0,
+            "carbs": 50,
+            "fats": 50,
+            "all": 0
+          },
+          "±10%": {
+            "calories": 50,
+            "protein": 0,
+            "carbs": 100,
+            "fats": 50,
+            "all": 0
+          },
+          "±25%": {
+            "calories": 100,
+            "protein": 100,
+            "carbs": 100,
+            "fats": 100,
+            "all": 100
+          },
+          "±50%": {
+            "calories": 100,
+            "protein": 100,
+            "carbs": 100,
+            "fats": 100,
+            "all": 100
+          }
+        }
+      }
+    },
+    "buckets": {
+      "truth": {
+        "n": 2,
+        "hardFailures": 0
+      },
+      "consistency": {
+        "n": 2,
+        "hardFailures": 0
+      },
+      "composition": {
+        "n": 2,
+        "hardFailures": 0
+      },
+      "robustness": {
+        "n": 2,
+        "hardFailures": 0
+      }
+    },
+    "relations": {
+      "evaluated": 1,
+      "failed": 0,
+      "drifted": 0
+    },
+    "latencyMs": {
+      "p50": 2424,
+      "p95": 3133
+    },
+    "tokens": {
+      "prompt": 1280,
+      "completion": 226
+    }
+  },
+  "relations": [
+    {
+      "id": "scale-eggs-3x",
+      "kind": "ratio",
+      "of": "egg-3",
+      "base": "egg-1",
+      "expect": 3,
+      "tolPct": 15,
+      "note": "3 eggs vs 1 egg",
+      "evaluated": false,
+      "reason": "a probe in this relation has no usable reply",
+      "hard": []
+    },
+    {
+      "id": "scale-rice-2x",
+      "kind": "ratio",
+      "of": "rice-2cup",
+      "base": "rice-1cup",
+      "expect": 2,
+      "tolPct": 15,
+      "note": "2 cups vs 1 cup",
+      "evaluated": false,
+      "reason": "a probe in this relation has no usable reply",
+      "hard": []
+    },
+    {
+      "id": "scale-eggs-dozen",
+      "kind": "ratio",
+      "of": "qty-dozen",
+      "base": "egg-1",
+      "expect": 12,
+      "tolPct": 20,
+      "note": "worded quantity",
+      "evaluated": false,
+      "reason": "a probe in this relation has no usable reply",
+      "hard": []
+    },
+    {
+      "id": "scale-bagel-half",
+      "kind": "ratio",
+      "of": "qty-half-bagel",
+      "base": "bagel-1",
+      "expect": 0.5,
+      "tolPct": 20,
+      "note": "fractional quantity",
+      "evaluated": false,
+      "reason": "a probe in this relation has no usable reply",
+      "hard": []
+    },
+    {
+      "id": "scale-oatmeal-2_5x",
+      "kind": "ratio",
+      "of": "qty-oatmeal-2_5",
+      "base": "oatmeal-1",
+      "expect": 2.5,
+      "tolPct": 20,
+      "note": "decimal quantity",
+      "evaluated": false,
+      "reason": "a probe in this relation has no usable reply",
+      "hard": []
+    },
+    {
+      "id": "unit-g-vs-oz",
+      "kind": "ratio",
+      "of": "chicken-100g",
+      "base": "chicken-3_5oz",
+      "expect": 1,
+      "tolPct": 12,
+      "note": "100 g = 3.53 oz",
+      "evaluated": false,
+      "reason": "a probe in this relation has no usable reply",
+      "hard": []
+    },
+    {
+      "id": "combine-chicken-rice",
+      "kind": "sum",
+      "of": "chicken-rice-combo",
+      "parts": [
+        "chicken-6oz",
+        "rice-1cup"
+      ],
+      "tolPct": 20,
+      "note": "combined vs parts",
+      "evaluated": false,
+      "reason": "a probe in this relation has no usable reply",
+      "hard": []
+    },
+    {
+      "id": "determinism-egg",
+      "kind": "identical",
+      "of": "egg-1-repeat",
+      "base": "egg-1",
+      "note": "temperature 0",
+      "evaluated": true,
+      "fields": [
+        {
+          "field": "calories",
+          "observed": 72,
+          "baseline": 72,
+          "ok": true
+        },
+        {
+          "field": "protein",
+          "observed": 6.3,
+          "baseline": 6.3,
+          "ok": true
+        },
+        {
+          "field": "carbs",
+          "observed": 0.4,
+          "baseline": 0.4,
+          "ok": true
+        },
+        {
+          "field": "fats",
+          "observed": 4.8,
+          "baseline": 4.8,
+          "ok": true
+        }
+      ],
+      "hard": [],
+      "soft": []
+    }
+  ],
+  "rows": [
+    {
+      "probe": {
+        "id": "meal-a1-01",
+        "text": "Sweetgreen Harvest Bowl",
+        "bucket": "truth",
+        "tier": "restaurant",
+        "truth": {
+          "id": "meal-a1-01",
+          "class": "meal",
+          "image": "images/meals/meal-a1-01.png",
+          "name": "Harvest Bowl",
+          "brand_or_source": "Sweetgreen",
+          "source_url": "https://www.sweetgreen.com/menu",
+          "image_url": "https://images.ctfassets.net/eum7w7yri3zr/Br3EYlf6srQYhCXdvOfwt/65b582e0c488a871e36cda2ea5e52df3/SG_Web_Image_Bowl_Harvest.png?w=600&q=75",
+          "basis": "per_serving",
+          "serving_desc": "1 bowl",
+          "serving_size_g": null,
+          "calories": 740,
+          "protein_g": 32,
+          "carbs_g": 60,
+          "fat_g": 41,
+          "label_tier": "publisher",
+          "license": "proprietary-marketing-asset",
+          "barcode": null,
+          "region": null,
+          "notes": "Photo and official macros (Calories/Protein/Carbs/Fat) published in the same menu-item card on sweetgreen.com/menu. Menu category: Bowls. Roasted chicken, sweet potatoes, apples, goat cheese, roasted almonds, shredded kale, warm wild rice, balsamic vinaigrette. Atwater 737 kcal vs published 740 (0.4% dev).",
+          "corrected": false,
+          "width": 600,
+          "height": 600,
+          "format": "PNG",
+          "bytes": 653892,
+          "sha256": "fafaf781f7d16ada8f5131cac6d2ca3fd118dff2d3d785228b1887211868b146",
+          "atwater_deviation_pct": 0.4,
+          "verification": {
+            "verdict": "pass",
+            "reason": "Every visible component (chicken, sweet potato, apple, goat cheese, almonds, kale, wild rice, dressing) is named in the Harvest Bowl build and the 60 g carbs comfortably covers the visible wild rice + sweet potato + apple. Single bowl, no accompaniment outside the macro block.",
+            "details": {
+              "portions_visible": 1,
+              "depicts": "one square bowl, overhead: roasted chicken cubes, roasted sweet potato wedges, goat cheese crumbles, apple chunks, sliced almonds, shredded kale, warm wild rice, plus balsamic vinaigrette in a small inset ramekin",
+              "uncounted_sides": "none"
+            }
+          },
+          "is_clean": true
+        },
+        "expect": {
+          "food": true
+        }
+      },
+      "response": {
+        "status": 200,
+        "latencyMs": 3133,
+        "usage": {
+          "prompt_tokens": 160,
+          "completion_tokens": 26,
+          "total_tokens": 186,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "rawContent": "{\"calories\":705,\"protein\":24,\"carbs\":66,\"fats\":39}",
+        "retried": false
+      },
+      "parsed": {
+        "jsonValid": true,
+        "shapeErrors": [],
+        "macros": {
+          "calories": 705,
+          "protein": 24,
+          "carbs": 66,
+          "fats": 39
+        },
+        "allZero": false,
+        "atwaterDevPct": 0.9,
+        "extraKeys": [],
+        "coercedFields": []
+      },
+      "checks": {
+        "hard": [],
+        "soft": [],
+        "shares": {
+          "protein": 13.5,
+          "carbs": 37.1,
+          "fats": 49.4
+        }
+      },
+      "score": {
+        "scored": true,
+        "expected": {
+          "calories": 740,
+          "protein": 32,
+          "carbs": 60,
+          "fats": 41
+        },
+        "errors": {
+          "calories": {
+            "unitErr": -35,
+            "pctErr": -4.7
+          },
+          "protein": {
+            "unitErr": -8,
+            "pctErr": -25
+          },
+          "carbs": {
+            "unitErr": 6,
+            "pctErr": 10
+          },
+          "fats": {
+            "unitErr": -2,
+            "pctErr": -4.9
+          }
+        },
+        "passes": {
+          "5": {
+            "calories": true,
+            "protein": false,
+            "carbs": false,
+            "fats": true,
+            "all": false
+          },
+          "10": {
+            "calories": true,
+            "protein": false,
+            "carbs": true,
+            "fats": true,
+            "all": false
+          },
+          "25": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "50": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          }
+        }
+      }
+    },
+    {
+      "probe": {
+        "id": "egg-1",
+        "text": "1 large egg",
+        "bucket": "consistency",
+        "expect": {
+          "food": true
+        }
+      },
+      "response": {
+        "status": 200,
+        "latencyMs": 2469,
+        "usage": {
+          "prompt_tokens": 160,
+          "completion_tokens": 32,
+          "total_tokens": 192,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "rawContent": "{\"calories\":72,\"protein\":6.3,\"carbs\":0.4,\"fats\":4.8}",
+        "retried": false
+      },
+      "parsed": {
+        "jsonValid": true,
+        "shapeErrors": [],
+        "macros": {
+          "calories": 72,
+          "protein": 6.3,
+          "carbs": 0.4,
+          "fats": 4.8
+        },
+        "allZero": false,
+        "atwaterDevPct": 2.8,
+        "extraKeys": [],
+        "coercedFields": []
+      },
+      "checks": {
+        "hard": [],
+        "soft": [],
+        "shares": {
+          "protein": 36,
+          "carbs": 2.3,
+          "fats": 61.7
+        }
+      },
+      "score": null
+    },
+    {
+      "probe": {
+        "id": "olive-oil",
+        "text": "1 tbsp olive oil",
+        "bucket": "composition",
+        "expect": {
+          "food": true,
+          "dominant": "fats",
+          "minPct": 60,
+          "nearZero": [
+            "protein",
+            "carbs"
+          ],
+          "nearZeroMaxG": 1
+        }
+      },
+      "response": {
+        "status": 200,
+        "latencyMs": 2356,
+        "usage": {
+          "prompt_tokens": 161,
+          "completion_tokens": 28,
+          "total_tokens": 189,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "rawContent": "{\"calories\":119,\"protein\":0,\"carbs\":0,\"fats\":13.5}",
+        "retried": false
+      },
+      "parsed": {
+        "jsonValid": true,
+        "shapeErrors": [],
+        "macros": {
+          "calories": 119,
+          "protein": 0,
+          "carbs": 0,
+          "fats": 13.5
+        },
+        "allZero": false,
+        "atwaterDevPct": 2.1,
+        "extraKeys": [],
+        "coercedFields": []
+      },
+      "checks": {
+        "hard": [],
+        "soft": [],
+        "shares": {
+          "protein": 0,
+          "carbs": 0,
+          "fats": 100
+        }
+      },
+      "score": null
+    },
+    {
+      "probe": {
+        "id": "junk-letters",
+        "text": "asdfgh",
+        "bucket": "robustness",
+        "expect": {
+          "zero": true
+        }
+      },
+      "response": {
+        "status": 200,
+        "latencyMs": 2583,
+        "usage": {
+          "prompt_tokens": 159,
+          "completion_tokens": 26,
+          "total_tokens": 185,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "rawContent": "{\"calories\":0,\"protein\":0,\"carbs\":0,\"fats\":0}",
+        "retried": false
+      },
+      "parsed": {
+        "jsonValid": true,
+        "shapeErrors": [],
+        "macros": {
+          "calories": 0,
+          "protein": 0,
+          "carbs": 0,
+          "fats": 0
+        },
+        "allZero": true,
+        "atwaterDevPct": null,
+        "extraKeys": [],
+        "coercedFields": []
+      },
+      "checks": {
+        "hard": [],
+        "soft": [],
+        "shares": null
+      },
+      "score": null
+    },
+    {
+      "probe": {
+        "id": "meal-a1-02",
+        "text": "Sweetgreen Crispy Rice Bowl",
+        "bucket": "truth",
+        "tier": "restaurant",
+        "truth": {
+          "id": "meal-a1-02",
+          "class": "meal",
+          "image": "images/meals/meal-a1-02.png",
+          "name": "Crispy Rice Bowl",
+          "brand_or_source": "Sweetgreen",
+          "source_url": "https://www.sweetgreen.com/menu",
+          "image_url": "https://images.ctfassets.net/eum7w7yri3zr/7cdaqRnWn5wBkPC0aIQk30/d64fbb0000847adef8f421b4bcae8170/SG_Web_Image_Bowl_CrispyRiceBowl.png?w=600&q=75",
+          "basis": "per_serving",
+          "serving_desc": "1 bowl",
+          "serving_size_g": null,
+          "calories": 640,
+          "protein_g": 28,
+          "carbs_g": 61,
+          "fat_g": 30,
+          "label_tier": "publisher",
+          "license": "proprietary-marketing-asset",
+          "barcode": null,
+          "region": null,
+          "notes": "Photo and official macros (Calories/Protein/Carbs/Fat) published in the same menu-item card on sweetgreen.com/menu. Menu category: Bowls. Atwater 626 kcal vs published 640 (2.2% dev).",
+          "corrected": false,
+          "width": 600,
+          "height": 600,
+          "format": "PNG",
+          "bytes": 659132,
+          "sha256": "c20393af39a00d500bcaa80d423fd404d17163251a586f129e499c56f5a50407",
+          "atwater_deviation_pct": 2.2,
+          "verification": {
+            "verdict": "pass",
+            "reason": "Right dish, one bowl. 61 g carbs is consistent with the visible wild rice plus crispy rice puffs; dressing is in-frame but is part of the bowl build the macros describe. Lime wedge is a negligible garnish.",
+            "details": {
+              "portions_visible": 1,
+              "depicts": "one square bowl, overhead: charred chicken pieces, wild rice, cucumber chunks, shredded red cabbage, carrot sticks, cilantro, crispy puffed rice, lime wedge, creamy dressing in an inset ramekin",
+              "uncounted_sides": "none"
+            }
+          },
+          "is_clean": true
+        },
+        "expect": {
+          "food": true
+        }
+      },
+      "response": {
+        "status": 200,
+        "latencyMs": 2424,
+        "usage": {
+          "prompt_tokens": 162,
+          "completion_tokens": 26,
+          "total_tokens": 188,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "rawContent": "{\"calories\":710,\"protein\":31,\"carbs\":64,\"fats\":37}",
+        "retried": false
+      },
+      "parsed": {
+        "jsonValid": true,
+        "shapeErrors": [],
+        "macros": {
+          "calories": 710,
+          "protein": 31,
+          "carbs": 64,
+          "fats": 37
+        },
+        "allZero": false,
+        "atwaterDevPct": 0.4,
+        "extraKeys": [],
+        "coercedFields": []
+      },
+      "checks": {
+        "hard": [],
+        "soft": [],
+        "shares": {
+          "protein": 17.4,
+          "carbs": 35.9,
+          "fats": 46.7
+        }
+      },
+      "score": {
+        "scored": true,
+        "expected": {
+          "calories": 640,
+          "protein": 28,
+          "carbs": 61,
+          "fats": 30
+        },
+        "errors": {
+          "calories": {
+            "unitErr": 70,
+            "pctErr": 10.9
+          },
+          "protein": {
+            "unitErr": 3,
+            "pctErr": 10.7
+          },
+          "carbs": {
+            "unitErr": 3,
+            "pctErr": 4.9
+          },
+          "fats": {
+            "unitErr": 7,
+            "pctErr": 23.3
+          }
+        },
+        "passes": {
+          "5": {
+            "calories": false,
+            "protein": false,
+            "carbs": true,
+            "fats": false,
+            "all": false
+          },
+          "10": {
+            "calories": false,
+            "protein": false,
+            "carbs": true,
+            "fats": false,
+            "all": false
+          },
+          "25": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          },
+          "50": {
+            "calories": true,
+            "protein": true,
+            "carbs": true,
+            "fats": true,
+            "all": true
+          }
+        }
+      }
+    },
+    {
+      "probe": {
+        "id": "egg-1-repeat",
+        "text": "1 large egg",
+        "bucket": "consistency",
+        "expect": {
+          "food": true
+        }
+      },
+      "response": {
+        "status": 200,
+        "latencyMs": 1008,
+        "usage": {
+          "prompt_tokens": 160,
+          "completion_tokens": 32,
+          "total_tokens": 192,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "rawContent": "{\"calories\":72,\"protein\":6.3,\"carbs\":0.4,\"fats\":4.8}",
+        "retried": false
+      },
+      "parsed": {
+        "jsonValid": true,
+        "shapeErrors": [],
+        "macros": {
+          "calories": 72,
+          "protein": 6.3,
+          "carbs": 0.4,
+          "fats": 4.8
+        },
+        "allZero": false,
+        "atwaterDevPct": 2.8,
+        "extraKeys": [],
+        "coercedFields": []
+      },
+      "checks": {
+        "hard": [],
+        "soft": [],
+        "shares": {
+          "protein": 36,
+          "carbs": 2.3,
+          "fats": 61.7
+        }
+      },
+      "score": null
+    },
+    {
+      "probe": {
+        "id": "butter",
+        "text": "1 tbsp butter",
+        "bucket": "composition",
+        "expect": {
+          "food": true,
+          "dominant": "fats",
+          "minPct": 60,
+          "nearZero": [
+            "carbs"
+          ],
+          "nearZeroMaxG": 1
+        }
+      },
+      "response": {
+        "status": 200,
+        "latencyMs": 1512,
+        "usage": {
+          "prompt_tokens": 160,
+          "completion_tokens": 30,
+          "total_tokens": 190,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "rawContent": "{\"calories\":102,\"protein\":0.1,\"carbs\":0,\"fats\":11.5}",
+        "retried": false
+      },
+      "parsed": {
+        "jsonValid": true,
+        "shapeErrors": [],
+        "macros": {
+          "calories": 102,
+          "protein": 0.1,
+          "carbs": 0,
+          "fats": 11.5
+        },
+        "allZero": false,
+        "atwaterDevPct": 1.9,
+        "extraKeys": [],
+        "coercedFields": []
+      },
+      "checks": {
+        "hard": [],
+        "soft": [],
+        "shares": {
+          "protein": 0.4,
+          "carbs": 0,
+          "fats": 99.6
+        }
+      },
+      "score": null
+    },
+    {
+      "probe": {
+        "id": "junk-object",
+        "text": "my car",
+        "bucket": "robustness",
+        "expect": {
+          "zero": true
+        }
+      },
+      "response": {
+        "status": 200,
+        "latencyMs": 715,
+        "usage": {
+          "prompt_tokens": 158,
+          "completion_tokens": 26,
+          "total_tokens": 184,
+          "prompt_tokens_details": {
+            "cached_tokens": 0,
+            "audio_tokens": 0
+          },
+          "completion_tokens_details": {
+            "reasoning_tokens": 0,
+            "audio_tokens": 0,
+            "accepted_prediction_tokens": 0,
+            "rejected_prediction_tokens": 0
+          }
+        },
+        "rawContent": "{\"calories\":0,\"protein\":0,\"carbs\":0,\"fats\":0}",
+        "retried": false
+      },
+      "parsed": {
+        "jsonValid": true,
+        "shapeErrors": [],
+        "macros": {
+          "calories": 0,
+          "protein": 0,
+          "carbs": 0,
+          "fats": 0
+        },
+        "allZero": true,
+        "atwaterDevPct": null,
+        "extraKeys": [],
+        "coercedFields": []
+      },
+      "checks": {
+        "hard": [],
+        "soft": [],
+        "shares": null
+      },
+      "score": null
+    }
+  ]
+}

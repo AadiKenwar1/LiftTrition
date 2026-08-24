@@ -4,7 +4,6 @@ import { BILLING_IDENTITY_ERROR_MESSAGE, hasActiveEntitlement, useBilling } from
 import { fonts, radius, useColors, type Colors } from '@/context/ThemeContext'
 import { useSubmitOnce } from '@/lib/hooks/useSubmitOnce'
 import { useScreenBottomPad } from '@/lib/hooks/useScreenBottomPad'
-import { usePreventRemove } from '@react-navigation/native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { BarChart3, Database, Sparkles, Zap } from 'lucide-react-native'
 import { useMemo, useState } from 'react'
@@ -22,8 +21,8 @@ const FEATURES = [
 
 /**
  * Subscription (Settings) — the V4 paywall look, but a standalone settings screen (not the onboarding flow):
- * purchase success shows an Alert (no navigation), usePreventRemove holds the screen mid-purchase, and it
- * keeps Manage-subscription + the already-premium state. Blue funnel = selected plan + CTA.
+ * purchase success shows an Alert (no navigation), and it keeps Manage-subscription + the already-premium
+ * state. Blue funnel = selected plan + CTA.
  */
 export default function SubscriptionScreen() {
     const colors = useColors()
@@ -36,13 +35,11 @@ export default function SubscriptionScreen() {
     const { loading, hasPremium, identityReady, monthlyPackage, annualPackage, priceInfo, annualPriceInfo, annualSavingsPercent, purchasePackage, restorePurchases, restoring, error } = useBilling()
     const [guardRestore] = useSubmitOnce()
 
-    // Hold the screen while money is in flight. usePreventRemove publishes the intent to the
-    // native stack ahead of time (preventNativeDismiss), so UIKit cancels the pop itself —
-    // a beforeRemove listener cannot do this: UIKit pops before any JS runs.
-    usePreventRemove(purchasing || restoring, () => {})
-
     const selectedPackage = plan === 'monthly' ? monthlyPackage : annualPackage
 
+    // Nothing holds the screen while money is in flight: purchasePackage settles against
+    // BillingProvider, which outlives this screen, so leaving mid-purchase still lands the
+    // entitlement, and Alert is global so the success message shows either way.
     const handleSubscribe = async () => {
         // Unreachable in practice (the CTA is disabled without a package) — kept for type narrowing
         if (!selectedPackage) return
